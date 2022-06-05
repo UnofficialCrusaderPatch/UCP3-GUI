@@ -56,13 +56,23 @@ contextBridge.exposeInMainWorld('electron', {
     // Allow browsing to a game folder
     async browseGameFolder() {
       console.log('click!');
-      window.postMessage({
-        type: 'select-dirs',
-      });
+      const result = await ipcRenderer.invoke('select-dirs');
+      const browseresult = document.getElementById(
+        'browseresult'
+      ) as HTMLInputElement;
+
+      if (browseresult !== null) {
+        if (result.filePaths.length > 0) {
+          const [target] = result.filePaths;
+          browseresult.value = target;
+        }
+      }
     },
 
-    // gameFolder is a number because it is passed as an index of the most recent game folders.
-    initializeMenuWindow(gameFolder: number) {},
+    // create an editor window for a game folder
+    initializeMenuWindow(gameFolder: string) {
+      ipcRenderer.invoke('launch-window', gameFolder);
+    },
 
     // Install or deinstalls UCP from these folders.
     installUCPToGameFolder(gameFolder: number) {},

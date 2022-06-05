@@ -116,13 +116,19 @@ const createWindow = async () => {
  * Add event listeners...
  */
 
-ipcMain.on('select-dirs', async (event, arg) => {
+ipcMain.handle('select-dirs', async (event, arg) => {
   if (mainWindow !== null) {
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory'],
     });
     console.log('directories selected', result.filePaths);
+    return result;
   }
+  return null;
+});
+
+ipcMain.handle('launch-window', (event, arg) => {
+  mainWindow?.loadURL(resolveHtmlPath('index.html?editor'));
 });
 
 app.on('window-all-closed', () => {

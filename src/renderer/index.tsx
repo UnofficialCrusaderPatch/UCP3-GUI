@@ -1,20 +1,16 @@
 import { createRoot } from 'react-dom/client';
-import App from './App';
+
+import ViewManager from './ViewManager';
+
+// ReactDOM.render(<ViewManager />, document.getElementById('root'));
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
-root.render(<App />);
+root.render(<ViewManager />);
 
 // calling IPC exposed from preload script
 window.electron.ipcRenderer.once('ipc-example', (arg) => {
   // eslint-disable-next-line no-console
   console.log(arg);
-
-  document.getElementById('dirs')?.addEventListener('click', () => {
-    console.log('click!');
-    window.postMessage({
-      type: 'select-dirs',
-    });
-  });
 });
 window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);

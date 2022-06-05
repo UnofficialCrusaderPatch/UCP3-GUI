@@ -12,61 +12,51 @@ const mostRecentGameFolder = recentGameFolders.sort(
     b.date.localeCompare(a.date)
 )[0];
 
-const Hello = () => {
+const Landing = () => {
   return (
     <div>
-      <input type="file" id="dirs" />
-      <button
-        id="browsebutton"
-        type="button"
-        onClick={window.electron.ucpBackEnd.browseGameFolder}
-      >
-        Browse
-      </button>
-      <div className="Hello">
-        <img width="200px" alt="icon" src={icon} />
+      <h1>Welcome to Unofficial Crusader Patch 3</h1>
+      <h4>
+        Browse to a Stronghold Crusader installation folder to get started
+      </h4>
+      <div className="input-group mb-3">
+        <input type="text" className="form-control" id="browseresult" />
+        <button
+          id="browsebutton"
+          type="button"
+          className="btn btn-primary"
+          onClick={window.electron.ucpBackEnd.browseGameFolder}
+        >
+          Browse
+        </button>
       </div>
-      <h1>electron-react-boilerplate</h1>
-      <div>{JSON.stringify(mostRecentGameFolder)}</div>
-      <div className="Hello">
-        {[...Array(r)].map((x, i) => (
-          <div key="hello-{i}">A{i}</div>
-        ))}
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
+      <div className="input-group mb-3">
+        <button
+          id="launchbutton"
+          type="button"
+          className="btn btn-primary"
+          onClick={() =>
+            window.electron.ucpBackEnd.initializeMenuWindow('test')
+          }
         >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button type="button">
-            <span role="img" aria-label="books">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
+          Launch
+        </button>
       </div>
     </div>
   );
 };
 
+const Editor = () => {
+  return <div>Hello!</div>;
+};
+
 export default function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hello />} />
-      </Routes>
-    </Router>
-  );
+  return <Landing />;
+  // return (
+  //   <Router>
+  //     <Routes>
+  //       <Route path="/" element={<Landing />} />
+  //     </Routes>
+  //   </Router>
+  // );
 }

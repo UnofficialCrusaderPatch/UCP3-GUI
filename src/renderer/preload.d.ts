@@ -18,6 +18,7 @@ declare global {
           date: string;
         }[];
         browseGameFolder(): string;
+        initializeMenuWindow(gameFolder: string): void;
       };
     };
   }

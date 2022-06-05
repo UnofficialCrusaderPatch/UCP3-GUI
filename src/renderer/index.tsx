@@ -9,5 +9,12 @@ root.render(<App />);
 window.electron.ipcRenderer.once('ipc-example', (arg) => {
   // eslint-disable-next-line no-console
   console.log(arg);
+
+  document.getElementById('dirs')?.addEventListener('click', () => {
+    console.log('click!');
+    window.postMessage({
+      type: 'select-dirs',
+    });
+  });
 });
 window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);

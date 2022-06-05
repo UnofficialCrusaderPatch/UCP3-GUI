@@ -35,9 +35,12 @@ const Landing = () => {
           id="launchbutton"
           type="button"
           className="btn btn-primary"
-          onClick={() =>
-            window.electron.ucpBackEnd.initializeMenuWindow('test')
-          }
+          onClick={() => {
+            const a = document.querySelector(
+              '#browseresult'
+            ) as HTMLInputElement;
+            return window.electron.ucpBackEnd.initializeMenuWindow(a.value);
+          }}
         >
           Launch
         </button>

@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent, dialog } from 'electron';
 import fs from 'fs';
+import yaml from 'yaml';
 
 export type Channels = 'ipc-example';
 
@@ -83,7 +84,22 @@ contextBridge.exposeInMainWorld('electron', {
     uninstallExtension(extensionNameIncludingVersion: string) {},
 
     // An installed extension will involve settings to be set, which means reloading the window.
-    buildOptionsWindow() {},
+    rebuildOptionsWindow() {},
+
+    // Get yaml definition
+    getYamlDefinition() {
+      // TODO: dummy
+      return yaml.parse(`
+- name: group1
+  type: GroupBox
+  children:
+  - name: element1
+    type: RadioButton
+  - name: element2
+    type: RadioButton
+
+      `);
+    },
 
     // Load configuration
     loadUCPConfig() {

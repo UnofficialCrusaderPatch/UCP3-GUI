@@ -127,8 +127,13 @@ ipcMain.handle('select-dirs', async (event, arg) => {
   return null;
 });
 
+let currentFolder = '';
+
 ipcMain.handle('launch-window', (event, arg) => {
-  mainWindow?.loadURL(resolveHtmlPath('index.html?editor'));
+  // TODO: make this appropriate for a real multi window scheme.
+  currentFolder = arg;
+  console.log(`Switching to: ${currentFolder}`);
+  mainWindow?.loadURL(resolveHtmlPath(`index.html?editor=${currentFolder}`));
 });
 
 app.on('window-all-closed', () => {

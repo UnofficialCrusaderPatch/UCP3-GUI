@@ -81,7 +81,7 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.loadURL(resolveHtmlPath('index.html?landing'));
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {

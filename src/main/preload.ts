@@ -87,18 +87,11 @@ contextBridge.exposeInMainWorld('electron', {
     rebuildOptionsWindow() {},
 
     // Get yaml definition
-    getYamlDefinition() {
+    getYamlDefinition(gameFolder: string) {
       // TODO: dummy
-      return yaml.parse(`
-- name: group1
-  type: GroupBox
-  children:
-  - name: element1
-    type: RadioButton
-  - name: element2
-    type: RadioButton
-
-      `);
+      return yaml.parse(
+        fs.readFileSync(`${gameFolder}poc.yml`, { encoding: 'utf-8' })
+      );
     },
 
     // Load configuration

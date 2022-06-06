@@ -1,6 +1,6 @@
 @import '~bootstrap';
 
-body {
+.editor-app {
   position: relative;
   height: 100vh;
   font-family: sans-serif;

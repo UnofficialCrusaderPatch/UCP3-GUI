@@ -49,6 +49,7 @@ type DisplayConfigElement = {
   children: DisplayConfigElement[];
   default: unknown;
   url: string;
+  columns: number;
 };
 
 // const dummyYaml = Object.values(
@@ -75,18 +76,25 @@ function getActiveDefaultConfig(): { [url: string]: unknown } {
 function CreateUIElement(args: { [spec: string]: DisplayConfigElement }) {
   const { spec } = args;
   if (spec.type === 'GroupBox') {
-    const ch = spec.children.map((x, i) => {
-      // eslint-disable-next-line react/no-array-index-key
-      return <CreateUIElement spec={x} />;
-    });
+    const itemCount = spec.children.length;
+    const rows = Math.ceil(itemCount / spec.columns);
 
     const children = [];
-    for (let i = 0; i < spec.children.length; i += 1) {
-      children.push(
-        <Col>
-          <CreateUIElement spec={spec.children[i]} />
-        </Col>
-      );
+
+    for (let row = 0; row < rows; row += 1) {
+      const rowChildren = [];
+      for (
+        let i = spec.columns * row;
+        i < Math.min(spec.columns * (row + 1), spec.children.length);
+        i += 1
+      ) {
+        rowChildren.push(
+          <Col>
+            <CreateUIElement spec={spec.children[i]} />
+          </Col>
+        );
+      }
+      children.push(<Row>{rowChildren}</Row>);
     }
 
     return (

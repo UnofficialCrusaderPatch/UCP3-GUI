@@ -88,9 +88,10 @@ contextBridge.exposeInMainWorld('electron', {
 
     // Get yaml definition
     getYamlDefinition(gameFolder: string) {
-      // TODO: dummy
       return yaml.parse(
-        fs.readFileSync(`${gameFolder}poc.yml`, { encoding: 'utf-8' })
+        fs.readFileSync(`${gameFolder}\\ucp3-gui-poc.yml`, {
+          encoding: 'utf-8',
+        })
       );
     },
 

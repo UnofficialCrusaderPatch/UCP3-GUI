@@ -2,7 +2,7 @@
 
 .editor-app {
   position: relative;
-  height: 100vh;
+  height: 90vh;
   font-family: sans-serif;
   overflow-y: hidden;
   display: flex;

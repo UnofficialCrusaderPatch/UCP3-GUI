@@ -10,6 +10,8 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+import React, { Component } from 'react';
+
 import './Editor.css';
 import { Form } from 'react-bootstrap';
 
@@ -32,14 +34,13 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-const currentFolder = (() => {
+function getCurrentFolder() {
   const i = global.location.search.indexOf('?editor=');
   if (i === -1) return 'undefined';
   return global.location.search.substring(i + '?editor'.length + 1);
-})();
+}
 
 console.log(global.location.search);
-console.log(currentFolder);
 
 type DisplayConfigElement = {
   name: string;
@@ -50,21 +51,24 @@ type DisplayConfigElement = {
   url: string;
 };
 
-const dummyYaml = Object.values(
-  window.electron.ucpBackEnd.getYamlDefinition(currentFolder)
-);
+// const dummyYaml = Object.values(
+//   window.electron.ucpBackEnd.getYamlDefinition(currentFolder)
+// );
 
 // TODO: this is a dummy
-const activeConfigurationDefaults = getConfigDefaults(dummyYaml);
-const activeConfiguration = JSON.parse(
-  JSON.stringify(activeConfigurationDefaults)
-);
+// const activeConfigurationDefaults = getConfigDefaults(dummyYaml);
+// const activeConfiguration = JSON.parse(
+//  JSON.stringify(activeConfigurationDefaults)
+// );
 
-function getActiveConfig() {
+let activeConfiguration = {};
+let activeConfigurationDefaults = {};
+
+function getActiveConfig(): { [url: string]: unknown } {
   return activeConfiguration;
 }
 
-function getActiveDefaultConfig() {
+function getActiveDefaultConfig(): { [url: string]: unknown } {
   return activeConfigurationDefaults;
 }
 
@@ -72,6 +76,7 @@ function CreateUIElement(args: { [spec: string]: DisplayConfigElement }) {
   const { spec } = args;
   if (spec.type === 'GroupBox') {
     const ch = spec.children.map((x, i) => {
+      // eslint-disable-next-line react/no-array-index-key
       return <CreateUIElement spec={x} />;
     });
 
@@ -91,12 +96,22 @@ function CreateUIElement(args: { [spec: string]: DisplayConfigElement }) {
     );
   }
   if (spec.type === 'RadioButton') {
+    // return React.createElement(Form.Switch, {
+    //   key: `${spec.url}-switch`,
+    //   label: spec.text,
+    //   id: `${spec.url}-switch`,
+    //   defaultChecked: spec.default as boolean,
+    //   onChange: (event) => {
+    //     getActiveConfig()[spec.url] = event.target.checked;
+    //     console.log(spec.url, event.target.checked);
+    //   },
+    // });
     return (
       <Form.Switch
         key={`${spec.url}-switch`}
         label={spec.text}
         id={`${spec.url}-switch`}
-        defaultChecked={getActiveConfig()[spec.url]}
+        defaultChecked={getActiveConfig()[spec.url] as boolean}
         onChange={(event) => {
           getActiveConfig()[spec.url] = event.target.checked;
           console.log(spec.url, event.target.checked);
@@ -143,10 +158,12 @@ const EditorTemplate = () => {
             </div>
           </Tab>
           <Tab eventKey="config" title="Config">
-            <div>
-              {dummyYaml.map((x: DisplayConfigElement, i: number) => {
-                return <CreateUIElement spec={x} />;
-              })}
+            <div id="dynamicContent">
+              {window.electron.ucpBackEnd
+                .getYamlDefinition(getCurrentFolder())
+                .map((x: unknown) => {
+                  return <CreateUIElement spec={x as DisplayConfigElement} />;
+                })}
             </div>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">
@@ -159,7 +176,7 @@ const EditorTemplate = () => {
             <div className="flex-grow-1">
               <span className="muted-text">
                 folder: "
-                <span className="px-2 font-italic">{currentFolder}</span>"
+                <span className="px-2 font-italic">{getCurrentFolder()}</span>"
               </span>
             </div>
             <div>
@@ -176,5 +193,9 @@ const EditorTemplate = () => {
 };
 
 export default function Editor() {
+  activeConfigurationDefaults = getConfigDefaults(
+    window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder())
+  );
+  activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
   return <EditorTemplate />;
 }

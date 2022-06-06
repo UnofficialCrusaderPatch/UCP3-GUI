@@ -19,7 +19,7 @@ declare global {
         }[];
         browseGameFolder(): string;
         initializeMenuWindow(gameFolder: string): void;
-        getYamlDefinition(gameFolder: string): object;
+        getYamlDefinition(gameFolder: string): object[];
       };
     };
   }

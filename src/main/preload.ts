@@ -107,7 +107,6 @@ contextBridge.exposeInMainWorld('electron', {
         const value = config[key];
         let fcp = finalConfig;
         const parts = key.split('.');
-        console.log(parts);
         const partsdrop1 = parts.slice(0, -1);
         const finalpart = parts.slice(-1)[0];
         partsdrop1.forEach((part: string) => {

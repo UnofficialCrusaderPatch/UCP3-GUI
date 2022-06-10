@@ -1,4 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
+/* global CreateUIElement */
+
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 
@@ -75,6 +77,88 @@ function getActiveDefaultConfig(): { [url: string]: unknown } {
   return activeConfigurationDefaults;
 }
 
+const UIFactory = {
+  CreateGroupBox(
+    spec: DisplayConfigElement,
+    configuration: { [key: string]: unknown },
+    setConfiguration: (args: { key: string; value: unknown }) => void
+  ) {
+    const { name, description, children, columns } = spec;
+    const itemCount = children.length;
+    const rows = Math.ceil(itemCount / columns);
+
+    const cs = [];
+
+    for (let row = 0; row < rows; row += 1) {
+      const rowChildren = [];
+      for (
+        let i = columns * row;
+        i < Math.min(columns * (row + 1), children.length);
+        i += 1
+      ) {
+        rowChildren.push(
+          <Col>
+            <UIFactory.CreateUIElement
+              spec={children[i]}
+              configuration={configuration}
+              setConfiguration={setConfiguration}
+            />
+          </Col>
+        );
+      }
+      cs.push(<Row>{rowChildren}</Row>);
+    }
+
+    return (
+      <Form key={`${name}-groupbox`}>
+        <Container className="border-bottom border-light">
+          <Row className="mb-3">
+            <div>
+              <span>{description}</span>
+            </div>
+          </Row>
+          <Row className="mb-3">{cs}</Row>
+        </Container>
+      </Form>
+    );
+  },
+
+  CreateSwitch(
+    spec: DisplayConfigElement,
+    configuration: { [url: string]: unknown },
+    setConfiguration: (args: { key: string; value: unknown }) => void
+  ) {
+    const { url, text } = spec;
+    const { [url]: value } = configuration;
+    return (
+      <Form.Switch
+        key={`${url}-switch`}
+        label={text}
+        id={`${url}-switch`}
+        checked={value === undefined ? false : (value as boolean)}
+        onChange={(event) => {
+          setConfiguration({ key: url, value: event.target.checked });
+        }}
+      />
+    );
+  },
+
+  CreateUIElement(args: {
+    spec: DisplayConfigElement;
+    configuration: { [key: string]: unknown };
+    setConfiguration: (args: { key: string; value: unknown }) => void;
+  }) {
+    const { spec, configuration, setConfiguration } = args;
+    if (spec.type === 'GroupBox') {
+      return UIFactory.CreateGroupBox(spec, configuration, setConfiguration);
+    }
+    if (spec.type === 'Switch') {
+      return UIFactory.CreateSwitch(spec, configuration, setConfiguration);
+    }
+    return <div />;
+  },
+};
+
 const EditorTemplate = () => {
   activeConfigurationDefaults = getConfigDefaults(
     window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder())
@@ -86,92 +170,12 @@ const EditorTemplate = () => {
       state: { [key: string]: unknown },
       action: { key: string; value: unknown }
     ) => {
-      const result: { [key: string]: unknown } = {};
+      const result: { [key: string]: unknown } = { ...state };
       result[action.key] = action.value;
       return result;
     },
-    getActiveDefaultConfig()
+    activeConfigurationDefaults
   );
-
-  function CreateUIElement(args: { spec: DisplayConfigElement }) {
-    let { spec } = args;
-    spec = spec as DisplayConfigElement;
-    if (spec.type === 'GroupBox') {
-      const itemCount = spec.children.length;
-      const rows = Math.ceil(itemCount / spec.columns);
-
-      const children = [];
-
-      for (let row = 0; row < rows; row += 1) {
-        const rowChildren = [];
-        for (
-          let i = spec.columns * row;
-          i < Math.min(spec.columns * (row + 1), spec.children.length);
-          i += 1
-        ) {
-          rowChildren.push(
-            <Col>
-              <CreateUIElement spec={spec.children[i]} />
-            </Col>
-          );
-        }
-        children.push(<Row>{rowChildren}</Row>);
-      }
-
-      return (
-        <Form key={`${spec.name}-groupbox`}>
-          <Container className="border-bottom border-light">
-            <Row className="mb-3">
-              <div>
-                <span>{spec.description}</span>
-              </div>
-            </Row>
-            <Row className="mb-3">{children}</Row>
-          </Container>
-        </Form>
-      );
-    }
-    if (spec.type === 'Switch') {
-      // return React.createElement(Form.Switch, {
-      //   key: `${spec.url}-switch`,
-      //   label: spec.text,
-      //   id: `${spec.url}-switch`,
-      //   defaultChecked: spec.default as boolean,
-      //   onChange: (event) => {
-      //     getActiveConfig()[spec.url] = event.target.checked;
-      //     console.log(spec.url, event.target.checked);
-      //   },
-      // });
-      return (
-        <Form.Switch
-          key={`${spec.url}-switch`}
-          label={spec.text}
-          id={`${spec.url}-switch`}
-          checked={
-            configuration[spec.url] === undefined
-              ? (getActiveDefaultConfig()[spec.url] as boolean)
-              : (configuration[spec.url] as boolean)
-          }
-          onChange={(event) => {
-            setConfiguration({ key: spec.url, value: event.target.checked });
-          }}
-        />
-      );
-      return (
-        <Form.Switch
-          key={`${spec.url}-switch`}
-          label={spec.text}
-          id={`${spec.url}-switch`}
-          defaultChecked={getActiveConfig()[spec.url] as boolean}
-          onChange={(event) => {
-            getActiveConfig()[spec.url] = event.target.checked;
-            console.log(spec.url, event.target.checked);
-          }}
-        />
-      );
-    }
-    return <div />;
-  }
 
   return (
     <div className="editor-app m-3">
@@ -212,7 +216,13 @@ const EditorTemplate = () => {
               {window.electron.ucpBackEnd
                 .getYamlDefinition(getCurrentFolder())
                 .map((x: unknown) => {
-                  return <CreateUIElement spec={x as DisplayConfigElement} />;
+                  return (
+                    <UIFactory.CreateUIElement
+                      spec={x as DisplayConfigElement}
+                      configuration={configuration}
+                      setConfiguration={setConfiguration}
+                    />
+                  );
                 })}
             </div>
             <div>

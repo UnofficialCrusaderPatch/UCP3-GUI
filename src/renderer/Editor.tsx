@@ -9,8 +9,9 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
 
-import React, { Component } from 'react';
+import React, { Component, useReducer, useState } from 'react';
 
 import './Editor.css';
 import { Form } from 'react-bootstrap';
@@ -44,6 +45,7 @@ console.log(global.location.search);
 
 type DisplayConfigElement = {
   name: string;
+  description: string;
   text: string;
   type: string;
   children: DisplayConfigElement[];
@@ -73,64 +75,101 @@ function getActiveDefaultConfig(): { [url: string]: unknown } {
   return activeConfigurationDefaults;
 }
 
-function CreateUIElement(args: { [spec: string]: DisplayConfigElement }) {
-  const { spec } = args;
-  if (spec.type === 'GroupBox') {
-    const itemCount = spec.children.length;
-    const rows = Math.ceil(itemCount / spec.columns);
-
-    const children = [];
-
-    for (let row = 0; row < rows; row += 1) {
-      const rowChildren = [];
-      for (
-        let i = spec.columns * row;
-        i < Math.min(spec.columns * (row + 1), spec.children.length);
-        i += 1
-      ) {
-        rowChildren.push(
-          <Col>
-            <CreateUIElement spec={spec.children[i]} />
-          </Col>
-        );
-      }
-      children.push(<Row>{rowChildren}</Row>);
-    }
-
-    return (
-      <Form key={`${spec.name}-groupbox`}>
-        <Row>{children}</Row>
-      </Form>
-    );
-  }
-  if (spec.type === 'RadioButton') {
-    // return React.createElement(Form.Switch, {
-    //   key: `${spec.url}-switch`,
-    //   label: spec.text,
-    //   id: `${spec.url}-switch`,
-    //   defaultChecked: spec.default as boolean,
-    //   onChange: (event) => {
-    //     getActiveConfig()[spec.url] = event.target.checked;
-    //     console.log(spec.url, event.target.checked);
-    //   },
-    // });
-    return (
-      <Form.Switch
-        key={`${spec.url}-switch`}
-        label={spec.text}
-        id={`${spec.url}-switch`}
-        defaultChecked={getActiveConfig()[spec.url] as boolean}
-        onChange={(event) => {
-          getActiveConfig()[spec.url] = event.target.checked;
-          console.log(spec.url, event.target.checked);
-        }}
-      />
-    );
-  }
-  return <div />;
-}
-
 const EditorTemplate = () => {
+  activeConfigurationDefaults = getConfigDefaults(
+    window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder())
+  );
+  activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
+
+  // const [configuration, dispatch] = useReducer(() => {
+  // }, getActiveDefaultConfig());
+  const [configuration, setConfiguration] = useState(getActiveDefaultConfig());
+
+  function CreateUIElement(args: { [spec: string]: DisplayConfigElement }) {
+    let { spec } = args;
+    spec = spec as DisplayConfigElement;
+    if (spec.type === 'GroupBox') {
+      const itemCount = spec.children.length;
+      const rows = Math.ceil(itemCount / spec.columns);
+
+      const children = [];
+
+      for (let row = 0; row < rows; row += 1) {
+        const rowChildren = [];
+        for (
+          let i = spec.columns * row;
+          i < Math.min(spec.columns * (row + 1), spec.children.length);
+          i += 1
+        ) {
+          rowChildren.push(
+            <Col>
+              <CreateUIElement spec={spec.children[i]} />
+            </Col>
+          );
+        }
+        children.push(<Row>{rowChildren}</Row>);
+      }
+
+      return (
+        <Form key={`${spec.name}-groupbox`}>
+          <Container className="border-bottom border-light">
+            <Row className="mb-3">
+              <div>
+                <span>{spec.description}</span>
+              </div>
+            </Row>
+            <Row className="mb-3">{children}</Row>
+          </Container>
+        </Form>
+      );
+    }
+    if (spec.type === 'Switch') {
+      // return React.createElement(Form.Switch, {
+      //   key: `${spec.url}-switch`,
+      //   label: spec.text,
+      //   id: `${spec.url}-switch`,
+      //   defaultChecked: spec.default as boolean,
+      //   onChange: (event) => {
+      //     getActiveConfig()[spec.url] = event.target.checked;
+      //     console.log(spec.url, event.target.checked);
+      //   },
+      // });
+      return (
+        <Form.Switch
+          key={`${spec.url}-switch`}
+          label={spec.text}
+          id={`${spec.url}-switch`}
+          checked={
+            configuration[spec.url] === undefined
+              ? (getActiveDefaultConfig()[spec.url] as boolean)
+              : (configuration[spec.url] as boolean)
+          }
+          onChange={(event) => {
+            const c = JSON.parse(JSON.stringify(configuration));
+            console.log(c);
+            c[spec.url] = event.target.checked;
+            console.log(spec.url, event.target.checked);
+            setConfiguration(c);
+            console.log(c);
+          }}
+        />
+      );
+      return (
+        <Form.Switch
+          key={`${spec.url}-switch`}
+          label={spec.text}
+          id={`${spec.url}-switch`}
+          defaultChecked={getActiveConfig()[spec.url] as boolean}
+          onChange={(event) => {
+            getActiveConfig()[spec.url] = event.target.checked;
+            console.log(spec.url, event.target.checked);
+          }}
+        />
+      );
+    }
+    return <div />;
+  }
+
   return (
     <div className="editor-app m-3">
       <div className="col-12">
@@ -173,6 +212,20 @@ const EditorTemplate = () => {
                   return <CreateUIElement spec={x as DisplayConfigElement} />;
                 })}
             </div>
+            <div>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() =>
+                  window.electron.ucpBackEnd.saveUCPConfig(
+                    configuration,
+                    `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
+                  )
+                }
+              >
+                Save
+              </button>
+            </div>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">
             ...
@@ -201,9 +254,5 @@ const EditorTemplate = () => {
 };
 
 export default function Editor() {
-  activeConfigurationDefaults = getConfigDefaults(
-    window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder())
-  );
-  activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
   return <EditorTemplate />;
 }

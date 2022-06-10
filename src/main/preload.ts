@@ -101,6 +101,24 @@ contextBridge.exposeInMainWorld('electron', {
     },
 
     // Save configuration
-    saveUCPConfig(config: object) {},
+    saveUCPConfig(config: { [key: string]: object }, filePath: string) {
+      const finalConfig: { [key: string]: object } = {};
+      Object.keys(config).forEach((key: string) => {
+        const value = config[key];
+        let fcp = finalConfig;
+        const parts = key.split('.');
+        console.log(parts);
+        const partsdrop1 = parts.slice(0, -1);
+        const finalpart = parts.slice(-1)[0];
+        partsdrop1.forEach((part: string) => {
+          if (fcp[part] === undefined) {
+            fcp[part] = {};
+          }
+          fcp = fcp[part] as { [key: string]: object };
+        });
+        fcp[finalpart] = value;
+      });
+      fs.writeFileSync(filePath, yaml.stringify(finalConfig));
+    },
   },
 });

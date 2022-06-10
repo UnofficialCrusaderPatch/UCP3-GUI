@@ -81,11 +81,19 @@ const EditorTemplate = () => {
   );
   activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
 
-  // const [configuration, dispatch] = useReducer(() => {
-  // }, getActiveDefaultConfig());
-  const [configuration, setConfiguration] = useState(getActiveDefaultConfig());
+  const [configuration, setConfiguration] = useReducer(
+    (
+      state: { [key: string]: unknown },
+      action: { key: string; value: unknown }
+    ) => {
+      const result: { [key: string]: unknown } = {};
+      result[action.key] = action.value;
+      return result;
+    },
+    getActiveDefaultConfig()
+  );
 
-  function CreateUIElement(args: { [spec: string]: DisplayConfigElement }) {
+  function CreateUIElement(args: { spec: DisplayConfigElement }) {
     let { spec } = args;
     spec = spec as DisplayConfigElement;
     if (spec.type === 'GroupBox') {
@@ -145,12 +153,7 @@ const EditorTemplate = () => {
               : (configuration[spec.url] as boolean)
           }
           onChange={(event) => {
-            const c = JSON.parse(JSON.stringify(configuration));
-            console.log(c);
-            c[spec.url] = event.target.checked;
-            console.log(spec.url, event.target.checked);
-            setConfiguration(c);
-            console.log(c);
+            setConfiguration({ key: spec.url, value: event.target.checked });
           }}
         />
       );

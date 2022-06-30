@@ -21,6 +21,7 @@ declare global {
         initializeMenuWindow(gameFolder: string): void;
         getYamlDefinition(gameFolder: string): object[];
         saveUCPConfig(config: object, gameFolder: string): void;
+        getExtensions(gameFolder: string): object[];
       };
     };
   }

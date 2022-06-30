@@ -71,6 +71,7 @@ function getActiveDefaultConfig(): { [url: string]: unknown } {
 const EditorTemplate = () => {
   activeConfigurationDefaults = getConfigDefaults(
     window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder())
+      .flat as unknown[]
   );
   activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
 
@@ -129,20 +130,18 @@ const EditorTemplate = () => {
             <div className="col-sm-3">
               <nav id="toc" data-toggle="toc" className="sticky-top" />
             </div>
-            {/* <div id="test">
-              {window.electron.ucpBackEnd
-                .getYamlDefinition(getCurrentFolder())
-                .map((x: unknown) => {
-                  return (
-                    <UIFactory.CreateSections
-                      definition={x as { [key: string]: unknown }}
-                      configuration={configuration}
-                      setConfiguration={setConfiguration}
-                    />
-                  );
-                })}
-            </div> */}
-            <div id="dynamicContent">
+            <div id="test">
+              <UIFactory.CreateSections
+                definition={
+                  window.electron.ucpBackEnd.getYamlDefinition(
+                    getCurrentFolder()
+                  ).hierarchical as { [key: string]: unknown }
+                }
+                configuration={configuration}
+                setConfiguration={setConfiguration}
+              />
+            </div>
+            {/* <div id="dynamicContent">
               {window.electron.ucpBackEnd
                 .getYamlDefinition(getCurrentFolder())
                 .map((x: unknown) => {
@@ -154,7 +153,7 @@ const EditorTemplate = () => {
                     />
                   );
                 })}
-            </div>
+            </div> */}
             <div>
               <button
                 className="btn btn-primary"

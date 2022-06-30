@@ -111,12 +111,16 @@ contextBridge.exposeInMainWorld('electron', {
             i += 1
           ) {
             const comp = a.category[i].localeCompare(b.category[i]);
-            if (comp !== 0) return comp;
+            if (comp !== 0) {
+              if (a.category[i] === 'Advanced') return 1;
+              if (b.category[i] === 'Advanced') return -1;
+              return comp;
+            }
           }
           return 0;
         });
 
-        const result: { [key: string]: unknown } = {};
+        const result: { [key: string]: unknown } = { elements: [] };
         uiCollection.forEach((ui) => {
           if (ui.category !== undefined) {
             let e: { [key: string]: unknown } = result;
@@ -125,6 +129,9 @@ contextBridge.exposeInMainWorld('electron', {
                 e[cat] = {};
               }
               e = e[cat] as { [key: string]: unknown };
+              if (e.elements === undefined) {
+                e.elements = [];
+              }
             });
             const f = e as { elements: object[] };
             if (f.elements === undefined) {
@@ -139,7 +146,7 @@ contextBridge.exposeInMainWorld('electron', {
         uiCache2[gameFolder] = result;
       }
       console.log('refreshing: ', gameFolder, uiCache[gameFolder]);
-      // return uiCache2[gameFolder];
+      return { flat: uiCache[gameFolder], hierarchical: uiCache2[gameFolder] };
       return uiCache[gameFolder];
       return yaml.parse(
         fs.readFileSync(`${gameFolder}\\ucp3-gui-poc.yml`, {

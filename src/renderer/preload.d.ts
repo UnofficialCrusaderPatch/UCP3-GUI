@@ -19,9 +19,11 @@ declare global {
         }[];
         browseGameFolder(): string;
         initializeMenuWindow(gameFolder: string): void;
-        getYamlDefinition(gameFolder: string): object[];
+        getYamlDefinition(gameFolder: string): {
+          flat: unknown;
+          hierarchical: unknown;
+        };
         saveUCPConfig(config: object, gameFolder: string): void;
-        getExtensions(gameFolder: string): object[];
       };
     };
   }

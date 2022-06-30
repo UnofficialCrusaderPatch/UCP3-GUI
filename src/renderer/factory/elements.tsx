@@ -12,6 +12,8 @@ import Container from 'react-bootstrap/Container';
 
 import { Form } from 'react-bootstrap';
 
+import React from 'react';
+
 export type DisplayConfigElement = {
   name: string;
   description: string;
@@ -154,56 +156,77 @@ const UIFactory = {
     return <div />;
   },
 
-  // CreateSections(args: {
-  //   definition: { [key: string]: unknown };
-  //   configuration: { [key: string]: unknown };
-  //   setConfiguration: (args: { key: string; value: unknown }) => void;
-  // }) {
-  //   const { definition, configuration, setConfiguration } = args;
-  //   const content = Object.keys(definition).map((level1Section) => {
-  //     console.log(definition[level1Section]);
-  //     const level2sections = Object.keys(definition[level1Section]).map(
-  //       (level2Section) => {
-  //         const level3sections = Object.keys(
-  //           definition[level1Section][level2Section]
-  //         ).map((level3Section) => {
-  //           console.log(level1Section, level2Section, level3Section);
-  //           console.log(definition[level1Section][level2Section][level3Section]);
-  //           const elements = definition[level1Section][level2Section][
-  //             level3Section
-  //           ].elements.map((e) => {
-  //             return (
-  //               <UIFactory.CreateUIElement
-  //                 spec={e}
-  //                 configuration={configuration}
-  //                 setConfiguration={setConfiguration}
-  //               />
-  //             );
-  //           });
-  //           return (
-  //             <div>
-  //               <h3>{level3Section}</h3>
-  //               {elements}
-  //             </div>
-  //           );
-  //         });
-  //         return (
-  //           <div>
-  //             <h2>{level2Section}</h2>
-  //             {level3sections}
-  //           </div>
-  //         );
-  //       }
-  //     );
-  //     return (
-  //       <div>
-  //         <h1>{level1Section}</h1>
-  //         {level2sections}
-  //       </div>
-  //     );
-  //   });
-  //   return <div>{content}</div>;
-  // },
+  CreateSection(args: {
+    level: number;
+    header: string;
+    contents: { [key: string]: unknown };
+    configuration: { [key: string]: unknown };
+    setConfiguration: (args: { key: string; value: unknown }) => void;
+  }) {
+    const { level, header, contents, configuration, setConfiguration } = args;
+    const elements = (contents.elements as DisplayConfigElement[]).map(
+      (el: DisplayConfigElement) => {
+        return (
+          <UIFactory.CreateUIElement
+            spec={el as DisplayConfigElement}
+            configuration={configuration}
+            setConfiguration={setConfiguration}
+          />
+        );
+      }
+    );
+
+    const htmlHeader =
+      level === 0 ? (
+        <h1>General</h1>
+      ) : (
+        React.createElement(`h${level}`, {}, header)
+      );
+
+    const childKeys = Object.keys(contents);
+    const elementsIndex = childKeys.indexOf('elements');
+    if (elementsIndex !== -1) {
+      childKeys.splice(elementsIndex, 1);
+    }
+
+    const children = childKeys.map((key) => {
+      return (
+        <UIFactory.CreateSection
+          level={level + 1}
+          header={key}
+          contents={contents[key] as { [key: string]: unknown }}
+          configuration={configuration}
+          setConfiguration={setConfiguration}
+        />
+      );
+    });
+
+    return (
+      <div>
+        {htmlHeader}
+        {elements}
+        {children}
+      </div>
+    );
+  },
+
+  CreateSections(args: {
+    definition: { [key: string]: unknown };
+    configuration: { [key: string]: unknown };
+    setConfiguration: (args: { key: string; value: unknown }) => void;
+  }) {
+    const { definition, configuration, setConfiguration } = args;
+
+    return (
+      <UIFactory.CreateSection
+        level={0}
+        header=""
+        contents={definition}
+        configuration={configuration}
+        setConfiguration={setConfiguration}
+      />
+    );
+  },
 };
 
 export { UIFactory };

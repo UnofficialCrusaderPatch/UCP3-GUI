@@ -1,6 +1,9 @@
 import fs from 'fs';
 import yaml from 'yaml';
 
+const localeSensitiveFields = ['description', 'text', 'tooltip'];
+const localeRegExp = new RegExp('^\\s*{{(.*)}}\\s*$');
+
 export class Extension {
   name: string;
 
@@ -27,11 +30,51 @@ export class Extension {
       );
     }
   }
+
+  setLocale(language: string): void {
+    function changeLocale(
+      locale: { [key: string]: string },
+      obj: { [key: string]: unknown }
+    ): void {
+      localeSensitiveFields.forEach((field) => {
+        if (typeof obj[field] === 'string') {
+          const search = localeRegExp.exec(obj[field] as string);
+
+          if (search !== undefined && search !== null) {
+            const keyword = search[1];
+            const loc = locale[keyword];
+            if (loc !== undefined) {
+              obj[field] = loc;
+            }
+          }
+        }
+        if (typeof obj[field] === 'object') {
+          changeLocale(locale, obj[field] as { [key: string]: unknown });
+        }
+      });
+    }
+
+    if (fs.existsSync(`${this.folder}/locale`)) {
+      if (fs.existsSync(`${this.folder}/locale/${language}.json`)) {
+        const locale = JSON.parse(
+          fs.readFileSync(`${this.folder}/locale/${language}.json`, {
+            encoding: 'utf-8',
+          })
+        );
+
+        this.ui.forEach((uiElement) => {
+          changeLocale(locale, uiElement as { [key: string]: unknown });
+        });
+      }
+    }
+  }
 }
 
 const Discovery = {
   Extension,
   discoverExtensions: (gameFolder: string) => {
+    const currentLocale = 'English'; // Dummy location for this code
+
     const moduleDir = `${gameFolder}/ucp/modules`;
     const modDirEnts = fs.readdirSync(moduleDir, { withFileTypes: true });
 
@@ -59,6 +102,7 @@ const Discovery = {
 
         const ext = new Extension(name, version, type, folder);
         ext.readUISpec();
+        ext.setLocale(currentLocale);
         return ext;
       });
   },

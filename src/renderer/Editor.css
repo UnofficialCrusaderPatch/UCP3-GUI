@@ -30,6 +30,22 @@
   -webkit-box-shadow: inset 0 0 6px rgba(90, 90, 90, 0.7);
 }
 
-.nav-link {
+#config-navbar * .nav-link {
   color: #f8f9fa;
+  padding: 0;
+}
+
+#config-navbar > nav > nav > a {
+  font-size: medium;
+}
+
+#config-navbar > nav > nav > nav > a {
+  font-size: small;
+}
+
+#config-navbar > nav > nav > nav > a {
+  font-size: smaller;
+}
+#config-navbar > nav > nav > nav > nav > a {
+  font-size: smaller;
 }

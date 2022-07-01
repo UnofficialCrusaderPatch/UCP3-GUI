@@ -82,7 +82,7 @@ const UIFactory = {
               <span>{description}</span>
             </div>
           </Row>
-          <Row className="mt-1 pt-2">{cs}</Row>
+          <Row className="mt-1 ps-2">{cs}</Row>
           <Row>
             <span className="text-muted text-end">module-name-v1.0.0</span>
           </Row>
@@ -255,7 +255,9 @@ const UIFactory = {
     return (
       <div style={{ marginLeft: `${level / 4}rem` }}>
         {htmlHeader}
-        {elements}
+        <div style={{ marginLeft: '0.5rem', marginBottom: '0.5rem' }}>
+          {elements}
+        </div>
         {children}
       </div>
     );

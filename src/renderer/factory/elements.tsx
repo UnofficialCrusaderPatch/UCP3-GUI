@@ -25,6 +25,7 @@ export type DisplayConfigElement = {
   url: string;
   columns: number;
   tooltip: string;
+  enabled: string;
 };
 
 export type NumberInputDisplayConfigElement = DisplayConfigElement & {
@@ -100,8 +101,10 @@ const UIFactory = {
       reset: boolean;
     }) => void
   ) {
-    const { url, text, tooltip } = spec;
+    const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
+    let { [enabled]: isEnabled } = configuration;
+    if (isEnabled === undefined) isEnabled = true;
     return (
       <Form.Switch
         className="my-3"
@@ -121,6 +124,7 @@ const UIFactory = {
             reset: false,
           });
         }}
+        disabled={!isEnabled}
       />
     );
   },
@@ -134,9 +138,11 @@ const UIFactory = {
       reset: boolean;
     }) => void
   ) {
-    const { url, text, tooltip, min, max } =
+    const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
+    let { [enabled]: isEnabled } = configuration;
+    if (isEnabled === undefined) isEnabled = true;
     return (
       <Form.Group className="d-flex align-items-baseline lh-sm">
         <div className="col-1 mr-3">
@@ -160,10 +166,11 @@ const UIFactory = {
                 reset: false,
               });
             }}
+            disabled={!isEnabled}
           />
         </div>
         <div className="flex-grow-1 px-2">
-          <Form.Label>{text}</Form.Label>
+          <Form.Label for={`${url}-input`}>{text}</Form.Label>
         </div>
       </Form.Group>
     );

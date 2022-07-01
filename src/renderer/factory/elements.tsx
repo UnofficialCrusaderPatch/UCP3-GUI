@@ -115,9 +115,10 @@ const UIFactory = {
     const { url, text, min, max } = spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
     return (
-      <Form.Group className="d-flex align-items-center">
+      <Form.Group className="d-flex align-items-baseline lh-sm">
         <div className="col-1 mr-3">
           <Form.Control
+            className="bg-dark text-light"
             key={`${url}-input`}
             type="number"
             min={min as number}
@@ -312,8 +313,8 @@ const UIFactory = {
           data-bs-target="#config-navbar"
           data-bs-offset="0"
           // tabIndex="0"
-          className="col-9"
-          id="config-form"
+          className="col-9 p-3"
+          id="config-sections"
         >
           <div>
             <h1 id="config-General">General</h1>

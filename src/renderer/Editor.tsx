@@ -73,10 +73,8 @@ function getActiveDefaultConfig(): { [url: string]: unknown } {
 }
 
 const EditorTemplate = () => {
-  activeConfigurationDefaults = getConfigDefaults(
-    window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder())
-      .flat as unknown[]
-  );
+  const def = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
+  activeConfigurationDefaults = getConfigDefaults(def.flat as unknown[]);
   activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
 
   const [configuration, setConfiguration] = useReducer(
@@ -141,13 +139,9 @@ const EditorTemplate = () => {
               </button>
             </div>
 
-            <div id="dynamicConfigPanel" className="row w-100">
+            <div id="dynamicConfigPanel" className="row w-100 mx-0">
               <UIFactory.CreateSections
-                definition={
-                  window.electron.ucpBackEnd.getYamlDefinition(
-                    getCurrentFolder()
-                  ).hierarchical as SectionDescription
-                }
+                definition={def.hierarchical as SectionDescription}
                 configuration={configuration}
                 setConfiguration={setConfiguration}
               />

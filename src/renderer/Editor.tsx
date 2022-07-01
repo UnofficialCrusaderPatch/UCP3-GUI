@@ -49,7 +49,7 @@ function getCurrentFolder() {
   return global.location.search.substring(i + '?editor'.length + 1);
 }
 
-console.log(global.location.search);
+console.log('Editor location: ', global.location.search);
 
 // const dummyYaml = Object.values(
 //   window.electron.ucpBackEnd.getYamlDefinition(currentFolder)
@@ -72,18 +72,37 @@ function getActiveDefaultConfig(): { [url: string]: unknown } {
   return activeConfigurationDefaults;
 }
 
-const EditorTemplate = () => {
-  const def = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
+const touched: { [url: string]: boolean } = {};
+let def: { flat: object[]; hierarchical: object };
+
+if (global.location.search.startsWith('?editor')) {
+  def = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
   activeConfigurationDefaults = getConfigDefaults(def.flat as unknown[]);
   activeConfiguration = JSON.parse(JSON.stringify(activeConfigurationDefaults));
+}
+
+export default function Editor() {
+  console.log('Create Editor');
 
   const [configuration, setConfiguration] = useReducer(
     (
       state: { [key: string]: unknown },
-      action: { key: string; value: unknown }
+      action: { key: string; value: unknown; reset: boolean }
     ) => {
       const result: { [key: string]: unknown } = { ...state };
+      if (action.reset) {
+        // for enumerable and non-enumerable properties
+        Object.getOwnPropertyNames(touched).forEach((prop) => {
+          delete touched[prop];
+        });
+        console.log(touched);
+        return { ...activeConfigurationDefaults };
+      }
       result[action.key] = action.value;
+      touched[action.key] = true;
+
+      console.log(touched);
+
       return result;
     },
     activeConfigurationDefaults
@@ -126,6 +145,7 @@ const EditorTemplate = () => {
           <Tab eventKey="config" title="Config" className="tabpanel-config">
             <div className="border-bottom border-light pb-2">
               <button
+                disabled={Object.keys(touched).length === 0}
                 className="btn btn-primary"
                 type="button"
                 onClick={() =>
@@ -136,6 +156,19 @@ const EditorTemplate = () => {
                 }
               >
                 Save
+              </button>
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={() => {
+                  setConfiguration({
+                    reset: true,
+                    key: '',
+                    value: undefined,
+                  });
+                }}
+              >
+                Reset
               </button>
             </div>
 
@@ -171,8 +204,4 @@ const EditorTemplate = () => {
       </div>
     </div>
   );
-};
-
-export default function Editor() {
-  return <EditorTemplate />;
 }

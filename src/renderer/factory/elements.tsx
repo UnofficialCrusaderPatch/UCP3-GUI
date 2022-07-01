@@ -24,6 +24,7 @@ export type DisplayConfigElement = {
   default: unknown;
   url: string;
   columns: number;
+  tooltip: string;
 };
 
 export type NumberInputDisplayConfigElement = DisplayConfigElement & {
@@ -40,7 +41,11 @@ const UIFactory = {
   CreateGroupBox(
     spec: DisplayConfigElement,
     configuration: { [key: string]: unknown },
-    setConfiguration: (args: { key: string; value: unknown }) => void
+    setConfiguration: (args: {
+      key: string;
+      value: unknown;
+      reset: boolean;
+    }) => void
   ) {
     const { name, description, children, columns, header } = spec;
     const itemCount = children.length;
@@ -89,19 +94,32 @@ const UIFactory = {
   CreateSwitch(
     spec: DisplayConfigElement,
     configuration: { [url: string]: unknown },
-    setConfiguration: (args: { key: string; value: unknown }) => void
+    setConfiguration: (args: {
+      key: string;
+      value: unknown;
+      reset: boolean;
+    }) => void
   ) {
-    const { url, text } = spec;
+    const { url, text, tooltip } = spec;
     const { [url]: value } = configuration;
     return (
       <Form.Switch
         className="my-3"
+        // Tooltip stuff
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title={tooltip}
+        // End of tooltip stuff
         key={`${url}-switch`}
         label={text}
         id={`${url}-switch`}
         checked={value === undefined ? false : (value as boolean)}
         onChange={(event) => {
-          setConfiguration({ key: url, value: event.target.checked });
+          setConfiguration({
+            key: url,
+            value: event.target.checked,
+            reset: false,
+          });
         }}
       />
     );
@@ -110,9 +128,14 @@ const UIFactory = {
   CreateNumberInputElement(
     spec: DisplayConfigElement,
     configuration: { [url: string]: unknown },
-    setConfiguration: (args: { key: string; value: unknown }) => void
+    setConfiguration: (args: {
+      key: string;
+      value: unknown;
+      reset: boolean;
+    }) => void
   ) {
-    const { url, text, min, max } = spec as NumberInputDisplayConfigElement;
+    const { url, text, tooltip, min, max } =
+      spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
     return (
       <Form.Group className="d-flex align-items-baseline lh-sm">
@@ -124,11 +147,17 @@ const UIFactory = {
             min={min as number}
             max={max as number}
             id={`${url}-input`}
+            // Tooltip stuff
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title={tooltip}
+            // End of tooltip stuff
             value={value === undefined ? 0 : (value as number)}
             onChange={(event) => {
               setConfiguration({
                 key: url,
                 value: parseInt(event.target.value, 10),
+                reset: false,
               });
             }}
           />
@@ -143,7 +172,11 @@ const UIFactory = {
   CreateUIElement(args: {
     spec: DisplayConfigElement;
     configuration: { [key: string]: unknown };
-    setConfiguration: (args: { key: string; value: unknown }) => void;
+    setConfiguration: (args: {
+      key: string;
+      value: unknown;
+      reset: boolean;
+    }) => void;
   }) {
     const { spec, configuration, setConfiguration } = args;
     if (spec.type === 'GroupBox') {
@@ -168,7 +201,11 @@ const UIFactory = {
     contents: SectionDescription;
     identifier: string;
     configuration: { [key: string]: unknown };
-    setConfiguration: (args: { key: string; value: unknown }) => void;
+    setConfiguration: (args: {
+      key: string;
+      value: unknown;
+      reset: boolean;
+    }) => void;
   }) {
     const {
       level,
@@ -191,7 +228,7 @@ const UIFactory = {
     );
 
     const htmlHeader = React.createElement(
-      `h${level}`,
+      `h${level + 1}`,
       { id: identifier },
       header
     );
@@ -216,7 +253,7 @@ const UIFactory = {
     });
 
     return (
-      <div>
+      <div style={{ marginLeft: `${level / 4}rem` }}>
         {htmlHeader}
         {elements}
         {children}
@@ -278,7 +315,11 @@ const UIFactory = {
   CreateSections(args: {
     definition: SectionDescription;
     configuration: { [key: string]: unknown };
-    setConfiguration: (args: { key: string; value: unknown }) => void;
+    setConfiguration: (args: {
+      key: string;
+      value: unknown;
+      reset: boolean;
+    }) => void;
   }) {
     const { definition, configuration, setConfiguration } = args;
     const elements = (definition.elements as DisplayConfigElement[]).map(

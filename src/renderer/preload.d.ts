@@ -20,8 +20,8 @@ declare global {
         browseGameFolder(): string;
         initializeMenuWindow(gameFolder: string): void;
         getYamlDefinition(gameFolder: string): {
-          flat: unknown;
-          hierarchical: unknown;
+          flat: object[];
+          hierarchical: object;
         };
         saveUCPConfig(config: object, gameFolder: string): void;
       };

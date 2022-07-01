@@ -29,3 +29,7 @@
   background-color: #fff;
   -webkit-box-shadow: inset 0 0 6px rgba(90, 90, 90, 0.7);
 }
+
+.nav-link {
+  color: #f8f9fa;
+}

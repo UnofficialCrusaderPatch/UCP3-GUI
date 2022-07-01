@@ -12,7 +12,7 @@ import Container from 'react-bootstrap/Container';
 
 import { Form } from 'react-bootstrap';
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 export type DisplayConfigElement = {
   name: string;
@@ -29,6 +29,11 @@ export type DisplayConfigElement = {
 export type NumberInputDisplayConfigElement = DisplayConfigElement & {
   min: number;
   max: number;
+};
+
+export type SectionDescription = {
+  elements: DisplayConfigElement[];
+  sections: { [key: string]: SectionDescription };
 };
 
 const UIFactory = {
@@ -159,11 +164,19 @@ const UIFactory = {
   CreateSection(args: {
     level: number;
     header: string;
-    contents: { [key: string]: unknown };
+    contents: SectionDescription;
+    identifier: string;
     configuration: { [key: string]: unknown };
     setConfiguration: (args: { key: string; value: unknown }) => void;
   }) {
-    const { level, header, contents, configuration, setConfiguration } = args;
+    const {
+      level,
+      identifier,
+      header,
+      contents,
+      configuration,
+      setConfiguration,
+    } = args;
     const elements = (contents.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
         return (
@@ -176,25 +189,25 @@ const UIFactory = {
       }
     );
 
-    const htmlHeader =
-      level === 0 ? (
-        <h1>General</h1>
-      ) : (
-        React.createElement(`h${level}`, {}, header)
-      );
+    const htmlHeader = React.createElement(
+      `h${level}`,
+      { id: identifier },
+      header
+    );
 
-    const childKeys = Object.keys(contents);
-    const elementsIndex = childKeys.indexOf('elements');
-    if (elementsIndex !== -1) {
-      childKeys.splice(elementsIndex, 1);
-    }
+    const childKeys = Object.keys(contents.sections);
+    // const elementsIndex = childKeys.indexOf('elements');
+    // if (elementsIndex !== -1) {
+    //   childKeys.splice(elementsIndex, 1);
+    // }
 
     const children = childKeys.map((key) => {
       return (
         <UIFactory.CreateSection
           level={level + 1}
           header={key}
-          contents={contents[key] as { [key: string]: unknown }}
+          contents={contents.sections[key]}
+          identifier={`${identifier}-${key}`}
           configuration={configuration}
           setConfiguration={setConfiguration}
         />
@@ -210,21 +223,105 @@ const UIFactory = {
     );
   },
 
+  CreateSectionsNav(args: { spec: SectionDescription }) {
+    const { spec } = args;
+
+    function createNavSection(
+      subspec: SectionDescription,
+      header: string,
+      href: string,
+      depth: number
+    ) {
+      const iClassName = `nav nav-pills flex-column`;
+      const style = { marginLeft: `${depth / 3}rem` };
+      return [
+        <a className="nav-link" href={href}>
+          {header}
+        </a>,
+        <nav className={iClassName} style={style}>
+          {Object.keys(subspec.sections).map((key) => {
+            return createNavSection(
+              subspec.sections[key],
+              key,
+              `${href}-${key}`,
+              depth + 1
+            );
+          })}
+        </nav>,
+      ];
+    }
+
+    const level1 = Object.keys(spec.sections).map((key) => {
+      return createNavSection(spec.sections[key], key, `#config-${key}`, 1);
+    });
+
+    return (
+      <nav
+        id="config-navbar"
+        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 col-3"
+        style={{ justifyContent: 'flex-start' }}
+      >
+        <a className="navbar-brand" href="#config-General">
+          Table of Contents
+        </a>
+        <nav className="nav nav-pills flex-column">
+          <a className="nav-link" href="#config-General">
+            General
+          </a>
+          {level1}
+        </nav>
+      </nav>
+    );
+  },
+
   CreateSections(args: {
-    definition: { [key: string]: unknown };
+    definition: SectionDescription;
     configuration: { [key: string]: unknown };
     setConfiguration: (args: { key: string; value: unknown }) => void;
   }) {
     const { definition, configuration, setConfiguration } = args;
-
+    const elements = (definition.elements as DisplayConfigElement[]).map(
+      (el: DisplayConfigElement) => {
+        return (
+          <UIFactory.CreateUIElement
+            spec={el as DisplayConfigElement}
+            configuration={configuration}
+            setConfiguration={setConfiguration}
+          />
+        );
+      }
+    );
+    const children = Object.keys(definition.sections).map((key) => {
+      return (
+        <UIFactory.CreateSection
+          level={1}
+          header={key}
+          contents={definition.sections[key]}
+          identifier={`config-${key}`}
+          configuration={configuration}
+          setConfiguration={setConfiguration}
+        />
+      );
+    });
+    // https://getbootstrap.com/docs/5.0/components/scrollspy/#list-item-4
     return (
-      <UIFactory.CreateSection
-        level={0}
-        header=""
-        contents={definition}
-        configuration={configuration}
-        setConfiguration={setConfiguration}
-      />
+      <>
+        <UIFactory.CreateSectionsNav spec={definition} />
+        <div
+          data-bs-spy="scroll"
+          data-bs-target="#config-navbar"
+          data-bs-offset="0"
+          // tabIndex="0"
+          className="col-9"
+          id="config-form"
+        >
+          <div>
+            <h1 id="config-General">General</h1>
+            {elements}
+          </div>
+          {children}
+        </div>
+      </>
     );
   },
 };

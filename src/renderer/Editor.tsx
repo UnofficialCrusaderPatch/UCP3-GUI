@@ -18,7 +18,11 @@ import React, { Component, useReducer, useState } from 'react';
 import './Editor.css';
 import { Form } from 'react-bootstrap';
 
-import { UIFactory, DisplayConfigElement } from './factory/elements';
+import {
+  UIFactory,
+  DisplayConfigElement,
+  SectionDescription,
+} from './factory/elements';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -121,40 +125,8 @@ const EditorTemplate = () => {
               </ToggleButton>
             </div>
           </Tab>
-          <Tab
-            eventKey="config"
-            title="Config"
-            data-bs-spy="scroll"
-            data-bs-target="#toc"
-          >
-            <div className="col-sm-3">
-              <nav id="toc" data-toggle="toc" className="sticky-top" />
-            </div>
-            <div id="test">
-              <UIFactory.CreateSections
-                definition={
-                  window.electron.ucpBackEnd.getYamlDefinition(
-                    getCurrentFolder()
-                  ).hierarchical as { [key: string]: unknown }
-                }
-                configuration={configuration}
-                setConfiguration={setConfiguration}
-              />
-            </div>
-            {/* <div id="dynamicContent">
-              {window.electron.ucpBackEnd
-                .getYamlDefinition(getCurrentFolder())
-                .map((x: unknown) => {
-                  return (
-                    <UIFactory.CreateUIElement
-                      spec={x as DisplayConfigElement}
-                      configuration={configuration}
-                      setConfiguration={setConfiguration}
-                    />
-                  );
-                })}
-            </div> */}
-            <div>
+          <Tab eventKey="config" title="Config" className="tabpanel-config">
+            <div className="border-bottom border-light pb-2">
               <button
                 className="btn btn-primary"
                 type="button"
@@ -167,6 +139,18 @@ const EditorTemplate = () => {
               >
                 Save
               </button>
+            </div>
+
+            <div id="dynamicConfigPanel" className="row w-100">
+              <UIFactory.CreateSections
+                definition={
+                  window.electron.ucpBackEnd.getYamlDefinition(
+                    getCurrentFolder()
+                  ).hierarchical as SectionDescription
+                }
+                configuration={configuration}
+                setConfiguration={setConfiguration}
+              />
             </div>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">

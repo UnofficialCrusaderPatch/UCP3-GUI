@@ -2,10 +2,15 @@
 
 .editor-app {
   position: relative;
-  height: 90vh;
+  height: 95vh;
   font-family: sans-serif;
   overflow-y: hidden;
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+
+#config-form {
+  height: 85vh;
+  overflow-y: scroll;
 }

@@ -11,8 +11,7 @@ if (!fs.existsSync(baseFolder)) {
 }
 
 const extensionsCache: { [key: string]: Extension[] } = {};
-const uiCache: { [key: string]: unknown[] } = {};
-const uiCache2: { [key: string]: unknown } = {};
+const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
 process.once('loaded', () => {
   window.addEventListener('message', (evt) => {
@@ -120,33 +119,32 @@ contextBridge.exposeInMainWorld('electron', {
           return 0;
         });
 
-        const result: { [key: string]: unknown } = { elements: [] };
+        const result = { elements: [], sections: {} };
         uiCollection.forEach((ui) => {
           if (ui.category !== undefined) {
-            let e: { [key: string]: unknown } = result;
+            let e: { elements: object[]; sections: { [key: string]: object } } =
+              result;
             ui.category.forEach((cat: string) => {
-              if (e[cat] === undefined) {
-                e[cat] = {};
+              if (e.sections[cat] === undefined) {
+                e.sections[cat] = { elements: [], sections: {} };
               }
-              e = e[cat] as { [key: string]: unknown };
-              if (e.elements === undefined) {
-                e.elements = [];
-              }
+              e = e.sections[cat] as {
+                elements: object[];
+                sections: { [key: string]: object };
+              };
             });
-            const f = e as { elements: object[] };
-            if (f.elements === undefined) {
-              f.elements = [];
-            }
+            const f = e;
+            // if (f.elements === undefined) {
+            //   f.elements = [];
+            // }
             f.elements.push(ui);
           }
         });
 
         console.log('caching: ', gameFolder, result);
-        uiCache[gameFolder] = uiCollection;
-        uiCache2[gameFolder] = result;
+        uiCache[gameFolder] = { flat: uiCollection, hierarchical: result };
       }
-      console.log('refreshing: ', gameFolder, uiCache[gameFolder]);
-      return { flat: uiCache[gameFolder], hierarchical: uiCache2[gameFolder] };
+      console.log('refreshing ui');
       return uiCache[gameFolder];
       return yaml.parse(
         fs.readFileSync(`${gameFolder}\\ucp3-gui-poc.yml`, {

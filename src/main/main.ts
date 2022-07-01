@@ -127,6 +127,15 @@ ipcMain.handle('select-dirs', async (event, arg) => {
   return null;
 });
 
+ipcMain.handle('select-file', async (event, arg) => {
+  if (mainWindow !== null) {
+    const result = await dialog.showSaveDialog(mainWindow);
+    console.log('file destination selected', result.filePath);
+    return result.filePath;
+  }
+  return null;
+});
+
 let currentFolder = '';
 
 ipcMain.handle('launch-window', (event, arg) => {

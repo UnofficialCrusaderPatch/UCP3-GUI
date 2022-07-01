@@ -142,7 +142,11 @@ export default function Editor() {
               </ToggleButton>
             </div>
           </Tab>
-          <Tab eventKey="config" title="Config" className="tabpanel-config">
+          <Tab
+            eventKey="config"
+            title="Config creator"
+            className="tabpanel-config"
+          >
             <div className="border-bottom border-light pb-2">
               <button
                 disabled={Object.keys(touched).length === 0}
@@ -151,11 +155,11 @@ export default function Editor() {
                 onClick={() =>
                   window.electron.ucpBackEnd.saveUCPConfig(
                     configuration,
-                    `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
+                    '' // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
                   )
                 }
               >
-                Save
+                Save As
               </button>
               <button
                 className="btn btn-primary"

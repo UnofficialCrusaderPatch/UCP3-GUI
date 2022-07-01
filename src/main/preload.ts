@@ -134,23 +134,13 @@ contextBridge.exposeInMainWorld('electron', {
               };
             });
             const f = e;
-            // if (f.elements === undefined) {
-            //   f.elements = [];
-            // }
             f.elements.push(ui);
           }
         });
 
-        console.log('caching: ', gameFolder, result);
         uiCache[gameFolder] = { flat: uiCollection, hierarchical: result };
       }
-      console.log('refreshing ui');
       return uiCache[gameFolder];
-      return yaml.parse(
-        fs.readFileSync(`${gameFolder}\\ucp3-gui-poc.yml`, {
-          encoding: 'utf-8',
-        })
-      );
     },
 
     // Load configuration
@@ -159,8 +149,14 @@ contextBridge.exposeInMainWorld('electron', {
     },
 
     // Save configuration
-    saveUCPConfig(config: { [key: string]: object }, filePath: string) {
-      const finalConfig: { [key: string]: object } = {};
+    async saveUCPConfig(config: { [key: string]: object }, filePath: string) {
+      let finalFilePath = filePath;
+      if (filePath === undefined || filePath === '') {
+        const result = await ipcRenderer.invoke('select-file');
+        finalFilePath = result;
+      }
+
+      const finalConfig: { [key: string]: unknown } = {};
       Object.keys(config).forEach((key: string) => {
         const value = config[key];
         let fcp = finalConfig;
@@ -172,11 +168,24 @@ contextBridge.exposeInMainWorld('electron', {
           if (fcp[part] === undefined) {
             fcp[part] = {};
           }
-          fcp = fcp[part] as { [key: string]: object };
+          fcp = fcp[part] as { [key: string]: unknown };
         });
         fcp[finalpart] = value;
       });
-      fs.writeFileSync(filePath, yaml.stringify(finalConfig));
+
+      Object.keys(finalConfig).forEach((moduleName) => {
+        const ext = extensionsCache[Object.keys(extensionsCache)[0]].filter(
+          (ex) => {
+            return ex.name === moduleName;
+          }
+        );
+        if (ext.length === 1) {
+          (finalConfig[moduleName] as { version: string }).version =
+            ext[0].version;
+        }
+      });
+
+      fs.writeFileSync(finalFilePath, yaml.stringify(finalConfig));
     },
 
     getExtensions(gameFolder: string) {

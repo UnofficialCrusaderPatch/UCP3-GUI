@@ -49,3 +49,11 @@
 #config-navbar > nav > nav > nav > nav > a {
   font-size: smaller;
 }
+
+.form-control:disabled {
+  opacity: 0.5;
+}
+
+.form-label:disabled {
+  opacity: 0.5;
+}

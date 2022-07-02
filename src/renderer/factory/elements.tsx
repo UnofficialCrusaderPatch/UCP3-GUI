@@ -107,7 +107,7 @@ const UIFactory = {
     if (isEnabled === undefined) isEnabled = true;
     return (
       <Form.Switch
-        className="my-3"
+        className=""
         // Tooltip stuff
         data-bs-toggle="tooltip"
         data-bs-placement="top"
@@ -144,7 +144,7 @@ const UIFactory = {
     let { [enabled]: isEnabled } = configuration;
     if (isEnabled === undefined) isEnabled = true;
     return (
-      <Form.Group className="d-flex align-items-baseline lh-sm">
+      <Form.Group className="d-flex align-items-baseline lh-sm config-number-group">
         <div className="col-1 mr-3">
           <Form.Control
             className="bg-dark text-light"
@@ -170,7 +170,9 @@ const UIFactory = {
           />
         </div>
         <div className="flex-grow-1 px-2">
-          <Form.Label for={`${url}-input`}>{text}</Form.Label>
+          <Form.Label for={`${url}-input`} className="" disabled={!isEnabled}>
+            {text}
+          </Form.Label>
         </div>
       </Form.Group>
     );

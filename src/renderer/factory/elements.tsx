@@ -64,6 +64,7 @@ const UIFactory = {
         rowChildren.push(
           <Col>
             <UIFactory.CreateUIElement
+              key={children[i].url}
               spec={children[i]}
               configuration={configuration}
               setConfiguration={setConfiguration}
@@ -170,7 +171,11 @@ const UIFactory = {
           />
         </div>
         <div className="flex-grow-1 px-2">
-          <Form.Label for={`${url}-input`} className="" disabled={!isEnabled}>
+          <Form.Label
+            htmlFor={`${url}-input`}
+            className=""
+            disabled={!isEnabled}
+          >
             {text}
           </Form.Label>
         </div>
@@ -228,6 +233,7 @@ const UIFactory = {
       (el: DisplayConfigElement) => {
         return (
           <UIFactory.CreateUIElement
+            key={el.url}
             spec={el as DisplayConfigElement}
             configuration={configuration}
             setConfiguration={setConfiguration}
@@ -243,14 +249,10 @@ const UIFactory = {
     );
 
     const childKeys = Object.keys(contents.sections);
-    // const elementsIndex = childKeys.indexOf('elements');
-    // if (elementsIndex !== -1) {
-    //   childKeys.splice(elementsIndex, 1);
-    // }
-
     const children = childKeys.map((key) => {
       return (
         <UIFactory.CreateSection
+          key={`${identifier}-${key}`}
           level={level + 1}
           header={key}
           contents={contents.sections[key]}
@@ -275,33 +277,47 @@ const UIFactory = {
   CreateSectionsNav(args: { spec: SectionDescription }) {
     const { spec } = args;
 
-    function createNavSection(
-      subspec: SectionDescription,
-      header: string,
-      href: string,
-      depth: number
-    ) {
+    function NavSection(navArgs: {
+      subspec: SectionDescription;
+      header: string;
+      href: string;
+      depth: number;
+    }) {
+      const { subspec, header, href, depth } = navArgs;
       const iClassName = `nav nav-pills flex-column`;
       const style = { marginLeft: `${depth / 3}rem` };
-      return [
-        <a className="nav-link" href={href}>
-          {header}
-        </a>,
-        <nav className={iClassName} style={style}>
-          {Object.keys(subspec.sections).map((key) => {
-            return createNavSection(
-              subspec.sections[key],
-              key,
-              `${href}-${key}`,
-              depth + 1
-            );
-          })}
-        </nav>,
-      ];
+      return (
+        <>
+          <a className="nav-link" href={href}>
+            {header}
+          </a>
+          <nav className={iClassName} style={style}>
+            {Object.keys(subspec.sections).map((key) => {
+              return (
+                <NavSection
+                  key={`${href}-${key}`}
+                  subspec={subspec.sections[key]}
+                  header={key}
+                  href={`${href}-${key}`}
+                  depth={depth + 1}
+                />
+              );
+            })}
+          </nav>
+        </>
+      );
     }
 
     const level1 = Object.keys(spec.sections).map((key) => {
-      return createNavSection(spec.sections[key], key, `#config-${key}`, 1);
+      return (
+        <NavSection
+          key={`#config-${key}`}
+          subspec={spec.sections[key]}
+          header={key}
+          href={`#config-${key}`}
+          depth={1}
+        />
+      );
     });
 
     return (
@@ -337,6 +353,7 @@ const UIFactory = {
       (el: DisplayConfigElement) => {
         return (
           <UIFactory.CreateUIElement
+            key={el.url}
             spec={el as DisplayConfigElement}
             configuration={configuration}
             setConfiguration={setConfiguration}
@@ -347,6 +364,7 @@ const UIFactory = {
     const children = Object.keys(definition.sections).map((key) => {
       return (
         <UIFactory.CreateSection
+          key={`config-${key}`}
           level={1}
           header={key}
           contents={definition.sections[key]}

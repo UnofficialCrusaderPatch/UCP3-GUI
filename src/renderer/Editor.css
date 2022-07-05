@@ -40,14 +40,14 @@
 }
 
 #config-navbar > nav > nav > nav > a {
-  font-size: small;
+  font-size: medium;
 }
 
 #config-navbar > nav > nav > nav > a {
-  font-size: smaller;
+  font-size: medium;
 }
 #config-navbar > nav > nav > nav > nav > a {
-  font-size: smaller;
+  font-size: medium;
 }
 
 .form-control:disabled {

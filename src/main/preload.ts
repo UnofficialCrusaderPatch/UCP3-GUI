@@ -153,6 +153,10 @@ contextBridge.exposeInMainWorld('electron', {
       let finalFilePath = filePath;
       if (filePath === undefined || filePath === '') {
         const result = await ipcRenderer.invoke('select-file');
+        if (result === null || result === undefined) {
+          window.alert('Saving: Operation cancelled');
+          return;
+        }
         finalFilePath = result;
       }
 

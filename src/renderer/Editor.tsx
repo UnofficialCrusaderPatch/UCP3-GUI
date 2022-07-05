@@ -95,13 +95,17 @@ export default function Editor() {
         Object.getOwnPropertyNames(touched).forEach((prop) => {
           delete touched[prop];
         });
-        console.log(touched);
+
+        // Reset to a value
+        if (typeof action.value === 'object') {
+          return { ...(result.value as object) };
+        }
+
+        // Reset to defaults
         return { ...activeConfigurationDefaults };
       }
       result[action.key] = action.value;
       touched[action.key] = true;
-
-      console.log(touched);
 
       return result;
     },
@@ -147,10 +151,10 @@ export default function Editor() {
             title="Config creator"
             className="tabpanel-config"
           >
-            <div className="border-bottom border-light pb-2">
+            <div className="row border-bottom border-light pb-2 mx-0">
               <button
                 disabled={Object.keys(touched).length === 0}
-                className="btn btn-primary"
+                className="col-auto btn btn-primary mx-1"
                 type="button"
                 onClick={() =>
                   window.electron.ucpBackEnd.saveUCPConfig(
@@ -162,7 +166,7 @@ export default function Editor() {
                 Save As
               </button>
               <button
-                className="btn btn-primary"
+                className="col-auto btn btn-primary mx-1"
                 type="button"
                 onClick={() => {
                   setConfiguration({
@@ -172,8 +176,14 @@ export default function Editor() {
                   });
                 }}
               >
-                Reset
+                Reset to Defaults
               </button>
+              <Form className="col-auto">
+                <Form.Switch
+                  id="config-sparse-mode-switch"
+                  label="Sparse config"
+                />
+              </Form>
             </div>
 
             <div id="dynamicConfigPanel" className="row w-100 mx-0">
@@ -193,8 +203,8 @@ export default function Editor() {
           <div className="d-flex p-1 px-2">
             <div className="flex-grow-1">
               <span className="muted-text">
-                folder: "
-                <span className="px-2 font-italic">{getCurrentFolder()}</span>"
+                folder:
+                <span className="px-2 fst-italic">{getCurrentFolder()}</span>
               </span>
             </div>
             <div>

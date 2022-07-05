@@ -264,7 +264,8 @@ const UIFactory = {
     });
 
     return (
-      <div style={{ marginLeft: `${level / 4}rem` }}>
+      // ${level / 4}rem
+      <div style={{ marginLeft: `0rem` }}>
         {htmlHeader}
         <div style={{ marginLeft: '0.5rem', marginBottom: '0.5rem' }}>
           {elements}

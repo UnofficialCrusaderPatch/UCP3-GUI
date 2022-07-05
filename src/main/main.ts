@@ -130,10 +130,11 @@ ipcMain.handle('select-dirs', async (event, arg) => {
 ipcMain.handle('select-file', async (event, arg) => {
   if (mainWindow !== null) {
     const result = await dialog.showSaveDialog(mainWindow);
+    if (result.canceled) return undefined;
     console.log('file destination selected', result.filePath);
     return result.filePath;
   }
-  return null;
+  return undefined;
 });
 
 let currentFolder = '';

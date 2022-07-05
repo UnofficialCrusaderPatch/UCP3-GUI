@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import App from './App';
-import Editor from './Editor';
+import Manager from './Manager';
 
 type ViewList = {
   [key: string]: JSX.Element;
@@ -12,7 +12,7 @@ class ViewManager extends Component {
   static Views(): ViewList {
     return {
       landing: <App />,
-      editor: <Editor />,
+      editor: <Manager />,
     };
   }
 

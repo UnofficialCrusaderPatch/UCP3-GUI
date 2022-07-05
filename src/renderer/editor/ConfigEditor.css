@@ -1,4 +1,4 @@
-@import '~bootstrap';
+/* @import '~bootstrap'; */
 
 .editor-app {
   position: relative;
@@ -8,6 +8,14 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+
+.form-control:disabled {
+  opacity: 0.5;
+}
+
+.label-disabled > label {
+  opacity: 0.5;
 }
 
 #config-sections {
@@ -48,12 +56,4 @@
 }
 #config-navbar > nav > nav > nav > nav > a {
   font-size: medium;
-}
-
-.form-control:disabled {
-  opacity: 0.5;
-}
-
-.form-label:disabled {
-  opacity: 0.5;
 }

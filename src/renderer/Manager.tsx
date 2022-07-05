@@ -85,6 +85,7 @@ export default function Manager() {
               file={`${getCurrentFolder()}/ucp-config-poc.yml`}
               definition={definition}
               defaults={defaults}
+              readonly={false}
             />
           </Tab>
           <Tab eventKey="extensions" title="Extensions">

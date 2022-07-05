@@ -41,6 +41,7 @@ export type SectionDescription = {
 const UIFactory = {
   CreateGroupBox(
     spec: DisplayConfigElement,
+    disabled: boolean,
     configuration: { [key: string]: unknown },
     setConfiguration: (args: {
       key: string;
@@ -66,6 +67,7 @@ const UIFactory = {
             <UIFactory.CreateUIElement
               key={children[i].url}
               spec={children[i]}
+              disabled={disabled}
               configuration={configuration}
               setConfiguration={setConfiguration}
             />
@@ -95,6 +97,7 @@ const UIFactory = {
 
   CreateSwitch(
     spec: DisplayConfigElement,
+    disabled: boolean,
     configuration: { [url: string]: unknown },
     setConfiguration: (args: {
       key: string;
@@ -125,13 +128,14 @@ const UIFactory = {
             reset: false,
           });
         }}
-        disabled={!isEnabled}
+        disabled={!isEnabled || disabled}
       />
     );
   },
 
   CreateNumberInputElement(
     spec: DisplayConfigElement,
+    disabled: boolean,
     configuration: { [url: string]: unknown },
     setConfiguration: (args: {
       key: string;
@@ -167,14 +171,17 @@ const UIFactory = {
                 reset: false,
               });
             }}
-            disabled={!isEnabled}
+            disabled={!isEnabled || disabled}
           />
         </div>
-        <div className="flex-grow-1 px-2">
+        <div
+          className={`flex-grow-1 px-2 ${
+            !isEnabled || disabled ? 'label-disabled' : ''
+          }`}
+        >
           <Form.Label
             htmlFor={`${url}-input`}
-            className=""
-            disabled={!isEnabled}
+            // disabled={!isEnabled || disabled}
           >
             {text}
           </Form.Label>
@@ -185,6 +192,7 @@ const UIFactory = {
 
   CreateUIElement(args: {
     spec: DisplayConfigElement;
+    disabled: boolean;
     configuration: { [key: string]: unknown };
     setConfiguration: (args: {
       key: string;
@@ -192,16 +200,27 @@ const UIFactory = {
       reset: boolean;
     }) => void;
   }) {
-    const { spec, configuration, setConfiguration } = args;
+    const { spec, disabled, configuration, setConfiguration } = args;
     if (spec.type === 'GroupBox') {
-      return UIFactory.CreateGroupBox(spec, configuration, setConfiguration);
+      return UIFactory.CreateGroupBox(
+        spec,
+        disabled,
+        configuration,
+        setConfiguration
+      );
     }
     if (spec.type === 'Switch') {
-      return UIFactory.CreateSwitch(spec, configuration, setConfiguration);
+      return UIFactory.CreateSwitch(
+        spec,
+        disabled,
+        configuration,
+        setConfiguration
+      );
     }
     if (spec.type === 'Number') {
       return UIFactory.CreateNumberInputElement(
         spec,
+        disabled,
         configuration,
         setConfiguration
       );
@@ -214,6 +233,7 @@ const UIFactory = {
     header: string;
     contents: SectionDescription;
     identifier: string;
+    readonly: boolean;
     configuration: { [key: string]: unknown };
     setConfiguration: (args: {
       key: string;
@@ -226,6 +246,7 @@ const UIFactory = {
       identifier,
       header,
       contents,
+      readonly,
       configuration,
       setConfiguration,
     } = args;
@@ -235,6 +256,7 @@ const UIFactory = {
           <UIFactory.CreateUIElement
             key={el.url}
             spec={el as DisplayConfigElement}
+            disabled={readonly}
             configuration={configuration}
             setConfiguration={setConfiguration}
           />
@@ -257,6 +279,7 @@ const UIFactory = {
           header={key}
           contents={contents.sections[key]}
           identifier={`${identifier}-${key}`}
+          readonly={readonly}
           configuration={configuration}
           setConfiguration={setConfiguration}
         />
@@ -342,6 +365,7 @@ const UIFactory = {
 
   CreateSections(args: {
     definition: SectionDescription;
+    readonly: boolean;
     configuration: { [key: string]: unknown };
     setConfiguration: (args: {
       key: string;
@@ -349,13 +373,14 @@ const UIFactory = {
       reset: boolean;
     }) => void;
   }) {
-    const { definition, configuration, setConfiguration } = args;
+    const { definition, readonly, configuration, setConfiguration } = args;
     const elements = (definition.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
         return (
           <UIFactory.CreateUIElement
             key={el.url}
             spec={el as DisplayConfigElement}
+            disabled={readonly}
             configuration={configuration}
             setConfiguration={setConfiguration}
           />
@@ -370,6 +395,7 @@ const UIFactory = {
           header={key}
           contents={definition.sections[key]}
           identifier={`config-${key}`}
+          readonly={readonly}
           configuration={configuration}
           setConfiguration={setConfiguration}
         />

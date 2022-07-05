@@ -31,9 +31,10 @@ export default function ConfigEditor(args: {
   defaults: { [key: string]: unknown };
   file: string;
   folder: string;
+  readonly: boolean;
 }) {
   console.log('Create Editor');
-  const { definition, defaults, file } = args;
+  const { definition, defaults, file, readonly } = args;
 
   const [configuration, setConfiguration] = useReducer(
     (
@@ -65,56 +66,58 @@ export default function ConfigEditor(args: {
 
   return (
     <>
-      <div className="row border-bottom border-light pb-2 mx-0">
-        <button
-          disabled={Object.keys(touched).length === 0}
-          className="col-auto btn btn-primary mx-1"
-          type="button"
-          onClick={() =>
-            window.electron.ucpBackEnd.saveUCPConfig(
-              configuration,
-              file // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
-            )
-          }
-        >
-          Save
-        </button>
-        <button
-          disabled={Object.keys(touched).length === 0}
-          className="col-auto btn btn-primary mx-1"
-          type="button"
-          onClick={() =>
-            window.electron.ucpBackEnd.saveUCPConfig(
-              configuration,
-              '' // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
-            )
-          }
-        >
-          Save As
-        </button>
-        <button
-          className="col-auto btn btn-primary mx-1"
-          type="button"
-          onClick={() => {
-            setConfiguration({
-              reset: true,
-              key: '',
-              value: undefined,
-            });
-          }}
-        >
-          Reset to Defaults
-        </button>
-        <Form className="col-auto">
-          <Form.Switch id="config-sparse-mode-switch" label="Sparse config" />
-        </Form>
-      </div>
-
+      {!readonly ? (
+        <div className="row border-bottom border-light pb-2 mx-0">
+          <button
+            disabled={Object.keys(touched).length === 0}
+            className="col-auto btn btn-primary mx-1"
+            type="button"
+            onClick={() =>
+              window.electron.ucpBackEnd.saveUCPConfig(
+                configuration,
+                file // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
+              )
+            }
+          >
+            Save
+          </button>
+          <button
+            disabled={Object.keys(touched).length === 0}
+            className="col-auto btn btn-primary mx-1"
+            type="button"
+            onClick={() =>
+              window.electron.ucpBackEnd.saveUCPConfig(
+                configuration,
+                '' // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
+              )
+            }
+          >
+            Save As
+          </button>
+          <button
+            className="col-auto btn btn-primary mx-1"
+            type="button"
+            onClick={() => {
+              setConfiguration({
+                reset: true,
+                key: '',
+                value: undefined,
+              });
+            }}
+          >
+            Reset to Defaults
+          </button>
+          <Form className="col-auto">
+            <Form.Switch id="config-sparse-mode-switch" label="Sparse config" />
+          </Form>
+        </div>
+      ) : null}
       <div id="dynamicConfigPanel" className="row w-100 mx-0">
         <UIFactory.CreateSections
           definition={definition.hierarchical as SectionDescription}
           configuration={configuration}
           setConfiguration={setConfiguration}
+          readonly={readonly}
         />
       </div>
     </>

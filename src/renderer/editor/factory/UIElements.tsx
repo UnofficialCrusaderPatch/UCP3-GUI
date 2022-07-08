@@ -38,13 +38,25 @@ export type SectionDescription = {
   sections: { [key: string]: SectionDescription };
 };
 
+function formatToolTip(tooltip: string, url: string) {
+  if (tooltip === undefined || tooltip === '') {
+    return `key: ${url}`;
+  }
+  return `${tooltip}\n\nurl:${url}`;
+}
+
 const UIFactory = {
-  ConfigWarning() {
+  ConfigWarning(args: { text: string; level: string }) {
+    const { text, level } = args;
+    let textColour = 'text-warning';
+    if (level !== undefined) textColour = `text-${level}`;
+    if (level === 'error') textColour = `text-danger`;
     return (
-      <div>
+      <div className="user-select-none">
         <span
-          className="position-relative fs-4 text-muted"
+          className={`position-relative fs-4 ${textColour}`}
           style={{ marginLeft: `${-2}rem` }}
+          title={text}
         >
           &#9888;
         </span>
@@ -59,7 +71,9 @@ const UIFactory = {
       key: string;
       value: unknown;
       reset: boolean;
-    }) => void
+    }) => void,
+    warnings: { [key: string]: { text: string; level: string } },
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
   ) {
     const { name, description, children, columns, header } = spec;
     const itemCount = children.length;
@@ -82,6 +96,8 @@ const UIFactory = {
               disabled={disabled}
               configuration={configuration}
               setConfiguration={setConfiguration}
+              warnings={warnings}
+              setWarning={setWarning}
             />
           </Col>
         );
@@ -95,20 +111,23 @@ const UIFactory = {
     }
 
     return (
-      <Form key={`${name}-groupbox`}>
-        <Container className="border-bottom border-light my-2">
-          <Row className="my-3">
-            <h5>{header}</h5>
-            <div>
-              <span>{description}</span>
-            </div>
-          </Row>
-          <Row className="mt-1">{cs}</Row>
-          <Row>
-            <span className="text-muted text-end">module-name-v1.0.0</span>
-          </Row>
-        </Container>
-      </Form>
+      // <Form key={`${name}-groupbox`}>
+      <Container
+        className="border-bottom border-light my-2"
+        style={{ marginLeft: '-1.5rem' }}
+      >
+        <Row className="my-3">
+          <h5>{header}</h5>
+          <div>
+            <span>{description}</span>
+          </div>
+        </Row>
+        <Row className="mt-1">{cs}</Row>
+        <Row>
+          <span className="text-muted text-end">module-name-v1.0.0</span>
+        </Row>
+      </Container>
+      // </Form>
     );
   },
 
@@ -120,21 +139,32 @@ const UIFactory = {
       key: string;
       value: unknown;
       reset: boolean;
-    }) => void
+    }) => void,
+    warnings: { [key: string]: { text: string; level: string } },
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
   ) {
     const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
     let { [enabled]: isEnabled } = configuration;
     if (isEnabled === undefined) isEnabled = true;
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = warnings[url] !== undefined;
+
     return (
       <div className="d-flex align-items-baseline lh-sm">
-        <UIFactory.ConfigWarning />
+        {hasWarning ? (
+          <UIFactory.ConfigWarning
+            text={warnings[url].text}
+            level={warnings[url].level}
+          />
+        ) : null}
         <Form.Switch
           className=""
           // Tooltip stuff
           data-bs-toggle="tooltip"
           data-bs-placement="top"
-          title={tooltip}
+          title={fullToolTip}
           // End of tooltip stuff
           key={`${url}-switch`}
           label={text}
@@ -161,16 +191,27 @@ const UIFactory = {
       key: string;
       value: unknown;
       reset: boolean;
-    }) => void
+    }) => void,
+    warnings: { [key: string]: { text: string; level: string } },
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
   ) {
     const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
     let { [enabled]: isEnabled } = configuration;
     if (isEnabled === undefined) isEnabled = true;
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = warnings[url] !== undefined;
+
     return (
       <Form.Group className="d-flex align-items-baseline lh-sm config-number-group">
-        <UIFactory.ConfigWarning />
+        {hasWarning ? (
+          <UIFactory.ConfigWarning
+            text={warnings[url].text}
+            level={warnings[url].level}
+          />
+        ) : null}
         <div className="col-1 mr-3">
           <Form.Control
             className="bg-dark text-light"
@@ -182,7 +223,7 @@ const UIFactory = {
             // Tooltip stuff
             data-bs-toggle="tooltip"
             data-bs-placement="top"
-            title={tooltip}
+            title={fullToolTip}
             // End of tooltip stuff
             value={value === undefined ? 0 : (value as number)}
             onChange={(event) => {
@@ -220,14 +261,25 @@ const UIFactory = {
       value: unknown;
       reset: boolean;
     }) => void;
+    warnings: { [key: string]: { text: string; level: string } };
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {
-    const { spec, disabled, configuration, setConfiguration } = args;
+    const {
+      spec,
+      disabled,
+      configuration,
+      setConfiguration,
+      warnings,
+      setWarning,
+    } = args;
     if (spec.type === 'GroupBox') {
       return UIFactory.CreateGroupBox(
         spec,
         disabled,
         configuration,
-        setConfiguration
+        setConfiguration,
+        warnings,
+        setWarning
       );
     }
     if (spec.type === 'Switch') {
@@ -235,7 +287,9 @@ const UIFactory = {
         spec,
         disabled,
         configuration,
-        setConfiguration
+        setConfiguration,
+        warnings,
+        setWarning
       );
     }
     if (spec.type === 'Number') {
@@ -243,7 +297,9 @@ const UIFactory = {
         spec,
         disabled,
         configuration,
-        setConfiguration
+        setConfiguration,
+        warnings,
+        setWarning
       );
     }
     return <div />;
@@ -261,6 +317,8 @@ const UIFactory = {
       value: unknown;
       reset: boolean;
     }) => void;
+    warnings: { [key: string]: { text: string; level: string } };
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {
     const {
       level,
@@ -270,6 +328,8 @@ const UIFactory = {
       readonly,
       configuration,
       setConfiguration,
+      warnings,
+      setWarning,
     } = args;
     const elements = (contents.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
@@ -280,6 +340,8 @@ const UIFactory = {
             disabled={readonly}
             configuration={configuration}
             setConfiguration={setConfiguration}
+            warnings={warnings}
+            setWarning={setWarning}
           />
         );
       }
@@ -303,6 +365,8 @@ const UIFactory = {
           readonly={readonly}
           configuration={configuration}
           setConfiguration={setConfiguration}
+          warnings={warnings}
+          setWarning={setWarning}
         />
       );
     });
@@ -393,8 +457,17 @@ const UIFactory = {
       value: unknown;
       reset: boolean;
     }) => void;
+    warnings: { [key: string]: { text: string; level: string } };
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {
-    const { definition, readonly, configuration, setConfiguration } = args;
+    const {
+      definition,
+      readonly,
+      configuration,
+      setConfiguration,
+      warnings,
+      setWarning,
+    } = args;
     const elements = (definition.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
         return (
@@ -404,6 +477,8 @@ const UIFactory = {
             disabled={readonly}
             configuration={configuration}
             setConfiguration={setConfiguration}
+            warnings={warnings}
+            setWarning={setWarning}
           />
         );
       }
@@ -419,6 +494,8 @@ const UIFactory = {
           readonly={readonly}
           configuration={configuration}
           setConfiguration={setConfiguration}
+          warnings={warnings}
+          setWarning={setWarning}
         />
       );
     });

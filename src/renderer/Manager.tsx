@@ -3,6 +3,7 @@ import Tab from 'react-bootstrap/Tab';
 import { Form } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
+import { useReducer } from 'react';
 import ConfigEditor from './editor/ConfigEditor';
 
 import { DisplayConfigElement } from './editor/factory/UIElements';
@@ -41,6 +42,47 @@ if (global.location.search.startsWith('?editor')) {
 }
 
 export default function Manager() {
+  const warningDefaults = {
+    'ucp.o_default_multiplayer_speed': {
+      text: 'ERROR: Conflicting options selected: test warning',
+      level: 'error',
+    },
+  };
+
+  const [warnings, setWarning] = useReducer(
+    (
+      state: { [key: string]: unknown },
+      action: { key: string; value: unknown; reset: boolean }
+    ) => {
+      const result: { [key: string]: unknown } = { ...state };
+      if (action.reset) {
+        // Reset to a value
+        if (typeof action.value === 'object') {
+          return { ...(result.value as object) };
+        }
+
+        // Reset to defaults
+        return { ...warningDefaults };
+      }
+      result[action.key] = action.value;
+
+      return result;
+    },
+    warningDefaults
+  );
+
+  const warningCount = Object.values(warnings)
+    .map((v) =>
+      (v as { text: string; level: string }).level === 'warning' ? 1 : 0
+    )
+    .reduce((a: number, b: number) => a + b, 0);
+
+  const errorCount = Object.values(warnings)
+    .map((v) =>
+      (v as { text: string; level: string }).level === 'error' ? 1 : 0
+    )
+    .reduce((a: number, b: number) => a + b, 0);
+
   return (
     <div className="editor-app m-3">
       <div className="col-12">
@@ -89,23 +131,29 @@ export default function Manager() {
               definition={definition}
               defaults={defaults}
               readonly={false}
+              warnings={
+                warnings as { [key: string]: { text: string; level: string } }
+              }
+              setWarning={setWarning}
             />
           </Tab>
         </Tabs>
 
         <div className="fixed-bottom bg-primary">
-          <div className="d-flex p-1 px-2">
+          <div className="d-flex p-1 px-2 fs-6">
             <div className="flex-grow-1">
-              <span className="muted-text">
+              <span className="">
                 folder:
                 <span className="px-2 fst-italic">{getCurrentFolder()}</span>
               </span>
             </div>
             <div>
-              <span className="muted-text px-2">
-                installed UCP version: 3.0.0
-              </span>
-              <span className="muted-text px-2">UCP active: true</span>
+              <span className="px-2">0 messages</span>
+              <span className="px-2">{warningCount} warnings</span>
+              <span className="px-2">{errorCount} errors</span>
+              <span className="px-2">GUI version: 1.0.0</span>
+              <span className="px-2">UCP version: 3.0.0</span>
+              <span className="px-2">UCP active: true</span>
             </div>
           </div>
         </div>

@@ -32,9 +32,11 @@ export default function ConfigEditor(args: {
   file: string;
   folder: string;
   readonly: boolean;
+  warnings: { [key: string]: { text: string; level: string } };
+  setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
 }) {
   console.log('Create Editor');
-  const { definition, defaults, file, readonly } = args;
+  const { definition, defaults, file, readonly, warnings, setWarning } = args;
 
   const [configuration, setConfiguration] = useReducer(
     (
@@ -64,55 +66,79 @@ export default function ConfigEditor(args: {
     defaults
   );
 
+  const warningCount = Object.values(warnings)
+    .map((v) =>
+      (v as { text: string; level: string }).level === 'warning' ? 1 : 0
+    )
+    .reduce((a: number, b: number) => a + b, 0);
+
+  const errorCount = Object.values(warnings)
+    .map((v) =>
+      (v as { text: string; level: string }).level === 'error' ? 1 : 0
+    )
+    .reduce((a: number, b: number) => a + b, 0);
+
   return (
     <>
       {!readonly ? (
         <div className="row border-bottom border-light pb-2 mx-0">
-          <button
-            disabled={Object.keys(touched).length === 0}
-            className="col-auto btn btn-primary mx-1"
-            type="button"
-            onClick={() =>
-              window.electron.ucpBackEnd.saveUCPConfig(
-                configuration,
-                file // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
-              )
-            }
-          >
-            Save
-          </button>
-          <button
-            disabled={Object.keys(touched).length === 0}
-            className="col-auto btn btn-primary mx-1"
-            type="button"
-            onClick={() =>
-              window.electron.ucpBackEnd.saveUCPConfig(
-                configuration,
-                '' // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
-              )
-            }
-          >
-            Save As
-          </button>
-          <button
-            className="col-auto btn btn-primary mx-1"
-            type="button"
-            onClick={() => {
-              setConfiguration({
-                reset: true,
-                key: '',
-                value: undefined,
-              });
-            }}
-          >
-            Reset to Defaults
-          </button>
-          <Form className="col-auto">
+          <div className="col">
+            <button
+              disabled={Object.keys(touched).length === 0}
+              className="col-auto btn btn-primary mx-1"
+              type="button"
+              onClick={() =>
+                window.electron.ucpBackEnd.saveUCPConfig(
+                  configuration,
+                  file // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
+                )
+              }
+            >
+              Save
+            </button>
+            <button
+              disabled={Object.keys(touched).length === 0}
+              className="col-auto btn btn-primary mx-1"
+              type="button"
+              onClick={() =>
+                window.electron.ucpBackEnd.saveUCPConfig(
+                  configuration,
+                  '' // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
+                )
+              }
+            >
+              Export
+            </button>
+            <button
+              className="col-auto btn btn-primary mx-1"
+              type="button"
+              onClick={() => {
+                setConfiguration({
+                  reset: true,
+                  key: '',
+                  value: undefined,
+                });
+              }}
+            >
+              Reset
+            </button>
             <Form.Switch
               id="config-allow-user-override-switch"
               label="Allow user override"
+              className="col-auto d-inline-block ms-1"
             />
-          </Form>
+          </div>
+
+          <div className="col-auto ml-auto">
+            {errorCount > 0 ? (
+              <span className="text-danger fs-4 mx-1">⚠</span>
+            ) : null}
+            <span>{errorCount} errors </span>
+            {warningCount > 0 ? (
+              <span className="text-warning fs-4 mx-1">⚠</span>
+            ) : null}
+            <span>{warningCount} warnings</span>
+          </div>
         </div>
       ) : null}
       <div id="dynamicConfigPanel" className="row w-100 mx-0">
@@ -121,6 +147,8 @@ export default function ConfigEditor(args: {
           configuration={configuration}
           setConfiguration={setConfiguration}
           readonly={readonly}
+          warnings={warnings}
+          setWarning={setWarning}
         />
       </div>
     </>

@@ -75,9 +75,12 @@ export default function Manager() {
               </ToggleButton>
             </div>
           </Tab>
+          <Tab eventKey="extensions" title="Extensions">
+            ...
+          </Tab>
           <Tab
             eventKey="config"
-            title="Config creator"
+            title="User Config"
             className="tabpanel-config"
           >
             <ConfigEditor
@@ -87,9 +90,6 @@ export default function Manager() {
               defaults={defaults}
               readonly={false}
             />
-          </Tab>
-          <Tab eventKey="extensions" title="Extensions">
-            ...
           </Tab>
         </Tabs>
 

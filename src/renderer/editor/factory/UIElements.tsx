@@ -39,6 +39,18 @@ export type SectionDescription = {
 };
 
 const UIFactory = {
+  ConfigWarning() {
+    return (
+      <div>
+        <span
+          className="position-relative fs-4 text-muted"
+          style={{ marginLeft: `${-2}rem` }}
+        >
+          &#9888;
+        </span>
+      </div>
+    );
+  },
   CreateGroupBox(
     spec: DisplayConfigElement,
     disabled: boolean,
@@ -63,7 +75,7 @@ const UIFactory = {
         i += 1
       ) {
         rowChildren.push(
-          <Col>
+          <Col key={children[i].url}>
             <UIFactory.CreateUIElement
               key={children[i].url}
               spec={children[i]}
@@ -74,7 +86,12 @@ const UIFactory = {
           </Col>
         );
       }
-      cs.push(<Row className="my-1">{rowChildren}</Row>);
+      // Or use key: children[i].url but that fails if no children?
+      cs.push(
+        <Row key={`${name}-${row}`} className="my-1">
+          {rowChildren}
+        </Row>
+      );
     }
 
     return (
@@ -86,7 +103,7 @@ const UIFactory = {
               <span>{description}</span>
             </div>
           </Row>
-          <Row className="mt-1 ps-2">{cs}</Row>
+          <Row className="mt-1">{cs}</Row>
           <Row>
             <span className="text-muted text-end">module-name-v1.0.0</span>
           </Row>
@@ -110,26 +127,29 @@ const UIFactory = {
     let { [enabled]: isEnabled } = configuration;
     if (isEnabled === undefined) isEnabled = true;
     return (
-      <Form.Switch
-        className=""
-        // Tooltip stuff
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title={tooltip}
-        // End of tooltip stuff
-        key={`${url}-switch`}
-        label={text}
-        id={`${url}-switch`}
-        checked={value === undefined ? false : (value as boolean)}
-        onChange={(event) => {
-          setConfiguration({
-            key: url,
-            value: event.target.checked,
-            reset: false,
-          });
-        }}
-        disabled={!isEnabled || disabled}
-      />
+      <div className="d-flex align-items-baseline lh-sm">
+        <UIFactory.ConfigWarning />
+        <Form.Switch
+          className=""
+          // Tooltip stuff
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          title={tooltip}
+          // End of tooltip stuff
+          key={`${url}-switch`}
+          label={text}
+          id={`${url}-switch`}
+          checked={value === undefined ? false : (value as boolean)}
+          onChange={(event) => {
+            setConfiguration({
+              key: url,
+              value: event.target.checked,
+              reset: false,
+            });
+          }}
+          disabled={!isEnabled || disabled}
+        />
+      </div>
     );
   },
 
@@ -150,6 +170,7 @@ const UIFactory = {
     if (isEnabled === undefined) isEnabled = true;
     return (
       <Form.Group className="d-flex align-items-baseline lh-sm config-number-group">
+        <UIFactory.ConfigWarning />
         <div className="col-1 mr-3">
           <Form.Control
             className="bg-dark text-light"
@@ -290,7 +311,7 @@ const UIFactory = {
       // ${level / 4}rem
       <div style={{ marginLeft: `0rem` }}>
         {htmlHeader}
-        <div style={{ marginLeft: '0.5rem', marginBottom: '0.5rem' }}>
+        <div style={{ marginLeft: '0rem', marginBottom: '0.5rem' }}>
           {elements}
         </div>
         {children}
@@ -347,7 +368,7 @@ const UIFactory = {
     return (
       <nav
         id="config-navbar"
-        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 col-3"
+        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 pe-0 col-3"
         style={{ justifyContent: 'flex-start' }}
       >
         <a className="navbar-brand" href="#config-General">
@@ -413,11 +434,11 @@ const UIFactory = {
           className="col-9 p-3"
           id="config-sections"
         >
-          <div>
+          <div style={{ marginLeft: `1rem` }}>
             <h1 id="config-General">General</h1>
             {elements}
           </div>
-          {children}
+          <div style={{ marginLeft: `1rem` }}>{children}</div>
         </div>
       </>
     );

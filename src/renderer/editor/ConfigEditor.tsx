@@ -108,7 +108,10 @@ export default function ConfigEditor(args: {
             Reset to Defaults
           </button>
           <Form className="col-auto">
-            <Form.Switch id="config-sparse-mode-switch" label="Sparse config" />
+            <Form.Switch
+              id="config-allow-user-override-switch"
+              label="Allow user override"
+            />
           </Form>
         </div>
       ) : null}

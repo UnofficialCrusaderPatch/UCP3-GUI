@@ -143,6 +143,25 @@ contextBridge.exposeInMainWorld('electron', {
       return uiCache[gameFolder];
     },
 
+    async loadConfigFromFile() {
+      const result = await ipcRenderer.invoke('open-config-file');
+      if (result === null || result === undefined) {
+        window.alert('Opening: Operation cancelled');
+        return {};
+      }
+      const filePath = result;
+
+      const config = yaml.parse(
+        fs.readFileSync(filePath, { encoding: 'utf-8' })
+      );
+
+      Object.keys(config).forEach((key) => {
+        config[key] = config[key].options;
+      });
+
+      return config;
+    },
+
     // Load configuration
     loadUCPConfig() {
       return {};

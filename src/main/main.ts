@@ -137,6 +137,22 @@ ipcMain.handle('select-file', async (event, arg) => {
   return undefined;
 });
 
+ipcMain.handle('open-config-file', async (event, arg) => {
+  if (mainWindow !== null) {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [
+        { name: 'All Files', extensions: ['*'] },
+        { name: 'Config files', extensions: ['yml', 'yaml'] },
+      ],
+    });
+    if (result.canceled) return undefined;
+    console.log('file source selected', result.filePaths[0]);
+    return result.filePaths[0];
+  }
+  return undefined;
+});
+
 let currentFolder = '';
 
 ipcMain.handle('launch-window', (event, arg) => {

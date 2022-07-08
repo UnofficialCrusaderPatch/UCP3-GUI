@@ -52,7 +52,8 @@ export default function ConfigEditor(args: {
 
         // Reset to a value
         if (typeof action.value === 'object') {
-          return { ...(result.value as object) };
+          console.log('resetted to', action.value);
+          return { ...(action.value as object) };
         }
 
         // Reset to defaults
@@ -83,6 +84,47 @@ export default function ConfigEditor(args: {
       {!readonly ? (
         <div className="row border-bottom border-light pb-2 mx-0">
           <div className="col">
+            <button
+              className="col-auto btn btn-primary mx-1"
+              type="button"
+              onClick={async () => {
+                const openedConfig =
+                  await window.electron.ucpBackEnd.loadConfigFromFile();
+
+                function findValue(
+                  obj: { [key: string]: unknown },
+                  url: string
+                ): unknown {
+                  const dot = url.indexOf('.');
+                  if (dot === -1) {
+                    return obj[url];
+                  }
+                  const key = url.slice(0, dot);
+                  const rest = url.slice(dot + 1);
+                  return findValue(
+                    obj[key] as { [key: string]: unknown },
+                    rest
+                  );
+                }
+
+                const newConfiguration: { [key: string]: unknown } = {};
+                Object.keys(configuration).forEach((url) => {
+                  const value = findValue(
+                    openedConfig as { [key: string]: unknown },
+                    url
+                  );
+                  newConfiguration[url] = value;
+                });
+
+                setConfiguration({
+                  reset: true,
+                  value: newConfiguration,
+                  key: '',
+                });
+              }}
+            >
+              Import
+            </button>
             <button
               disabled={Object.keys(touched).length === 0}
               className="col-auto btn btn-primary mx-1"

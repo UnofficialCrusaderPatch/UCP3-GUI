@@ -24,6 +24,7 @@ declare global {
           hierarchical: object;
         };
         saveUCPConfig(config: object, gameFolder: string): void;
+        loadConfigFromFile(): object;
       };
     };
   }

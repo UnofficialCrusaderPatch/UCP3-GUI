@@ -15,12 +15,21 @@ export class Extension {
 
   ui: object[];
 
-  constructor(name: string, version: string, type: string, folder: string) {
+  definition: string;
+
+  constructor(
+    name: string,
+    version: string,
+    type: string,
+    folder: string,
+    def: string
+  ) {
     this.name = name;
     this.version = version;
     this.type = type;
     this.folder = folder;
     this.ui = [];
+    this.definition = def;
   }
 
   readUISpec(): void {
@@ -100,7 +109,7 @@ const Discovery = {
         );
         const { name, version } = def;
 
-        const ext = new Extension(name, version, type, folder);
+        const ext = new Extension(name, version, type, folder, def);
         ext.readUISpec();
         ext.setLocale(currentLocale);
         return ext;

@@ -12,11 +12,11 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import { Form } from 'react-bootstrap';
 
 import React, { Component, useReducer, useState } from 'react';
 
 import './ConfigEditor.css';
-import { Form } from 'react-bootstrap';
 
 import {
   UIFactory,

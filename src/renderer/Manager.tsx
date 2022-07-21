@@ -7,6 +7,7 @@ import { useReducer } from 'react';
 import ConfigEditor from './editor/ConfigEditor';
 
 import { DisplayConfigElement } from './editor/factory/UIElements';
+import ExtensionManager from './extensionManager/ExtensionManager';
 
 function getCurrentFolder() {
   const i = global.location.search.indexOf('?editor=');
@@ -47,6 +48,10 @@ if (global.location.search.startsWith('?editor')) {
 }
 
 export default function Manager() {
+  const extensions = window.electron.ucpBackEnd.getExtensions(
+    getCurrentFolder()
+  );
+
   const warningDefaults = {
     'ucp.o_default_multiplayer_speed': {
       text: 'ERROR: Conflicting options selected: test warning',
@@ -112,61 +117,19 @@ export default function Manager() {
             </div>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">
-            <Container>
-              <Row>
-                <ListGroup className="col">
-                  <ListGroup.Item
-                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
-                    className="text-light border-light container"
-                  >
-                    <Row>
-                      <Col>
-                        <Form.Switch id="item-1">
-                          <Form.Switch.Input />
-                          <Form.Switch.Label>
-                            <span className="mx-2">Extension name</span>
-                            <span className="mx-2 text-secondary">-</span>
-                            <span
-                              className="mx-2"
-                              style={{ fontSize: 'smaller' }}
-                            >
-                              Version
-                            </span>
-                          </Form.Switch.Label>
-                        </Form.Switch>
-                      </Col>
-                      <Col className="col-auto">
-                        <Button>Info</Button>
-                      </Col>
-                    </Row>
-                  </ListGroup.Item>
-                  <ListGroup.Item
-                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
-                    className="text-light border-light"
-                  >
-                    Dapibus ac facilisis in
-                  </ListGroup.Item>
-                  <ListGroup.Item
-                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
-                    className="text-light border-light"
-                  >
-                    Morbi leo risus
-                  </ListGroup.Item>
-                  <ListGroup.Item
-                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
-                    className="text-light border-light"
-                  >
-                    Porta ac consectetur ac
-                  </ListGroup.Item>
-                  <ListGroup.Item
-                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
-                    className="text-light border-light"
-                  >
-                    Vestibulum at eros
-                  </ListGroup.Item>
-                </ListGroup>
-              </Row>
-            </Container>
+            <ExtensionManager
+              extensions={
+                extensions as [
+                  {
+                    definition: {
+                      name: string;
+                      version: string;
+                      author: string;
+                    };
+                  }
+                ]
+              }
+            />
           </Tab>
           <Tab
             eventKey="config"

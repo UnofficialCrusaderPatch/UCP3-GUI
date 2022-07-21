@@ -90,6 +90,13 @@ contextBridge.exposeInMainWorld('electron', {
     // An installed extension will involve settings to be set, which means reloading the window.
     rebuildOptionsWindow() {},
 
+    getExtensions(gameFolder: string) {
+      if (extensionsCache[gameFolder] === undefined) {
+        extensionsCache[gameFolder] = Discovery.discoverExtensions(gameFolder);
+      }
+      return extensionsCache[gameFolder];
+    },
+
     // Get yaml definition
     getYamlDefinition(gameFolder: string) {
       if (uiCache[gameFolder] === undefined) {
@@ -209,10 +216,6 @@ contextBridge.exposeInMainWorld('electron', {
       });
 
       fs.writeFileSync(finalFilePath, yaml.stringify(finalConfig));
-    },
-
-    getExtensions(gameFolder: string) {
-      return Discovery.discoverExtensions(gameFolder);
     },
   },
 });

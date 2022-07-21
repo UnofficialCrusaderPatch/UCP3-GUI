@@ -1,6 +1,6 @@
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import { Form } from 'react-bootstrap';
+import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import { useReducer } from 'react';
@@ -39,6 +39,11 @@ let defaults: { [key: string]: unknown };
 if (global.location.search.startsWith('?editor')) {
   definition = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
   defaults = getConfigDefaults(definition.flat as unknown[]);
+  console.log('used definition', definition);
+  console.log(
+    'extensions',
+    window.electron.ucpBackEnd.getExtensions(getCurrentFolder())
+  );
 }
 
 export default function Manager() {
@@ -105,20 +110,63 @@ export default function Manager() {
                 Uninstall UCP from this folder
               </button>
             </div>
-            <div className="m-3">
-              <ToggleButton
-                className="mb-2"
-                id="activate-toggle-check"
-                type="checkbox"
-                variant="outline-primary"
-                value="1"
-              >
-                Activate UCP
-              </ToggleButton>
-            </div>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">
-            ...
+            <Container>
+              <Row>
+                <ListGroup className="col">
+                  <ListGroup.Item
+                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
+                    className="text-light border-light container"
+                  >
+                    <Row>
+                      <Col>
+                        <Form.Switch id="item-1">
+                          <Form.Switch.Input />
+                          <Form.Switch.Label>
+                            <span className="mx-2">Extension name</span>
+                            <span className="mx-2 text-secondary">-</span>
+                            <span
+                              className="mx-2"
+                              style={{ fontSize: 'smaller' }}
+                            >
+                              Version
+                            </span>
+                          </Form.Switch.Label>
+                        </Form.Switch>
+                      </Col>
+                      <Col className="col-auto">
+                        <Button>Info</Button>
+                      </Col>
+                    </Row>
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
+                    className="text-light border-light"
+                  >
+                    Dapibus ac facilisis in
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
+                    className="text-light border-light"
+                  >
+                    Morbi leo risus
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
+                    className="text-light border-light"
+                  >
+                    Porta ac consectetur ac
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    style={{ backgroundColor: 'var(--bs-gray-800)' }}
+                    className="text-light border-light"
+                  >
+                    Vestibulum at eros
+                  </ListGroup.Item>
+                </ListGroup>
+              </Row>
+            </Container>
           </Tab>
           <Tab
             eventKey="config"

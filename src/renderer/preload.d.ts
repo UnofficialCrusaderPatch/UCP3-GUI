@@ -25,6 +25,7 @@ declare global {
         };
         saveUCPConfig(config: object, gameFolder: string): void;
         loadConfigFromFile(): object;
+        getExtensions(gameFolder: string): object;
       };
     };
   }

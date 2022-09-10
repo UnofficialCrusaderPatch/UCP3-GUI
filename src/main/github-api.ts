@@ -16,7 +16,7 @@ type GitRelease = {
 
 async function getLatestUCP3Release() {
   const url =
-    'https://api.github.com/repos/UnofficialCrusaderPatch/UnofficialCrusaderPatch/releases';
+    'https://api.github.com/repos/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases';
 
   const resultRaw = await axios.get(url);
   const resultJSON = JSON.parse(resultRaw);

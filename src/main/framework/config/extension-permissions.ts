@@ -1,24 +1,29 @@
 import { isValuePermitted } from './value-permissions';
 import './common';
 
-import { readYAML } from './util';
-
 function isValidConfig(extensions: unknown, ext: { configEntries: unknown }) {
   const config = ext.configEntries;
+  return [config, extensions]; // stub
   // Check if required and suggested values are within the ranges specified by the spec.
 }
 
-function resolveDependencyOrder(extensions: Extension[]) {}
+function resolveDependencyOrder(extensions: Extension[]) {
+  return extensions; // stub
+}
 
 function hasDependencyRequirementsFulfilled(
   extensions: Extension[],
   ext: Extension
-) {}
+) {
+  return [extensions, ext]; // stub
+}
 
 function isValidExtensionDependencyOrder(
   extensions: Extension[],
   ext: Extension
-) {}
+) {
+  return [extensions, ext]; // stub
+}
 
 function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
   // Should this do it for all?
@@ -47,7 +52,6 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         if (p === undefined) {
           throw new Error('fail!');
         }
-        console.log(p);
         if (p.status !== 'OK') {
           return {
             status: 'CONFLICT',
@@ -77,7 +81,6 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
     .filter((r) => r !== undefined);
 
   if (results.length > 0) {
-    console.log(results);
     return {
       status: 'CONFLICTS',
       count: results.length,
@@ -111,3 +114,12 @@ function isAllValidExtensionConfigOrder(extensions: Extension[]) {
     conflicts: ss,
   };
 }
+
+export {
+  isAllValidExtensionConfigOrder,
+  isValidConfig,
+  isValidExtensionConfigOrder,
+  isValidExtensionDependencyOrder,
+  resolveDependencyOrder,
+  hasDependencyRequirementsFulfilled,
+};

@@ -125,9 +125,9 @@ class Config {
       const configFilePath = `${extensionPath}/config.yml`;
       if (fs.exists(configFilePath)) {
         config = readYAML(configFilePath);
-        const { modules } = config;
-        const { plugins } = config;
-        const { order } = config;
+        // const { modules } = config;
+        // const { plugins } = config;
+        // const { order } = config;
 
         // this.activeExtensionNames[def.name] = false;
 
@@ -141,7 +141,7 @@ class Config {
           config.plugins as { value: unknown; [key: string]: unknown },
           ''
         );
-        processedOptions.name = def.name; // This is a bit unorthodox.
+        // processedOptions.name = def.name; // This is a bit unorthodox.
         this.configs[def.name] = processedOptions;
       }
 
@@ -287,4 +287,4 @@ class Config {
   }
 }
 
-export default Config;
+export { Config, collectConfigs, collectOptions, collectDependencies };

@@ -103,7 +103,7 @@ function isChoiceValuePermittedByConfigs(
       const configValueDef = configDemands.value;
 
       const requiredValue = configValueDef['required-value'];
-      if (value !== requiredValue) {
+      if (requiredValue !== undefined && value !== requiredValue) {
         return {
           status: 'illegal',
           reason: `choice (${value}) does not match the choice (${requiredValue}) required by ${config.name}`,
@@ -112,7 +112,10 @@ function isChoiceValuePermittedByConfigs(
       }
 
       const requiredValues = configValueDef['required-values'];
-      if (requiredValues.indexOf(value.toString()) === -1) {
+      if (
+        requiredValues !== undefined &&
+        requiredValues.indexOf(value.toString()) === -1
+      ) {
         return {
           status: 'illegal',
           reason: `choice (${value}) not a valid choice (${JSON.stringify(
@@ -123,7 +126,7 @@ function isChoiceValuePermittedByConfigs(
       }
 
       const suggestedValue = configValueDef['suggested-value'];
-      if (value !== suggestedValue) {
+      if (suggestedValue !== undefined && value !== suggestedValue) {
         return {
           status: 'warning',
           reason: `choice (${value}) does not match the choice (${suggestedValue}) suggested by ${config.name}`,
@@ -132,7 +135,10 @@ function isChoiceValuePermittedByConfigs(
       }
 
       const suggestedValues = configValueDef['suggested-values'];
-      if (suggestedValues.indexOf(value.toString()) === -1) {
+      if (
+        suggestedValues !== undefined &&
+        suggestedValues.indexOf(value.toString()) === -1
+      ) {
         return {
           status: 'warning',
           reason: `choice (${value}) not a suggested choice (${JSON.stringify(
@@ -302,7 +308,9 @@ function isValuePermitted(value: unknown, spec: OptionEntry, configs: Configs) {
   const valueDef = spec.value;
   if (spec.type === 'number') {
     const numberValue = value as number;
+
     const valueRange = valueDef.range;
+
     if (valueRange !== undefined) {
       if (numberValue < (valueRange.min as number)) {
         return {

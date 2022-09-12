@@ -1,212 +1,243 @@
+/* eslint-disable no-debugger */
 /* eslint-disable no-console */
-import { debug } from 'console';
+
+import { describe, expect, test } from '@jest/globals';
 import '../main/framework/config/common';
+import YAML from 'yaml';
 import { isValuePermitted } from '../main/framework/config/value-permissions';
+import { collectConfigs } from '../main/framework/config/Config';
+import {
+  isValidExtensionConfigOrder,
+  isAllValidExtensionConfigOrder,
+} from '../main/framework/config/extension-permissions';
 
 describe('Test 1', () => {
-  it('should be true', () => {
+  test('should fail because of a missing spec.type value', () => {
     expect(() => {
       const a = isValuePermitted(2, { url: 'test1.hello' } as OptionEntry, []);
-      debug(JSON.stringify(a));
       return a.status === 'OK';
-    }).toBeTruthy();
+    }).toThrow(`unrecognized type: ${undefined}`);
   });
 });
+
+const b = isValuePermitted(
+  2,
+  {
+    type: 'number',
+    url: 'test1.hello',
+    value: {
+      default: 4,
+    },
+  } as unknown as OptionEntry,
+  [
+    {
+      'test1.hello': {
+        url: 'test1.hello',
+        value: { 'required-value': 3 },
+      } as unknown as ConfigEntry,
+    },
+  ]
+);
 
 describe('Test 2', () => {
-  it('should be false', () => {
-    expect(() => {
-      return (
-        isValuePermitted(
-          2,
-          {
-            type: 'number',
-            url: 'test1.hello',
-            value: { 'required-value': 3 },
-          } as unknown as OptionEntry,
-          []
-        ).status === 'OK'
-      );
-    }).toBeTruthy();
+  test('should be illegal because of a required value mismatch', () => {
+    expect(b.status).toBe('illegal');
   });
 });
 
-// const test1 = isNumberValuePermittedByConfigs(2, { url: 'test1.hello' }, []);
-// reportTest('Test 1', test1);
+const test3Spec = {
+  url: 'test.hello',
+  type: 'number',
+  value: {
+    default: 0,
+  },
+} as unknown as OptionEntry;
 
-// const test2_spec = { url: 'test2.hello' };
-// const test2_configs = [
-//   {
-//     name: 'test2-plugin1',
-//     'test2.hello': {
-//       value: {
-//         'suggested-value': 10,
-//       },
-//     },
-//   },
-//   {},
-// ];
+const test3Configs = [
+  {
+    'test.hello': {
+      value: {
+        'suggested-value': 10,
+      },
+    } as unknown as ConfigEntry,
+  },
+];
 
-// const test2 = isNumberValuePermittedByConfigs(1, test2_spec, test2_configs);
-// reportTest('Test 2', test2);
+const test3 = isValuePermitted(1, test3Spec, test3Configs);
 
-// const test3_spec = { url: 'test3.hello' };
-// const test3_configs = [
-//   {
-//     name: 'test3-plugin1',
-//     'test3.hello': {
-//       value: {
-//         'required-value': 10,
-//       },
-//     },
-//   },
-//   {},
-// ];
+describe('Test 3', () => {
+  test('should raise a warning', () => {
+    expect(test3.status).toBe('warning');
+  });
+});
 
-// const test3 = isNumberValuePermittedByConfigs(1, test3_spec, test3_configs);
-// reportTest('Test 3', test3);
+const test4Spec = {
+  value: {
+    choices: ['A', 'B', 'C'],
+  },
+  type: 'choice',
+  url: 'test4.choice1',
+} as unknown as OptionEntry;
+const test4Configs = [
+  {
+    'test4.choice1': {
+      value: {
+        'required-value': 'A',
+      },
+    } as unknown as ConfigEntry,
+  },
+];
 
-// const test4_spec = {
-//   value: {
-//     choices: ['A', 'B', 'C'],
-//   },
-//   type: 'choice',
-//   url: 'test4.choice1',
-// };
-// const test4_configs = [
-//   {
-//     name: 'test4-plugin1',
-//     'test4.choice1': {
-//       value: {
-//         'required-value': 'A',
-//       },
-//     },
-//   },
-//   {},
-// ];
+const test4 = isValuePermitted('A', test4Spec, test4Configs);
 
-// const test4 = isValuePermitted('B', test4_spec, test4_configs);
-// reportTest('Test 4', test4);
+describe('Test 4', () => {
+  test('should be OK', () => {
+    expect(test4.status).toBe('OK');
+  });
+});
 
-// const test5_spec = {
-//   value: {
-//     default: 'alpha',
-//   },
-//   type: 'string',
-//   url: 'test5.string1',
-// };
-// const test5_configs = [
-//   {
-//     name: 'test5-plugin1',
-//     'test5.string1': {
-//       value: {
-//         'suggested-value': 'bravo',
-//       },
-//     },
-//   },
-//   {},
-// ];
+const test4B = isValuePermitted('B', test4Spec, test4Configs);
 
-// const test5 = isValuePermitted('charlie', test5_spec, test5_configs);
-// reportTest('Test 5', test5);
+describe('Test 4B', () => {
+  test('should be illegal', () => {
+    expect(test4B.status).toBe('illegal');
+  });
+});
 
-// const test6_collection = {};
-// const test6_obj = {
-//   modules: {
-//     dummy_one_test6: {
-//       version: '0.0.1',
-//       options: {
-//         feature1: {
-//           subfeature2: {
-//             value: {
-//               'suggested-value': 100,
-//               'required-range': {
-//                 min: 0,
-//                 max: 200,
-//               },
-//             },
-//           },
-//         },
-//       },
-//     },
-//     dummy_two_test6: {
-//       version: '1.0.0',
-//       options: {
-//         feature1: {
-//           value: {
-//             'required-value': 'hello world!',
-//           },
-//         },
-//       },
-//     },
-//   },
-// };
+const test5Spec = {
+  value: {
+    default: 'alpha',
+  },
+  type: 'string',
+  url: 'test5.string1',
+} as unknown as OptionEntry;
+const test5Configs = [
+  {
+    'test5.string1': {
+      value: {
+        'suggested-value': 'bravo',
+      },
+    } as unknown as ConfigEntry,
+  },
+];
 
-// Object.keys(test6_obj.modules).forEach((module) => {
-//   collectConfigs(test6_collection, test6_obj.modules[module].options, module);
-// });
+const test5 = isValuePermitted('charlie', test5Spec, test5Configs);
 
-// const test6 = test6_collection;
+describe('Test 5', () => {
+  test('should be warning', () => {
+    expect(test5.status).toBe('warning');
+  });
+});
 
-// reportTest('Test 6', test6);
+const test6ConfigYaml = `
+order: []
+plugins: {}
+modules:
+  dummy_one:
+    version: 0.0.1
+    options:
+      feature1:
+        subfeature2:
+          value:
+            suggested-value: 100
+            required-range:
+              min: 0
+              max: 200
+  dummy_two:
+    version: 0.0.2
+    options:
+      feature1:
+        value:
+          required-value: Hello world!
+`;
 
-// const test7_extensions = [
-//   {
-//     name: 'mod1',
-//     configEntries: {},
-//     optionEntries: {
-//       'mod1.feature1': {
-//         type: 'number',
-//         value: {
-//           default: 20,
-//         },
-//         url: 'mod1.feature1',
-//       },
-//     },
-//   },
-//   {
-//     name: 'mod2',
-//     configEntries: {},
-//   },
-// ];
+const test6Config = YAML.parse(test6ConfigYaml);
 
-// // TODO: refactor extensions to a dictionary intead of a list. NO! should be a list, because of ordering...
-// const test7_extension = {
-//   name: 'test7',
-//   configEntries: {
-//     'mod1.feature1': {
-//       value: {
-//         'required-value': 30,
-//       },
-//     },
-//   },
-// };
+const test6 = {};
 
-// const test7 = isValidExtensionConfigOrder(test7_extensions, test7_extension);
-// reportTest('Test 7', test7);
+Object.keys(test6Config.modules).forEach((module) => {
+  collectConfigs(test6, test6Config.modules[module].options, module);
+});
 
-// const test8extensions = Array.from(test7_extensions);
-// test8extensions.push(test7_extension);
-// test8extensions.push({
-//   name: 'test8',
-//   configEntries: {
-//     'mod1.feature1': {
-//       value: {
-//         'required-value': 50,
-//       },
-//     },
-//   },
-// });
-// console.log(test8extensions);
-// const test8 = isAllValidExtensionConfigOrder(test8extensions);
-// reportTest('Test 8', test8);
+describe('Test 6: collectConfigs', () => {
+  test('result should be of size 2', () => {
+    expect(JSON.stringify(new Set(Object.keys(test6)))).toBe(
+      JSON.stringify(
+        new Set(['dummy_one.feature1.subfeature2', 'dummy_two.feature1'])
+      )
+    );
+  });
+});
 
-// // TODO: this should fail!
-// reportTest(
-//   'Test 9',
-//   isValuePermitted(
-//     1000,
-//     test8extensions[0].optionEntries['mod1.feature1'],
-//     test8extensions
-//   )
-// );
+const test7Extensions = [
+  {
+    name: 'mod1',
+    configEntries: {},
+    optionEntries: {
+      'mod1.feature1': {
+        type: 'number',
+        value: {
+          default: 20,
+        },
+        url: 'mod1.feature1',
+      },
+    },
+  } as unknown as Extension,
+  {
+    name: 'mod2',
+    configEntries: {},
+  } as unknown as Extension,
+];
+
+// TODO: refactor extensions to a dictionary intead of a list. NO! should be a list, because of ordering...
+const test7Extension = {
+  name: 'test7',
+  configEntries: {
+    'mod1.feature1': {
+      value: {
+        'required-value': 30,
+      },
+    },
+  },
+} as unknown as Extension;
+
+const test7 = isValidExtensionConfigOrder(test7Extensions, test7Extension);
+
+describe('Test 7: isValidExtensionConfigOrder', () => {
+  test('result should be of size 2', () => {
+    expect(test7.status).toBe('OK');
+  });
+});
+
+const test8Extensions = Array.from(test7Extensions);
+test8Extensions.push(test7Extension);
+test8Extensions.push({
+  name: 'test8',
+  configEntries: {
+    'mod1.feature1': {
+      value: {
+        'required-value': 50,
+      },
+    },
+  },
+} as unknown as Extension);
+
+const test8a = isValuePermitted(
+  1000,
+  test8Extensions[0].optionEntries['mod1.feature1'],
+  test8Extensions.map((e) => e.configEntries)
+);
+
+describe('Test 8a: isValuePermitted', () => {
+  test('result should be illegal', () => {
+    expect(test8a.status).toBe('illegal');
+  });
+});
+
+const test8b = isAllValidExtensionConfigOrder(test8Extensions);
+
+describe('Test 8b: isAllValidExtensionConfigOrder', () => {
+  test('result should be CONFLICTS', () => {
+    expect(test8b.status).toBe('CONFLICTS');
+  });
+});

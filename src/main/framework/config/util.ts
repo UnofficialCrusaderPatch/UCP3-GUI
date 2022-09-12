@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
+import yaml from 'yaml';
+
 const fs = require('fs');
-const yaml = require('yaml');
 
 function readYAML(path: string) {
   const data = fs.readFileSync(path, { encoding: 'utf-8' });

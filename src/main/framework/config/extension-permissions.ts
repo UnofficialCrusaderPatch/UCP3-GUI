@@ -1,5 +1,5 @@
 import { isValuePermitted } from './value-permissions';
-import './common';
+import { Extension } from './common';
 
 function isValidConfig(extensions: unknown, ext: { configEntries: unknown }) {
   const config = ext.configEntries;

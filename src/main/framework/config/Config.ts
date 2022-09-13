@@ -1,4 +1,4 @@
-import './common';
+import { ConfigEntry, OptionEntry, Extension, ConfigFile } from './common';
 import { isValuePermitted } from './value-permissions';
 import './extension-permissions';
 import { readYAML } from './util';

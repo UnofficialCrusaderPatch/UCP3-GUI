@@ -2,8 +2,12 @@
 /* eslint-disable no-console */
 
 import { describe, expect, test } from '@jest/globals';
-import '../main/framework/config/common';
 import YAML from 'yaml';
+import {
+  ConfigEntry,
+  Extension,
+  OptionEntry,
+} from '../main/framework/config/common';
 import { isValuePermitted } from '../main/framework/config/value-permissions';
 import { collectConfigs } from '../main/framework/config/Config';
 import {

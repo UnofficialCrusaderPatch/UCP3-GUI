@@ -144,3 +144,16 @@ type Extension = {
   configEntries: { [key: string]: ConfigEntry };
   optionEntries: { [key: string]: OptionEntry };
 };
+
+type Configs = { [key: string]: ConfigEntry }[];
+
+type PermissionStatus = { status: string; reason: string; by: string };
+
+export {
+  ConfigEntry,
+  ConfigFile,
+  Configs,
+  Extension,
+  OptionEntry,
+  PermissionStatus,
+};

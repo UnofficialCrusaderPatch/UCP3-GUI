@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 
 import App from './App';
 import Manager from './Manager';
@@ -17,11 +17,11 @@ class ViewManager extends Component {
   }
 
   static View() {
-    let name: string = global.location.search.substring(1);
-    const eq = name.indexOf('=', 1);
-    if (eq > 0) {
-      name = name.substring(0, eq);
-    }
+    const sloc = global.location.search;
+    const partStart = sloc.lastIndexOf('?') + 1;
+    let partEnd = sloc.indexOf('=', partStart);
+    if (partEnd === -1) partEnd = sloc.length;
+    let name: string = sloc.substring(partStart, partEnd);
     if (name === '') name = 'landing';
     const view: JSX.Element = ViewManager.Views()[name];
     if (view == null) throw new Error(`View '${name}' is undefined`);
@@ -33,6 +33,12 @@ class ViewManager extends Component {
       <Router>
         <Routes>
           <Route path="/index.html" element={<ViewManager.View />} />
+          <Route path="landing" element={<App />} />
+          <Route path="editor" element={<Manager />} />
+          <Route path="/landing" element={<App />} />
+          <Route path="/editor" element={<Manager />} />
+          <Route path="#landing" element={<App />} />
+          <Route path="#editor" element={<Manager />} />
         </Routes>
       </Router>
     );

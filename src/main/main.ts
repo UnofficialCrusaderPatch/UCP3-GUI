@@ -56,7 +56,14 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
-const createWindow = async () => {
+const windows = new Set();
+
+const createWindow = async (options: {
+  url: string;
+  width: number;
+  height: number;
+  maximize: boolean;
+}) => {
   if (isDebug) {
     await installExtensions();
   }
@@ -69,10 +76,12 @@ const createWindow = async () => {
     return path.join(RESOURCES_PATH, ...paths);
   };
 
-  mainWindow = new BrowserWindow({
+  const { url, width, height, maximize } = options;
+
+  const window = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width,
+    height,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
@@ -81,28 +90,31 @@ const createWindow = async () => {
     },
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html?landing'));
+  windows.add(window);
 
-  mainWindow.on('ready-to-show', () => {
-    if (!mainWindow) {
+  window.loadURL(url);
+
+  window.on('ready-to-show', () => {
+    if (!window) {
       throw new Error('"mainWindow" is not defined');
     }
-    if (process.env.START_MINIMIZED) {
-      mainWindow.minimize();
+
+    if (maximize) {
+      window.maximize();
     } else {
-      mainWindow.show();
+      window.show();
     }
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  window.on('closed', () => {
+    windows.delete(window);
   });
 
-  const menuBuilder = new MenuBuilder(mainWindow);
+  const menuBuilder = new MenuBuilder(window);
   menuBuilder.buildMenu();
 
   // Open urls in the user's browser
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
+  window.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
@@ -110,6 +122,8 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  return window;
 };
 
 /**
@@ -155,11 +169,16 @@ ipcMain.handle('open-config-file', async (event, arg) => {
 
 let currentFolder = '';
 
-ipcMain.handle('launch-window', (event, arg) => {
+ipcMain.handle('launch-window', async (event, arg) => {
   // TODO: make this appropriate for a real multi window scheme.
   currentFolder = arg;
   console.log(`Switching to: ${currentFolder}`);
-  mainWindow?.loadURL(resolveHtmlPath(`index.html?editor=${currentFolder}`));
+  const window = await createWindow({
+    url: resolveHtmlPath(`index.html#/editor?directory=${currentFolder}`),
+    width: 1024,
+    height: 768,
+    maximize: true,
+  });
 });
 
 app.on('window-all-closed', () => {
@@ -172,12 +191,23 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
-    createWindow();
-    app.on('activate', () => {
+  .then(async () => {
+    mainWindow = await createWindow({
+      url: resolveHtmlPath('index.html#/landing'),
+      width: 1024,
+      height: 768,
+      maximize: false,
+    });
+    app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null)
+        mainWindow = await createWindow({
+          url: resolveHtmlPath('index.html#/landing'),
+          width: 1024,
+          height: 768,
+          maximize: false,
+        });
     });
   })
   .catch(console.log);

@@ -10,9 +10,19 @@ import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
 
 function getCurrentFolder() {
-  const i = global.location.search.indexOf('?editor=');
-  if (i === -1) return 'undefined';
-  return global.location.search.substring(i + '?editor'.length + 1);
+  const s = global.location.hash;
+  const i = s.indexOf('editor');
+  if (i === -1) {
+    return '';
+  }
+  const part1: string = s.substring(i);
+
+  const i2 = part1.indexOf('directory=');
+  if (i2 === -1) {
+    return '';
+  }
+
+  return part1.substring(i2 + 'directory='.length);
 }
 
 function getConfigDefaults(yml: unknown[]) {
@@ -37,7 +47,10 @@ function getConfigDefaults(yml: unknown[]) {
 let definition: { flat: object[]; hierarchical: object };
 let defaults: { [key: string]: unknown };
 
-if (global.location.search.startsWith('?editor')) {
+console.log(getCurrentFolder());
+
+if (getCurrentFolder().length > 0) {
+  console.log(getCurrentFolder());
   definition = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
   defaults = getConfigDefaults(definition.flat as unknown[]);
   console.log('used definition', definition);
@@ -94,7 +107,7 @@ export default function Manager() {
     .reduce((a: number, b: number) => a + b, 0);
 
   return (
-    <div className="editor-app m-3">
+    <div className="editor-app m-3 fs-7">
       <div className="col-12">
         <Tabs
           defaultActiveKey="config"
@@ -106,9 +119,13 @@ export default function Manager() {
               <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
             </Form>
             <div className="m-3">
-              <button type="button" className="btn btn-primary">
+              <Button
+                type="button"
+                className="btn btn-primary"
+                variant="gyntsmaller"
+              >
                 Install UCP to folder
-              </button>
+              </Button>
             </div>
             <div className="m-3">
               <button type="button" className="btn btn-primary disabled">
@@ -151,7 +168,7 @@ export default function Manager() {
         </Tabs>
 
         <div className="fixed-bottom bg-primary">
-          <div className="d-flex p-1 px-2 fs-6">
+          <div className="d-flex p-1 px-2 fs-7">
             <div className="flex-grow-1">
               <span className="">
                 folder:

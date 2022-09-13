@@ -24,6 +24,8 @@ import {
   SectionDescription,
 } from './factory/UIElements';
 
+console.log('Load ConfigEditor.tsx');
+
 const touched: { [url: string]: boolean } = {};
 
 export default function ConfigEditor(args: {

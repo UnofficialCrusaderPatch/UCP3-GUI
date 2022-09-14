@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, IpcRendererEvent, dialog } from 'electron';
 import fs from 'fs';
 import yaml from 'yaml';
 import { Extension, Discovery } from './framework/discovery';
+import { getLatestUCP3Artifacts } from './versions/github';
 
 export type Channels = 'ipc-example';
 
@@ -90,6 +91,14 @@ contextBridge.exposeInMainWorld('electron', {
     // An installed extension will involve settings to be set, which means reloading the window.
     rebuildOptionsWindow() {},
 
+    getUCPVersion(gameFolder: string) {
+      const path = `${gameFolder}/ucp-version.yml`;
+      if (fs.existsSync(path)) {
+        return yaml.parse(fs.readFileSync(path, { encoding: 'utf-8' }));
+      }
+      return {};
+    },
+
     getExtensions(gameFolder: string) {
       if (extensionsCache[gameFolder] === undefined) {
         extensionsCache[gameFolder] = Discovery.discoverExtensions(gameFolder);
@@ -148,6 +157,13 @@ contextBridge.exposeInMainWorld('electron', {
         uiCache[gameFolder] = { flat: uiCollection, hierarchical: result };
       }
       return uiCache[gameFolder];
+    },
+
+    async getGitHubLatestUCP3Artifacts() {
+      const result = await getLatestUCP3Artifacts();
+      console.log(getLatestUCP3Artifacts);
+      console.log(result);
+      return result;
     },
 
     async loadConfigFromFile() {

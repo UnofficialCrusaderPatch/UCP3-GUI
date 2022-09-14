@@ -46,6 +46,14 @@ function getConfigDefaults(yml: unknown[]) {
 
 let definition: { flat: object[]; hierarchical: object };
 let defaults: { [key: string]: unknown };
+let ucpVersion: {
+  major: number;
+  minor: number;
+  patch: number;
+  sha: string;
+  build: string;
+};
+let latestUCP3: unknown;
 
 console.log(getCurrentFolder());
 
@@ -58,6 +66,9 @@ if (getCurrentFolder().length > 0) {
     'extensions',
     window.electron.ucpBackEnd.getExtensions(getCurrentFolder())
   );
+
+  ucpVersion = window.electron.ucpBackEnd.getUCPVersion(getCurrentFolder());
+  console.log(ucpVersion);
 }
 
 export default function Manager() {
@@ -119,11 +130,7 @@ export default function Manager() {
               <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
             </Form>
             <div className="m-3">
-              <Button
-                type="button"
-                className="btn btn-primary"
-                variant="gyntsmaller"
-              >
+              <Button type="button" className="btn btn-primary">
                 Install UCP to folder
               </Button>
             </div>
@@ -168,7 +175,7 @@ export default function Manager() {
         </Tabs>
 
         <div className="fixed-bottom bg-primary">
-          <div className="d-flex p-1 px-2 fs-7">
+          <div className="d-flex p-1 px-2 fs-8">
             <div className="flex-grow-1">
               <span className="">
                 folder:
@@ -180,7 +187,12 @@ export default function Manager() {
               <span className="px-2">{warningCount} warnings</span>
               <span className="px-2">{errorCount} errors</span>
               <span className="px-2">GUI version: 1.0.0</span>
-              <span className="px-2">UCP version: 3.0.0</span>
+              <span className="px-2">
+                UCP version:{' '}
+                {`${ucpVersion.major}.${ucpVersion.minor}.${
+                  ucpVersion.patch
+                } - ${ucpVersion.sha.substring(0, 8)}`}
+              </span>
               <span className="px-2">UCP active: true</span>
             </div>
           </div>

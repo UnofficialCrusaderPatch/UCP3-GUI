@@ -26,6 +26,14 @@ declare global {
         saveUCPConfig(config: object, gameFolder: string): void;
         loadConfigFromFile(): object;
         getExtensions(gameFolder: string): object;
+        getUCPVersion(gameFolder: string): {
+          major: number;
+          minor: number;
+          patch: number;
+          sha: string;
+          build: string;
+        };
+        getGitHubLatestUCP3Artifacts(): object;
       };
     };
   }

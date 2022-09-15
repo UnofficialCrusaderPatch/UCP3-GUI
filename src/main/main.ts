@@ -167,19 +167,30 @@ ipcMain.handle('open-config-file', async (event, arg) => {
   return undefined;
 });
 
-let currentFolder = '';
+const windowFolderMapping = {};
 
 ipcMain.handle('launch-window', async (event, arg) => {
   // TODO: make this appropriate for a real multi window scheme.
-  currentFolder = arg;
+  const currentFolder = arg;
   console.log(`Switching to: ${currentFolder}`);
+
+  // Alternative: https://stackoverflow.com/a/68551332
   const window = await createWindow({
     url: resolveHtmlPath(`index.html#/editor?directory=${currentFolder}`),
     width: 1024,
     height: 768,
     maximize: true,
   });
+
+  console.log(window.id);
 });
+
+// Alternative to URL based game folder logic
+// ipcMain.handle('get-current-folder', async (event, arg) => {
+//   console.log(arg);
+//   console.log(event.sender.getOwnerBrowserWindow());
+//   console.log(event.processId);
+// });
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even

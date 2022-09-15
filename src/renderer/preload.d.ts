@@ -34,6 +34,7 @@ declare global {
           build: string;
         };
         getGitHubLatestUCP3Artifacts(): object;
+        getCurrentFolder(): void;
       };
     };
   }

@@ -3,17 +3,13 @@
 
 import { describe, expect, test } from '@jest/globals';
 import YAML from 'yaml';
-import {
-  ConfigEntry,
-  Extension,
-  OptionEntry,
-} from '../main/framework/config/common';
-import { isValuePermitted } from '../main/framework/config/value-permissions';
-import { collectConfigs } from '../main/framework/config/Config';
+import { ConfigEntry, Extension, OptionEntry } from '../common/config/common';
+import { isValuePermitted } from '../common/config/value-permissions';
+import { collectConfigs } from '../common/config/Config';
 import {
   isValidExtensionConfigOrder,
   isAllValidExtensionConfigOrder,
-} from '../main/framework/config/extension-permissions';
+} from '../common/config/extension-permissions';
 
 describe('Test 1', () => {
   test('should fail because of a missing spec.type value', () => {

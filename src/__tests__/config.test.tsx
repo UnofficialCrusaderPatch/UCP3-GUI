@@ -5,7 +5,7 @@ import { describe, expect, test } from '@jest/globals';
 import YAML from 'yaml';
 import { ConfigEntry, Extension, OptionEntry } from '../common/config/common';
 import { isValuePermitted } from '../common/config/value-permissions';
-import { collectConfigs } from '../common/config/Config';
+import { collectConfigs, Config } from '../common/config/Config';
 import {
   isValidExtensionConfigOrder,
   isAllValidExtensionConfigOrder,
@@ -239,5 +239,43 @@ const test8b = isAllValidExtensionConfigOrder(test8Extensions);
 describe('Test 8b: isAllValidExtensionConfigOrder', () => {
   test('result should be CONFLICTS', () => {
     expect(test8b.status).toBe('CONFLICTS');
+  });
+});
+
+const test9DummyExtensions = `
+- name: test9_1
+  type: module
+  version: 0.0.1
+  definition:
+    name: test9_1
+    version: 0.0.1
+  ui:
+    - type: number
+      value:
+        default: 20
+      url: mod1.feature1
+  config:
+    modules: {}
+    plugins: {}
+    order: []
+
+`;
+
+const test9 = new Config().parse(
+  YAML.parse(test9DummyExtensions) as Extension[]
+);
+
+describe('Test 9: Config.parse', () => {
+  test('result should be without errors', () => {
+    expect(test9).toBeTruthy();
+  });
+});
+
+test9.activateExtension('test9_1');
+const test9B = test9.getValue('test9_1.mod1.feature1');
+
+describe('Test 9: Config.getValue', () => {
+  test('result should be 20', () => {
+    expect(test9B).toBe(20);
   });
 });

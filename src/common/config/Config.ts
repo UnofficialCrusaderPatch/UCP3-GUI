@@ -4,7 +4,8 @@ import './extension-permissions';
 
 function collectOptions(
   collection: { [key: string]: unknown },
-  obj: { [key: string]: unknown }
+  obj: { [key: string]: unknown },
+  extensionName: string
 ) {
   if (typeof obj === 'object') {
     if (obj.url !== undefined) {
@@ -12,10 +13,18 @@ function collectOptions(
       if (collection[oeObj.url] !== undefined) {
         throw new Error(`url already has a value: ${oeObj.url}`);
       }
-      collection[oeObj.url] = obj;
+      let colURL = oeObj.url;
+      if (colURL.indexOf(`${extensionName}.`) !== 0) {
+        colURL = `${extensionName}.${colURL}`;
+      }
+      collection[colURL] = obj;
     } else {
       Object.keys(obj).forEach((key: string) => {
-        collectOptions(collection, obj[key] as { [key: string]: unknown });
+        collectOptions(
+          collection,
+          obj[key] as { [key: string]: unknown },
+          extensionName
+        );
       });
     }
   }
@@ -110,7 +119,8 @@ class Config {
       const optionsCollection: { [key: string]: OptionEntry } = {};
       collectOptions(
         optionsCollection,
-        ui as unknown as { [key: string]: unknown }
+        ui as unknown as { [key: string]: unknown },
+        name
       );
       Object.keys(optionsCollection).forEach((key) => {
         const k = `${name}.${key}`;
@@ -143,6 +153,8 @@ class Config {
         optionEntries: optionsCollection,
       };
     });
+
+    return this;
   }
 
   // I am getting confused on which level this Config class operates.
@@ -200,6 +212,8 @@ class Config {
       return undefined;
     });
 
+    this.activeExtensionNames.push(ext.name);
+
     return {
       status: 'OK',
       effects: ['REQUIRE dependencyX'],
@@ -208,12 +222,14 @@ class Config {
   }
 
   getValue(url: string) {
+    const extensionName = url.split('.')[0];
+
     if (this.userValues[url] !== undefined) {
       return this.userValues[url];
     }
     // eslint-disable-next-line no-restricted-syntax
     for (const config of this.activeExtensionNames.map(
-      (ae) => this.configs[ae]
+      (ae) => this.extensions[ae].configEntries
     )) {
       if (config[url] !== undefined) {
         if (config[url].value !== undefined) {
@@ -237,7 +253,7 @@ class Config {
         }
       }
     }
-    const spec = this.specs[url];
+    const spec = this.extensions[extensionName].optionEntries[url];
     if (spec === undefined) {
       throw new Error(`url does not exist: ${url}`);
     }

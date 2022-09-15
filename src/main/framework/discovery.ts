@@ -17,6 +17,8 @@ export class Extension {
 
   definition: string;
 
+  config: unknown;
+
   constructor(
     name: string,
     version: string,
@@ -30,12 +32,21 @@ export class Extension {
     this.folder = folder;
     this.ui = [];
     this.definition = def;
+    this.config = {};
   }
 
   readUISpec(): void {
     if (fs.existsSync(`${this.folder}/ui.yml`)) {
       this.ui = yaml.parse(
         fs.readFileSync(`${this.folder}/ui.yml`, { encoding: 'utf-8' })
+      );
+    }
+  }
+
+  readConfig(): void {
+    if (fs.existsSync(`${this.folder}/config.yml`)) {
+      this.config = yaml.parse(
+        fs.readFileSync(`${this.folder}/config.yml`, { encoding: 'utf-8' })
       );
     }
   }
@@ -112,6 +123,7 @@ const Discovery = {
         const ext = new Extension(name, version, type, folder, def);
         ext.readUISpec();
         ext.setLocale(currentLocale);
+        ext.readConfig();
         return ext;
       });
   },

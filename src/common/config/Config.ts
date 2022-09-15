@@ -1,9 +1,6 @@
-import { ConfigEntry, OptionEntry, Extension, ConfigFile } from './common';
+import { ConfigEntry, OptionEntry, Extension } from './common';
 import { isValuePermitted } from './value-permissions';
 import './extension-permissions';
-import { readYAML } from './util';
-
-const fs = require('fs');
 
 function collectOptions(
   collection: { [key: string]: unknown },
@@ -106,60 +103,44 @@ class Config {
   }
 
   // Sets the default basis
-  parse(folder: string) {
-    fs.readdirSync(folder).forEach((subfolder: string) => {
-      const extensionPath = `${folder}/${subfolder}`;
-      const def = readYAML(`${extensionPath}/definition.yml`);
+  parse(extensions: Extension[]) {
+    extensions.forEach((ext: Extension) => {
+      const { name, ui } = ext;
 
-      const ui = readYAML(`${extensionPath}/ui.yml`);
       const optionsCollection: { [key: string]: OptionEntry } = {};
-      collectOptions(optionsCollection, ui);
+      collectOptions(
+        optionsCollection,
+        ui as unknown as { [key: string]: unknown }
+      );
       Object.keys(optionsCollection).forEach((key) => {
-        const k = `${def.name}.${key}`;
+        const k = `${name}.${key}`;
         this.specs[k] = optionsCollection[key];
       });
 
-      let config: ConfigFile = { modules: {}, plugins: {}, order: [] };
       const processedOptions: { [key: string]: ConfigEntry } = {};
 
-      const configFilePath = `${extensionPath}/config.yml`;
-      if (fs.exists(configFilePath)) {
-        config = readYAML(configFilePath);
-        // const { modules } = config;
-        // const { plugins } = config;
-        // const { order } = config;
+      collectConfigs(
+        processedOptions,
+        ext.config.modules as { value: unknown; [key: string]: unknown },
+        ''
+      );
+      collectConfigs(
+        processedOptions,
+        ext.config.plugins as { value: unknown; [key: string]: unknown },
+        ''
+      );
 
-        // this.activeExtensionNames[def.name] = false;
-
-        collectConfigs(
-          processedOptions,
-          config.modules as { value: unknown; [key: string]: unknown },
-          ''
-        );
-        collectConfigs(
-          processedOptions,
-          config.plugins as { value: unknown; [key: string]: unknown },
-          ''
-        );
-        // processedOptions.name = def.name; // This is a bit unorthodox.
-        this.configs[def.name] = processedOptions;
-      }
-
-      if (this.extensions[def.name] !== undefined) {
+      if (this.extensions[name] !== undefined) {
         // Multiple versions detected of same extension, allow?
-        throw new Error(`extension already loaded: ${def.name}`);
+        throw new Error(`extension already loaded: ${name}`);
       }
 
+      // this.configs[def.name] = processedOptions;
       // TODO propagate this new system throughout this file :)
-      this.extensions[def.name] = {
-        name: def.name,
-        ui,
-        def,
-        config,
-        path: extensionPath,
+      this.extensions[name] = {
+        ...ext,
         configEntries: processedOptions,
         optionEntries: optionsCollection,
-        type: folder.endsWith('modules') ? 'modules' : 'plugins',
       };
     });
   }

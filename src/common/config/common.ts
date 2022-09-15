@@ -137,7 +137,8 @@ type OptionEntry = {
 type Extension = {
   name: string;
   type: string;
-  def: { [key: string]: unknown };
+  version: string;
+  definition: { [key: string]: unknown };
   ui: { [key: string]: unknown }[];
   config: { [key: string]: unknown };
   path: string;

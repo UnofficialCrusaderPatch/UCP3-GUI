@@ -47,7 +47,7 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         const p = isValuePermitted(
           configEntry.value['required-value'],
           spec,
-          extensions.map((e) => e.configEntries)
+          extensions
         );
         if (p === undefined) {
           throw new Error('fail!');
@@ -65,7 +65,7 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         const p = isValuePermitted(
           configEntry.value['required-values'],
           spec,
-          extensions.map((e) => e.configEntries)
+          extensions
         );
         if (p.status !== 'OK') {
           return {

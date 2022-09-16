@@ -161,11 +161,13 @@ class Config {
   // Is spec still for a single exension that provides options?
   // Cause the this.configs variable is meant to contain configs that are relevant for a certain spec, right?
   activeExtensions() {
-    return this.activeExtensionNames.map((ext) => this.configs[ext]);
+    return this.activeExtensionNames.map((ext) => this.extensions[ext]);
   }
 
   activeConfigs() {
-    return this.activeExtensionNames.map((ext) => this.configs[ext]);
+    return this.activeExtensionNames.map(
+      (ext) => this.extensions[ext].configEntries
+    );
   }
 
   activateExtension(name: string) {
@@ -176,7 +178,9 @@ class Config {
     const ext = this.extensions[name];
     if (ext === undefined) throw new Error(`extension does not exist: ${name}`);
 
-    Object.keys(ext.configEntries).forEach((ce) => {
+    // TODO: return all conflicts?
+    // eslint-disable-next-line no-restricted-syntax
+    for (const ce of Object.keys(ext.configEntries)) {
       const configEntry = ext.configEntries[ce];
       const specName = ce.split('.')[0];
       const spec = this.extensions[specName].optionEntries[ce];
@@ -191,6 +195,7 @@ class Config {
           return {
             status: 'CONFLICT',
             reason: `required value (for "${ce}") by ${name} conflicts with specifications of ${p.by}`,
+            by: p.by,
           };
         }
       }
@@ -205,12 +210,11 @@ class Config {
           return {
             status: 'CONFLICT',
             reason: `required values (for "${ce}") by ${name} conflicts with specifications of ${p.by}`,
+            by: p.by,
           };
         }
       }
-
-      return undefined;
-    });
+    }
 
     this.activeExtensionNames.push(ext.name);
 
@@ -271,7 +275,7 @@ class Config {
     const check = isValuePermitted(
       value,
       this.specs[url],
-      this.activeConfigs()
+      this.activeExtensions()
     );
     if (check.status === 'OK') {
       this.setValue(url, value);
@@ -280,7 +284,7 @@ class Config {
   }
 
   checkIsValuePermitted(url: string, value: unknown) {
-    return isValuePermitted(value, this.specs[url], this.activeConfigs());
+    return isValuePermitted(value, this.specs[url], this.activeExtensions());
   }
 }
 

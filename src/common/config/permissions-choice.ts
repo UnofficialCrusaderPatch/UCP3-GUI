@@ -1,4 +1,4 @@
-import { ConfigEntry, OptionEntry, Configs } from './common';
+import { ConfigEntry, OptionEntry, Extension } from './common';
 
 function isChoiceValuePermittedByConfig(
   value: string,
@@ -60,18 +60,15 @@ function isChoiceValuePermittedByConfig(
 function isChoiceValuePermittedByConfigs(
   value: string,
   spec: OptionEntry,
-  configs: Configs
+  extensions: Extension[]
 ) {
   // eslint-disable-next-line no-restricted-syntax
-  for (const config of configs) {
+  for (const ext of extensions) {
+    const config = ext.configEntries;
     if (config[spec.url] !== undefined) {
       const configDemands = config[spec.url];
 
-      const r = isChoiceValuePermittedByConfig(
-        value,
-        configDemands,
-        'not implemented'
-      );
+      const r = isChoiceValuePermittedByConfig(value, configDemands, ext.name);
       if (r.status !== 'OK') {
         return r;
       }

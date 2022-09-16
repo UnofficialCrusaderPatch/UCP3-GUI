@@ -23,6 +23,7 @@ describe('Test 1', () => {
 const b = isValuePermitted(
   2,
   {
+    name: 'test1',
     type: 'number',
     url: 'test1.hello',
     value: {
@@ -31,11 +32,14 @@ const b = isValuePermitted(
   } as unknown as OptionEntry,
   [
     {
-      'test1.hello': {
-        url: 'test1.hello',
-        value: { 'required-value': 3 },
-      } as unknown as ConfigEntry,
-    },
+      name: 'e1',
+      configEntries: {
+        'test1.hello': {
+          url: 'test1.hello',
+          value: { 'required-value': 3 },
+        } as unknown as ConfigEntry,
+      },
+    } as unknown as Extension,
   ]
 );
 
@@ -46,6 +50,7 @@ describe('Test 2', () => {
 });
 
 const test3Spec = {
+  name: 'test',
   url: 'test.hello',
   type: 'number',
   value: {
@@ -53,17 +58,20 @@ const test3Spec = {
   },
 } as unknown as OptionEntry;
 
-const test3Configs = [
+const test3Extensions = [
   {
-    'test.hello': {
-      value: {
-        'suggested-value': 10,
-      },
-    } as unknown as ConfigEntry,
-  },
+    name: 'e',
+    configEntries: {
+      'test.hello': {
+        value: {
+          'suggested-value': 10,
+        },
+      } as unknown as ConfigEntry,
+    },
+  } as unknown as Extension,
 ];
 
-const test3 = isValuePermitted(1, test3Spec, test3Configs);
+const test3 = isValuePermitted(1, test3Spec, test3Extensions);
 
 describe('Test 3', () => {
   test('should raise a warning', () => {
@@ -72,23 +80,27 @@ describe('Test 3', () => {
 });
 
 const test4Spec = {
+  name: 'test4',
   value: {
     choices: ['A', 'B', 'C'],
   },
   type: 'choice',
   url: 'test4.choice1',
 } as unknown as OptionEntry;
-const test4Configs = [
+const test4Extensions = [
   {
-    'test4.choice1': {
-      value: {
-        'required-value': 'A',
-      },
-    } as unknown as ConfigEntry,
-  },
+    name: 'e',
+    configEntries: {
+      'test4.choice1': {
+        value: {
+          'required-value': 'A',
+        },
+      } as unknown as ConfigEntry,
+    },
+  } as unknown as Extension,
 ];
 
-const test4 = isValuePermitted('A', test4Spec, test4Configs);
+const test4 = isValuePermitted('A', test4Spec, test4Extensions);
 
 describe('Test 4', () => {
   test('should be OK', () => {
@@ -96,7 +108,7 @@ describe('Test 4', () => {
   });
 });
 
-const test4B = isValuePermitted('B', test4Spec, test4Configs);
+const test4B = isValuePermitted('B', test4Spec, test4Extensions);
 
 describe('Test 4B', () => {
   test('should be illegal', () => {
@@ -105,23 +117,27 @@ describe('Test 4B', () => {
 });
 
 const test5Spec = {
+  name: 'test5',
   value: {
     default: 'alpha',
   },
   type: 'string',
   url: 'test5.string1',
 } as unknown as OptionEntry;
-const test5Configs = [
+const test5Extensions = [
   {
-    'test5.string1': {
-      value: {
-        'suggested-value': 'bravo',
-      },
-    } as unknown as ConfigEntry,
-  },
+    name: 'e',
+    configEntries: {
+      'test5.string1': {
+        value: {
+          'suggested-value': 'bravo',
+        },
+      } as unknown as ConfigEntry,
+    },
+  } as unknown as Extension,
 ];
 
-const test5 = isValuePermitted('charlie', test5Spec, test5Configs);
+const test5 = isValuePermitted('charlie', test5Spec, test5Extensions);
 
 describe('Test 5', () => {
   test('should be warning', () => {
@@ -225,7 +241,7 @@ test8Extensions.push({
 const test8a = isValuePermitted(
   1000,
   test8Extensions[0].optionEntries['mod1.feature1'],
-  test8Extensions.map((e) => e.configEntries)
+  test8Extensions
 );
 
 describe('Test 8a: isValuePermitted', () => {
@@ -253,7 +269,7 @@ const test9DummyExtensions = `
     - type: number
       value:
         default: 20
-      url: mod1.feature1
+      url: test9_1.mod1.feature1
   config:
     modules: {}
     plugins: {}
@@ -277,5 +293,81 @@ const test9B = test9.getValue('test9_1.mod1.feature1');
 describe('Test 9: Config.getValue', () => {
   test('result should be 20', () => {
     expect(test9B).toBe(20);
+  });
+});
+
+const test10DummyExtensions = `
+${test9DummyExtensions}
+- name: test10_1
+  type: module
+  version: 0.0.1
+  definition:
+    name: test10_1
+    version: 0.0.1
+  ui: []
+  config:
+    modules:
+      test9_1:
+        mod1:
+          feature1:
+            value:
+              required-value: 40
+    plugins: {}
+    order: []  
+`;
+
+const test10 = new Config().parse(
+  YAML.parse(test10DummyExtensions) as Extension[]
+);
+test10.activateExtension('test9_1');
+test10.activateExtension('test10_1');
+
+const test10Value = test10.getValue('test9_1.mod1.feature1');
+
+describe('Test 10: Config.getValue override by config', () => {
+  test('result should be 20', () => {
+    expect(test10Value).toBe(40);
+  });
+});
+
+const test11DummyExtensions = `
+${test10DummyExtensions}
+- name: test11_1
+  type: module
+  version: 0.0.1
+  definition:
+    name: test11_1
+    version: 0.0.1
+  ui: []
+  config:
+    modules:
+      test9_1:
+        mod1:
+          feature1:
+            value:
+              required-value: 60
+    plugins: {}
+    order: []  
+`;
+
+const test11 = new Config().parse(
+  YAML.parse(test11DummyExtensions) as Extension[]
+);
+test11.activateExtension('test9_1');
+test11.activateExtension('test10_1');
+// This one should error!
+const test11ActivationResult = test11.activateExtension('test11_1');
+
+describe('Test 11a: Config.getValue override: failed extension loading', () => {
+  test('result should be illegal', () => {
+    expect(test11ActivationResult.status !== 'OK').toBe(true);
+  });
+});
+
+const test11Value = test11.getValue('test9_1.mod1.feature1');
+
+describe('Test 11b: Config.getValue override: failed extension load', () => {
+  test('result should be 40', () => {
+    expect(test11Value).toBe(40);
   });
 });

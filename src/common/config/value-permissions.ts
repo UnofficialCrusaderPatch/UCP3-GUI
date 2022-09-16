@@ -1,4 +1,9 @@
-import { ConfigEntry, OptionEntry, Configs, PermissionStatus } from './common';
+import {
+  ConfigEntry,
+  OptionEntry,
+  PermissionStatus,
+  Extension,
+} from './common';
 import { isChoiceValuePermittedByConfigs } from './permissions-choice';
 import { isNumberValuePermittedByConfigs } from './permissions-number';
 import { isSetValuePermittedByConfigs } from './permissions-set';
@@ -39,13 +44,14 @@ function isValuePermittedByConfig(
 function isValuePermittedByConfigs(
   value: unknown,
   spec: OptionEntry,
-  configs: Configs
+  extensions: Extension[]
 ): PermissionStatus {
   // eslint-disable-next-line no-restricted-syntax
-  for (const config of configs) {
+  for (const ext of extensions) {
+    const config = ext.configEntries;
     const configDemands = config[spec.url];
 
-    const r = isValuePermittedByConfig(value, configDemands, 'not implemented');
+    const r = isValuePermittedByConfig(value, configDemands, ext.name);
     if (r.status !== 'OK') {
       return r;
     }
@@ -58,7 +64,11 @@ function isValuePermittedByConfigs(
   };
 }
 
-function isValuePermitted(value: unknown, spec: OptionEntry, configs: Configs) {
+function isValuePermitted(
+  value: unknown,
+  spec: OptionEntry,
+  extensions: Extension[]
+) {
   /* 	if(spec.type !== typeof(value)) {
           return {
               status: "illegal", 
@@ -88,7 +98,7 @@ function isValuePermitted(value: unknown, spec: OptionEntry, configs: Configs) {
         };
       }
     }
-    return isNumberValuePermittedByConfigs(numberValue, spec, configs);
+    return isNumberValuePermittedByConfigs(numberValue, spec, extensions);
   }
 
   if (spec.type === 'choice') {
@@ -105,23 +115,23 @@ function isValuePermitted(value: unknown, spec: OptionEntry, configs: Configs) {
       };
     }
 
-    return isChoiceValuePermittedByConfigs(choiceValue, spec, configs);
+    return isChoiceValuePermittedByConfigs(choiceValue, spec, extensions);
   }
 
   if (spec.type === 'set') {
-    return isSetValuePermittedByConfigs(value as [], spec, configs);
+    return isSetValuePermittedByConfigs(value as [], spec, extensions);
   }
 
   if (spec.type === 'boolean') {
-    return isValuePermittedByConfigs(value as boolean, spec, configs);
+    return isValuePermittedByConfigs(value as boolean, spec, extensions);
   }
 
   if (spec.type === 'string') {
-    return isValuePermittedByConfigs(value as string, spec, configs);
+    return isValuePermittedByConfigs(value as string, spec, extensions);
   }
 
   if (spec.type === 'filepath') {
-    return isValuePermittedByConfigs(value as string, spec, configs);
+    return isValuePermittedByConfigs(value as string, spec, extensions);
   }
 
   throw new Error(`unrecognized type: ${spec.type}`);

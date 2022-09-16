@@ -1,4 +1,9 @@
-import { ConfigEntry, OptionEntry, Configs, PermissionStatus } from './common';
+import {
+  ConfigEntry,
+  OptionEntry,
+  PermissionStatus,
+  Extension,
+} from './common';
 
 function isSetValuePermittedByConfig(
   values: unknown[],
@@ -98,18 +103,15 @@ function isSetValuePermittedByConfig(
 function isSetValuePermittedByConfigs(
   values: unknown[],
   spec: OptionEntry,
-  configs: Configs
+  extensions: Extension[]
 ) {
   // eslint-disable-next-line no-restricted-syntax
-  for (const config of configs) {
+  for (const ext of extensions) {
+    const config = ext.configEntries;
     if (config[spec.url] !== undefined) {
       const configDemands = config[spec.url];
 
-      const r = isSetValuePermittedByConfig(
-        values,
-        configDemands,
-        'not implemented'
-      );
+      const r = isSetValuePermittedByConfig(values, configDemands, ext.name);
 
       if (r.status !== 'OK') {
         return r;

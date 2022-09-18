@@ -218,9 +218,11 @@ class Config {
 
     this.activeExtensionNames.push(ext.name);
 
+    // If dependencies are required, return status DEPENDENCY I guess, and return which packages need to be added
+
     return {
       status: 'OK',
-      effects: ['REQUIRE dependencyX'],
+      effects: [],
       order: [],
     };
   }

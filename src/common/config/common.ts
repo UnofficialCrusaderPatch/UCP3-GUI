@@ -134,11 +134,18 @@ type OptionEntry = {
   };
 };
 
+type Definition = {
+  name: string;
+  version: string;
+  author: [] | string;
+  dependencies: string[];
+};
+
 type Extension = {
   name: string;
   type: string;
   version: string;
-  definition: { [key: string]: unknown };
+  definition: Definition;
   ui: { [key: string]: unknown }[];
   config: { [key: string]: unknown };
   path: string;

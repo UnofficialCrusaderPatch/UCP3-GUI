@@ -1,12 +1,12 @@
 {
-  "name": "electron-react-boilerplate",
-  "version": "4.6.0",
-  "description": "A foundation for scalable desktop apps",
-  "license": "MIT",
+  "name": "UCP3-GUI",
+  "version": "0.0.1",
+  "description": "A GUI for UnofficialCrusaderPatch3 Configuration",
+  "license": "AGPLv3",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "name": "UnofficialCrusaderPatch",
+    "email": "UnofficialCrusaderPatch@gmail.com",
+    "url": "https://github.com/UnofficialCrusaderPatch"
   },
   "main": "./dist/main/main.js",
   "scripts": {

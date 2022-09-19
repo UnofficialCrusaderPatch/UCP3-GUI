@@ -1,35 +1,31 @@
 {
-  "description": "A foundation for scalable desktop apps",
+  "description": "A GUI for UnofficialCrusaderPatch3 Configuration",
   "keywords": [
-    "electron",
-    "boilerplate",
-    "react",
-    "typescript",
-    "ts",
-    "sass",
-    "webpack",
-    "hot",
-    "reload"
+    "stronghold crusader",
+    "UnofficialCrusaderPatch",
+    "Unofficial Crusader Patch",
+    "Configuration",
+    "GUI"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/UnofficialCrusaderPatch/UCP3-GUI#readme",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/UnofficialCrusaderPatch/UCP3-GUI/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/UnofficialCrusaderPatch/UCP3-GUI.git"
   },
   "license": "MIT",
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "UnofficialCrusaderPatch",
+    "email": "UnofficialCrusaderPatch@gmail.com",
+    "url": "https://UnofficialCrusaderPatch.com/"
   },
   "contributors": [
     {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
+      "name": "gynt",
+      "email": "gynt@users.noreply.github.com",
+      "url": "https://github.com/gynt"
     }
   ],
   "main": "./src/main/main.ts",
@@ -183,8 +179,8 @@
     "webpack-merge": "^5.8.0"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "UnofficialCrusaderPatch3",
+    "appId": "org.UnofficialCrusaderPatch.UnofficialCrusaderPatch3GUI",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -242,12 +238,12 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
+      "owner": "UnofficialCrusaderPatch",
+      "repo": "UCP3-GUI"
     }
   },
   "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
+    "url": ""
   },
   "devEngines": {
     "node": ">=14.x",

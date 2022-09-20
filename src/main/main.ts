@@ -176,7 +176,7 @@ ipcMain.handle('launch-window', async (event, arg) => {
 
   // Alternative: https://stackoverflow.com/a/68551332
   const window = await createWindow({
-    url: resolveHtmlPath(`index.html#/editor?directory=${currentFolder}`),
+    url: resolveHtmlPath(`index.html?window=editor&directory=${currentFolder}`),
     width: 1024,
     height: 768,
     maximize: true,
@@ -204,7 +204,7 @@ app
   .whenReady()
   .then(async () => {
     mainWindow = await createWindow({
-      url: resolveHtmlPath('index.html#/landing'),
+      url: resolveHtmlPath('index.html?window=landing'),
       width: 1024,
       height: 768,
       maximize: false,
@@ -214,7 +214,7 @@ app
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null)
         mainWindow = await createWindow({
-          url: resolveHtmlPath('index.html#/landing'),
+          url: resolveHtmlPath('index.html?window=landing'),
           width: 1024,
           height: 768,
           maximize: false,

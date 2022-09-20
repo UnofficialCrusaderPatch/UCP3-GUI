@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { HashRouter as Router, Route, Routes } from 'react-router-dom';
+import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
 
 import App from './App';
 import Manager from './Manager';
@@ -17,28 +17,29 @@ class ViewManager extends Component {
   }
 
   static View() {
+    const sp = new URLSearchParams(global.location.search);
+    if (sp.has('window')) {
+      return ViewManager.Views()[sp.get('window') as string];
+    }
+    return ViewManager.Views().landing;
+    /*  
     const sloc = global.location.search;
     const partStart = sloc.lastIndexOf('?') + 1;
     let partEnd = sloc.indexOf('=', partStart);
     if (partEnd === -1) partEnd = sloc.length;
     let name: string = sloc.substring(partStart, partEnd);
     if (name === '') name = 'landing';
+    console.log(`view name:  ${name}`);
     const view: JSX.Element = ViewManager.Views()[name];
     if (view == null) throw new Error(`View '${name}' is undefined`);
-    return view;
+    return view; */
   }
 
   render() {
     return (
-      <Router>
+      <Router initialEntries={['/index.html']}>
         <Routes>
           <Route path="/index.html" element={<ViewManager.View />} />
-          <Route path="landing" element={<App />} />
-          <Route path="editor" element={<Manager />} />
-          <Route path="/landing" element={<App />} />
-          <Route path="/editor" element={<Manager />} />
-          <Route path="#landing" element={<App />} />
-          <Route path="#editor" element={<Manager />} />
         </Routes>
       </Router>
     );

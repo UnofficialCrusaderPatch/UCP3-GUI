@@ -10,19 +10,13 @@ import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
 
 function getCurrentFolder() {
-  const s = global.location.hash;
-  const i = s.indexOf('editor');
-  if (i === -1) {
-    return '';
+  const sp = new URLSearchParams(global.location.search);
+  if (sp.has('window') && sp.get('window') === 'editor') {
+    if (sp.has('directory')) {
+      return sp.get('directory') as string;
+    }
   }
-  const part1: string = s.substring(i);
-
-  const i2 = part1.indexOf('directory=');
-  if (i2 === -1) {
-    return '';
-  }
-
-  return part1.substring(i2 + 'directory='.length);
+  return '';
 }
 
 function getConfigDefaults(yml: unknown[]) {

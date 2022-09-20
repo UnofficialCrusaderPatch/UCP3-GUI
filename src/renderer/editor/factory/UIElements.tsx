@@ -333,9 +333,10 @@ const UIFactory = {
     } = args;
     const elements = (contents.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
+        const key = el.url || `${identifier}-${el.name}`;
         return (
           <UIFactory.CreateUIElement
-            key={el.url}
+            key={key}
             spec={el as DisplayConfigElement}
             disabled={readonly}
             configuration={configuration}
@@ -373,7 +374,7 @@ const UIFactory = {
 
     return (
       // ${level / 4}rem
-      <div style={{ marginLeft: `0rem` }}>
+      <div key={identifier} style={{ marginLeft: `0rem` }}>
         {htmlHeader}
         <div style={{ marginLeft: '0rem', marginBottom: '0.5rem' }}>
           {elements}

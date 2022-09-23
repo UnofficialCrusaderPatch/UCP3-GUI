@@ -24,8 +24,6 @@ import {
   SectionDescription,
 } from './factory/UIElements';
 
-console.log('Load ConfigEditor.tsx');
-
 const touched: { [url: string]: boolean } = {};
 
 export default function ConfigEditor(args: {
@@ -37,7 +35,6 @@ export default function ConfigEditor(args: {
   warnings: { [key: string]: { text: string; level: string } };
   setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
 }) {
-  console.log('Create Editor');
   const { definition, defaults, file, readonly, warnings, setWarning } = args;
 
   const [configuration, setConfiguration] = useReducer(
@@ -54,7 +51,6 @@ export default function ConfigEditor(args: {
 
         // Reset to a value
         if (typeof action.value === 'object') {
-          console.log('resetted to', action.value);
           return { ...(action.value as object) };
         }
 

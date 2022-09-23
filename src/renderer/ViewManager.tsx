@@ -22,17 +22,6 @@ class ViewManager extends Component {
       return ViewManager.Views()[sp.get('window') as string];
     }
     return ViewManager.Views().landing;
-    /*  
-    const sloc = global.location.search;
-    const partStart = sloc.lastIndexOf('?') + 1;
-    let partEnd = sloc.indexOf('=', partStart);
-    if (partEnd === -1) partEnd = sloc.length;
-    let name: string = sloc.substring(partStart, partEnd);
-    if (name === '') name = 'landing';
-    console.log(`view name:  ${name}`);
-    const view: JSX.Element = ViewManager.Views()[name];
-    if (view == null) throw new Error(`View '${name}' is undefined`);
-    return view; */
   }
 
   render() {

@@ -135,7 +135,6 @@ ipcMain.handle('select-dirs', async (event, arg) => {
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory'],
     });
-    console.log('directories selected', result.filePaths);
     return result;
   }
   return null;
@@ -145,7 +144,6 @@ ipcMain.handle('select-file', async (event, arg) => {
   if (mainWindow !== null) {
     const result = await dialog.showSaveDialog(mainWindow);
     if (result.canceled) return undefined;
-    console.log('file destination selected', result.filePath);
     return result.filePath;
   }
   return undefined;
@@ -161,7 +159,6 @@ ipcMain.handle('open-config-file', async (event, arg) => {
       ],
     });
     if (result.canceled) return undefined;
-    console.log('file source selected', result.filePaths[0]);
     return result.filePaths[0];
   }
   return undefined;
@@ -172,7 +169,6 @@ const windowFolderMapping = {};
 ipcMain.handle('launch-window', async (event, arg) => {
   // TODO: make this appropriate for a real multi window scheme.
   const currentFolder = arg;
-  console.log(`Switching to: ${currentFolder}`);
 
   // Alternative: https://stackoverflow.com/a/68551332
   const window = await createWindow({
@@ -182,7 +178,7 @@ ipcMain.handle('launch-window', async (event, arg) => {
     maximize: true,
   });
 
-  console.log(window.id);
+  // console.log(window.id);
 });
 
 // Alternative to URL based game folder logic

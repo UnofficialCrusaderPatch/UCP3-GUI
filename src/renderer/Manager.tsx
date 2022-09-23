@@ -49,20 +49,11 @@ let ucpVersion: {
 };
 let latestUCP3: unknown;
 
-console.log(getCurrentFolder());
-
 if (getCurrentFolder().length > 0) {
-  console.log(getCurrentFolder());
   definition = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
   defaults = getConfigDefaults(definition.flat as unknown[]);
-  console.log('used definition', definition);
-  console.log(
-    'extensions',
-    window.electron.ucpBackEnd.getExtensions(getCurrentFolder())
-  );
 
   ucpVersion = window.electron.ucpBackEnd.getUCPVersion(getCurrentFolder());
-  console.log(ucpVersion);
 }
 
 export default function Manager() {
@@ -135,19 +126,7 @@ export default function Manager() {
             </div>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">
-            <ExtensionManager
-              extensions={
-                extensions as [
-                  {
-                    definition: {
-                      name: string;
-                      version: string;
-                      author: string;
-                    };
-                  }
-                ]
-              }
-            />
+            <ExtensionManager extensions={extensions} />
           </Tab>
           <Tab
             eventKey="config"

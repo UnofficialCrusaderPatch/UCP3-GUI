@@ -61,7 +61,6 @@ contextBridge.exposeInMainWorld('electron', {
 
     // Allow browsing to a game folder
     async browseGameFolder() {
-      console.log('click!');
       const result = await ipcRenderer.invoke('select-dirs');
       const browseresult = document.getElementById(
         'browseresult'
@@ -100,6 +99,8 @@ contextBridge.exposeInMainWorld('electron', {
     },
 
     getExtensions(gameFolder: string) {
+      return Discovery.discoverExtensions(gameFolder);
+      // Premature optimization is the root of all evil.
       if (extensionsCache[gameFolder] === undefined) {
         extensionsCache[gameFolder] = Discovery.discoverExtensions(gameFolder);
       }
@@ -161,8 +162,6 @@ contextBridge.exposeInMainWorld('electron', {
 
     async getGitHubLatestUCP3Artifacts() {
       const result = await getLatestUCP3Artifacts();
-      console.log(getLatestUCP3Artifacts);
-      console.log(result);
       return result;
     },
 

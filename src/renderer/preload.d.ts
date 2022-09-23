@@ -1,5 +1,7 @@
 import { Channels } from 'main/preload';
 
+import { Extension } from '../common/config/common';
+
 declare global {
   interface Window {
     electron: {
@@ -25,7 +27,7 @@ declare global {
         };
         saveUCPConfig(config: object, gameFolder: string): void;
         loadConfigFromFile(): object;
-        getExtensions(gameFolder: string): object;
+        getExtensions(gameFolder: string): Extension[];
         getUCPVersion(gameFolder: string): {
           major: number;
           minor: number;

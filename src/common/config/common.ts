@@ -161,6 +161,7 @@ export {
   ConfigEntry,
   ConfigFile,
   Configs,
+  Definition,
   Extension,
   OptionEntry,
   PermissionStatus,

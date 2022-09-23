@@ -1,6 +1,8 @@
 import fs from 'fs';
 import yaml from 'yaml';
 
+import { Definition } from '../../common/config/common';
+
 const localeSensitiveFields = ['description', 'text', 'tooltip'];
 const localeRegExp = new RegExp('^\\s*{{(.*)}}\\s*$');
 
@@ -15,7 +17,7 @@ export class Extension {
 
   ui: object[];
 
-  definition: string;
+  definition: Definition;
 
   config: unknown;
 
@@ -24,7 +26,7 @@ export class Extension {
     version: string,
     type: string,
     folder: string,
-    def: string
+    def: Definition
   ) {
     this.name = name;
     this.version = version;
@@ -120,10 +122,13 @@ const Discovery = {
         );
         const { name, version } = def;
 
+        def.dependencies = def.depends || [];
+
         const ext = new Extension(name, version, type, folder, def);
         ext.readUISpec();
         ext.setLocale(currentLocale);
         ext.readConfig();
+
         return ext;
       });
   },

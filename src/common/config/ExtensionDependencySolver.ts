@@ -1,4 +1,5 @@
 import { Extension } from './common';
+import { DependencyStatement } from './DependencyStatement';
 
 function SetSubtract<Type>(s1: Set<Type>, s2: Set<Type>): Set<Type> {
   return new Set([...s1].filter((x) => !s2.has(x)));
@@ -18,8 +19,39 @@ class ExtensionDependencySolver {
     this.extensions = extensions;
     this.extensionDependencies = {};
     this.extensions.forEach((e: Extension) => {
-      this.extensionDependencies[e.name] = [...e.definition.dependencies];
+      this.extensionDependencies[e.name] = [
+        ...e.definition.dependencies.map(
+          (dep) => DependencyStatement.fromString(dep).extension
+        ),
+      ];
     });
+  }
+
+  dependenciesFor(extName: string) {
+    const result: string[] = [extName];
+
+    const ed2 = JSON.parse(JSON.stringify(this.extensionDependencies));
+
+    const todo: string[] = ed2[extName];
+    const done: string[] = [];
+    while (todo.length > 0) {
+      const item = todo[0];
+
+      // eslint-disable-next-line no-continue
+      if (done.indexOf(item) !== -1) continue;
+
+      result.push(item);
+      done.push(item);
+
+      todo.splice(0, 1);
+      ed2[item].forEach((dep: string) => todo.push(dep));
+    }
+
+    return new ExtensionDependencySolver(
+      this.extensions.filter(
+        (ext: Extension) => result.indexOf(ext.name) !== -1
+      )
+    ).solve();
   }
 
   solve() {

@@ -56,6 +56,30 @@ function renderExtension(
 export default function ExtensionManager(args: { extensions: Extension[] }) {
   const { extensions } = args;
 
+  type State = {
+    allExtensions: Extension[];
+    // Explicitly activated
+    activatedExtensions: Extension[];
+    activeExtensions: Extension[];
+    inactiveExtensions: Extension[];
+    isDependency: { [key: string]: boolean };
+  };
+
+  const [extensionsState, setExtensionsState] = useReducer(
+    (oldState: State, newState: unknown): State => {
+      return { ...oldState, ...(newState as object) };
+    },
+    {
+      allExtensions: [...extensions],
+      activeExtensions: [],
+      activatedExtensions: [],
+      inactiveExtensions: [...extensions],
+      isDependency: Object.fromEntries(
+        extensions.map((e: Extension) => [e.name, false])
+      ),
+    } as State
+  );
+
   const [getActiveExtensions, setActiveExtensions] = useReducer(
     (state: Extension[], newState: Extension[]): Extension[] => {
       return [...newState];

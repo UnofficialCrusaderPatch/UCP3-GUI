@@ -119,6 +119,8 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
       ext,
       'Activate',
       (event) => {
+        // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
+
         const impliedExtensions = eds.dependenciesFor(ext.name).flat();
 
         const ies: Extension[] = impliedExtensions

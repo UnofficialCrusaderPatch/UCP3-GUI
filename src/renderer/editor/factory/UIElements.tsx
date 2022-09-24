@@ -152,7 +152,7 @@ const UIFactory = {
     const hasWarning = warnings[url] !== undefined;
 
     return (
-      <div className="d-flex align-items-baseline lh-sm">
+      <div className="d-flex align-items-baseline lh-sm my-1">
         {hasWarning ? (
           <UIFactory.ConfigWarning
             text={warnings[url].text}
@@ -205,7 +205,7 @@ const UIFactory = {
     const hasWarning = warnings[url] !== undefined;
 
     return (
-      <Form.Group className="d-flex align-items-baseline lh-sm config-number-group">
+      <Form.Group className="d-flex align-items-baseline lh-sm config-number-group my-1">
         {hasWarning ? (
           <UIFactory.ConfigWarning
             text={warnings[url].text}
@@ -395,7 +395,7 @@ const UIFactory = {
     }) {
       const { subspec, header, href, depth } = navArgs;
       const iClassName = `nav nav-pills flex-column`;
-      const style = { marginLeft: `${depth / 3}rem` };
+      const style = { marginLeft: `${depth / 2}rem` };
       return (
         <>
           <a className="nav-link" href={href}>

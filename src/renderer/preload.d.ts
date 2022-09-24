@@ -37,6 +37,11 @@ declare global {
         };
         getGitHubLatestUCP3Artifacts(): object;
         getCurrentFolder(): void;
+        openFileDialog(
+          filters: { name: string; extensions: string[] }[]
+        ): string;
+        installUCPFromZip(zipFilePath: string, gameFolder: string): void;
+        getGameFolderPath(): string;
       };
     };
   }

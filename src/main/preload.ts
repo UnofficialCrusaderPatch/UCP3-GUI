@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent, dialog } from 'electron';
 import fs from 'fs';
+import StreamZip from 'node-stream-zip';
 import yaml from 'yaml';
 import { Extension, Discovery } from './framework/discovery';
 import { getLatestUCP3Artifacts } from './versions/github';
@@ -72,6 +73,10 @@ contextBridge.exposeInMainWorld('electron', {
           browseresult.value = target;
         }
       }
+    },
+
+    getGameFolderPath() {
+      return ipcRenderer.sendSync('get-game-folder-path');
     },
 
     // create an editor window for a game folder
@@ -163,6 +168,31 @@ contextBridge.exposeInMainWorld('electron', {
     async getGitHubLatestUCP3Artifacts() {
       const result = await getLatestUCP3Artifacts();
       return result;
+    },
+
+    async openFileDialog(filters: { name: string; extensions: string[] }[]) {
+      const result = await ipcRenderer.invoke('open-file-dialog', filters);
+      if (result === null || result === undefined) {
+        window.alert('Opening: Operation cancelled');
+        return '';
+      }
+      return result;
+    },
+
+    async installUCPFromZip(zipFilePath: string, gameFolder: string) {
+      // eslint-disable-next-line new-cap
+      const zip = new StreamZip.async({ file: zipFilePath });
+
+      if (!fs.existsSync(`${gameFolder}/binkw32_real.dll`)) {
+        fs.copyFileSync(
+          `${gameFolder}/binkw32.dll`,
+          `${gameFolder}/binkw32_real.dll`
+        );
+      }
+
+      const count = await zip.extract(null, gameFolder);
+      console.log(`Extracted ${count} entries`);
+      await zip.close();
     },
 
     async loadConfigFromFile() {

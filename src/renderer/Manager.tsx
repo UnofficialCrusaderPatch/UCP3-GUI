@@ -10,6 +10,7 @@ import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
 
 function getCurrentFolder() {
+  return window.electron.ucpBackEnd.getGameFolderPath() || '';
   const sp = new URLSearchParams(global.location.search);
   if (sp.has('window') && sp.get('window') === 'editor') {
     if (sp.has('directory')) {
@@ -18,6 +19,8 @@ function getCurrentFolder() {
   }
   return '';
 }
+
+console.log(window.electron.ucpBackEnd.getGameFolderPath());
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -115,8 +118,25 @@ export default function Manager() {
               <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
             </Form>
             <div className="m-3">
-              <Button type="button" className="btn btn-primary">
-                Install UCP to folder
+              <Button
+                type="button"
+                className="btn btn-primary"
+                onClick={async () => {
+                  const zipFilePath =
+                    await window.electron.ucpBackEnd.openFileDialog([
+                      { name: 'Zip files', extensions: ['zip'] },
+                      { name: 'All files', extensions: ['*'] },
+                    ]);
+
+                  if (zipFilePath === '') return;
+
+                  window.electron.ucpBackEnd.installUCPFromZip(
+                    zipFilePath,
+                    getCurrentFolder()
+                  );
+                }}
+              >
+                Install UCP to folder from Zip
               </Button>
             </div>
             <div className="m-3">
@@ -164,7 +184,7 @@ export default function Manager() {
                 UCP version:{' '}
                 {`${ucpVersion.major}.${ucpVersion.minor}.${
                   ucpVersion.patch
-                } - ${ucpVersion.sha.substring(0, 8)}`}
+                } - ${(ucpVersion.sha || '').substring(0, 8)}`}
               </span>
               <span className="px-2">UCP active: true</span>
             </div>

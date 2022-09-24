@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  dialog,
+  WebContents,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -149,6 +156,25 @@ ipcMain.handle('select-file', async (event, arg) => {
   return undefined;
 });
 
+interface Sender extends Electron.WebContents {
+  getOwnerBrowserWindow(): Electron.BrowserWindow;
+}
+
+ipcMain.handle('open-file-dialog', async (event, filters) => {
+  if (mainWindow !== null) {
+    const result = await dialog.showOpenDialog(
+      (event.sender as Sender).getOwnerBrowserWindow(),
+      {
+        properties: ['openFile'],
+        filters: filters || [{ name: 'All Files', extensions: ['*'] }],
+      }
+    );
+    if (result.canceled) return undefined;
+    return result.filePaths[0];
+  }
+  return undefined;
+});
+
 ipcMain.handle('open-config-file', async (event, arg) => {
   if (mainWindow !== null) {
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -164,7 +190,12 @@ ipcMain.handle('open-config-file', async (event, arg) => {
   return undefined;
 });
 
-const windowFolderMapping = {};
+const windowFolderMapping: { [key: number]: string } = {};
+
+ipcMain.on('get-game-folder-path', (event) => {
+  event.returnValue =
+    windowFolderMapping[(event.sender as Sender).getOwnerBrowserWindow().id];
+});
 
 ipcMain.handle('launch-window', async (event, arg) => {
   // TODO: make this appropriate for a real multi window scheme.
@@ -177,6 +208,8 @@ ipcMain.handle('launch-window', async (event, arg) => {
     height: 768,
     maximize: true,
   });
+
+  windowFolderMapping[window.id] = currentFolder;
 
   // console.log(window.id);
 });

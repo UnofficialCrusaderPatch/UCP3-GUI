@@ -27,6 +27,17 @@ class ExtensionDependencySolver {
     });
   }
 
+  reverseDependenciesFor(extName: string) {
+    return Object.entries(this.extensionDependencies)
+      .map(([n, deps]) => {
+        if (deps.indexOf(extName) !== -1) {
+          return n;
+        }
+        return undefined;
+      })
+      .filter((v) => v !== undefined) as string[];
+  }
+
   dependenciesFor(extName: string) {
     const result: string[] = [extName];
 

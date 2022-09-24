@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v1
+
+      - name: Install Node and NPM
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm install
+          npm run package
+
+      - name: Upload exe artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: UCP3-GUI-installer
+          path: build/*.exe
+
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: UCP3-GUI-portable
+          path: build/win-unpacked/*

@@ -231,34 +231,56 @@ contextBridge.exposeInMainWorld('electron', {
         finalFilePath = result;
       }
 
-      const finalConfig: { [key: string]: unknown } = {};
-      Object.keys(config).forEach((key: string) => {
-        const value = config[key];
-        let fcp = finalConfig;
-        const parts = key.split('.');
-        const partsComplete = [parts[0], 'options', ...parts.slice(1)];
-        const partsdrop1 = partsComplete.slice(0, -1);
-        const finalpart = partsComplete.slice(-1)[0];
-        partsdrop1.forEach((part: string) => {
-          if (fcp[part] === undefined) {
-            fcp[part] = {};
-          }
-          fcp = fcp[part] as { [key: string]: unknown };
-        });
-        fcp[finalpart] = value;
-      });
+      const finalConfig: {
+        modules: {
+          [key: string]: {
+            active: boolean;
+            version: string;
+            options: { [key: string]: unknown };
+          };
+        };
+        plugins: {
+          [key: string]: {
+            active: boolean;
+            version: string;
+            options: { [key: string]: unknown };
+          };
+        };
+      } = { modules: {}, plugins: {} };
+      Object.entries(config)
+        .filter(([key, value]) => value !== undefined)
+        .forEach(([key, value]) => {
+          const parts = key.split('.');
+          const extName = parts[0];
 
-      Object.keys(finalConfig).forEach((moduleName) => {
-        const ext = extensionsCache[Object.keys(extensionsCache)[0]].filter(
-          (ex) => {
-            return ex.name === moduleName;
+          const ext = extensionsCache[Object.keys(extensionsCache)[0]].filter(
+            (ex) => {
+              return ex.name === extName;
+            }
+          )[0];
+
+          const type = ext.type === 'module' ? 'modules' : 'plugins';
+
+          if (finalConfig[type][extName] === undefined) {
+            finalConfig[type][extName] = {
+              version: ext.version,
+              options: {},
+              active: true,
+            };
           }
-        );
-        if (ext.length === 1) {
-          (finalConfig[moduleName] as { version: string }).version =
-            ext[0].version;
-        }
-      });
+
+          const configParts = parts.slice(1);
+          const partsdrop1 = configParts.slice(0, -1);
+          const finalpart = configParts.slice(-1)[0];
+          let fcp = finalConfig[type][extName].options;
+          partsdrop1.forEach((part: string) => {
+            if (fcp[part] === undefined) {
+              fcp[part] = {};
+            }
+            fcp = fcp[part] as { [key: string]: unknown };
+          });
+          fcp[finalpart] = value;
+        });
 
       fs.writeFileSync(finalFilePath, yaml.stringify(finalConfig));
     },

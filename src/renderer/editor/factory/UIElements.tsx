@@ -214,7 +214,7 @@ const UIFactory = {
         ) : null}
         <div className="col-1 mr-3">
           <Form.Control
-            className="bg-dark text-light"
+            className="bg-dark text-light fs-7 lh-1"
             key={`${url}-input`}
             type="number"
             min={min as number}

@@ -23,7 +23,10 @@ declare global {
         initializeMenuWindow(gameFolder: string): void;
         getYamlDefinition(gameFolder: string): {
           flat: object[];
-          hierarchical: object;
+          hierarchical: {
+            elements: object[];
+            sections: { [key: string]: object };
+          };
         };
         saveUCPConfig(config: object, gameFolder: string): void;
         loadConfigFromFile(): object;

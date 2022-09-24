@@ -11,11 +11,13 @@ import {
 } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
-import { useReducer, useState } from 'react';
+import { useReducer, useState, createContext } from 'react';
 import ConfigEditor from './editor/ConfigEditor';
 
 import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
+
+import GlobalState from './GlobalState';
 
 function getCurrentFolder() {
   return window.electron.ucpBackEnd.getGameFolderPath() || '';
@@ -51,7 +53,10 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-let definition: { flat: object[]; hierarchical: object };
+let definition: {
+  flat: object[];
+  hierarchical: { elements: object[]; sections: { [key: string]: object } };
+};
 let defaults: { [key: string]: unknown };
 let ucpVersion: {
   major: number;
@@ -121,125 +126,127 @@ export default function Manager() {
   const handleShow = () => setShow(true);
 
   return (
-    <div className="editor-app m-3 fs-7">
-      <div className="col-12">
-        <Tabs
-          defaultActiveKey="overview"
-          id="uncontrolled-tab-example"
-          className="mb-3"
-        >
-          <Tab eventKey="overview" title="Overview">
-            <div className="m-3">
-              UCP version in this folder:{' '}
-              {isUCP3Installed
-                ? `${ucpVersion.major}.${ucpVersion.minor}.${
-                    ucpVersion.patch
-                  } - ${(ucpVersion.sha || '').substring(0, 8)}`
-                : `not installed`}
-            </div>
-            <div className="m-3">
-              <Button
-                type="button"
-                className="btn btn-primary"
-                onClick={async () => {
-                  const zipFilePath =
-                    await window.electron.ucpBackEnd.openFileDialog([
-                      { name: 'Zip files', extensions: ['zip'] },
-                      { name: 'All files', extensions: ['*'] },
-                    ]);
-
-                  if (zipFilePath === '') return;
-
-                  await window.electron.ucpBackEnd.installUCPFromZip(
-                    zipFilePath,
-                    currentFolder
-                  );
-
-                  setShow(true);
-                }}
-              >
-                Install UCP to folder from Zip
-              </Button>
-              <Modal show={show} onHide={handleClose} className="text-dark">
-                <Modal.Header closeButton>
-                  <Modal.Title>Reload required</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  The installation process requires a reload, reload now?
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={handleClose}>
-                    Close
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={(event) => {
-                      handleClose();
-                      window.electron.ucpBackEnd.reloadWindow();
-                    }}
-                  >
-                    Reload
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            </div>
-            <div className="m-3">
-              <button type="button" className="btn btn-primary disabled">
-                Uninstall UCP from this folder
-              </button>
-            </div>
-            <Form className="m-3 d-none">
-              <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
-            </Form>
-          </Tab>
-          <Tab eventKey="extensions" title="Extensions">
-            <ExtensionManager extensions={extensions} />
-          </Tab>
-          <Tab
-            eventKey="config"
-            title="User Config"
-            className="tabpanel-config"
+    <GlobalState.Provider value={{ extensions, warnings, definition }}>
+      <div className="editor-app m-3 fs-7">
+        <div className="col-12">
+          <Tabs
+            defaultActiveKey="overview"
+            id="uncontrolled-tab-example"
+            className="mb-3"
           >
-            <ConfigEditor
-              folder={currentFolder}
-              file={`${currentFolder}/ucp-config-poc.yml`}
-              definition={definition}
-              defaults={defaults}
-              readonly={false}
-              warnings={
-                warnings as { [key: string]: { text: string; level: string } }
-              }
-              setWarning={setWarning}
-            />
-          </Tab>
-        </Tabs>
-
-        <div className="fixed-bottom bg-primary">
-          <div className="d-flex p-1 px-2 fs-8">
-            <div className="flex-grow-1">
-              <span className="">
-                folder:
-                <span className="px-2 fst-italic">{currentFolder}</span>
-              </span>
-            </div>
-            <div>
-              <span className="px-2">0 messages</span>
-              <span className="px-2">{warningCount} warnings</span>
-              <span className="px-2">{errorCount} errors</span>
-              <span className="px-2">GUI version: 1.0.0</span>
-              <span className="px-2">
-                UCP version:{' '}
+            <Tab eventKey="overview" title="Overview">
+              <div className="m-3">
+                UCP version in this folder:{' '}
                 {isUCP3Installed
                   ? `${ucpVersion.major}.${ucpVersion.minor}.${
                       ucpVersion.patch
                     } - ${(ucpVersion.sha || '').substring(0, 8)}`
                   : `not installed`}
-              </span>
-              <span className="px-2">UCP active: {`${isUCP3Installed}`}</span>
+              </div>
+              <div className="m-3">
+                <Button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    const zipFilePath =
+                      await window.electron.ucpBackEnd.openFileDialog([
+                        { name: 'Zip files', extensions: ['zip'] },
+                        { name: 'All files', extensions: ['*'] },
+                      ]);
+
+                    if (zipFilePath === '') return;
+
+                    await window.electron.ucpBackEnd.installUCPFromZip(
+                      zipFilePath,
+                      currentFolder
+                    );
+
+                    setShow(true);
+                  }}
+                >
+                  Install UCP to folder from Zip
+                </Button>
+                <Modal show={show} onHide={handleClose} className="text-dark">
+                  <Modal.Header closeButton>
+                    <Modal.Title>Reload required</Modal.Title>
+                  </Modal.Header>
+                  <Modal.Body>
+                    The installation process requires a reload, reload now?
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                      Close
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={(event) => {
+                        handleClose();
+                        window.electron.ucpBackEnd.reloadWindow();
+                      }}
+                    >
+                      Reload
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+              </div>
+              <div className="m-3">
+                <button type="button" className="btn btn-primary disabled">
+                  Uninstall UCP from this folder
+                </button>
+              </div>
+              <Form className="m-3 d-none">
+                <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
+              </Form>
+            </Tab>
+            <Tab eventKey="extensions" title="Extensions">
+              <ExtensionManager extensions={extensions} />
+            </Tab>
+            <Tab
+              eventKey="config"
+              title="User Config"
+              className="tabpanel-config"
+            >
+              <ConfigEditor
+                folder={currentFolder}
+                file={`${currentFolder}/ucp-config-poc.yml`}
+                definition={definition}
+                defaults={defaults}
+                readonly={false}
+                warnings={
+                  warnings as { [key: string]: { text: string; level: string } }
+                }
+                setWarning={setWarning}
+              />
+            </Tab>
+          </Tabs>
+
+          <div className="fixed-bottom bg-primary">
+            <div className="d-flex p-1 px-2 fs-8">
+              <div className="flex-grow-1">
+                <span className="">
+                  folder:
+                  <span className="px-2 fst-italic">{currentFolder}</span>
+                </span>
+              </div>
+              <div>
+                <span className="px-2">0 messages</span>
+                <span className="px-2">{warningCount} warnings</span>
+                <span className="px-2">{errorCount} errors</span>
+                <span className="px-2">GUI version: 1.0.0</span>
+                <span className="px-2">
+                  UCP version:{' '}
+                  {isUCP3Installed
+                    ? `${ucpVersion.major}.${ucpVersion.minor}.${
+                        ucpVersion.patch
+                      } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                    : `not installed`}
+                </span>
+                <span className="px-2">UCP active: {`${isUCP3Installed}`}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </GlobalState.Provider>
   );
 }

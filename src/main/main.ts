@@ -126,9 +126,9 @@ const createWindow = async (options: {
     return { action: 'deny' };
   });
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
+  // // Remove this if your app does not use auto updates
+  // // eslint-disable-next-line
+  // new AppUpdater();
 
   return window;
 };

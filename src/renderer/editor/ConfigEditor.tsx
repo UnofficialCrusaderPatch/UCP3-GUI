@@ -27,7 +27,10 @@ import {
 const touched: { [url: string]: boolean } = {};
 
 export default function ConfigEditor(args: {
-  definition: { flat: object[]; hierarchical: object };
+  definition: {
+    flat: object[];
+    hierarchical: { elements: object[]; sections: { [key: string]: object } };
+  };
   defaults: { [key: string]: unknown };
   file: string;
   folder: string;

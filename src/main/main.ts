@@ -197,6 +197,10 @@ ipcMain.on('get-game-folder-path', (event) => {
     windowFolderMapping[(event.sender as Sender).getOwnerBrowserWindow().id];
 });
 
+ipcMain.handle('reload-window', (event) => {
+  (event.sender as Sender).getOwnerBrowserWindow().reload();
+});
+
 ipcMain.handle('launch-window', async (event, arg) => {
   // TODO: make this appropriate for a real multi window scheme.
   const currentFolder = arg;

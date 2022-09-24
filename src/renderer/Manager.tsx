@@ -1,9 +1,17 @@
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
+import {
+  Button,
+  Col,
+  Container,
+  Form,
+  ListGroup,
+  Modal,
+  Row,
+} from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
-import { useReducer } from 'react';
+import { useReducer, useState } from 'react';
 import ConfigEditor from './editor/ConfigEditor';
 
 import { DisplayConfigElement } from './editor/factory/UIElements';
@@ -20,7 +28,9 @@ function getCurrentFolder() {
   return '';
 }
 
-console.log(window.electron.ucpBackEnd.getGameFolderPath());
+const currentFolder = getCurrentFolder();
+
+console.log(currentFolder);
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -50,25 +60,25 @@ let ucpVersion: {
   sha: string;
   build: string;
 };
+let isUCP3Installed = false;
 let latestUCP3: unknown;
 
-if (getCurrentFolder().length > 0) {
-  definition = window.electron.ucpBackEnd.getYamlDefinition(getCurrentFolder());
+if (currentFolder.length > 0) {
+  definition = window.electron.ucpBackEnd.getYamlDefinition(currentFolder);
   defaults = getConfigDefaults(definition.flat as unknown[]);
 
-  ucpVersion = window.electron.ucpBackEnd.getUCPVersion(getCurrentFolder());
+  ucpVersion = window.electron.ucpBackEnd.getUCPVersion(currentFolder);
+  if (ucpVersion.major !== undefined) isUCP3Installed = true;
 }
 
 export default function Manager() {
-  const extensions = window.electron.ucpBackEnd.getExtensions(
-    getCurrentFolder()
-  );
+  const extensions = window.electron.ucpBackEnd.getExtensions(currentFolder);
 
   const warningDefaults = {
-    'ucp.o_default_multiplayer_speed': {
-      text: 'ERROR: Conflicting options selected: test warning',
-      level: 'error',
-    },
+    // 'ucp.o_default_multiplayer_speed': {
+    //   text: 'ERROR: Conflicting options selected: test warning',
+    //   level: 'error',
+    // },
   };
 
   const [warnings, setWarning] = useReducer(
@@ -105,18 +115,28 @@ export default function Manager() {
     )
     .reduce((a: number, b: number) => a + b, 0);
 
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   return (
     <div className="editor-app m-3 fs-7">
       <div className="col-12">
         <Tabs
-          defaultActiveKey="config"
+          defaultActiveKey="overview"
           id="uncontrolled-tab-example"
           className="mb-3"
         >
           <Tab eventKey="overview" title="Overview">
-            <Form className="m-3">
-              <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
-            </Form>
+            <div className="m-3">
+              UCP version in this folder:{' '}
+              {isUCP3Installed
+                ? `${ucpVersion.major}.${ucpVersion.minor}.${
+                    ucpVersion.patch
+                  } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                : `not installed`}
+            </div>
             <div className="m-3">
               <Button
                 type="button"
@@ -130,20 +150,47 @@ export default function Manager() {
 
                   if (zipFilePath === '') return;
 
-                  window.electron.ucpBackEnd.installUCPFromZip(
+                  await window.electron.ucpBackEnd.installUCPFromZip(
                     zipFilePath,
-                    getCurrentFolder()
+                    currentFolder
                   );
+
+                  setShow(true);
                 }}
               >
                 Install UCP to folder from Zip
               </Button>
+              <Modal show={show} onHide={handleClose} className="text-dark">
+                <Modal.Header closeButton>
+                  <Modal.Title>Reload required</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  The installation process requires a reload, reload now?
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleClose}>
+                    Close
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={(event) => {
+                      handleClose();
+                      window.electron.ucpBackEnd.reloadWindow();
+                    }}
+                  >
+                    Reload
+                  </Button>
+                </Modal.Footer>
+              </Modal>
             </div>
             <div className="m-3">
               <button type="button" className="btn btn-primary disabled">
                 Uninstall UCP from this folder
               </button>
             </div>
+            <Form className="m-3 d-none">
+              <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
+            </Form>
           </Tab>
           <Tab eventKey="extensions" title="Extensions">
             <ExtensionManager extensions={extensions} />
@@ -154,8 +201,8 @@ export default function Manager() {
             className="tabpanel-config"
           >
             <ConfigEditor
-              folder={getCurrentFolder()}
-              file={`${getCurrentFolder()}/ucp-config-poc.yml`}
+              folder={currentFolder}
+              file={`${currentFolder}/ucp-config-poc.yml`}
               definition={definition}
               defaults={defaults}
               readonly={false}
@@ -172,7 +219,7 @@ export default function Manager() {
             <div className="flex-grow-1">
               <span className="">
                 folder:
-                <span className="px-2 fst-italic">{getCurrentFolder()}</span>
+                <span className="px-2 fst-italic">{currentFolder}</span>
               </span>
             </div>
             <div>
@@ -182,11 +229,13 @@ export default function Manager() {
               <span className="px-2">GUI version: 1.0.0</span>
               <span className="px-2">
                 UCP version:{' '}
-                {`${ucpVersion.major}.${ucpVersion.minor}.${
-                  ucpVersion.patch
-                } - ${(ucpVersion.sha || '').substring(0, 8)}`}
+                {isUCP3Installed
+                  ? `${ucpVersion.major}.${ucpVersion.minor}.${
+                      ucpVersion.patch
+                    } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                  : `not installed`}
               </span>
-              <span className="px-2">UCP active: true</span>
+              <span className="px-2">UCP active: {`${isUCP3Installed}`}</span>
             </div>
           </div>
         </div>

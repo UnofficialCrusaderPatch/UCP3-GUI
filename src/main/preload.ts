@@ -95,6 +95,10 @@ contextBridge.exposeInMainWorld('electron', {
     // An installed extension will involve settings to be set, which means reloading the window.
     rebuildOptionsWindow() {},
 
+    reloadWindow() {
+      ipcRenderer.invoke('reload-window');
+    },
+
     getUCPVersion(gameFolder: string) {
       const path = `${gameFolder}/ucp-version.yml`;
       if (fs.existsSync(path)) {

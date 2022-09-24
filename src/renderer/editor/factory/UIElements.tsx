@@ -9,10 +9,10 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
-import { Form } from 'react-bootstrap';
-
-import React, { Fragment } from 'react';
+import React, { Fragment, ReactElement } from 'react';
 
 export type DisplayConfigElement = {
   name: string;
@@ -44,6 +44,13 @@ function formatToolTip(tooltip: string, url: string) {
   }
   return `${tooltip}\n\nurl:${url}`;
 }
+
+const renderTooltip = (props: { [key: string]: unknown }) => {
+  return (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Tooltip {...(props as object)}>{props.tooltipText as string}</Tooltip>
+  );
+};
 
 const UIFactory = {
   ConfigWarning(args: { text: string; level: string }) {
@@ -243,6 +250,11 @@ const UIFactory = {
         >
           <Form.Label
             htmlFor={`${url}-input`}
+            // Tooltip stuff
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title={fullToolTip}
+            // End of tooltip stuff
             // disabled={!isEnabled || disabled}
           >
             {text}

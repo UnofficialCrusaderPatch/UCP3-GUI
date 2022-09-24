@@ -42,6 +42,7 @@ declare global {
         ): string;
         installUCPFromZip(zipFilePath: string, gameFolder: string): void;
         getGameFolderPath(): string;
+        reloadWindow(): void;
       };
     };
   }

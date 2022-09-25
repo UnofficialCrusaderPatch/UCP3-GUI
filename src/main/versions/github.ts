@@ -3,6 +3,7 @@ import fs from 'fs';
 
 const UCP3_REPO_URL = 'UnofficialCrusaderPatch/UnofficialCrusaderPatch3';
 const UCP3_REPO_URL_API = `https://api.github.com/repos/${UCP3_REPO_URL}`;
+const UCP3_REPOS_MACHINE_TOKEN = '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';
 
 async function getLatestUCP3Artifacts() {
   const GITHUB_TOKEN_AUTH = JSON.parse(
@@ -11,7 +12,7 @@ async function getLatestUCP3Artifacts() {
 
   const result = await axios
     .get(`${UCP3_REPO_URL_API}/actions/artifacts`, {
-      auth: GITHUB_TOKEN_AUTH,
+      auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
     })
     .then((res: { data: { artifacts: unknown } }) => {
       console.log(res);

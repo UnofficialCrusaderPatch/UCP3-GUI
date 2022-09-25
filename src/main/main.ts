@@ -26,6 +26,11 @@ export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
+    autoUpdater.setFeedURL({
+      provider: 'github',
+      private: true,
+      token: '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',
+    });
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
@@ -126,9 +131,9 @@ const createWindow = async (options: {
     return { action: 'deny' };
   });
 
-  // // Remove this if your app does not use auto updates
-  // // eslint-disable-next-line
-  // new AppUpdater();
+  // Remove this if your app does not use auto updates
+  // eslint-disable-next-line
+  if (windows.size === 1) new AppUpdater();
 
   return window;
 };

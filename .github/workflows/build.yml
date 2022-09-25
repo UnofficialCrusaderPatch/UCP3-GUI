@@ -28,6 +28,23 @@ jobs:
         run: |
           npm install
           npm run package
+          
+      - name: Make zip
+        shell: pwsh
+        run: |
+          pushd release\build\win-unpacked
+          7z a -tzip -m0=Copy ..\..\..\UCP3-GUI-portable-latest.zip *
+          popd
+          
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            UCP3-GUI-portable-latest.zip
+            release/build/*.exe
 
       - name: Upload exe artifact
         uses: actions/upload-artifact@v2

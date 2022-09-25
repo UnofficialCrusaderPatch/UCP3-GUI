@@ -43,7 +43,8 @@
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest",
-    "testConfig": "jest 'config.test.tsx'"
+    "testConfig": "jest 'config.test.tsx'",
+    "debugpackage": "npx cross-env DEBUG_PROD=true npm run package"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

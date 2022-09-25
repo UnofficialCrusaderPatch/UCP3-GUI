@@ -208,7 +208,7 @@ export default function Manager() {
             >
               <ConfigEditor
                 folder={currentFolder}
-                file={`${currentFolder}/ucp-config-poc.yml`}
+                file={`${currentFolder}/ucp-config.yml`}
                 definition={definition}
                 defaults={defaults}
                 readonly={false}

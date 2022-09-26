@@ -26,6 +26,16 @@ import {
 
 const touched: { [url: string]: boolean } = {};
 
+function saveConfig(configuration: { [key: string]: unknown }, folder: string) {
+  const finalConfig = Object.fromEntries(
+    Object.entries(configuration).filter(([key]) => touched[key])
+  );
+
+  console.log(finalConfig);
+
+  window.electron.ucpBackEnd.saveUCPConfig(finalConfig, folder);
+}
+
 export default function ConfigEditor(args: {
   definition: {
     flat: object[];
@@ -43,27 +53,25 @@ export default function ConfigEditor(args: {
   const [configuration, setConfiguration] = useReducer(
     (
       state: { [key: string]: unknown },
-      action: { key: string; value: unknown; reset: boolean }
+      action: { type: string; value: unknown }
     ) => {
-      const result: { [key: string]: unknown } = { ...state };
-      if (action.reset) {
+      if (action.type === 'reset') {
         // for enumerable and non-enumerable properties
         Object.getOwnPropertyNames(touched).forEach((prop) => {
           delete touched[prop];
         });
 
-        // Reset to a value
-        if (typeof action.value === 'object') {
-          return { ...(action.value as object) };
-        }
-
         // Reset to defaults
         return { ...defaults };
       }
-      result[action.key] = action.value;
-      touched[action.key] = true;
-
-      return result;
+      if (action.type === 'set-multiple') {
+        // Reset to a value
+        Object.keys(action.value as object).forEach((key) => {
+          touched[key] = true;
+        });
+        return { ...state, ...(action.value as object) };
+      }
+      throw new Error(`Unknown configuration action type: ${action.type}`);
     },
     defaults
   );
@@ -89,8 +97,10 @@ export default function ConfigEditor(args: {
               className="col-auto btn btn-primary mx-1"
               type="button"
               onClick={async () => {
-                const openedConfig =
+                const openedConfig: { [key: string]: unknown } =
                   await window.electron.ucpBackEnd.loadConfigFromFile();
+
+                if (openedConfig === undefined) return;
 
                 function findValue(
                   obj: { [key: string]: unknown },
@@ -102,11 +112,19 @@ export default function ConfigEditor(args: {
                   }
                   const key = url.slice(0, dot);
                   const rest = url.slice(dot + 1);
+
+                  if (obj[key] === undefined) return undefined;
+
                   return findValue(
                     obj[key] as { [key: string]: unknown },
                     rest
                   );
                 }
+
+                setConfiguration({
+                  type: 'reset',
+                  value: undefined,
+                });
 
                 const newConfiguration: { [key: string]: unknown } = {};
                 Object.keys(configuration).forEach((url) => {
@@ -114,13 +132,14 @@ export default function ConfigEditor(args: {
                     openedConfig as { [key: string]: unknown },
                     url
                   );
-                  newConfiguration[url] = value;
+                  if (value !== undefined) {
+                    newConfiguration[url] = value;
+                  }
                 });
 
                 setConfiguration({
-                  reset: true,
+                  type: 'set-multiple',
                   value: newConfiguration,
-                  key: '',
                 });
               }}
             >
@@ -131,7 +150,7 @@ export default function ConfigEditor(args: {
               className="col-auto btn btn-primary mx-1"
               type="button"
               onClick={() =>
-                window.electron.ucpBackEnd.saveUCPConfig(
+                saveConfig(
                   configuration,
                   file // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
                 )
@@ -144,7 +163,7 @@ export default function ConfigEditor(args: {
               className="col-auto btn btn-primary mx-1"
               type="button"
               onClick={() =>
-                window.electron.ucpBackEnd.saveUCPConfig(
+                saveConfig(
                   configuration,
                   '' // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
                 )
@@ -157,8 +176,7 @@ export default function ConfigEditor(args: {
               type="button"
               onClick={() => {
                 setConfiguration({
-                  reset: true,
-                  key: '',
+                  type: 'reset',
                   value: undefined,
                 });
               }}

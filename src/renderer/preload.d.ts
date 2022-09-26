@@ -19,8 +19,8 @@ declare global {
           folder: string;
           date: string;
         }[];
-        browseGameFolder(): string;
-        initializeMenuWindow(gameFolder: string): void;
+        openFolderDialog(): string;
+        createEditorWindow(gameFolder: string): void;
         getYamlDefinition(gameFolder: string): {
           flat: object[];
           hierarchical: {
@@ -29,7 +29,22 @@ declare global {
           };
         };
         saveUCPConfig(config: object, gameFolder: string): void;
-        loadConfigFromFile(): object;
+        loadConfigFromFile(): {
+          modules: {
+            [key: string]: {
+              active: boolean;
+              version: string;
+              options: { [key: string]: unknown };
+            };
+          };
+          plugins: {
+            [key: string]: {
+              active: boolean;
+              version: string;
+              options: { [key: string]: unknown };
+            };
+          };
+        };
         getExtensions(gameFolder: string): Extension[];
         getUCPVersion(gameFolder: string): {
           major: number;

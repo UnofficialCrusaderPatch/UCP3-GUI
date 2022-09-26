@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
 
@@ -14,6 +15,8 @@ const mostRecentGameFolder = recentGameFolders.sort(
 )[0];
 
 const Landing = () => {
+  const [launchButtonState, setLaunchButtonState] = useState(false);
+  const [browseResultState, setBrowseResultState] = useState('');
   return (
     <div className="landing-app">
       <div>
@@ -22,12 +25,25 @@ const Landing = () => {
           Browse to a Stronghold Crusader installation folder to get started
         </h4>
         <div className="input-group mb-3">
-          <input type="text" className="form-control" id="browseresult" />
+          <input
+            type="text"
+            className="form-control"
+            id="browseresult"
+            value={browseResultState}
+            readOnly
+          />
           <button
             id="browsebutton"
             type="button"
             className="btn btn-primary"
-            onClick={window.electron.ucpBackEnd.browseGameFolder}
+            onClick={async () => {
+              const folder =
+                await window.electron.ucpBackEnd.openFolderDialog();
+              if (folder !== undefined && folder.length > 0) {
+                setBrowseResultState(folder);
+                setLaunchButtonState(true);
+              }
+            }}
           >
             Browse
           </button>
@@ -37,11 +53,12 @@ const Landing = () => {
             id="launchbutton"
             type="button"
             className="btn btn-primary"
+            disabled={launchButtonState !== true}
             onClick={() => {
               const a = document.querySelector(
                 '#browseresult'
               ) as HTMLInputElement;
-              return window.electron.ucpBackEnd.initializeMenuWindow(a.value);
+              return window.electron.ucpBackEnd.createEditorWindow(a.value);
             }}
           >
             Launch
@@ -52,17 +69,6 @@ const Landing = () => {
   );
 };
 
-const Editor = () => {
-  return <div>Hello!</div>;
-};
-
 export default function App() {
   return <Landing />;
-  // return (
-  //   <Router>
-  //     <Routes>
-  //       <Route path="/" element={<Landing />} />
-  //     </Routes>
-  //   </Router>
-  // );
 }

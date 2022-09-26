@@ -19,6 +19,7 @@ import {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { resourceLimits } from 'worker_threads';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -26,10 +27,13 @@ export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
+    autoUpdater.allowPrerelease = true;
     autoUpdater.setFeedURL({
       provider: 'github',
       private: true,
       token: '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',
+      owner: 'UnofficialCrusaderPatch',
+      repo: 'UCP3-GUI',
     });
     autoUpdater.checkForUpdatesAndNotify();
   }
@@ -142,14 +146,16 @@ const createWindow = async (options: {
  * Add event listeners...
  */
 
-ipcMain.handle('select-dirs', async (event, arg) => {
-  if (mainWindow !== null) {
-    const result = await dialog.showOpenDialog(mainWindow, {
+ipcMain.handle('open-folder-dialog', async (event, arg) => {
+  const result = await dialog.showOpenDialog(
+    (event.sender as Sender).getOwnerBrowserWindow(),
+    {
       properties: ['openDirectory'],
-    });
-    return result;
-  }
-  return null;
+    }
+  );
+  return result !== null && result.filePaths.length > 0
+    ? result.filePaths[0]
+    : undefined;
 });
 
 ipcMain.handle('select-file', async (event, arg) => {
@@ -166,18 +172,26 @@ interface Sender extends Electron.WebContents {
 }
 
 ipcMain.handle('open-file-dialog', async (event, filters) => {
-  if (mainWindow !== null) {
-    const result = await dialog.showOpenDialog(
-      (event.sender as Sender).getOwnerBrowserWindow(),
-      {
-        properties: ['openFile'],
-        filters: filters || [{ name: 'All Files', extensions: ['*'] }],
-      }
-    );
-    if (result.canceled) return undefined;
-    return result.filePaths[0];
-  }
-  return undefined;
+  const result = await dialog.showOpenDialog(
+    (event.sender as Sender).getOwnerBrowserWindow(),
+    {
+      properties: ['openFile'],
+      filters: filters || [{ name: 'All Files', extensions: ['*'] }],
+    }
+  );
+  if (result.canceled) return undefined;
+  return result.filePaths[0];
+});
+
+ipcMain.handle('save-file-dialog', async (event, filters) => {
+  const result = await dialog.showSaveDialog(
+    (event.sender as Sender).getOwnerBrowserWindow(),
+    {
+      filters: filters || [{ name: 'All Files', extensions: ['*'] }],
+    }
+  );
+  if (result.canceled) return undefined;
+  return result.filePath;
 });
 
 ipcMain.handle('open-config-file', async (event, arg) => {
@@ -206,7 +220,7 @@ ipcMain.handle('reload-window', (event) => {
   (event.sender as Sender).getOwnerBrowserWindow().reload();
 });
 
-ipcMain.handle('launch-window', async (event, arg) => {
+ipcMain.handle('launch-editor', async (event, arg) => {
   // TODO: make this appropriate for a real multi window scheme.
   const currentFolder = arg;
 

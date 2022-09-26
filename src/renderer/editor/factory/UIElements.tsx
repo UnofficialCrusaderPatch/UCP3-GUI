@@ -74,11 +74,7 @@ const UIFactory = {
     spec: DisplayConfigElement,
     disabled: boolean,
     configuration: { [key: string]: unknown },
-    setConfiguration: (args: {
-      key: string;
-      value: unknown;
-      reset: boolean;
-    }) => void,
+    setConfiguration: (args: { type: string; value: unknown }) => void,
     warnings: { [key: string]: { text: string; level: string } },
     setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
   ) {
@@ -142,11 +138,7 @@ const UIFactory = {
     spec: DisplayConfigElement,
     disabled: boolean,
     configuration: { [url: string]: unknown },
-    setConfiguration: (args: {
-      key: string;
-      value: unknown;
-      reset: boolean;
-    }) => void,
+    setConfiguration: (args: { type: string; value: unknown }) => void,
     warnings: { [key: string]: { text: string; level: string } },
     setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
   ) {
@@ -179,9 +171,8 @@ const UIFactory = {
           checked={value === undefined ? false : (value as boolean)}
           onChange={(event) => {
             setConfiguration({
-              key: url,
-              value: event.target.checked,
-              reset: false,
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, event.target.checked]]),
             });
           }}
           disabled={!isEnabled || disabled}
@@ -194,11 +185,7 @@ const UIFactory = {
     spec: DisplayConfigElement,
     disabled: boolean,
     configuration: { [url: string]: unknown },
-    setConfiguration: (args: {
-      key: string;
-      value: unknown;
-      reset: boolean;
-    }) => void,
+    setConfiguration: (args: { type: string; value: unknown }) => void,
     warnings: { [key: string]: { text: string; level: string } },
     setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
   ) {
@@ -235,9 +222,10 @@ const UIFactory = {
             value={value === undefined ? 0 : (value as number)}
             onChange={(event) => {
               setConfiguration({
-                key: url,
-                value: parseInt(event.target.value, 10),
-                reset: false,
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [url, parseInt(event.target.value, 10)],
+                ]),
               });
             }}
             disabled={!isEnabled || disabled}
@@ -268,11 +256,7 @@ const UIFactory = {
     spec: DisplayConfigElement;
     disabled: boolean;
     configuration: { [key: string]: unknown };
-    setConfiguration: (args: {
-      key: string;
-      value: unknown;
-      reset: boolean;
-    }) => void;
+    setConfiguration: (args: { type: string; value: unknown }) => void;
     warnings: { [key: string]: { text: string; level: string } };
     setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {
@@ -324,11 +308,7 @@ const UIFactory = {
     identifier: string;
     readonly: boolean;
     configuration: { [key: string]: unknown };
-    setConfiguration: (args: {
-      key: string;
-      value: unknown;
-      reset: boolean;
-    }) => void;
+    setConfiguration: (args: { type: string; value: unknown }) => void;
     warnings: { [key: string]: { text: string; level: string } };
     setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {
@@ -465,11 +445,7 @@ const UIFactory = {
     definition: SectionDescription;
     readonly: boolean;
     configuration: { [key: string]: unknown };
-    setConfiguration: (args: {
-      key: string;
-      value: unknown;
-      reset: boolean;
-    }) => void;
+    setConfiguration: (args: { type: string; value: unknown }) => void;
     warnings: { [key: string]: { text: string; level: string } };
     setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {

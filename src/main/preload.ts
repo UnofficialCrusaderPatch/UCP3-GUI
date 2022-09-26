@@ -60,28 +60,13 @@ contextBridge.exposeInMainWorld('electron', {
       return [];
     },
 
-    // Allow browsing to a game folder
-    async browseGameFolder() {
-      const result = await ipcRenderer.invoke('select-dirs');
-      const browseresult = document.getElementById(
-        'browseresult'
-      ) as HTMLInputElement;
-
-      if (browseresult !== null) {
-        if (result.filePaths.length > 0) {
-          const [target] = result.filePaths;
-          browseresult.value = target;
-        }
-      }
-    },
-
     getGameFolderPath() {
       return ipcRenderer.sendSync('get-game-folder-path');
     },
 
     // create an editor window for a game folder
-    initializeMenuWindow(gameFolder: string) {
-      ipcRenderer.invoke('launch-window', gameFolder);
+    createEditorWindow(gameFolder: string) {
+      ipcRenderer.invoke('launch-editor', gameFolder);
     },
 
     // Install or deinstalls UCP from these folders.
@@ -183,6 +168,11 @@ contextBridge.exposeInMainWorld('electron', {
       return result;
     },
 
+    async openFolderDialog() {
+      const result = await ipcRenderer.invoke('open-folder-dialog');
+      return result;
+    },
+
     async installUCPFromZip(zipFilePath: string, gameFolder: string) {
       // eslint-disable-next-line new-cap
       const zip = new StreamZip.async({ file: zipFilePath });
@@ -200,22 +190,44 @@ contextBridge.exposeInMainWorld('electron', {
     },
 
     async loadConfigFromFile() {
-      const result = await ipcRenderer.invoke('open-config-file');
+      const result = await ipcRenderer.invoke('open-file-dialog', [
+        { name: 'All Files', extensions: ['*'] },
+        { name: 'Config files', extensions: ['yml', 'yaml'] },
+      ]);
       if (result === null || result === undefined) {
         window.alert('Opening: Operation cancelled');
-        return {};
+        return undefined;
       }
       const filePath = result;
 
-      const config = yaml.parse(
-        fs.readFileSync(filePath, { encoding: 'utf-8' })
-      );
+      const config: {
+        modules: {
+          [key: string]: {
+            active: boolean;
+            version: string;
+            options: { [key: string]: unknown };
+          };
+        };
+        plugins: {
+          [key: string]: {
+            active: boolean;
+            version: string;
+            options: { [key: string]: unknown };
+          };
+        };
+      } = yaml.parse(fs.readFileSync(filePath, { encoding: 'utf-8' }));
 
-      Object.keys(config).forEach((key) => {
-        config[key] = config[key].options;
+      const finalConfig: { [key: string]: unknown } = {};
+
+      Object.entries(config.modules || {}).forEach(([key, value]) => {
+        finalConfig[key] = value.options;
       });
 
-      return config;
+      Object.entries(config.plugins || {}).forEach(([key, value]) => {
+        finalConfig[key] = value.options;
+      });
+
+      return finalConfig;
     },
 
     // Load configuration
@@ -227,7 +239,7 @@ contextBridge.exposeInMainWorld('electron', {
     async saveUCPConfig(config: { [key: string]: object }, filePath: string) {
       let finalFilePath = filePath;
       if (filePath === undefined || filePath === '') {
-        const result = await ipcRenderer.invoke('select-file');
+        const result = await ipcRenderer.invoke('save-file-dialog');
         if (result === null || result === undefined) {
           window.alert('Saving: Operation cancelled');
           return;

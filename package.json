@@ -45,7 +45,7 @@
     "test": "jest",
     "testConfig": "jest 'config.test.tsx'",
     "debugpackage": "npx cross-env DEBUG_PROD=true npm run package",
-    "publish": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish onTagOrDraft"
+    "publish": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish always"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -203,8 +203,8 @@
     "yaml": "^2.1.1"
   },
   "build": {
-    "productName": "UnofficialCrusaderPatch3",
-    "appId": "org.UnofficialCrusaderPatch.UnofficialCrusaderPatch3GUI",
+    "productName": "UCP3-GUI",
+    "appId": "org.UnofficialCrusaderPatch.UCP3-GUI",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [

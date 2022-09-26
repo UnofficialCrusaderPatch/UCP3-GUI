@@ -3,7 +3,7 @@ import fs from 'fs';
 
 const UCP3_REPO_URL = 'UnofficialCrusaderPatch/UnofficialCrusaderPatch3';
 const UCP3_REPO_URL_API = `https://api.github.com/repos/${UCP3_REPO_URL}`;
-const UCP3_REPOS_MACHINE_TOKEN = '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';
+const UCP3_REPOS_MACHINE_TOKEN = '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'; // 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
 
 async function getLatestUCP3Artifacts() {
   const GITHUB_TOKEN_AUTH = JSON.parse(

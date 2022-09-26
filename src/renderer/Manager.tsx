@@ -17,7 +17,15 @@ import ConfigEditor from './editor/ConfigEditor';
 import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
 
-import GlobalState from './GlobalState';
+import {
+  activeExtensionsReducer,
+  configurationDefaultsReducer,
+  configurationReducer,
+  configurationTouchedReducer,
+  configurationWarningReducer,
+  GlobalState,
+  UIDefinition,
+} from './GlobalState';
 
 function getCurrentFolder() {
   return window.electron.ucpBackEnd.getGameFolderPath() || '';
@@ -53,10 +61,7 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-let definition: {
-  flat: object[];
-  hierarchical: { elements: object[]; sections: { [key: string]: object } };
-};
+let uiDefinition: UIDefinition;
 let defaults: { [key: string]: unknown };
 let ucpVersion: {
   major: number;
@@ -69,8 +74,8 @@ let isUCP3Installed = false;
 let latestUCP3: unknown;
 
 if (currentFolder.length > 0) {
-  definition = window.electron.ucpBackEnd.getYamlDefinition(currentFolder);
-  defaults = getConfigDefaults(definition.flat as unknown[]);
+  uiDefinition = window.electron.ucpBackEnd.getYamlDefinition(currentFolder);
+  defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
 
   ucpVersion = window.electron.ucpBackEnd.getUCPVersion(currentFolder);
   if (ucpVersion.major !== undefined) isUCP3Installed = true;
@@ -86,35 +91,36 @@ export default function Manager() {
     // },
   };
 
-  const [warnings, setWarning] = useReducer(
-    (
-      state: { [key: string]: unknown },
-      action: { key: string; value: unknown; reset: boolean }
-    ) => {
-      const result: { [key: string]: unknown } = { ...state };
-      if (action.reset) {
-        // Reset to a value
-        if (typeof action.value === 'object') {
-          return { ...(result.value as object) };
-        }
-
-        // Reset to defaults
-        return { ...warningDefaults };
-      }
-      result[action.key] = action.value;
-
-      return result;
-    },
-    warningDefaults
+  const [configurationWarnings, setConfigurationWarnings] = useReducer(
+    configurationWarningReducer,
+    {}
   );
 
-  const warningCount = Object.values(warnings)
+  const [configurationDefaults, setConfigurationDefaults] = useReducer(
+    configurationDefaultsReducer,
+    defaults
+  );
+  const [configurationTouched, setConfigurationTouched] = useReducer(
+    configurationTouchedReducer,
+    {}
+  );
+  const [activeExtensions, setActiveExtensions] = useReducer(
+    activeExtensionsReducer,
+    []
+  );
+
+  const [configuration, setConfiguration] = useReducer(
+    configurationReducer,
+    defaults // If you would remove this default initialization, then you need more value if undefined logic in the rendering factory
+  );
+
+  const warningCount = Object.values(configurationWarnings)
     .map((v) =>
       (v as { text: string; level: string }).level === 'warning' ? 1 : 0
     )
     .reduce((a: number, b: number) => a + b, 0);
 
-  const errorCount = Object.values(warnings)
+  const errorCount = Object.values(configurationWarnings)
     .map((v) =>
       (v as { text: string; level: string }).level === 'error' ? 1 : 0
     )
@@ -126,7 +132,24 @@ export default function Manager() {
   const handleShow = () => setShow(true);
 
   return (
-    <GlobalState.Provider value={{ extensions, warnings, definition }}>
+    <GlobalState.Provider
+      value={{
+        extensions,
+        configurationWarnings,
+        setConfigurationWarnings,
+        configurationDefaults,
+        setConfigurationDefaults,
+        configurationTouched,
+        setConfigurationTouched,
+        activeExtensions,
+        setActiveExtensions,
+        configuration,
+        setConfiguration,
+        uiDefinition,
+        folder: currentFolder,
+        file: `${currentFolder}/ucp-config.yml`,
+      }}
+    >
       <div className="editor-app m-3 fs-7">
         <div className="col-12">
           <Tabs
@@ -206,17 +229,7 @@ export default function Manager() {
               title="User Config"
               className="tabpanel-config"
             >
-              <ConfigEditor
-                folder={currentFolder}
-                file={`${currentFolder}/ucp-config.yml`}
-                definition={definition}
-                defaults={defaults}
-                readonly={false}
-                warnings={
-                  warnings as { [key: string]: { text: string; level: string } }
-                }
-                setWarning={setWarning}
-              />
+              <ConfigEditor readonly={false} />
             </Tab>
           </Tabs>
 

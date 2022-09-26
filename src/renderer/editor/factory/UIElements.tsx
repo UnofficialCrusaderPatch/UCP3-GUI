@@ -12,7 +12,8 @@ import Container from 'react-bootstrap/Container';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
-import React, { Fragment, ReactElement } from 'react';
+import React, { Fragment, ReactElement, useContext } from 'react';
+import { GlobalState } from 'renderer/GlobalState';
 
 export type DisplayConfigElement = {
   choices: string[];
@@ -71,14 +72,8 @@ const UIFactory = {
       </div>
     );
   },
-  CreateGroupBox(
-    spec: DisplayConfigElement,
-    disabled: boolean,
-    configuration: { [key: string]: unknown },
-    setConfiguration: (args: { type: string; value: unknown }) => void,
-    warnings: { [key: string]: { text: string; level: string } },
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
-  ) {
+  CreateGroupBox(args: { spec: DisplayConfigElement; disabled: boolean }) {
+    const { spec, disabled } = args;
     const { name, description, children, columns, header } = spec;
     const itemCount = children.length;
     const rows = Math.ceil(itemCount / columns);
@@ -98,10 +93,6 @@ const UIFactory = {
               key={children[i].url}
               spec={children[i]}
               disabled={disabled}
-              configuration={configuration}
-              setConfiguration={setConfiguration}
-              warnings={warnings}
-              setWarning={setWarning}
             />
           </Col>
         );
@@ -135,28 +126,40 @@ const UIFactory = {
     );
   },
 
-  CreateSwitch(
-    spec: DisplayConfigElement,
-    disabled: boolean,
-    configuration: { [url: string]: unknown },
-    setConfiguration: (args: { type: string; value: unknown }) => void,
-    warnings: { [key: string]: { text: string; level: string } },
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
-  ) {
+  CreateSwitch(args: { spec: DisplayConfigElement; disabled: boolean }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled } = args;
     const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
-    let { [enabled]: isEnabled } = configuration;
-    if (isEnabled === undefined) isEnabled = true;
+    let isEnabled = true;
+    if (enabled !== undefined) {
+      if (configuration[enabled] === undefined) {
+        if (configurationDefaults[enabled] === undefined) {
+          isEnabled = true;
+        } else {
+          isEnabled = configurationDefaults[enabled] as boolean;
+        }
+      } else {
+        isEnabled = configuration[enabled] as boolean;
+      }
+    }
     const fullToolTip = formatToolTip(tooltip, url);
 
-    const hasWarning = warnings[url] !== undefined;
+    const hasWarning = configurationWarnings[url] !== undefined;
 
     return (
       <div className="d-flex align-items-baseline lh-sm my-1">
         {hasWarning ? (
           <UIFactory.ConfigWarning
-            text={warnings[url].text}
-            level={warnings[url].level}
+            text={configurationWarnings[url].text}
+            level={configurationWarnings[url].level}
           />
         ) : null}
         <Form.Switch
@@ -175,6 +178,10 @@ const UIFactory = {
               type: 'set-multiple',
               value: Object.fromEntries([[url, event.target.checked]]),
             });
+            setConfigurationTouched({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, true]]),
+            });
           }}
           disabled={!isEnabled || disabled}
         />
@@ -182,29 +189,41 @@ const UIFactory = {
     );
   },
 
-  CreateNumberInputElement(
-    spec: DisplayConfigElement,
-    disabled: boolean,
-    configuration: { [url: string]: unknown },
-    setConfiguration: (args: { type: string; value: unknown }) => void,
-    warnings: { [key: string]: { text: string; level: string } },
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
-  ) {
+  CreateNumberInput(args: { spec: DisplayConfigElement; disabled: boolean }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled } = args;
     const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
-    let { [enabled]: isEnabled } = configuration;
-    if (isEnabled === undefined) isEnabled = true;
+    let isEnabled = true;
+    if (enabled !== undefined) {
+      if (configuration[enabled] === undefined) {
+        if (configurationDefaults[enabled] === undefined) {
+          isEnabled = true;
+        } else {
+          isEnabled = configurationDefaults[enabled] as boolean;
+        }
+      } else {
+        isEnabled = configuration[enabled] as boolean;
+      }
+    }
     const fullToolTip = formatToolTip(tooltip, url);
 
-    const hasWarning = warnings[url] !== undefined;
+    const hasWarning = configurationWarnings[url] !== undefined;
 
     return (
       <Form.Group className="d-flex align-items-baseline lh-sm config-number-group my-1">
         {hasWarning ? (
           <UIFactory.ConfigWarning
-            text={warnings[url].text}
-            level={warnings[url].level}
+            text={configurationWarnings[url].text}
+            level={configurationWarnings[url].level}
           />
         ) : null}
         <div className="col-1 mr-3">
@@ -227,6 +246,10 @@ const UIFactory = {
                 value: Object.fromEntries([
                   [url, parseInt(event.target.value, 10)],
                 ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
               });
             }}
             disabled={!isEnabled || disabled}
@@ -253,29 +276,41 @@ const UIFactory = {
     );
   },
 
-  CreateChoiceElement(
-    spec: DisplayConfigElement,
-    disabled: boolean,
-    configuration: { [url: string]: unknown },
-    setConfiguration: (args: { type: string; value: unknown }) => void,
-    warnings: { [key: string]: { text: string; level: string } },
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
-  ) {
+  CreateChoice(args: { spec: DisplayConfigElement; disabled: boolean }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled } = args;
     const { url, text, tooltip, enabled, choices } = spec;
     const { [url]: value } = configuration;
-    let { [enabled]: isEnabled } = configuration;
-    if (isEnabled === undefined) isEnabled = true;
+    let isEnabled = true;
+    if (enabled !== undefined) {
+      if (configuration[enabled] === undefined) {
+        if (configurationDefaults[enabled] === undefined) {
+          isEnabled = true;
+        } else {
+          isEnabled = configurationDefaults[enabled] as boolean;
+        }
+      } else {
+        isEnabled = configuration[enabled] as boolean;
+      }
+    }
     const fullToolTip = formatToolTip(tooltip, url);
 
-    const hasWarning = warnings[url] !== undefined;
+    const hasWarning = configurationWarnings[url] !== undefined;
     const defaultChoice = choices[0];
 
     return (
       <Form.Group className="d-flex align-items-baseline lh-sm config-number-group my-1">
         {hasWarning ? (
           <UIFactory.ConfigWarning
-            text={warnings[url].text}
-            level={warnings[url].level}
+            text={configurationWarnings[url].text}
+            level={configurationWarnings[url].level}
           />
         ) : null}
         <div className="col-3">
@@ -295,11 +330,17 @@ const UIFactory = {
                 type: 'set-multiple',
                 value: Object.fromEntries([[url, event.target.value]]),
               });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
             }}
             disabled={!isEnabled || disabled}
           >
             {choices.map((choice: string) => (
-              <option value={choice}>{choice}</option>
+              <option key={`choice-${choice}`} value={choice}>
+                {choice}
+              </option>
             ))}
           </Form.Select>
         </div>
@@ -324,61 +365,19 @@ const UIFactory = {
     );
   },
 
-  CreateUIElement(args: {
-    spec: DisplayConfigElement;
-    disabled: boolean;
-    configuration: { [key: string]: unknown };
-    setConfiguration: (args: { type: string; value: unknown }) => void;
-    warnings: { [key: string]: { text: string; level: string } };
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
-  }) {
-    const {
-      spec,
-      disabled,
-      configuration,
-      setConfiguration,
-      warnings,
-      setWarning,
-    } = args;
+  CreateUIElement(args: { spec: DisplayConfigElement; disabled: boolean }) {
+    const { spec, disabled } = args;
     if (spec.type === 'GroupBox') {
-      return UIFactory.CreateGroupBox(
-        spec,
-        disabled,
-        configuration,
-        setConfiguration,
-        warnings,
-        setWarning
-      );
+      return <UIFactory.CreateGroupBox spec={spec} disabled={disabled} />;
     }
     if (spec.type === 'Switch') {
-      return UIFactory.CreateSwitch(
-        spec,
-        disabled,
-        configuration,
-        setConfiguration,
-        warnings,
-        setWarning
-      );
+      return <UIFactory.CreateSwitch spec={spec} disabled={disabled} />;
     }
     if (spec.type === 'Number') {
-      return UIFactory.CreateNumberInputElement(
-        spec,
-        disabled,
-        configuration,
-        setConfiguration,
-        warnings,
-        setWarning
-      );
+      return <UIFactory.CreateNumberInput spec={spec} disabled={disabled} />;
     }
     if (spec.type === 'Choice') {
-      return UIFactory.CreateChoiceElement(
-        spec,
-        disabled,
-        configuration,
-        setConfiguration,
-        warnings,
-        setWarning
-      );
+      return <UIFactory.CreateChoice spec={spec} disabled={disabled} />;
     }
     console.warn(
       `Element not created because of unsupported type: ${spec.type}`
@@ -392,22 +391,8 @@ const UIFactory = {
     contents: SectionDescription;
     identifier: string;
     readonly: boolean;
-    configuration: { [key: string]: unknown };
-    setConfiguration: (args: { type: string; value: unknown }) => void;
-    warnings: { [key: string]: { text: string; level: string } };
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
   }) {
-    const {
-      level,
-      identifier,
-      header,
-      contents,
-      readonly,
-      configuration,
-      setConfiguration,
-      warnings,
-      setWarning,
-    } = args;
+    const { level, identifier, header, contents, readonly } = args;
     const elements = (contents.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
         const key = el.url || `${identifier}-${el.name}`;
@@ -416,10 +401,6 @@ const UIFactory = {
             key={key}
             spec={el as DisplayConfigElement}
             disabled={readonly}
-            configuration={configuration}
-            setConfiguration={setConfiguration}
-            warnings={warnings}
-            setWarning={setWarning}
           />
         );
       }
@@ -441,10 +422,6 @@ const UIFactory = {
           contents={contents.sections[key]}
           identifier={`${identifier}-${key}`}
           readonly={readonly}
-          configuration={configuration}
-          setConfiguration={setConfiguration}
-          warnings={warnings}
-          setWarning={setWarning}
         />
       );
     });
@@ -526,22 +503,16 @@ const UIFactory = {
     );
   },
 
-  CreateSections(args: {
-    definition: SectionDescription;
-    readonly: boolean;
-    configuration: { [key: string]: unknown };
-    setConfiguration: (args: { type: string; value: unknown }) => void;
-    warnings: { [key: string]: { text: string; level: string } };
-    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void;
-  }) {
+  CreateSections(args: { readonly: boolean }) {
     const {
-      definition,
-      readonly,
+      uiDefinition,
       configuration,
       setConfiguration,
-      warnings,
-      setWarning,
-    } = args;
+      configurationWarnings,
+    } = useContext(GlobalState);
+    const definition = uiDefinition.hierarchical as SectionDescription;
+    const { readonly } = args;
+
     const elements = (definition.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => {
         return (
@@ -549,10 +520,6 @@ const UIFactory = {
             key={el.url}
             spec={el as DisplayConfigElement}
             disabled={readonly}
-            configuration={configuration}
-            setConfiguration={setConfiguration}
-            warnings={warnings}
-            setWarning={setWarning}
           />
         );
       }
@@ -566,10 +533,6 @@ const UIFactory = {
           contents={definition.sections[key]}
           identifier={`config-${key}`}
           readonly={readonly}
-          configuration={configuration}
-          setConfiguration={setConfiguration}
-          warnings={warnings}
-          setWarning={setWarning}
         />
       );
     });

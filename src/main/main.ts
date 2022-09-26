@@ -25,7 +25,7 @@ import { resolveHtmlPath } from './util';
 
 export default class AppUpdater {
   constructor() {
-    log.transports.file.level = 'info';
+    log.transports.file.level = 'debug';
     autoUpdater.logger = log;
     autoUpdater.allowPrerelease = true;
     autoUpdater.setFeedURL({
@@ -115,9 +115,7 @@ const createWindow = async (options: {
       throw new Error('"mainWindow" is not defined');
     }
 
-    window.setTitle(
-      `Unofficial Crusader Patch 3 - GUI v${process.env.npm_package_version}`
-    );
+    window.setTitle(`Unofficial Crusader Patch 3 - GUI v${app.getVersion()}`);
 
     if (maximize) {
       window.maximize();

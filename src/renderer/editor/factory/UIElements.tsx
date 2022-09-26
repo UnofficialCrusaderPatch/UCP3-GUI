@@ -15,6 +15,7 @@ import { Tooltip, Form, Overlay } from 'react-bootstrap';
 import React, { Fragment, ReactElement } from 'react';
 
 export type DisplayConfigElement = {
+  choices: string[];
   name: string;
   description: string;
   header: string;
@@ -252,6 +253,77 @@ const UIFactory = {
     );
   },
 
+  CreateChoiceElement(
+    spec: DisplayConfigElement,
+    disabled: boolean,
+    configuration: { [url: string]: unknown },
+    setConfiguration: (args: { type: string; value: unknown }) => void,
+    warnings: { [key: string]: { text: string; level: string } },
+    setWarning: (args: { key: string; value: unknown; reset: boolean }) => void
+  ) {
+    const { url, text, tooltip, enabled, choices } = spec;
+    const { [url]: value } = configuration;
+    let { [enabled]: isEnabled } = configuration;
+    if (isEnabled === undefined) isEnabled = true;
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = warnings[url] !== undefined;
+    const defaultChoice = choices[0];
+
+    return (
+      <Form.Group className="d-flex align-items-baseline lh-sm config-number-group my-1">
+        {hasWarning ? (
+          <UIFactory.ConfigWarning
+            text={warnings[url].text}
+            level={warnings[url].level}
+          />
+        ) : null}
+        <div className="col-3">
+          <Form.Select
+            size="sm"
+            className="bg-dark text-light fs-7 lh-1"
+            key={`${url}-input`}
+            id={`${url}-input`}
+            // Tooltip stuff
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title={fullToolTip}
+            // End of tooltip stuff
+            value={value === undefined ? defaultChoice : (value as string)}
+            onChange={(event) => {
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, event.target.value]]),
+              });
+            }}
+            disabled={!isEnabled || disabled}
+          >
+            {choices.map((choice: string) => (
+              <option value={choice}>{choice}</option>
+            ))}
+          </Form.Select>
+        </div>
+        <div
+          className={`flex-grow-1 px-2 ${
+            !isEnabled || disabled ? 'label-disabled' : ''
+          }`}
+        >
+          <Form.Label
+            htmlFor={`${url}-input`}
+            // Tooltip stuff
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title={fullToolTip}
+            // End of tooltip stuff
+            // disabled={!isEnabled || disabled}
+          >
+            {text}
+          </Form.Label>
+        </div>
+      </Form.Group>
+    );
+  },
+
   CreateUIElement(args: {
     spec: DisplayConfigElement;
     disabled: boolean;
@@ -298,6 +370,19 @@ const UIFactory = {
         setWarning
       );
     }
+    if (spec.type === 'Choice') {
+      return UIFactory.CreateChoiceElement(
+        spec,
+        disabled,
+        configuration,
+        setConfiguration,
+        warnings,
+        setWarning
+      );
+    }
+    console.warn(
+      `Element not created because of unsupported type: ${spec.type}`
+    );
     return <div />;
   },
 

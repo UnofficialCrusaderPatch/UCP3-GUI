@@ -115,6 +115,10 @@ const createWindow = async (options: {
       throw new Error('"mainWindow" is not defined');
     }
 
+    window.setTitle(
+      `Unofficial Crusader Patch 3 - GUI v${process.env.npm_package_version}`
+    );
+
     if (maximize) {
       window.maximize();
     } else {

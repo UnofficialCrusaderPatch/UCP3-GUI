@@ -1,0 +1,30 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - v**
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [windows-latest]
+
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v1
+
+      - name: Install Node and NPM
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install and build
+        run: |
+          npm install
+          npm run package
+          npm run publish

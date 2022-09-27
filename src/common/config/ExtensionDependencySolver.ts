@@ -48,8 +48,11 @@ class ExtensionDependencySolver {
     while (todo.length > 0) {
       const item = todo[0];
 
-      // eslint-disable-next-line no-continue
-      if (done.indexOf(item) !== -1) continue;
+      if (done.indexOf(item) !== -1) {
+        todo.splice(0, 1);
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
       result.push(item);
       done.push(item);

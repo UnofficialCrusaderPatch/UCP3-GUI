@@ -130,6 +130,9 @@ export default function Manager() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
+    'Download and install the latest UCP version'
+  );
 
   return (
     <GlobalState.Provider
@@ -167,6 +170,29 @@ export default function Manager() {
                   : `not installed`}
               </div>
               <div className="m-3">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={async (event) => {
+                    setCheckForUpdatesButtonText('Updating...');
+                    const updateResult =
+                      await window.electron.ucpBackEnd.checkForUCP3Updates();
+                    if (
+                      updateResult.update === true &&
+                      updateResult.installed === true
+                    ) {
+                      setShow(true);
+                      setCheckForUpdatesButtonText('Updated!');
+                    } else {
+                      console.log(JSON.stringify(updateResult));
+                      setCheckForUpdatesButtonText('No updates available');
+                    }
+                  }}
+                >
+                  {checkForUpdatesButtonText}
+                </button>
+              </div>
+              <div className="m-3">
                 <Button
                   type="button"
                   className="btn btn-primary"
@@ -180,8 +206,7 @@ export default function Manager() {
                     if (zipFilePath === '') return;
 
                     await window.electron.ucpBackEnd.installUCPFromZip(
-                      zipFilePath,
-                      currentFolder
+                      zipFilePath
                     );
 
                     setShow(true);

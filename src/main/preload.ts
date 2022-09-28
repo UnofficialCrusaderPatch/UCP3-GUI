@@ -1,9 +1,7 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent, dialog } from 'electron';
 import fs from 'fs';
-import StreamZip from 'node-stream-zip';
 import yaml from 'yaml';
 import { Extension, Discovery } from './framework/discovery';
-import { getLatestUCP3Artifacts } from './versions/github';
 
 export type Channels = 'ipc-example';
 
@@ -67,6 +65,41 @@ contextBridge.exposeInMainWorld('electron', {
     // create an editor window for a game folder
     createEditorWindow(gameFolder: string) {
       ipcRenderer.invoke('launch-editor', gameFolder);
+    },
+
+    async checkForUCP3Updates() {
+      const result = await ipcRenderer.invoke('check-ucp3-updates');
+
+      if (result.update === true) {
+        const downloadResult = await ipcRenderer.invoke(
+          'download-ucp3-update',
+          result
+        );
+        console.log(downloadResult);
+        const installResult = await ipcRenderer.invoke(
+          'install-ucp3-from-zip',
+          downloadResult
+        );
+
+        return {
+          update: true,
+          file: result.file,
+          downloaded: downloadResult,
+          installed: installResult,
+        };
+      }
+
+      return {
+        update: false,
+        file: result.file,
+        downloaded: false,
+        installed: false,
+      };
+    },
+
+    async downloadUCP3Update(update: unknown) {
+      const result = await ipcRenderer.invoke('download-ucp3-update', update);
+      return result;
     },
 
     // Install or deinstalls UCP from these folders.
@@ -154,11 +187,6 @@ contextBridge.exposeInMainWorld('electron', {
       return uiCache[gameFolder];
     },
 
-    async getGitHubLatestUCP3Artifacts() {
-      const result = await getLatestUCP3Artifacts();
-      return result;
-    },
-
     async openFileDialog(filters: { name: string; extensions: string[] }[]) {
       const result = await ipcRenderer.invoke('open-file-dialog', filters);
       if (result === null || result === undefined) {
@@ -173,20 +201,12 @@ contextBridge.exposeInMainWorld('electron', {
       return result;
     },
 
-    async installUCPFromZip(zipFilePath: string, gameFolder: string) {
-      // eslint-disable-next-line new-cap
-      const zip = new StreamZip.async({ file: zipFilePath });
-
-      if (!fs.existsSync(`${gameFolder}/binkw32_real.dll`)) {
-        fs.copyFileSync(
-          `${gameFolder}/binkw32.dll`,
-          `${gameFolder}/binkw32_real.dll`
-        );
-      }
-
-      const count = await zip.extract(null, gameFolder);
-      console.log(`Extracted ${count} entries`);
-      await zip.close();
+    async installUCPFromZip(zipFilePath: string) {
+      const result = await ipcRenderer.invoke(
+        'install-ucp3-from-zip',
+        zipFilePath
+      );
+      return result;
     },
 
     async loadConfigFromFile() {

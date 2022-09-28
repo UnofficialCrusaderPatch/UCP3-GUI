@@ -16,12 +16,24 @@ import {
   ipcMain,
   dialog,
   WebContents,
+  session,
+  netLog,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { resourceLimits } from 'worker_threads';
+import fs, { createWriteStream } from 'fs';
+
+import * as stream from 'stream';
+import { promisify } from 'util';
+import yaml from 'yaml';
+import StreamZip from 'node-stream-zip';
+import axios from 'axios';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import {
+  checkForLatestUCP3DevReleaseUpdate,
+  UCP3_REPOS_MACHINE_TOKEN,
+} from './versions/github';
 
 export default class AppUpdater {
   constructor() {
@@ -186,7 +198,7 @@ ipcMain.handle('open-file-dialog', async (event, filters) => {
 });
 
 ipcMain.handle('save-file-dialog', async (event, filters) => {
-  const result = await dialog.showSaveDialog(
+  const result: Electron.SaveDialogReturnValue = await dialog.showSaveDialog(
     (event.sender as Sender).getOwnerBrowserWindow(),
     {
       filters: filters || [{ name: 'All Files', extensions: ['*'] }],
@@ -212,6 +224,89 @@ ipcMain.handle('open-config-file', async (event, arg) => {
 });
 
 const windowFolderMapping: { [key: number]: string } = {};
+
+ipcMain.handle('check-ucp3-updates', async (event) => {
+  const folder =
+    windowFolderMapping[(event.sender as Sender).getOwnerBrowserWindow().id];
+  const { sha } = fs.existsSync(`${folder}/ucp-version.yml`)
+    ? yaml.parse(
+        fs.readFileSync(`${folder}/ucp-version.yml`, { encoding: 'utf-8' })
+      )
+    : { sha: '!' };
+  const result = await checkForLatestUCP3DevReleaseUpdate(sha);
+  return result;
+});
+
+async function installUCP3FromZip(zipFilePath: string, gameFolder: string) {
+  // eslint-disable-next-line new-cap
+  const zip = new StreamZip.async({ file: zipFilePath });
+
+  if (!fs.existsSync(`${gameFolder}/binkw32_real.dll`)) {
+    if (fs.existsSync(`${gameFolder}/binkw32.dll`)) {
+      fs.copyFileSync(
+        `${gameFolder}/binkw32.dll`,
+        `${gameFolder}/binkw32_real.dll`
+      );
+    }
+    // TODO: appropriate warning
+  }
+
+  const count = await zip.extract(null, gameFolder);
+  console.log(`Extracted ${count} entries`);
+  await zip.close();
+
+  return true;
+}
+
+ipcMain.handle('download-ucp3-update', (event, update) => {
+  return new Promise((resolve, reject) => {
+    const window = (event.sender as Sender).getOwnerBrowserWindow();
+
+    const folder = windowFolderMapping[window.id];
+
+    const dialogResult = dialog.showMessageBoxSync(window, {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      title: 'Confirm',
+      message: `Do you want to download the latest UCP3 version?\n\n${update.file}`,
+    });
+
+    if (dialogResult !== 0) return reject(new Error('cancelled by user'));
+
+    const finished = promisify(stream.finished);
+    const writer = createWriteStream(`${folder}/${update.file}`);
+    return axios({
+      method: 'get',
+      url: update.downloadUrl,
+      responseType: 'stream',
+      auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
+      headers: {
+        Accept: 'application/octet-stream',
+      },
+    })
+      .then((response: { data: { pipe: (arg0: fs.WriteStream) => void } }) => {
+        response.data.pipe(writer);
+
+        finished(writer)
+          .then(() => {
+            resolve(`${folder}/${update.file}`);
+          })
+          .catch((reason) => {
+            console.error(reason);
+          });
+      })
+      .catch((reason) => {
+        console.error(reason);
+      });
+  });
+});
+
+ipcMain.handle('install-ucp3-from-zip', async (event, zipFilePath: string) => {
+  const gameFolder =
+    windowFolderMapping[(event.sender as Sender).getOwnerBrowserWindow().id];
+  const result = await installUCP3FromZip(zipFilePath, gameFolder);
+  return result;
+});
 
 ipcMain.on('get-game-folder-path', (event) => {
   event.returnValue =

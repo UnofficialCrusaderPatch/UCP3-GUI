@@ -28,6 +28,13 @@ declare global {
             sections: { [key: string]: object };
           };
         };
+        checkForUCP3Updates(): {
+          update: boolean;
+          file: string;
+          downloaded: boolean;
+          installed: boolean;
+        };
+        downloadUCP3Update(update: unknown): string;
         saveUCPConfig(config: object, gameFolder: string): void;
         loadConfigFromFile(): {
           modules: {
@@ -58,7 +65,7 @@ declare global {
         openFileDialog(
           filters: { name: string; extensions: string[] }[]
         ): string;
-        installUCPFromZip(zipFilePath: string, gameFolder: string): void;
+        installUCPFromZip(zipFilePath: string): void;
         getGameFolderPath(): string;
         reloadWindow(): void;
       };

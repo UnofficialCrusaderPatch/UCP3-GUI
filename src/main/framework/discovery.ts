@@ -98,10 +98,14 @@ const Discovery = {
     const currentLocale = 'English'; // Dummy location for this code
 
     const moduleDir = `${gameFolder}/ucp/modules`;
-    const modDirEnts = fs.readdirSync(moduleDir, { withFileTypes: true });
+    const modDirEnts = fs.existsSync(moduleDir)
+      ? fs.readdirSync(moduleDir, { withFileTypes: true })
+      : [];
 
     const pluginDir = `${gameFolder}/ucp/plugins`;
-    const pluginDirEnts = fs.readdirSync(pluginDir, { withFileTypes: true });
+    const pluginDirEnts = fs.existsSync(pluginDir)
+      ? fs.readdirSync(pluginDir, { withFileTypes: true })
+      : [];
 
     const dirEnts: fs.Dirent[] = [...modDirEnts, ...pluginDirEnts];
 

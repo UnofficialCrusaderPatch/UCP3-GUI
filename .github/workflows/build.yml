@@ -26,7 +26,7 @@ jobs:
       - name: Install and build
         run: |
           npm install
-          npm run package
+          npm run debugpackage
 
       - name: Make zip
         shell: pwsh
@@ -40,7 +40,9 @@ jobs:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           automatic_release_tag: 'latest'
           prerelease: true
+          draft: true
           title: 'Development Build'
           files: |
+            release/build/latest.yml
             UCP3-GUI-portable-latest.zip
             release/build/*.exe

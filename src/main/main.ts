@@ -247,13 +247,19 @@ async function installUCP3FromZip(zipFilePath: string, gameFolder: string) {
         `${gameFolder}/binkw32.dll`,
         `${gameFolder}/binkw32_real.dll`
       );
+    } else {
+      // TODO: appropriate warning
+      log.warn(
+        `binkw32.dll does not exist in this directory, are we in a game directory?`
+      );
     }
-    // TODO: appropriate warning
   }
 
   const count = await zip.extract(null, gameFolder);
   console.log(`Extracted ${count} entries`);
   await zip.close();
+
+  fs.copyFileSync(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
 
   return true;
 }

@@ -11,7 +11,7 @@ import {
 } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
-import { useReducer, useState, createContext } from 'react';
+import { useReducer, useState, createContext, useEffect } from 'react';
 import ConfigEditor from './editor/ConfigEditor';
 
 import { DisplayConfigElement } from './editor/factory/UIElements';
@@ -27,20 +27,8 @@ import {
   UIDefinition,
 } from './GlobalState';
 
-function getCurrentFolder() {
-  return window.electron.ucpBackEnd.getGameFolderPath() || '';
-  const sp = new URLSearchParams(global.location.search);
-  if (sp.has('window') && sp.get('window') === 'editor') {
-    if (sp.has('directory')) {
-      return sp.get('directory') as string;
-    }
-  }
-  return '';
-}
-
-const currentFolder = getCurrentFolder();
-
-console.log(currentFolder);
+import { ucpBackEnd } from './fakeBackend';
+import { useSearchParams } from 'react-router-dom';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -73,16 +61,30 @@ let ucpVersion: {
 let isUCP3Installed = false;
 let latestUCP3: unknown;
 
-if (currentFolder.length > 0) {
-  uiDefinition = window.electron.ucpBackEnd.getYamlDefinition(currentFolder);
-  defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
-
-  ucpVersion = window.electron.ucpBackEnd.getUCPVersion(currentFolder);
-  if (ucpVersion.major !== undefined) isUCP3Installed = true;
-}
+let extensions = [];
 
 export default function Manager() {
-  const extensions = window.electron.ucpBackEnd.getExtensions(currentFolder);
+  const [searchParams, _] = useSearchParams();
+  const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
+  const [initDone, setInitState] = useState(false);
+
+  useEffect(() => {
+    async function prepareValues() {
+      console.log(currentFolder);
+      if (currentFolder.length > 0) {
+        uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
+        defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
+      
+        ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
+        if (ucpVersion.major !== undefined) isUCP3Installed = true;
+      }
+
+      // TODO: currently only set on initial render and folder selection
+      extensions = await ucpBackEnd.getExtensions(currentFolder);
+      setInitState(true);
+    }
+    prepareValues();
+  }, [currentFolder]);
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -133,6 +135,10 @@ export default function Manager() {
   const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
     'Download and install the latest UCP version'
   );
+
+  if (!initDone) {
+    return "";
+  }
 
   return (
     <GlobalState.Provider

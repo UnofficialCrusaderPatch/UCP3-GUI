@@ -1,38 +1,33 @@
-import React, { Component } from 'react';
-import { MemoryRouter as Router, Route, Routes } from 'react-router-dom';
+
+import { BrowserRouter, MemoryRouter, Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 
 import App from './App';
 import Manager from './Manager';
 
-type ViewList = {
-  [key: string]: JSX.Element;
+const pageFunctions = {
+  landing: <App />,
+  editor: <Manager />,
 };
 
-class ViewManager extends Component {
-  static Views(): ViewList {
-    return {
-      landing: <App />,
-      editor: <Manager />,
-    };
-  }
+function FittingPage() {
+  const [searchParams, _] = useSearchParams();
+  const windowValue = searchParams.get("window");
 
-  static View() {
-    const sp = new URLSearchParams(global.location.search);
-    if (sp.has('window')) {
-      return ViewManager.Views()[sp.get('window') as string];
-    }
-    return ViewManager.Views().landing;
+  if (windowValue) {
+    return pageFunctions[windowValue];
   }
-
-  render() {
-    return (
-      <Router initialEntries={['/index.html']}>
-        <Routes>
-          <Route path="/index.html" element={<ViewManager.View />} />
-        </Routes>
-      </Router>
-    );
-  }
+  return pageFunctions.landing;
 }
 
-export default ViewManager;
+export default () => {
+  return (
+    // this router is apparently only for browsers... but it was the only on that kept the search param part...
+    // TODO: needs test with compiled version
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<FittingPage/>} />
+        <Route path="/index.html" element={<FittingPage/>} />
+      </Routes>
+    </BrowserRouter>
+  );
+};

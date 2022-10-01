@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import icon from '../../assets/icon.svg';
+import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
 
 const r = Math.floor(Math.random() * 10);
 
 const recentGameFolders: { index: number; folder: string; date: string }[] =
-  window.electron.ucpBackEnd.getRecentGameFolders();
+  await ucpBackEnd.getRecentGameFolders();
 
 const mostRecentGameFolder = recentGameFolders.sort(
   (a: { folder: string; date: string }, b: { folder: string; date: string }) =>
@@ -38,7 +39,7 @@ const Landing = () => {
             className="btn btn-primary"
             onClick={async () => {
               const folder =
-                await window.electron.ucpBackEnd.openFolderDialog();
+                await ucpBackEnd.openFolderDialog();
               if (folder !== undefined && folder.length > 0) {
                 setBrowseResultState(folder);
                 setLaunchButtonState(true);
@@ -58,7 +59,7 @@ const Landing = () => {
               const a = document.querySelector(
                 '#browseresult'
               ) as HTMLInputElement;
-              return window.electron.ucpBackEnd.createEditorWindow(a.value);
+              return ucpBackEnd.createEditorWindow(a.value);
             }}
           >
             Launch

@@ -1,4 +1,4 @@
-import fs from 'fs';
+import * as fs from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
 import { Definition } from '../../common/config/common';
@@ -37,23 +37,23 @@ export class Extension {
     this.config = {};
   }
 
-  readUISpec(): void {
-    if (fs.existsSync(`${this.folder}/ui.yml`)) {
+  async readUISpec(): Promise<void> {
+    if (await fs.exists(`${this.folder}/ui.yml`)) {
       this.ui = yaml.parse(
-        fs.readFileSync(`${this.folder}/ui.yml`, { encoding: 'utf-8' })
+        await fs.readTextFile(`${this.folder}/ui.yml`)
       );
     }
   }
 
-  readConfig(): void {
-    if (fs.existsSync(`${this.folder}/config.yml`)) {
+  async readConfig(): Promise<void> {
+    if (await fs.exists(`${this.folder}/config.yml`)) {
       this.config = yaml.parse(
-        fs.readFileSync(`${this.folder}/config.yml`, { encoding: 'utf-8' })
+        await fs.readTextFile(`${this.folder}/config.yml`)
       );
     }
   }
 
-  setLocale(language: string): void {
+  async setLocale(language: string): Promise<void> {
     function changeLocale(
       locale: { [key: string]: string },
       obj: { [key: string]: unknown }
@@ -76,12 +76,10 @@ export class Extension {
       });
     }
 
-    if (fs.existsSync(`${this.folder}/locale`)) {
-      if (fs.existsSync(`${this.folder}/locale/${language}.json`)) {
+    if (await fs.exists(`${this.folder}/locale`)) {
+      if (await fs.exists(`${this.folder}/locale/${language}.json`)) {
         const locale = JSON.parse(
-          fs.readFileSync(`${this.folder}/locale/${language}.json`, {
-            encoding: 'utf-8',
-          })
+          await fs.readTextFile(`${this.folder}/locale/${language}.json`)
         );
 
         this.ui.forEach((uiElement) => {
@@ -94,26 +92,26 @@ export class Extension {
 
 const Discovery = {
   Extension,
-  discoverExtensions: (gameFolder: string) => {
+  discoverExtensions: async (gameFolder: string) => {
     const currentLocale = 'English'; // Dummy location for this code
 
     const moduleDir = `${gameFolder}/ucp/modules`;
-    const modDirEnts = fs.existsSync(moduleDir)
-      ? fs.readdirSync(moduleDir, { withFileTypes: true })
+    const modDirEnts = await fs.exists(moduleDir)
+      ? await fs.readDir(moduleDir)
       : [];
 
     const pluginDir = `${gameFolder}/ucp/plugins`;
-    const pluginDirEnts = fs.existsSync(pluginDir)
-      ? fs.readdirSync(pluginDir, { withFileTypes: true })
+    const pluginDirEnts = await fs.exists(pluginDir)
+      ? await fs.readDir(pluginDir)
       : [];
 
-    const dirEnts: fs.Dirent[] = [...modDirEnts, ...pluginDirEnts];
+    const dirEnts: fs.FileEntry[] = [...modDirEnts, ...pluginDirEnts];
 
-    return dirEnts
-      .filter((d: fs.Dirent) => {
-        return d.isDirectory();
+    return Promise.all(dirEnts
+      .filter((d: fs.FileEntry) => {
+        return d.children;  // should be null/undefined if no dir
       })
-      .map((d: fs.Dirent) => {
+      .map(async (d: fs.FileEntry) => {
         const type = modDirEnts.indexOf(d) === -1 ? 'plugin' : 'module';
 
         const folder =
@@ -122,7 +120,7 @@ const Discovery = {
             : `${gameFolder}/ucp/plugins/${d.name}`;
 
         const def = yaml.parse(
-          fs.readFileSync(`${folder}/definition.yml`, { encoding: 'utf-8' })
+          await fs.readTextFile(`${folder}/definition.yml`)
         );
         const { name, version } = def;
 
@@ -134,7 +132,8 @@ const Discovery = {
         ext.readConfig();
 
         return ext;
-      });
+      })
+    );
   },
 };
 

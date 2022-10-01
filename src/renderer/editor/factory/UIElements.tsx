@@ -13,7 +13,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
 import React, { Fragment, ReactElement, useContext } from 'react';
-import { GlobalState } from 'renderer/GlobalState';
+import { GlobalState } from '../../GlobalState';
 
 export type DisplayConfigElement = {
   choices: string[];

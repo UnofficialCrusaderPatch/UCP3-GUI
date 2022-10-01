@@ -1,34 +1,31 @@
-import fs from 'fs';
+import { FileEntry, readTextFile, readDir } from '@tauri-apps/api/fs';
+import { proxyFsExists } from '../../renderer/util';
 import yaml from 'yaml';
 
 import { Definition, Extension } from '../../common/config/common';
 
-type ExtensionExtra = Extension & { folder: string };
-
 const localeSensitiveFields = ['description', 'text', 'tooltip'];
 const localeRegExp = new RegExp('^\\s*{{(.*)}}\\s*$');
-
-function readUISpec(ext: ExtensionExtra): void {
-  if (fs.existsSync(`${ext.folder}/ui.yml`)) {
-    ext.ui = yaml.parse(
-      fs.readFileSync(`${ext.folder}/ui.yml`, { encoding: 'utf-8' })
-    );
-  } else {
-    ext.ui = [];
+async function readUISpec(folder: string, ext: Extension): Promise<void> {
+    if (await proxyFsExists(`${folder}/ui.yml`)) {
+      ext.ui = yaml.parse(
+        await readTextFile(`${folder}/ui.yml`)
+      );
+    } else {
+        ext.ui = [];
+    }
   }
-}
 
-function readConfig(ext: ExtensionExtra): void {
-  if (fs.existsSync(`${ext.folder}/config.yml`)) {
-    ext.config = yaml.parse(
-      fs.readFileSync(`${ext.folder}/config.yml`, { encoding: 'utf-8' })
-    );
-  } else {
-    ext.config = {};
+  async function readConfig(folder: string, ext: Extension): Promise<void> {
+    if (await proxyFsExists(`${folder}/config.yml`)) {
+      ext.config = yaml.parse(
+        await readTextFile(`${folder}/config.yml`)
+      );
+    } else {
+        ext.config = {};
+    }
   }
-}
 
-function setLocale(ext: ExtensionExtra, language: string): void {
   function changeLocale(
     locale: { [key: string]: string },
     obj: { [key: string]: unknown }
@@ -51,42 +48,44 @@ function setLocale(ext: ExtensionExtra, language: string): void {
     });
   }
 
-  if (fs.existsSync(`${ext.folder}/locale`)) {
-    if (fs.existsSync(`${ext.folder}/locale/${language}.json`)) {
-      const locale = JSON.parse(
-        fs.readFileSync(`${ext.folder}/locale/${language}.json`, {
-          encoding: 'utf-8',
-        })
-      );
+  async function setLocale(folder: string, ext: Extension, language: string): Promise<void> {
+    
 
-      ext.ui.forEach((uiElement) => {
-        changeLocale(locale, uiElement as { [key: string]: unknown });
-      });
+    if (await proxyFsExists(`${folder}/locale`)) {
+      if (await proxyFsExists(`${folder}/locale/${language}.json`)) {
+        const locale = JSON.parse(
+          await readTextFile(`${folder}/locale/${language}.json`)
+        );
+
+        ext.ui.forEach((uiElement) => {
+          changeLocale(locale, uiElement as { [key: string]: unknown });
+        });
+      }
     }
   }
-}
 
 const Discovery = {
-  discoverExtensions: (gameFolder: string) => {
-    const currentLocale = 'English'; // Dummy location for ext code
+  Extension,
+  discoverExtensions: async (gameFolder: string) => {
+    const currentLocale = 'English'; // Dummy location for this code
 
     const moduleDir = `${gameFolder}/ucp/modules`;
-    const modDirEnts = fs.existsSync(moduleDir)
-      ? fs.readdirSync(moduleDir, { withFileTypes: true })
+    const modDirEnts = await proxyFsExists(moduleDir)
+      ? await readDir(moduleDir)
       : [];
 
     const pluginDir = `${gameFolder}/ucp/plugins`;
-    const pluginDirEnts = fs.existsSync(pluginDir)
-      ? fs.readdirSync(pluginDir, { withFileTypes: true })
+    const pluginDirEnts = await proxyFsExists(pluginDir)
+      ? await readDir(pluginDir)
       : [];
 
-    const dirEnts: fs.Dirent[] = [...modDirEnts, ...pluginDirEnts];
+    const dirEnts: FileEntry[] = [...modDirEnts, ...pluginDirEnts];
 
-    return dirEnts
-      .filter((d: fs.Dirent) => {
-        return d.isDirectory();
+    return Promise.all(dirEnts
+      .filter((d: FileEntry) => {
+        return d.children;  // should be null/undefined if no dir
       })
-      .map((d: fs.Dirent) => {
+      .map(async (d: FileEntry) => {
         const type = modDirEnts.indexOf(d) === -1 ? 'plugin' : 'module';
 
         const folder =
@@ -94,28 +93,22 @@ const Discovery = {
             ? `${gameFolder}/ucp/modules/${d.name}`
             : `${gameFolder}/ucp/plugins/${d.name}`;
 
-        const definition = yaml.parse(
-          fs.readFileSync(`${folder}/definition.yml`, { encoding: 'utf-8' })
+        const def = yaml.parse(
+          await readTextFile(`${folder}/definition.yml`)
         );
-        const { name, version } = definition;
+        const { name, version } = def;
 
-        definition.dependencies = definition.depends || [];
+        def.dependencies = def.depends || [];
 
-        const ext = {
-          name,
-          version,
-          type,
-          folder,
-          definition,
-        } as unknown as ExtensionExtra;
-        readUISpec(ext);
-        setLocale(ext, currentLocale);
-        readConfig(ext);
+        const ext = { name, version, type, folder, def };
+        await readUISpec(folder, ext);
+        await setLocale(folder, ext, currentLocale);
+        await readConfig(folder, ext);
 
         return ext;
-      });
+      })
+    );
   },
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export { Discovery };

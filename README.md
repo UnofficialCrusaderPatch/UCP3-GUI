@@ -1,1 +1,1 @@
-# UCP3 GUI written in electron
+# UCP3 GUI written using tauri

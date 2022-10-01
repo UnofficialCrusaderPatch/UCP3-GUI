@@ -18,7 +18,7 @@ import React, { Component, useContext, useReducer, useState } from 'react';
 
 import './ConfigEditor.css';
 
-import { GlobalState } from 'renderer/GlobalState';
+import { GlobalState } from '../GlobalState';
 import {
   UIFactory,
   DisplayConfigElement,

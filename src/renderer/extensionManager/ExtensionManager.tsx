@@ -47,7 +47,7 @@ function renderExtension(
     <ListGroup.Item
       key={`${name}-${version}-${author}`}
       style={{ backgroundColor: 'var(--bs-gray-800)' }}
-      className="text-light border-light container border-bottom p-1"
+      className="text-light border-secondary container border-bottom p-1"
     >
       <Row className="align-items-center">
         <Col>
@@ -140,13 +140,6 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
 
         const final = [...ies, ...remainder];
 
-        // const activeAsDependencies = extensionsState.isDependency;
-        // ies
-        //   .filter((e: Extension) => e.name !== ext.name)
-        //   .forEach((e: Extension) => {
-        //     activeAsDependencies[e.name] = true;
-        //   });
-
         setExtensionsState({
           activatedExtensions: [...extensionsState.activatedExtensions, ext],
           activeExtensions: final,
@@ -205,14 +198,34 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   });
 
   return (
-    <Container className="fs-6">
-      <Row className="mb-3">
+    <Container className="fs-6" style={{ height: '85vh' }}>
+      <Row className="mb-3" style={{}}>
         <h4>Activated extensions</h4>
-        {activated}
+        <div
+          style={{
+            height: '40vh',
+            overflowY: 'scroll',
+            overflowX: 'clip',
+            backgroundColor: 'var(--bs-gray-800)',
+          }}
+          className="border-secondary border"
+        >
+          {activated}
+        </div>
       </Row>
-      <Row>
+      <Row style={{}}>
         <h4>Available extensions</h4>
-        {eUI}
+        <div
+          style={{
+            height: '40vh',
+            overflowY: 'scroll',
+            overflowX: 'clip',
+            backgroundColor: 'var(--bs-gray-800)',
+          }}
+          className="border-secondary border"
+        >
+          {eUI}
+        </div>
       </Row>
     </Container>
   );

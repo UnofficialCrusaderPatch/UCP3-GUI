@@ -39,7 +39,7 @@ const Landing = () => {
             className="btn btn-primary"
             onClick={async () => {
               const folder =
-                await ucpBackEnd.openFolderDialog();
+                await ucpBackEnd.openFolderDialog(mostRecentGameFolder ? mostRecentGameFolder.folder : "");
               if (folder !== undefined && folder.length > 0) {
                 setBrowseResultState(folder);
                 setLaunchButtonState(true);

@@ -1,7 +1,4 @@
 import axios from 'axios';
-import fs from 'fs';
-import { download } from 'electron-dl';
-import { BrowserWindow } from 'electron';
 
 const UCP3_REPO_URL = 'UnofficialCrusaderPatch/UnofficialCrusaderPatch3';
 const UCP3_REPO_URL_API = `https://api.github.com/repos/${UCP3_REPO_URL}`;

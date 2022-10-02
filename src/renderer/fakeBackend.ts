@@ -1,6 +1,6 @@
 // This file fake the backend calls. They become synchronous, though.
 
-import { dataDir } from '@tauri-apps/api/path';
+import { dataDir, resolve } from '@tauri-apps/api/path';
 import * as fs from '@tauri-apps/api/fs';
 import * as dialog from '@tauri-apps/api/dialog';
 import { WebviewWindow } from '@tauri-apps/api/window'
@@ -10,6 +10,15 @@ import yaml from 'yaml';
 import { Extension, Discovery } from '../main/framework/discovery';
 import { UIDefinition } from './GlobalState';
 
+import {
+  checkForLatestUCP3DevReleaseUpdate,
+  UCP3_REPOS_MACHINE_TOKEN,
+} from '../main/versions/github';
+
+import { fetch, ResponseType } from '@tauri-apps/api/http';
+
+import JSZip from 'jszip';
+
 const baseFolder = `${await dataDir()}/UnofficialCrusaderPatch3/`;
 if (!(await fs.exists(baseFolder))) { // apparently a bug of the typing, actually returns boolean
   fs.createDir(baseFolder);
@@ -17,8 +26,6 @@ if (!(await fs.exists(baseFolder))) { // apparently a bug of the typing, actuall
 
 const extensionsCache: { [key: string]: Extension[] } = {};
 const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
-
-let currentFolder = "";
 
 export const ucpBackEnd = {
 
@@ -46,7 +53,7 @@ export const ucpBackEnd = {
 
   // create an editor window for a game folder
   createEditorWindow(gameFolder: string) {
-    // Alternative: https://stackoverflow.com/a/68551332
+    // only one editor currently possible
     const webview = new WebviewWindow('editor', {
       url: `index.html?window=editor&directory=${gameFolder}`,
       width: 1024,
@@ -55,24 +62,60 @@ export const ucpBackEnd = {
     });
   },
 
-  async checkForUCP3Updates() {
-    const result = await ipcRenderer.invoke('check-ucp3-updates');
+  async checkForUCP3Updates(gameFolder: string) {
+    const { sha } = await fs.exists(`${gameFolder}/ucp-version.yml`)
+      ? yaml.parse(
+          await fs.readTextFile(`${gameFolder}/ucp-version.yml`)
+        )
+      : { sha: '!' };
+    const result = await checkForLatestUCP3DevReleaseUpdate(sha);
 
     if (result.update === true) {
-      const downloadResult = await ipcRenderer.invoke(
-        'download-ucp3-update',
-        result
+      // ask options are fixed in tauri
+      const dialogResult = await dialog.ask(
+        `Do you want to download the latest UCP3 version?\n\n${result.file}`,
+        { title: 'Confirm', type: 'info' }
       );
-      console.log(downloadResult);
-      const installResult = await ipcRenderer.invoke(
-        'install-ucp3-from-zip',
-        downloadResult
-      );
+  
+      if (dialogResult !== true) {
+        window.alert('cancelled by user');
+        return {
+          update: false,
+          file: "",
+          downloaded: false,
+          installed: false,
+        };
+      }
+
+      const downloadPath = `${gameFolder}/${result.file}`;
+      const response = await fetch(result.downloadUrl, {
+        method: 'GET',
+        responseType: ResponseType.Binary, // important, because we are downloading inside a browser
+        headers:{
+          Accept: 'application/octet-stream',
+          Authorization: 'Basic ' + window.btoa('ucp3-machine' + ":" + UCP3_REPOS_MACHINE_TOKEN)
+        }
+      });
+
+      if (response.ok) {
+        await fs.writeBinaryFile(downloadPath, response.data);
+      } else {
+        window.alert('Failed to download UCP3 update.');
+        return {
+          update: false,
+          file: "",
+          downloaded: false,
+          installed: false,
+        };
+      }
+      
+      console.log(downloadPath);
+      const installResult = await this.installUCPFromZip(downloadPath, gameFolder);
 
       return {
         update: true,
         file: result.file,
-        downloaded: downloadResult,
+        downloaded: resolve(downloadPath),
         installed: installResult,
       };
     }
@@ -102,7 +145,7 @@ export const ucpBackEnd = {
   rebuildOptionsWindow() {},
 
   reloadWindow() {
-    ipcRenderer.invoke('reload-window');
+    window.location.reload();
   },
 
   async getUCPVersion(gameFolder: string) {
@@ -175,30 +218,63 @@ export const ucpBackEnd = {
     return uiCache[gameFolder];
   },
 
-  async openFileDialog(filters: { name: string; extensions: string[] }[]) {
-    const result = await ipcRenderer.invoke('open-file-dialog', filters);
-    if (result === null || result === undefined) {
+  async openFileDialog(gameFolder: string, filters: { name: string; extensions: string[] }[]) {
+    const result = await dialog.open({
+      directory: false,
+      multiple: false,
+      defaultPath: gameFolder,
+      filters: filters || [{ name: 'All Files', extensions: ['*'] }]
+    });
+
+    if (result === null){
       window.alert('Opening: Operation cancelled');
       return '';
     }
     return result;
   },
 
-  async openFolderDialog() {
+  async openFolderDialog(gameFolder: string) {
     const result = await dialog.open({
       directory: true,
       multiple: false,
-      defaultPath: currentFolder,
+      defaultPath: gameFolder,
     });
     return result !== null ? result : undefined;
   },
 
-  async installUCPFromZip(zipFilePath: string) {
-    const result = await ipcRenderer.invoke(
-      'install-ucp3-from-zip',
-      zipFilePath
-    );
-    return result;
+  async installUCPFromZip(zipFilePath: string, gameFolder: string) {
+    if (!(await fs.exists(`${gameFolder}/binkw32_real.dll`))) {
+      if (await fs.exists(`${gameFolder}/binkw32.dll`)) {
+        await fs.copyFile(
+          `${gameFolder}/binkw32.dll`,
+          `${gameFolder}/binkw32_real.dll`
+        );
+      } else {
+        // TODO: appropriate warning
+        console.warn(
+          `binkw32.dll does not exist in this directory, are we in a game directory?`
+        );
+      }
+    }
+
+    const data = await fs.readBinaryFile(zipFilePath);
+    const zip = await JSZip.loadAsync(data);
+
+    const listOfDir: Array<JSZip.JSZipObject> = []
+    const listOfFiles: Array<JSZip.JSZipObject> = []
+    zip. forEach((relativePath: string, file: JSZip.JSZipObject) => {
+      (file.dir ? listOfDir : listOfFiles).push(file);
+    });
+    Promise.all(listOfDir.map((dir) => fs.createDir(`${gameFolder}/${dir.name}`, {recursive: true})));
+    Promise.all(listOfFiles.map(async (file) => {
+      const data = await file.async("uint8array");
+      await fs.writeBinaryFile(`${gameFolder}/${file.name}`, data);
+    }));
+    console.log(`Extracted ${listOfFiles.length} entries`);
+
+    await fs.copyFile(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
+
+    return true;
   },
 
   async loadConfigFromFile() {

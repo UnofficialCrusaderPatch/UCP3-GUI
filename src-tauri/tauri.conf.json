@@ -26,6 +26,10 @@
       },
       "window": {
         "all": true
+      },
+      "http": {
+        "all": true,
+        "scope": ["https://api.github.com/repos/UnofficialCrusaderPatch/**"]
       }
     },
     "bundle": {

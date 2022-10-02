@@ -182,7 +182,7 @@ export default function Manager() {
                   onClick={async (event) => {
                     setCheckForUpdatesButtonText('Updating...');
                     const updateResult =
-                      await window.electron.ucpBackEnd.checkForUCP3Updates();
+                      await ucpBackEnd.checkForUCP3Updates(currentFolder);
                     if (
                       updateResult.update === true &&
                       updateResult.installed === true
@@ -204,15 +204,15 @@ export default function Manager() {
                   className="btn btn-primary"
                   onClick={async () => {
                     const zipFilePath =
-                      await window.electron.ucpBackEnd.openFileDialog([
+                      await ucpBackEnd.openFileDialog(currentFolder, [
                         { name: 'Zip files', extensions: ['zip'] },
                         { name: 'All files', extensions: ['*'] },
                       ]);
 
                     if (zipFilePath === '') return;
 
-                    await window.electron.ucpBackEnd.installUCPFromZip(
-                      zipFilePath
+                    await ucpBackEnd.installUCPFromZip(
+                      zipFilePath, currentFolder
                     );
 
                     setShow(true);
@@ -235,7 +235,7 @@ export default function Manager() {
                       variant="primary"
                       onClick={(event) => {
                         handleClose();
-                        window.electron.ucpBackEnd.reloadWindow();
+                        ucpBackEnd.reloadWindow();
                       }}
                     >
                       Reload

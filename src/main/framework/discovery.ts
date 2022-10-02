@@ -65,7 +65,6 @@ async function readUISpec(folder: string, ext: Extension): Promise<void> {
   }
 
 const Discovery = {
-  Extension,
   discoverExtensions: async (gameFolder: string) => {
     const currentLocale = 'English'; // Dummy location for this code
 
@@ -100,7 +99,7 @@ const Discovery = {
 
         def.dependencies = def.depends || [];
 
-        const ext = { name, version, type, folder, def };
+        const ext = { name, version, type, def } as unknown as Extension;
         await readUISpec(folder, ext);
         await setLocale(folder, ext, currentLocale);
         await readConfig(folder, ext);

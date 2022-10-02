@@ -29,6 +29,7 @@ import {
 
 import { ucpBackEnd } from './fakeBackend';
 import { useSearchParams } from 'react-router-dom';
+import { Extension } from '../main/framework/discovery';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -60,7 +61,7 @@ let ucpVersion: {
 let isUCP3Installed = false;
 let latestUCP3: unknown;
 
-let extensions = [];
+let extensions: Extension[] = []; // which extension type?
 
 export default function Manager() {
   const [searchParams, _] = useSearchParams();

@@ -127,9 +127,9 @@ const Discovery = {
         def.dependencies = def.depends || [];
 
         const ext = new Extension(name, version, type, folder, def);
-        ext.readUISpec();
-        ext.setLocale(currentLocale);
-        ext.readConfig();
+        await ext.readUISpec();
+        await ext.setLocale(currentLocale);
+        await ext.readConfig();
 
         return ext;
       })

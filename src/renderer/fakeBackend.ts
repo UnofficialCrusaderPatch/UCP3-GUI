@@ -265,8 +265,8 @@ export const ucpBackEnd = {
     zip. forEach((relativePath: string, file: JSZip.JSZipObject) => {
       (file.dir ? listOfDir : listOfFiles).push(file);
     });
-    Promise.all(listOfDir.map((dir) => fs.createDir(`${gameFolder}/${dir.name}`, {recursive: true})));
-    Promise.all(listOfFiles.map(async (file) => {
+    await Promise.all(listOfDir.map((dir) => fs.createDir(`${gameFolder}/${dir.name}`, {recursive: true})));
+    await Promise.all(listOfFiles.map(async (file) => {
       const data = await file.async("uint8array");
       await fs.writeBinaryFile(`${gameFolder}/${file.name}`, data);
     }));
@@ -277,12 +277,18 @@ export const ucpBackEnd = {
     return true;
   },
 
-  async loadConfigFromFile() {
-    const result = await ipcRenderer.invoke('open-file-dialog', [
-      { name: 'All Files', extensions: ['*'] },
-      { name: 'Config files', extensions: ['yml', 'yaml'] },
-    ]);
-    if (result === null || result === undefined) {
+  async loadConfigFromFile(gameFolder: string) {
+    const result = await dialog.open({
+      directory: false,
+      multiple: false,
+      defaultPath: gameFolder,
+      filters: [
+        { name: 'All Files', extensions: ['*'] },
+        { name: 'Config files', extensions: ['yml', 'yaml'] },
+      ]
+    });
+
+    if (result === null){
       window.alert('Opening: Operation cancelled');
       return undefined;
     }
@@ -303,7 +309,7 @@ export const ucpBackEnd = {
           options: { [key: string]: unknown };
         };
       };
-    } = yaml.parse(fs.readFileSync(filePath, { encoding: 'utf-8' }));
+    } = yaml.parse(await fs.readTextFile(filePath));
 
     const finalConfig: { [key: string]: unknown } = {};
 
@@ -327,7 +333,9 @@ export const ucpBackEnd = {
   async saveUCPConfig(config: { [key: string]: object }, filePath: string) {
     let finalFilePath = filePath;
     if (filePath === undefined || filePath === '') {
-      const result = await ipcRenderer.invoke('save-file-dialog');
+      const result = await dialog.save({
+        filters: [{ name: 'All Files', extensions: ['*'] }]
+      });
       if (result === null || result === undefined) {
         window.alert('Saving: Operation cancelled');
         return;
@@ -386,6 +394,6 @@ export const ucpBackEnd = {
         fcp[finalpart] = value;
       });
 
-    fs.writeFileSync(finalFilePath, yaml.stringify(finalConfig));
+    await fs.writeTextFile(finalFilePath, yaml.stringify(finalConfig));
   }
 };

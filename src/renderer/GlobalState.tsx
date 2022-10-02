@@ -88,12 +88,15 @@ const GlobalState = createContext<GlobalStateType>({
 
 export {
   GlobalState,
-  GlobalStateType,
   configurationReducer,
   configurationTouchedReducer,
   configurationWarningReducer,
-  Warning,
   activeExtensionsReducer,
-  configurationDefaultsReducer,
-  UIDefinition,
+  configurationDefaultsReducer
+}; 
+export type {
+  GlobalStateType,
+  Warning,
+  UIDefinition
 };
+

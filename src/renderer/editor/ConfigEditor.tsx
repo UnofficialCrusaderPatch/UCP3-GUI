@@ -25,6 +25,8 @@ import {
   SectionDescription,
 } from './factory/UIElements';
 
+import { ucpBackEnd } from '../fakeBackend';
+
 function saveConfig(
   configuration: { [key: string]: unknown },
   folder: string,
@@ -36,11 +38,11 @@ function saveConfig(
 
   console.log(finalConfig);
 
-  window.electron.ucpBackEnd.saveUCPConfig(finalConfig, folder);
+  ucpBackEnd.saveUCPConfig(finalConfig, folder);
 }
 
-export default function ConfigEditor(args: { readonly: boolean }) {
-  const { readonly } = args;
+export default function ConfigEditor(args: { readonly: boolean, gameFolder: string }) {
+  const { readonly, gameFolder } = args;
   const {
     uiDefinition,
     configurationDefaults,
@@ -74,7 +76,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
               type="button"
               onClick={async () => {
                 const openedConfig: { [key: string]: unknown } =
-                  await window.electron.ucpBackEnd.loadConfigFromFile();
+                  await ucpBackEnd.loadConfigFromFile(gameFolder);
 
                 if (openedConfig === undefined) return;
 

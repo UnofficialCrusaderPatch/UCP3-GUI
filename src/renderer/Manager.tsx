@@ -50,7 +50,6 @@ function getConfigDefaults(yml: unknown[]) {
 }
 
 let uiDefinition: UIDefinition;
-let defaults: { [key: string]: unknown };
 let ucpVersion: {
   major: number;
   minor: number;
@@ -66,25 +65,6 @@ let extensions = [];
 export default function Manager() {
   const [searchParams, _] = useSearchParams();
   const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
-  const [initDone, setInitState] = useState(false);
-
-  useEffect(() => {
-    async function prepareValues() {
-      console.log(currentFolder);
-      if (currentFolder.length > 0) {
-        uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
-        defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
-      
-        ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
-        if (ucpVersion.major !== undefined) isUCP3Installed = true;
-      }
-
-      // TODO: currently only set on initial render and folder selection
-      extensions = await ucpBackEnd.getExtensions(currentFolder);
-      setInitState(true);
-    }
-    prepareValues();
-  }, [currentFolder]);
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -100,7 +80,7 @@ export default function Manager() {
 
   const [configurationDefaults, setConfigurationDefaults] = useReducer(
     configurationDefaultsReducer,
-    defaults
+    {}
   );
   const [configurationTouched, setConfigurationTouched] = useReducer(
     configurationTouchedReducer,
@@ -113,7 +93,7 @@ export default function Manager() {
 
   const [configuration, setConfiguration] = useReducer(
     configurationReducer,
-    defaults // If you would remove this default initialization, then you need more value if undefined logic in the rendering factory
+    {}
   );
 
   const warningCount = Object.values(configurationWarnings)
@@ -136,6 +116,32 @@ export default function Manager() {
     'Download and install the latest UCP version'
   );
 
+  const [initDone, setInitState] = useState(false);
+  useEffect(() => {
+    async function prepareValues() {
+      console.log(currentFolder);
+      if (currentFolder.length > 0) {
+        uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
+        const defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
+      
+        ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
+        if (ucpVersion.major !== undefined) isUCP3Installed = true;
+        setConfiguration({
+          type: 'reset',
+          value: defaults,
+        });
+        setConfigurationDefaults({
+          type: 'reset',
+          value: defaults,
+        });
+      }
+
+      // TODO: currently only set on initial render and folder selection
+      extensions = await ucpBackEnd.getExtensions(currentFolder);
+      setInitState(true);
+    }
+    prepareValues();
+  }, [currentFolder]);
   if (!initDone) {
     return "";
   }
@@ -260,7 +266,7 @@ export default function Manager() {
               title="User Config"
               className="tabpanel-config"
             >
-              <ConfigEditor readonly={false} />
+              <ConfigEditor readonly={false} gameFolder={currentFolder}/>
             </Tab>
           </Tabs>
 

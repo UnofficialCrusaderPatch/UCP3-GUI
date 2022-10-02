@@ -151,7 +151,10 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
           activatedExtensions: [...extensionsState.activatedExtensions, ext],
           activeExtensions: final,
           installedExtensions: extensionsState.installedExtensions.filter(
-            (e: Extension) => final.indexOf(e) === -1
+            (e: Extension) =>
+              final
+                .map((ex: Extension) => `${ex.name}-${ex.version}`)
+                .indexOf(`${e.name}-${e.version}`) === -1
           ),
         });
       },
@@ -171,7 +174,9 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
       (event) => {
         const relevantExtensions = new Set(
           extensionsState.activatedExtensions
-            .filter((e) => e !== ext)
+            .filter(
+              (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
+            )
             .map((e: Extension) => eds.dependenciesFor(e.name).flat())
             .flat()
         );
@@ -180,7 +185,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
 
         setExtensionsState({
           activatedExtensions: extensionsState.activatedExtensions.filter(
-            (e) => e !== ext
+            (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
           ),
           activeExtensions: extensionsState.activeExtensions.filter((e) =>
             relevantExtensions.has(e.name)

@@ -8,8 +8,10 @@ import { WebviewWindow } from '@tauri-apps/api/window'
 
 import yaml from 'yaml';
 
-import { Extension, Discovery } from '../main/framework/discovery';
+import { Discovery } from '../main/framework/discovery';
 import { UIDefinition } from './GlobalState';
+
+import { Extension } from '../common/config/common';
 
 import {
   checkForLatestUCP3DevReleaseUpdate,

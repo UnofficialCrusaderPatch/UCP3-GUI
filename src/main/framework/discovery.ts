@@ -6,6 +6,7 @@ import { Definition, Extension } from '../../common/config/common';
 
 const localeSensitiveFields = ['description', 'text', 'tooltip'];
 const localeRegExp = new RegExp('^\\s*{{(.*)}}\\s*$');
+
 async function readUISpec(folder: string, ext: Extension): Promise<void> {
     if (await proxyFsExists(`${folder}/ui.yml`)) {
       ext.ui = yaml.parse(

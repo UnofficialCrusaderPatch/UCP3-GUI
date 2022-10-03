@@ -5,6 +5,7 @@ import { readTextFile, writeTextFile, createDir, readBinaryFile, writeBinaryFile
 import { proxyFsExists } from './util';
 import { open as dialogOpen, save as dialogSave, ask as dialogAsk } from '@tauri-apps/api/dialog';
 import { WebviewWindow } from '@tauri-apps/api/window'
+import { getName, getVersion } from '@tauri-apps/api/app';
 
 import yaml from 'yaml';
 
@@ -65,7 +66,7 @@ export const ucpBackEnd = {
   },
 
   // create an editor window for a game folder
-  createEditorWindow(gameFolder: string) {
+  async createEditorWindow(gameFolder: string) {
     // only one editor currently possible
     const webview = new WebviewWindow('editor', {
       url: `index.html?window=editor&directory=${gameFolder}`,
@@ -73,6 +74,7 @@ export const ucpBackEnd = {
       height: 768,
       maximized: true
     });
+    webview.setTitle(`${await getName()} - ${await getVersion()}`);
   },
 
   async checkForUCP3Updates(gameFolder: string) {

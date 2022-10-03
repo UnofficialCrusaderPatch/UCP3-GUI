@@ -1,8 +1,9 @@
 // This file fake the backend calls. They become synchronous, though.
 
 import { dataDir, resolve } from '@tauri-apps/api/path';
-import * as fs from '@tauri-apps/api/fs';
-import * as dialog from '@tauri-apps/api/dialog';
+import { readTextFile, writeTextFile, createDir, readBinaryFile, writeBinaryFile, copyFile, BinaryFileContents } from '@tauri-apps/api/fs';
+import { proxyFsExists } from './util';
+import { open as dialogOpen, save as dialogSave, ask as dialogAsk } from '@tauri-apps/api/dialog';
 import { WebviewWindow } from '@tauri-apps/api/window'
 
 import yaml from 'yaml';
@@ -19,10 +20,20 @@ import { fetch, ResponseType } from '@tauri-apps/api/http';
 
 import JSZip from 'jszip';
 
-const baseFolder = `${await dataDir()}/UnofficialCrusaderPatch3/`;
-if (!(await fs.exists(baseFolder))) { // apparently a bug of the typing, actually returns boolean
-  fs.createDir(baseFolder);
-}
+// wrap in closure to avoid top level await
+const getBaseFolder = (function() {
+  let baseFolder: string | null = null;
+  return async () => {
+    if (baseFolder) {
+      return baseFolder;
+    }
+    baseFolder = `${await dataDir()}/UnofficialCrusaderPatch3/`;
+    if (!(await proxyFsExists(baseFolder))) { // apparently a bug of the typing, actually returns boolean
+      createDir(baseFolder);
+    }
+    return baseFolder;
+  };
+})();
 
 const extensionsCache: { [key: string]: Extension[] } = {};
 const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
@@ -31,10 +42,10 @@ export const ucpBackEnd = {
 
   // Once the main window boots, it starts up a second window which launches the most recent game folder. It needs to know the most recent game folder.
   async getRecentGameFolders() {
-    const fname = `${baseFolder}recent.json`;
-    if (await fs.exists(fname)) {
+    const fname = `${await getBaseFolder()}recent.json`;
+    if (await proxyFsExists(fname)) {
       const recentjson = JSON.parse(
-        await fs.readTextFile(fname)
+        await readTextFile(fname)
       );
       for (let i = 0; i < recentjson.length; i += 1) {
         recentjson[i].index = i;
@@ -42,7 +53,7 @@ export const ucpBackEnd = {
       // var mostRecent = recentjson.sort((a: { folder: string, date: number; }, b: { folder: string, date: number; }) => b.date - a.date);
       return recentjson;
     }
-    await fs.writeTextFile(fname, JSON.stringify([]));
+    await writeTextFile(fname, JSON.stringify([]));
 
     return [];
   },
@@ -63,16 +74,16 @@ export const ucpBackEnd = {
   },
 
   async checkForUCP3Updates(gameFolder: string) {
-    const { sha } = await fs.exists(`${gameFolder}/ucp-version.yml`)
+    const { sha } = await proxyFsExists(`${gameFolder}/ucp-version.yml`)
       ? yaml.parse(
-          await fs.readTextFile(`${gameFolder}/ucp-version.yml`)
+          await readTextFile(`${gameFolder}/ucp-version.yml`)
         )
       : { sha: '!' };
     const result = await checkForLatestUCP3DevReleaseUpdate(sha);
 
     if (result.update === true) {
       // ask options are fixed in tauri
-      const dialogResult = await dialog.ask(
+      const dialogResult = await dialogAsk(
         `Do you want to download the latest UCP3 version?\n\n${result.file}`,
         { title: 'Confirm', type: 'info' }
       );
@@ -98,7 +109,7 @@ export const ucpBackEnd = {
       });
 
       if (response.ok) {
-        await fs.writeBinaryFile(downloadPath, response.data);
+        await writeBinaryFile(downloadPath, response.data as BinaryFileContents);
       } else {
         window.alert('Failed to download UCP3 update.');
         return {
@@ -128,11 +139,6 @@ export const ucpBackEnd = {
     };
   },
 
-  async downloadUCP3Update(update: unknown) {
-    const result = await ipcRenderer.invoke('download-ucp3-update', update);
-    return result;
-  },
-
   // Install or deinstalls UCP from these folders.
   installUCPToGameFolder(gameFolder: number) {},
   uninstallUCPFromGameFolder(gameFolder: number) {},
@@ -150,8 +156,8 @@ export const ucpBackEnd = {
 
   async getUCPVersion(gameFolder: string) {
     const path = `${gameFolder}/ucp-version.yml`;
-    if (await fs.exists(path)) {
-      return yaml.parse(await fs.readTextFile(path));
+    if (await proxyFsExists(path)) {
+      return yaml.parse(await readTextFile(path));
     }
     return {};
   },
@@ -215,11 +221,11 @@ export const ucpBackEnd = {
 
       uiCache[gameFolder] = { flat: uiCollection, hierarchical: result };
     }
-    return uiCache[gameFolder];
+    return uiCache[gameFolder] as UIDefinition; // this could be prettier with the type checking
   },
 
   async openFileDialog(gameFolder: string, filters: { name: string; extensions: string[] }[]) {
-    const result = await dialog.open({
+    const result = await dialogOpen({
       directory: false,
       multiple: false,
       defaultPath: gameFolder,
@@ -230,22 +236,22 @@ export const ucpBackEnd = {
       window.alert('Opening: Operation cancelled');
       return '';
     }
-    return result;
+    return result as string;
   },
 
-  async openFolderDialog(gameFolder: string) {
-    const result = await dialog.open({
+  async openFolderDialog(gameFolder: string): Promise<string | undefined> {
+    const result = await dialogOpen({
       directory: true,
       multiple: false,
       defaultPath: gameFolder,
     });
-    return result !== null ? result : undefined;
+    return result !== null ? result as string : undefined;
   },
 
   async installUCPFromZip(zipFilePath: string, gameFolder: string) {
-    if (!(await fs.exists(`${gameFolder}/binkw32_real.dll`))) {
-      if (await fs.exists(`${gameFolder}/binkw32.dll`)) {
-        await fs.copyFile(
+    if (!(await proxyFsExists(`${gameFolder}/binkw32_real.dll`))) {
+      if (await proxyFsExists(`${gameFolder}/binkw32.dll`)) {
+        await copyFile(
           `${gameFolder}/binkw32.dll`,
           `${gameFolder}/binkw32_real.dll`
         );
@@ -257,7 +263,7 @@ export const ucpBackEnd = {
       }
     }
 
-    const data = await fs.readBinaryFile(zipFilePath);
+    const data = await readBinaryFile(zipFilePath);
     const zip = await JSZip.loadAsync(data);
 
     const listOfDir: Array<JSZip.JSZipObject> = []
@@ -265,20 +271,20 @@ export const ucpBackEnd = {
     zip. forEach((relativePath: string, file: JSZip.JSZipObject) => {
       (file.dir ? listOfDir : listOfFiles).push(file);
     });
-    await Promise.all(listOfDir.map((dir) => fs.createDir(`${gameFolder}/${dir.name}`, {recursive: true})));
+    await Promise.all(listOfDir.map((dir) => createDir(`${gameFolder}/${dir.name}`, {recursive: true})));
     await Promise.all(listOfFiles.map(async (file) => {
       const data = await file.async("uint8array");
-      await fs.writeBinaryFile(`${gameFolder}/${file.name}`, data);
+      await writeBinaryFile(`${gameFolder}/${file.name}`, data);
     }));
     console.log(`Extracted ${listOfFiles.length} entries`);
 
-    await fs.copyFile(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
+    await copyFile(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
 
     return true;
   },
 
   async loadConfigFromFile(gameFolder: string) {
-    const result = await dialog.open({
+    const result = await dialogOpen({
       directory: false,
       multiple: false,
       defaultPath: gameFolder,
@@ -290,7 +296,7 @@ export const ucpBackEnd = {
 
     if (result === null){
       window.alert('Opening: Operation cancelled');
-      return undefined;
+      return {};
     }
     const filePath = result;
 
@@ -309,7 +315,7 @@ export const ucpBackEnd = {
           options: { [key: string]: unknown };
         };
       };
-    } = yaml.parse(await fs.readTextFile(filePath));
+    } = yaml.parse(await readTextFile(filePath as string)); // will only be one
 
     const finalConfig: { [key: string]: unknown } = {};
 
@@ -330,10 +336,10 @@ export const ucpBackEnd = {
   },
 
   // Save configuration
-  async saveUCPConfig(config: { [key: string]: object }, filePath: string) {
+  async saveUCPConfig(config: { [key: string]: unknown }, filePath: string) {
     let finalFilePath = filePath;
     if (filePath === undefined || filePath === '') {
-      const result = await dialog.save({
+      const result = await dialogSave({
         filters: [{ name: 'All Files', extensions: ['*'] }]
       });
       if (result === null || result === undefined) {
@@ -394,6 +400,6 @@ export const ucpBackEnd = {
         fcp[finalpart] = value;
       });
 
-    await fs.writeTextFile(finalFilePath, yaml.stringify(finalConfig));
+    await writeTextFile(finalFilePath, yaml.stringify(finalConfig));
   }
 };

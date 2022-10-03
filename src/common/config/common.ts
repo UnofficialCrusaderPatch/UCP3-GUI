@@ -157,7 +157,7 @@ type Configs = { [key: string]: ConfigEntry }[];
 
 type PermissionStatus = { status: string; reason: string; by: string };
 
-export {
+export type {
   ConfigEntry,
   ConfigFile,
   Configs,

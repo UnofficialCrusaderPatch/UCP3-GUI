@@ -29,7 +29,7 @@ import {
 
 import { ucpBackEnd } from './fakeBackend';
 import { useSearchParams } from 'react-router-dom';
-import { Extension } from '../main/framework/discovery';
+import { Extension } from '../common/config/common';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -138,13 +138,14 @@ export default function Manager() {
       }
 
       // TODO: currently only set on initial render and folder selection
-      extensions = await ucpBackEnd.getExtensions(currentFolder);
+      // TODO: resolve this type badness
+      extensions = (await ucpBackEnd.getExtensions(currentFolder) as unknown) as Extension[];
       setInitState(true);
     }
     prepareValues();
   }, [currentFolder]);
   if (!initDone) {
-    return "";
+    return <p>Loading...</p>;
   }
 
   return (

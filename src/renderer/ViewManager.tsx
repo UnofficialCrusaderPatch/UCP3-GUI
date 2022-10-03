@@ -4,7 +4,7 @@ import { BrowserRouter, MemoryRouter, Route, Routes, useLocation, useSearchParam
 import App from './App';
 import Manager from './Manager';
 
-const pageFunctions = {
+const pageFunctions: { [ key: string ]: JSX.Element } = {
   landing: <App />,
   editor: <Manager />,
 };

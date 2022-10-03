@@ -4,8 +4,14 @@ const UCP3_REPO_URL = 'UnofficialCrusaderPatch/UnofficialCrusaderPatch3';
 const UCP3_REPO_URL_API = `https://api.github.com/repos/${UCP3_REPO_URL}`;
 const UCP3_REPOS_MACHINE_TOKEN = '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';
 
-async function checkForLatestUCP3DevReleaseUpdate(currentSHA: string) {
-  const result = await axios
+async function checkForLatestUCP3DevReleaseUpdate(currentSHA: string):
+    Promise<{ update: boolean, file: string, downloadUrl: string }> {
+  const result = {
+    update: false,
+    file: "",
+    downloadUrl: "",
+  };
+  await axios
     .get(`${UCP3_REPO_URL_API}/releases/tags/latest`, {
       auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
     })
@@ -26,15 +32,11 @@ async function checkForLatestUCP3DevReleaseUpdate(currentSHA: string) {
         const detectedSha = devReleaseAsset.browser_download_url
           .split('UCP3-snapshot-DevRelease-')[1]
           .split('.zip')[0];
-
-        if (currentSHA.startsWith(detectedSha)) {
-          return { update: false };
-        }
-
-        return {
-          update: true,
-          file: devReleaseAsset.name,
-          downloadUrl: devReleaseAsset.url,
+        
+        if (!currentSHA.startsWith(detectedSha)) {
+          result.update = true;
+          result.file = devReleaseAsset.name,
+          result.downloadUrl = devReleaseAsset.url
         };
       }
     )
@@ -42,20 +44,10 @@ async function checkForLatestUCP3DevReleaseUpdate(currentSHA: string) {
       console.error(error);
       window.alert(error);
     });
-  return result;
-}
 
-async function downloadDevReleaseUpdate(
-  window: BrowserWindow,
-  update: { file: string; downloadUrl: string },
-  folder: string,
-  onComplete: (info: { filename: string; path: string }) => void
-) {
-  download(window, update.downloadUrl, {
-    directory: folder,
-    filename: update.file,
-    onCompleted: onComplete,
-  });
+  // TODO: there should be a proper "no/failed connection"-handling
+
+  return result;
 }
 
 async function getLatestUCP3Artifacts() {

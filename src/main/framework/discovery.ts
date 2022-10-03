@@ -93,14 +93,14 @@ const Discovery = {
             ? `${gameFolder}/ucp/modules/${d.name}`
             : `${gameFolder}/ucp/plugins/${d.name}`;
 
-        const def = yaml.parse(
+        const definition = yaml.parse(
           await readTextFile(`${folder}/definition.yml`)
         );
-        const { name, version } = def;
+        const { name, version } = definition;
 
-        def.dependencies = def.depends || [];
+        definition.dependencies = definition.depends || [];
 
-        const ext = { name, version, type, def } as unknown as Extension;
+        const ext = { name, version, type, definition } as unknown as Extension;
         await readUISpec(folder, ext);
         await setLocale(folder, ext, currentLocale);
         await readConfig(folder, ext);

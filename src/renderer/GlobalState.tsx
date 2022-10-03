@@ -92,7 +92,9 @@ export {
   configurationTouchedReducer,
   configurationWarningReducer,
   activeExtensionsReducer,
-  configurationDefaultsReducer
+  configurationDefaultsReducer,
+
+  KeyValueReducer,
 }; 
 export type {
   GlobalStateType,

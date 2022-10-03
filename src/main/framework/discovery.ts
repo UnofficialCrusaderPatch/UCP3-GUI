@@ -1,4 +1,5 @@
-import * as fs from '@tauri-apps/api/fs';
+import { FileEntry, readTextFile, readDir } from '@tauri-apps/api/fs';
+import { proxyFsExists } from '../../renderer/util';
 import yaml from 'yaml';
 
 import { Definition } from '../../common/config/common';
@@ -38,17 +39,17 @@ export class Extension {
   }
 
   async readUISpec(): Promise<void> {
-    if (await fs.exists(`${this.folder}/ui.yml`)) {
+    if (await proxyFsExists(`${this.folder}/ui.yml`)) {
       this.ui = yaml.parse(
-        await fs.readTextFile(`${this.folder}/ui.yml`)
+        await readTextFile(`${this.folder}/ui.yml`)
       );
     }
   }
 
   async readConfig(): Promise<void> {
-    if (await fs.exists(`${this.folder}/config.yml`)) {
+    if (await proxyFsExists(`${this.folder}/config.yml`)) {
       this.config = yaml.parse(
-        await fs.readTextFile(`${this.folder}/config.yml`)
+        await readTextFile(`${this.folder}/config.yml`)
       );
     }
   }
@@ -76,10 +77,10 @@ export class Extension {
       });
     }
 
-    if (await fs.exists(`${this.folder}/locale`)) {
-      if (await fs.exists(`${this.folder}/locale/${language}.json`)) {
+    if (await proxyFsExists(`${this.folder}/locale`)) {
+      if (await proxyFsExists(`${this.folder}/locale/${language}.json`)) {
         const locale = JSON.parse(
-          await fs.readTextFile(`${this.folder}/locale/${language}.json`)
+          await readTextFile(`${this.folder}/locale/${language}.json`)
         );
 
         this.ui.forEach((uiElement) => {
@@ -96,22 +97,22 @@ const Discovery = {
     const currentLocale = 'English'; // Dummy location for this code
 
     const moduleDir = `${gameFolder}/ucp/modules`;
-    const modDirEnts = await fs.exists(moduleDir)
-      ? await fs.readDir(moduleDir)
+    const modDirEnts = await proxyFsExists(moduleDir)
+      ? await readDir(moduleDir)
       : [];
 
     const pluginDir = `${gameFolder}/ucp/plugins`;
-    const pluginDirEnts = await fs.exists(pluginDir)
-      ? await fs.readDir(pluginDir)
+    const pluginDirEnts = await proxyFsExists(pluginDir)
+      ? await readDir(pluginDir)
       : [];
 
-    const dirEnts: fs.FileEntry[] = [...modDirEnts, ...pluginDirEnts];
+    const dirEnts: FileEntry[] = [...modDirEnts, ...pluginDirEnts];
 
     return Promise.all(dirEnts
-      .filter((d: fs.FileEntry) => {
+      .filter((d: FileEntry) => {
         return d.children;  // should be null/undefined if no dir
       })
-      .map(async (d: fs.FileEntry) => {
+      .map(async (d: FileEntry) => {
         const type = modDirEnts.indexOf(d) === -1 ? 'plugin' : 'module';
 
         const folder =
@@ -120,7 +121,7 @@ const Discovery = {
             : `${gameFolder}/ucp/plugins/${d.name}`;
 
         const def = yaml.parse(
-          await fs.readTextFile(`${folder}/definition.yml`)
+          await readTextFile(`${folder}/definition.yml`)
         );
         const { name, version } = def;
 

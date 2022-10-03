@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from "axios";
 
 type GitReleaseAttachment = {
   url: string;
@@ -19,7 +19,7 @@ async function getLatestUCP3Release() {
     'https://api.github.com/repos/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases';
 
   const resultRaw = await axios.get(url);
-  const resultJSON = JSON.parse(resultRaw);
+  const resultJSON = JSON.parse(resultRaw as any);
 
   const relevantReleases = resultJSON.filter((rel: any) => rel.draft === false);
 
@@ -45,7 +45,7 @@ async function getLatestUCP3Release() {
 }
 
 async function downloadAttachment(a: GitReleaseAttachment) {
-  const result = await axios.get(a.downloadUrl);
+  const result: any = await axios.get(a.downloadUrl);
 
   const blob = result.blob();
 

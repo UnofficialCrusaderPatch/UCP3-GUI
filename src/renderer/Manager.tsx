@@ -116,6 +116,9 @@ export default function Manager() {
   const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
     'Download and install the latest UCP version'
   );
+  const [guiUpdateStatus, setGuiUpdateStatus] = useState(
+    ''
+  );
 
   const [initDone, setInitState] = useState(false);
   useEffect(() => {
@@ -255,6 +258,16 @@ export default function Manager() {
                 <button type="button" className="btn btn-primary disabled">
                   Uninstall UCP from this folder
                 </button>
+              </div>
+              <div className="m-3">
+                <Button onClick={(event) => {
+                  ucpBackEnd.checkForGUIUpdates(setGuiUpdateStatus);
+                }}>
+                  Check for GUI updates
+                </Button>
+                <span className="mx-1">
+                  {guiUpdateStatus}
+                </span>
               </div>
               <Form className="m-3 d-none">
                 <Form.Switch id="activate-ucp-switch" label="Activate UCP" />

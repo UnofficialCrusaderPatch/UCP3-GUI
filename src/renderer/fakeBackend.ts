@@ -1,6 +1,6 @@
 // This file fake the backend calls. They become synchronous, though.
 
-import { dataDir, resolve } from '@tauri-apps/api/path';
+import { appDir, dataDir, desktopDir, downloadDir, executableDir, resolve } from '@tauri-apps/api/path';
 import { readTextFile, writeTextFile, createDir, readBinaryFile, writeBinaryFile, copyFile, BinaryFileContents } from '@tauri-apps/api/fs';
 import { proxyFsExists } from './util';
 import { open as dialogOpen, save as dialogSave, ask as dialogAsk } from '@tauri-apps/api/dialog';
@@ -22,6 +22,11 @@ import {
 import { fetch, ResponseType } from '@tauri-apps/api/http';
 
 import JSZip from 'jszip';
+import { normalize } from '@tauri-apps/api/path';
+import axios from 'axios';
+
+import semver from 'semver';
+import { dialog } from '@tauri-apps/api';
 
 // wrap in closure to avoid top level await
 const getBaseFolder = (function() {
@@ -36,6 +41,18 @@ const getBaseFolder = (function() {
     }
     return baseFolder;
   };
+})();
+
+const exeFolder = (function() {
+  let f: string | null = null;
+  return async () => {
+    if (f) {
+      return f;
+    }
+    f = `${await normalize('.')}`;
+    console.log(`Executable path: ${f}`);
+    return f;
+  }; 
 })();
 
 const extensionsCache: { [key: string]: Extension[] } = {};
@@ -75,6 +92,101 @@ export const ucpBackEnd = {
       maximized: true
     });
     webview.setTitle(`${await getName()} - ${await getVersion()}`);
+  },
+
+  async checkForGUIUpdates(setGuiUpdateStatus: (newText: string) => void) {
+
+    setGuiUpdateStatus('Contacting GitHub...');
+    const res: {
+      data: {
+        assets: {
+          browser_download_url: any;
+          name: string;
+          url: string;
+          id: string;
+        }[];
+      };
+    } = await axios
+    .get(`https://api.github.com/repos/UnofficialCrusaderPatch/UCP3-GUI/releases/tags/latest-tauri`, {
+      auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
+    });
+
+    const latestJSONAsset = res.data.assets.filter((asset) => asset.name === 'latest.json')[0];
+
+    setGuiUpdateStatus('Fetching latest version info...');
+    const latestJSON: {
+      version: string;
+        pub_date: string;
+        notes: string;
+        platforms: {
+          'windows-x86_64': {
+            url: string;
+            signature: string;
+          }
+        };
+    } = (await fetch(latestJSONAsset.url, {
+      method: 'GET',
+      responseType: ResponseType.JSON,
+      headers:{
+        Accept: 'application/octet-stream',
+        Authorization: 'Basic ' + window.btoa('ucp3-machine' + ":" + UCP3_REPOS_MACHINE_TOKEN)
+      }
+    })).data as {
+      version: string;
+        pub_date: string;
+        notes: string;
+        platforms: {
+          'windows-x86_64': {
+            url: string;
+            signature: string;
+          }
+        };
+    };
+
+    console.log(latestJSON);
+
+    const curVer = await getVersion();
+    if (semver.lt(curVer, latestJSON.version) || true) {
+      const dialogResult = await dialogAsk(
+        `Do you want to download the latest GUI version?\n\n${latestJSON.version}`,
+        { title: 'Confirm', type: 'info' }
+      );
+
+      if (dialogResult === true) {
+        const downloadPath = `${await downloadDir()}UCP3-GUI-${latestJSON.version}.exe`;
+        const guiExeAsset = res.data.assets.filter((asset) => asset.name === 'UCP3-GUI.exe')[0];
+
+        setGuiUpdateStatus('Downloading newer version...');
+      const response = await fetch(guiExeAsset.url, {
+        method: 'GET',
+        responseType: ResponseType.Binary, // important, because we are downloading inside a browser
+        headers:{
+          Accept: 'application/octet-stream',
+          Authorization: 'Basic ' + window.btoa('ucp3-machine' + ":" + UCP3_REPOS_MACHINE_TOKEN)
+        }
+      });
+
+      if (response.ok) {
+        setGuiUpdateStatus('Writing file...');
+        await writeBinaryFile(downloadPath, response.data as BinaryFileContents);
+      } else {
+        setGuiUpdateStatus('Failed...');
+        window.alert('Failed to download GUI update.');
+        return;
+      }
+      
+      setGuiUpdateStatus(`New version downloaded to: ${downloadPath}`);
+      console.log(downloadPath);
+
+      // await dialog.message('New GUI version downloaded', { title: `New GUI exe downloaded to: ${downloadPath}`, type: 'info'});
+      } else {
+        setGuiUpdateStatus('');
+      }
+    } else {
+      await dialog.message('GUI is up to date', { title: 'Up to date!', type: 'info'});
+    }
+
+    
   },
 
   async checkForUCP3Updates(gameFolder: string) {

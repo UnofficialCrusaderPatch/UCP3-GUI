@@ -18,8 +18,11 @@ import { useReducer } from 'react';
 import { Extension } from '../../common/config/common';
 import ExtensionDependencySolver from '../../common/config/ExtensionDependencySolver';
 
+import './ExtensionManager.css';
+
 function renderExtension(
   ext: Extension,
+  active: boolean,
   buttonText: string,
   clickCallback: (event: unknown) => void,
   revDeps: string[]
@@ -63,7 +66,12 @@ function renderExtension(
             </Col>
           </Row>
         </Col>
+        <Col className="col-auto arrow up mx-1" disabled={!active}>
+        </Col>
+        <Col className="col-auto arrow down mx-1" disabled={!active}>
+        </Col>
         <Col className="col-auto">
+
           <OverlayTrigger placement="left" overlay={renderTooltip}>
             <div>
               <Button
@@ -117,6 +125,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   const eUI = extensionsState.installedExtensions.map((ext) => {
     return renderExtension(
       ext,
+      false,
       'Activate',
       (event) => {
         // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
@@ -163,6 +172,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   const activated = extensionsState.activeExtensions.map((ext) => {
     return renderExtension(
       ext,
+      true,
       'Deactivate',
       (event) => {
         const relevantExtensions = new Set(

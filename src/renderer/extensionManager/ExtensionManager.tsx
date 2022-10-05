@@ -44,7 +44,8 @@ function renderExtension(
         </Tooltip>
       );
     }
-    return null;
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    return <></>;
   };
 
   const arrows = active ? (
@@ -64,7 +65,10 @@ function renderExtension(
         }}
       />
     </>
-  ) : null;
+  ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <></>
+  );
 
   // my-auto is also possible instead of align-items-center
   return (

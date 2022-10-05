@@ -8,18 +8,18 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import {
   Button,
   Col,
-  Div,
   Container,
   Form,
   ListGroup,
   Row,
   Tooltip,
 } from 'react-bootstrap';
-import { useReducer } from 'react';
+import { useReducer, useContext } from 'react';
 import { Extension } from '../../common/config/common';
 import ExtensionDependencySolver from '../../common/config/ExtensionDependencySolver';
 
 import './ExtensionManager.css';
+import { GlobalState } from '../GlobalState';
 
 function renderExtension(
   ext: Extension,
@@ -52,22 +52,22 @@ function renderExtension(
   const arrows = active ? (
     <>
       <Col
-        className="col-auto"
+        className="col-auto arrow-container"
         disabled={!movability.up}
         onClick={() => {
           if (movability.up) moveCallback({ name: ext.name, type: 'up' });
         }}
       >
-        <Div className="arrow up" disabled={!movability.up} />
+        <div className="arrow up" />
       </Col>
       <Col
-        className="col-auto"
+        className="col-auto arrow-container"
         disabled={!movability.down}
         onClick={() => {
           if (movability.down) moveCallback({ name: ext.name, type: 'down' });
         }}
       >
-        <Div className="arrow down" disabled={!movability.down} />
+        <div className="arrow down" />
       </Col>
     </>
   ) : (
@@ -117,6 +117,7 @@ function renderExtension(
 
 export default function ExtensionManager(args: { extensions: Extension[] }) {
   const { extensions } = args;
+  const { setActiveExtensions } = useContext(GlobalState);
 
   type State = {
     allExtensions: Extension[];
@@ -148,10 +149,11 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   );
 
   const [extensionsState, setExtensionsState] = useReducer(
-    (oldState: State, newState: unknown): State => ({
-      ...oldState,
-      ...(newState as object),
-    }),
+    (oldState: State, newState: unknown): State => {
+      const state = { ...oldState, ...(newState as object) };
+      setActiveExtensions(state.activeExtensions);
+      return state;
+    },
     {
       allExtensions: [...extensions],
       activeExtensions: [],

@@ -23,8 +23,10 @@ import './ExtensionManager.css';
 function renderExtension(
   ext: Extension,
   active: boolean,
+  movability: { up: boolean; down: boolean },
   buttonText: string,
   clickCallback: (event: unknown) => void,
+  moveCallback: (event: { name: string, type: "up" | "down" }) => void,
   revDeps: string[]
 ) {
   const { name, version, author } = ext.definition;
@@ -45,6 +47,13 @@ function renderExtension(
     return <></>;
   };
 
+  const arrows = active ? (<>
+        <Col className="col-auto arrow up mx-1" disabled={!movability.up} onClick={() => {if (movability.up) moveCallback({ name: ext.name, type: "up"} )}}>
+        </Col>
+        <Col className="col-auto arrow down mx-1" disabled={!movability.down} onClick={() => {if (movability.down) moveCallback({ name: ext.name, type: "down" } )}}>
+        </Col>
+  </>) : (<></>);
+
   // my-auto is also possible instead of align-items-center
   return (
     <ListGroup.Item
@@ -53,22 +62,19 @@ function renderExtension(
       className="text-light border-secondary container border-bottom p-1"
     >
       <Row className="align-items-center">
+      {arrows}
         <Col>
           <Row>
             <Col className="col-3">
               <span className="mx-2">{name}</span>
-              <span className="mx-2 text-secondary">-</span>
             </Col>
             <Col>
+              <span className="mx-2 text-secondary">-</span>
               <span className="mx-2" style={{ fontSize: 'smaller' }}>
                 {version}
               </span>
             </Col>
           </Row>
-        </Col>
-        <Col className="col-auto arrow up mx-1" disabled={!active}>
-        </Col>
-        <Col className="col-auto arrow down mx-1" disabled={!active}>
         </Col>
         <Col className="col-auto">
 
@@ -108,6 +114,10 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
       eds.reverseDependenciesFor(e.name),
     ])
   );
+  const depsFor = Object.fromEntries(
+    extensions.map((e: Extension) => [e.name, eds.dependenciesFor(e.name).flat().filter((s) => s !== e.name)])
+  )
+  const revExtensions = Object.fromEntries(extensions.map((ext: Extension) => [ext.name, ext]));
 
   const [extensionsState, setExtensionsState] = useReducer(
     (oldState: State, newState: unknown): State => {
@@ -126,6 +136,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
     return renderExtension(
       ext,
       false,
+      { up: false, down: false },
       'Activate',
       (event) => {
         // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
@@ -134,20 +145,23 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
 
         const ies: Extension[] = impliedExtensions
           .map((v: string) => {
-            const i = extensions.map((e) => e.name).indexOf(v);
-            if (i !== -1) {
-              return extensions[i];
+            if (revExtensions[v] !== undefined) {
+              return revExtensions[v];
             }
             throw new Error();
           })
           .filter((e: Extension) => impliedExtensions.indexOf(e.name) !== -1)
           .reverse();
 
-        const remainder = extensionsState.activeExtensions.filter(
+        const remainder = extensionsState.activeExtensions.flat().filter(
           (e: Extension) => ies.indexOf(e) === -1
         );
 
         const final = [...ies, ...remainder];
+
+        const localEDS = new ExtensionDependencySolver(final);
+        console.log(localEDS.solve());
+        const order = localEDS.solve().reverse().map((a: string[]) => a.map((v: string) => revExtensions[v]));
 
         setExtensionsState({
           activatedExtensions: [...extensionsState.activatedExtensions, ext],
@@ -160,19 +174,27 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
           ),
         });
       },
+      (event: { type: "up" | "down" }) => {
+
+      },
       extensionsState.reverseDependencies[ext.name].filter(
         (e: string) =>
-          extensionsState.activeExtensions
+          extensionsState.activeExtensions.flat()
             .map((ex: Extension) => ex.name)
             .indexOf(e) !== -1
       )
     );
   });
 
-  const activated = extensionsState.activeExtensions.map((ext) => {
+  const activated = extensionsState.activeExtensions.map((ext, index, arr) => {
+    const movability = {
+      up: (index > 0) && revDeps[ext.name].indexOf(arr[index - 1].name) === -1,
+      down: (index < arr.length - 1) && depsFor[ext.name].indexOf(arr[index + 1].name) === -1,
+    };
     return renderExtension(
       ext,
       true,
+      movability,
       'Deactivate',
       (event) => {
         const relevantExtensions = new Set(
@@ -197,6 +219,19 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
             .filter((e: Extension) => !relevantExtensions.has(e.name))
             .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name)),
         } as unknown as State);
+      },
+      (event: { name: string, type: "up" | "down" }) => {
+        const { name, type } = event;
+        const index = extensionsState.activeExtensions.map((e) => e.name).indexOf(name);
+        const element = extensionsState.activeExtensions[index];
+        let newIndex = type === "up" ? index - 1 : index + 1;
+        newIndex = newIndex < 0 ? 0 : newIndex;
+        newIndex = newIndex > extensionsState.activeExtensions.length - 1 ? extensionsState.activeExtensions.length - 1 : newIndex;
+        extensionsState.activeExtensions.splice(index, 1);
+        extensionsState.activeExtensions.splice(newIndex, 0, element);
+        setExtensionsState({
+          activeExtensions: extensionsState.activeExtensions
+        });
       },
       extensionsState.reverseDependencies[ext.name].filter(
         (e: string) =>

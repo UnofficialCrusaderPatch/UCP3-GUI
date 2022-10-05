@@ -26,6 +26,6 @@
   -webkit-transform: rotate(45deg);
 }
 
-.arrow:disabled {
+.arrow[disabled] {
   border-color: var(--bs-secondary);
 }

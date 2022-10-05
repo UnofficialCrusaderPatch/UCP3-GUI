@@ -29,9 +29,9 @@ type ArrayReducerArgs<Type> = Type[];
 type ArrayReducerState<Type> = Type[];
 
 function ArrayReducer<Type>() {
-  return (state: ArrayReducerState<Type>, newState: ArrayReducerArgs<Type>) => {
-    return [...newState];
-  };
+  return (state: ArrayReducerState<Type>, newState: ArrayReducerArgs<Type>) => [
+    ...newState,
+  ];
 }
 
 const configurationReducer = KeyValueReducer<unknown>();
@@ -93,12 +93,6 @@ export {
   configurationWarningReducer,
   activeExtensionsReducer,
   configurationDefaultsReducer,
-
   KeyValueReducer,
-}; 
-export type {
-  GlobalStateType,
-  Warning,
-  UIDefinition
 };
-
+export type { GlobalStateType, Warning, UIDefinition };

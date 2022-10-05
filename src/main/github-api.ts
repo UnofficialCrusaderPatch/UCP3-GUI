@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 type GitReleaseAttachment = {
   url: string;
@@ -34,13 +34,14 @@ async function getLatestUCP3Release() {
     tag: latestRelease.tag_name,
     url: latestRelease.url,
     date: latestRelease.created_at,
-    attachments: latestRelease.assets.map((asset: any) => {
-      return {
-        fileName: asset.name,
-        url: asset.url,
-        downloadUrl: asset.browser_download_url,
-      } as GitReleaseAttachment;
-    }),
+    attachments: latestRelease.assets.map(
+      (asset: any) =>
+        ({
+          fileName: asset.name,
+          url: asset.url,
+          downloadUrl: asset.browser_download_url,
+        } as GitReleaseAttachment)
+    ),
   } as GitRelease;
 }
 

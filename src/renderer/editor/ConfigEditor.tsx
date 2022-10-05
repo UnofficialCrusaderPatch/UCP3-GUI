@@ -41,7 +41,10 @@ function saveConfig(
   ucpBackEnd.saveUCPConfig(finalConfig, folder);
 }
 
-export default function ConfigEditor(args: { readonly: boolean, gameFolder: string }) {
+export default function ConfigEditor(args: {
+  readonly: boolean;
+  gameFolder: string;
+}) {
   const { readonly, gameFolder } = args;
   const {
     uiDefinition,

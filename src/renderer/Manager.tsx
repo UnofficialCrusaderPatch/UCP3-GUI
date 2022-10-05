@@ -12,6 +12,7 @@ import {
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import { useReducer, useState, createContext, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ConfigEditor from './editor/ConfigEditor';
 
 import { DisplayConfigElement } from './editor/factory/UIElements';
@@ -28,7 +29,6 @@ import {
 } from './GlobalState';
 
 import { ucpBackEnd } from './fakeBackend';
-import { useSearchParams } from 'react-router-dom';
 import { Extension } from '../common/config/common';
 
 function getConfigDefaults(yml: unknown[]) {
@@ -64,7 +64,7 @@ let latestUCP3: unknown;
 let extensions: Extension[] = []; // which extension type?
 
 export default function Manager() {
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
 
   const warningDefaults = {
@@ -116,9 +116,7 @@ export default function Manager() {
   const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
     'Download and install the latest UCP version'
   );
-  const [guiUpdateStatus, setGuiUpdateStatus] = useState(
-    ''
-  );
+  const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
   const [initDone, setInitState] = useState(false);
   useEffect(() => {
@@ -127,7 +125,7 @@ export default function Manager() {
       if (currentFolder.length > 0) {
         uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
         const defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
-      
+
         ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
         if (ucpVersion.major !== undefined) isUCP3Installed = true;
         setConfiguration({
@@ -142,7 +140,9 @@ export default function Manager() {
 
       // TODO: currently only set on initial render and folder selection
       // TODO: resolve this type badness
-      extensions = (await ucpBackEnd.getExtensions(currentFolder) as unknown) as Extension[];
+      extensions = (await ucpBackEnd.getExtensions(
+        currentFolder
+      )) as unknown as Extension[];
       setInitState(true);
     }
     prepareValues();
@@ -153,6 +153,7 @@ export default function Manager() {
 
   return (
     <GlobalState.Provider
+      // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{
         extensions,
         configurationWarnings,
@@ -192,8 +193,9 @@ export default function Manager() {
                   className="btn btn-primary"
                   onClick={async (event) => {
                     setCheckForUpdatesButtonText('Updating...');
-                    const updateResult =
-                      await ucpBackEnd.checkForUCP3Updates(currentFolder);
+                    const updateResult = await ucpBackEnd.checkForUCP3Updates(
+                      currentFolder
+                    );
                     if (
                       updateResult.update === true &&
                       updateResult.installed === true
@@ -214,16 +216,19 @@ export default function Manager() {
                   type="button"
                   className="btn btn-primary"
                   onClick={async () => {
-                    const zipFilePath =
-                      await ucpBackEnd.openFileDialog(currentFolder, [
+                    const zipFilePath = await ucpBackEnd.openFileDialog(
+                      currentFolder,
+                      [
                         { name: 'Zip files', extensions: ['zip'] },
                         { name: 'All files', extensions: ['*'] },
-                      ]);
+                      ]
+                    );
 
                     if (zipFilePath === '') return;
 
                     await ucpBackEnd.installUCPFromZip(
-                      zipFilePath, currentFolder
+                      zipFilePath,
+                      currentFolder
                     );
 
                     setShow(true);
@@ -260,14 +265,14 @@ export default function Manager() {
                 </button>
               </div>
               <div className="m-3">
-                <Button onClick={(event) => {
-                  ucpBackEnd.checkForGUIUpdates(setGuiUpdateStatus);
-                }}>
+                <Button
+                  onClick={(event) => {
+                    ucpBackEnd.checkForGUIUpdates(setGuiUpdateStatus);
+                  }}
+                >
                   Check for GUI updates
                 </Button>
-                <span className="mx-1">
-                  {guiUpdateStatus}
-                </span>
+                <span className="mx-1">{guiUpdateStatus}</span>
               </div>
               <Form className="m-3 d-none">
                 <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
@@ -281,7 +286,7 @@ export default function Manager() {
               title="User Config"
               className="tabpanel-config"
             >
-              <ConfigEditor readonly={false} gameFolder={currentFolder}/>
+              <ConfigEditor readonly={false} gameFolder={currentFolder} />
             </Tab>
           </Tabs>
 

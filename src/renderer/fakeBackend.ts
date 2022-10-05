@@ -1,49 +1,66 @@
 // This file fake the backend calls. They become synchronous, though.
 
-import { appDir, dataDir, desktopDir, downloadDir, executableDir, resolve } from '@tauri-apps/api/path';
-import { readTextFile, writeTextFile, createDir, readBinaryFile, writeBinaryFile, copyFile, BinaryFileContents } from '@tauri-apps/api/fs';
-import { proxyFsExists } from './util';
-import { open as dialogOpen, save as dialogSave, ask as dialogAsk } from '@tauri-apps/api/dialog';
-import { WebviewWindow } from '@tauri-apps/api/window'
+import {
+  appDir,
+  dataDir,
+  desktopDir,
+  downloadDir,
+  executableDir,
+  resolve,
+  normalize,
+} from '@tauri-apps/api/path';
+import type { BinaryFileContents } from '@tauri-apps/api/fs';
+import {
+  readTextFile,
+  writeTextFile,
+  createDir,
+  readBinaryFile,
+  writeBinaryFile,
+  copyFile,
+} from '@tauri-apps/api/fs';
+import {
+  open as dialogOpen,
+  save as dialogSave,
+  ask as dialogAsk,
+} from '@tauri-apps/api/dialog';
+import { WebviewWindow } from '@tauri-apps/api/window';
 import { getName, getVersion } from '@tauri-apps/api/app';
 
 import yaml from 'yaml';
 
-import { Discovery } from '../main/framework/discovery';
-import { UIDefinition } from './GlobalState';
-
-import { Extension } from '../common/config/common';
-
-import {
-  checkForLatestUCP3DevReleaseUpdate,
-  UCP3_REPOS_MACHINE_TOKEN,
-} from '../main/versions/github';
-
 import { fetch, ResponseType } from '@tauri-apps/api/http';
 
 import JSZip from 'jszip';
-import { normalize } from '@tauri-apps/api/path';
 import axios from 'axios';
 
 import semver from 'semver';
 import { dialog } from '@tauri-apps/api';
+import {
+  checkForLatestUCP3DevReleaseUpdate,
+  UCP3_REPOS_MACHINE_TOKEN,
+} from '../main/versions/github';
+import { Extension } from '../common/config/common';
+import { UIDefinition } from './GlobalState';
+import { Discovery } from '../main/framework/discovery';
+import { proxyFsExists } from './util';
 
 // wrap in closure to avoid top level await
-const getBaseFolder = (function() {
+const getBaseFolder = (function () {
   let baseFolder: string | null = null;
   return async () => {
     if (baseFolder) {
       return baseFolder;
     }
     baseFolder = `${await dataDir()}/UnofficialCrusaderPatch3/`;
-    if (!(await proxyFsExists(baseFolder))) { // apparently a bug of the typing, actually returns boolean
+    if (!(await proxyFsExists(baseFolder))) {
+      // apparently a bug of the typing, actually returns boolean
       createDir(baseFolder);
     }
     return baseFolder;
   };
 })();
 
-const exeFolder = (function() {
+const exeFolder = (function () {
   let f: string | null = null;
   return async () => {
     if (f) {
@@ -52,21 +69,19 @@ const exeFolder = (function() {
     f = `${await normalize('.')}`;
     console.log(`Executable path: ${f}`);
     return f;
-  }; 
+  };
 })();
 
 const extensionsCache: { [key: string]: Extension[] } = {};
 const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
+// eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
-
   // Once the main window boots, it starts up a second window which launches the most recent game folder. It needs to know the most recent game folder.
   async getRecentGameFolders() {
     const fname = `${await getBaseFolder()}recent.json`;
     if (await proxyFsExists(fname)) {
-      const recentjson = JSON.parse(
-        await readTextFile(fname)
-      );
+      const recentjson = JSON.parse(await readTextFile(fname));
       for (let i = 0; i < recentjson.length; i += 1) {
         recentjson[i].index = i;
       }
@@ -79,7 +94,7 @@ export const ucpBackEnd = {
   },
 
   getGameFolderPath(urlParams: URLSearchParams) {
-    return urlParams.get("directory") || "";
+    return urlParams.get('directory') || '';
   },
 
   // create an editor window for a game folder
@@ -89,13 +104,12 @@ export const ucpBackEnd = {
       url: `index.html?window=editor&directory=${gameFolder}`,
       width: 1024,
       height: 768,
-      maximized: true
+      maximized: true,
     });
     webview.setTitle(`${await getName()} - ${await getVersion()}`);
   },
 
   async checkForGUIUpdates(setGuiUpdateStatus: (newText: string) => void) {
-
     setGuiUpdateStatus('Contacting GitHub...');
     const res: {
       data: {
@@ -106,41 +120,49 @@ export const ucpBackEnd = {
           id: string;
         }[];
       };
-    } = await axios
-    .get(`https://api.github.com/repos/UnofficialCrusaderPatch/UCP3-GUI/releases/tags/latest-tauri`, {
-      auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
-    });
+    } = await axios.get(
+      `https://api.github.com/repos/UnofficialCrusaderPatch/UCP3-GUI/releases/tags/latest-tauri`,
+      {
+        auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
+      }
+    );
 
-    const latestJSONAsset = res.data.assets.filter((asset) => asset.name === 'latest.json')[0];
+    const latestJSONAsset = res.data.assets.filter(
+      (asset) => asset.name === 'latest.json'
+    )[0];
 
     setGuiUpdateStatus('Fetching latest version info...');
     const latestJSON: {
       version: string;
-        pub_date: string;
-        notes: string;
-        platforms: {
-          'windows-x86_64': {
-            url: string;
-            signature: string;
-          }
+      pub_date: string;
+      notes: string;
+      platforms: {
+        'windows-x86_64': {
+          url: string;
+          signature: string;
         };
-    } = (await fetch(latestJSONAsset.url, {
-      method: 'GET',
-      responseType: ResponseType.JSON,
-      headers:{
-        Accept: 'application/octet-stream',
-        Authorization: 'Basic ' + window.btoa('ucp3-machine' + ":" + UCP3_REPOS_MACHINE_TOKEN)
-      }
-    })).data as {
+      };
+    } = (
+      await fetch(latestJSONAsset.url, {
+        method: 'GET',
+        responseType: ResponseType.JSON,
+        headers: {
+          Accept: 'application/octet-stream',
+          Authorization: `Basic ${window.btoa(
+            `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
+          )}`,
+        },
+      })
+    ).data as {
       version: string;
-        pub_date: string;
-        notes: string;
-        platforms: {
-          'windows-x86_64': {
-            url: string;
-            signature: string;
-          }
+      pub_date: string;
+      notes: string;
+      platforms: {
+        'windows-x86_64': {
+          url: string;
+          signature: string;
         };
+      };
     };
 
     console.log(latestJSON);
@@ -153,47 +175,55 @@ export const ucpBackEnd = {
       );
 
       if (dialogResult === true) {
-        const downloadPath = `${await downloadDir()}UCP3-GUI-${latestJSON.version}.exe`;
-        const guiExeAsset = res.data.assets.filter((asset) => asset.name === 'UCP3-GUI.exe')[0];
+        const downloadPath = `${await downloadDir()}UCP3-GUI-${
+          latestJSON.version
+        }.exe`;
+        const guiExeAsset = res.data.assets.filter(
+          (asset) => asset.name === 'UCP3-GUI.exe'
+        )[0];
 
         setGuiUpdateStatus('Downloading newer version...');
-      const response = await fetch(guiExeAsset.url, {
-        method: 'GET',
-        responseType: ResponseType.Binary, // important, because we are downloading inside a browser
-        headers:{
-          Accept: 'application/octet-stream',
-          Authorization: 'Basic ' + window.btoa('ucp3-machine' + ":" + UCP3_REPOS_MACHINE_TOKEN)
+        const response = await fetch(guiExeAsset.url, {
+          method: 'GET',
+          responseType: ResponseType.Binary, // important, because we are downloading inside a browser
+          headers: {
+            Accept: 'application/octet-stream',
+            Authorization: `Basic ${window.btoa(
+              `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
+            )}`,
+          },
+        });
+
+        if (response.ok) {
+          setGuiUpdateStatus('Writing file...');
+          await writeBinaryFile(
+            downloadPath,
+            response.data as BinaryFileContents
+          );
+        } else {
+          setGuiUpdateStatus('Failed...');
+          window.alert('Failed to download GUI update.');
+          return;
         }
-      });
 
-      if (response.ok) {
-        setGuiUpdateStatus('Writing file...');
-        await writeBinaryFile(downloadPath, response.data as BinaryFileContents);
-      } else {
-        setGuiUpdateStatus('Failed...');
-        window.alert('Failed to download GUI update.');
-        return;
-      }
-      
-      setGuiUpdateStatus(`New version downloaded to: ${downloadPath}`);
-      console.log(downloadPath);
+        setGuiUpdateStatus(`New version downloaded to: ${downloadPath}`);
+        console.log(downloadPath);
 
-      // await dialog.message('New GUI version downloaded', { title: `New GUI exe downloaded to: ${downloadPath}`, type: 'info'});
+        // await dialog.message('New GUI version downloaded', { title: `New GUI exe downloaded to: ${downloadPath}`, type: 'info'});
       } else {
         setGuiUpdateStatus('');
       }
     } else {
-      await dialog.message('GUI is up to date', { title: 'Up to date!', type: 'info'});
+      await dialog.message('GUI is up to date', {
+        title: 'Up to date!',
+        type: 'info',
+      });
     }
-
-    
   },
 
   async checkForUCP3Updates(gameFolder: string) {
-    const { sha } = await proxyFsExists(`${gameFolder}/ucp-version.yml`)
-      ? yaml.parse(
-          await readTextFile(`${gameFolder}/ucp-version.yml`)
-        )
+    const { sha } = (await proxyFsExists(`${gameFolder}/ucp-version.yml`))
+      ? yaml.parse(await readTextFile(`${gameFolder}/ucp-version.yml`))
       : { sha: '!' };
     const result = await checkForLatestUCP3DevReleaseUpdate(sha);
 
@@ -203,12 +233,12 @@ export const ucpBackEnd = {
         `Do you want to download the latest UCP3 version?\n\n${result.file}`,
         { title: 'Confirm', type: 'info' }
       );
-  
+
       if (dialogResult !== true) {
         window.alert('cancelled by user');
         return {
           update: false,
-          file: "",
+          file: '',
           downloaded: false,
           installed: false,
         };
@@ -218,26 +248,34 @@ export const ucpBackEnd = {
       const response = await fetch(result.downloadUrl, {
         method: 'GET',
         responseType: ResponseType.Binary, // important, because we are downloading inside a browser
-        headers:{
+        headers: {
           Accept: 'application/octet-stream',
-          Authorization: 'Basic ' + window.btoa('ucp3-machine' + ":" + UCP3_REPOS_MACHINE_TOKEN)
-        }
+          Authorization: `Basic ${window.btoa(
+            `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
+          )}`,
+        },
       });
 
       if (response.ok) {
-        await writeBinaryFile(downloadPath, response.data as BinaryFileContents);
+        await writeBinaryFile(
+          downloadPath,
+          response.data as BinaryFileContents
+        );
       } else {
         window.alert('Failed to download UCP3 update.');
         return {
           update: false,
-          file: "",
+          file: '',
           downloaded: false,
           installed: false,
         };
       }
-      
+
       console.log(downloadPath);
-      const installResult = await this.installUCPFromZip(downloadPath, gameFolder);
+      const installResult = await this.installUCPFromZip(
+        downloadPath,
+        gameFolder
+      );
 
       return {
         update: true,
@@ -279,20 +317,23 @@ export const ucpBackEnd = {
   },
 
   async getExtensions(gameFolder: string) {
-    return await Discovery.discoverExtensions(gameFolder);
+    return Discovery.discoverExtensions(gameFolder);
     // Premature optimization is the root of all evil.
     if (extensionsCache[gameFolder] === undefined) {
-      extensionsCache[gameFolder] = await Discovery.discoverExtensions(gameFolder);
+      extensionsCache[gameFolder] = await Discovery.discoverExtensions(
+        gameFolder
+      );
     }
     return extensionsCache[gameFolder];
   },
 
   // Get yaml definition
-  async getYamlDefinition(gameFolder: string) : Promise<UIDefinition> {
+  async getYamlDefinition(gameFolder: string): Promise<UIDefinition> {
     if (uiCache[gameFolder] === undefined) {
       if (extensionsCache[gameFolder] === undefined) {
-        extensionsCache[gameFolder] =
-          await Discovery.discoverExtensions(gameFolder);
+        extensionsCache[gameFolder] = await Discovery.discoverExtensions(
+          gameFolder
+        );
       }
       const exts = extensionsCache[gameFolder];
       const uiCollection: any[] = [];
@@ -340,15 +381,18 @@ export const ucpBackEnd = {
     return uiCache[gameFolder] as UIDefinition; // this could be prettier with the type checking
   },
 
-  async openFileDialog(gameFolder: string, filters: { name: string; extensions: string[] }[]) {
+  async openFileDialog(
+    gameFolder: string,
+    filters: { name: string; extensions: string[] }[]
+  ) {
     const result = await dialogOpen({
       directory: false,
       multiple: false,
       defaultPath: gameFolder,
-      filters: filters || [{ name: 'All Files', extensions: ['*'] }]
+      filters: filters || [{ name: 'All Files', extensions: ['*'] }],
     });
 
-    if (result === null){
+    if (result === null) {
       window.alert('Opening: Operation cancelled');
       return '';
     }
@@ -361,7 +405,7 @@ export const ucpBackEnd = {
       multiple: false,
       defaultPath: gameFolder,
     });
-    return result !== null ? result as string : undefined;
+    return result !== null ? (result as string) : undefined;
   },
 
   async installUCPFromZip(zipFilePath: string, gameFolder: string) {
@@ -382,19 +426,29 @@ export const ucpBackEnd = {
     const data = await readBinaryFile(zipFilePath);
     const zip = await JSZip.loadAsync(data);
 
-    const listOfDir: Array<JSZip.JSZipObject> = []
-    const listOfFiles: Array<JSZip.JSZipObject> = []
-    zip. forEach((relativePath: string, file: JSZip.JSZipObject) => {
+    const listOfDir: Array<JSZip.JSZipObject> = [];
+    const listOfFiles: Array<JSZip.JSZipObject> = [];
+    zip.forEach((relativePath: string, file: JSZip.JSZipObject) => {
       (file.dir ? listOfDir : listOfFiles).push(file);
     });
-    await Promise.all(listOfDir.map((dir) => createDir(`${gameFolder}/${dir.name}`, {recursive: true})));
-    await Promise.all(listOfFiles.map(async (file) => {
-      const data = await file.async("uint8array");
-      await writeBinaryFile(`${gameFolder}/${file.name}`, data);
-    }));
+    // https://github.com/tauri-apps/tauri-docs/issues/696
+    await Promise.all(
+      listOfDir.map((dir) =>
+        createDir(`${gameFolder}/${dir.name}`, { recursive: true })
+      )
+    );
+    await Promise.all(
+      listOfFiles.map(async (file) => {
+        const fileData = await file.async('uint8array');
+        await writeBinaryFile(`${gameFolder}/${file.name}`, fileData);
+      })
+    );
     console.log(`Extracted ${listOfFiles.length} entries`);
 
-    await copyFile(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
+    await copyFile(
+      `${gameFolder}/binkw32_ucp.dll`,
+      `${gameFolder}/binkw32.dll`
+    );
 
     return true;
   },
@@ -407,10 +461,10 @@ export const ucpBackEnd = {
       filters: [
         { name: 'All Files', extensions: ['*'] },
         { name: 'Config files', extensions: ['yml', 'yaml'] },
-      ]
+      ],
     });
 
-    if (result === null){
+    if (result === null) {
       window.alert('Opening: Operation cancelled');
       return {};
     }
@@ -456,7 +510,7 @@ export const ucpBackEnd = {
     let finalFilePath = filePath;
     if (filePath === undefined || filePath === '') {
       const result = await dialogSave({
-        filters: [{ name: 'All Files', extensions: ['*'] }]
+        filters: [{ name: 'All Files', extensions: ['*'] }],
       });
       if (result === null || result === undefined) {
         window.alert('Saving: Operation cancelled');
@@ -488,9 +542,7 @@ export const ucpBackEnd = {
         const extName = parts[0];
 
         const ext = extensionsCache[Object.keys(extensionsCache)[0]].filter(
-          (ex) => {
-            return ex.name === extName;
-          }
+          (ex) => ex.name === extName
         )[0];
 
         const type = ext.type === 'module' ? 'modules' : 'plugins';
@@ -517,5 +569,5 @@ export const ucpBackEnd = {
       });
 
     await writeTextFile(finalFilePath, yaml.stringify(finalConfig));
-  }
+  },
 };

@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file */
-const MATCHER = new RegExp('^([a-zA-Z0-9-_]+)\\s*([<>=]+)\\s*([0-9\\.]+)$');
-const MATCHER_SIMPLE = new RegExp('^([a-zA-Z0-9-_]+)$');
+const MATCHER = /^([a-zA-Z0-9-_]+)\s*([<>=]+)\s*([0-9.]+)$/;
+const MATCHER_SIMPLE = /^([a-zA-Z0-9-_]+)$/;
 
-const VERSION_MATCHER = new RegExp('([0-9]+)\\.([0-9]+)\\.([0-9]+)');
+const VERSION_MATCHER = /([0-9]+)\.([0-9]+)\.([0-9]+)/;
 
 class Version {
   major: number;

@@ -17,6 +17,7 @@ function collectOptions(
       if (colURL.indexOf(`${extensionName}.`) !== 0) {
         colURL = `${extensionName}.${colURL}`;
       }
+      // eslint-disable-next-line no-param-reassign
       collection[colURL] = obj;
     } else {
       Object.keys(obj).forEach((key: string) => {
@@ -40,6 +41,7 @@ function collectConfigs(
       if (collection[url] !== undefined) {
         throw new Error(`url already has a value: ${url}`);
       }
+      // eslint-disable-next-line no-param-reassign
       collection[url] = obj;
     } else {
       Object.keys(obj).forEach((key) => {

@@ -1,6 +1,5 @@
 import { useEffect, useReducer, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
@@ -8,31 +7,36 @@ import { KeyValueReducer } from './GlobalState';
 
 const r = Math.floor(Math.random() * 10);
 
-const Landing = () => {
+function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState('');
   const [mostRecentGameFolder, setMostRecentGameFolder] = useReducer(
     KeyValueReducer<unknown>(),
-    { index: 0, folder: "", date: "" }
+    { index: 0, folder: '', date: '' }
   );
 
   useEffect(() => {
     (async () => {
-      const recentGameFolders: { index: number; folder: string; date: string }[] =
-      await ucpBackEnd.getRecentGameFolders();
-    
+      const recentGameFolders: {
+        index: number;
+        folder: string;
+        date: string;
+      }[] = await ucpBackEnd.getRecentGameFolders();
+
       const receivedRecentFolders = recentGameFolders.sort(
-        (a: { folder: string; date: string }, b: { folder: string; date: string }) =>
-          b.date.localeCompare(a.date)
+        (
+          a: { folder: string; date: string },
+          b: { folder: string; date: string }
+        ) => b.date.localeCompare(a.date)
       )[0];
       if (receivedRecentFolders) {
         setMostRecentGameFolder({
-          type: "reset",
-          value: receivedRecentFolders
+          type: 'reset',
+          value: receivedRecentFolders,
         });
-      };
+      }
     })();
-  }, [])
+  }, []);
 
   return (
     <div className="landing-app">
@@ -54,8 +58,9 @@ const Landing = () => {
             type="button"
             className="btn btn-primary"
             onClick={async () => {
-              const folder =
-                await ucpBackEnd.openFolderDialog(mostRecentGameFolder.folder as string);
+              const folder = await ucpBackEnd.openFolderDialog(
+                mostRecentGameFolder.folder as string
+              );
               if (folder !== undefined && folder.length > 0) {
                 setBrowseResultState(folder);
                 setLaunchButtonState(true);
@@ -84,7 +89,7 @@ const Landing = () => {
       </div>
     </div>
   );
-};
+}
 
 export default function App() {
   return <Landing />;

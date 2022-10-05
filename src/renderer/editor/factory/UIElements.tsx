@@ -47,12 +47,10 @@ function formatToolTip(tooltip: string, url: string) {
   return `${tooltip}\n\nurl:${url}`;
 }
 
-const renderTooltip = (props: { [key: string]: unknown }) => {
-  return (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Tooltip {...(props as object)}>{props.tooltipText as string}</Tooltip>
-  );
-};
+const renderTooltip = (props: { [key: string]: unknown }) => (
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  <Tooltip {...(props as object)}>{props.tooltipText as string}</Tooltip>
+);
 
 const UIFactory = {
   ConfigWarning(args: { text: string; level: string }) {
@@ -413,18 +411,16 @@ const UIFactory = {
     );
 
     const childKeys = Object.keys(contents.sections);
-    const children = childKeys.map((key) => {
-      return (
-        <UIFactory.CreateSection
-          key={`${identifier}-${key}`}
-          level={level + 1}
-          header={key}
-          contents={contents.sections[key]}
-          identifier={`${identifier}-${key}`}
-          readonly={readonly}
-        />
-      );
-    });
+    const children = childKeys.map((key) => (
+      <UIFactory.CreateSection
+        key={`${identifier}-${key}`}
+        level={level + 1}
+        header={key}
+        contents={contents.sections[key]}
+        identifier={`${identifier}-${key}`}
+        readonly={readonly}
+      />
+    ));
 
     return (
       // ${level / 4}rem
@@ -438,51 +434,47 @@ const UIFactory = {
     );
   },
 
+  NavSection(navArgs: {
+    subspec: SectionDescription;
+    header: string;
+    href: string;
+    depth: number;
+  }) {
+    const { subspec, header, href, depth } = navArgs;
+    const iClassName = `nav nav-pills flex-column`;
+    const style = { marginLeft: `${depth / 2}rem` };
+    return (
+      <>
+        <a className="nav-link" href={href}>
+          {header}
+        </a>
+        <nav className={iClassName} style={style}>
+          {Object.keys(subspec.sections).map((key) => (
+            <UIFactory.NavSection
+              key={`${href}-${key}`}
+              subspec={subspec.sections[key]}
+              header={key}
+              href={`${href}-${key}`}
+              depth={depth + 1}
+            />
+          ))}
+        </nav>
+      </>
+    );
+  },
+
   CreateSectionsNav(args: { spec: SectionDescription }) {
     const { spec } = args;
 
-    function NavSection(navArgs: {
-      subspec: SectionDescription;
-      header: string;
-      href: string;
-      depth: number;
-    }) {
-      const { subspec, header, href, depth } = navArgs;
-      const iClassName = `nav nav-pills flex-column`;
-      const style = { marginLeft: `${depth / 2}rem` };
-      return (
-        <>
-          <a className="nav-link" href={href}>
-            {header}
-          </a>
-          <nav className={iClassName} style={style}>
-            {Object.keys(subspec.sections).map((key) => {
-              return (
-                <NavSection
-                  key={`${href}-${key}`}
-                  subspec={subspec.sections[key]}
-                  header={key}
-                  href={`${href}-${key}`}
-                  depth={depth + 1}
-                />
-              );
-            })}
-          </nav>
-        </>
-      );
-    }
-
-    const level1 = Object.keys(spec.sections).map((key) => {
-      return (
-        <NavSection
-          key={`#config-${key}`}
-          subspec={spec.sections[key]}
-          header={key}
-          href={`#config-${key}`}
-          depth={1}
-        />
-      );
-    });
+    const level1 = Object.keys(spec.sections).map((key) => (
+      <UIFactory.NavSection
+        key={`#config-${key}`}
+        subspec={spec.sections[key]}
+        header={key}
+        href={`#config-${key}`}
+        depth={1}
+      />
+    ));
 
     return (
       <nav
@@ -514,28 +506,24 @@ const UIFactory = {
     const { readonly } = args;
 
     const elements = (definition.elements as DisplayConfigElement[]).map(
-      (el: DisplayConfigElement) => {
-        return (
-          <UIFactory.CreateUIElement
-            key={el.url}
-            spec={el as DisplayConfigElement}
-            disabled={readonly}
-          />
-        );
-      }
-    );
-    const children = Object.keys(definition.sections).map((key) => {
-      return (
-        <UIFactory.CreateSection
-          key={`config-${key}`}
-          level={1}
-          header={key}
-          contents={definition.sections[key]}
-          identifier={`config-${key}`}
-          readonly={readonly}
+      (el: DisplayConfigElement) => (
+        <UIFactory.CreateUIElement
+          key={el.url}
+          spec={el as DisplayConfigElement}
+          disabled={readonly}
         />
-      );
-    });
+      )
+    );
+    const children = Object.keys(definition.sections).map((key) => (
+      <UIFactory.CreateSection
+        key={`config-${key}`}
+        level={1}
+        header={key}
+        contents={definition.sections[key]}
+        identifier={`config-${key}`}
+        readonly={readonly}
+      />
+    ));
     // https://getbootstrap.com/docs/5.0/components/scrollspy/#list-item-4
     return (
       <>

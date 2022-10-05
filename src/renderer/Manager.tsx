@@ -11,7 +11,7 @@ import {
 } from 'react-bootstrap';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 
-import { useReducer, useState, createContext, useEffect } from 'react';
+import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ConfigEditor from './editor/ConfigEditor';
 
@@ -147,30 +147,42 @@ export default function Manager() {
     }
     prepareValues();
   }, [currentFolder]);
+
+  const globalStateValue = useMemo(
+    () => ({
+      initDone,
+      extensions,
+      configurationWarnings,
+      setConfigurationWarnings,
+      configurationDefaults,
+      setConfigurationDefaults,
+      configurationTouched,
+      setConfigurationTouched,
+      activeExtensions,
+      setActiveExtensions,
+      configuration,
+      setConfiguration,
+      uiDefinition,
+      folder: currentFolder,
+      file: `${currentFolder}/ucp-config.yml`,
+    }),
+    [
+      initDone,
+      activeExtensions,
+      configuration,
+      configurationDefaults,
+      configurationTouched,
+      configurationWarnings,
+      currentFolder,
+    ]
+  );
+
   if (!initDone) {
     return <p>Loading...</p>;
   }
 
   return (
-    <GlobalState.Provider
-      // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{
-        extensions,
-        configurationWarnings,
-        setConfigurationWarnings,
-        configurationDefaults,
-        setConfigurationDefaults,
-        configurationTouched,
-        setConfigurationTouched,
-        activeExtensions,
-        setActiveExtensions,
-        configuration,
-        setConfiguration,
-        uiDefinition,
-        folder: currentFolder,
-        file: `${currentFolder}/ucp-config.yml`,
-      }}
-    >
+    <GlobalState.Provider value={globalStateValue}>
       <div className="editor-app m-3 fs-7">
         <div className="col-12">
           <Tabs

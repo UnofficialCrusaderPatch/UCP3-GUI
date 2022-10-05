@@ -146,7 +146,7 @@ export const ucpBackEnd = {
     console.log(latestJSON);
 
     const curVer = await getVersion();
-    if (semver.lt(curVer, latestJSON.version) || true) {
+    if (semver.lt(curVer, latestJSON.version)) {
       const dialogResult = await dialogAsk(
         `Do you want to download the latest GUI version?\n\n${latestJSON.version}`,
         { title: 'Confirm', type: 'info' }

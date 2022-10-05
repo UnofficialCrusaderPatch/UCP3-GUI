@@ -8,6 +8,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import {
   Button,
   Col,
+  Div,
   Container,
   Form,
   ListGroup,
@@ -51,19 +52,23 @@ function renderExtension(
   const arrows = active ? (
     <>
       <Col
-        className="col-auto arrow up mx-1"
+        className="col-auto"
         disabled={!movability.up}
         onClick={() => {
           if (movability.up) moveCallback({ name: ext.name, type: 'up' });
         }}
-      />
+      >
+        <Div className="arrow up" disabled={!movability.up} />
+      </Col>
       <Col
-        className="col-auto arrow down mx-1"
+        className="col-auto"
         disabled={!movability.down}
         onClick={() => {
           if (movability.down) moveCallback({ name: ext.name, type: 'down' });
         }}
-      />
+      >
+        <Div className="arrow down" disabled={!movability.down} />
+      </Col>
     </>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment

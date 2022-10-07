@@ -42,35 +42,7 @@ import {
 import { Extension } from '../common/config/common';
 import { UIDefinition } from './GlobalState';
 import { Discovery } from '../main/framework/discovery';
-import { proxyFsExists } from './util';
-
-// wrap in closure to avoid top level await
-const getBaseFolder = (function () {
-  let baseFolder: string | null = null;
-  return async () => {
-    if (baseFolder) {
-      return baseFolder;
-    }
-    baseFolder = `${await dataDir()}/UnofficialCrusaderPatch3/`;
-    if (!(await proxyFsExists(baseFolder))) {
-      // apparently a bug of the typing, actually returns boolean
-      createDir(baseFolder);
-    }
-    return baseFolder;
-  };
-})();
-
-const exeFolder = (function () {
-  let f: string | null = null;
-  return async () => {
-    if (f) {
-      return f;
-    }
-    f = `${await normalize('.')}`;
-    console.log(`Executable path: ${f}`);
-    return f;
-  };
-})();
+import { getBaseFolder, proxyFsExists } from './utils/fs-utils';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
 const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};

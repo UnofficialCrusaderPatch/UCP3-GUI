@@ -2,7 +2,7 @@
 import type { FileEntry } from '@tauri-apps/api/fs';
 import { readTextFile, readDir } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
-import { proxyFsExists } from '../../renderer/util';
+import { proxyFsExists } from '../../renderer/utils/fs-utils';
 
 import { Definition, Extension } from '../../common/config/common';
 

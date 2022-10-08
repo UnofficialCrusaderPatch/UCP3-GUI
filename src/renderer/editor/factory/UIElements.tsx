@@ -15,6 +15,13 @@ import { Tooltip, Form, Overlay } from 'react-bootstrap';
 import React, { Fragment, ReactElement, useContext } from 'react';
 import { GlobalState } from '../../GlobalState';
 
+const DisplayDefaults: { [key: string]: string } = {
+  boolean: 'Switch',
+  string: 'TextEntry',
+  integer: 'Number',
+  number: 'Number',
+};
+
 export type DisplayConfigElement = {
   choices: string[];
   name: string;
@@ -22,6 +29,7 @@ export type DisplayConfigElement = {
   header: string;
   text: string;
   type: string;
+  display: string;
   children: DisplayConfigElement[];
   default: unknown;
   url: string;
@@ -365,20 +373,31 @@ const UIFactory = {
 
   CreateUIElement(args: { spec: DisplayConfigElement; disabled: boolean }) {
     const { spec, disabled } = args;
-    if (spec.type === 'GroupBox') {
+    if (spec.display === undefined) {
+      if (spec.type !== undefined) {
+        spec.display = DisplayDefaults[spec.type];
+      }
+    }
+    if (spec.display === undefined) {
+      console.warn(
+        `Element (${spec.url}) not created because of unsupported type: ${spec.type}`
+      );
+      return <div />;
+    }
+    if (spec.display === 'GroupBox') {
       return <UIFactory.CreateGroupBox spec={spec} disabled={disabled} />;
     }
-    if (spec.type === 'Switch') {
+    if (spec.display === 'Switch') {
       return <UIFactory.CreateSwitch spec={spec} disabled={disabled} />;
     }
-    if (spec.type === 'Number') {
+    if (spec.display === 'Number') {
       return <UIFactory.CreateNumberInput spec={spec} disabled={disabled} />;
     }
-    if (spec.type === 'Choice') {
+    if (spec.display === 'Choice') {
       return <UIFactory.CreateChoice spec={spec} disabled={disabled} />;
     }
     console.warn(
-      `Element not created because of unsupported type: ${spec.type}`
+      `Element (${spec.url}) not created because of unsupported type: ${spec.type}`
     );
     return <div />;
   },

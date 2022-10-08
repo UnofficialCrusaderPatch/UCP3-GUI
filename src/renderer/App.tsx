@@ -37,51 +37,55 @@ function Landing() {
   }
 
   return (
-    <div className="landing-app">
-      <div>
-        <h1>Welcome to Unofficial Crusader Patch 3</h1>
-        <h4>
-          Browse to a Stronghold Crusader installation folder to get started
-        </h4>
-        <div className="input-group mb-3">
-          <select
-            className="form-control"
-            id="browseresult"
-            onChange={(event) => {
-              updateCurrentFolderSelectState(event.target.value)
-            }}
-            value={browseResultState}
-          >
-            {configHandler.getRecentGameFolders().map((recentFolder, index) =>
-              <option key={index}>{recentFolder}</option>
-            )}
-          </select>
-          <button
-            id="browsebutton"
-            type="button"
-            className="btn btn-primary"
-            onClick={async () => {
-              const folder = await ucpBackEnd.openFolderDialog(
-                browseResultState
-              );
-              if (folder !== undefined && folder.length > 0) {
-                updateCurrentFolderSelectState(folder);
+    <div className="vh-100 d-flex flex-column justify-content-center">
+      <div className="h-75 container-md d-flex flex-column justify-content-center">
+        <div className="mb-3 flex-grow-1">
+          <h1 className="mb-3">Welcome to Unofficial Crusader Patch 3</h1>
+          <label htmlFor="browseresult">Browse to a Stronghold Crusader installation folder to get started:</label>
+          <div className="input-group">
+            <input
+              id="browseresult"
+              type="text"
+              className="form-control"
+              readOnly
+              role="button"
+              onClick={async () => {
+                const folder = await ucpBackEnd.openFolderDialog(
+                  browseResultState
+                );
+                if (folder !== undefined && folder.length > 0) {
+                  updateCurrentFolderSelectState(folder);
+                }
+              }}
+              value={browseResultState}
+            />
+            <button
+              id="launchbutton"
+              type="button"
+              className="btn btn-primary"
+              disabled={launchButtonState !== true}
+              onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
+            >
+              Launch
+            </button>
+          </div>
+        </div>
+        <div className="mb-3 h-75 d-flex flex-column">
+          <label htmlFor="recentfolders">Use one of the recently used folders:</label>
+          <div
+            id="recentfolders"
+            className="list-group bg-light h-75 overflow-auto"
+            onClick={(event) => {
+              const inputTarget = event.target as HTMLInputElement;
+              if (inputTarget.value) {
+                updateCurrentFolderSelectState(inputTarget.value);
               }
             }}
           >
-            Browse
-          </button>
-        </div>
-        <div className="input-group mb-3">
-          <button
-            id="launchbutton"
-            type="button"
-            className="btn btn-primary"
-            disabled={launchButtonState !== true}
-            onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
-          >
-            Launch
-          </button>
+            {configHandler.getRecentGameFolders().filter((_, index) => index !== 0).map((recentFolder, index) =>
+              <input type="button" key={index} className="list-group-item list-group-item-action" value={recentFolder} />
+            )}
+          </div>
         </div>
       </div>
     </div>

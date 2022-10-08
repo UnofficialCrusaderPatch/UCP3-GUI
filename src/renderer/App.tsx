@@ -2,9 +2,10 @@ import { useEffect, useReducer, useState } from 'react';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
-import { RecentFolderHandler } from './utils/recent-folder-handling';
+import { GuiConfigHandler } from './utils/gui-config-handling';
 import { appWindow } from '@tauri-apps/api/window';
 import { UnlistenFn } from '@tauri-apps/api/event';
+import { useGuiConfig } from './utils/swr-components';
 
 
 // TODO: handling of scope permissions should be avoided
@@ -15,46 +16,24 @@ const r = Math.floor(Math.random() * 10);
 
 function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
-  const [browseResultState, setBrowseResultState] = useState('');
+  const [browseResultState, setBrowseResultState] = useState("");
+  const configResult = useGuiConfig();
 
-  // in strict dev mode, certain hooks like useEffect execute twice to trigger issues
-  // this is a work around here, I am open to use a better solution
-  // currently, the file is simply saved and loaded twice
-  const [recentGameFolderHandlerContainer, setRecentGameFolderHandlerContainer] = useState<{
-    handler: RecentFolderHandler,
-    windowUnlisten: null | UnlistenFn
-  }>({
-    handler: new RecentFolderHandler(),
-    windowUnlisten: null,
-  });
-  const recentGameFolderHandler = recentGameFolderHandlerContainer.handler;
+  // needs better loading site
+  if (configResult.isLoading) {
+    return <p>Loading...</p>
+  }
 
+  const configHandler = configResult.data as GuiConfigHandler;
   const updateCurrentFolderSelectState = (folder: string) => {
-    recentGameFolderHandler.addToRecentFolders(folder);
+    configHandler.addToRecentFolders(folder);
     setBrowseResultState(folder);
     setLaunchButtonState(true);
   };
 
-  useEffect(() => {
-    (async () => {
-      await recentGameFolderHandler.loadRecentGameFolders();
-
-      // this does not protect from the double event, but maybe from recalls... which should not happen
-      const currentUnlisten = recentGameFolderHandlerContainer.windowUnlisten;
-      recentGameFolderHandlerContainer.windowUnlisten = await appWindow.onCloseRequested(async () => {
-        if (currentUnlisten) {
-          currentUnlisten();
-        }
-        await recentGameFolderHandler.saveRecentFolders();
-      });
-      setRecentGameFolderHandlerContainer({...recentGameFolderHandlerContainer});
-      updateCurrentFolderSelectState(recentGameFolderHandler.getMostRecentGameFolder());
-    })();
-  }, []);
-
-  // needs better loading site
-  if (!recentGameFolderHandler.isInitialized()) {
-    return <p>Loading...</p>
+  // set initial state
+  if (!browseResultState && configHandler.getMostRecentGameFolder()) {
+    updateCurrentFolderSelectState(configHandler.getMostRecentGameFolder());
   }
 
   return (
@@ -65,7 +44,7 @@ function Landing() {
           Browse to a Stronghold Crusader installation folder to get started
         </h4>
         <div className="input-group mb-3">
-          <select 
+          <select
             className="form-control"
             id="browseresult"
             onChange={(event) => {
@@ -73,7 +52,7 @@ function Landing() {
             }}
             value={browseResultState}
           >
-            {recentGameFolderHandler.getRecentGameFolders().map((recentFolder, index) =>
+            {configHandler.getRecentGameFolders().map((recentFolder, index) =>
               <option key={index}>{recentFolder}</option>
             )}
           </select>

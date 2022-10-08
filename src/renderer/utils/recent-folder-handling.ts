@@ -9,7 +9,7 @@ interface RecentFolder {
 
 export class RecentFolderHandler {
     static #recentFoldersFileName: string = "recent.json";
-    static #maxRecentFolders: number = 30;
+    static #maxRecentFolders: number = 10;
 
     static #showNotLoadedError(): void {
         showError(`There was no attempt to load the recently used folders. This should not happen.`);
@@ -47,8 +47,9 @@ export class RecentFolderHandler {
             const fPath = await this.#getRecentFoldersFilePath();
             if (await proxyFsExists(fPath)) {
                 this.#currentRecentFolders = JSON.parse(await readTextFile(fPath));
+                this.#sortRecentFolders();
+                return;
             }
-            this.#sortRecentFolders();
         } catch (error) {
             showError(`Failed to load recently used folders: ${error}`);
         }
@@ -88,5 +89,9 @@ export class RecentFolderHandler {
         if (alreadyThereIndex < 0 && this.#currentRecentFolders.length > RecentFolderHandler.#maxRecentFolders) {
             this.#currentRecentFolders.splice(RecentFolderHandler.#maxRecentFolders); // should keep it in size
         }
+    }
+
+    isInitialized(): boolean {
+        return !!this.#currentRecentFolders;
     }
 }

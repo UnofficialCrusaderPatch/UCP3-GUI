@@ -1,42 +1,61 @@
 import { useEffect, useReducer, useState } from 'react';
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
-import { KeyValueReducer } from './GlobalState';
+import { RecentFolderHandler } from './utils/recent-folder-handling';
+import { appWindow } from '@tauri-apps/api/window';
+import { UnlistenFn } from '@tauri-apps/api/event';
+
+
+// TODO: handling of scope permissions should be avoided
+// better would be to move the file access into the backend
+// or at least recreate the scope
 
 const r = Math.floor(Math.random() * 10);
 
 function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState('');
-  const [mostRecentGameFolder, setMostRecentGameFolder] = useReducer(
-    KeyValueReducer<unknown>(),
-    { index: 0, folder: '', date: '' }
-  );
+
+  // in strict dev mode, certain hooks like useEffect execute twice to trigger issues
+  // this is a work around here, I am open to use a better solution
+  // currently, the file is simply saved and loaded twice
+  const [recentGameFolderHandlerContainer, setRecentGameFolderHandlerContainer] = useState<{
+    handler: RecentFolderHandler,
+    windowUnlisten: null | UnlistenFn
+  }>({
+    handler: new RecentFolderHandler(),
+    windowUnlisten: null,
+  });
+  const recentGameFolderHandler = recentGameFolderHandlerContainer.handler;
+
+  const updateCurrentFolderSelectState = (folder: string) => {
+    recentGameFolderHandler.addToRecentFolders(folder);
+    setBrowseResultState(folder);
+    setLaunchButtonState(true);
+  };
 
   useEffect(() => {
     (async () => {
-      const recentGameFolders: {
-        index: number;
-        folder: string;
-        date: string;
-      }[] = await ucpBackEnd.getRecentGameFolders();
+      await recentGameFolderHandler.loadRecentGameFolders();
 
-      const receivedRecentFolders = recentGameFolders.sort(
-        (
-          a: { folder: string; date: string },
-          b: { folder: string; date: string }
-        ) => b.date.localeCompare(a.date)
-      )[0];
-      if (receivedRecentFolders) {
-        setMostRecentGameFolder({
-          type: 'reset',
-          value: receivedRecentFolders,
-        });
-      }
+      // this does not protect from the double event, but maybe from recalls... which should not happen
+      const currentUnlisten = recentGameFolderHandlerContainer.windowUnlisten;
+      recentGameFolderHandlerContainer.windowUnlisten = await appWindow.onCloseRequested(async () => {
+        if (currentUnlisten) {
+          currentUnlisten();
+        }
+        await recentGameFolderHandler.saveRecentFolders();
+      });
+      setRecentGameFolderHandlerContainer({...recentGameFolderHandlerContainer});
+      updateCurrentFolderSelectState(recentGameFolderHandler.getMostRecentGameFolder());
     })();
   }, []);
+
+  // needs better loading site
+  if (!recentGameFolderHandler.isInitialized()) {
+    return <p>Loading...</p>
+  }
 
   return (
     <div className="landing-app">
@@ -46,24 +65,28 @@ function Landing() {
           Browse to a Stronghold Crusader installation folder to get started
         </h4>
         <div className="input-group mb-3">
-          <input
-            type="text"
+          <select 
             className="form-control"
             id="browseresult"
+            onChange={(event) => {
+              updateCurrentFolderSelectState(event.target.value)
+            }}
             value={browseResultState}
-            readOnly
-          />
+          >
+            {recentGameFolderHandler.getRecentGameFolders().map((recentFolder, index) =>
+              <option key={index}>{recentFolder}</option>
+            )}
+          </select>
           <button
             id="browsebutton"
             type="button"
             className="btn btn-primary"
             onClick={async () => {
               const folder = await ucpBackEnd.openFolderDialog(
-                mostRecentGameFolder.folder as string
+                browseResultState
               );
               if (folder !== undefined && folder.length > 0) {
-                setBrowseResultState(folder);
-                setLaunchButtonState(true);
+                updateCurrentFolderSelectState(folder);
               }
             }}
           >
@@ -76,12 +99,7 @@ function Landing() {
             type="button"
             className="btn btn-primary"
             disabled={launchButtonState !== true}
-            onClick={() => {
-              const a = document.querySelector(
-                '#browseresult'
-              ) as HTMLInputElement;
-              return ucpBackEnd.createEditorWindow(a.value);
-            }}
+            onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
           >
             Launch
           </button>

@@ -4,6 +4,8 @@ import { ucpBackEnd } from './fakeBackend';
 import './App.css';
 import { GuiConfigHandler } from './utils/gui-config-handling';
 import { useGuiConfig } from './utils/swr-components';
+import { redirect, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 
 // TODO: handling of scope permissions should be avoided
@@ -13,16 +15,33 @@ import { useGuiConfig } from './utils/swr-components';
 const r = Math.floor(Math.random() * 10);
 
 function Landing() {
+  const [searchParams] = useSearchParams();
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState("");
   const configResult = useGuiConfig();
 
-  // needs better loading site
-  if (configResult.isLoading) {
-    return <p>Loading...</p>
-  }
+  const navigate = useNavigate();
+
+  // lang
+  const [t] = useTranslation();
 
   const configHandler = configResult.data as GuiConfigHandler;
+
+  // always executed
+  useEffect(() => {
+    if (!configResult.isLoading) {
+      const configLang = configHandler.getLanguage();
+      if (configLang && searchParams.get("lang") !== configLang) {
+        navigate(`/?lang=${configLang}`); // to set language -> I do not really like this...
+      }
+    }
+  });
+
+  // needs better loading site
+  if (configResult.isLoading) {
+    return <p>{t("general:loading")}</p>
+  }
+
   const updateCurrentFolderSelectState = (folder: string) => {
     configHandler.addToRecentFolders(folder);
     setBrowseResultState(folder);
@@ -38,8 +57,8 @@ function Landing() {
     <div className="vh-100 d-flex flex-column justify-content-center">
       <div className="h-75 container-md d-flex flex-column justify-content-center">
         <div className="mb-3 flex-grow-1">
-          <h1 className="mb-3">Welcome to Unofficial Crusader Patch 3</h1>
-          <label htmlFor="browseresult">Browse to a Stronghold Crusader installation folder to get started:</label>
+          <h1 className="mb-3">{t("landing:title")}</h1>
+          <label htmlFor="browseresult">{t("landing:selectfolder")}</label>
           <div className="input-group">
             <input
               id="browseresult"
@@ -62,14 +81,14 @@ function Landing() {
               type="button"
               className="btn btn-primary"
               disabled={launchButtonState !== true}
-              onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
+              onClick={() => ucpBackEnd.createEditorWindow(browseResultState, configHandler.getLanguage())}
             >
-              Launch
+              {t("landing:launch")}
             </button>
           </div>
         </div>
         <div className="mb-3 h-75 d-flex flex-column">
-          <label htmlFor="recentfolders">Use one of the recently used folders:</label>
+          <label htmlFor="recentfolders">{t("landing:oldfolders")}</label>
           <div
             id="recentfolders"
             className="list-group bg-light h-75 overflow-auto"

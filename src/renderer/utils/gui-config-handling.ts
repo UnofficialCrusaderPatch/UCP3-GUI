@@ -8,7 +8,7 @@ interface RecentFolder {
 }
 
 interface GuiConfig {
-    language: String
+    language: string
     recentFolderPaths: RecentFolder[];
 }
 
@@ -129,6 +129,22 @@ export class GuiConfigHandler {
 
         if (alreadyThereIndex < 0 && recentFolders.length > GuiConfigHandler.#maxRecentFolders) {
             recentFolders.splice(GuiConfigHandler.#maxRecentFolders); // should keep it in size
+        }
+    }
+
+    getLanguage(): string | undefined {
+        if (!this.#currentGuiConfig) {
+            GuiConfigHandler.#showNotLoadedError();
+            return undefined;
+        }
+        return this.#currentGuiConfig?.language;
+    }
+
+    setLanguage(lang: string) {
+        if (!this.#currentGuiConfig) {
+            GuiConfigHandler.#showNotLoadedError();
+        } else {
+            this.#currentGuiConfig.language = lang;
         }
     }
 

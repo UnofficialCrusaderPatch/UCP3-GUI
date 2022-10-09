@@ -30,6 +30,7 @@ import {
 
 import { ucpBackEnd } from './fakeBackend';
 import { Extension } from '../common/config/common';
+import { useTranslation } from 'react-i18next';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -66,6 +67,8 @@ let extensions: Extension[] = []; // which extension type?
 export default function Manager() {
   const [searchParams] = useSearchParams();
   const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
+
+  const [t] = useTranslation();
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -178,7 +181,7 @@ export default function Manager() {
   );
 
   if (!initDone) {
-    return <p>Loading...</p>;
+    return <p>{t("general:loading")}</p>;
   }
 
   return (
@@ -190,9 +193,9 @@ export default function Manager() {
             id="uncontrolled-tab-example"
             className="mb-3"
           >
-            <Tab eventKey="overview" title="Overview">
+            <Tab eventKey="overview" title={t("editor:overview.title")}>
               <div className="m-3">
-                UCP version in this folder:{' '}
+                {t("editor:overview.folderversion")}{' '}
                 {isUCP3Installed
                   ? `${ucpVersion.major}.${ucpVersion.minor}.${
                       ucpVersion.patch

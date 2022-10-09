@@ -56,9 +56,10 @@ export const ucpBackEnd = {
   },
 
   // create an editor window for a game folder
-  async createEditorWindow(gameFolder: string) {
+  async createEditorWindow(gameFolder: string, language: string | undefined) {
+    const langParam = language ? `&lang=${language}` : "";
     await createNewWindow(gameFolder, {
-      url: `index.html?window=editor&directory=${gameFolder}`,
+      url: `index.html?window=editor&directory=${gameFolder}${langParam}`,
       width: 1024,
       height: 768,
       maximized: true,

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter,
   MemoryRouter,
@@ -9,6 +10,7 @@ import {
 
 import App from './App';
 import Manager from './Manager';
+import { useLanguage } from './utils/swr-components';
 
 const pageFunctions: { [key: string]: JSX.Element } = {
   landing: <App />,
@@ -16,8 +18,14 @@ const pageFunctions: { [key: string]: JSX.Element } = {
 };
 
 function FittingPage() {
+  const languageState = useLanguage();
+
   const [searchParams] = useSearchParams();
   const windowValue = searchParams.get('window');
+
+  if (languageState.isLoading) {
+    return <div></div>;
+  }
 
   if (windowValue) {
     return pageFunctions[windowValue];

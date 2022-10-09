@@ -38,19 +38,18 @@ export function useGuiConfig(): SwrResult<GuiConfigHandler> {
 
 export function useLanguage(): SwrResult<TFunction> {
     const [searchParams] = useSearchParams();
-    const [lang, setLang] = useState<string>();
     const { i18n } = useTranslation();
     const paramLanguage = searchParams.get('lang');
 
-    const { data, error, mutate } = useSWRImmutable(SWR_KEYS.LANGUAGE_LOAD, async () => {
+    const changeLanguage = async () => {
         return await i18n.changeLanguage(paramLanguage || undefined);
-    });
+    }
+    const { data, error, mutate } = useSWRImmutable(SWR_KEYS.LANGUAGE_LOAD, changeLanguage);
 
-    // always called
+    // always executed
     useEffect(() => {
-        if (paramLanguage && paramLanguage !== lang && i18n.language !== paramLanguage) {
-            setLang(paramLanguage);
-            mutate();
+        if ((data || error) && paramLanguage && i18n.language !== paramLanguage) {
+            mutate(null as unknown as undefined, true);  // should force data to be undefined, maybe
         }
     });
     return {

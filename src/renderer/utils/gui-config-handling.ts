@@ -8,6 +8,7 @@ interface RecentFolder {
 }
 
 interface GuiConfig {
+    language: String
     recentFolderPaths: RecentFolder[];
 }
 
@@ -19,6 +20,18 @@ export class GuiConfigHandler {
     static #showNotLoadedError(): void {
         showError(`There was no attempt to load the recently used folders. This should not happen.`,
             GuiConfigHandler.#messageTitle);
+    }
+
+    static #isRecentFolderObject(recentFolder: RecentFolder): boolean {
+        return recentFolder && typeof recentFolder?.path === "string"
+            && typeof recentFolder?.date === "number";
+    }
+
+    static #createNewConfig(): GuiConfig {
+        return {
+            language: "en",
+            recentFolderPaths: []
+        };
     }
 
 
@@ -50,42 +63,38 @@ export class GuiConfigHandler {
         return this.#currentGuiConfig.recentFolderPaths;
     }
 
-    #createNewConfig(): void {
-        this.#currentGuiConfig = {
-            recentFolderPaths: []
-        };
-    }
-
     // no idea if there are better ways
-    #validateConfig(): boolean {
-        const thisConfig = this.#currentGuiConfig;
-        return typeof thisConfig === "object" && Array.isArray(thisConfig?.recentFolderPaths);
+    #addToCurrentConfig(loadedConfig: GuiConfig): void {
+        const thisConfig = this.#currentGuiConfig as GuiConfig;
+
+        const loadedRecentFolderPaths = loadedConfig?.recentFolderPaths;
+        if (Array.isArray(loadedRecentFolderPaths) && loadedRecentFolderPaths.length > 0
+            && !loadedRecentFolderPaths.filter(recentFolder => !GuiConfigHandler.#isRecentFolderObject(recentFolder)).length) {
+            thisConfig.recentFolderPaths = loadedRecentFolderPaths;
+        }
+
+        const loadedLanguage = loadedConfig?.language;
+        if (loadedLanguage && typeof loadedLanguage === "string") {
+            thisConfig.language = loadedLanguage;
+        }
     }
 
     async loadGuiConfig() {
+        this.#currentGuiConfig = GuiConfigHandler.#createNewConfig();
         try {
             const fPath = await this.#getRecentFoldersFilePath();
             if (await proxyFsExists(fPath)) {
-                this.#currentGuiConfig = JSON.parse(await readTextFile(fPath));
-                if (this.#validateConfig()) {
-                    this.#sortRecentFolders();
-                    return;
-                } else {
-                    showWarning("The current GUI config does not fit the structure and is discarded.",
-                        GuiConfigHandler.#messageTitle);
-                }
+                this.#addToCurrentConfig(JSON.parse(await readTextFile(fPath)))
+                this.#sortRecentFolders();
+                return;
             }
         } catch (error) {
             showError(`Failed to load recently used folders:\n${error}`, GuiConfigHandler.#messageTitle);
         }
-        this.#createNewConfig();
     }
 
     async saveGuiConfig() {
         try {
-            if (!this.#validateConfig) {
-                throw "Current configuration structure is invalid.";
-            }
             await writeTextFile(await this.#getRecentFoldersFilePath(),
                 JSON.stringify(this.#currentGuiConfig));
         } catch (error) {

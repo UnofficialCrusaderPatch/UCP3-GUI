@@ -3,8 +3,6 @@ import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
 import { GuiConfigHandler } from './utils/gui-config-handling';
-import { appWindow } from '@tauri-apps/api/window';
-import { UnlistenFn } from '@tauri-apps/api/event';
 import { useGuiConfig } from './utils/swr-components';
 
 

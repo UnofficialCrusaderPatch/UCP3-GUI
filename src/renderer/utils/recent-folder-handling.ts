@@ -77,9 +77,9 @@ export class RecentFolderHandler {
   }
 
   getRecentGameFolders(): string[] {
-    return this.#getCurrentRecentFolders().map(
-      (recentFolder) => recentFolder.path
-    );
+    return this.#getCurrentRecentFolders()
+      .map((recentFolder) => recentFolder.path)
+      .filter((entry) => entry !== undefined);
   }
 
   getMostRecentGameFolder(): string | '' {

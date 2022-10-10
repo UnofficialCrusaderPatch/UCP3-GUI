@@ -32,6 +32,7 @@ function Landing() {
   const recentGameFolderHandler = recentGameFolderHandlerContainer.handler;
 
   const updateCurrentFolderSelectState = (folder: string) => {
+    console.log(folder);
     recentGameFolderHandler.addToRecentFolders(folder);
     setBrowseResultState(folder);
     setLaunchButtonState(true);
@@ -57,7 +58,8 @@ function Landing() {
         recentGameFolderHandler.getMostRecentGameFolder()
       );
     })();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // needs better loading site
   if (!recentGameFolderHandler.isInitialized()) {
@@ -76,6 +78,7 @@ function Landing() {
             className="form-control"
             id="browseresult"
             onChange={(event) => {
+              console.log(event.target.value);
               updateCurrentFolderSelectState(event.target.value);
             }}
             value={browseResultState}
@@ -83,7 +86,8 @@ function Landing() {
             {recentGameFolderHandler
               .getRecentGameFolders()
               .map((recentFolder, index) => (
-                <option key={`folder-${recentFolder}`}>{recentFolder}</option>
+                // eslint-disable-next-line react/no-array-index-key
+                <option key={index}>{recentFolder}</option>
               ))}
           </select>
           <button
@@ -94,6 +98,7 @@ function Landing() {
               const folder = await ucpBackEnd.openFolderDialog(
                 browseResultState
               );
+              console.log(folder);
               if (folder !== undefined && folder.length > 0) {
                 updateCurrentFolderSelectState(folder);
               }

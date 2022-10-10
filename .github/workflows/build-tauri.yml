@@ -1,10 +1,6 @@
 name: Build Tauri app
 
-on:
-  push:
-    branches:
-      - tauri_switch
-      - main
+on: workflow_dispatch
 
 jobs:
   build:
@@ -69,4 +65,3 @@ jobs:
             latest.json
             src-tauri/target/release/*.exe
             src-tauri/target/release/bundle/msi/*.msi
-

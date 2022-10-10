@@ -9,7 +9,7 @@ import {
   resolve,
   normalize,
 } from '@tauri-apps/api/path';
-import type { BinaryFileContents } from '@tauri-apps/api/fs';
+import { BinaryFileContents, removeFile } from '@tauri-apps/api/fs';
 import {
   readTextFile,
   writeTextFile,
@@ -249,6 +249,9 @@ export const ucpBackEnd = {
         gameFolder
       );
 
+      // TODO: in the future, use a cache?
+      await removeFile(downloadPath);
+
       return {
         update: true,
         file: result.file,
@@ -389,7 +392,7 @@ export const ucpBackEnd = {
         );
       } else {
         // TODO: appropriate warning
-        console.warn(
+        window.alert(
           `binkw32.dll does not exist in this directory, are we in a game directory?`
         );
       }

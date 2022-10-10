@@ -115,7 +115,7 @@ const UIFactory = {
       // <Form key={`${name}-groupbox`}>
       <Container
         className="border-bottom border-light my-2 px-0"
-        // style={{ marginLeft: '-1.5rem' }}
+        style={{ margin: 0 }}
       >
         <Row className="my-3">
           <h5>{header}</h5>

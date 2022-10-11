@@ -37,7 +37,7 @@ function getConfigDefaults(yml: unknown[]) {
   function yieldDefaults(part: any | DisplayConfigElement): void {
     if (typeof part === 'object') {
       if (Object.keys(part).indexOf('url') > -1) {
-        result[part.url as string] = part.default;
+        result[part.url as string] = (part.value || {}).default;
       }
       if (Object.keys(part).indexOf('children') > -1) {
         part.children.forEach((child: unknown) => yieldDefaults(child));
@@ -125,6 +125,8 @@ export default function Manager() {
       if (currentFolder.length > 0) {
         uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
         const defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
+
+        console.log('defaults', defaults);
 
         ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
         if (ucpVersion.major !== undefined) isUCP3Installed = true;

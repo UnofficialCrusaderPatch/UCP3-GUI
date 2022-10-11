@@ -1,4 +1,6 @@
 import { useEffect, useReducer, useState } from 'react';
+import { appWindow } from '@tauri-apps/api/window';
+import { UnlistenFn } from '@tauri-apps/api/event';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';

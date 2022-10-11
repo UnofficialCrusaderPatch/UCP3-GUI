@@ -20,12 +20,12 @@ function Landing() {
   const configResult = useGuiConfig();
 
   // lang
-  const [t] = useTranslation();
+  const [t] = useTranslation(["gui-general", "gui-landing"]);
   const setLanguage = useLanguageSetter();
 
   // needs better loading site
   if (configResult.isLoading) {
-    return <p>{t("general:loading")}</p>
+    return <p>{t("gui-general:loading")}</p>
   }
 
   const configHandler = configResult.data as GuiConfigHandler;
@@ -53,8 +53,8 @@ function Landing() {
           {currentLang}
         </button>
         <div className="mb-3 flex-grow-1">
-          <h1 className="mb-3">{t("landing:title")}</h1>
-          <label htmlFor="browseresult">{t("landing:selectfolder")}</label>
+          <h1 className="mb-3">{t("gui-landing:title")}</h1>
+          <label htmlFor="browseresult">{t("gui-landing:select.folder")}</label>
           <div className="input-group">
             <input
               id="browseresult"
@@ -79,12 +79,12 @@ function Landing() {
               disabled={launchButtonState !== true}
               onClick={() => ucpBackEnd.createEditorWindow(browseResultState, currentLang)}
             >
-              {t("landing:launch")}
+              {t("gui-landing:launch")}
             </button>
           </div>
         </div>
         <div className="mb-3 h-75 d-flex flex-column">
-          <label htmlFor="recentfolders">{t("landing:oldfolders")}</label>
+          <label htmlFor="recentfolders">{t("gui-landing:old.folders")}</label>
           <div
             id="recentfolders"
             className="list-group bg-light h-75 overflow-auto"

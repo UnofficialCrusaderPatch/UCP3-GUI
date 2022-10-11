@@ -1,10 +1,7 @@
-import { useTranslation } from 'react-i18next';
 import {
   BrowserRouter,
-  MemoryRouter,
   Route,
   Routes,
-  useLocation,
   useSearchParams,
 } from 'react-router-dom';
 

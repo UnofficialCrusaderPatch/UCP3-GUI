@@ -21,16 +21,26 @@ const SWR_KEYS = {
 };
 
 export function useGuiConfig(): SwrResult<GuiConfigHandler> {
-    const [_, setSearchParams] = customUseSearchParams();
+    const [searchParams, setSearchParams] = customUseSearchParams();
 
     const { data, error, mutate } = useSWRImmutable(SWR_KEYS.GUI_CONFIG, async () => {
         const guiConfig = new GuiConfigHandler();
         await guiConfig.loadGuiConfig();
 
-        const loadedLang = guiConfig.getLanguage();
-        setSearchParams({ lang: loadedLang ? loadedLang : "en" });
+        const currentLanguage = searchParams.get('lang');
+        if (currentLanguage) {
+            guiConfig.setLanguage(currentLanguage);
+        } else {
+            const loadedLang = guiConfig.getLanguage();
+            setSearchParams({ lang: loadedLang ? loadedLang : "en" });
+        }
 
         registerForWindowClose(SWR_KEYS.GUI_CONFIG, async () => {
+            // Currently, only the Landing Page loads the GUI config 
+            // this would change, if a language switch would be added to the editor,
+            // then, the editor window would also save the config on close,
+            // to really handle this, either the settings are limited to landing, or
+            // the GuiConfig would need to move the handling to a Singleton in Rust
             await guiConfig.saveGuiConfig();    // no idea if need to keep object binding
         });
         return guiConfig;

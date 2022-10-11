@@ -68,7 +68,7 @@ export default function Manager() {
   const [searchParams] = useSearchParams();
   const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
 
-  const [t] = useTranslation();
+  const [t] = useTranslation(["gui-general", "gui-editor"]);
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -181,7 +181,7 @@ export default function Manager() {
   );
 
   if (!initDone) {
-    return <p>{t("general:loading")}</p>;
+    return <p>{t("gui-general:loading")}</p>;
   }
 
   return (
@@ -193,14 +193,14 @@ export default function Manager() {
             id="uncontrolled-tab-example"
             className="mb-3"
           >
-            <Tab eventKey="overview" title={t("editor:overview.title")}>
+            <Tab eventKey="overview" title={t("gui-editor:overview.title")}>
               <div className="m-3">
-                {t("editor:overview.folderversion")}{' '}
+                {t("gui-editor:overview.folder.version")}{' '}
                 {isUCP3Installed
                   ? `${ucpVersion.major}.${ucpVersion.minor}.${
                       ucpVersion.patch
                     } - ${(ucpVersion.sha || '').substring(0, 8)}`
-                  : `not installed`}
+                  : t("gui-editor:overview.not.installed")}
               </div>
               <div className="m-3">
                 <button
@@ -249,13 +249,14 @@ export default function Manager() {
                     setShow(true);
                   }}
                 >
-                  Install UCP to folder from Zip
+                  {t("gui-editor:overview.install.from.zip")}
                 </Button>
                 <Modal show={show} onHide={handleClose} className="text-dark">
                   <Modal.Header closeButton>
-                    <Modal.Title>Reload required</Modal.Title>
+                    <Modal.Title>{t("gui-general:require.reload.title")}</Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
+                    {t("gui-general:require.reload.text")}
                     The installation process requires a reload, reload now?
                   </Modal.Body>
                   <Modal.Footer>

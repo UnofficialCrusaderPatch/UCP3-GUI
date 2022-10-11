@@ -1,0 +1,9 @@
+{
+    "overview": {
+        "folder.version": "UCP version in this folder:",
+        "title": "Overview",
+        "not.installed": "not installed",
+        "install.from.zip": "Install UCP to folder from Zip",
+        "require.reload.text": "The installation process requires a reload, reload now?"
+    } 
+}

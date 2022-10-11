@@ -43,42 +43,27 @@ import { Extension } from '../common/config/common';
 import { UIDefinition } from './GlobalState';
 import { Discovery } from '../main/framework/discovery';
 import { getBaseFolder, proxyFsExists } from './utils/fs-utils';
+import { createNewWindow } from './utils/window-utils';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
 const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
 // eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
-  // Once the main window boots, it starts up a second window which launches the most recent game folder. It needs to know the most recent game folder.
-  async getRecentGameFolders() {
-    const fname = `${await getBaseFolder()}recent.json`;
-    if (await proxyFsExists(fname)) {
-      const recentjson = JSON.parse(await readTextFile(fname));
-      for (let i = 0; i < recentjson.length; i += 1) {
-        recentjson[i].index = i;
-      }
-      // var mostRecent = recentjson.sort((a: { folder: string, date: number; }, b: { folder: string, date: number; }) => b.date - a.date);
-      return recentjson;
-    }
-    await writeTextFile(fname, JSON.stringify([]));
-
-    return [];
-  },
-
   getGameFolderPath(urlParams: URLSearchParams) {
     return urlParams.get('directory') || '';
   },
 
   // create an editor window for a game folder
   async createEditorWindow(gameFolder: string) {
-    // only one editor currently possible
-    const webview = new WebviewWindow('editor', {
+    await createNewWindow(gameFolder, {
       url: `index.html?window=editor&directory=${gameFolder}`,
       width: 1024,
       height: 768,
       maximized: true,
+      title: `${await getName()} - ${await getVersion()}`,
+      focus: true,
     });
-    webview.setTitle(`${await getName()} - ${await getVersion()}`);
   },
 
   async checkForGUIUpdates(setGuiUpdateStatus: (newText: string) => void) {

@@ -4,7 +4,8 @@ import { UnlistenFn } from '@tauri-apps/api/event';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
-import { RecentFolderHandler } from './utils/recent-folder-handling';
+import { GuiConfigHandler } from './utils/gui-config-handling';
+import { useGuiConfig } from './utils/swr-components';
 
 // TODO: handling of scope permissions should be avoided
 // better would be to move the file access into the backend
@@ -15,108 +16,91 @@ const r = Math.floor(Math.random() * 10);
 function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState('');
+  const configResult = useGuiConfig();
 
-  // in strict dev mode, certain hooks like useEffect execute twice to trigger issues
-  // this is a work around here, I am open to use a better solution
-  // currently, the file is simply saved and loaded twice
-  const [
-    recentGameFolderHandlerContainer,
-    setRecentGameFolderHandlerContainer,
-  ] = useState<{
-    handler: RecentFolderHandler;
-    windowUnlisten: null | UnlistenFn;
-  }>({
-    handler: new RecentFolderHandler(),
-    windowUnlisten: null,
-  });
-  const recentGameFolderHandler = recentGameFolderHandlerContainer.handler;
+  // needs better loading site
+  if (configResult.isLoading) {
+    return <p>Loading...</p>;
+  }
 
+  const configHandler = configResult.data as GuiConfigHandler;
   const updateCurrentFolderSelectState = (folder: string) => {
-    console.log(folder);
-    recentGameFolderHandler.addToRecentFolders(folder);
+    configHandler.addToRecentFolders(folder);
     setBrowseResultState(folder);
     setLaunchButtonState(true);
   };
 
-  useEffect(() => {
-    (async () => {
-      await recentGameFolderHandler.loadRecentGameFolders();
-
-      // this does not protect from the double event, but maybe from recalls... which should not happen
-      const currentUnlisten = recentGameFolderHandlerContainer.windowUnlisten;
-      recentGameFolderHandlerContainer.windowUnlisten =
-        await appWindow.onCloseRequested(async () => {
-          if (currentUnlisten) {
-            currentUnlisten();
-          }
-          await recentGameFolderHandler.saveRecentFolders();
-        });
-      setRecentGameFolderHandlerContainer({
-        ...recentGameFolderHandlerContainer,
-      });
-      updateCurrentFolderSelectState(
-        recentGameFolderHandler.getMostRecentGameFolder()
-      );
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // needs better loading site
-  if (!recentGameFolderHandler.isInitialized()) {
-    return <p>Loading...</p>;
+  // set initial state
+  if (!browseResultState && configHandler.getMostRecentGameFolder()) {
+    updateCurrentFolderSelectState(configHandler.getMostRecentGameFolder());
   }
 
   return (
-    <div className="landing-app">
-      <div>
-        <h1>Welcome to Unofficial Crusader Patch 3</h1>
-        <h4>
-          Browse to a Stronghold Crusader installation folder to get started
-        </h4>
-        <div className="input-group mb-3">
-          <select
-            className="form-control"
-            id="browseresult"
-            onChange={(event) => {
-              console.log(event.target.value);
-              updateCurrentFolderSelectState(event.target.value);
-            }}
-            value={browseResultState}
-          >
-            {recentGameFolderHandler
-              .getRecentGameFolders()
-              .map((recentFolder, index) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <option key={index}>{recentFolder}</option>
-              ))}
-          </select>
-          <button
-            id="browsebutton"
-            type="button"
-            className="btn btn-primary"
-            onClick={async () => {
-              const folder = await ucpBackEnd.openFolderDialog(
-                browseResultState
-              );
-              console.log(folder);
-              if (folder !== undefined && folder.length > 0) {
-                updateCurrentFolderSelectState(folder);
+    <div className="vh-100 d-flex flex-column justify-content-center">
+      <div className="h-75 container-md d-flex flex-column justify-content-center">
+        <div className="mb-3 flex-grow-1">
+          <h1 className="mb-3">Welcome to Unofficial Crusader Patch 3</h1>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label htmlFor="browseresult">
+            Browse to a Stronghold Crusader installation folder to get started:
+          </label>
+          <div className="input-group">
+            <input
+              id="browseresult"
+              type="text"
+              className="form-control"
+              readOnly
+              role="button"
+              onClick={async () => {
+                const folder = await ucpBackEnd.openFolderDialog(
+                  browseResultState
+                );
+                if (folder !== undefined && folder.length > 0) {
+                  updateCurrentFolderSelectState(folder);
+                }
+              }}
+              value={browseResultState}
+            />
+            <button
+              id="launchbutton"
+              type="button"
+              className="btn btn-primary"
+              disabled={launchButtonState !== true}
+              onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
+            >
+              Launch
+            </button>
+          </div>
+        </div>
+        <div className="mb-3 h-75 d-flex flex-column">
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label htmlFor="recentfolders">
+            Use one of the recently used folders:
+          </label>
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+          <div
+            id="recentfolders"
+            className="list-group bg-light h-75 overflow-auto"
+            onClick={(event) => {
+              const inputTarget = event.target as HTMLInputElement;
+              if (inputTarget.value) {
+                updateCurrentFolderSelectState(inputTarget.value);
               }
             }}
           >
-            Browse
-          </button>
-        </div>
-        <div className="input-group mb-3">
-          <button
-            id="launchbutton"
-            type="button"
-            className="btn btn-primary"
-            disabled={launchButtonState !== true}
-            onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
-          >
-            Launch
-          </button>
+            {configHandler
+              .getRecentGameFolders()
+              .filter((_, index) => index !== 0)
+              .map((recentFolder, index) => (
+                <input
+                  type="button"
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={index}
+                  className="list-group-item list-group-item-action"
+                  value={recentFolder}
+                />
+              ))}
+          </div>
         </div>
       </div>
     </div>

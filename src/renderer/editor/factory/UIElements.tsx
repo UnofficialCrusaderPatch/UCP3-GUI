@@ -14,38 +14,20 @@ import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
 import React, { Fragment, ReactElement, useContext } from 'react';
 import { GlobalState } from '../../GlobalState';
+import { ucpBackEnd } from '../../fakeBackend';
+
+import type {
+  DisplayConfigElement,
+  NumberInputDisplayConfigElement,
+  OptionEntry,
+  SectionDescription,
+} from '../../../common/config/common';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
   string: 'TextEntry',
   integer: 'Number',
   number: 'Number',
-};
-
-export type DisplayConfigElement = {
-  choices: string[];
-  name: string;
-  description: string;
-  header: string;
-  text: string;
-  type: string;
-  display: string;
-  children: DisplayConfigElement[];
-  default: unknown;
-  url: string;
-  columns: number;
-  tooltip: string;
-  enabled: string;
-};
-
-export type NumberInputDisplayConfigElement = DisplayConfigElement & {
-  min: number;
-  max: number;
-};
-
-export type SectionDescription = {
-  elements: DisplayConfigElement[];
-  sections: { [key: string]: SectionDescription };
 };
 
 function formatToolTip(tooltip: string, url: string) {
@@ -518,13 +500,36 @@ const UIFactory = {
 
   CreateSections(args: { readonly: boolean }) {
     const {
+      folder,
+      activeExtensions,
       uiDefinition,
       configuration,
       setConfiguration,
       configurationWarnings,
     } = useContext(GlobalState);
-    const definition = uiDefinition.hierarchical as SectionDescription;
+    const optionEntries = ucpBackEnd
+      .extensionsToOptionEntries(activeExtensions)
+      .filter((o: OptionEntry) => o.hidden === undefined || o.hidden === false);
+    const definition = ucpBackEnd.optionEntriesToHierarchical(optionEntries);
     const { readonly } = args;
+
+    if (optionEntries.length === 0) {
+      // Display message that no config options can be displayed
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            minHeight: '85vh',
+          }}
+        >
+          No extensions are active, so there are no options to display! Go to
+          the Extensions tab to activate an Extension.
+        </div>
+      );
+    }
 
     const elements = (definition.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => (
@@ -568,4 +573,5 @@ const UIFactory = {
   },
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export { UIFactory };

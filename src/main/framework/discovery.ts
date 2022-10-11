@@ -66,7 +66,7 @@ async function setLocale(
 }
 
 const Discovery = {
-  discoverExtensions: async (gameFolder: string) => {
+  discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
     const currentLocale = 'English'; // Dummy location for this code
 
     const moduleDir = `${gameFolder}/ucp/modules`;

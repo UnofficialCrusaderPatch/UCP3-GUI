@@ -9,8 +9,9 @@ import {
   resolve,
   normalize,
 } from '@tauri-apps/api/path';
-import { BinaryFileContents, removeFile } from '@tauri-apps/api/fs';
 import {
+  BinaryFileContents,
+  removeFile,
   readTextFile,
   writeTextFile,
   createDir,
@@ -39,7 +40,11 @@ import {
   checkForLatestUCP3DevReleaseUpdate,
   UCP3_REPOS_MACHINE_TOKEN,
 } from '../main/versions/github';
-import { Extension } from '../common/config/common';
+import {
+  Extension,
+  OptionEntry,
+  SectionDescription,
+} from '../common/config/common';
 import { UIDefinition } from './GlobalState';
 import { Discovery } from '../main/framework/discovery';
 import { getBaseFolder, proxyFsExists } from './utils/fs-utils';
@@ -287,6 +292,54 @@ export const ucpBackEnd = {
     return extensionsCache[gameFolder];
   },
 
+  optionEntriesToHierarchical(uiCollection: OptionEntry[]): SectionDescription {
+    const result = { elements: [], sections: {} };
+
+    uiCollection.forEach((ui) => {
+      if (ui.category !== undefined) {
+        let e: { elements: object[]; sections: { [key: string]: object } } =
+          result;
+        ui.category.forEach((cat: string) => {
+          if (e.sections[cat] === undefined) {
+            e.sections[cat] = { elements: [], sections: {} };
+          }
+          e = e.sections[cat] as {
+            elements: object[];
+            sections: { [key: string]: object };
+          };
+        });
+        const f = e;
+        f.elements.push(ui);
+      }
+    });
+
+    return result;
+  },
+
+  extensionsToOptionEntries(exts: Extension[]) {
+    const uiCollection: any[] = [];
+    exts.forEach((ext) => {
+      uiCollection.push(...ext.ui);
+    });
+    uiCollection.sort((a, b) => {
+      if (a.category === undefined || b.category === undefined) return 0;
+      for (
+        let i = 0;
+        i < Math.min(a.category.length, b.category.length);
+        i += 1
+      ) {
+        const comp = a.category[i].localeCompare(b.category[i]);
+        if (comp !== 0) {
+          if (a.category[i] === 'Advanced') return 1;
+          if (b.category[i] === 'Advanced') return -1;
+          return comp;
+        }
+      }
+      return 0;
+    });
+    return uiCollection;
+  },
+
   // Get yaml definition
   async getYamlDefinition(gameFolder: string): Promise<UIDefinition> {
     if (uiCache[gameFolder] === undefined) {
@@ -296,45 +349,8 @@ export const ucpBackEnd = {
         );
       }
       const exts = extensionsCache[gameFolder];
-      const uiCollection: any[] = [];
-      exts.forEach((ext) => {
-        uiCollection.push(...ext.ui);
-      });
-      uiCollection.sort((a, b) => {
-        if (a.category === undefined || b.category === undefined) return 0;
-        for (
-          let i = 0;
-          i < Math.min(a.category.length, b.category.length);
-          i += 1
-        ) {
-          const comp = a.category[i].localeCompare(b.category[i]);
-          if (comp !== 0) {
-            if (a.category[i] === 'Advanced') return 1;
-            if (b.category[i] === 'Advanced') return -1;
-            return comp;
-          }
-        }
-        return 0;
-      });
-
-      const result = { elements: [], sections: {} };
-      uiCollection.forEach((ui) => {
-        if (ui.category !== undefined) {
-          let e: { elements: object[]; sections: { [key: string]: object } } =
-            result;
-          ui.category.forEach((cat: string) => {
-            if (e.sections[cat] === undefined) {
-              e.sections[cat] = { elements: [], sections: {} };
-            }
-            e = e.sections[cat] as {
-              elements: object[];
-              sections: { [key: string]: object };
-            };
-          });
-          const f = e;
-          f.elements.push(ui);
-        }
-      });
+      const uiCollection = this.extensionsToOptionEntries(exts);
+      const result = this.optionEntriesToHierarchical(uiCollection);
 
       uiCache[gameFolder] = { flat: uiCollection, hierarchical: result };
     }

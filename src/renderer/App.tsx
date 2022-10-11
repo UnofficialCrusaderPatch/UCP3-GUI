@@ -4,8 +4,8 @@ import { ucpBackEnd } from './fakeBackend';
 import './App.css';
 import { GuiConfigHandler } from './utils/gui-config-handling';
 import { useGuiConfig } from './utils/swr-components';
-import { redirect, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLanguageSetter } from './utils/util-components';
 
 
 // TODO: handling of scope permissions should be avoided
@@ -15,32 +15,21 @@ import { useTranslation } from 'react-i18next';
 const r = Math.floor(Math.random() * 10);
 
 function Landing() {
-  const [searchParams] = useSearchParams();
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState("");
   const configResult = useGuiConfig();
 
-  const navigate = useNavigate();
-
   // lang
   const [t] = useTranslation();
-
-  const configHandler = configResult.data as GuiConfigHandler;
-
-  // always executed
-  useEffect(() => {
-    if (!configResult.isLoading) {
-      const configLang = configHandler.getLanguage();
-      if (configLang && searchParams.get("lang") !== configLang) {
-        navigate(`/?lang=${configLang}`); // to set language -> I do not really like this...
-      }
-    }
-  });
+  const setLanguage = useLanguageSetter();
 
   // needs better loading site
   if (configResult.isLoading) {
     return <p>{t("general:loading")}</p>
   }
+
+  const configHandler = configResult.data as GuiConfigHandler;
+  const currentLang = configHandler.getLanguage();
 
   const updateCurrentFolderSelectState = (folder: string) => {
     configHandler.addToRecentFolders(folder);
@@ -56,6 +45,13 @@ function Landing() {
   return (
     <div className="vh-100 d-flex flex-column justify-content-center">
       <div className="h-75 container-md d-flex flex-column justify-content-center">
+        <button 
+          onClick={() => {
+            setLanguage(currentLang === "en" ? "de" : "en");
+          }}
+        >
+          {currentLang}
+        </button>
         <div className="mb-3 flex-grow-1">
           <h1 className="mb-3">{t("landing:title")}</h1>
           <label htmlFor="browseresult">{t("landing:selectfolder")}</label>
@@ -81,7 +77,7 @@ function Landing() {
               type="button"
               className="btn btn-primary"
               disabled={launchButtonState !== true}
-              onClick={() => ucpBackEnd.createEditorWindow(browseResultState, configHandler.getLanguage())}
+              onClick={() => ucpBackEnd.createEditorWindow(browseResultState, currentLang)}
             >
               {t("landing:launch")}
             </button>

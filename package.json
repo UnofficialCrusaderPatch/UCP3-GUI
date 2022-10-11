@@ -46,6 +46,7 @@
     "axios": "^0.27.2",
     "bootstrap": "^5.2.1",
     "i18next": "^21.10.0",
+    "i18next-resources-to-backend": "^1.0.0",
     "jquery": "^3.6.0",
     "jszip": "^3.10.1",
     "node-stream-zip": "^1.15.0",

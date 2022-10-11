@@ -5,6 +5,7 @@ import { KeyedMutator } from "swr";
 import useSWRImmutable from "swr/immutable";    // only fetches once
 import { GuiConfigHandler } from "./gui-config-handling";
 import { registerForWindowClose } from "./tauri-hooks";
+import { customUseSearchParams } from "./util-components";
 
 interface SwrResult<T> {
     data: T | undefined,
@@ -20,9 +21,15 @@ const SWR_KEYS = {
 };
 
 export function useGuiConfig(): SwrResult<GuiConfigHandler> {
+    const [_, setSearchParams] = customUseSearchParams();
+
     const { data, error, mutate } = useSWRImmutable(SWR_KEYS.GUI_CONFIG, async () => {
         const guiConfig = new GuiConfigHandler();
         await guiConfig.loadGuiConfig();
+
+        const loadedLang = guiConfig.getLanguage();
+        setSearchParams({ lang: loadedLang ? loadedLang : "en" });
+
         registerForWindowClose(SWR_KEYS.GUI_CONFIG, async () => {
             await guiConfig.saveGuiConfig();    // no idea if need to keep object binding
         });

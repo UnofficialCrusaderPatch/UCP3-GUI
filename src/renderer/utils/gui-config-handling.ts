@@ -165,6 +165,25 @@ export class GuiConfigHandler {
     }
   }
 
+  removeFromRecentFolders(path: string) {
+    if (!this.#currentGuiConfig) {
+      showError(
+        `Recently used game folders were not initialized. No saving happens.`,
+        GuiConfigHandler.#messageTitle
+      );
+      return;
+    }
+    const recentFolders = this.#currentGuiConfig.recentFolderPaths;
+    const alreadyThereIndex = recentFolders.findIndex(
+      (recentFolder) => recentFolder.path === path
+    );
+    if (alreadyThereIndex === -1) {
+      // Should not happen, but okay, let's just return
+      return;
+    }
+    recentFolders.splice(alreadyThereIndex, 1);
+  }
+
   isInitialized(): boolean {
     return !!this.#currentGuiConfig;
   }

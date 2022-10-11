@@ -16,6 +16,7 @@ const r = Math.floor(Math.random() * 10);
 function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState('');
+  const [folders, setFolders] = useState([] as string[]);
   const configResult = useGuiConfig();
 
   // needs better loading site
@@ -26,6 +27,7 @@ function Landing() {
   const configHandler = configResult.data as GuiConfigHandler;
   const updateCurrentFolderSelectState = (folder: string) => {
     configHandler.addToRecentFolders(folder);
+    setFolders(configHandler.getRecentGameFolders());
     setBrowseResultState(folder);
     setLaunchButtonState(true);
   };
@@ -37,7 +39,7 @@ function Landing() {
 
   return (
     <div className="vh-100 d-flex flex-column justify-content-center">
-      <div className="h-75 container-md d-flex flex-column justify-content-center">
+      <div className="container-md d-flex flex-column justify-content-center">
         <div className="mb-3 flex-grow-1">
           <h1 className="mb-3">Welcome to Unofficial Crusader Patch 3</h1>
           {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
@@ -72,7 +74,7 @@ function Landing() {
             </button>
           </div>
         </div>
-        <div className="mb-3 h-75 d-flex flex-column">
+        <div>
           {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label htmlFor="recentfolders">
             Use one of the recently used folders:
@@ -80,25 +82,38 @@ function Landing() {
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
           <div
             id="recentfolders"
-            className="list-group bg-light h-75 overflow-auto"
+            className="list-group overflow-auto"
             onClick={(event) => {
               const inputTarget = event.target as HTMLInputElement;
-              if (inputTarget.value) {
-                updateCurrentFolderSelectState(inputTarget.value);
+              if (inputTarget.textContent) {
+                updateCurrentFolderSelectState(
+                  inputTarget.textContent as string
+                );
               }
             }}
           >
-            {configHandler
-              .getRecentGameFolders()
+            {folders
               .filter((_, index) => index !== 0)
               .map((recentFolder, index) => (
-                <input
-                  type="button"
+                <div
                   // eslint-disable-next-line react/no-array-index-key
                   key={index}
-                  className="list-group-item list-group-item-action"
-                  value={recentFolder}
-                />
+                  className="list-group-item list-group-item-action list-group-item-dark d-flex justify-content-between align-items-center"
+                >
+                  {recentFolder}
+                  <input
+                    type="button"
+                    style={{ width: '0.25em', height: '0.25em' }}
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={(event) => {
+                      configHandler.removeFromRecentFolders(recentFolder);
+                      updateCurrentFolderSelectState(
+                        configHandler.getMostRecentGameFolder()
+                      );
+                    }}
+                  />
+                </div>
               ))}
           </div>
         </div>

@@ -50,7 +50,6 @@ const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
 // eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
-
   getGameFolderPath(urlParams: URLSearchParams) {
     return urlParams.get('directory') || '';
   },
@@ -63,7 +62,7 @@ export const ucpBackEnd = {
       height: 768,
       maximized: true,
       title: `${await getName()} - ${await getVersion()}`,
-      focus: true
+      focus: true,
     });
   },
 

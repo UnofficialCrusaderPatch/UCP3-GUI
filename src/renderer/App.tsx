@@ -5,7 +5,6 @@ import './App.css';
 import { GuiConfigHandler } from './utils/gui-config-handling';
 import { useGuiConfig } from './utils/swr-components';
 
-
 // TODO: handling of scope permissions should be avoided
 // better would be to move the file access into the backend
 // or at least recreate the scope
@@ -14,12 +13,12 @@ const r = Math.floor(Math.random() * 10);
 
 function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
-  const [browseResultState, setBrowseResultState] = useState("");
+  const [browseResultState, setBrowseResultState] = useState('');
   const configResult = useGuiConfig();
 
   // needs better loading site
   if (configResult.isLoading) {
-    return <p>Loading...</p>
+    return <p>Loading...</p>;
   }
 
   const configHandler = configResult.data as GuiConfigHandler;
@@ -39,7 +38,10 @@ function Landing() {
       <div className="h-75 container-md d-flex flex-column justify-content-center">
         <div className="mb-3 flex-grow-1">
           <h1 className="mb-3">Welcome to Unofficial Crusader Patch 3</h1>
-          <label htmlFor="browseresult">Browse to a Stronghold Crusader installation folder to get started:</label>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label htmlFor="browseresult">
+            Browse to a Stronghold Crusader installation folder to get started:
+          </label>
           <div className="input-group">
             <input
               id="browseresult"
@@ -69,7 +71,11 @@ function Landing() {
           </div>
         </div>
         <div className="mb-3 h-75 d-flex flex-column">
-          <label htmlFor="recentfolders">Use one of the recently used folders:</label>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label htmlFor="recentfolders">
+            Use one of the recently used folders:
+          </label>
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
           <div
             id="recentfolders"
             className="list-group bg-light h-75 overflow-auto"
@@ -80,9 +86,18 @@ function Landing() {
               }
             }}
           >
-            {configHandler.getRecentGameFolders().filter((_, index) => index !== 0).map((recentFolder, index) =>
-              <input type="button" key={index} className="list-group-item list-group-item-action" value={recentFolder} />
-            )}
+            {configHandler
+              .getRecentGameFolders()
+              .filter((_, index) => index !== 0)
+              .map((recentFolder, index) => (
+                <input
+                  type="button"
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={index}
+                  className="list-group-item list-group-item-action"
+                  value={recentFolder}
+                />
+              ))}
           </div>
         </div>
       </div>

@@ -15,7 +15,6 @@ import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ConfigEditor from './editor/ConfigEditor';
 
-import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
 
 import {
@@ -29,7 +28,7 @@ import {
 } from './GlobalState';
 
 import { ucpBackEnd } from './fakeBackend';
-import { Extension } from '../common/config/common';
+import { DisplayConfigElement, Extension } from '../common/config/common';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};

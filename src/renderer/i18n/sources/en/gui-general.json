@@ -1,4 +1,5 @@
 {
     "loading": "Loading...",
-    "require.reload.title": "Reload required"
+    "require.reload.title": "Reload required",
+    "confirm": "Confirm"
 }

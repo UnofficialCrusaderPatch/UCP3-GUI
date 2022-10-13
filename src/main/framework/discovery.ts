@@ -1,28 +1,32 @@
-/* eslint-disable no-param-reassign */
 import type { FileEntry } from '@tauri-apps/api/fs';
 import { readTextFile, readDir } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 import { proxyFsExists } from '../../renderer/utils/fs-utils';
 
-import { Definition, Extension } from '../../common/config/common';
+import {
+  ConfigEntry,
+  Definition,
+  Extension,
+  OptionEntry,
+} from '../../common/config/common';
 
 const localeSensitiveFields = ['description', 'text', 'tooltip'];
 const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
-async function readUISpec(folder: string, ext: Extension): Promise<void> {
+async function readUISpec(
+  folder: string
+): Promise<{ [key: string]: unknown }[]> {
   if (await proxyFsExists(`${folder}/ui.yml`)) {
-    ext.ui = yaml.parse(await readTextFile(`${folder}/ui.yml`));
-  } else {
-    ext.ui = [];
+    return yaml.parse(await readTextFile(`${folder}/ui.yml`));
   }
+  return [];
 }
 
-async function readConfig(folder: string, ext: Extension): Promise<void> {
+async function readConfig(folder: string): Promise<{ [key: string]: unknown }> {
   if (await proxyFsExists(`${folder}/config.yml`)) {
-    ext.config = yaml.parse(await readTextFile(`${folder}/config.yml`));
-  } else {
-    ext.config = {};
+    return yaml.parse(await readTextFile(`${folder}/config.yml`));
   }
+  return {};
 }
 
 function changeLocale(
@@ -37,6 +41,7 @@ function changeLocale(
         const keyword = search[1];
         const loc = locale[keyword];
         if (loc !== undefined) {
+          // eslint-disable-next-line no-param-reassign
           obj[field] = loc;
         }
       }
@@ -63,6 +68,77 @@ async function setLocale(
       });
     }
   }
+}
+
+function collectOptionEntries(
+  obj: { [key: string]: unknown },
+  extensionName: string,
+  collection?: { [key: string]: OptionEntry }
+) {
+  // eslint-disable-next-line no-param-reassign
+  if (collection === undefined) collection = {};
+
+  if (typeof obj === 'object') {
+    if (obj.url !== undefined) {
+      const oeObj = obj as OptionEntry;
+      if (collection[oeObj.url] !== undefined) {
+        throw new Error(`url already has a value: ${oeObj.url}`);
+      }
+      let colURL = oeObj.url;
+      if (colURL.indexOf(`${extensionName}.`) !== 0) {
+        colURL = `${extensionName}.${colURL}`;
+      }
+      // eslint-disable-next-line no-param-reassign
+      collection[colURL] = oeObj;
+    } else {
+      Object.keys(obj).forEach((key: string) => {
+        collectOptionEntries(
+          obj[key] as { [key: string]: unknown },
+          extensionName,
+          collection
+        );
+      });
+    }
+  }
+  return collection;
+}
+
+function collectConfigEntries(
+  obj: { value: unknown; [key: string]: unknown },
+  url?: string,
+  collection?: { [key: string]: ConfigEntry }
+) {
+  // eslint-disable-next-line no-param-reassign
+  if (collection === undefined) collection = {};
+  // eslint-disable-next-line no-param-reassign
+  if (url === undefined) url = '';
+
+  if (obj !== null && obj !== undefined && typeof obj === 'object') {
+    if (obj.value !== undefined) {
+      const o = obj as ConfigEntry;
+      if (collection[url] !== undefined) {
+        throw new Error(`url already has a value: ${url}`);
+      }
+      // eslint-disable-next-line no-param-reassign
+      collection[url] = o;
+    } else {
+      Object.keys(obj).forEach((key) => {
+        let newUrl = url;
+        if (newUrl === undefined) newUrl = '';
+        if (newUrl !== '') {
+          newUrl += '.';
+        }
+        newUrl += key;
+        collectConfigEntries(
+          obj[key] as { value: unknown; [key: string]: unknown },
+          newUrl,
+          collection
+        );
+      });
+    }
+  }
+
+  return collection;
 }
 
 const Discovery = {
@@ -107,9 +183,23 @@ const Discovery = {
             type,
             definition,
           } as unknown as Extension;
-          await readUISpec(folder, ext);
+          ext.ui = await readUISpec(folder);
           await setLocale(folder, ext, currentLocale);
-          await readConfig(folder, ext);
+          ext.config = await readConfig(folder);
+
+          ext.optionEntries = collectOptionEntries(
+            ext.ui as unknown as { [key: string]: unknown },
+            ext.name
+          );
+
+          ext.configEntries = {
+            ...collectConfigEntries(
+              ext.config.modules as { [key: string]: unknown; value: unknown }
+            ),
+            ...collectConfigEntries(
+              ext.config.plugins as { [key: string]: unknown; value: unknown }
+            ),
+          };
 
           return ext;
         })

@@ -4,6 +4,36 @@
         "title": "Overview",
         "not.installed": "not installed",
         "install.from.zip": "Install UCP to folder from Zip",
-        "require.reload.text": "The installation process requires a reload, reload now?"
-    } 
+        "require.reload.text": "The installation process requires a reload, reload now?",
+        "download.install": "Download and install the latest UCP version",
+        "uninstall": "Uninstall UCP from this folder",
+        "update": {
+            "gui.check": "Check for GUI updates",
+            "running": "Updating...",
+            "done": "Updated!",
+            "not.available": "No updates available"
+        }
+    },
+    "footer": {
+        "folder": "folder:",
+        "version": {
+            "gui": "GUI version: {{version}}",
+            "ucp": "UCP version: {{version}}",
+            "no.ucp": "not installed"
+        },
+        "ucp.active": "UCP active: {{active}}"
+    },
+    "extensions": {
+        "title": "Extensions",
+        "available": "Available extensions",
+        "activated": "Activated extensions",
+        "is.dependency": "Cannot deactivate this because this is a dependency of {{dependencies}}"
+    },
+    "config": {
+        "title": "User Config",
+        "allow.override": "Allow user override",
+        "table.of.contents": "Table of Contents",
+        "general": "General",
+        "element.unsupported.type": "Element {{url}} not created because of unsupported type: {{type}}"
+    }
 }

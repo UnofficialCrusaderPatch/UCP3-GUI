@@ -1,5 +1,22 @@
 {
     "loading": "Loading...",
     "require.reload.title": "Reload required",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "close": "Close",
+    "reload": "Reload",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "save": "Save",
+    "export": "Export",
+    "import": "Import",
+    "reset": "Reset",
+    "messages_zero": "{{count}} message",
+    "messages_one": "{{count}} message",
+    "messages_other": "{{count}} messages",
+    "warnings_zero": "{{count}} warning",
+    "warnings_one": "{{count}} warning",
+    "warnings_other": "{{count}} warnings",
+    "errors_zero": "{{count}} error",
+    "errors_one": "{{count}} error",
+    "errors_other": "{{count}} errors"
 }

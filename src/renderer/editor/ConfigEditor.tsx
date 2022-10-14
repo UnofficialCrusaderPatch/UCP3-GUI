@@ -26,6 +26,7 @@ import {
 } from './factory/UIElements';
 
 import { ucpBackEnd } from '../fakeBackend';
+import { useTranslation } from 'react-i18next';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -56,6 +57,8 @@ export default function ConfigEditor(args: {
     configurationTouched,
     setConfigurationTouched,
   } = useContext(GlobalState);
+
+  const [t] = useTranslation(["gui-general", "gui-editor"]);
 
   const warningCount = Object.values(configurationWarnings)
     .map((v) =>
@@ -130,7 +133,7 @@ export default function ConfigEditor(args: {
                 });
               }}
             >
-              Import
+              {t("gui-general:import")}
             </button>
             <button
               disabled={Object.keys(configurationTouched).length === 0}
@@ -144,7 +147,7 @@ export default function ConfigEditor(args: {
                 )
               }
             >
-              Save
+              {t("gui-general:save")}
             </button>
             <button
               disabled={Object.keys(configurationTouched).length === 0}
@@ -158,7 +161,7 @@ export default function ConfigEditor(args: {
                 )
               }
             >
-              Export
+              {t("gui-general:export")}
             </button>
             <button
               className="col-auto btn btn-primary mx-1"
@@ -174,11 +177,11 @@ export default function ConfigEditor(args: {
                 });
               }}
             >
-              Reset
+              {t("gui-general:reset")}
             </button>
             <Form.Switch
               id="config-allow-user-override-switch"
-              label="Allow user override"
+              label={t("gui-editor:config.allow.override")}
               className="col-auto d-inline-block ms-1"
             />
           </div>
@@ -187,11 +190,11 @@ export default function ConfigEditor(args: {
             {errorCount > 0 ? (
               <span className="text-danger fs-4 mx-1">⚠</span>
             ) : null}
-            <span>{errorCount} errors </span>
+            <span>{t("gui-general:errors", { count: errorCount })}</span>
             {warningCount > 0 ? (
               <span className="text-warning fs-4 mx-1">⚠</span>
             ) : null}
-            <span>{warningCount} warnings</span>
+            <span>{t("gui-general:warnings", { count: warningCount })}</span>
           </div>
         </div>
       ) : null}

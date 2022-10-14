@@ -20,6 +20,7 @@ import ExtensionDependencySolver from '../../common/config/ExtensionDependencySo
 
 import './ExtensionManager.css';
 import { GlobalState } from '../GlobalState';
+import { useTranslation } from 'react-i18next';
 
 function renderExtension(
   ext: Extension,
@@ -32,16 +33,17 @@ function renderExtension(
 ) {
   const { name, version, author } = ext.definition;
 
+  const [t] = useTranslation(["gui-editor"]);
+
   const renderTooltip = (props: unknown) => {
     if (revDeps.length > 0) {
       return (
         // eslint-disable-next-line react/jsx-props-no-spreading
         <Tooltip {...(props as object)}>
           {revDeps.length > 0
-            ? `Cannot deactivate this because this is a dependency of ${revDeps.join(
-                ', '
-              )}`
-            : ''}
+            ? t("gui-editor:extensions.is.dependency", { dependencies: revDeps.join(', ') })
+            : ''
+          }
         </Tooltip>
       );
     }
@@ -119,6 +121,8 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   const { extensions } = args;
   const { setActiveExtensions } = useContext(GlobalState);
 
+  const [t] = useTranslation(["gui-general", "gui-editor"]);
+
   type State = {
     allExtensions: Extension[];
     // Explicitly activated
@@ -168,7 +172,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
       ext,
       false,
       { up: false, down: false },
-      'Activate',
+      t("gui-general:activate"),
       (event) => {
         // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
@@ -208,7 +212,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
           ),
         });
       },
-      (event: { type: 'up' | 'down' }) => {},
+      (event: { type: 'up' | 'down' }) => { },
       extensionsState.reverseDependencies[ext.name].filter(
         (e: string) =>
           extensionsState.activeExtensions
@@ -230,7 +234,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
       ext,
       true,
       movability,
-      'Deactivate',
+      t("gui-general:deactivate"),
       (event) => {
         const relevantExtensions = new Set(
           extensionsState.activatedExtensions
@@ -285,7 +289,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   return (
     <Container className="fs-6" style={{ height: '85vh' }}>
       <Row className="mb-3" style={{}}>
-        <h4>Activated extensions</h4>
+        <h4>{t("gui-editor:extensions.activated")}</h4>
         <div
           style={{
             height: '40vh',
@@ -299,7 +303,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
         </div>
       </Row>
       <Row style={{}}>
-        <h4>Available extensions</h4>
+        <h4>{t("gui-editor:extensions.available")}</h4>
         <div
           style={{
             height: '40vh',

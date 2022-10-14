@@ -14,6 +14,7 @@ import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
 import React, { Fragment, ReactElement, useContext } from 'react';
 import { GlobalState } from '../../GlobalState';
+import { useTranslation } from 'react-i18next';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
@@ -115,7 +116,7 @@ const UIFactory = {
       // <Form key={`${name}-groupbox`}>
       <Container
         className="border-bottom border-light my-2 px-0"
-        // style={{ marginLeft: '-1.5rem' }}
+      // style={{ marginLeft: '-1.5rem' }}
       >
         <Row className="my-3">
           <h5>{header}</h5>
@@ -262,9 +263,8 @@ const UIFactory = {
           />
         </div>
         <div
-          className={`flex-grow-1 px-2 ${
-            !isEnabled || disabled ? 'label-disabled' : ''
-          }`}
+          className={`flex-grow-1 px-2 ${!isEnabled || disabled ? 'label-disabled' : ''
+            }`}
         >
           <Form.Label
             htmlFor={`${url}-input`}
@@ -272,8 +272,8 @@ const UIFactory = {
             data-bs-toggle="tooltip"
             data-bs-placement="top"
             title={fullToolTip}
-            // End of tooltip stuff
-            // disabled={!isEnabled || disabled}
+          // End of tooltip stuff
+          // disabled={!isEnabled || disabled}
           >
             {text}
           </Form.Label>
@@ -351,9 +351,8 @@ const UIFactory = {
           </Form.Select>
         </div>
         <div
-          className={`flex-grow-1 px-2 ${
-            !isEnabled || disabled ? 'label-disabled' : ''
-          }`}
+          className={`flex-grow-1 px-2 ${!isEnabled || disabled ? 'label-disabled' : ''
+            }`}
         >
           <Form.Label
             htmlFor={`${url}-input`}
@@ -361,8 +360,8 @@ const UIFactory = {
             data-bs-toggle="tooltip"
             data-bs-placement="top"
             title={fullToolTip}
-            // End of tooltip stuff
-            // disabled={!isEnabled || disabled}
+          // End of tooltip stuff
+          // disabled={!isEnabled || disabled}
           >
             {text}
           </Form.Label>
@@ -373,6 +372,9 @@ const UIFactory = {
 
   CreateUIElement(args: { spec: DisplayConfigElement; disabled: boolean }) {
     const { spec, disabled } = args;
+
+    const [t] = useTranslation(["gui-editor"]);
+
     if (spec.display === undefined) {
       if (spec.type !== undefined) {
         spec.display = DisplayDefaults[spec.type];
@@ -380,7 +382,7 @@ const UIFactory = {
     }
     if (spec.display === undefined) {
       console.warn(
-        `Element (${spec.url}) not created because of unsupported type: ${spec.type}`
+        t("gui-editor:config.element.unsupported.type", { url: spec.url, type: spec.type })
       );
       return <div />;
     }
@@ -397,7 +399,7 @@ const UIFactory = {
       return <UIFactory.CreateChoice spec={spec} disabled={disabled} />;
     }
     console.warn(
-      `Element (${spec.url}) not created because of unsupported type: ${spec.type}`
+      t("gui-editor:config.element.unsupported.type", { url: spec.url, type: spec.type })
     );
     return <div />;
   },
@@ -485,6 +487,8 @@ const UIFactory = {
   CreateSectionsNav(args: { spec: SectionDescription }) {
     const { spec } = args;
 
+    const [t] = useTranslation(["gui-editor"]);
+
     const level1 = Object.keys(spec.sections).map((key) => (
       <UIFactory.NavSection
         key={`#config-${key}`}
@@ -502,11 +506,11 @@ const UIFactory = {
         style={{ justifyContent: 'flex-start' }}
       >
         <a className="navbar-brand" href="#config-General">
-          Table of Contents
+          {t("gui-editor:config.table.of.contents")}
         </a>
         <nav className="nav nav-pills flex-column">
           <a className="nav-link" href="#config-General">
-            General
+            {t("gui-editor:config.general")}
           </a>
           {level1}
         </nav>
@@ -523,6 +527,8 @@ const UIFactory = {
     } = useContext(GlobalState);
     const definition = uiDefinition.hierarchical as SectionDescription;
     const { readonly } = args;
+
+    const [t] = useTranslation(["gui-editor"]);
 
     const elements = (definition.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => (
@@ -556,7 +562,7 @@ const UIFactory = {
           id="config-sections"
         >
           <div style={{ marginLeft: `1rem` }}>
-            <h1 id="config-General">General</h1>
+            <h1 id="config-General">{t("gui-editor:config.general")}</h1>
             {elements}
           </div>
           <div style={{ marginLeft: `1rem` }}>{children}</div>

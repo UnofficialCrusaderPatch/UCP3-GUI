@@ -155,7 +155,6 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   const [extensionsState, setExtensionsState] = useReducer(
     (oldState: State, newState: unknown): State => {
       const state = { ...oldState, ...(newState as object) };
-      setActiveExtensions(state.activeExtensions);
       return state;
     },
     {
@@ -211,6 +210,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
                 .indexOf(`${e.name}-${e.version}`) === -1
           ),
         });
+        setActiveExtensions(final);
       },
       (event: { type: 'up' | 'down' }) => { },
       extensionsState.reverseDependencies[ext.name].filter(
@@ -246,18 +246,19 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
         );
 
         // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
-
+        const ae = extensionsState.activeExtensions.filter((e) =>
+          relevantExtensions.has(e.name)
+        );
         setExtensionsState({
           activatedExtensions: extensionsState.activatedExtensions.filter(
             (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
           ),
-          activeExtensions: extensionsState.activeExtensions.filter((e) =>
-            relevantExtensions.has(e.name)
-          ),
+          activeExtensions: ae,
           installedExtensions: extensions
             .filter((e: Extension) => !relevantExtensions.has(e.name))
             .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name)),
         } as unknown as State);
+        setActiveExtensions(ae);
       },
       (event: { name: string; type: 'up' | 'down' }) => {
         const { name, type } = event;
@@ -276,6 +277,7 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
         setExtensionsState({
           activeExtensions: extensionsState.activeExtensions,
         });
+        setActiveExtensions(extensionsState.activeExtensions);
       },
       extensionsState.reverseDependencies[ext.name].filter(
         (e: string) =>

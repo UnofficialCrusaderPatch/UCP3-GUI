@@ -8,10 +8,10 @@ import { registerForWindowClose } from "./tauri-hooks";
 import { customUseSearchParams } from "./util-components";
 
 interface SwrResult<T> {
-    data: T | undefined,
-    isLoading: boolean,
-    isError: boolean,
-    mutate: KeyedMutator<T>
+  data: T | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  mutate: KeyedMutator<T>;
 }
 
 // keys are used to identify and cache the request, so they need to be unique for different sources
@@ -20,6 +20,7 @@ const SWR_KEYS = {
     LANGUAGE_LOAD: "ucp.lang.load"
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export function useGuiConfig(): SwrResult<GuiConfigHandler> {
     const [searchParams, setSearchParams] = customUseSearchParams();
 

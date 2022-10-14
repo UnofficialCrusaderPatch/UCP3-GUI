@@ -12,41 +12,24 @@ import Container from 'react-bootstrap/Container';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
-import React, { Fragment, ReactElement, useContext } from 'react';
+import React, { Fragment, ReactElement, useContext, useEffect } from 'react';
+import * as bootstrap from 'bootstrap';
 import { GlobalState } from '../../GlobalState';
 import { useTranslation } from 'react-i18next';
+import { ucpBackEnd } from '../../fakeBackend';
+
+import type {
+  DisplayConfigElement,
+  NumberInputDisplayConfigElement,
+  OptionEntry,
+  SectionDescription,
+} from '../../../common/config/common';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
   string: 'TextEntry',
   integer: 'Number',
   number: 'Number',
-};
-
-export type DisplayConfigElement = {
-  choices: string[];
-  name: string;
-  description: string;
-  header: string;
-  text: string;
-  type: string;
-  display: string;
-  children: DisplayConfigElement[];
-  default: unknown;
-  url: string;
-  columns: number;
-  tooltip: string;
-  enabled: string;
-};
-
-export type NumberInputDisplayConfigElement = DisplayConfigElement & {
-  min: number;
-  max: number;
-};
-
-export type SectionDescription = {
-  elements: DisplayConfigElement[];
-  sections: { [key: string]: SectionDescription };
 };
 
 function formatToolTip(tooltip: string, url: string) {
@@ -60,6 +43,8 @@ const renderTooltip = (props: { [key: string]: unknown }) => (
   // eslint-disable-next-line react/jsx-props-no-spreading
   <Tooltip {...(props as object)}>{props.tooltipText as string}</Tooltip>
 );
+
+const sanitizeID = (id: string) => id.toLowerCase().replaceAll(' ', '-');
 
 const UIFactory = {
   ConfigWarning(args: { text: string; level: string }) {
@@ -81,7 +66,9 @@ const UIFactory = {
   },
   CreateGroupBox(args: { spec: DisplayConfigElement; disabled: boolean }) {
     const { spec, disabled } = args;
-    const { name, description, children, columns, header } = spec;
+    const { name, description, children, columns, header, text } = spec;
+    let finalDescription = description;
+    if (finalDescription === undefined) finalDescription = text;
     const itemCount = children.length;
     const rows = Math.ceil(itemCount / columns);
 
@@ -116,12 +103,12 @@ const UIFactory = {
       // <Form key={`${name}-groupbox`}>
       <Container
         className="border-bottom border-light my-2 px-0"
-      // style={{ marginLeft: '-1.5rem' }}
+        style={{ margin: 0 }}
       >
         <Row className="my-3">
           <h5>{header}</h5>
           <div>
-            <span>{description}</span>
+            <span>{finalDescription}</span>
           </div>
         </Row>
         <Row className="mt-1">{cs}</Row>
@@ -425,27 +412,26 @@ const UIFactory = {
       }
     );
 
-    const htmlHeader = React.createElement(
-      `h${level + 1}`,
-      { id: identifier },
-      header
-    );
+    const htmlHeader = React.createElement(`h${level + 1}`, {}, header);
 
     const childKeys = Object.keys(contents.sections);
-    const children = childKeys.map((key) => (
-      <UIFactory.CreateSection
-        key={`${identifier}-${key}`}
-        level={level + 1}
-        header={key}
-        contents={contents.sections[key]}
-        identifier={`${identifier}-${key}`}
-        readonly={readonly}
-      />
-    ));
+    const children = childKeys.map((key) => {
+      const id = sanitizeID(`${identifier}-${key}`);
+      return (
+        <UIFactory.CreateSection
+          key={id}
+          level={level + 1}
+          header={key}
+          contents={contents.sections[key]}
+          identifier={id}
+          readonly={readonly}
+        />
+      );
+    });
 
     return (
       // ${level / 4}rem
-      <div key={identifier} style={{ marginLeft: `0rem` }}>
+      <div key={identifier} id={identifier} style={{ marginLeft: `0rem` }}>
         {htmlHeader}
         <div style={{ marginLeft: '0rem', marginBottom: '0.5rem' }}>
           {elements}
@@ -470,15 +456,18 @@ const UIFactory = {
           {header}
         </a>
         <nav className={iClassName} style={style}>
-          {Object.keys(subspec.sections).map((key) => (
-            <UIFactory.NavSection
-              key={`${href}-${key}`}
-              subspec={subspec.sections[key]}
-              header={key}
-              href={`${href}-${key}`}
-              depth={depth + 1}
-            />
-          ))}
+          {Object.keys(subspec.sections).map((key) => {
+            const id = sanitizeID(`${href}-${key}`);
+            return (
+              <UIFactory.NavSection
+                key={id}
+                subspec={subspec.sections[key]}
+                header={key}
+                href={id}
+                depth={depth + 1}
+              />
+            );
+          })}
         </nav>
       </>
     );
@@ -488,16 +477,18 @@ const UIFactory = {
     const { spec } = args;
 
     const [t] = useTranslation(["gui-editor"]);
-
-    const level1 = Object.keys(spec.sections).map((key) => (
-      <UIFactory.NavSection
-        key={`#config-${key}`}
-        subspec={spec.sections[key]}
-        header={key}
-        href={`#config-${key}`}
-        depth={1}
-      />
-    ));
+    const level1 = Object.keys(spec.sections).map((key) => {
+      const id = sanitizeID(`#config-${key}`);
+      return (
+        <UIFactory.NavSection
+          key={id}
+          subspec={spec.sections[key]}
+          header={key}
+          href={id}
+          depth={1}
+        />
+      );
+    });
 
     return (
       <nav
@@ -520,15 +511,50 @@ const UIFactory = {
 
   CreateSections(args: { readonly: boolean }) {
     const {
+      folder,
+      activeExtensions,
       uiDefinition,
       configuration,
       setConfiguration,
       configurationWarnings,
     } = useContext(GlobalState);
-    const definition = uiDefinition.hierarchical as SectionDescription;
+    const optionEntries = ucpBackEnd
+      .extensionsToOptionEntries(activeExtensions)
+      .filter((o: OptionEntry) => o.hidden === undefined || o.hidden === false);
+    const definition = ucpBackEnd.optionEntriesToHierarchical(optionEntries);
     const { readonly } = args;
 
     const [t] = useTranslation(["gui-editor"]);
+
+    useEffect(() => {
+      // eslint-disable-next-line no-new
+      new bootstrap.ScrollSpy(
+        document.querySelector('#dynamicConfigPanel') as Element,
+        {
+          target: '#config-navbar',
+          offset: 10,
+          method: 'offset',
+        }
+      );
+    });
+
+    if (optionEntries.length === 0) {
+      // Display message that no config options can be displayed
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            minHeight: '85vh',
+          }}
+        >
+          No extensions are active, so there are no options to display! Go to
+          the Extensions tab to activate an Extension.
+        </div>
+      );
+    }
 
     const elements = (definition.elements as DisplayConfigElement[]).map(
       (el: DisplayConfigElement) => (
@@ -539,29 +565,38 @@ const UIFactory = {
         />
       )
     );
-    const children = Object.keys(definition.sections).map((key) => (
-      <UIFactory.CreateSection
-        key={`config-${key}`}
-        level={1}
-        header={key}
-        contents={definition.sections[key]}
-        identifier={`config-${key}`}
-        readonly={readonly}
-      />
-    ));
+
+    const children = Object.keys(definition.sections).map((key) => {
+      const id = sanitizeID(`config-${key}`);
+      return (
+        <UIFactory.CreateSection
+          key={id}
+          level={1}
+          header={key}
+          contents={definition.sections[key]}
+          identifier={id}
+          readonly={readonly}
+        />
+      );
+    });
+
     // https://getbootstrap.com/docs/5.0/components/scrollspy/#list-item-4
     return (
       <>
         <UIFactory.CreateSectionsNav spec={definition} />
         <div
-          data-bs-spy="scroll"
-          data-bs-target="#config-navbar"
-          data-bs-offset="0"
-          // tabIndex="0"
+          // data-bs-spy="scroll"
+          // data-bs-target="#config-navbar"
+          // data-bs-offset="0"
+          // // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          // tabIndex={0}
+          style={{
+            position: 'relative',
+          }}
           className="col-9 p-3"
           id="config-sections"
         >
-          <div style={{ marginLeft: `1rem` }}>
+          <div id="config-General" style={{ marginLeft: `1rem` }}>
             <h1 id="config-General">{t("gui-editor:config.general")}</h1>
             {elements}
           </div>
@@ -572,4 +607,5 @@ const UIFactory = {
   },
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export { UIFactory };

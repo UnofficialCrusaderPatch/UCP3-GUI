@@ -1,7 +1,7 @@
 import { exists as fileExists, createDir, FsOptions } from '@tauri-apps/api/fs';
 import { dataDir, normalize as normalizePath } from '@tauri-apps/api/path';
 
-const BASE_FOLDER = "UnofficialCrusaderPatch3";
+const BASE_FOLDER = 'UnofficialCrusaderPatch3';
 
 // at the time of writing this, there is a typing error for fs.exists
 // this function is used to proxy every call, so that the error only needs to be ignored here

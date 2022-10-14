@@ -19,14 +19,9 @@ import React, { Component, useContext, useReducer, useState } from 'react';
 import './ConfigEditor.css';
 
 import { GlobalState } from '../GlobalState';
-import {
-  UIFactory,
-  DisplayConfigElement,
-  SectionDescription,
-} from './factory/UIElements';
-
 import { ucpBackEnd } from '../fakeBackend';
 import { useTranslation } from 'react-i18next';
+import { UIFactory } from './factory/UIElements';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -56,6 +51,7 @@ export default function ConfigEditor(args: {
     setConfiguration,
     configurationTouched,
     setConfigurationTouched,
+    activeExtensions,
   } = useContext(GlobalState);
 
   const [t] = useTranslation(["gui-general", "gui-editor"]);

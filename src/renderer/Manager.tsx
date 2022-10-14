@@ -15,7 +15,6 @@ import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ConfigEditor from './editor/ConfigEditor';
 
-import { DisplayConfigElement } from './editor/factory/UIElements';
 import ExtensionManager from './extensionManager/ExtensionManager';
 
 import {
@@ -29,7 +28,7 @@ import {
 } from './GlobalState';
 
 import { ucpBackEnd } from './fakeBackend';
-import { Extension } from '../common/config/common';
+import { DisplayConfigElement, Extension } from '../common/config/common';
 import { useTranslation } from 'react-i18next';
 
 function getConfigDefaults(yml: unknown[]) {
@@ -38,7 +37,7 @@ function getConfigDefaults(yml: unknown[]) {
   function yieldDefaults(part: any | DisplayConfigElement): void {
     if (typeof part === 'object') {
       if (Object.keys(part).indexOf('url') > -1) {
-        result[part.url as string] = part.default;
+        result[part.url as string] = (part.value || {}).default;
       }
       if (Object.keys(part).indexOf('children') > -1) {
         part.children.forEach((child: unknown) => yieldDefaults(child));
@@ -128,6 +127,8 @@ export default function Manager() {
       if (currentFolder.length > 0) {
         uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
         const defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
+
+        console.log('defaults', defaults);
 
         ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
         if (ucpVersion.major !== undefined) isUCP3Installed = true;

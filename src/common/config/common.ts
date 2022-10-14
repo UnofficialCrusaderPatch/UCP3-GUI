@@ -121,6 +121,8 @@ type ConfigFile = {
 
 type OptionEntry = {
   name: string;
+  text: string;
+  tooltip: string;
   type: string;
   display: string;
   url: string;
@@ -132,6 +134,8 @@ type OptionEntry = {
       max: unknown;
     };
   };
+  hidden: boolean;
+  category: string[];
 };
 
 type Definition = {
@@ -157,6 +161,32 @@ type Configs = { [key: string]: ConfigEntry }[];
 
 type PermissionStatus = { status: string; reason: string; by: string };
 
+type DisplayConfigElement = {
+  choices: string[];
+  name: string;
+  description: string;
+  header: string;
+  text: string;
+  type: string;
+  display: string;
+  children: DisplayConfigElement[];
+  default: unknown;
+  url: string;
+  columns: number;
+  tooltip: string;
+  enabled: string;
+};
+
+type NumberInputDisplayConfigElement = DisplayConfigElement & {
+  min: number;
+  max: number;
+};
+
+type SectionDescription = {
+  elements: DisplayConfigElement[];
+  sections: { [key: string]: SectionDescription };
+};
+
 export type {
   ConfigEntry,
   ConfigFile,
@@ -165,4 +195,7 @@ export type {
   Extension,
   OptionEntry,
   PermissionStatus,
+  DisplayConfigElement,
+  NumberInputDisplayConfigElement,
+  SectionDescription,
 };

@@ -21,7 +21,7 @@ function FittingPage() {
   const windowValue = searchParams.get('window');
 
   if (languageState.isLoading) {
-    return <div></div>;
+    return <div />;
   }
 
   if (windowValue) {

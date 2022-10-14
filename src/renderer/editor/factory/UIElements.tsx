@@ -14,8 +14,8 @@ import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
 import React, { Fragment, ReactElement, useContext, useEffect } from 'react';
 import * as bootstrap from 'bootstrap';
-import { GlobalState } from '../../GlobalState';
 import { useTranslation } from 'react-i18next';
+import { GlobalState } from '../../GlobalState';
 import { ucpBackEnd } from '../../fakeBackend';
 
 import type {
@@ -250,8 +250,9 @@ const UIFactory = {
           />
         </div>
         <div
-          className={`flex-grow-1 px-2 ${!isEnabled || disabled ? 'label-disabled' : ''
-            }`}
+          className={`flex-grow-1 px-2 ${
+            !isEnabled || disabled ? 'label-disabled' : ''
+          }`}
         >
           <Form.Label
             htmlFor={`${url}-input`}
@@ -259,8 +260,8 @@ const UIFactory = {
             data-bs-toggle="tooltip"
             data-bs-placement="top"
             title={fullToolTip}
-          // End of tooltip stuff
-          // disabled={!isEnabled || disabled}
+            // End of tooltip stuff
+            // disabled={!isEnabled || disabled}
           >
             {text}
           </Form.Label>
@@ -338,8 +339,9 @@ const UIFactory = {
           </Form.Select>
         </div>
         <div
-          className={`flex-grow-1 px-2 ${!isEnabled || disabled ? 'label-disabled' : ''
-            }`}
+          className={`flex-grow-1 px-2 ${
+            !isEnabled || disabled ? 'label-disabled' : ''
+          }`}
         >
           <Form.Label
             htmlFor={`${url}-input`}
@@ -347,8 +349,8 @@ const UIFactory = {
             data-bs-toggle="tooltip"
             data-bs-placement="top"
             title={fullToolTip}
-          // End of tooltip stuff
-          // disabled={!isEnabled || disabled}
+            // End of tooltip stuff
+            // disabled={!isEnabled || disabled}
           >
             {text}
           </Form.Label>
@@ -360,7 +362,7 @@ const UIFactory = {
   CreateUIElement(args: { spec: DisplayConfigElement; disabled: boolean }) {
     const { spec, disabled } = args;
 
-    const [t] = useTranslation(["gui-editor"]);
+    const [t] = useTranslation(['gui-editor']);
 
     if (spec.display === undefined) {
       if (spec.type !== undefined) {
@@ -369,7 +371,10 @@ const UIFactory = {
     }
     if (spec.display === undefined) {
       console.warn(
-        t("gui-editor:config.element.unsupported.type", { url: spec.url, type: spec.type })
+        t('gui-editor:config.element.unsupported.type', {
+          url: spec.url,
+          type: spec.type,
+        })
       );
       return <div />;
     }
@@ -386,7 +391,10 @@ const UIFactory = {
       return <UIFactory.CreateChoice spec={spec} disabled={disabled} />;
     }
     console.warn(
-      t("gui-editor:config.element.unsupported.type", { url: spec.url, type: spec.type })
+      t('gui-editor:config.element.unsupported.type', {
+        url: spec.url,
+        type: spec.type,
+      })
     );
     return <div />;
   },
@@ -476,7 +484,7 @@ const UIFactory = {
   CreateSectionsNav(args: { spec: SectionDescription }) {
     const { spec } = args;
 
-    const [t] = useTranslation(["gui-editor"]);
+    const [t] = useTranslation(['gui-editor']);
     const level1 = Object.keys(spec.sections).map((key) => {
       const id = sanitizeID(`#config-${key}`);
       return (
@@ -497,11 +505,11 @@ const UIFactory = {
         style={{ justifyContent: 'flex-start' }}
       >
         <a className="navbar-brand" href="#config-General">
-          {t("gui-editor:config.table.of.contents")}
+          {t('gui-editor:config.table.of.contents')}
         </a>
         <nav className="nav nav-pills flex-column">
           <a className="nav-link" href="#config-General">
-            {t("gui-editor:config.general")}
+            {t('gui-editor:config.general')}
           </a>
           {level1}
         </nav>
@@ -524,7 +532,7 @@ const UIFactory = {
     const definition = ucpBackEnd.optionEntriesToHierarchical(optionEntries);
     const { readonly } = args;
 
-    const [t] = useTranslation(["gui-editor"]);
+    const [t] = useTranslation(['gui-editor']);
 
     useEffect(() => {
       // eslint-disable-next-line no-new
@@ -597,7 +605,7 @@ const UIFactory = {
           id="config-sections"
         >
           <div id="config-General" style={{ marginLeft: `1rem` }}>
-            <h1 id="config-General">{t("gui-editor:config.general")}</h1>
+            <h1 id="config-General">{t('gui-editor:config.general')}</h1>
             {elements}
           </div>
           <div style={{ marginLeft: `1rem` }}>{children}</div>

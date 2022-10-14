@@ -18,9 +18,9 @@ import React, { Component, useContext, useReducer, useState } from 'react';
 
 import './ConfigEditor.css';
 
+import { useTranslation } from 'react-i18next';
 import { GlobalState } from '../GlobalState';
 import { ucpBackEnd } from '../fakeBackend';
-import { useTranslation } from 'react-i18next';
 import { UIFactory } from './factory/UIElements';
 
 function saveConfig(
@@ -54,7 +54,7 @@ export default function ConfigEditor(args: {
     activeExtensions,
   } = useContext(GlobalState);
 
-  const [t] = useTranslation(["gui-general", "gui-editor"]);
+  const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   const warningCount = Object.values(configurationWarnings)
     .map((v) =>
@@ -129,7 +129,7 @@ export default function ConfigEditor(args: {
                 });
               }}
             >
-              {t("gui-general:import")}
+              {t('gui-general:import')}
             </button>
             <button
               disabled={Object.keys(configurationTouched).length === 0}
@@ -143,7 +143,7 @@ export default function ConfigEditor(args: {
                 )
               }
             >
-              {t("gui-general:save")}
+              {t('gui-general:save')}
             </button>
             <button
               disabled={Object.keys(configurationTouched).length === 0}
@@ -157,7 +157,7 @@ export default function ConfigEditor(args: {
                 )
               }
             >
-              {t("gui-general:export")}
+              {t('gui-general:export')}
             </button>
             <button
               className="col-auto btn btn-primary mx-1"
@@ -173,27 +173,41 @@ export default function ConfigEditor(args: {
                 });
               }}
             >
-              {t("gui-general:reset")}
+              {t('gui-general:reset')}
             </button>
             <Form.Switch
               id="config-allow-user-override-switch"
-              label={t("gui-editor:config.allow.override")}
+              label={t('gui-editor:config.allow.override')}
               className="col-auto d-inline-block ms-1"
             />
           </div>
 
           <div className="col-auto ml-auto d-flex justify-content-center align-items-center">
-            <div className="d-flex justify-content-center align-items-center" style={{ height: "0" }}>
-              <span className={`text-danger fs-4 mx-1${errorCount > 0 ? '' : ' invisible'}`}>⚠</span>
-              <span className='mx-1'>
-                {t("gui-general:errors", { count: errorCount })}
+            <div
+              className="d-flex justify-content-center align-items-center"
+              style={{ height: '0' }}
+            >
+              <span
+                className={`text-danger fs-4 mx-1${
+                  errorCount > 0 ? '' : ' invisible'
+                }`}
+              >
+                ⚠
               </span>
-              <span className={`text-warning fs-4 mx-1${errorCount > 0 ? '' : ' invisible'}`}>⚠</span>
-              <span className='mx-1'>
-                {t("gui-general:warnings", { count: warningCount })}
+              <span className="mx-1">
+                {t('gui-general:errors', { count: errorCount })}
+              </span>
+              <span
+                className={`text-warning fs-4 mx-1${
+                  errorCount > 0 ? '' : ' invisible'
+                }`}
+              >
+                ⚠
+              </span>
+              <span className="mx-1">
+                {t('gui-general:warnings', { count: warningCount })}
               </span>
             </div>
-
           </div>
         </div>
       ) : null}

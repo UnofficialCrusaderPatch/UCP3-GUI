@@ -13,6 +13,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ConfigEditor from './editor/ConfigEditor';
 
 import ExtensionManager from './extensionManager/ExtensionManager';
@@ -29,7 +30,6 @@ import {
 
 import { ucpBackEnd } from './fakeBackend';
 import { DisplayConfigElement, Extension } from '../common/config/common';
-import { useTranslation } from 'react-i18next';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -67,7 +67,7 @@ export default function Manager() {
   const [searchParams] = useSearchParams();
   const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
 
-  const [t] = useTranslation(["gui-general", "gui-editor"]);
+  const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -116,7 +116,7 @@ export default function Manager() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
-    t("gui-editor:overview.download.install")
+    t('gui-editor:overview.download.install')
   );
   const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
@@ -182,7 +182,7 @@ export default function Manager() {
   );
 
   if (!initDone) {
-    return <p>{t("gui-general:loading")}</p>;
+    return <p>{t('gui-general:loading')}</p>;
   }
 
   return (
@@ -194,20 +194,23 @@ export default function Manager() {
             id="uncontrolled-tab-example"
             className="mb-3"
           >
-            <Tab eventKey="overview" title={t("gui-editor:overview.title")}>
+            <Tab eventKey="overview" title={t('gui-editor:overview.title')}>
               <div className="m-3">
-                {t("gui-editor:overview.folder.version")}{' '}
+                {t('gui-editor:overview.folder.version')}{' '}
                 {isUCP3Installed
-                  ? `${ucpVersion.major}.${ucpVersion.minor}.${ucpVersion.patch
-                  } - ${(ucpVersion.sha || '').substring(0, 8)}`
-                  : t("gui-editor:overview.not.installed")}
+                  ? `${ucpVersion.major}.${ucpVersion.minor}.${
+                      ucpVersion.patch
+                    } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                  : t('gui-editor:overview.not.installed')}
               </div>
               <div className="m-3">
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={async (event) => {
-                    setCheckForUpdatesButtonText(t("gui-editor:overview.update.running"));
+                    setCheckForUpdatesButtonText(
+                      t('gui-editor:overview.update.running')
+                    );
                     const updateResult = await ucpBackEnd.checkForUCP3Updates(
                       currentFolder
                     );
@@ -216,10 +219,14 @@ export default function Manager() {
                       updateResult.installed === true
                     ) {
                       setShow(true);
-                      setCheckForUpdatesButtonText(t("gui-editor:overview.update.done"));
+                      setCheckForUpdatesButtonText(
+                        t('gui-editor:overview.update.done')
+                      );
                     } else {
                       console.log(JSON.stringify(updateResult));
-                      setCheckForUpdatesButtonText(t("gui-editor:overview.update.not.available"));
+                      setCheckForUpdatesButtonText(
+                        t('gui-editor:overview.update.not.available')
+                      );
                     }
                   }}
                 >
@@ -249,18 +256,20 @@ export default function Manager() {
                     setShow(true);
                   }}
                 >
-                  {t("gui-editor:overview.install.from.zip")}
+                  {t('gui-editor:overview.install.from.zip')}
                 </Button>
                 <Modal show={show} onHide={handleClose} className="text-dark">
                   <Modal.Header closeButton>
-                    <Modal.Title>{t("gui-general:require.reload.title")}</Modal.Title>
+                    <Modal.Title>
+                      {t('gui-general:require.reload.title')}
+                    </Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
-                    {t("gui-editor:overview.require.reload.text")}
+                    {t('gui-editor:overview.require.reload.text')}
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                      {t("gui-general:close")}
+                      {t('gui-general:close')}
                     </Button>
                     <Button
                       variant="primary"
@@ -269,14 +278,14 @@ export default function Manager() {
                         ucpBackEnd.reloadWindow();
                       }}
                     >
-                      {t("gui-general:reload")}
+                      {t('gui-general:reload')}
                     </Button>
                   </Modal.Footer>
                 </Modal>
               </div>
               <div className="m-3">
                 <button type="button" className="btn btn-primary disabled">
-                  {t("gui-editor:overview.uninstall")}
+                  {t('gui-editor:overview.uninstall')}
                 </button>
               </div>
               <div className="m-3">
@@ -285,7 +294,7 @@ export default function Manager() {
                     ucpBackEnd.checkForGUIUpdates(setGuiUpdateStatus);
                   }}
                 >
-                  {t("gui-editor:overview.update.gui.check")}
+                  {t('gui-editor:overview.update.gui.check')}
                 </Button>
                 <span className="mx-1">{guiUpdateStatus}</span>
               </div>
@@ -293,12 +302,12 @@ export default function Manager() {
                 <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
               </Form>
             </Tab>
-            <Tab eventKey="extensions" title={t("gui-editor:extensions.title")}>
+            <Tab eventKey="extensions" title={t('gui-editor:extensions.title')}>
               <ExtensionManager extensions={extensions} />
             </Tab>
             <Tab
               eventKey="config"
-              title={t("gui-editor:config.title")}
+              title={t('gui-editor:config.title')}
               className="tabpanel-config"
             >
               <ConfigEditor readonly={false} gameFolder={currentFolder} />
@@ -309,24 +318,37 @@ export default function Manager() {
             <div className="d-flex p-1 px-2 fs-8">
               <div className="flex-grow-1">
                 <span className="">
-                  {t("gui-editor:footer.folder")}
+                  {t('gui-editor:footer.folder')}
                   <span className="px-2 fst-italic">{currentFolder}</span>
                 </span>
               </div>
               <div>
-                <span className="px-2">{t("gui-general:messages", { count: 0 })}</span>
-                <span className="px-2">{t("gui-general:warnings", { count: warningCount })}</span>
-                <span className="px-2">{t("gui-general:errors", { count: errorCount })}</span>
-                <span className="px-2">{t("gui-editor:footer.version.gui", { version: "1.0.0" })}</span>
                 <span className="px-2">
-                  {t("gui-editor:footer.version.ucp", {
+                  {t('gui-general:messages', { count: 0 })}
+                </span>
+                <span className="px-2">
+                  {t('gui-general:warnings', { count: warningCount })}
+                </span>
+                <span className="px-2">
+                  {t('gui-general:errors', { count: errorCount })}
+                </span>
+                <span className="px-2">
+                  {t('gui-editor:footer.version.gui', { version: '1.0.0' })}
+                </span>
+                <span className="px-2">
+                  {t('gui-editor:footer.version.ucp', {
                     version: isUCP3Installed
-                      ? `${ucpVersion.major}.${ucpVersion.minor}.${ucpVersion.patch} - ${(ucpVersion.sha || '')
-                        .substring(0, 8)}`
-                      : t("gui-editor:footer.version.no.ucp")
+                      ? `${ucpVersion.major}.${ucpVersion.minor}.${
+                          ucpVersion.patch
+                        } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                      : t('gui-editor:footer.version.no.ucp'),
                   })}
                 </span>
-                <span className="px-2">{t("gui-editor:footer.ucp.active", { active: isUCP3Installed })}</span>
+                <span className="px-2">
+                  {t('gui-editor:footer.ucp.active', {
+                    active: isUCP3Installed,
+                  })}
+                </span>
               </div>
             </div>
           </div>

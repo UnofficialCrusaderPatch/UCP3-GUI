@@ -184,23 +184,23 @@ export class GuiConfigHandler {
     recentFolders.splice(alreadyThereIndex, 1);
   }
 
-    getLanguage(): string | undefined {
-        if (!this.#currentGuiConfig) {
-            GuiConfigHandler.#showNotLoadedError();
-            return undefined;
-        }
-        return this.#currentGuiConfig?.language;
+  getLanguage(): string | undefined {
+    if (!this.#currentGuiConfig) {
+      GuiConfigHandler.#showNotLoadedError();
+      return undefined;
     }
+    return this.#currentGuiConfig?.language;
+  }
 
-    setLanguage(lang: string) {
-        if (!this.#currentGuiConfig) {
-            GuiConfigHandler.#showNotLoadedError();
-        } else {
-            this.#currentGuiConfig.language = lang;
-        }
+  setLanguage(lang: string) {
+    if (!this.#currentGuiConfig) {
+      GuiConfigHandler.#showNotLoadedError();
+    } else {
+      this.#currentGuiConfig.language = lang;
     }
+  }
 
-    isInitialized(): boolean {
-        return !!this.#currentGuiConfig;
-    }
+  isInitialized(): boolean {
+    return !!this.#currentGuiConfig;
+  }
 }

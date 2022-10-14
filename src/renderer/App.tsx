@@ -47,57 +47,26 @@ function Landing() {
   }
 
   return (
-    <div className="vh-100 d-flex flex-column justify-content-center">
-      <div className="container-md d-flex flex-column justify-content-center">
-        <div className="mb-3 flex-grow-1">
-          <h1 className="mb-3">Welcome to Unofficial Crusader Patch 3</h1>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label htmlFor="browseresult">
-            Browse to a Stronghold Crusader installation folder to get started:
-          </label>
-          <div className="input-group">
-            <input
-              id="browseresult"
-              type="text"
-              className="form-control"
-              readOnly
-              role="button"
-              onClick={async () => {
-                const folder = await ucpBackEnd.openFolderDialog(
-                  browseResultState
-                );
-                if (folder !== undefined && folder.length > 0) {
-                  updateCurrentFolderSelectState(folder);
-                }
-              }}
-              value={browseResultState}
-            />
-            <button
-              id="launchbutton"
-              type="button"
-              className="btn btn-primary"
-              disabled={launchButtonState !== true}
-              onClick={() => ucpBackEnd.createEditorWindow(browseResultState)}
-            >
-              Launch
-            </button>
-          </div>
-        </div>
-        <div>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label htmlFor="recentfolders">
-            Use one of the recently used folders:
-          </label>
-          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-          <div
-            id="recentfolders"
-            className="list-group overflow-auto"
-            onClick={(event) => {
-              const inputTarget = event.target as HTMLInputElement;
-              if (inputTarget.textContent) {
-                updateCurrentFolderSelectState(
-                  inputTarget.textContent as string
-                );
+    <div className="container-md h-75 d-flex flex-column justify-content-start">
+      <div className="mb-3">
+        <h1 className="mb-3">{t("gui-landing:title")}</h1>
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label htmlFor="browseresult">
+          {t("gui-landing:select.folder")}
+        </label>
+        <div className="input-group">
+          <input
+            id="browseresult"
+            type="text"
+            className="form-control"
+            readOnly
+            role="button"
+            onClick={async () => {
+              const folder = await ucpBackEnd.openFolderDialog(
+                browseResultState
+              );
+              if (folder !== undefined && folder.length > 0) {
+                updateCurrentFolderSelectState(folder);
               }
             }}
             value={browseResultState}
@@ -109,47 +78,51 @@ function Landing() {
             disabled={launchButtonState !== true}
             onClick={() => ucpBackEnd.createEditorWindow(browseResultState, currentLang)}
           >
-            {folders
-              .filter((_, index) => index !== 0)
-              .map((recentFolder, index) => (
-                <div
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={index}
-                  className="list-group-item list-group-item-action list-group-item-dark d-flex justify-content-between align-items-center"
-                >
-                  {recentFolder}
-                  <input
-                    type="button"
-                    style={{ width: '0.25em', height: '0.25em' }}
-                    className="btn-close"
-                    aria-label="Close"
-                    onClick={(event) => {
-                      configHandler.removeFromRecentFolders(recentFolder);
-                      updateCurrentFolderSelectState(
-                        configHandler.getMostRecentGameFolder()
-                      );
-                    }}
-                  />
-                </div>
-              ))}
-          </div>
+            {t("gui-landing:launch")}
+          </button>
         </div>
       </div>
-      <div className="mb-3 h-75 d-flex flex-column">
-        <label htmlFor="recentfolders">{t("gui-landing:old.folders")}</label>
+      <div className="flex-grow-1 overflow-hidden d-flex flex-column justify-content-start">
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label htmlFor="recentfolders">
+          {t("gui-landing:old.folders")}
+        </label>
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
         <div
           id="recentfolders"
-          className="list-group bg-light h-75 overflow-auto"
+          className="list-group overflow-auto bg-secondary"
           onClick={(event) => {
             const inputTarget = event.target as HTMLInputElement;
-            if (inputTarget.value) {
-              updateCurrentFolderSelectState(inputTarget.value);
+            if (inputTarget.textContent) {
+              updateCurrentFolderSelectState(
+                inputTarget.textContent as string
+              );
             }
           }}
         >
-          {configHandler.getRecentGameFolders().filter((_, index) => index !== 0).map((recentFolder, index) =>
-            <input type="button" key={index} className="list-group-item list-group-item-action" value={recentFolder} />
-          )}
+          {folders
+            .filter((_, index) => index !== 0)
+            .map((recentFolder, index) => (
+              <div
+                // eslint-disable-next-line react/no-array-index-key
+                key={index}
+                className="list-group-item list-group-item-action list-group-item-dark d-flex justify-content-between align-items-center"
+              >
+                {recentFolder}
+                <input
+                  type="button"
+                  style={{ width: '0.25em', height: '0.25em' }}
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={(event) => {
+                    configHandler.removeFromRecentFolders(recentFolder);
+                    updateCurrentFolderSelectState(
+                      configHandler.getMostRecentGameFolder()
+                    );
+                  }}
+                />
+              </div>
+            ))}
         </div>
       </div>
     </div>

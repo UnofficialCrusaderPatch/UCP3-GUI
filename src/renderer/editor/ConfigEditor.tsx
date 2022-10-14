@@ -182,15 +182,18 @@ export default function ConfigEditor(args: {
             />
           </div>
 
-          <div className="col-auto ml-auto">
-            {errorCount > 0 ? (
-              <span className="text-danger fs-4 mx-1">⚠</span>
-            ) : null}
-            <span>{t("gui-general:errors", { count: errorCount })}</span>
-            {warningCount > 0 ? (
-              <span className="text-warning fs-4 mx-1">⚠</span>
-            ) : null}
-            <span>{t("gui-general:warnings", { count: warningCount })}</span>
+          <div className="col-auto ml-auto d-flex justify-content-center align-items-center">
+            <div className="d-flex justify-content-center align-items-center" style={{ height: "0" }}>
+              <span className={`text-danger fs-4 mx-1${errorCount > 0 ? '' : ' invisible'}`}>⚠</span>
+              <span className='mx-1'>
+                {t("gui-general:errors", { count: errorCount })}
+              </span>
+              <span className={`text-warning fs-4 mx-1${errorCount > 0 ? '' : ' invisible'}`}>⚠</span>
+              <span className='mx-1'>
+                {t("gui-general:warnings", { count: warningCount })}
+              </span>
+            </div>
+
           </div>
         </div>
       ) : null}

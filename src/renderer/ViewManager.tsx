@@ -1,14 +1,13 @@
 import {
   BrowserRouter,
-  MemoryRouter,
   Route,
   Routes,
-  useLocation,
   useSearchParams,
 } from 'react-router-dom';
 
 import App from './App';
 import Manager from './Manager';
+import { useLanguage } from './utils/swr-components';
 
 const pageFunctions: { [key: string]: JSX.Element } = {
   landing: <App />,
@@ -16,8 +15,14 @@ const pageFunctions: { [key: string]: JSX.Element } = {
 };
 
 function FittingPage() {
+  const languageState = useLanguage();
+
   const [searchParams] = useSearchParams();
   const windowValue = searchParams.get('window');
+
+  if (languageState.isLoading) {
+    return <div />;
+  }
 
   if (windowValue) {
     return pageFunctions[windowValue];

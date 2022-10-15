@@ -13,6 +13,7 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 
 import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ConfigEditor from './editor/ConfigEditor';
 
 import ExtensionManager from './extensionManager/ExtensionManager';
@@ -66,6 +67,8 @@ export default function Manager() {
   const [searchParams] = useSearchParams();
   const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
 
+  const [t] = useTranslation(['gui-general', 'gui-editor']);
+
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
     //   text: 'ERROR: Conflicting options selected: test warning',
@@ -113,7 +116,7 @@ export default function Manager() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
-    'Download and install the latest UCP version'
+    t('gui-editor:overview.download.install')
   );
   const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
@@ -179,7 +182,7 @@ export default function Manager() {
   );
 
   if (!initDone) {
-    return <p>Loading...</p>;
+    return <p>{t('gui-general:loading')}</p>;
   }
 
   return (
@@ -191,21 +194,23 @@ export default function Manager() {
             id="uncontrolled-tab-example"
             className="mb-3"
           >
-            <Tab eventKey="overview" title="Overview">
+            <Tab eventKey="overview" title={t('gui-editor:overview.title')}>
               <div className="m-3">
-                UCP version in this folder:{' '}
+                {t('gui-editor:overview.folder.version')}{' '}
                 {isUCP3Installed
                   ? `${ucpVersion.major}.${ucpVersion.minor}.${
                       ucpVersion.patch
                     } - ${(ucpVersion.sha || '').substring(0, 8)}`
-                  : `not installed`}
+                  : t('gui-editor:overview.not.installed')}
               </div>
               <div className="m-3">
                 <button
                   type="button"
                   className="btn btn-primary"
                   onClick={async (event) => {
-                    setCheckForUpdatesButtonText('Updating...');
+                    setCheckForUpdatesButtonText(
+                      t('gui-editor:overview.update.running')
+                    );
                     const updateResult = await ucpBackEnd.checkForUCP3Updates(
                       currentFolder
                     );
@@ -214,10 +219,14 @@ export default function Manager() {
                       updateResult.installed === true
                     ) {
                       setShow(true);
-                      setCheckForUpdatesButtonText('Updated!');
+                      setCheckForUpdatesButtonText(
+                        t('gui-editor:overview.update.done')
+                      );
                     } else {
                       console.log(JSON.stringify(updateResult));
-                      setCheckForUpdatesButtonText('No updates available');
+                      setCheckForUpdatesButtonText(
+                        t('gui-editor:overview.update.not.available')
+                      );
                     }
                   }}
                 >
@@ -247,18 +256,20 @@ export default function Manager() {
                     setShow(true);
                   }}
                 >
-                  Install UCP to folder from Zip
+                  {t('gui-editor:overview.install.from.zip')}
                 </Button>
                 <Modal show={show} onHide={handleClose} className="text-dark">
                   <Modal.Header closeButton>
-                    <Modal.Title>Reload required</Modal.Title>
+                    <Modal.Title>
+                      {t('gui-general:require.reload.title')}
+                    </Modal.Title>
                   </Modal.Header>
                   <Modal.Body>
-                    The installation process requires a reload, reload now?
+                    {t('gui-editor:overview.require.reload.text')}
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
-                      Close
+                      {t('gui-general:close')}
                     </Button>
                     <Button
                       variant="primary"
@@ -267,14 +278,14 @@ export default function Manager() {
                         ucpBackEnd.reloadWindow();
                       }}
                     >
-                      Reload
+                      {t('gui-general:reload')}
                     </Button>
                   </Modal.Footer>
                 </Modal>
               </div>
               <div className="m-3">
                 <button type="button" className="btn btn-primary disabled">
-                  Uninstall UCP from this folder
+                  {t('gui-editor:overview.uninstall')}
                 </button>
               </div>
               <div className="m-3">
@@ -283,7 +294,7 @@ export default function Manager() {
                     ucpBackEnd.checkForGUIUpdates(setGuiUpdateStatus);
                   }}
                 >
-                  Check for GUI updates
+                  {t('gui-editor:overview.update.gui.check')}
                 </Button>
                 <span className="mx-1">{guiUpdateStatus}</span>
               </div>
@@ -291,12 +302,12 @@ export default function Manager() {
                 <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
               </Form>
             </Tab>
-            <Tab eventKey="extensions" title="Extensions">
+            <Tab eventKey="extensions" title={t('gui-editor:extensions.title')}>
               <ExtensionManager extensions={extensions} />
             </Tab>
             <Tab
               eventKey="config"
-              title="User Config"
+              title={t('gui-editor:config.title')}
               className="tabpanel-config"
             >
               <ConfigEditor readonly={false} gameFolder={currentFolder} />
@@ -307,24 +318,37 @@ export default function Manager() {
             <div className="d-flex p-1 px-2 fs-8">
               <div className="flex-grow-1">
                 <span className="">
-                  folder:
+                  {t('gui-editor:footer.folder')}
                   <span className="px-2 fst-italic">{currentFolder}</span>
                 </span>
               </div>
               <div>
-                <span className="px-2">0 messages</span>
-                <span className="px-2">{warningCount} warnings</span>
-                <span className="px-2">{errorCount} errors</span>
-                <span className="px-2">GUI version: 1.0.0</span>
                 <span className="px-2">
-                  UCP version:{' '}
-                  {isUCP3Installed
-                    ? `${ucpVersion.major}.${ucpVersion.minor}.${
-                        ucpVersion.patch
-                      } - ${(ucpVersion.sha || '').substring(0, 8)}`
-                    : `not installed`}
+                  {t('gui-general:messages', { count: 0 })}
                 </span>
-                <span className="px-2">UCP active: {`${isUCP3Installed}`}</span>
+                <span className="px-2">
+                  {t('gui-general:warnings', { count: warningCount })}
+                </span>
+                <span className="px-2">
+                  {t('gui-general:errors', { count: errorCount })}
+                </span>
+                <span className="px-2">
+                  {t('gui-editor:footer.version.gui', { version: '1.0.0' })}
+                </span>
+                <span className="px-2">
+                  {t('gui-editor:footer.version.ucp', {
+                    version: isUCP3Installed
+                      ? `${ucpVersion.major}.${ucpVersion.minor}.${
+                          ucpVersion.patch
+                        } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                      : t('gui-editor:footer.version.no.ucp'),
+                  })}
+                </span>
+                <span className="px-2">
+                  {t('gui-editor:footer.ucp.active', {
+                    active: isUCP3Installed,
+                  })}
+                </span>
               </div>
             </div>
           </div>

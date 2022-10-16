@@ -1,6 +1,6 @@
 import { readTextFile, writeTextFile } from '@tauri-apps/api/fs';
 import { showError, showWarning } from './dialog-util';
-import { getBaseFolder, proxyFsExists } from './fs-utils';
+import { getRoamingDataFolder, proxyFsExists } from './file-utils';
 
 interface RecentFolder {
   path: string;
@@ -50,7 +50,7 @@ export class GuiConfigHandler {
     if (this.#guiConfigFilePath) {
       return this.#guiConfigFilePath;
     }
-    this.#guiConfigFilePath = `${await getBaseFolder()}${
+    this.#guiConfigFilePath = `${await getRoamingDataFolder()}${
       GuiConfigHandler.#guiConfigFileName
     }`;
     return this.#guiConfigFilePath;

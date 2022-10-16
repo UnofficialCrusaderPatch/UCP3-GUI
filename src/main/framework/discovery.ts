@@ -1,7 +1,7 @@
 import type { FileEntry } from '@tauri-apps/api/fs';
 import { readTextFile, readDir } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
-import { proxyFsExists } from '../../renderer/utils/fs-utils';
+import { proxyFsExists } from '../../renderer/utils/file-utils';
 
 import {
   ConfigEntry,

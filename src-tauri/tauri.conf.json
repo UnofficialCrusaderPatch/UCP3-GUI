@@ -14,7 +14,7 @@
     "allowlist": {
       "fs": {
         "all": true,
-        "scope": ["$DATA/*", "$DOWNLOAD/*"]
+        "scope": ["$DATA/*", "$DOWNLOAD/*", "$LOCALDATA/*"]
       },
       "path": {
         "all": true

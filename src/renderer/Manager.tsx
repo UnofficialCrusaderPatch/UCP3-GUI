@@ -216,7 +216,9 @@ export default function Manager() {
                       t('gui-editor:overview.update.running')
                     );
                     const updateResult = await checkForUCP3Updates(
-                      currentFolder
+                      currentFolder,
+                      (status) => setCheckForUpdatesButtonText(status),
+                      t
                     );
                     if (
                       updateResult.update === true &&
@@ -225,11 +227,6 @@ export default function Manager() {
                       setShow(true);
                       setCheckForUpdatesButtonText(
                         t('gui-editor:overview.update.done')
-                      );
-                    } else {
-                      console.log(JSON.stringify(updateResult));
-                      setCheckForUpdatesButtonText(
-                        t('gui-editor:overview.update.not.available')
                       );
                     }
                   }}

@@ -13,5 +13,22 @@
         "read.error": "Error while reading zip file: {{error}}",
         "extract": "Extracting zip-file",
         "extract.error": "Error while extracting zip content. Some files may remain. Error: {{error}}"
+    },
+    "ucp": {
+        "version": {
+            "yaml.load": "Checking current UCP version.",
+            "check": "Check for latest UCP version.",
+            "not.available": "No updates available"
+        },
+        "download": {
+            "request": "Do you want to download the latest UCP3 version?\n\n${{version}}",
+            "download": "Downloading new UCP version",
+            "cancelled": "User cancelled the download.",
+            "failed": "Failed to download the new UCP version: {{error}}"
+        },
+        "install": {
+            "zip.remove.failed": "Failed to remove install zip. File remains, because: {{error}}",
+            "failed": "Failed to install UCP: {{error}}"
+        }
     }
 }

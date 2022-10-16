@@ -93,30 +93,53 @@ export async function installUCPFromZip(
   return [true, undefined];
 }
 
-export async function checkForUCP3Updates(gameFolder: string) {
-  const [yamlRet] = await loadYaml(`${gameFolder}/ucp-version.yml`);
+export async function checkForUCP3Updates(
+  gameFolder: string,
+  statusCallback: (status: string) => void,
+  t: TFunction
+) {
+  const returnObject = {
+    update: false,
+    file: '',
+    downloaded: false,
+    installed: false,
+  };
+
+  statusCallback(t('gui-download:ucp.version.yaml.load'));
+  const [yamlRet] = await loadYaml(
+    await resolvePath(gameFolder, 'ucp-version.yml')
+  );
   const { sha } = yamlRet || { sha: '!' };
+
+  statusCallback(t('gui-download:ucp.version.check'));
   const result = await checkForLatestUCP3DevReleaseUpdate(sha);
 
-  if (result.update === true) {
-    // ask options are fixed in tauri
-    const dialogResult = await askInfo(
-      `Do you want to download the latest UCP3 version?\n\n${result.file}`,
-      'Confirm'
-    );
+  if (result.update !== true) {
+    statusCallback(t('gui-download:ucp.version.not.available'));
+    return returnObject;
+  }
+  returnObject.update = true;
+  returnObject.file = result.file;
 
-    if (dialogResult !== true) {
-      showInfo('cancelled by user');
-      return {
-        update: false,
-        file: '',
-        downloaded: false,
-        installed: false,
-      };
+  // ask options are fixed in tauri
+  const dialogResult = await askInfo(
+    t('gui-download:ucp.download.request', { version: result.file }),
+    t('gui-general:confirm')
+  );
+
+  if (dialogResult !== true) {
+    statusCallback(t('gui-download:ucp.download.cancelled'));
+    return returnObject;
+  }
+
+  statusCallback(t('gui-download:ucp.download.download'));
+  const downloadPath = `${await getLocalDataFolder()}/ucp-zip/${result.file}`;
+  try {
+    let [success, error] = await recursiveCreateDir(downloadPath);
+    if (!success) {
+      throw error;
     }
 
-    const downloadPath = `${await getLocalDataFolder()}/ucp-zip/${result.file}`;
-    await recursiveCreateDir(downloadPath); // TODO: no safety
     const response = await fetchBinary<BinaryFileContents>(result.downloadUrl, {
       headers: {
         Authorization: `Basic ${window.btoa(
@@ -124,37 +147,42 @@ export async function checkForUCP3Updates(gameFolder: string) {
         )}`,
       },
     });
-
-    if (response.ok) {
-      await writeBinaryFile(downloadPath, response.data);
-    } else {
-      showWarning('Failed to download UCP3 update.');
-      return {
-        update: false,
-        file: '',
-        downloaded: false,
-        installed: false,
-      };
+    if (!response.ok) {
+      throw new Error('Failed to fetch update.');
     }
 
-    console.log(downloadPath);
-    const installResult = await installUCPFromZip(downloadPath, gameFolder);
+    [success, error] = await writeBinaryFile(downloadPath, response.data);
+    if (!success) {
+      throw error;
+    }
+  } catch (error) {
+    statusCallback(t('gui-download:ucp.download.failed', { error }));
+    return returnObject;
+  }
+  returnObject.downloaded = true;
 
-    // TODO: in the future, use a cache?
-    await removeFile(downloadPath);
-
-    return {
-      update: true,
-      file: result.file,
-      downloaded: downloadPath,
-      installed: installResult,
-    };
+  // has its own statusCallbacks
+  const [installResult, installError] = await installUCPFromZip(
+    downloadPath,
+    gameFolder,
+    statusCallback,
+    t
+  );
+  if (!installResult) {
+    statusCallback(
+      t('gui-download:ucp.install.failed', { error: installError })
+    );
+    return returnObject;
   }
 
-  return {
-    update: false,
-    file: result.file,
-    downloaded: false,
-    installed: false,
-  };
+  // TODO: in the future, use a cache?
+  const [removeResult, removeError] = await removeFile(downloadPath);
+  if (!removeResult) {
+    showWarning(
+      t('gui-download:ucp.install.zip.remove.failed', { error: removeError })
+    );
+  }
+
+  returnObject.installed = true;
+  return returnObject;
 }

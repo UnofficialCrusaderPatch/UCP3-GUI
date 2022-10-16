@@ -1,18 +1,20 @@
-import {
-  BinaryFileContents,
-  copyFile,
-  createDir,
-  readTextFile,
-  removeFile,
-  writeBinaryFile,
-} from '@tauri-apps/api/fs';
 import JSZip from 'jszip';
-import { resolve } from '@tauri-apps/api/path';
+import { BinaryFileContents } from '@tauri-apps/api/fs';
 import {
   checkForLatestUCP3DevReleaseUpdate,
   UCP3_REPOS_MACHINE_TOKEN,
 } from '../../main/versions/github';
-import { fetchBinary, loadYaml, proxyFsExists } from './file-utils';
+import {
+  copyFile,
+  fetchBinary,
+  getLocalDataFolder,
+  loadYaml,
+  proxyFsExists,
+  readBinaryFile,
+  recursiveCreateDir,
+  removeFile,
+  writeBinaryFile,
+} from './file-utils';
 import { askInfo, showInfo, showWarning } from './dialog-util';
 
 export async function installUCPFromZip(
@@ -27,14 +29,15 @@ export async function installUCPFromZip(
       );
     } else {
       // TODO: appropriate warning
-      window.alert(
-        `binkw32.dll does not exist in this directory, are we in a game directory?`
+      showWarning(
+        'binkw32.dll does not exist in this directory, are we in a game directory?'
       );
     }
   }
 
-  const data = await readBinaryFile(zipFilePath);
-  const zip = await JSZip.loadAsync(data);
+  // TODO: needs better error handling
+  const [data] = await readBinaryFile(zipFilePath);
+  const zip = await JSZip.loadAsync(data as Uint8Array);
 
   const listOfDir: Array<JSZip.JSZipObject> = [];
   const listOfFiles: Array<JSZip.JSZipObject> = [];
@@ -43,20 +46,19 @@ export async function installUCPFromZip(
   });
   // https://github.com/tauri-apps/tauri-docs/issues/696
   await Promise.all(
-    listOfDir.map((dir) =>
-      createDir(`${gameFolder}/${dir.name}`, { recursive: true })
-    )
+    // TODO: currently no safety
+    listOfDir.map((dir) => recursiveCreateDir(`${gameFolder}/${dir.name}`))
   );
   await Promise.all(
     listOfFiles.map(async (file) => {
       const fileData = await file.async('uint8array');
+      // TODO: currently no safety
       await writeBinaryFile(`${gameFolder}/${file.name}`, fileData);
     })
   );
   console.log(`Extracted ${listOfFiles.length} entries`);
 
   await copyFile(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
-
   return true;
 }
 
@@ -82,7 +84,8 @@ export async function checkForUCP3Updates(gameFolder: string) {
       };
     }
 
-    const downloadPath = `${gameFolder}/${result.file}`;
+    const downloadPath = `${await getLocalDataFolder()}/ucp-zip/${result.file}`;
+    await recursiveCreateDir(downloadPath); // TODO: no safety
     const response = await fetchBinary<BinaryFileContents>(result.downloadUrl, {
       headers: {
         Authorization: `Basic ${window.btoa(
@@ -104,10 +107,7 @@ export async function checkForUCP3Updates(gameFolder: string) {
     }
 
     console.log(downloadPath);
-    const installResult = await this.installUCPFromZip(
-      downloadPath,
-      gameFolder
-    );
+    const installResult = await installUCPFromZip(downloadPath, gameFolder);
 
     // TODO: in the future, use a cache?
     await removeFile(downloadPath);
@@ -115,7 +115,7 @@ export async function checkForUCP3Updates(gameFolder: string) {
     return {
       update: true,
       file: result.file,
-      downloaded: resolve(downloadPath),
+      downloaded: downloadPath,
       installed: installResult,
     };
   }

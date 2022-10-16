@@ -1,45 +1,28 @@
 // This file fake the backend calls. They become synchronous, though.
 
-import {
-  appDir,
-  dataDir,
-  desktopDir,
-  downloadDir,
-  executableDir,
-  resolve,
-  normalize,
-} from '@tauri-apps/api/path';
+import { downloadDir } from '@tauri-apps/api/path';
 import {
   BinaryFileContents,
-  removeFile,
   readTextFile,
   writeTextFile,
-  createDir,
-  readBinaryFile,
   writeBinaryFile,
-  copyFile,
 } from '@tauri-apps/api/fs';
 import {
   open as dialogOpen,
   save as dialogSave,
   ask as dialogAsk,
 } from '@tauri-apps/api/dialog';
-import { WebviewWindow } from '@tauri-apps/api/window';
 import { getName, getVersion } from '@tauri-apps/api/app';
 
 import yaml from 'yaml';
 
 import { fetch, ResponseType } from '@tauri-apps/api/http';
 
-import JSZip from 'jszip';
 import axios from 'axios';
 
 import semver from 'semver';
 import { dialog } from '@tauri-apps/api';
-import {
-  checkForLatestUCP3DevReleaseUpdate,
-  UCP3_REPOS_MACHINE_TOKEN,
-} from '../main/versions/github';
+import { UCP3_REPOS_MACHINE_TOKEN } from '../main/versions/github';
 import {
   Extension,
   OptionEntry,
@@ -47,7 +30,7 @@ import {
 } from '../common/config/common';
 import { UIDefinition } from './GlobalState';
 import { Discovery } from '../main/framework/discovery';
-import { getRoamingDataFolder, proxyFsExists } from './utils/file-utils';
+import { proxyFsExists } from './utils/file-utils';
 import { createNewWindow } from './utils/window-utils';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
@@ -55,10 +38,6 @@ const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
 // eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
-  getGameFolderPath(urlParams: URLSearchParams) {
-    return urlParams.get('directory') || '';
-  },
-
   // create an editor window for a game folder
   async createEditorWindow(gameFolder: string, language: string | undefined) {
     const langParam = language ? `&lang=${language}` : '';

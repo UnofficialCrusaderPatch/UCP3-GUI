@@ -6,6 +6,8 @@ import {
   writeTextFile as tauriWriteTextFile,
   readBinaryFile as tauriReadBinaryFile,
   writeBinaryFile as tauriWriteBinaryFile,
+  copyFile as tauriCopyFile,
+  removeFile as tauriRemoveFile,
   BinaryFileContents,
 } from '@tauri-apps/api/fs';
 import {
@@ -113,6 +115,29 @@ export async function writeBinaryFile(
   return [true, undefined];
 }
 
+export async function copyFile(
+  source: string,
+  destination: string
+): Promise<[boolean, Error | undefined]> {
+  try {
+    await tauriCopyFile(source, destination);
+    return [true, undefined];
+  } catch (error) {
+    return [false, error];
+  }
+}
+
+export async function removeFile(
+  path: string
+): Promise<[boolean, Error | undefined]> {
+  try {
+    await tauriRemoveFile(path);
+    return [true, undefined];
+  } catch (error) {
+    return [false, error];
+  }
+}
+
 export async function loadYaml(
   path: string,
   yamlOptions?:
@@ -125,6 +150,31 @@ export async function loadYaml(
   }
   return [yamlParse(content, yamlOptions), undefined];
 }
+
+export async function fetchBinary<T>(
+  url: string,
+  addOptions?:
+    | (Omit<FetchOptions, 'method'> & { method?: HttpVerb })
+    | undefined
+): Promise<Response<T>> {
+  let options: FetchOptions = {
+    method: 'GET',
+    responseType: ResponseType.Binary, // important, because we are downloading inside a browser
+    headers: {
+      Accept: 'application/octet-stream',
+    },
+  };
+  // merge with addOptions, with special handling for the records
+  // others are overwritten
+  if (addOptions) {
+    const headersToUse = { ...options.headers, ...addOptions?.headers };
+    options = { ...options, ...addOptions };
+    options.headers = headersToUse;
+  }
+  return fetch<T>(url, options);
+}
+
+// GET FOLDER
 
 export const getRoamingDataFolder: () => Promise<string> = (() => {
   let roamingFolder: string | null = null;
@@ -166,25 +216,6 @@ export const getLocalDataFolder: () => Promise<string> = (() => {
   };
 })();
 
-export async function fetchBinary<T>(
-  url: string,
-  addOptions?:
-    | (Omit<FetchOptions, 'method'> & { method?: HttpVerb })
-    | undefined
-): Promise<Response<T>> {
-  let options: FetchOptions = {
-    method: 'GET',
-    responseType: ResponseType.Binary, // important, because we are downloading inside a browser
-    headers: {
-      Accept: 'application/octet-stream',
-    },
-  };
-  // merge with addOptions, with special handling for the records
-  // others are overwritten
-  if (addOptions) {
-    const headersToUse = { ...options.headers, ...addOptions?.headers };
-    options = { ...options, ...addOptions };
-    options.headers = headersToUse;
-  }
-  return fetch<T>(url, options);
+export function getGameFolderPath(urlParams: URLSearchParams) {
+  return urlParams.get('directory') || '';
 }

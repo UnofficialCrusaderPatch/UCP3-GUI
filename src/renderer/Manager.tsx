@@ -30,6 +30,11 @@ import {
 
 import { ucpBackEnd } from './fakeBackend';
 import { DisplayConfigElement, Extension } from '../common/config/common';
+import {
+  checkForUCP3Updates,
+  installUCPFromZip,
+} from './utils/ucp-download-handling';
+import { getGameFolderPath } from './utils/file-utils';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -65,7 +70,7 @@ let extensions: Extension[] = []; // which extension type?
 
 export default function Manager() {
   const [searchParams] = useSearchParams();
-  const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
+  const currentFolder = getGameFolderPath(searchParams);
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -211,7 +216,7 @@ export default function Manager() {
                     setCheckForUpdatesButtonText(
                       t('gui-editor:overview.update.running')
                     );
-                    const updateResult = await ucpBackEnd.checkForUCP3Updates(
+                    const updateResult = await checkForUCP3Updates(
                       currentFolder
                     );
                     if (
@@ -248,10 +253,7 @@ export default function Manager() {
 
                     if (zipFilePath === '') return;
 
-                    await ucpBackEnd.installUCPFromZip(
-                      zipFilePath,
-                      currentFolder
-                    );
+                    await installUCPFromZip(zipFilePath, currentFolder);
 
                     setShow(true);
                   }}

@@ -1,0 +1,17 @@
+{
+    "bink": {
+        "copy": {
+            "real": "Copy binkw32.dll to binkw32_ucp.dll.",
+            "real.error": "Failed to properly copy binkw32: {{error}}",
+            "ucp": "Copy binkw32_ucp.dll to binkw32.dll.",
+            "ucp.error": "Failed to properly copy binkw32_ucp: {{error}}"
+        },
+        "missing": "binkw32.dll does not exist in this directory, are we in a game directory?"
+    },
+    "zip": {
+        "read": "Reading zip-file",
+        "read.error": "Error while reading zip file: {{error}}",
+        "extract": "Extracting zip-file",
+        "extract.error": "Error while extracting zip content. Some files may remain. Error: {{error}}"
+    }
+}

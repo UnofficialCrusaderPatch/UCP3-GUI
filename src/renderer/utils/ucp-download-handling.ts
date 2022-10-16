@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { BinaryFileContents } from '@tauri-apps/api/fs';
+import { TFunction } from 'react-i18next';
 import {
   checkForLatestUCP3DevReleaseUpdate,
   UCP3_REPOS_MACHINE_TOKEN,
@@ -14,52 +15,82 @@ import {
   recursiveCreateDir,
   removeFile,
   writeBinaryFile,
+  Error as FileUtilError,
+  resolvePath,
 } from './file-utils';
 import { askInfo, showInfo, showWarning } from './dialog-util';
 
 export async function installUCPFromZip(
   zipFilePath: string,
-  gameFolder: string
-) {
-  if (!(await proxyFsExists(`${gameFolder}/binkw32_real.dll`))) {
-    if (await proxyFsExists(`${gameFolder}/binkw32.dll`)) {
-      await copyFile(
-        `${gameFolder}/binkw32.dll`,
-        `${gameFolder}/binkw32_real.dll`
-      );
+  gameFolder: string,
+  statusCallback: (status: string) => void,
+  t: TFunction
+): Promise<[boolean, FileUtilError]> {
+  const binkRealPath = await resolvePath(gameFolder, 'binkw32_real.dll');
+  const binkUcpPath = await resolvePath(gameFolder, 'binkw32_ucp.dll');
+  const binkPath = await resolvePath(gameFolder, 'binkw32.dll');
+
+  statusCallback(t('gui-download:bink.copy.real'));
+  if (!(await proxyFsExists(binkRealPath))) {
+    if (await proxyFsExists(binkPath)) {
+      // TODO: could this also be a rename?
+      const [success, error] = await copyFile(binkPath, binkRealPath);
+      if (!success) {
+        return [false, t('gui-download:bink.copy.real.error', { error })];
+      }
     } else {
-      // TODO: appropriate warning
-      showWarning(
-        'binkw32.dll does not exist in this directory, are we in a game directory?'
-      );
+      return [false, t('gui-download:bink.missing')];
     }
   }
 
-  // TODO: needs better error handling
-  const [data] = await readBinaryFile(zipFilePath);
-  const zip = await JSZip.loadAsync(data as Uint8Array);
+  statusCallback(t('gui-download:zip.read'));
+  const [zipData, zipDataError] = await readBinaryFile(zipFilePath);
+  if (zipDataError) {
+    return [false, t('gui-download:zip.read.error', { error: zipDataError })];
+  }
 
+  statusCallback(t('gui-download:zip.extract'));
+  const zip = await JSZip.loadAsync(zipData as Uint8Array);
   const listOfDir: Array<JSZip.JSZipObject> = [];
   const listOfFiles: Array<JSZip.JSZipObject> = [];
   zip.forEach((relativePath: string, file: JSZip.JSZipObject) => {
     (file.dir ? listOfDir : listOfFiles).push(file);
   });
   // https://github.com/tauri-apps/tauri-docs/issues/696
-  await Promise.all(
-    // TODO: currently no safety
-    listOfDir.map((dir) => recursiveCreateDir(`${gameFolder}/${dir.name}`))
-  );
-  await Promise.all(
-    listOfFiles.map(async (file) => {
-      const fileData = await file.async('uint8array');
-      // TODO: currently no safety
-      await writeBinaryFile(`${gameFolder}/${file.name}`, fileData);
-    })
-  );
-  console.log(`Extracted ${listOfFiles.length} entries`);
+  try {
+    await Promise.all(
+      listOfDir.map(async (dir) => {
+        const [success, error] = await recursiveCreateDir(
+          await resolvePath(gameFolder, dir.name)
+        );
+        if (!success) {
+          throw error;
+        }
+      })
+    );
+    await Promise.all(
+      listOfFiles.map(async (file) => {
+        const fileData = await file.async('uint8array');
+        const [success, error] = await writeBinaryFile(
+          await resolvePath(gameFolder, file.name),
+          fileData
+        );
+        if (!success) {
+          throw error;
+        }
+      })
+    );
+  } catch (error) {
+    return [false, t('gui-download:zip.extract.error', { error })];
+  }
 
-  await copyFile(`${gameFolder}/binkw32_ucp.dll`, `${gameFolder}/binkw32.dll`);
-  return true;
+  statusCallback(t('gui-download:bink.copy.ucp'));
+  // TODO: could this also be a rename?
+  const [success, error] = await copyFile(binkUcpPath, binkPath);
+  if (!success) {
+    return [false, t('gui-download:bink.copy.ucp.error', { error })];
+  }
+  return [true, undefined];
 }
 
 export async function checkForUCP3Updates(gameFolder: string) {

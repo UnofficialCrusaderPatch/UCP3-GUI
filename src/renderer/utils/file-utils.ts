@@ -22,6 +22,7 @@ import {
   dirname,
   localDataDir,
   normalize as normalizePath,
+  resolve,
 } from '@tauri-apps/api/path';
 import {
   DocumentOptions,
@@ -33,8 +34,8 @@ import {
 
 // TYPES
 
-type Yaml = any;
-type Error = unknown;
+export type Yaml = any;
+export type Error = unknown;
 
 // CODE
 
@@ -48,6 +49,11 @@ export async function proxyFsExists(
   options?: FsOptions | undefined
 ): Promise<boolean> {
   return (await fileExists(path, options)) as unknown as boolean;
+}
+
+// only proxy
+export async function resolvePath(...paths: string[]): Promise<string> {
+  return resolve(...paths);
 }
 
 export async function recursiveCreateDir(

@@ -72,7 +72,7 @@ export default function Manager() {
   const [searchParams] = useSearchParams();
   const currentFolder = getGameFolderPath(searchParams);
 
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
+  const [t] = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -120,9 +120,8 @@ export default function Manager() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
-    t('gui-editor:overview.download.install')
-  );
+  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] =
+    useState<string>(t('gui-editor:overview.download.install'));
   const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
   const [initDone, setInitState] = useState(false);
@@ -253,7 +252,14 @@ export default function Manager() {
 
                     if (zipFilePath === '') return;
 
-                    await installUCPFromZip(zipFilePath, currentFolder);
+                    // TODO: improve feedback
+                    const [success, error] = await installUCPFromZip(
+                      zipFilePath,
+                      currentFolder,
+                      // can be used to transform -> although splitting into more components might be better
+                      (status) => console.log(status),
+                      t
+                    );
 
                     setShow(true);
                   }}

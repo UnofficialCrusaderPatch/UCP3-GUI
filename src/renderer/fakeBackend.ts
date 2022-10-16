@@ -1,45 +1,28 @@
 // This file fake the backend calls. They become synchronous, though.
 
-import {
-  appDir,
-  dataDir,
-  desktopDir,
-  downloadDir,
-  executableDir,
-  resolve,
-  normalize,
-} from '@tauri-apps/api/path';
+import { downloadDir } from '@tauri-apps/api/path';
 import {
   BinaryFileContents,
-  removeFile,
   readTextFile,
   writeTextFile,
-  createDir,
-  readBinaryFile,
   writeBinaryFile,
-  copyFile,
 } from '@tauri-apps/api/fs';
 import {
   open as dialogOpen,
   save as dialogSave,
   ask as dialogAsk,
 } from '@tauri-apps/api/dialog';
-import { WebviewWindow } from '@tauri-apps/api/window';
 import { getName, getVersion } from '@tauri-apps/api/app';
 
 import yaml from 'yaml';
 
 import { fetch, ResponseType } from '@tauri-apps/api/http';
 
-import JSZip from 'jszip';
 import axios from 'axios';
 
 import semver from 'semver';
 import { dialog } from '@tauri-apps/api';
-import {
-  checkForLatestUCP3DevReleaseUpdate,
-  UCP3_REPOS_MACHINE_TOKEN,
-} from '../main/versions/github';
+import { UCP3_REPOS_MACHINE_TOKEN } from '../main/versions/github';
 import {
   Extension,
   OptionEntry,
@@ -47,7 +30,7 @@ import {
 } from '../common/config/common';
 import { UIDefinition } from './GlobalState';
 import { Discovery } from '../main/framework/discovery';
-import { getBaseFolder, proxyFsExists } from './utils/fs-utils';
+import { proxyFsExists } from './utils/file-utils';
 import { createNewWindow } from './utils/window-utils';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
@@ -55,10 +38,6 @@ const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
 // eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
-  getGameFolderPath(urlParams: URLSearchParams) {
-    return urlParams.get('directory') || '';
-  },
-
   // create an editor window for a game folder
   async createEditorWindow(gameFolder: string, language: string | undefined) {
     const langParam = language ? `&lang=${language}` : '';
@@ -182,81 +161,6 @@ export const ucpBackEnd = {
         type: 'info',
       });
     }
-  },
-
-  async checkForUCP3Updates(gameFolder: string) {
-    const { sha } = (await proxyFsExists(`${gameFolder}/ucp-version.yml`))
-      ? yaml.parse(await readTextFile(`${gameFolder}/ucp-version.yml`))
-      : { sha: '!' };
-    const result = await checkForLatestUCP3DevReleaseUpdate(sha);
-
-    if (result.update === true) {
-      // ask options are fixed in tauri
-      const dialogResult = await dialogAsk(
-        `Do you want to download the latest UCP3 version?\n\n${result.file}`,
-        { title: 'Confirm', type: 'info' }
-      );
-
-      if (dialogResult !== true) {
-        window.alert('cancelled by user');
-        return {
-          update: false,
-          file: '',
-          downloaded: false,
-          installed: false,
-        };
-      }
-
-      const downloadPath = `${gameFolder}/${result.file}`;
-      const response = await fetch(result.downloadUrl, {
-        method: 'GET',
-        responseType: ResponseType.Binary, // important, because we are downloading inside a browser
-        headers: {
-          Accept: 'application/octet-stream',
-          Authorization: `Basic ${window.btoa(
-            `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
-          )}`,
-        },
-      });
-
-      if (response.ok) {
-        await writeBinaryFile(
-          downloadPath,
-          response.data as BinaryFileContents
-        );
-      } else {
-        window.alert('Failed to download UCP3 update.');
-        return {
-          update: false,
-          file: '',
-          downloaded: false,
-          installed: false,
-        };
-      }
-
-      console.log(downloadPath);
-      const installResult = await this.installUCPFromZip(
-        downloadPath,
-        gameFolder
-      );
-
-      // TODO: in the future, use a cache?
-      await removeFile(downloadPath);
-
-      return {
-        update: true,
-        file: result.file,
-        downloaded: resolve(downloadPath),
-        installed: installResult,
-      };
-    }
-
-    return {
-      update: false,
-      file: result.file,
-      downloaded: false,
-      installed: false,
-    };
   },
 
   // Install or deinstalls UCP from these folders.
@@ -383,51 +287,6 @@ export const ucpBackEnd = {
       defaultPath: gameFolder,
     });
     return result !== null ? (result as string) : undefined;
-  },
-
-  async installUCPFromZip(zipFilePath: string, gameFolder: string) {
-    if (!(await proxyFsExists(`${gameFolder}/binkw32_real.dll`))) {
-      if (await proxyFsExists(`${gameFolder}/binkw32.dll`)) {
-        await copyFile(
-          `${gameFolder}/binkw32.dll`,
-          `${gameFolder}/binkw32_real.dll`
-        );
-      } else {
-        // TODO: appropriate warning
-        window.alert(
-          `binkw32.dll does not exist in this directory, are we in a game directory?`
-        );
-      }
-    }
-
-    const data = await readBinaryFile(zipFilePath);
-    const zip = await JSZip.loadAsync(data);
-
-    const listOfDir: Array<JSZip.JSZipObject> = [];
-    const listOfFiles: Array<JSZip.JSZipObject> = [];
-    zip.forEach((relativePath: string, file: JSZip.JSZipObject) => {
-      (file.dir ? listOfDir : listOfFiles).push(file);
-    });
-    // https://github.com/tauri-apps/tauri-docs/issues/696
-    await Promise.all(
-      listOfDir.map((dir) =>
-        createDir(`${gameFolder}/${dir.name}`, { recursive: true })
-      )
-    );
-    await Promise.all(
-      listOfFiles.map(async (file) => {
-        const fileData = await file.async('uint8array');
-        await writeBinaryFile(`${gameFolder}/${file.name}`, fileData);
-      })
-    );
-    console.log(`Extracted ${listOfFiles.length} entries`);
-
-    await copyFile(
-      `${gameFolder}/binkw32_ucp.dll`,
-      `${gameFolder}/binkw32.dll`
-    );
-
-    return true;
   },
 
   async loadConfigFromFile(gameFolder: string) {

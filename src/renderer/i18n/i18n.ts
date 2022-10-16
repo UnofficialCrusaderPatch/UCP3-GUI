@@ -1,6 +1,6 @@
 // Tut Source: https://phrase.com/blog/posts/localizing-react-apps-with-i18next/
 
-import i18next from 'i18next';
+import i18next, { getFixedT } from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
 import { initReactI18next } from 'react-i18next';
 

@@ -10,8 +10,7 @@
         "update": {
             "gui.check": "Check for GUI updates",
             "running": "Updating...",
-            "done": "Updated!",
-            "not.available": "No updates available"
+            "done": "Updated!"
         }
     },
     "footer": {

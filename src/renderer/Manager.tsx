@@ -30,6 +30,11 @@ import {
 
 import { ucpBackEnd } from './fakeBackend';
 import { DisplayConfigElement, Extension } from '../common/config/common';
+import {
+  checkForUCP3Updates,
+  installUCPFromZip,
+} from './utils/ucp-download-handling';
+import { getGameFolderPath } from './utils/file-utils';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -65,9 +70,9 @@ let extensions: Extension[] = []; // which extension type?
 
 export default function Manager() {
   const [searchParams] = useSearchParams();
-  const currentFolder = ucpBackEnd.getGameFolderPath(searchParams);
+  const currentFolder = getGameFolderPath(searchParams);
 
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
+  const [t] = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -115,9 +120,8 @@ export default function Manager() {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] = useState(
-    t('gui-editor:overview.download.install')
-  );
+  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] =
+    useState<string>(t('gui-editor:overview.download.install'));
   const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
   const [initDone, setInitState] = useState(false);
@@ -211,8 +215,10 @@ export default function Manager() {
                     setCheckForUpdatesButtonText(
                       t('gui-editor:overview.update.running')
                     );
-                    const updateResult = await ucpBackEnd.checkForUCP3Updates(
-                      currentFolder
+                    const updateResult = await checkForUCP3Updates(
+                      currentFolder,
+                      (status) => setCheckForUpdatesButtonText(status),
+                      t
                     );
                     if (
                       updateResult.update === true &&
@@ -221,11 +227,6 @@ export default function Manager() {
                       setShow(true);
                       setCheckForUpdatesButtonText(
                         t('gui-editor:overview.update.done')
-                      );
-                    } else {
-                      console.log(JSON.stringify(updateResult));
-                      setCheckForUpdatesButtonText(
-                        t('gui-editor:overview.update.not.available')
                       );
                     }
                   }}
@@ -248,9 +249,13 @@ export default function Manager() {
 
                     if (zipFilePath === '') return;
 
-                    await ucpBackEnd.installUCPFromZip(
+                    // TODO: improve feedback
+                    const [success, error] = await installUCPFromZip(
                       zipFilePath,
-                      currentFolder
+                      currentFolder,
+                      // can be used to transform -> although splitting into more components might be better
+                      (status) => console.log(status),
+                      t
                     );
 
                     setShow(true);

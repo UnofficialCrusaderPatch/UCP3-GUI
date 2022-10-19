@@ -399,6 +399,27 @@ export const ucpBackEnd = {
         fcp[finalpart] = value;
       });
 
+    extensions.forEach((e: Extension) => {
+      if (e.type === 'module') {
+        if (finalConfig.modules[e.name] === undefined) {
+          finalConfig.modules[e.name] = {
+            version: e.version,
+            options: {},
+            active: true,
+          };
+        }
+      }
+      if (e.type === 'plugin') {
+        if (finalConfig.plugins[e.name] === undefined) {
+          finalConfig.plugins[e.name] = {
+            version: e.version,
+            options: {},
+            active: true,
+          };
+        }
+      }
+    });
+
     await writeTextFile(filePath, yaml.stringify(finalConfig));
   },
 };

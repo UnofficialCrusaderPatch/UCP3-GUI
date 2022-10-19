@@ -24,6 +24,7 @@ import {
   configurationReducer,
   configurationTouchedReducer,
   configurationWarningReducer,
+  ExtensionsState,
   GlobalState,
   UIDefinition,
 } from './GlobalState';
@@ -156,6 +157,19 @@ export default function Manager() {
     prepareValues();
   }, [currentFolder]);
 
+  const [extensionsState, setExtensionsState] = useReducer(
+    (oldState: ExtensionsState, newState: unknown): ExtensionsState => {
+      const state = { ...oldState, ...(newState as object) };
+      return state;
+    },
+    {
+      allExtensions: [...extensions],
+      activeExtensions: [],
+      activatedExtensions: [],
+      installedExtensions: [...extensions],
+    } as ExtensionsState
+  );
+
   const globalStateValue = useMemo(
     () => ({
       initDone,
@@ -173,6 +187,8 @@ export default function Manager() {
       uiDefinition,
       folder: currentFolder,
       file: `${currentFolder}/ucp-config.yml`,
+      extensionsState,
+      setExtensionsState,
     }),
     [
       initDone,
@@ -182,6 +198,8 @@ export default function Manager() {
       configurationTouched,
       configurationWarnings,
       currentFolder,
+      extensionsState,
+      setExtensionsState,
     ]
   );
 

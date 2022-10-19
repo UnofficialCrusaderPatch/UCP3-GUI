@@ -64,8 +64,12 @@ const UIFactory = {
       </div>
     );
   },
-  CreateGroupBox(args: { spec: DisplayConfigElement; disabled: boolean }) {
-    const { spec, disabled } = args;
+  CreateGroupBox(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const { spec, disabled, className } = args;
     const { name, description, children, columns, header, text } = spec;
     let finalDescription = description;
     if (finalDescription === undefined) finalDescription = text;
@@ -87,6 +91,7 @@ const UIFactory = {
               key={children[i].url}
               spec={children[i]}
               disabled={disabled}
+              className=""
             />
           </Col>
         );
@@ -102,7 +107,7 @@ const UIFactory = {
     return (
       // <Form key={`${name}-groupbox`}>
       <Container
-        className="border-bottom border-light my-2 px-0"
+        className={`border-bottom border-light my-2 px-0 ${className}`}
         style={{ margin: 0 }}
       >
         <Row className="my-3">
@@ -120,7 +125,11 @@ const UIFactory = {
     );
   },
 
-  CreateSwitch(args: { spec: DisplayConfigElement; disabled: boolean }) {
+  CreateSwitch(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
     const {
       configuration,
       setConfiguration,
@@ -129,7 +138,7 @@ const UIFactory = {
       setConfigurationTouched,
       configurationDefaults,
     } = useContext(GlobalState);
-    const { spec, disabled } = args;
+    const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
     let isEnabled = true;
@@ -149,7 +158,7 @@ const UIFactory = {
     const hasWarning = configurationWarnings[url] !== undefined;
 
     return (
-      <div className="d-flex align-items-baseline lh-sm my-1">
+      <div className="d-flex align-items-baseline lh-sm my-1 {className}">
         {hasWarning ? (
           <UIFactory.ConfigWarning
             text={configurationWarnings[url].text}
@@ -183,7 +192,11 @@ const UIFactory = {
     );
   },
 
-  CreateNumberInput(args: { spec: DisplayConfigElement; disabled: boolean }) {
+  CreateNumberInput(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
     const {
       configuration,
       setConfiguration,
@@ -192,7 +205,7 @@ const UIFactory = {
       setConfigurationTouched,
       configurationDefaults,
     } = useContext(GlobalState);
-    const { spec, disabled } = args;
+    const { spec, disabled, className } = args;
     const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
@@ -213,7 +226,9 @@ const UIFactory = {
     const hasWarning = configurationWarnings[url] !== undefined;
 
     return (
-      <Form.Group className="d-flex align-items-baseline lh-sm config-number-group my-1">
+      <Form.Group
+        className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
+      >
         {hasWarning ? (
           <UIFactory.ConfigWarning
             text={configurationWarnings[url].text}
@@ -270,7 +285,11 @@ const UIFactory = {
     );
   },
 
-  CreateChoice(args: { spec: DisplayConfigElement; disabled: boolean }) {
+  CreateChoice(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
     const {
       configuration,
       setConfiguration,
@@ -279,7 +298,7 @@ const UIFactory = {
       setConfigurationTouched,
       configurationDefaults,
     } = useContext(GlobalState);
-    const { spec, disabled } = args;
+    const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, choices } = spec;
     const { [url]: value } = configuration;
     let isEnabled = true;
@@ -300,7 +319,9 @@ const UIFactory = {
     const defaultChoice = choices[0];
 
     return (
-      <Form.Group className="d-flex align-items-baseline lh-sm config-number-group my-1">
+      <Form.Group
+        className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
+      >
         {hasWarning ? (
           <UIFactory.ConfigWarning
             text={configurationWarnings[url].text}
@@ -359,8 +380,12 @@ const UIFactory = {
     );
   },
 
-  CreateUIElement(args: { spec: DisplayConfigElement; disabled: boolean }) {
-    const { spec, disabled } = args;
+  CreateUIElement(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const { spec, disabled, className } = args;
 
     const [t] = useTranslation(['gui-editor']);
 
@@ -379,16 +404,40 @@ const UIFactory = {
       return <div />;
     }
     if (spec.display === 'GroupBox') {
-      return <UIFactory.CreateGroupBox spec={spec} disabled={disabled} />;
+      return (
+        <UIFactory.CreateGroupBox
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
     }
     if (spec.display === 'Switch') {
-      return <UIFactory.CreateSwitch spec={spec} disabled={disabled} />;
+      return (
+        <UIFactory.CreateSwitch
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
     }
     if (spec.display === 'Number') {
-      return <UIFactory.CreateNumberInput spec={spec} disabled={disabled} />;
+      return (
+        <UIFactory.CreateNumberInput
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
     }
     if (spec.display === 'Choice') {
-      return <UIFactory.CreateChoice spec={spec} disabled={disabled} />;
+      return (
+        <UIFactory.CreateChoice
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
     }
     console.warn(
       t('gui-editor:config.element.unsupported.type', {
@@ -415,6 +464,7 @@ const UIFactory = {
             key={key}
             spec={el as DisplayConfigElement}
             disabled={readonly}
+            className="pt-1"
           />
         );
       }
@@ -439,9 +489,13 @@ const UIFactory = {
 
     return (
       // ${level / 4}rem
-      <div key={identifier} id={identifier} style={{ marginLeft: `0rem` }}>
+      <div
+        key={identifier}
+        id={identifier}
+        style={{ marginLeft: `0rem`, paddingTop: `${(10 - level) * 0.1}rem` }}
+      >
         {htmlHeader}
-        <div style={{ marginLeft: '0rem', marginBottom: '0.5rem' }}>
+        <div style={{ marginLeft: '0rem', marginBottom: '0.0rem' }}>
           {elements}
         </div>
         {children}
@@ -549,18 +603,20 @@ const UIFactory = {
     if (optionEntries.length === 0) {
       // Display message that no config options can be displayed
       return (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textAlign: 'center',
-            minHeight: '85vh',
-          }}
-        >
-          No extensions are active, so there are no options to display! Go to
-          the Extensions tab to activate an Extension.
-        </div>
+        // <h3
+        //   style={{
+        //     display: 'flex',
+        //     justifyContent: 'center',
+        //     alignItems: 'center',
+        //     textAlign: 'center',
+        //     minHeight: '85vh',
+        //   }}
+        // >
+        //   No extensions are active, so there are no options to display! Go to
+        //   the Extensions tab to activate an Extension.
+        // </h3>
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <></>
       );
     }
 
@@ -570,6 +626,7 @@ const UIFactory = {
           key={el.url}
           spec={el as DisplayConfigElement}
           disabled={readonly}
+          className=""
         />
       )
     );

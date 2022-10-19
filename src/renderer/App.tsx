@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
 import { UnlistenFn } from '@tauri-apps/api/event';
+import { useTranslation } from 'react-i18next';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
 import { GuiConfigHandler } from './utils/gui-config-handling';
 import { useGuiConfig } from './utils/swr-components';
-import { useTranslation } from 'react-i18next';
 
 import LanguageSelect from './LanguageSelect';
 
@@ -125,7 +125,7 @@ function Landing() {
 }
 
 export default function App() {
-  const [langSelectActive, setLangSelectActive] = useState(true);
+  const [langSelectActive, setLangSelectActive] = useState(false);
   const [t] = useTranslation(['gui-landing']);
 
   return (

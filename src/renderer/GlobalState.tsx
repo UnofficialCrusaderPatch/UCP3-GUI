@@ -52,6 +52,14 @@ type UIDefinition = {
   hierarchical: { elements: object[]; sections: { [key: string]: object } };
 };
 
+type ExtensionsState = {
+  allExtensions: Extension[];
+  // Explicitly activated
+  activatedExtensions: Extension[];
+  activeExtensions: Extension[];
+  installedExtensions: Extension[];
+};
+
 type GlobalStateType = {
   configurationDefaults: KeyValueReducerState<unknown>;
   setConfigurationDefaults: (action: KeyValueReducerArgs<Warning>) => void;
@@ -67,6 +75,8 @@ type GlobalStateType = {
   uiDefinition: UIDefinition;
   folder: string;
   file: string;
+  extensionsState: ExtensionsState;
+  setExtensionsState: (newState: ExtensionsState) => void;
 };
 
 const GlobalState = createContext<GlobalStateType>({
@@ -84,6 +94,13 @@ const GlobalState = createContext<GlobalStateType>({
   uiDefinition: { flat: [], hierarchical: { elements: [], sections: {} } },
   folder: '',
   file: '',
+  extensionsState: {
+    allExtensions: [],
+    activeExtensions: [],
+    activatedExtensions: [],
+    installedExtensions: [],
+  } as ExtensionsState,
+  setExtensionsState: () => {},
 });
 
 export {
@@ -95,4 +112,4 @@ export {
   configurationDefaultsReducer,
   KeyValueReducer,
 };
-export type { GlobalStateType, Warning, UIDefinition };
+export type { ExtensionsState, GlobalStateType, Warning, UIDefinition };

@@ -289,24 +289,9 @@ export const ucpBackEnd = {
     return result !== null ? (result as string) : undefined;
   },
 
-  async loadConfigFromFile(gameFolder: string) {
-    const result = await dialogOpen({
-      directory: false,
-      multiple: false,
-      defaultPath: gameFolder,
-      filters: [
-        { name: 'All Files', extensions: ['*'] },
-        { name: 'Config files', extensions: ['yml', 'yaml'] },
-      ],
-    });
-
-    if (result === null) {
-      window.alert('Opening: Operation cancelled');
-      return {};
-    }
-    const filePath = result;
-
+  async loadConfigFromFile(filePath: string) {
     const config: {
+      order: string[];
       modules: {
         [key: string]: {
           active: boolean;
@@ -323,6 +308,13 @@ export const ucpBackEnd = {
       };
     } = yaml.parse(await readTextFile(filePath as string)); // will only be one
 
+    if (config.modules === undefined && config.plugins === undefined) {
+      return {
+        status: 'FAIL',
+        message: 'Not a valid config file',
+      };
+    }
+
     const finalConfig: { [key: string]: unknown } = {};
 
     Object.entries(config.modules || {}).forEach(([key, value]) => {
@@ -333,7 +325,14 @@ export const ucpBackEnd = {
       finalConfig[key] = value.options;
     });
 
-    return finalConfig;
+    return {
+      status: 'OK',
+      message: '',
+      result: {
+        config: finalConfig,
+        order: config.order || [],
+      },
+    };
   },
 
   // Load configuration
@@ -342,20 +341,13 @@ export const ucpBackEnd = {
   },
 
   // Save configuration
-  async saveUCPConfig(config: { [key: string]: unknown }, filePath: string) {
-    let finalFilePath = filePath;
-    if (filePath === undefined || filePath === '') {
-      const result = await dialogSave({
-        filters: [{ name: 'All Files', extensions: ['*'] }],
-      });
-      if (result === null || result === undefined) {
-        window.alert('Saving: Operation cancelled');
-        return;
-      }
-      finalFilePath = result;
-    }
-
+  async saveUCPConfig(
+    config: { [key: string]: unknown },
+    filePath: string,
+    extensions: Extension[]
+  ) {
     const finalConfig: {
+      order: string[];
       modules: {
         [key: string]: {
           active: boolean;
@@ -370,7 +362,10 @@ export const ucpBackEnd = {
           options: { [key: string]: unknown };
         };
       };
-    } = { modules: {}, plugins: {} };
+    } = { modules: {}, plugins: {}, order: [] };
+    finalConfig.order = extensions.map(
+      (e: Extension) => `${e.name} == ${e.version}`
+    );
     Object.entries(config)
       .filter(([key, value]) => value !== undefined)
       .forEach(([key, value]) => {
@@ -404,6 +399,6 @@ export const ucpBackEnd = {
         fcp[finalpart] = value;
       });
 
-    await writeTextFile(finalFilePath, yaml.stringify(finalConfig));
+    await writeTextFile(filePath, yaml.stringify(finalConfig));
   },
 };

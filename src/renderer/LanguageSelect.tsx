@@ -46,6 +46,7 @@ export default function LanguageSelect({
               }
             />
           </div>
+          {/* eslint-disable-next-line */}
           <div
             id="language-select"
             className={`list-group overflow-auto bg-light${
@@ -65,7 +66,7 @@ export default function LanguageSelect({
                 return (
                   <button
                     type="button"
-                    key={index}
+                    key={lang}
                     className="list-group-item list-group-item-action active"
                     value={lang}
                     disabled
@@ -77,7 +78,7 @@ export default function LanguageSelect({
               return (
                 <button
                   type="button"
-                  key={index}
+                  key={lang}
                   className="list-group-item list-group-item-action"
                   value={lang}
                 >

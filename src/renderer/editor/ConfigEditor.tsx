@@ -14,19 +14,34 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import { Form } from 'react-bootstrap';
 
-import React, { Component, useContext, useReducer, useState } from 'react';
+import React, {
+  Component,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react';
+import {
+  open as dialogOpen,
+  save as dialogSave,
+  ask as dialogAsk,
+} from '@tauri-apps/api/dialog';
 
 import './ConfigEditor.css';
 
 import { useTranslation } from 'react-i18next';
+import { escape } from 'querystring';
 import { GlobalState } from '../GlobalState';
 import { ucpBackEnd } from '../fakeBackend';
 import { UIFactory } from './factory/UIElements';
+import { Extension } from '../../common/config/common';
+import { DependencyStatement } from '../../common/config/DependencyStatement';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
   folder: string,
-  touched: { [key: string]: boolean }
+  touched: { [key: string]: boolean },
+  extensions: Extension[]
 ) {
   const finalConfig = Object.fromEntries(
     Object.entries(configuration).filter(([key]) => touched[key])
@@ -34,7 +49,7 @@ function saveConfig(
 
   console.log(finalConfig);
 
-  ucpBackEnd.saveUCPConfig(finalConfig, folder);
+  return ucpBackEnd.saveUCPConfig(finalConfig, folder, extensions);
 }
 
 export default function ConfigEditor(args: {
@@ -52,6 +67,10 @@ export default function ConfigEditor(args: {
     configurationTouched,
     setConfigurationTouched,
     activeExtensions,
+    setActiveExtensions,
+    extensions,
+    extensionsState,
+    setExtensionsState,
   } = useContext(GlobalState);
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
@@ -68,6 +87,16 @@ export default function ConfigEditor(args: {
     )
     .reduce((a: number, b: number) => a + b, 0);
 
+  const [configStatus, setConfigStatus] = useState('');
+
+  useEffect(() => {
+    setConfigStatus(
+      activeExtensions.length === 0
+        ? `Nothing to display, no extensions are active: ${activeExtensions.length}`
+        : ''
+    );
+  }, [activeExtensions]);
+
   return (
     <>
       {!readonly ? (
@@ -76,11 +105,106 @@ export default function ConfigEditor(args: {
             <button
               className="col-auto btn btn-primary mx-1"
               type="button"
-              onClick={async () => {
-                const openedConfig: { [key: string]: unknown } =
-                  await ucpBackEnd.loadConfigFromFile(gameFolder);
+              onClick={() => {
+                setConfiguration({
+                  type: 'reset',
+                  value: configurationDefaults,
+                });
+                setConfigurationTouched({
+                  type: 'reset',
+                  value: {},
+                });
+              }}
+            >
+              {t('gui-general:reset')}
+            </button>
 
-                if (openedConfig === undefined) return;
+            <button
+              className="col-auto btn btn-primary mx-1"
+              type="button"
+              onClick={() =>
+                saveConfig(
+                  configuration,
+                  file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                  configurationTouched,
+                  activeExtensions
+                )
+              }
+            >
+              {t('gui-general:apply')}
+            </button>
+            <button
+              className="col-auto btn btn-primary mx-1"
+              type="button"
+              onClick={async () => {
+                const result = await dialogOpen({
+                  directory: false,
+                  multiple: false,
+                  defaultPath: gameFolder,
+                  filters: [
+                    { name: 'All Files', extensions: ['*'] },
+                    { name: 'Config files', extensions: ['yml', 'yaml'] },
+                  ],
+                });
+
+                if (result === null) {
+                  setConfigStatus('No file selected');
+                }
+
+                const openedConfig: {
+                  status: string;
+                  message: string;
+                  result?: {
+                    config: { [key: string]: unknown };
+                    order: string[];
+                  };
+                } = await ucpBackEnd.loadConfigFromFile(result as string);
+
+                if (openedConfig.status !== 'OK') {
+                  setConfigStatus(
+                    `${openedConfig.status}: ${openedConfig.message}`
+                  );
+                  return;
+                }
+
+                if (openedConfig.result === undefined) {
+                  setConfigStatus(`Failed to load config: unknown error`);
+                  return;
+                }
+
+                if (openedConfig.result.order.length > 0) {
+                  const es: Extension[] = [];
+
+                  // eslint-disable-next-line no-restricted-syntax
+                  for (const e of openedConfig.result.order) {
+                    const ds = DependencyStatement.fromString(e);
+                    const options = extensions.filter(
+                      (ext: Extension) =>
+                        ext.name === ds.extension &&
+                        ext.version === ds.version.toString()
+                    );
+                    if (options.length === 0) {
+                      setConfigStatus(
+                        `Could not import configuration. Missing extension: ${e}`
+                      );
+                      return; // `Could not import configuration. Missing extension: ${e}`;
+                    }
+                    es.push(options[0]);
+                  }
+
+                  setActiveExtensions(es);
+                  setExtensionsState({
+                    allExtensions: extensionsState.allExtensions,
+                    activatedExtensions: es,
+                    activeExtensions: es,
+                    installedExtensions: extensionsState.allExtensions.filter(
+                      (e: Extension) =>
+                        es
+                          .map((ex: Extension) => `${ex.name}-${ex.version}`)
+                          .indexOf(`${e.name}-${e.version}`) === -1
+                    ),
+                  });
+                }
 
                 function findValue(
                   obj: { [key: string]: unknown },
@@ -109,7 +233,9 @@ export default function ConfigEditor(args: {
                 const newConfiguration: { [key: string]: unknown } = {};
                 Object.keys(configuration).forEach((url) => {
                   const value = findValue(
-                    openedConfig as { [key: string]: unknown },
+                    (openedConfig.result || {}).config as {
+                      [key: string]: unknown;
+                    },
                     url
                   );
                   if (value !== undefined) {
@@ -132,59 +258,43 @@ export default function ConfigEditor(args: {
               {t('gui-general:import')}
             </button>
             <button
-              disabled={Object.keys(configurationTouched).length === 0}
               className="col-auto btn btn-primary mx-1"
               type="button"
-              onClick={() =>
+              onClick={async () => {
+                const filePath = await dialogSave({
+                  filters: [{ name: 'All Files', extensions: ['*'] }],
+                });
+                if (filePath === null || filePath === undefined) {
+                  setConfigStatus('Config export cancelled');
+                  return;
+                }
+
                 saveConfig(
                   configuration,
-                  file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                  configurationTouched
+                  filePath,
+                  configurationTouched,
+                  activeExtensions
                 )
-              }
-            >
-              {t('gui-general:save')}
-            </button>
-            <button
-              disabled={Object.keys(configurationTouched).length === 0}
-              className="col-auto btn btn-primary mx-1"
-              type="button"
-              onClick={() =>
-                saveConfig(
-                  configuration,
-                  '', // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`
-                  configurationTouched
-                )
-              }
+                  .then(() => setConfigStatus(`Configuration exported!`))
+                  .catch((e) => {
+                    throw new Error(e);
+                  });
+              }}
             >
               {t('gui-general:export')}
             </button>
-            <button
-              className="col-auto btn btn-primary mx-1"
-              type="button"
-              onClick={() => {
-                setConfiguration({
-                  type: 'reset',
-                  value: configurationDefaults,
-                });
-                setConfigurationTouched({
-                  type: 'reset',
-                  value: {},
-                });
-              }}
-            >
-              {t('gui-general:reset')}
-            </button>
+
             <Form.Switch
               id="config-allow-user-override-switch"
               label={t('gui-editor:config.allow.override')}
-              className="col-auto d-inline-block ms-1"
+              className="col-auto d-inline-block ms-1 d-none"
             />
+            <span className="text-warning fs-6">{configStatus}</span>
           </div>
 
           <div className="col-auto ml-auto d-flex justify-content-center align-items-center">
             <div
-              className="d-flex justify-content-center align-items-center"
+              className="d-flex justify-content-center align-items-center d-none"
               style={{ height: '0' }}
             >
               <span

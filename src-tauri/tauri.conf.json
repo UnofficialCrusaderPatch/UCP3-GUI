@@ -8,13 +8,17 @@
   },
   "package": {
     "productName": "UCP3-GUI",
-    "version": "0.0.7"
+    "version": "0.0.8"
   },
   "tauri": {
     "allowlist": {
       "fs": {
         "all": true,
-        "scope": ["$DATA/*", "$DOWNLOAD/*", "$LOCALDATA/*"]
+        "scope": [
+          "$DATA/*",
+          "$DOWNLOAD/*",
+          "$LOCALDATA/*"
+        ]
       },
       "path": {
         "all": true
@@ -29,7 +33,9 @@
       },
       "http": {
         "all": true,
-        "scope": ["https://api.github.com/repos/UnofficialCrusaderPatch/**"]
+        "scope": [
+          "https://api.github.com/repos/UnofficialCrusaderPatch/**"
+        ]
       }
     },
     "bundle": {

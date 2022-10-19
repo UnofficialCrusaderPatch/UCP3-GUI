@@ -261,13 +261,13 @@ export default function ConfigEditor(args: {
               className="col-auto btn btn-primary mx-1"
               type="button"
               onClick={async () => {
-                const filePath = await dialogSave({
-                  filters: [{ name: 'All Files', extensions: ['*'] }],
-                });
+                let filePath = await dialogSave({});
                 if (filePath === null || filePath === undefined) {
                   setConfigStatus('Config export cancelled');
                   return;
                 }
+
+                if (!filePath.endsWith('.yml')) filePath = `${filePath}.yml`;
 
                 saveConfig(
                   configuration,

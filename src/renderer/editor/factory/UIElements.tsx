@@ -70,7 +70,11 @@ const UIFactory = {
     className: string;
   }) {
     const { spec, disabled, className } = args;
-    const { name, description, children, columns, header, text } = spec;
+    const { name, description, children, header, text } = spec;
+
+    let { columns } = spec;
+    if (columns === undefined) columns = 1;
+
     let finalDescription = description;
     if (finalDescription === undefined) finalDescription = text;
     const itemCount = children.length;

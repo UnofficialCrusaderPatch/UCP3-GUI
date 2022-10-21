@@ -15,6 +15,8 @@ import { Tooltip, Form, Overlay } from 'react-bootstrap';
 import React, { Fragment, ReactElement, useContext, useEffect } from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
+import { RadioGroup, Radio } from 'react-radio-group';
+
 import { GlobalState } from '../../GlobalState';
 import { ucpBackEnd } from '../../fakeBackend';
 
@@ -43,6 +45,97 @@ const renderTooltip = (props: { [key: string]: unknown }) => (
   // eslint-disable-next-line react/jsx-props-no-spreading
   <Tooltip {...(props as object)}>{props.tooltipText as string}</Tooltip>
 );
+
+const parseEnabledLogic = (
+  statement: string,
+  configuration: { [key: string]: unknown },
+  configurationDefaults: { [key: string]: unknown }
+) => {
+  if (statement === undefined || statement === null) return true;
+
+  const reSimple = /^\s*([!]{0,1})([a-zA-Z0-9_.]+)\s*$/;
+  const reBooleanComparison =
+    /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*((?:true)|(?:false))\s*$/;
+  const reNumericComparison =
+    /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*([0-9.]+)\s*$/;
+  const reStringComparison =
+    /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*"([^"]+)"\s*$/;
+  const sSimple = reSimple.exec(statement);
+  if (sSimple !== null) {
+    const [, exclamationMark, url] = sSimple;
+    const configValue =
+      configuration[url] !== undefined
+        ? configuration[url]
+        : configurationDefaults[url];
+    if (configValue === undefined) return undefined;
+    if (exclamationMark === '!') {
+      return configValue !== true;
+    }
+    return configValue !== false;
+  }
+  const sBoolComp = reBooleanComparison.exec(statement);
+  if (sBoolComp !== null) {
+    const [, url, comparator, value] = sBoolComp;
+    const configValue =
+      configuration[url] !== undefined
+        ? configuration[url]
+        : configurationDefaults[url];
+    if (configValue === undefined) return undefined;
+    if (comparator === '==') {
+      if (value === 'true') {
+        return configValue === true;
+      }
+      if (value === 'false') {
+        return configValue === false;
+      }
+      return undefined;
+    }
+    if (comparator === '!=') {
+      if (value === 'true') {
+        return configValue !== true;
+      }
+      if (value === 'false') {
+        return configValue !== false;
+      }
+      return undefined;
+    }
+    return undefined;
+  }
+  const sNumComp = reNumericComparison.exec(statement);
+  if (sNumComp !== null) {
+    const [, url, comparator, value] = sNumComp;
+    const configValue =
+      configuration[url] !== undefined
+        ? configuration[url]
+        : configurationDefaults[url];
+    if (configValue === undefined) return undefined;
+    if (comparator === '==') {
+      return configValue === parseFloat(value);
+    }
+    if (comparator === '!=') {
+      return configValue !== parseFloat(value);
+    }
+    return undefined;
+  }
+  const sStringComp = reStringComparison.exec(statement);
+  if (sStringComp !== null) {
+    const [, url, comparator, value] = sStringComp;
+    const configValue =
+      configuration[url] !== undefined
+        ? configuration[url]
+        : configurationDefaults[url];
+    console.log(`string comparing ${url}: ${configValue} to ${value}`);
+    if (configValue === undefined) return undefined;
+    if (comparator === '==') {
+      return configValue === value;
+    }
+    if (comparator === '!=') {
+      return configValue !== value;
+    }
+    return undefined;
+  }
+  return undefined;
+};
 
 const sanitizeID = (id: string) => id.toLowerCase().replaceAll(' ', '-');
 
@@ -75,7 +168,7 @@ const UIFactory = {
     // eslint-disable-next-line react/jsx-no-useless-fragment
     let headerElement = <></>;
     if (header !== undefined) {
-      headerElement = <h3>{header}</h3>;
+      headerElement = <h5>{header}</h5>;
     }
 
     return (
@@ -130,7 +223,10 @@ const UIFactory = {
     }
 
     return (
-      <Container className={`${className}`} style={{ margin: 0 }}>
+      <Container
+        className={`my-2 px-0 pb-4 ${className}`}
+        style={{ margin: 0 }}
+      >
         {cs}
       </Container>
     );
@@ -216,18 +312,11 @@ const UIFactory = {
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
-    let isEnabled = true;
-    if (enabled !== undefined) {
-      if (configuration[enabled] === undefined) {
-        if (configurationDefaults[enabled] === undefined) {
-          isEnabled = true;
-        } else {
-          isEnabled = configurationDefaults[enabled] as boolean;
-        }
-      } else {
-        isEnabled = configuration[enabled] as boolean;
-      }
-    }
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
     const fullToolTip = formatToolTip(tooltip, url);
 
     const hasWarning = configurationWarnings[url] !== undefined;
@@ -284,18 +373,11 @@ const UIFactory = {
     const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
     const { [url]: value } = configuration;
-    let isEnabled = true;
-    if (enabled !== undefined) {
-      if (configuration[enabled] === undefined) {
-        if (configurationDefaults[enabled] === undefined) {
-          isEnabled = true;
-        } else {
-          isEnabled = configurationDefaults[enabled] as boolean;
-        }
-      } else {
-        isEnabled = configuration[enabled] as boolean;
-      }
-    }
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
     const fullToolTip = formatToolTip(tooltip, url);
 
     const hasWarning = configurationWarnings[url] !== undefined;
@@ -376,18 +458,11 @@ const UIFactory = {
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, choices } = spec;
     const { [url]: value } = configuration;
-    let isEnabled = true;
-    if (enabled !== undefined) {
-      if (configuration[enabled] === undefined) {
-        if (configurationDefaults[enabled] === undefined) {
-          isEnabled = true;
-        } else {
-          isEnabled = configurationDefaults[enabled] as boolean;
-        }
-      } else {
-        isEnabled = configuration[enabled] as boolean;
-      }
-    }
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
     const fullToolTip = formatToolTip(tooltip, url);
 
     const hasWarning = configurationWarnings[url] !== undefined;
@@ -452,6 +527,73 @@ const UIFactory = {
           </Form.Label>
         </div>
       </Form.Group>
+    );
+  },
+
+  CreateRadioGroup(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+
+    const { spec, disabled, className } = args;
+    const { url, text, tooltip, enabled, choices } = spec;
+    const { [url]: value } = configuration;
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = configurationWarnings[url] !== undefined;
+    const defaultChoice = choices[0];
+
+    const radios = choices.map((choice: string) => (
+      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+      <div key={choice} className="form-check">
+        <Radio
+          className="form-check-input"
+          value={choice}
+          id={`${url}-radio-${choice}`}
+        />
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label className="form-check-label" htmlFor={`${url}-radio-${choice}`}>
+          {choice}
+        </label>
+      </div>
+    ));
+    return (
+      <>
+        <p>{text}</p>
+        <RadioGroup
+          name={url}
+          selectedValue={
+            value === undefined ? defaultChoice : (value as string)
+          }
+          onChange={(newValue: string) => {
+            setConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, newValue]]),
+            });
+            setConfigurationTouched({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, true]]),
+            });
+            configuration[url] = newValue;
+          }}
+        >
+          {radios}
+        </RadioGroup>
+      </>
     );
   },
 
@@ -526,6 +668,15 @@ const UIFactory = {
     if (spec.display === 'Choice') {
       return (
         <UIFactory.CreateChoice
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    }
+    if (spec.display === 'RadioGroup') {
+      return (
+        <UIFactory.CreateRadioGroup
           spec={spec}
           disabled={disabled}
           className={className}

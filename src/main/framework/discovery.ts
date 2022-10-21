@@ -46,8 +46,11 @@ function changeLocale(
         }
       }
     }
-    if (typeof obj[field] === 'object') {
-      changeLocale(locale, obj[field] as { [key: string]: unknown });
+  });
+
+  Object.entries(obj).forEach(([key, value]) => {
+    if (typeof obj[key] === 'object') {
+      changeLocale(locale, value as { [key: string]: unknown });
     }
   });
 }

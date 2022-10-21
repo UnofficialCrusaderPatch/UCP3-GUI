@@ -10,7 +10,7 @@ import {
   OptionEntry,
 } from '../../common/config/common';
 
-const localeSensitiveFields = ['description', 'text', 'tooltip'];
+const localeSensitiveFields = ['description', 'text', 'tooltip', 'header'];
 const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
 async function readUISpec(

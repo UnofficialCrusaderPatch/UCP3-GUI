@@ -16,6 +16,8 @@ import React, { Fragment, ReactElement, useContext, useEffect } from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, Radio } from 'react-radio-group';
+import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import RangeSlider from 'react-bootstrap-range-slider';
 
 import { GlobalState } from '../../GlobalState';
 import { ucpBackEnd } from '../../fakeBackend';
@@ -124,7 +126,6 @@ const parseEnabledLogic = (
       configuration[url] !== undefined
         ? configuration[url]
         : configurationDefaults[url];
-    console.log(`string comparing ${url}: ${configValue} to ${value}`);
     if (configValue === undefined) return undefined;
     if (comparator === '==') {
       return configValue === value;
@@ -154,6 +155,320 @@ const UIFactory = {
         >
           &#9888;
         </span>
+      </div>
+    );
+  },
+
+  CreateUCP2Slider(args: {
+    spec: NumberInputDisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled, className } = args;
+    const { url, text, tooltip, enabled, min, max, step, header } = spec;
+    const { [url]: value } = configuration as {
+      [url: string]: { enabled: boolean; sliderValue: number };
+    };
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = configurationWarnings[url] !== undefined;
+    const { hasHeader } = spec as NumberInputDisplayConfigElement & {
+      hasHeader: boolean;
+    };
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    let headerElement = <></>;
+    if (hasHeader) {
+      headerElement = (
+        <Form.Switch>
+          <Form.Switch.Input
+            className="me-2"
+            id={`${url}-header`}
+            key={`${url}-header`}
+            checked={
+              value.enabled === undefined ? false : (value.enabled as boolean)
+            }
+            onChange={(event) => {
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [url, { ...value, ...{ enabled: event.target.checked } }],
+                ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
+            }}
+            disabled={!isEnabled || disabled}
+          />
+          <Form.Switch.Label className="fs-5" htmlFor={`${url}-header`}>
+            {header}
+          </Form.Switch.Label>
+        </Form.Switch>
+      );
+    }
+    // eslint-disable-next-line no-nested-ternary
+    const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
+    return (
+      <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+        {headerElement}
+        <div>
+          <label className="form-check-label" htmlFor={`${url}-slider`}>
+            {!hasHeader && header}
+            {text}
+          </label>
+        </div>
+        <div className="row">
+          <Form.Label className="col-auto">{min}</Form.Label>
+          <Form.Range
+            className="col"
+            style={{ width: '5em' }}
+            min={min * factor}
+            max={max * factor}
+            step={step * factor}
+            id={`${url}-slider`}
+            key={`${url}-slider`}
+            value={
+              value.sliderValue === undefined
+                ? 0
+                : (value.sliderValue as number) * factor
+            }
+            onChange={(event) => {
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [
+                    url,
+                    {
+                      ...value,
+                      ...{
+                        sliderValue: parseInt(event.target.value, 10) / factor,
+                      },
+                    },
+                  ],
+                ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
+            }}
+            disabled={!isEnabled || disabled || !value.enabled}
+          />
+          <Form.Label className="col-auto">{max}</Form.Label>
+        </div>
+        <div className="fs-8">
+          <span> Current value: </span>
+          <span className="" id={`${url}-value`}>
+            {value.sliderValue}
+          </span>
+          <span>
+            {' '}
+            Default value:{' '}
+            {
+              (configurationDefaults[url] as { sliderValue: number })
+                .sliderValue
+            }
+          </span>
+        </div>
+      </div>
+    );
+  },
+  CreateUCP2SliderChoice(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled, className } = args;
+    const { url, text, tooltip, enabled, header, choices } =
+      spec as DisplayConfigElement & {
+        choices: {
+          name: string;
+          enabled: boolean;
+          slider: number;
+          min: number;
+          max: number;
+          step: number;
+          text: string;
+        }[];
+      };
+    const { [url]: value } = configuration as {
+      [url: string]: {
+        enabled: boolean;
+        choice: string;
+        choices: { [choice: string]: { enabled: boolean; slider: number } };
+      };
+    };
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = configurationWarnings[url] !== undefined;
+    const { hasHeader } = spec as NumberInputDisplayConfigElement & {
+      hasHeader: boolean;
+    };
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    let headerElement = <></>;
+    if (hasHeader) {
+      headerElement = (
+        <Form.Switch>
+          <Form.Switch.Input
+            className="me-2"
+            id={`${url}-header`}
+            key={`${url}-header`}
+            checked={
+              value.enabled === undefined ? false : (value.enabled as boolean)
+            }
+            onChange={(event) => {
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [url, { ...value, ...{ enabled: event.target.checked } }],
+                ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
+            }}
+            disabled={!isEnabled || disabled}
+          />
+          <Form.Switch.Label className="fs-5" htmlFor={`${url}-header`}>
+            {header}
+          </Form.Switch.Label>
+        </Form.Switch>
+      );
+    }
+
+    const radios = choices.map(
+      (choice: {
+        name: string;
+        enabled: boolean;
+        slider: number;
+        min: number;
+        max: number;
+        step: number;
+        text: string;
+      }) => {
+        const factor =
+          1 /
+          // eslint-disable-next-line no-nested-ternary
+          (choice.step === undefined ? 1 : choice.step === 0 ? 1 : choice.step);
+        return (
+          // eslint-disable-next-line jsx-a11y/label-has-associated-control
+          <div key={choice.name} className="form-check">
+            <Radio
+              className="form-check-input"
+              value={choice.name}
+              id={`${url}-radio-${choice.name}`}
+              disabled={!value.enabled}
+            />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
+              <div className="pb-1">
+                <label className="form-check-label" htmlFor={`${url}-slider`}>
+                  {choice.text}
+                </label>
+              </div>
+              <div className="row">
+                <Form.Label className="col-auto">{choice.min}</Form.Label>
+                <div className="col-auto">
+                  <RangeSlider
+                    min={choice.min * factor}
+                    max={choice.max * factor}
+                    step={choice.step * factor}
+                    id={`${url}-slider`}
+                    tooltip="on"
+                    size="sm"
+                    variant="primary"
+                    value={
+                      value.choices[choice.name].slider === undefined
+                        ? 0
+                        : (value.choices[choice.name].slider as number) * factor
+                    }
+                    onChange={(event) => {
+                      const newValue = { ...value };
+                      newValue.choices[choice.name].slider =
+                        parseInt(event.target.value, 10) / factor;
+                      setConfiguration({
+                        type: 'set-multiple',
+                        value: Object.fromEntries([[url, newValue]]),
+                      });
+                      setConfigurationTouched({
+                        type: 'set-multiple',
+                        value: Object.fromEntries([[url, true]]),
+                      });
+                    }}
+                    disabled={
+                      !isEnabled ||
+                      disabled ||
+                      !value.enabled ||
+                      value.choice !== choice.name
+                    }
+                  />
+                </div>
+                <div className="col-auto">
+                  <Form.Label>{choice.max}</Form.Label>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+    );
+
+    let enabledOption = '';
+    if (value !== undefined) {
+      enabledOption = value.choice;
+    }
+
+    return (
+      <div className="pb-3">
+        {headerElement}
+        <p>{text}</p>
+        <RadioGroup
+          name={url}
+          selectedValue={enabledOption}
+          onChange={(newValue: string) => {
+            setConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [url, { ...value, ...{ choice: newValue } }],
+              ]),
+            });
+            setConfigurationTouched({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, true]]),
+            });
+            configuration[url] = newValue;
+          }}
+        >
+          {radios}
+        </RadioGroup>
       </div>
     );
   },
@@ -619,6 +934,24 @@ const UIFactory = {
         })
       );
       return <div />;
+    }
+    if (spec.display === 'UCP2Slider') {
+      return (
+        <UIFactory.CreateUCP2Slider
+          spec={spec as NumberInputDisplayConfigElement}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    }
+    if (spec.display === 'UCP2SliderChoice') {
+      return (
+        <UIFactory.CreateUCP2SliderChoice
+          spec={spec as NumberInputDisplayConfigElement}
+          disabled={disabled}
+          className={className}
+        />
+      );
     }
     if (spec.display === 'Paragraph') {
       return (

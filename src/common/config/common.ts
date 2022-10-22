@@ -180,6 +180,7 @@ type DisplayConfigElement = {
 type NumberInputDisplayConfigElement = DisplayConfigElement & {
   min: number;
   max: number;
+  step: number;
 };
 
 type SectionDescription = {

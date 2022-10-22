@@ -12,7 +12,13 @@ import Container from 'react-bootstrap/Container';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { Tooltip, Form, Overlay } from 'react-bootstrap';
 
-import React, { Fragment, ReactElement, useContext, useEffect } from 'react';
+import React, {
+  Fragment,
+  ReactElement,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, Radio } from 'react-radio-group';
@@ -222,6 +228,12 @@ const UIFactory = {
     }
     // eslint-disable-next-line no-nested-ternary
     const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [localValue, setLocalValue] = useState(
+      value.sliderValue === undefined
+        ? 0
+        : (value.sliderValue as number) * factor
+    );
     return (
       <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
         {headerElement}
@@ -242,12 +254,14 @@ const UIFactory = {
               step={step * factor}
               id={`${url}-slider`}
               size="sm"
-              value={
-                value.sliderValue === undefined
-                  ? 0
-                  : (value.sliderValue as number) * factor
+              value={localValue}
+              tooltipLabel={(currentValue) =>
+                (currentValue / factor).toString()
               }
               onChange={(event) => {
+                setLocalValue(parseInt(event.target.value, 10));
+              }}
+              onAfterChange={(event) => {
                 setConfiguration({
                   type: 'set-multiple',
                   value: Object.fromEntries([
@@ -370,6 +384,12 @@ const UIFactory = {
           1 /
           // eslint-disable-next-line no-nested-ternary
           (choice.step === undefined ? 1 : choice.step === 0 ? 1 : choice.step);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [localValue, setLocalValue] = useState(
+          value.choices[choice.name].slider === undefined
+            ? 0
+            : (value.choices[choice.name].slider as number) * factor
+        );
         return (
           // eslint-disable-next-line jsx-a11y/label-has-associated-control
           <div key={choice.name} className="form-check">
@@ -391,7 +411,16 @@ const UIFactory = {
               </div>
               <div className="row">
                 <div className="col-auto">
-                  <Form.Label>{choice.min}</Form.Label>
+                  <Form.Label
+                    disabled={
+                      !isEnabled ||
+                      disabled ||
+                      !value.enabled ||
+                      value.choice !== choice.name
+                    }
+                  >
+                    {choice.min}
+                  </Form.Label>
                 </div>
                 <div className="col-4">
                   <RangeSlider
@@ -401,12 +430,15 @@ const UIFactory = {
                     id={`${url}-slider`}
                     size="sm"
                     variant="primary"
-                    value={
-                      value.choices[choice.name].slider === undefined
-                        ? 0
-                        : (value.choices[choice.name].slider as number) * factor
+                    value={localValue}
+                    tooltipLabel={(currentValue) =>
+                      (currentValue / factor).toString()
                     }
                     onChange={(event) => {
+                      setLocalValue(parseInt(event.target.value, 10));
+                    }}
+                    onAfterChange={(event) => {
+                      setLocalValue(parseInt(event.target.value, 10));
                       const newValue = { ...value };
                       newValue.choices[choice.name].slider =
                         parseInt(event.target.value, 10) / factor;
@@ -428,7 +460,16 @@ const UIFactory = {
                   />
                 </div>
                 <div className="col-auto">
-                  <Form.Label>{choice.max}</Form.Label>
+                  <Form.Label
+                    disabled={
+                      !isEnabled ||
+                      disabled ||
+                      !value.enabled ||
+                      value.choice !== choice.name
+                    }
+                  >
+                    {choice.max}
+                  </Form.Label>
                 </div>
               </div>
             </div>

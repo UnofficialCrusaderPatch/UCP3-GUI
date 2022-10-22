@@ -1,6 +1,11 @@
-import { readTextFile, writeTextFile } from '@tauri-apps/api/fs';
-import { showError, showWarning } from './dialog-util';
-import { getRoamingDataFolder, proxyFsExists } from './file-utils';
+import { invoke } from '@tauri-apps/api/tauri';
+import { showError } from './dialog-util';
+import {
+  getRoamingDataFolder,
+  loadJson,
+  proxyFsExists,
+  writeJson,
+} from './file-utils';
 
 interface RecentFolder {
   path: string;
@@ -95,13 +100,25 @@ export class GuiConfigHandler {
     }
   }
 
+  async #addLoadedRecentFoldersToScope() {
+    const promises = this.#currentGuiConfig?.recentFolderPaths.map(({ path }) =>
+      invoke('add_dir_to_fs_scope', { path })
+    );
+    return promises ? Promise.all(promises) : undefined;
+  }
+
   async loadGuiConfig() {
     this.#currentGuiConfig = GuiConfigHandler.#createNewConfig();
     try {
       const fPath = await this.#getRecentFoldersFilePath();
       if (await proxyFsExists(fPath)) {
-        this.#addToCurrentConfig(JSON.parse(await readTextFile(fPath)));
+        const [result, error] = await loadJson(fPath);
+        if (!result) {
+          throw error;
+        }
+        this.#addToCurrentConfig(result);
         this.#sortRecentFolders();
+        await this.#addLoadedRecentFoldersToScope();
         return;
       }
     } catch (error) {
@@ -114,10 +131,13 @@ export class GuiConfigHandler {
 
   async saveGuiConfig() {
     try {
-      await writeTextFile(
+      const [result, error] = await writeJson(
         await this.#getRecentFoldersFilePath(),
-        JSON.stringify(this.#currentGuiConfig)
+        this.#currentGuiConfig
       );
+      if (!result) {
+        throw error;
+      }
     } catch (error) {
       // needs to await, since it is called during shutdown
       await showError(

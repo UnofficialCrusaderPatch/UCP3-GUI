@@ -35,6 +35,7 @@ import {
 // TYPES
 
 export type Yaml = any;
+export type Json = any;
 export type Error = unknown;
 
 // CODE
@@ -152,9 +153,38 @@ export async function loadYaml(
 ): Promise<[Yaml | undefined, Error | undefined]> {
   const [content, error] = await readTextFile(path);
   if (!content) {
-    return [content, error];
+    return [undefined, error];
   }
   return [yamlParse(content, yamlOptions), undefined];
+}
+
+export async function loadJson(
+  path: string,
+  reviver?:
+    | ((this: unknown, key: string, value: unknown) => unknown)
+    | undefined
+): Promise<[Json | undefined, Error | undefined]> {
+  const [content, error] = await readTextFile(path);
+  if (!content) {
+    return [undefined, error];
+  }
+  return [JSON.parse(content, reviver), undefined];
+}
+
+export async function writeJson(
+  path: string,
+  contents: unknown,
+  replacer?:
+    | ((this: unknown, key: string, value: unknown) => unknown)
+    | undefined,
+  space?: string | number | undefined
+): Promise<[boolean, Error | undefined]> {
+  try {
+    const jsonStr = JSON.stringify(contents, replacer, space);
+    return await writeTextFile(path, jsonStr);
+  } catch (error) {
+    return [false, error];
+  }
 }
 
 export async function fetchBinary<T>(

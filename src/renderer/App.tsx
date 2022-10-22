@@ -125,7 +125,7 @@ function Landing() {
 }
 
 export default function App() {
-  const [langSelectActive, setLangSelectActive] = useState(false);
+  const [langSelectActive, setLangSelectActive] = useState(true);
   const [t] = useTranslation(['gui-landing']);
 
   return (

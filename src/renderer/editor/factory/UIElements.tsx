@@ -232,57 +232,49 @@ const UIFactory = {
           </label>
         </div>
         <div className="row">
-          <Form.Label className="col-auto">{min}</Form.Label>
-          <Form.Range
-            className="col"
-            style={{ width: '5em' }}
-            min={min * factor}
-            max={max * factor}
-            step={step * factor}
-            id={`${url}-slider`}
-            key={`${url}-slider`}
-            value={
-              value.sliderValue === undefined
-                ? 0
-                : (value.sliderValue as number) * factor
-            }
-            onChange={(event) => {
-              setConfiguration({
-                type: 'set-multiple',
-                value: Object.fromEntries([
-                  [
-                    url,
-                    {
-                      ...value,
-                      ...{
-                        sliderValue: parseInt(event.target.value, 10) / factor,
+          <div className="col-auto">
+            <Form.Label>{min}</Form.Label>
+          </div>
+          <div className="col">
+            <RangeSlider
+              min={min * factor}
+              max={max * factor}
+              step={step * factor}
+              id={`${url}-slider`}
+              size="sm"
+              value={
+                value.sliderValue === undefined
+                  ? 0
+                  : (value.sliderValue as number) * factor
+              }
+              onChange={(event) => {
+                setConfiguration({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([
+                    [
+                      url,
+                      {
+                        ...value,
+                        ...{
+                          sliderValue:
+                            parseInt(event.target.value, 10) / factor,
+                        },
                       },
-                    },
-                  ],
-                ]),
-              });
-              setConfigurationTouched({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, true]]),
-              });
-            }}
-            disabled={!isEnabled || disabled || !value.enabled}
-          />
-          <Form.Label className="col-auto">{max}</Form.Label>
-        </div>
-        <div className="fs-8">
-          <span> Current value: </span>
-          <span className="" id={`${url}-value`}>
-            {value.sliderValue}
-          </span>
-          <span>
-            {' '}
-            Default value:{' '}
-            {
-              (configurationDefaults[url] as { sliderValue: number })
-                .sliderValue
-            }
-          </span>
+                    ],
+                  ]),
+                });
+                setConfigurationTouched({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([[url, true]]),
+                });
+              }}
+              disabled={!isEnabled || disabled || !value.enabled}
+            />
+          </div>
+
+          <div className="col-auto">
+            <Form.Label>{max}</Form.Label>
+          </div>
         </div>
       </div>
     );
@@ -390,19 +382,23 @@ const UIFactory = {
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
             <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
               <div className="pb-1">
-                <label className="form-check-label" htmlFor={`${url}-slider`}>
+                <label
+                  className="form-check-label"
+                  htmlFor={`${url}-radio-${choice.name}`}
+                >
                   {choice.text}
                 </label>
               </div>
               <div className="row">
-                <Form.Label className="col-auto">{choice.min}</Form.Label>
                 <div className="col-auto">
+                  <Form.Label>{choice.min}</Form.Label>
+                </div>
+                <div className="col-4">
                   <RangeSlider
                     min={choice.min * factor}
                     max={choice.max * factor}
                     step={choice.step * factor}
                     id={`${url}-slider`}
-                    tooltip="on"
                     size="sm"
                     variant="primary"
                     value={

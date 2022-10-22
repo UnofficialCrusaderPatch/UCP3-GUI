@@ -1,4 +1,3 @@
-import { invoke } from '@tauri-apps/api/tauri';
 import { showError } from './dialog-util';
 import {
   getRoamingDataFolder,
@@ -6,6 +5,7 @@ import {
   proxyFsExists,
   writeJson,
 } from './file-utils';
+import { addCompleteDirectoryToFsScope } from './tauri-invoke';
 
 interface RecentFolder {
   path: string;
@@ -102,7 +102,7 @@ export class GuiConfigHandler {
 
   async #addLoadedRecentFoldersToScope() {
     const promises = this.#currentGuiConfig?.recentFolderPaths.map(({ path }) =>
-      invoke('add_dir_to_fs_scope', { path })
+      addCompleteDirectoryToFsScope(path)
     );
     return promises ? Promise.all(promises) : undefined;
   }

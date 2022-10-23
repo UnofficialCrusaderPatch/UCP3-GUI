@@ -130,21 +130,21 @@ export class GuiConfigHandler {
   }
 
   async saveGuiConfig() {
-    try {
-      const [result, error] = await writeJson(
-        await this.#getRecentFoldersFilePath(),
-        this.#currentGuiConfig
-      );
-      if (!result) {
-        throw error;
-      }
-    } catch (error) {
-      // needs to await, since it is called during shutdown
-      await showError(
-        `Failed to save GUI configuration:\n${error}`,
-        GuiConfigHandler.#messageTitle
-      );
-    }
+    // try {
+    //   const [result, error] = await writeJson(
+    //     await this.#getRecentFoldersFilePath(),
+    //     this.#currentGuiConfig
+    //   );
+    //   if (!result) {
+    //     throw error;
+    //   }
+    // } catch (error) {
+    //   // needs to await, since it is called during shutdown
+    //   await showError(
+    //     `Failed to save GUI configuration:\n${error}`,
+    //     GuiConfigHandler.#messageTitle
+    //   );
+    // }
   }
 
   getRecentGameFolders(): string[] {

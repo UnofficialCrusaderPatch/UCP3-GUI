@@ -6,11 +6,12 @@ use std::{
 };
 use tauri::{api::dialog::message, AppHandle, Manager};
 
-use super::utils::get_roaming_folder_path;
+use crate::utils::{do_with_mutex_state, get_roaming_folder_path};
 
 const NUMBER_OF_RECENT_FOLDERS: usize = 10;
 const CONFIG_FILE_NAME: &str = "recent.json";
 const MESSAGE_TITLE: &str = "GUI-Configuration";
+const LANGUAGE_CHANGE_EVENT: &str = "language-change";
 
 #[derive(Serialize, Deserialize)]
 struct RecentFolder {
@@ -55,8 +56,35 @@ impl GuiConfig {
         path
     }
 
+    fn check_if_init(&self) -> bool {
+        if !self.init {
+            message(
+                None::<&tauri::Window>,
+                MESSAGE_TITLE,
+                format!("Tried to run gui config function before init."),
+            );
+        }
+        self.init
+    }
+
     fn sort_recent_folders(&mut self) {
         self.recent_folders.sort_by(|a, b| b.date.cmp(&a.date));
+    }
+
+    fn add_loaded_recent_to_scope(&self, app_handle: &AppHandle) {
+        for recent_folder in &self.recent_folders {
+            if let Some(error) = app_handle
+                .fs_scope()
+                .allow_directory(&recent_folder.path, true)
+                .err()
+            {
+                message(
+                    None::<&tauri::Window>,
+                    MESSAGE_TITLE,
+                    format!("Failed to add path to scope: {}", error.to_string()),
+                );
+            }
+        }
     }
 
     pub fn new() -> GuiConfig {
@@ -93,6 +121,10 @@ impl GuiConfig {
                     }
                 }
             }
+
+            self.sort_recent_folders();
+            self.add_loaded_recent_to_scope(app_handle);
+
             Ok(())
         }();
         if let Some(error) = load_result.err() {
@@ -105,7 +137,6 @@ impl GuiConfig {
                 ),
             }
         }
-        self.sort_recent_folders();
 
         self.init = true;
     }
@@ -128,13 +159,142 @@ impl GuiConfig {
             );
         }
     }
+
+    pub fn get_language(&self) -> Option<&String> {
+        if self.check_if_init() {
+            Some(&self.lang)
+        } else {
+            None
+        }
+    }
+
+    pub fn set_language(&mut self, app_handle: &AppHandle, lang: &str) {
+        if self.check_if_init() {
+            self.lang = String::from(lang);
+
+            // tell the frontend, that the language changed
+            if let Some(error) = app_handle
+                .emit_all(LANGUAGE_CHANGE_EVENT, self.lang.clone())
+                .err()
+            {
+                message(
+                    None::<&tauri::Window>,
+                    MESSAGE_TITLE,
+                    format!(
+                        "Failed to send language change event because: {}",
+                        error.to_string()
+                    ),
+                );
+            }
+        }
+    }
+
+    pub fn get_recent_folders(&self) -> Vec<&String> {
+        if self.check_if_init() {
+            self.recent_folders
+                .iter()
+                .map(|recent_folder| &recent_folder.path)
+                .collect()
+        } else {
+            Vec::new()
+        }
+    }
+
+    pub fn get_most_recent_folder(&self) -> Option<&String> {
+        if self.check_if_init() {
+            if let Some(recent_folder) = self.recent_folders.first() {
+                return Some(&recent_folder.path);
+            }
+        }
+        None
+    }
+
+    pub fn add_recent_folder(&mut self, path: &str) {
+        if !self.check_if_init() {
+            return;
+        }
+        if let Some(recent_folder) = self
+            .recent_folders
+            .iter_mut()
+            .find(|recent_folder| recent_folder.path.eq(path))
+        {
+            recent_folder.update_entry_date();
+        } else {
+            //  add the moment, a new folder is added to scope via dialog open
+            self.recent_folders.push(RecentFolder::new(path));
+        }
+        self.sort_recent_folders();
+    }
+
+    pub fn remove_recent_folder(&mut self, path: &str) {
+        if !self.check_if_init() {
+            return;
+        }
+        // order is kept
+        // there seems to be no way to remove allowed scopes, only forbid, but what is forbidden stays
+        // during the programs lifetime
+        self.recent_folders
+            .retain(|recent_folder| !recent_folder.path.eq(path));
+    }
 }
 
-// This function is not async, and will run in the Rust main thread.
+// These functions are not async, and will run in the Rust main thread.
 // It should therefore kinda behave like JS in a way.
 // Truly async stuff (other thread) is possible by using "async"
 // Currently it is not possible to delete them, and it will add the complete folder.
+
 #[tauri::command]
-pub fn add_dir_to_fs_scope(app_handle: tauri::AppHandle, path: &str) -> Result<(), tauri::Error> {
-    app_handle.fs_scope().allow_directory(path, true)
+pub fn set_config_language(app_handle: tauri::AppHandle, lang: &str) {
+    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+        gui_config.set_language(&app_handle, lang);
+    });
+}
+
+#[tauri::command]
+pub fn get_config_language(app_handle: tauri::AppHandle) -> Option<String> {
+    let mut lang_str = None;
+    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+        if let Some(lang_str_ref) = gui_config.get_language() {
+            lang_str = Some(String::from(lang_str_ref));
+        }
+    });
+    lang_str
+}
+
+#[tauri::command]
+pub fn get_config_recent_folders(app_handle: tauri::AppHandle) -> Vec<String> {
+    let mut return_vector = Vec::new();
+    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+        return_vector = gui_config
+            .get_recent_folders()
+            .iter()
+            .map(|path_ref| String::from(*path_ref))
+            .collect();
+    });
+    return_vector
+}
+
+#[tauri::command]
+pub fn get_config_most_recent_folder(app_handle: tauri::AppHandle) -> Option<String> {
+    let mut recent_folder_path_str = None;
+    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+        if let Some(recent_folder_path_str_ref) = gui_config.get_most_recent_folder() {
+            recent_folder_path_str = Some(String::from(recent_folder_path_str_ref));
+        }
+    });
+    recent_folder_path_str
+}
+
+#[tauri::command]
+pub fn add_config_recent_folder(app_handle: tauri::AppHandle, path: &str) {
+    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+        gui_config.add_recent_folder(path);
+    });
+}
+
+#[tauri::command]
+pub fn remove_config_recent_folder(app_handle: tauri::AppHandle, path: &str) {
+    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+        gui_config.remove_recent_folder(path);
+    });
 }

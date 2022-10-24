@@ -164,7 +164,118 @@ const UIFactory = {
       </div>
     );
   },
+  CreateUCP2RadioGroup(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled, className } = args;
+    const { url, text, tooltip, enabled, choices, header } = spec;
+    const { [url]: value } = configuration as {
+      [url: string]: { enabled: boolean; choice: string };
+    };
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
+    const fullToolTip = formatToolTip(tooltip, url);
 
+    const hasWarning = configurationWarnings[url] !== undefined;
+    const { hasHeader } = spec as DisplayConfigElement & {
+      hasHeader: boolean;
+    };
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    let headerElement = <></>;
+    if (hasHeader) {
+      headerElement = (
+        <Form.Switch>
+          <Form.Switch.Input
+            className="me-2"
+            id={`${url}-header`}
+            key={`${url}-header`}
+            checked={
+              value.enabled === undefined ? false : (value.enabled as boolean)
+            }
+            onChange={(event) => {
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [url, { ...value, ...{ enabled: event.target.checked } }],
+                ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
+            }}
+            disabled={!isEnabled || disabled}
+          />
+          <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
+            {header}
+          </Form.Switch.Label>
+        </Form.Switch>
+      );
+    }
+    return (
+      <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+        {headerElement}
+        <div>
+          <label className="form-check-label" htmlFor={`${url}-choice`}>
+            {!hasHeader && header}
+            {text}
+          </label>
+        </div>
+        <div className="row">
+          <RadioGroup
+            name={url}
+            selectedValue={value.choice}
+            onChange={(newValue: string) => {
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [url, { ...value, ...{ choice: newValue } }],
+                ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
+              configuration[url] = newValue;
+            }}
+            disabled={!value.enabled}
+          >
+            {choices.map((choice: string) => (
+              // eslint-disable-next-line jsx-a11y/label-has-associated-control
+              <div key={choice} className="form-check">
+                <Radio
+                  className="form-check-input"
+                  value={choice}
+                  id={`${url}-radio-${choice}`}
+                  disabled={!value.enabled}
+                />
+                {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                <label
+                  className="form-check-label"
+                  htmlFor={`${url}-radio-${choice}`}
+                >
+                  {choice}
+                </label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+      </div>
+    );
+  },
   CreateUCP2Slider(args: {
     spec: NumberInputDisplayConfigElement;
     disabled: boolean;
@@ -220,7 +331,7 @@ const UIFactory = {
             }}
             disabled={!isEnabled || disabled}
           />
-          <Form.Switch.Label className="fs-5" htmlFor={`${url}-header`}>
+          <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
             {header}
           </Form.Switch.Label>
         </Form.Switch>
@@ -290,6 +401,62 @@ const UIFactory = {
             <Form.Label>{max}</Form.Label>
           </div>
         </div>
+      </div>
+    );
+  },
+  CreateUCP2Switch(args: {
+    spec: DisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled, className } = args;
+    const { url, text, tooltip, enabled, header } = spec;
+    const { [url]: value } = configuration;
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
+    const fullToolTip = formatToolTip(tooltip, url);
+
+    const hasWarning = configurationWarnings[url] !== undefined;
+    const headerElement = (
+      <Form.Switch>
+        <Form.Switch.Input
+          className="me-2"
+          id={`${url}`}
+          key={`${url}-switch`}
+          checked={value === undefined ? false : (value as boolean)}
+          onChange={(event) => {
+            setConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, event.target.checked]]),
+            });
+            setConfigurationTouched({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, true]]),
+            });
+          }}
+          disabled={!isEnabled || disabled}
+        />
+        <Form.Switch.Label className="fs-6" htmlFor={`${url}`}>
+          {header}
+        </Form.Switch.Label>
+      </Form.Switch>
+    );
+
+    return (
+      <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
+        {headerElement}
+        {text}
       </div>
     );
   },
@@ -363,7 +530,7 @@ const UIFactory = {
             }}
             disabled={!isEnabled || disabled}
           />
-          <Form.Switch.Label className="fs-5" htmlFor={`${url}-header`}>
+          <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
             {header}
           </Form.Switch.Label>
         </Form.Switch>
@@ -647,7 +814,79 @@ const UIFactory = {
       // </Form>
     );
   },
+  CreateSlider(args: {
+    spec: NumberInputDisplayConfigElement;
+    disabled: boolean;
+    className: string;
+  }) {
+    const {
+      configuration,
+      setConfiguration,
+      configurationWarnings,
+      setConfigurationWarnings,
+      setConfigurationTouched,
+      configurationDefaults,
+    } = useContext(GlobalState);
+    const { spec, disabled, className } = args;
+    const { url, text, tooltip, enabled, min, max, step } = spec;
+    const { [url]: value } = configuration as {
+      [url: string]: { enabled: boolean; sliderValue: number };
+    };
+    const isEnabled = parseEnabledLogic(
+      enabled,
+      configuration,
+      configurationDefaults
+    );
+    const fullToolTip = formatToolTip(tooltip, url);
 
+    const hasWarning = configurationWarnings[url] !== undefined;
+
+    // eslint-disable-next-line no-nested-ternary
+    const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [localValue, setLocalValue] = useState(
+      value.sliderValue === undefined
+        ? 0
+        : (value.sliderValue as number) * factor
+    );
+    return (
+      <div>
+        <RangeSlider
+          min={min * factor}
+          max={max * factor}
+          step={step * factor}
+          id={`${url}-slider`}
+          size="sm"
+          value={localValue}
+          tooltipLabel={(currentValue) => (currentValue / factor).toString()}
+          onChange={(event) => {
+            setLocalValue(parseInt(event.target.value, 10));
+          }}
+          onAfterChange={(event) => {
+            setConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [
+                  url,
+                  {
+                    ...value,
+                    ...{
+                      sliderValue: parseInt(event.target.value, 10) / factor,
+                    },
+                  },
+                ],
+              ]),
+            });
+            setConfigurationTouched({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, true]]),
+            });
+          }}
+          disabled={!isEnabled || disabled || !value.enabled}
+        />
+      </div>
+    );
+  },
   CreateSwitch(args: {
     spec: DisplayConfigElement;
     disabled: boolean;
@@ -984,6 +1223,33 @@ const UIFactory = {
     if (spec.display === 'UCP2SliderChoice') {
       return (
         <UIFactory.CreateUCP2SliderChoice
+          spec={spec as NumberInputDisplayConfigElement}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    }
+    if (spec.display === 'UCP2Switch') {
+      return (
+        <UIFactory.CreateUCP2Switch
+          spec={spec as DisplayConfigElement}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    }
+    if (spec.display === 'UCP2RadioGroup') {
+      return (
+        <UIFactory.CreateUCP2RadioGroup
+          spec={spec as DisplayConfigElement}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    }
+    if (spec.display === 'Slider') {
+      return (
+        <UIFactory.CreateSlider
           spec={spec as NumberInputDisplayConfigElement}
           disabled={disabled}
           className={className}

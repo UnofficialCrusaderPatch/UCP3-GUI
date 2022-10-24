@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { appWindow } from '@tauri-apps/api/window';
-import { UnlistenFn } from '@tauri-apps/api/event';
 import { useTranslation } from 'react-i18next';
 import { ucpBackEnd } from './fakeBackend';
 
 import './App.css';
-import { GuiConfigHandler } from './utils/gui-config-handling';
-import { useGuiConfig } from './utils/swr-components';
 
 import LanguageSelect from './LanguageSelect';
+import { useRecentFolders } from './utils/swr-components';
+import { RecentFolderHelper } from './utils/gui-config-handling';
 
 // TODO: handling of scope permissions should be avoided
 // better would be to move the file access into the backend
@@ -20,29 +18,31 @@ function Landing() {
   const [launchButtonState, setLaunchButtonState] = useState(false);
   const [browseResultState, setBrowseResultState] = useState('');
   const [folders, setFolders] = useState([] as string[]);
-  const configResult = useGuiConfig();
+  const recentFolderResult = useRecentFolders();
 
   // lang
   const [t] = useTranslation(['gui-general', 'gui-landing']);
 
   // needs better loading site
-  if (configResult.isLoading) {
+  if (recentFolderResult.isLoading) {
     return <p>{t('gui-general:loading')}</p>;
   }
 
-  const configHandler = configResult.data as GuiConfigHandler;
+  const recentFolderHelper = recentFolderResult.data as RecentFolderHelper;
   const currentLang = configHandler.getLanguage();
 
   const updateCurrentFolderSelectState = (folder: string) => {
-    configHandler.addToRecentFolders(folder);
-    setFolders(configHandler.getRecentGameFolders());
+    recentFolderHelper.addToRecentFolders(folder);
+    setFolders(recentFolderHelper.getRecentGameFolders());
     setBrowseResultState(folder);
     setLaunchButtonState(true);
   };
 
   // set initial state
-  if (!browseResultState && configHandler.getMostRecentGameFolder()) {
-    updateCurrentFolderSelectState(configHandler.getMostRecentGameFolder());
+  if (!browseResultState && recentFolderHelper.getMostRecentGameFolder()) {
+    updateCurrentFolderSelectState(
+      recentFolderHelper.getMostRecentGameFolder()
+    );
   }
 
   return (
@@ -110,9 +110,9 @@ function Landing() {
                   className="btn-close"
                   aria-label="Close"
                   onClick={(event) => {
-                    configHandler.removeFromRecentFolders(recentFolder);
+                    recentFolderHelper.removeFromRecentFolders(recentFolder);
                     updateCurrentFolderSelectState(
-                      configHandler.getMostRecentGameFolder()
+                      recentFolderHelper.getMostRecentGameFolder()
                     );
                   }}
                 />

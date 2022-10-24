@@ -178,7 +178,10 @@ const UIFactory = {
       configurationDefaults,
     } = useContext(GlobalState);
     const { spec, disabled, className } = args;
-    const { url, text, tooltip, enabled, choices, header } = spec;
+    const { url, text, tooltip, enabled, header } = spec;
+    const { choices } = spec as unknown as {
+      choices: { name: string; text: string; subtext: string }[];
+    };
     const { [url]: value } = configuration as {
       [url: string]: { enabled: boolean; choice: string };
     };
@@ -253,22 +256,28 @@ const UIFactory = {
             }}
             disabled={!value.enabled}
           >
-            {choices.map((choice: string) => (
+            {choices.map((choice) => (
               // eslint-disable-next-line jsx-a11y/label-has-associated-control
-              <div key={choice} className="form-check">
+              <div key={choice.name} className="form-check">
                 <Radio
                   className="form-check-input"
-                  value={choice}
-                  id={`${url}-radio-${choice}`}
+                  value={choice.name}
+                  id={`${url}-radio-${choice.name}`}
                   disabled={!value.enabled}
                 />
                 {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                 <label
                   className="form-check-label"
-                  htmlFor={`${url}-radio-${choice}`}
+                  htmlFor={`${url}-radio-${choice.name}`}
                 >
-                  {choice}
+                  {choice.text}
                 </label>
+                {choice.subtext === undefined ? (
+                  // eslint-disable-next-line react/jsx-no-useless-fragment
+                  <></>
+                ) : (
+                  <div className="fs-8">{choice.subtext}</div>
+                )}
               </div>
             ))}
           </RadioGroup>
@@ -723,7 +732,7 @@ const UIFactory = {
         i += 1
       ) {
         rowChildren.push(
-          <Col key={children[i].url}>
+          <Col key={`${name}-${row}-${children[i].url || children[i].name}`}>
             <UIFactory.CreateUIElement
               key={children[i].url}
               spec={children[i]}
@@ -1057,7 +1066,7 @@ const UIFactory = {
     const fullToolTip = formatToolTip(tooltip, url);
 
     const hasWarning = configurationWarnings[url] !== undefined;
-    const defaultChoice = choices[0];
+    const defaultChoice = choices[0].name;
 
     return (
       <Form.Group
@@ -1093,9 +1102,9 @@ const UIFactory = {
             }}
             disabled={!isEnabled || disabled}
           >
-            {choices.map((choice: string) => (
-              <option key={`choice-${choice}`} value={choice}>
-                {choice}
+            {choices.map((choice) => (
+              <option key={`choice-${choice.name}`} value={choice.name}>
+                {choice.text}
               </option>
             ))}
           </Form.Select>
@@ -1148,17 +1157,20 @@ const UIFactory = {
     const hasWarning = configurationWarnings[url] !== undefined;
     const defaultChoice = choices[0];
 
-    const radios = choices.map((choice: string) => (
+    const radios = choices.map((choice) => (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
-      <div key={choice} className="form-check">
+      <div key={choice.name} className="form-check">
         <Radio
           className="form-check-input"
-          value={choice}
-          id={`${url}-radio-${choice}`}
+          value={choice.name}
+          id={`${url}-radio-${choice.name}`}
         />
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label className="form-check-label" htmlFor={`${url}-radio-${choice}`}>
-          {choice}
+        <label
+          className="form-check-label"
+          htmlFor={`${url}-radio-${choice.name}`}
+        >
+          {choice.text}
         </label>
       </div>
     ));

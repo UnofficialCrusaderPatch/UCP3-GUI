@@ -162,7 +162,7 @@ type Configs = { [key: string]: ConfigEntry }[];
 type PermissionStatus = { status: string; reason: string; by: string };
 
 type DisplayConfigElement = {
-  choices: string[];
+  choices: { name: string; text: string }[];
   name: string;
   description: string;
   header: string;

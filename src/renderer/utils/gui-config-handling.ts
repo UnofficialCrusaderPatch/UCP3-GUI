@@ -1,226 +1,57 @@
-import { showError } from './dialog-util';
 import {
-  getRoamingDataFolder,
-  loadJson,
-  proxyFsExists,
-  writeJson,
-} from './file-utils';
-import { addCompleteDirectoryToFsScope } from './tauri-invoke';
-
-interface RecentFolder {
-  path: string;
-  date: number;
-}
-
-interface GuiConfig {
-  language: string;
-  recentFolderPaths: RecentFolder[];
-}
+  addGuiConfigRecentFolder,
+  getGuiConfigRecentFolders,
+  removeGuiConfigRecentFolder,
+} from './tauri-invoke';
 
 // eslint-disable-next-line import/prefer-default-export
-export class GuiConfigHandler {
-  static #guiConfigFileName = 'recent.json';
-
+export class RecentFolderHelper {
   static #maxRecentFolders = 10;
 
-  static #messageTitle = 'GUI-Configuration';
+  #currentRecent: string[] = [];
 
-  static #showNotLoadedError(): void {
-    showError(
-      `There was no attempt to load the recently used folders. This should not happen.`,
-      GuiConfigHandler.#messageTitle
-    );
-  }
-
-  static #isRecentFolderObject(recentFolder: RecentFolder): boolean {
-    return (
-      recentFolder &&
-      typeof recentFolder?.path === 'string' &&
-      typeof recentFolder?.date === 'number'
-    );
-  }
-
-  static #createNewConfig(): GuiConfig {
-    return {
-      language: 'en',
-      recentFolderPaths: [],
-    };
-  }
-
-  #guiConfigFilePath: string | null = null;
-
-  #currentGuiConfig: GuiConfig | null = null;
-
-  async #getRecentFoldersFilePath(): Promise<string> {
-    if (this.#guiConfigFilePath) {
-      return this.#guiConfigFilePath;
-    }
-    this.#guiConfigFilePath = `${await getRoamingDataFolder()}${
-      GuiConfigHandler.#guiConfigFileName
-    }`;
-    return this.#guiConfigFilePath;
-  }
-
-  // most recent first
-  #sortRecentFolders(): void {
-    if (this.#currentGuiConfig) {
-      this.#currentGuiConfig.recentFolderPaths.sort(
-        (recentFolderOne, recentFolderTwo) =>
-          recentFolderTwo.date - recentFolderOne.date
-      );
-    }
-  }
-
-  #getCurrentRecentFolders(): RecentFolder[] {
-    if (!this.#currentGuiConfig) {
-      GuiConfigHandler.#showNotLoadedError();
-      return [];
-    }
-    return this.#currentGuiConfig.recentFolderPaths;
-  }
-
-  // no idea if there are better ways
-  #addToCurrentConfig(loadedConfig: GuiConfig): void {
-    const thisConfig = this.#currentGuiConfig as GuiConfig;
-
-    const loadedRecentFolderPaths = loadedConfig?.recentFolderPaths;
-    if (
-      Array.isArray(loadedRecentFolderPaths) &&
-      loadedRecentFolderPaths.length > 0 &&
-      !loadedRecentFolderPaths.filter(
-        (recentFolder) => !GuiConfigHandler.#isRecentFolderObject(recentFolder)
-      ).length
-    ) {
-      thisConfig.recentFolderPaths = loadedRecentFolderPaths;
-    }
-
-    const loadedLanguage = loadedConfig?.language;
-    if (loadedLanguage && typeof loadedLanguage === 'string') {
-      thisConfig.language = loadedLanguage;
-    }
-  }
-
-  async #addLoadedRecentFoldersToScope() {
-    const promises = this.#currentGuiConfig?.recentFolderPaths.map(({ path }) =>
-      addCompleteDirectoryToFsScope(path)
-    );
-    return promises ? Promise.all(promises) : undefined;
-  }
-
-  async loadGuiConfig() {
-    this.#currentGuiConfig = GuiConfigHandler.#createNewConfig();
-    try {
-      const fPath = await this.#getRecentFoldersFilePath();
-      if (await proxyFsExists(fPath)) {
-        const [result, error] = await loadJson(fPath);
-        if (!result) {
-          throw error;
-        }
-        this.#addToCurrentConfig(result);
-        this.#sortRecentFolders();
-        await this.#addLoadedRecentFoldersToScope();
-        return;
-      }
-    } catch (error) {
-      showError(
-        `Failed to load recently used folders:\n${error}`,
-        GuiConfigHandler.#messageTitle
-      );
-    }
-  }
-
-  async saveGuiConfig() {
-    // try {
-    //   const [result, error] = await writeJson(
-    //     await this.#getRecentFoldersFilePath(),
-    //     this.#currentGuiConfig
-    //   );
-    //   if (!result) {
-    //     throw error;
-    //   }
-    // } catch (error) {
-    //   // needs to await, since it is called during shutdown
-    //   await showError(
-    //     `Failed to save GUI configuration:\n${error}`,
-    //     GuiConfigHandler.#messageTitle
-    //   );
-    // }
+  async loadRecentFolders() {
+    this.#currentRecent = await getGuiConfigRecentFolders();
   }
 
   getRecentGameFolders(): string[] {
-    return this.#getCurrentRecentFolders().map(
-      (recentFolder) => recentFolder.path
-    );
+    return this.#currentRecent.slice(); // not allowed to modify current cache
   }
 
   getMostRecentGameFolder(): string | '' {
-    const recentFolders = this.#getCurrentRecentFolders();
-    return recentFolders.length > 0 ? recentFolders[0].path : '';
+    return this.#currentRecent.length > 0 ? this.#currentRecent[0] : '';
   }
 
   addToRecentFolders(path: string) {
-    if (!this.#currentGuiConfig) {
-      showError(
-        `Recently used game folders were not initialized. No saving happens.`,
-        GuiConfigHandler.#messageTitle
-      );
-      return;
-    }
-    const recentFolders = this.#currentGuiConfig.recentFolderPaths;
-    const alreadyThereIndex = recentFolders.findIndex(
-      (recentFolder) => recentFolder.path === path
+    addGuiConfigRecentFolder(path); // async, effects only noticeable at next get or load
+
+    // add to cache
+    const alreadyThereIndex = this.#currentRecent.findIndex(
+      (recentFolder) => recentFolder === path
     );
-    if (alreadyThereIndex < 0) {
-      recentFolders.push({ path, date: Date.now() });
-    } else {
-      recentFolders[alreadyThereIndex].date = Date.now();
+    if (alreadyThereIndex !== -1) {
+      this.#currentRecent.splice(alreadyThereIndex, 1);
     }
-    this.#sortRecentFolders();
+    this.#currentRecent.unshift(path);
 
     if (
       alreadyThereIndex < 0 &&
-      recentFolders.length > GuiConfigHandler.#maxRecentFolders
+      this.#currentRecent.length > RecentFolderHelper.#maxRecentFolders
     ) {
-      recentFolders.splice(GuiConfigHandler.#maxRecentFolders); // should keep it in size
+      this.#currentRecent.splice(RecentFolderHelper.#maxRecentFolders); // should keep it in size
     }
   }
 
   removeFromRecentFolders(path: string) {
-    if (!this.#currentGuiConfig) {
-      showError(
-        `Recently used game folders were not initialized. No saving happens.`,
-        GuiConfigHandler.#messageTitle
-      );
-      return;
-    }
-    const recentFolders = this.#currentGuiConfig.recentFolderPaths;
-    const alreadyThereIndex = recentFolders.findIndex(
-      (recentFolder) => recentFolder.path === path
+    removeGuiConfigRecentFolder(path); // async, effects only noticeable at next get or load
+
+    const alreadyThereIndex = this.#currentRecent.findIndex(
+      (recentFolder) => recentFolder === path
     );
     if (alreadyThereIndex === -1) {
       // Should not happen, but okay, let's just return
       return;
     }
-    recentFolders.splice(alreadyThereIndex, 1);
-  }
-
-  getLanguage(): string | undefined {
-    if (!this.#currentGuiConfig) {
-      GuiConfigHandler.#showNotLoadedError();
-      return undefined;
-    }
-    return this.#currentGuiConfig?.language;
-  }
-
-  setLanguage(lang: string) {
-    if (!this.#currentGuiConfig) {
-      GuiConfigHandler.#showNotLoadedError();
-    } else {
-      this.#currentGuiConfig.language = lang;
-    }
-  }
-
-  isInitialized(): boolean {
-    return !!this.#currentGuiConfig;
+    this.#currentRecent.splice(alreadyThereIndex, 1);
   }
 }

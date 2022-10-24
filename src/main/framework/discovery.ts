@@ -10,7 +10,13 @@ import {
   OptionEntry,
 } from '../../common/config/common';
 
-const localeSensitiveFields = ['description', 'text', 'tooltip', 'header'];
+const localeSensitiveFields = [
+  'description',
+  'text',
+  'tooltip',
+  'header',
+  'choices',
+];
 const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
 async function readUISpec(
@@ -45,6 +51,21 @@ function changeLocale(
           obj[field] = loc;
         }
       }
+    }
+    if (typeof obj[field] === 'object') {
+      const oobj = obj[field] as { [key: string]: string };
+      Object.entries(oobj).forEach(([k, v]) => {
+        const search = localeRegExp.exec(v);
+
+        if (search !== undefined && search !== null) {
+          const keyword = search[1];
+          const loc = locale[keyword];
+          if (loc !== undefined) {
+            // eslint-disable-next-line no-param-reassign
+            oobj[k] = loc;
+          }
+        }
+      });
     }
   });
 

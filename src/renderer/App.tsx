@@ -6,7 +6,7 @@ import './App.css';
 
 import LanguageSelect from './LanguageSelect';
 import { useRecentFolders } from './utils/swr-components';
-import { RecentFolderHelper } from './utils/gui-config-handling';
+import { RecentFolderHelper } from './utils/gui-config-helper';
 
 // TODO: handling of scope permissions should be avoided
 // better would be to move the file access into the backend
@@ -15,9 +15,10 @@ import { RecentFolderHelper } from './utils/gui-config-handling';
 const r = Math.floor(Math.random() * 10);
 
 function Landing() {
-  const [launchButtonState, setLaunchButtonState] = useState(false);
-  const [browseResultState, setBrowseResultState] = useState('');
-  const [folders, setFolders] = useState([] as string[]);
+  const [landingState, setLandingState] = useState({
+    lauchButton: false,
+    browseResult: '',
+  });
   const recentFolderResult = useRecentFolders();
 
   // lang
@@ -29,17 +30,20 @@ function Landing() {
   }
 
   const recentFolderHelper = recentFolderResult.data as RecentFolderHelper;
-  const currentLang = configHandler.getLanguage();
 
   const updateCurrentFolderSelectState = (folder: string) => {
     recentFolderHelper.addToRecentFolders(folder);
-    setFolders(recentFolderHelper.getRecentGameFolders());
-    setBrowseResultState(folder);
-    setLaunchButtonState(true);
+    setLandingState({
+      lauchButton: true,
+      browseResult: folder,
+    });
   };
 
   // set initial state
-  if (!browseResultState && recentFolderHelper.getMostRecentGameFolder()) {
+  if (
+    !landingState.browseResult &&
+    recentFolderHelper.getMostRecentGameFolder()
+  ) {
     updateCurrentFolderSelectState(
       recentFolderHelper.getMostRecentGameFolder()
     );
@@ -60,21 +64,21 @@ function Landing() {
             role="button"
             onClick={async () => {
               const folder = await ucpBackEnd.openFolderDialog(
-                browseResultState
+                landingState.browseResult
               );
               if (folder !== undefined && folder.length > 0) {
                 updateCurrentFolderSelectState(folder);
               }
             }}
-            value={browseResultState}
+            value={landingState.browseResult}
           />
           <button
             id="launchbutton"
             type="button"
             className="btn btn-primary"
-            disabled={launchButtonState !== true}
+            disabled={landingState.lauchButton !== true}
             onClick={() =>
-              ucpBackEnd.createEditorWindow(browseResultState, currentLang)
+              ucpBackEnd.createEditorWindow(landingState.browseResult)
             }
           >
             {t('gui-landing:launch')}
@@ -95,13 +99,15 @@ function Landing() {
             }
           }}
         >
-          {folders
+          {recentFolderHelper
+            .getRecentGameFolders()
             .filter((_, index) => index !== 0)
             .map((recentFolder, index) => (
               <div
                 // eslint-disable-next-line react/no-array-index-key
                 key={index}
                 className="list-group-item list-group-item-action list-group-item-dark d-flex justify-content-between align-items-center"
+                role="button"
               >
                 {recentFolder}
                 <input
@@ -110,6 +116,7 @@ function Landing() {
                   className="btn-close"
                   aria-label="Close"
                   onClick={(event) => {
+                    event.stopPropagation();
                     recentFolderHelper.removeFromRecentFolders(recentFolder);
                     updateCurrentFolderSelectState(
                       recentFolderHelper.getMostRecentGameFolder()

@@ -1,15 +1,23 @@
-import { useEffect } from 'react';
-import { TFunction, useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useSWR, { KeyedMutator } from 'swr';
 import useSWRImmutable from 'swr/immutable'; // only fetches once
-import { RecentFolderHelper } from './gui-config-handling';
+import { Event, UnlistenFn } from '@tauri-apps/api/event';
+import { RecentFolderHelper } from './gui-config-helper';
+import { getGuiConfigLanguage, setGuiConfigLanguage } from './tauri-invoke';
+import { onLanguageChange } from './tauri-listen';
 
-interface SwrResult<T> {
+export interface SwrResult<T> {
   data: T | undefined;
   isLoading: boolean;
   isError: boolean;
   mutate: KeyedMutator<T>;
+}
+
+export interface Language {
+  getLanguage: () => string | null;
+  setLanguage: (lang: string) => Promise<void>;
+  // needed if mutation is intended
+  unlistenChangeEvent: UnlistenFn;
 }
 
 // keys are used to identify and cache the request, so they need to be unique for different sources
@@ -21,11 +29,16 @@ const SWR_KEYS = {
 // eslint-disable-next-line import/prefer-default-export
 export function useRecentFolders(): SwrResult<RecentFolderHelper> {
   // normal swr, since refetching is ok
-  const { data, error, mutate } = useSWR(SWR_KEYS.RECENT_FOLDERS, async () => {
-    const recentFolderHelper = new RecentFolderHelper();
-    await recentFolderHelper.loadRecentFolders();
-    return recentFolderHelper;
-  });
+  const { data, error, mutate } = useSWRImmutable(
+    SWR_KEYS.RECENT_FOLDERS,
+    async () => {
+      const recentFolderHelper = new RecentFolderHelper();
+      // the folders will only be loaded once, so multiple landing pages will not work
+      // since the object here needs to copy the backend behavior and will not query again
+      await recentFolderHelper.loadRecentFolders();
+      return recentFolderHelper;
+    }
+  );
   return {
     data,
     isLoading: !data,
@@ -34,25 +47,28 @@ export function useRecentFolders(): SwrResult<RecentFolderHelper> {
   };
 }
 
-// TODO: remove language from url and use backend
-export function useLanguage(): SwrResult<TFunction> {
-  const [searchParams] = useSearchParams();
+export function useLanguage(): SwrResult<Language> {
   const { i18n } = useTranslation();
-  const paramLanguage = searchParams.get('lang');
 
-  const changeLanguage = async () =>
-    i18n.changeLanguage(paramLanguage || undefined);
   const { data, error, mutate } = useSWRImmutable(
     SWR_KEYS.LANGUAGE_LOAD,
-    changeLanguage
-  );
-
-  // always executed
-  useEffect(() => {
-    if ((data || error) && paramLanguage && i18n.language !== paramLanguage) {
-      mutate(null as unknown as undefined, true); // should force data to be undefined, maybe
+    async () => {
+      let lang = await getGuiConfigLanguage();
+      i18n.changeLanguage(lang || undefined);
+      // returns unlistener, but is ignored, since it exits over the lifetime of the window
+      const unlistenFunc = await onLanguageChange(
+        (langEvent: Event<string>) => {
+          lang = langEvent.payload;
+          i18n.changeLanguage(lang || undefined);
+        }
+      );
+      return {
+        getLanguage: () => lang,
+        setLanguage: setGuiConfigLanguage,
+        unlistenChangeEvent: unlistenFunc,
+      };
     }
-  });
+  );
   return {
     data,
     isLoading: !data,

@@ -40,10 +40,9 @@ const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 // eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
   // create an editor window for a game folder
-  async createEditorWindow(gameFolder: string, language: string | undefined) {
-    const langParam = language ? `&lang=${language}` : '';
+  async createEditorWindow(gameFolder: string) {
     await createNewWindow(gameFolder, {
-      url: `index.html?window=editor&directory=${gameFolder}${langParam}`,
+      url: `index.html?window=editor&directory=${gameFolder}`,
       width: 1024,
       height: 768,
       maximized: true,

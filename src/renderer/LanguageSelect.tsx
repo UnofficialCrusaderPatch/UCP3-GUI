@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GuiConfigHandler } from './utils/gui-config-handling';
-import { useGuiConfig } from './utils/swr-components';
-import { useLanguageSetter } from './utils/util-components';
 
 import languages from './i18n/languages.json';
+import { Language, useLanguage } from './utils/swr-components';
 
 export default function LanguageSelect({
   closeLangSelect,
@@ -12,18 +10,17 @@ export default function LanguageSelect({
   closeLangSelect: () => void;
 }) {
   const [selectActive, setSelectActive] = useState(false);
-  const configResult = useGuiConfig();
+  const langResult = useLanguage();
 
   // lang
   const [t] = useTranslation(['gui-general', 'gui-landing']);
-  const setLanguage = useLanguageSetter();
 
   // needs better loading site
-  if (configResult.isLoading) {
+  if (langResult.isLoading) {
     return <p>{t('gui-general:loading')}</p>;
   }
 
-  const configHandler = configResult.data as GuiConfigHandler;
+  const langHandler = langResult.data as Language;
   return (
     <div className="container h-50 border border-info rounded p-4 p-4">
       <div className="row justify-content-center h-100">
@@ -41,7 +38,7 @@ export default function LanguageSelect({
               onClick={() => setSelectActive(!selectActive)}
               value={
                 (languages as { [key: string]: string })[
-                  configHandler.getLanguage() as string
+                  langHandler.getLanguage() as string
                 ]
               }
             />
@@ -56,13 +53,13 @@ export default function LanguageSelect({
             onClick={(event) => {
               const buttonTarget = event.target as HTMLButtonElement;
               if (buttonTarget.value) {
-                setLanguage(buttonTarget.value);
+                langHandler.setLanguage(buttonTarget.value);
                 setSelectActive(false);
               }
             }}
           >
             {Object.entries(languages).map(([lang, label], index) => {
-              if (configHandler.getLanguage() === lang) {
+              if (langHandler.getLanguage() === lang) {
                 return (
                   <button
                     type="button"

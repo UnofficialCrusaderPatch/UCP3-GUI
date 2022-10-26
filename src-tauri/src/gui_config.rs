@@ -103,14 +103,14 @@ impl GuiConfig {
             let value: serde_json::Value = serde_json::from_reader(reader)?;
 
             // get lang
-            if let Some(lang_value) = value.get("language") {
+            if let Some(lang_value) = value.get("lang") {
                 if let Some(lang) = lang_value.as_str() {
                     self.lang = String::from(lang);
                 }
             }
 
             // get folders
-            if let Some(folders_value) = value.get("recentFolderPaths") {
+            if let Some(folders_value) = value.get("recent_folders") {
                 if let Some(folders) = folders_value.as_array() {
                     for folder_value in folders {
                         if let Ok(recent_folder) =
@@ -223,7 +223,11 @@ impl GuiConfig {
             //  add the moment, a new folder is added to scope via dialog open
             self.recent_folders.push(RecentFolder::new(path));
         }
-        self.sort_recent_folders();
+        self.sort_recent_folders(); // not really efficient
+
+        if  self.recent_folders.len() > NUMBER_OF_RECENT_FOLDERS {
+            self.recent_folders.truncate(NUMBER_OF_RECENT_FOLDERS);
+        }
     }
 
     pub fn remove_recent_folder(&mut self, path: &str) {

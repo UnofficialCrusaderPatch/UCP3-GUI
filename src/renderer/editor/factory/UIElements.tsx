@@ -61,6 +61,7 @@ const parseEnabledLogic = (
 ) => {
   if (statement === undefined || statement === null) return true;
 
+  const reLiteral = /^(true|false)$/;
   const reSimple = /^\s*([!]{0,1})([a-zA-Z0-9_.]+)\s*$/;
   const reBooleanComparison =
     /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*((?:true)|(?:false))\s*$/;
@@ -68,6 +69,14 @@ const parseEnabledLogic = (
     /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*([0-9.]+)\s*$/;
   const reStringComparison =
     /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*"([^"]+)"\s*$/;
+
+  const sLiteral = reLiteral.exec(statement);
+  if (sLiteral !== null) {
+    const [, lit] = sLiteral;
+    if (lit === 'true') return true;
+    if (lit === 'false') return false;
+    throw new Error('we should never get here');
+  }
   const sSimple = reSimple.exec(statement);
   if (sSimple !== null) {
     const [, exclamationMark, url] = sSimple;

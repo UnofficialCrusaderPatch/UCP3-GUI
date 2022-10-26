@@ -1,10 +1,10 @@
 import { createSearchParams, useSearchParams } from 'react-router-dom';
 import { showError } from './dialog-util';
-import { GuiConfigHandler } from './gui-config-handling';
-import { useGuiConfig } from './swr-components';
 
 // returns normal search params, but setSearchParams expects object and boolean
-export function customUseSearchParams(): [
+
+// eslint-disable-next-line import/prefer-default-export
+export function useSearchParamsCustom(): [
   URLSearchParams,
   (
     newParams: { [keys: string]: string | string[] },
@@ -22,29 +22,4 @@ export function customUseSearchParams(): [
       );
     },
   ];
-}
-
-export function useLanguageSetter(): (lang: string) => void {
-  const [_, setSearchParams] = customUseSearchParams();
-  const configResult = useGuiConfig();
-
-  return (lang: string) => {
-    if (configResult.isLoading) {
-      showError(
-        `Failed to set language, because the GuiConfigHandler was not ready.`,
-        'Language Configuration'
-      );
-      return;
-    }
-    if (!lang) {
-      showError(
-        `Failed to set language, because 'undefined' was received.`,
-        'Language Configuration'
-      );
-      return;
-    }
-    const configHandler = configResult.data as GuiConfigHandler;
-    configHandler.setLanguage(lang);
-    setSearchParams({ lang });
-  };
 }

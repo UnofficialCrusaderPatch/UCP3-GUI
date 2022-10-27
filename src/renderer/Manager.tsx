@@ -14,6 +14,8 @@ import ToggleButton from 'react-bootstrap/ToggleButton';
 import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
+import languages from './i18n/languages.json';
 import ConfigEditor from './editor/ConfigEditor';
 
 import ExtensionManager from './extensionManager/ExtensionManager';
@@ -56,7 +58,6 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-let uiDefinition: UIDefinition;
 let ucpVersion: {
   major: number;
   minor: number;
@@ -69,11 +70,19 @@ let latestUCP3: unknown;
 
 let extensions: Extension[] = []; // which extension type?
 
+let activeLanguage: string;
+
 export default function Manager() {
   const [searchParams] = useSearchParams();
   const currentFolder = getGameFolderPath(searchParams);
 
-  const [t] = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
+  const { t, i18n } = useTranslation([
+    'gui-general',
+    'gui-editor',
+    'gui-download',
+  ]);
+
+  activeLanguage = (languages as { [lang: string]: string })[i18n.language];
 
   const warningDefaults = {
     // 'ucp.o_default_multiplayer_speed': {
@@ -129,9 +138,22 @@ export default function Manager() {
   useEffect(() => {
     async function prepareValues() {
       console.log(currentFolder);
+      console.log(
+        `Current locale: ${
+          (languages as { [lang: string]: string })[i18n.language]
+        }`
+      );
+
+      // TODO: currently only set on initial render and folder selection
+      // TODO: resolve this type badness
+      extensions = (await ucpBackEnd.getExtensions(
+        currentFolder,
+        i18n.language
+      )) as unknown as Extension[];
+
       if (currentFolder.length > 0) {
-        uiDefinition = await ucpBackEnd.getYamlDefinition(currentFolder);
-        const defaults = getConfigDefaults(uiDefinition.flat as unknown[]);
+        const optionEntries = ucpBackEnd.extensionsToOptionEntries(extensions);
+        const defaults = getConfigDefaults(optionEntries);
 
         console.log('defaults', defaults);
 
@@ -147,15 +169,10 @@ export default function Manager() {
         });
       }
 
-      // TODO: currently only set on initial render and folder selection
-      // TODO: resolve this type badness
-      extensions = (await ucpBackEnd.getExtensions(
-        currentFolder
-      )) as unknown as Extension[];
       setInitState(true);
     }
     prepareValues();
-  }, [currentFolder]);
+  }, [currentFolder, i18n.language]);
 
   const [extensionsState, setExtensionsState] = useReducer(
     (oldState: ExtensionsState, newState: unknown): ExtensionsState => {
@@ -184,7 +201,6 @@ export default function Manager() {
       setActiveExtensions,
       configuration,
       setConfiguration,
-      uiDefinition,
       folder: currentFolder,
       file: `${currentFolder}/ucp-config.yml`,
       extensionsState,

@@ -72,7 +72,7 @@ type GlobalStateType = {
   extensions: Extension[];
   activeExtensions: Extension[];
   setActiveExtensions: (newState: ArrayReducerArgs<Extension>) => void;
-  uiDefinition: UIDefinition;
+  // uiDefinition: UIDefinition;
   folder: string;
   file: string;
   extensionsState: ExtensionsState;
@@ -91,7 +91,7 @@ const GlobalState = createContext<GlobalStateType>({
   extensions: [],
   activeExtensions: [],
   setActiveExtensions: () => {},
-  uiDefinition: { flat: [], hierarchical: { elements: [], sections: {} } },
+  // uiDefinition: { flat: [], hierarchical: { elements: [], sections: {} } },
   folder: '',
   file: '',
   extensionsState: {

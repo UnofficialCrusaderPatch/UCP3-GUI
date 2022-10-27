@@ -186,8 +186,8 @@ export const ucpBackEnd = {
     return {};
   },
 
-  async getExtensions(gameFolder: string) {
-    return Discovery.discoverExtensions(gameFolder);
+  async getExtensions(gameFolder: string, locale?: string) {
+    return Discovery.discoverExtensions(gameFolder, locale);
     // Premature optimization is the root of all evil.
     if (extensionsCache[gameFolder] === undefined) {
       extensionsCache[gameFolder] = await Discovery.discoverExtensions(
@@ -250,23 +250,6 @@ export const ucpBackEnd = {
       return 0;
     });
     return uiCollection;
-  },
-
-  // Get yaml definition
-  async getYamlDefinition(gameFolder: string): Promise<UIDefinition> {
-    if (uiCache[gameFolder] === undefined) {
-      if (extensionsCache[gameFolder] === undefined) {
-        extensionsCache[gameFolder] = await Discovery.discoverExtensions(
-          gameFolder
-        );
-      }
-      const exts = extensionsCache[gameFolder];
-      const uiCollection = this.extensionsToOptionEntries(exts);
-      const result = this.optionEntriesToHierarchical(uiCollection);
-
-      uiCache[gameFolder] = { flat: uiCollection, hierarchical: result };
-    }
-    return uiCache[gameFolder] as UIDefinition; // this could be prettier with the type checking
   },
 
   async openFileDialog(

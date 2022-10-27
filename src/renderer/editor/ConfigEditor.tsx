@@ -58,7 +58,6 @@ export default function ConfigEditor(args: {
 }) {
   const { readonly, gameFolder } = args;
   const {
-    uiDefinition,
     configurationDefaults,
     file,
     configurationWarnings,

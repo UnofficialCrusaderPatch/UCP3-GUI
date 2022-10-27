@@ -1473,14 +1473,7 @@ const UIFactory = {
   },
 
   CreateSections(args: { readonly: boolean }) {
-    const {
-      folder,
-      activeExtensions,
-      uiDefinition,
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-    } = useContext(GlobalState);
+    const { activeExtensions } = useContext(GlobalState);
     const optionEntries = ucpBackEnd
       .extensionsToOptionEntries(activeExtensions)
       .filter((o: OptionEntry) => o.hidden === undefined || o.hidden === false);

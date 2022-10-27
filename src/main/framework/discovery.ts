@@ -92,9 +92,9 @@ async function setLocale(
   language: string
 ): Promise<void> {
   if (await proxyFsExists(`${folder}/locale`)) {
-    if (await proxyFsExists(`${folder}/locale/${language}.json`)) {
-      const locale = JSON.parse(
-        await readTextFile(`${folder}/locale/${language}.json`)
+    if (await proxyFsExists(`${folder}/locale/${language}.yml`)) {
+      const locale = yaml.parse(
+        await readTextFile(`${folder}/locale/${language}.yml`)
       );
 
       ext.ui.forEach((uiElement) => {
@@ -175,9 +175,18 @@ function collectConfigEntries(
   return collection;
 }
 
+const LOCALE_FILES: { [lang: string]: string } = {
+  en: 'English',
+  de: 'German',
+};
+
 const Discovery = {
-  discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
-    const currentLocale = 'English'; // Dummy location for this code
+  discoverExtensions: async (
+    gameFolder: string,
+    locale?: string
+  ): Promise<Extension[]> => {
+    const currentLocale =
+      locale === undefined ? 'English' : LOCALE_FILES[locale]; // Dummy location for this code
 
     const moduleDir = `${gameFolder}/ucp/modules`;
     const modDirEnts = (await proxyFsExists(moduleDir))

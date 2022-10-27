@@ -40,7 +40,13 @@ function ExtensionElement(props: {
     moveCallback,
     revDeps,
   } = props;
-  const { name, version, author } = ext.definition;
+  const {
+    name,
+    version,
+    author,
+    'display-name': displayName,
+    description,
+  } = ext.definition;
 
   const [t] = useTranslation(['gui-editor']);
 
@@ -98,14 +104,17 @@ function ExtensionElement(props: {
         {arrows}
         <Col>
           <Row>
-            <Col className="col-3">
-              <span className="mx-2">{name}</span>
+            <Col className="col-2">
+              <span className="mx-2">{displayName || name}</span>
             </Col>
-            <Col>
+            <Col className="col-3">
               <span className="mx-2 text-secondary">-</span>
               <span className="mx-2" style={{ fontSize: 'smaller' }}>
-                {version}
+                {name}-{version}
               </span>
+            </Col>
+            <Col>
+              <span className="mx-2">{description || ''}</span>
             </Col>
           </Row>
         </Col>

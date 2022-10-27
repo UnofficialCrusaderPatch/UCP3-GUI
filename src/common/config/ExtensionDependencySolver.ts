@@ -58,7 +58,10 @@ class ExtensionDependencySolver {
       done.push(item);
 
       todo.splice(0, 1);
-      ed2[item].forEach((dep: string) => todo.push(dep));
+      if (ed2[item] === undefined) {
+        window.alert(`Missing extension dependency: ${item}`);
+      }
+      (ed2[item] || []).forEach((dep: string) => todo.push(dep));
     }
 
     return new ExtensionDependencySolver(

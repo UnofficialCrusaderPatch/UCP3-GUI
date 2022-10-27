@@ -143,6 +143,8 @@ type Definition = {
   version: string;
   author: [] | string;
   dependencies: string[];
+  'display-name': string;
+  description: string;
 };
 
 type Extension = {

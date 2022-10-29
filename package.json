@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.1.0",
+    "@zip.js/zip.js": "^2.6.51",
     "axios": "^0.27.2",
     "bootstrap": "^5.2.1",
     "i18next": "^21.10.0",

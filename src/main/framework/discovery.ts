@@ -2,8 +2,12 @@
 import type { FileEntry } from '@tauri-apps/api/fs';
 import { readTextFile, readDir } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
-import JSZip from 'jszip';
+
 import { proxyFsExists, readBinaryFile } from '../../renderer/utils/file-utils';
+
+import ExtensionHandle from './ExtensionHandle';
+import ZipExtensionHandle from './StreamZipExtensionHandle';
+import DirectoryExtensionHandle from './DirectoryExtensionHandle';
 
 import {
   ConfigEntry,
@@ -183,112 +187,6 @@ const LOCALE_FILES: { [lang: string]: string } = {
   en: 'English',
   de: 'German',
 };
-
-interface ExtensionHandle {
-  path: string;
-  getTextContents(path: string): Promise<string>;
-  getBinaryContents(path: string): Promise<Uint8Array>;
-  doesEntryExist(path: string): Promise<boolean>;
-}
-
-class ZipExtensionHandle implements ExtensionHandle {
-  zip: JSZip;
-
-  path: string;
-
-  constructor(path: string, zip: JSZip) {
-    this.zip = zip;
-    this.path = path;
-  }
-
-  static async fromPath(path: string) {
-    // Do hash check here!
-    const [data, error] = await readBinaryFile(path);
-
-    if (error) {
-      throw new Error(`Could not read zip file: ${path}: ${error}`);
-    }
-
-    if (data !== undefined && data instanceof Uint8Array) {
-      const zip = await JSZip.loadAsync(data as Uint8Array, {
-        createFolders: true,
-      });
-      return new ZipExtensionHandle(path, zip);
-    }
-    throw new Error(`Could not read zip file: ${path}: ${error}`);
-  }
-
-  async doesEntryExist(path: string) {
-    const f = this.zip.file(path);
-    return f !== undefined && f !== null;
-  }
-
-  async getBinaryContents(path: string): Promise<Uint8Array> {
-    const f = this.zip.file(path);
-    if (f !== undefined && f !== null) {
-      const result = await f.async<'uint8array'>('uint8array');
-      if (result !== undefined) {
-        return result;
-      }
-      throw new Error(`${path} contents is undefined`);
-    }
-    throw new Error(`${path} not found`);
-  }
-
-  async getTextContents(path: string) {
-    const f = this.zip.file(path);
-    if (f !== undefined && f !== null) {
-      const result = await f.async<'string'>('string');
-      if (result !== undefined) {
-        return result;
-      }
-      throw new Error(`${path} contents is undefined`);
-    }
-    throw new Error(`${path} not found`);
-  }
-}
-
-class DirectoryExtensionHandle implements ExtensionHandle {
-  path: string;
-
-  constructor(path: string) {
-    this.path = path;
-  }
-
-  async doesEntryExist(path: string): Promise<boolean> {
-    const p = `${this.path}/${path}`;
-    return proxyFsExists(p);
-  }
-
-  async getTextContents(path: string): Promise<string> {
-    const p = `${this.path}/${path}`;
-    if (await proxyFsExists(p)) {
-      const result = await readTextFile(p);
-      if (result === undefined) {
-        throw new Error(`Error while reading text file: ${p}`);
-      }
-      return result;
-    }
-    throw new Error(`${p} not found`);
-  }
-
-  async getBinaryContents(path: string): Promise<Uint8Array> {
-    const p = `${this.path}/${path}`;
-    if (await proxyFsExists(p)) {
-      const [result, error] = await readBinaryFile(p);
-      if (error !== undefined) {
-        throw new Error(
-          `Error while reading binary file: ${p}. Error: ${error}`
-        );
-      }
-      if (result instanceof Uint8Array) {
-        return result;
-      }
-      throw new Error(`${p} contents is unexpected type`);
-    }
-    throw new Error(`${p} not found`);
-  }
-}
 
 async function getExtensionHandles(ucpFolder: string) {
   const moduleDir = `${ucpFolder}/modules`;

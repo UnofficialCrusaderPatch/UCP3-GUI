@@ -362,9 +362,7 @@ export const ucpBackEnd = {
         const parts = key.split('.');
         const extName = parts[0];
 
-        const ext = extensionsCache[Object.keys(extensionsCache)[0]].filter(
-          (ex) => ex.name === extName
-        )[0];
+        const ext = extensions.filter((ex) => ex.name === extName)[0];
 
         const type = ext.type === 'module' ? 'modules' : 'plugins';
 

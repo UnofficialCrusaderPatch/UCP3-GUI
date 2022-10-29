@@ -126,6 +126,19 @@ export default function Manager() {
     )
     .reduce((a: number, b: number) => a + b, 0);
 
+  const [extensionsState, setExtensionsState] = useReducer(
+    (oldState: ExtensionsState, newState: unknown): ExtensionsState => {
+      const state = { ...oldState, ...(newState as object) };
+      return state;
+    },
+    {
+      allExtensions: [...extensions],
+      activeExtensions: [],
+      activatedExtensions: [],
+      installedExtensions: [...extensions],
+    } as ExtensionsState
+  );
+
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
@@ -137,12 +150,8 @@ export default function Manager() {
   const [initDone, setInitState] = useState(false);
   useEffect(() => {
     async function prepareValues() {
-      console.log(currentFolder);
-      console.log(
-        `Current locale: ${
-          (languages as { [lang: string]: string })[i18n.language]
-        }`
-      );
+      console.log(`Current folder: ${currentFolder}`);
+      console.log(`Current locale: ${i18n.language}`);
 
       // TODO: currently only set on initial render and folder selection
       // TODO: resolve this type badness
@@ -154,8 +163,6 @@ export default function Manager() {
       if (currentFolder.length > 0) {
         const optionEntries = ucpBackEnd.extensionsToOptionEntries(extensions);
         const defaults = getConfigDefaults(optionEntries);
-
-        console.log('defaults', defaults);
 
         ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
         if (ucpVersion.major !== undefined) isUCP3Installed = true;
@@ -169,23 +176,18 @@ export default function Manager() {
         });
       }
 
+      setExtensionsState({
+        allExtensions: [...extensions],
+        activeExtensions: [],
+        activatedExtensions: [],
+        installedExtensions: [...extensions],
+      } as ExtensionsState);
+
+      console.log('Finished loading');
       setInitState(true);
     }
     prepareValues();
   }, [currentFolder, i18n.language]);
-
-  const [extensionsState, setExtensionsState] = useReducer(
-    (oldState: ExtensionsState, newState: unknown): ExtensionsState => {
-      const state = { ...oldState, ...(newState as object) };
-      return state;
-    },
-    {
-      allExtensions: [...extensions],
-      activeExtensions: [],
-      activatedExtensions: [],
-      installedExtensions: [...extensions],
-    } as ExtensionsState
-  );
 
   const globalStateValue = useMemo(
     () => ({

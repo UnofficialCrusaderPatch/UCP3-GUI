@@ -141,17 +141,6 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   const { setActiveExtensions, extensionsState, setExtensionsState } =
     useContext(GlobalState);
 
-  useEffect(() => {
-    if (extensionsState.allExtensions.length === 0) {
-      setExtensionsState({
-        allExtensions: [...extensions],
-        activeExtensions: [],
-        activatedExtensions: [],
-        installedExtensions: [...extensions],
-      } as ExtensionsState);
-    }
-  }, [extensionsState.allExtensions, extensions, setExtensionsState]);
-
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   const eds = new ExtensionDependencySolver(extensions);

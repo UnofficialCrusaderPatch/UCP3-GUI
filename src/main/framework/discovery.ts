@@ -1,7 +1,9 @@
+// eslint-disable-next-line max-classes-per-file
 import type { FileEntry } from '@tauri-apps/api/fs';
 import { readTextFile, readDir } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
-import { proxyFsExists } from '../../renderer/utils/file-utils';
+import JSZip from 'jszip';
+import { proxyFsExists, readBinaryFile } from '../../renderer/utils/file-utils';
 
 import {
   ConfigEntry,
@@ -20,17 +22,19 @@ const localeSensitiveFields = [
 const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
 async function readUISpec(
-  folder: string
+  eh: ExtensionHandle
 ): Promise<{ [key: string]: unknown }[]> {
-  if (await proxyFsExists(`${folder}/ui.yml`)) {
-    return yaml.parse(await readTextFile(`${folder}/ui.yml`));
+  if (await eh.doesEntryExist('ui.yml')) {
+    return yaml.parse(await eh.getTextContents('ui.yml'));
   }
   return [];
 }
 
-async function readConfig(folder: string): Promise<{ [key: string]: unknown }> {
-  if (await proxyFsExists(`${folder}/config.yml`)) {
-    return yaml.parse(await readTextFile(`${folder}/config.yml`));
+async function readConfig(
+  eh: ExtensionHandle
+): Promise<{ [key: string]: unknown }> {
+  if (await eh.doesEntryExist('config.yml')) {
+    return yaml.parse(await eh.getTextContents('config.yml'));
   }
   return {};
 }
@@ -87,14 +91,14 @@ function changeLocale(
 }
 
 async function setLocale(
-  folder: string,
+  eh: ExtensionHandle,
   ext: Extension,
   language: string
 ): Promise<void> {
-  if (await proxyFsExists(`${folder}/locale`)) {
-    if (await proxyFsExists(`${folder}/locale/${language}.yml`)) {
+  if (await eh.doesEntryExist('locale')) {
+    if (await eh.doesEntryExist(`locale/${language}.yml`)) {
       const locale = yaml.parse(
-        await readTextFile(`${folder}/locale/${language}.yml`)
+        await eh.getTextContents(`locale/${language}.yml`)
       );
 
       ext.ui.forEach((uiElement) => {
@@ -180,72 +184,212 @@ const LOCALE_FILES: { [lang: string]: string } = {
   de: 'German',
 };
 
+interface ExtensionHandle {
+  path: string;
+  getTextContents(path: string): Promise<string>;
+  getBinaryContents(path: string): Promise<Uint8Array>;
+  doesEntryExist(path: string): Promise<boolean>;
+}
+
+class ZipExtensionHandle implements ExtensionHandle {
+  zip: JSZip;
+
+  path: string;
+
+  constructor(path: string, zip: JSZip) {
+    this.zip = zip;
+    this.path = path;
+  }
+
+  static async fromPath(path: string) {
+    // Do hash check here!
+    const [data, error] = await readBinaryFile(path);
+
+    if (error) {
+      throw new Error(`Could not read zip file: ${path}: ${error}`);
+    }
+
+    if (data !== undefined && data instanceof Uint8Array) {
+      const zip = await JSZip.loadAsync(data as Uint8Array, {
+        createFolders: true,
+      });
+      return new ZipExtensionHandle(path, zip);
+    }
+    throw new Error(`Could not read zip file: ${path}: ${error}`);
+  }
+
+  async doesEntryExist(path: string) {
+    const f = this.zip.file(path);
+    return f !== undefined && f !== null;
+  }
+
+  async getBinaryContents(path: string): Promise<Uint8Array> {
+    const f = this.zip.file(path);
+    if (f !== undefined && f !== null) {
+      const result = await f.async<'uint8array'>('uint8array');
+      if (result !== undefined) {
+        return result;
+      }
+      throw new Error(`${path} contents is undefined`);
+    }
+    throw new Error(`${path} not found`);
+  }
+
+  async getTextContents(path: string) {
+    const f = this.zip.file(path);
+    if (f !== undefined && f !== null) {
+      const result = await f.async<'string'>('string');
+      if (result !== undefined) {
+        return result;
+      }
+      throw new Error(`${path} contents is undefined`);
+    }
+    throw new Error(`${path} not found`);
+  }
+}
+
+class DirectoryExtensionHandle implements ExtensionHandle {
+  path: string;
+
+  constructor(path: string) {
+    this.path = path;
+  }
+
+  async doesEntryExist(path: string): Promise<boolean> {
+    const p = `${this.path}/${path}`;
+    return proxyFsExists(p);
+  }
+
+  async getTextContents(path: string): Promise<string> {
+    const p = `${this.path}/${path}`;
+    if (await proxyFsExists(p)) {
+      const result = await readTextFile(p);
+      if (result === undefined) {
+        throw new Error(`Error while reading text file: ${p}`);
+      }
+      return result;
+    }
+    throw new Error(`${p} not found`);
+  }
+
+  async getBinaryContents(path: string): Promise<Uint8Array> {
+    const p = `${this.path}/${path}`;
+    if (await proxyFsExists(p)) {
+      const [result, error] = await readBinaryFile(p);
+      if (error !== undefined) {
+        throw new Error(
+          `Error while reading binary file: ${p}. Error: ${error}`
+        );
+      }
+      if (result instanceof Uint8Array) {
+        return result;
+      }
+      throw new Error(`${p} contents is unexpected type`);
+    }
+    throw new Error(`${p} not found`);
+  }
+}
+
+async function getExtensionHandles(ucpFolder: string) {
+  const moduleDir = `${ucpFolder}/modules`;
+  const modDirEnts = (await proxyFsExists(moduleDir))
+    ? await readDir(moduleDir)
+    : [];
+
+  const pluginDir = `${ucpFolder}/plugins`;
+  const pluginDirEnts = (await proxyFsExists(pluginDir))
+    ? await readDir(pluginDir)
+    : [];
+
+  const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(
+    (fe) =>
+      (fe.name || '').endsWith('.zip') ||
+      (fe.children !== null && fe.children !== undefined)
+  );
+  const den = de.map((f) => f.name);
+  const dirEnts = de.filter((e) => {
+    // Zip files supersede folders
+    if (e.children !== null && e.children !== undefined) {
+      if (den.indexOf(`${e.name}.zip`) !== -1) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const exts = await Promise.all(
+    dirEnts.map(async (fe: FileEntry) => {
+      const type = modDirEnts.indexOf(fe) === -1 ? 'plugin' : 'module';
+
+      const folder =
+        type === 'module'
+          ? `${ucpFolder}/modules/${fe.name}`
+          : `${ucpFolder}/plugins/${fe.name}`;
+
+      if (fe.name !== undefined && fe.name.endsWith('.zip')) {
+        // Do hash check here!
+        const result = await ZipExtensionHandle.fromPath(folder);
+        return result as ExtensionHandle;
+      }
+      if (fe.children !== null) {
+        // fe is a directory
+        return new DirectoryExtensionHandle(folder) as ExtensionHandle;
+      }
+      throw new Error(`${folder} not a valid extension directory`);
+    })
+  );
+
+  return exts;
+}
+
 const Discovery = {
   discoverExtensions: async (
     gameFolder: string,
     locale?: string
   ): Promise<Extension[]> => {
+    console.log(`Discovering extensions`);
     const currentLocale =
       locale === undefined ? 'English' : LOCALE_FILES[locale]; // Dummy location for this code
 
-    const moduleDir = `${gameFolder}/ucp/modules`;
-    const modDirEnts = (await proxyFsExists(moduleDir))
-      ? await readDir(moduleDir)
-      : [];
-
-    const pluginDir = `${gameFolder}/ucp/plugins`;
-    const pluginDirEnts = (await proxyFsExists(pluginDir))
-      ? await readDir(pluginDir)
-      : [];
-
-    const dirEnts: FileEntry[] = [...modDirEnts, ...pluginDirEnts];
+    const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
 
     return Promise.all(
-      dirEnts
-        .filter(
-          (d: FileEntry) => d.children // should be null/undefined if no dir
-        )
-        .map(async (d: FileEntry) => {
-          const type = modDirEnts.indexOf(d) === -1 ? 'plugin' : 'module';
+      ehs.map(async (eh) => {
+        const type = eh.path.indexOf('/modules/') ? 'module' : 'plugin';
+        const definition = yaml.parse(
+          await eh.getTextContents(`definition.yml`)
+        );
+        const { name, version } = definition;
 
-          const folder =
-            type === 'module'
-              ? `${gameFolder}/ucp/modules/${d.name}`
-              : `${gameFolder}/ucp/plugins/${d.name}`;
+        definition.dependencies = definition.depends || [];
 
-          const definition = yaml.parse(
-            await readTextFile(`${folder}/definition.yml`)
-          );
-          const { name, version } = definition;
+        const ext = {
+          name,
+          version,
+          type,
+          definition,
+        } as unknown as Extension;
 
-          definition.dependencies = definition.depends || [];
+        ext.ui = await readUISpec(eh);
+        await setLocale(eh, ext, currentLocale);
+        ext.config = await readConfig(eh);
 
-          const ext = {
-            name,
-            version,
-            type,
-            definition,
-          } as unknown as Extension;
-          ext.ui = await readUISpec(folder);
-          await setLocale(folder, ext, currentLocale);
-          ext.config = await readConfig(folder);
+        ext.optionEntries = collectOptionEntries(
+          ext.ui as unknown as { [key: string]: unknown },
+          ext.name
+        );
 
-          ext.optionEntries = collectOptionEntries(
-            ext.ui as unknown as { [key: string]: unknown },
-            ext.name
-          );
+        ext.configEntries = {
+          ...collectConfigEntries(
+            ext.config.modules as { [key: string]: unknown; value: unknown }
+          ),
+          ...collectConfigEntries(
+            ext.config.plugins as { [key: string]: unknown; value: unknown }
+          ),
+        };
 
-          ext.configEntries = {
-            ...collectConfigEntries(
-              ext.config.modules as { [key: string]: unknown; value: unknown }
-            ),
-            ...collectConfigEntries(
-              ext.config.plugins as { [key: string]: unknown; value: unknown }
-            ),
-          };
-
-          return ext;
-        })
+        return ext;
+      })
     );
   },
 };

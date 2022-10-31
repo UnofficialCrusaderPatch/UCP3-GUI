@@ -1,20 +1,12 @@
-type Empty = undefined | null | void;
-type NotEmpty<T> = T extends Empty ? never : T;
+import Option from './option';
 
-// Inspired by the "Result" and "Option" Enums from Rust and the "Optional" from Java
-class Result<OK, ERR> {
-  #content: NotEmpty<OK> | NotEmpty<ERR> | null;
+// Inspired by the "Result" Enum from Rust
+export default class Result<OK, ERR> {
+  #content: OK | ERR;
 
   #success: boolean;
 
-  #getOrNull(): NotEmpty<OK> | null {
-    return this.#success ? (this.#content as NotEmpty<OK> | null) : null;
-  }
-
-  private constructor(
-    content: NotEmpty<OK> | NotEmpty<ERR> | null,
-    success: boolean
-  ) {
+  private constructor(content: OK | ERR, success: boolean) {
     this.#content = content;
     this.#success = success;
   }
@@ -27,103 +19,56 @@ class Result<OK, ERR> {
     return !this.#success;
   }
 
-  // get result, throws if empty ok result or ERR
-  get(): NotEmpty<OK> | null {
+  ok(): Option<OK> {
+    return this.#success ? Option.of(this.#content as OK) : Option.ofEmpty();
+  }
+
+  err(): Option<ERR> {
+    return !this.#success ? Option.of(this.#content as ERR) : Option.ofEmpty();
+  }
+
+  map<T>(func: (result: Result<OK, ERR>) => T): T {
+    return func(this);
+  }
+
+  mapOk<T>(func: (ok: OK) => T): Result<T, ERR> {
+    let res = this as unknown as Result<T, ERR>;
+    this.ok().ifPresent((ok) => {
+      res = Result.ok(func(ok));
+    });
+    return res;
+  }
+
+  mapErr<T>(func: (err: ERR) => T): Result<OK, T> {
+    let res = this as unknown as Result<OK, T>;
+    this.err().ifPresent((error) => {
+      res = Result.err(func(error));
+    });
+    return res;
+  }
+
+  throwIfErr() {
     if (!this.#success) {
-      throw new Error('Trying to get result of failed Result.');
-    }
-    if (this.#content !== null) {
-      return this.#content as NotEmpty<OK>;
-    }
-    throw new Error('Trying to get result of empty Result.');
-  }
-
-  // get error, throws if empty error result or OK
-  getError(): NotEmpty<ERR> | null {
-    if (this.#success) {
-      throw new Error('Trying to get error of successful Result.');
-    }
-    if (this.#content !== null) {
-      return this.#content as NotEmpty<ERR>;
-    }
-    throw new Error('Trying to get error of empty Result.');
-  }
-
-  // get or either throw ERR, a given Error, or the error created by a function
-  // NOTE: empty result throws its own error
-  getOrThrow(
-    error: undefined | Error | ((error: NotEmpty<ERR>) => Error)
-  ): NotEmpty<OK> {
-    const res = this.#getOrNull();
-    if (res) {
-      return res;
-    }
-    if (this.#content === null) {
-      throw new Error('Trying to get result of empty Result.');
-    }
-    if (!error) {
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
-      throw this.#content;
+      throw this.err().getOrThrow(() => new Error('Result contains an error.'));
     }
-    if (typeof error === 'function') {
-      throw error(this.#content as NotEmpty<ERR>);
-    }
-    throw error;
-  }
-
-  // get or return the given value
-  getOrElse(other: NotEmpty<OK>): NotEmpty<OK> {
-    const res = this.#getOrNull();
-    if (res) {
-      return res;
-    }
-    return other;
-  }
-
-  // get or receive the given value
-  getOrReceive(supplier: () => NotEmpty<OK>): NotEmpty<OK> {
-    const res = this.#getOrNull();
-    if (res) {
-      return res;
-    }
-    return supplier();
-  }
-
-  // do something if ok
-  ifOkDo(consumer: (result: NotEmpty<OK>) => void): void {
-    const res = this.#getOrNull();
-    if (res) {
-      consumer(res);
-    }
-  }
-
-  // map something if ok, the error will be lost
-  map<T>(func: (result: NotEmpty<OK>) => NotEmpty<T>): Result<T, void> {
-    if (!this.#success || this.#content === null) {
-      return Result.emptyErr();
-    }
-    return Result.ok(func(this.#content as NotEmpty<OK>));
   }
 
   //* factories *//
 
-  static ok<OK, ERR>(content: NotEmpty<OK>): Result<OK, ERR> {
+  static ok<OK, ERR>(content: OK): Result<OK, ERR> {
     return new Result<OK, ERR>(content, true);
   }
 
-  static err<OK, ERR>(content: NotEmpty<ERR>): Result<OK, ERR> {
+  static err<OK, ERR>(content: ERR): Result<OK, ERR> {
     return new Result<OK, ERR>(content, false);
   }
 
-  // ERR is just for typing
   static emptyOk<ERR>(): Result<void, ERR> {
-    return new Result<void, ERR>(null, true);
+    return new Result<void, ERR>(undefined, true);
   }
 
-  // OK is just for typing
   static emptyErr<OK>(): Result<OK, void> {
-    return new Result<OK, void>(null, false);
+    return new Result<OK, void>(undefined, true);
   }
 }
-
-export default Result;

@@ -30,14 +30,15 @@ class DirectoryExtensionHandle implements ExtensionHandle {
   async getBinaryContents(path: string): Promise<Uint8Array> {
     const p = `${this.path}/${path}`;
     if (await proxyFsExists(p)) {
-      const [result, error] = await readBinaryFile(p);
-      if (error !== undefined) {
+      const result = await readBinaryFile(p);
+      result.err().ifPresent((error) => {
         throw new Error(
           `Error while reading binary file: ${p}. Error: ${error}`
         );
-      }
-      if (result instanceof Uint8Array) {
-        return result;
+      });
+      const array = result.ok().get();
+      if (array instanceof Uint8Array) {
+        return array;
       }
       throw new Error(`${p} contents is unexpected type`);
     }

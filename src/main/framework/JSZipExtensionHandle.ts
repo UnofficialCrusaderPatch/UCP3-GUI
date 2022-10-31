@@ -14,19 +14,20 @@ class JSZipExtensionHandle implements ExtensionHandle {
 
   static async fromPath(path: string) {
     // Do hash check here!
-    const [data, error] = await readBinaryFile(path);
-
-    if (error) {
+    const dataResult = await readBinaryFile(path);
+    dataResult.err().ifPresent((error) => {
       throw new Error(`Could not read zip file: ${path}: ${error}`);
-    }
+    });
 
-    if (data !== undefined && data instanceof Uint8Array) {
-      const zip = await JSZip.loadAsync(data as Uint8Array, {
-        createFolders: false,
-      });
-      return new JSZipExtensionHandle(path, zip);
-    }
-    throw new Error(`Could not read zip file: ${path}: ${error}`);
+    return dataResult
+      .ok()
+      .map(async (data) => {
+        const zip = await JSZip.loadAsync(data as Uint8Array, {
+          createFolders: false,
+        });
+        return new JSZipExtensionHandle(path, zip);
+      })
+      .get();
   }
 
   async doesEntryExist(path: string) {

@@ -20,13 +20,14 @@ import {
 } from './file-utils';
 import { askInfo, showInfo, showWarning } from './dialog-util';
 import { extractZipToPath } from './tauri-invoke';
+import Result from './result';
 
 export async function installUCPFromZip(
   zipFilePath: string,
   gameFolder: string,
   statusCallback: (status: string) => void,
   t: TFunction
-): Promise<[boolean, FileUtilError]> {
+): Promise<Result<void, FileUtilError>> {
   const binkRealPath = await resolvePath(gameFolder, 'binkw32_real.dll');
   const binkUcpPath = await resolvePath(gameFolder, 'binkw32_ucp.dll');
   const binkPath = await resolvePath(gameFolder, 'binkw32.dll');
@@ -35,12 +36,14 @@ export async function installUCPFromZip(
   if (!(await proxyFsExists(binkRealPath))) {
     if (await proxyFsExists(binkPath)) {
       // TODO: could this also be a rename?
-      const [success, error] = await copyFile(binkPath, binkRealPath);
-      if (!success) {
-        return [false, t('gui-download:bink.copy.real.error', { error })];
+      const copyResult = await copyFile(binkPath, binkRealPath);
+      if (copyResult.isErr()) {
+        return copyResult.mapErr((error) =>
+          t('gui-download:bink.copy.real.error', { error })
+        );
       }
     } else {
-      return [false, t('gui-download:bink.missing')];
+      return Result.err(t('gui-download:bink.missing'));
     }
   }
 
@@ -48,16 +51,18 @@ export async function installUCPFromZip(
   try {
     await extractZipToPath(zipFilePath, gameFolder);
   } catch (error) {
-    return [false, t('gui-download:zip.extract.error', { error })];
+    return Result.err(t('gui-download:zip.extract.error', { error }));
   }
 
   statusCallback(t('gui-download:bink.copy.ucp'));
   // TODO: could this also be a rename?
-  const [success, error] = await copyFile(binkUcpPath, binkPath);
-  if (!success) {
-    return [false, t('gui-download:bink.copy.ucp.error', { error })];
+  const copyResult = await copyFile(binkUcpPath, binkPath);
+  if (copyResult.isErr()) {
+    return copyResult.mapErr((error) =>
+      t('gui-download:bink.copy.real.error', { error })
+    );
   }
-  return [true, undefined];
+  return Result.emptyOk();
 }
 
 export async function checkForUCP3Updates(
@@ -73,10 +78,10 @@ export async function checkForUCP3Updates(
   };
 
   statusCallback(t('gui-download:ucp.version.yaml.load'));
-  const [yamlRet] = await loadYaml(
-    await resolvePath(gameFolder, 'ucp-version.yml')
-  );
-  const { sha } = yamlRet || { sha: '!' };
+  const sha = (await loadYaml(await resolvePath(gameFolder, 'ucp-version.yml')))
+    .ok()
+    .map((content) => content.sha)
+    .getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));
   const result = await checkForLatestUCP3DevReleaseUpdate(sha);
@@ -102,10 +107,7 @@ export async function checkForUCP3Updates(
   statusCallback(t('gui-download:ucp.download.download'));
   const downloadPath = `${await getLocalDataFolder()}/ucp-zip/${result.file}`;
   try {
-    let [success, error] = await recursiveCreateDir(downloadPath);
-    if (!success) {
-      throw error;
-    }
+    (await recursiveCreateDir(downloadPath)).throwIfErr();
 
     const response = await fetchBinary<BinaryFileContents>(result.downloadUrl, {
       headers: {
@@ -118,10 +120,7 @@ export async function checkForUCP3Updates(
       throw new Error('Failed to fetch update.');
     }
 
-    [success, error] = await writeBinaryFile(downloadPath, response.data);
-    if (!success) {
-      throw error;
-    }
+    (await writeBinaryFile(downloadPath, response.data)).throwIfErr();
   } catch (error) {
     statusCallback(t('gui-download:ucp.download.failed', { error }));
     return returnObject;
@@ -129,26 +128,27 @@ export async function checkForUCP3Updates(
   returnObject.downloaded = true;
 
   // has its own statusCallbacks
-  const [installResult, installError] = await installUCPFromZip(
+  const installResult = await installUCPFromZip(
     downloadPath,
     gameFolder,
     statusCallback,
     t
   );
-  if (!installResult) {
-    statusCallback(
-      t('gui-download:ucp.install.failed', { error: installError })
-    );
+  if (installResult.isErr()) {
+    installResult
+      .err()
+      .ifPresent((error) =>
+        statusCallback(t('gui-download:ucp.install.failed', { error }))
+      );
     return returnObject;
   }
 
   // TODO: in the future, use a cache?
-  const [removeResult, removeError] = await removeFile(downloadPath);
-  if (!removeResult) {
-    showWarning(
-      t('gui-download:ucp.install.zip.remove.failed', { error: removeError })
+  (await removeFile(downloadPath))
+    .err()
+    .ifPresent((error) =>
+      showWarning(t('gui-download:ucp.install.zip.remove.failed', { error }))
     );
-  }
 
   returnObject.installed = true;
   return returnObject;

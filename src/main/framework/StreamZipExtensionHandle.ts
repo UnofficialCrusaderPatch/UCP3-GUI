@@ -23,10 +23,13 @@ class StreamZipExtensionHandle implements ExtensionHandle {
   }
 
   static async fromPath(path: string) {
-    const [blob, error] = await readBinaryFile(path);
-    if (blob === undefined || error)
+    const blobResult = await readBinaryFile(path);
+    blobResult.err().ifPresent((error) => {
       throw new Error(`Could not read zip file: ${path}: ${error}`);
-    const zip = new ZipReader(new BlobReader(new Blob([blob])));
+    });
+    const zip = new ZipReader(
+      new BlobReader(new Blob([blobResult.ok().get()]))
+    );
     return new StreamZipExtensionHandle(path, zip);
   }
 

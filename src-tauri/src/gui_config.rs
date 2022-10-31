@@ -144,9 +144,8 @@ impl GuiConfig {
     pub fn save_config(&self) {
         let save_result = || -> Result<(), io::Error> {
             let path = GuiConfig::get_config_file_path();
-            if let Some(folder) = path.parent() {
-                fs::create_dir_all(folder)?;
-            }
+            let folder = path.parent().unwrap();
+            fs::create_dir_all(folder)?;
             let file = fs::File::create(path)?;
             let writer = io::BufWriter::new(file);
             serde_json::to_writer(writer, self)?;

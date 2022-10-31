@@ -5,7 +5,6 @@
 
 mod gui_config;
 mod utils;
-mod zip_utils;
 
 use std::sync::Mutex;
 use tauri::RunEvent;
@@ -21,8 +20,7 @@ fn main() {
             gui_config::get_config_recent_folders,
             gui_config::get_config_most_recent_folder,
             gui_config::add_config_recent_folder,
-            gui_config::remove_config_recent_folder,
-            zip_utils::extract_zip_to_path
+            gui_config::remove_config_recent_folder
         ])
         .manage::<Mutex<GuiConfig>>(Mutex::new(GuiConfig::new()))
         .build(tauri::generate_context!())

@@ -6,7 +6,7 @@ import yaml from 'yaml';
 import { proxyFsExists, readBinaryFile } from '../../renderer/utils/file-utils';
 
 import ExtensionHandle from './ExtensionHandle';
-import ZipExtensionHandle from './StreamZipExtensionHandle';
+import ZipExtensionHandle from './RustZipExtensionHandle';
 import DirectoryExtensionHandle from './DirectoryExtensionHandle';
 
 import {

@@ -19,6 +19,7 @@ import {
   resolvePath,
 } from './file-utils';
 import { askInfo, showInfo, showWarning } from './dialog-util';
+import { extractZipToPath } from './tauri-invoke';
 
 export async function installUCPFromZip(
   zipFilePath: string,
@@ -43,43 +44,9 @@ export async function installUCPFromZip(
     }
   }
 
-  statusCallback(t('gui-download:zip.read'));
-  const [zipData, zipDataError] = await readBinaryFile(zipFilePath);
-  if (zipDataError) {
-    return [false, t('gui-download:zip.read.error', { error: zipDataError })];
-  }
-
   statusCallback(t('gui-download:zip.extract'));
-  const zip = await JSZip.loadAsync(zipData as Uint8Array);
-  const listOfDir: Array<JSZip.JSZipObject> = [];
-  const listOfFiles: Array<JSZip.JSZipObject> = [];
-  zip.forEach((relativePath: string, file: JSZip.JSZipObject) => {
-    (file.dir ? listOfDir : listOfFiles).push(file);
-  });
-  // https://github.com/tauri-apps/tauri-docs/issues/696
   try {
-    await Promise.all(
-      listOfDir.map(async (dir) => {
-        const [success, error] = await recursiveCreateDir(
-          await resolvePath(gameFolder, dir.name)
-        );
-        if (!success) {
-          throw error;
-        }
-      })
-    );
-    await Promise.all(
-      listOfFiles.map(async (file) => {
-        const fileData = await file.async('uint8array');
-        const [success, error] = await writeBinaryFile(
-          await resolvePath(gameFolder, file.name),
-          fileData
-        );
-        if (!success) {
-          throw error;
-        }
-      })
-    );
+    await extractZipToPath(zipFilePath, gameFolder);
   } catch (error) {
     return [false, t('gui-download:zip.extract.error', { error })];
   }

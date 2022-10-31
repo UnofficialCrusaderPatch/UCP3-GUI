@@ -10,11 +10,6 @@ const TAURI_COMMAND = {
   CONFIG_ADD_RECENT_FOLDER: 'add_config_recent_folder',
   CONFIG_REMOVE_RECENT_FOLDER: 'remove_config_recent_folder',
   ZIP_EXTRACT_TO_PATH: 'extract_zip_to_path',
-  ZIP_LOAD: 'load_zip',
-  ZIP_CLOSE: 'close_zip',
-  ZIP_EXIST_ENTRY: 'exist_zip_entry',
-  ZIP_GET_ENTRY_AS_BINARY: 'get_zip_entry_as_binary',
-  ZIP_GET_ENTRY_AS_TEXT: 'get_zip_entry_as_text',
 };
 
 export async function setGuiConfigLanguage(lang: string): Promise<void> {
@@ -46,33 +41,4 @@ export async function extractZipToPath(
   dest: string
 ): Promise<void> {
   return invoke(TAURI_COMMAND.ZIP_EXTRACT_TO_PATH, { source, dest });
-}
-
-export async function loadZip(source: string): Promise<number> {
-  return invoke(TAURI_COMMAND.ZIP_LOAD, { source });
-}
-
-export async function closeZip(id: number): Promise<void> {
-  return invoke(TAURI_COMMAND.ZIP_CLOSE, { id });
-}
-
-export async function existZipEntry(
-  id: number,
-  path: string
-): Promise<boolean> {
-  return invoke(TAURI_COMMAND.ZIP_EXIST_ENTRY, { id, path });
-}
-
-export async function getZipEntryAsBinary(
-  id: number,
-  path: string
-): Promise<Uint8Array> {
-  return invoke(TAURI_COMMAND.ZIP_GET_ENTRY_AS_BINARY, { id, path });
-}
-
-export async function getZipEntryAsText(
-  id: number,
-  path: string
-): Promise<string> {
-  return invoke(TAURI_COMMAND.ZIP_GET_ENTRY_AS_TEXT, { id, path });
 }

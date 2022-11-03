@@ -50,8 +50,17 @@ export default class Result<OK, ERR> {
   throwIfErr() {
     if (!this.#success) {
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
-      throw this.err().getOrThrow(() => new Error('Result contains an error.'));
+      throw this.err().get();
     }
+  }
+
+  getOrThrow() {
+    const res = this.ok();
+    if (res.isPresent()) {
+      return res.get();
+    }
+    // eslint-disable-next-line @typescript-eslint/no-throw-literal
+    throw this.err().get();
   }
 
   //* factories *//

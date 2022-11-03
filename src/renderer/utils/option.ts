@@ -1,4 +1,6 @@
 // Inspired by the "Option" Enum from Rust and Optional from Java
+// A bit weird decision: "null" and "undefined" might be the contained values.
+// But then by contract.
 export default class Option<T> {
   #content: T | null;
 

@@ -286,7 +286,7 @@ export default function Manager() {
                     if (zipFilePath === '') return;
 
                     // TODO: improve feedback
-                    const [success, error] = await installUCPFromZip(
+                    const zipInstallResult = await installUCPFromZip(
                       zipFilePath,
                       currentFolder,
                       // can be used to transform -> although splitting into more components might be better

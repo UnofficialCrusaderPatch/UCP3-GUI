@@ -8,14 +8,13 @@ import { showError } from './dialog-util';
 const onWindowCloseFuncs = new Map<unknown, () => Promise<void>>();
 
 // module await is apparently not supported
-// the promise will not be awaited, since at the moment it is assumed
-// the shutdown happens, so no clean-up is performed
 const windowCloseUnlistenPromise = appWindow.onCloseRequested(async () => {
   // eslint-disable-next-line no-restricted-syntax
   for (const [, func] of onWindowCloseFuncs) {
     // eslint-disable-next-line no-await-in-loop
     await func();
   }
+  (await windowCloseUnlistenPromise)();
 });
 
 export function unregisterForWindowClose(key: unknown): boolean {

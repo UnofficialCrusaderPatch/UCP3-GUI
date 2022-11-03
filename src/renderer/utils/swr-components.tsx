@@ -5,6 +5,10 @@ import { Event, UnlistenFn } from '@tauri-apps/api/event';
 import { RecentFolderHelper } from './gui-config-helper';
 import { getGuiConfigLanguage, setGuiConfigLanguage } from './tauri-invoke';
 import { onLanguageChange } from './tauri-listen';
+import {
+  registerForWindowClose,
+  unregisterForWindowClose,
+} from './tauri-hooks';
 
 export interface SwrResult<T> {
   data: T | undefined;
@@ -25,6 +29,8 @@ const SWR_KEYS = {
   RECENT_FOLDERS: 'ucp.gui.recent.folders',
   LANGUAGE_LOAD: 'ucp.lang.load',
 };
+
+const LANG_WINDOW_CLOSE_KEY = 'LANG';
 
 // eslint-disable-next-line import/prefer-default-export
 export function useRecentFolders(): SwrResult<RecentFolderHelper> {
@@ -55,17 +61,18 @@ export function useLanguage(): SwrResult<Language> {
     async () => {
       let lang = await getGuiConfigLanguage();
       i18n.changeLanguage(lang || undefined);
-      // returns unlistener, but is ignored, since it exits over the lifetime of the window
       const unlistenFunc = await onLanguageChange(
         (langEvent: Event<string>) => {
           lang = langEvent.payload;
           i18n.changeLanguage(lang || undefined);
         }
       );
+      unregisterForWindowClose(LANG_WINDOW_CLOSE_KEY);
+      registerForWindowClose(LANG_WINDOW_CLOSE_KEY, async () => unlistenFunc());
       return {
         getLanguage: () => lang,
         setLanguage: setGuiConfigLanguage,
-        unlistenChangeEvent: unlistenFunc,
+        unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
       };
     }
   );

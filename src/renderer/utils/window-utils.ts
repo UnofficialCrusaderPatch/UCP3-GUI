@@ -42,8 +42,9 @@ export async function createNewWindow(
   );
 
   // also expects close to go through
-  await webview.onCloseRequested(() => {
+  const unlistenFunc = await webview.onCloseRequested(() => {
     delete createdWindows[windowName];
+    unlistenFunc();
   });
   createdWindows[windowName] = webview;
 }

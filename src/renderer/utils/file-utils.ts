@@ -33,6 +33,9 @@ import {
 } from 'yaml';
 import Result from './result';
 
+// WARNING: Tauri funcs lie about their return.
+// Void Promises return "null" as result instead of undefined.
+
 // TYPES
 
 export type Yaml = any;
@@ -61,87 +64,52 @@ export async function resolvePath(...paths: string[]): Promise<string> {
 export async function recursiveCreateDir(
   path: string
 ): Promise<Result<void, Error>> {
-  try {
+  return Result.tryAsync(async () => {
     await createDir(await dirname(path), { recursive: true });
-  } catch (error) {
-    return Result.err(error); // may create empty err -> already weakness, but ok for small project
-  }
-  return Result.emptyOk();
+  });
 }
 
 export async function readTextFile(
   path: string
 ): Promise<Result<string, Error>> {
-  try {
-    return Result.ok(await tauriReadTextFile(path));
-  } catch (error) {
-    return Result.err(error);
-  }
+  return Result.tryAsync(tauriReadTextFile, path);
 }
 
 export async function readBinaryFile(
   path: string
 ): Promise<Result<Uint8Array, Error>> {
-  try {
-    return Result.ok(await tauriReadBinaryFile(path));
-  } catch (error) {
-    return Result.err(error);
-  }
+  return Result.tryAsync(tauriReadBinaryFile, path);
 }
 
 export async function writeTextFile(
   path: string,
   contents: string
 ): Promise<Result<void, Error>> {
-  const dirResult = await recursiveCreateDir(path);
-  if (dirResult.isErr()) {
-    return dirResult;
-  }
-
-  try {
+  return Result.tryAsync(async () => {
+    (await recursiveCreateDir(path)).throwIfErr();
     await tauriWriteTextFile(path, contents);
-  } catch (error) {
-    return Result.err(error);
-  }
-  return Result.emptyOk();
+  });
 }
 
 export async function writeBinaryFile(
   path: string,
   contents: BinaryFileContents
 ): Promise<Result<void, Error>> {
-  const dirResult = await recursiveCreateDir(path);
-  if (dirResult.isErr()) {
-    return dirResult;
-  }
-
-  try {
+  return Result.tryAsync(async () => {
+    (await recursiveCreateDir(path)).throwIfErr();
     await tauriWriteBinaryFile(path, contents);
-  } catch (error) {
-    return Result.err(error);
-  }
-  return Result.emptyOk();
+  });
 }
 
 export async function copyFile(
   source: string,
   destination: string
 ): Promise<Result<void, Error>> {
-  try {
-    await tauriCopyFile(source, destination);
-    return Result.emptyOk();
-  } catch (error) {
-    return Result.err(error);
-  }
+  return Result.tryAsync(tauriCopyFile, source, destination);
 }
 
 export async function removeFile(path: string): Promise<Result<void, Error>> {
-  try {
-    await tauriRemoveFile(path);
-    return Result.emptyOk();
-  } catch (error) {
-    return Result.err(error);
-  }
+  return Result.tryAsync(tauriRemoveFile, path);
 }
 
 export async function loadYaml(
@@ -162,17 +130,10 @@ export async function loadJson(
     | ((this: unknown, key: string, value: unknown) => unknown)
     | undefined
 ): Promise<Result<Json, Error>> {
-  const readResult = await readTextFile(path);
-  if (readResult.isErr()) {
-    return readResult; // will be error
-  }
-
-  try {
-    // errors are thrown outside, so the loss of the error should be no problem
-    return readResult.mapOk((result) => JSON.parse(result, reviver));
-  } catch (error) {
-    return Result.err(error);
-  }
+  return Result.tryAsync(async () => {
+    const readContent = (await readTextFile(path)).getOrThrow();
+    return JSON.parse(readContent, reviver);
+  });
 }
 
 export async function writeJson(
@@ -183,12 +144,10 @@ export async function writeJson(
     | undefined,
   space?: string | number | undefined
 ): Promise<Result<void, Error>> {
-  try {
+  return Result.tryAsync(async () => {
     const jsonStr = JSON.stringify(contents, replacer, space);
-    return await writeTextFile(path, jsonStr);
-  } catch (error) {
-    return Result.err(error);
-  }
+    (await writeTextFile(path, jsonStr)).throwIfErr();
+  });
 }
 
 export async function fetchBinary<T>(

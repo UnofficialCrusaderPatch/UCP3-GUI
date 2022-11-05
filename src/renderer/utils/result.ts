@@ -20,11 +20,11 @@ export default class Result<OK, ERR> {
   }
 
   ok(): Option<OK> {
-    return this.#success ? Option.of(this.#content as OK) : Option.ofEmpty();
+    return this.isOk() ? Option.of(this.#content as OK) : Option.ofEmpty();
   }
 
   err(): Option<ERR> {
-    return !this.#success ? Option.of(this.#content as ERR) : Option.ofEmpty();
+    return this.isErr() ? Option.of(this.#content as ERR) : Option.ofEmpty();
   }
 
   map<T>(func: (result: Result<OK, ERR>) => T): T {
@@ -48,7 +48,7 @@ export default class Result<OK, ERR> {
   }
 
   throwIfErr() {
-    if (!this.#success) {
+    if (this.isErr()) {
       // eslint-disable-next-line @typescript-eslint/no-throw-literal
       throw this.err().get();
     }

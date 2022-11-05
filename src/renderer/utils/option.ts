@@ -64,7 +64,19 @@ export default class Option<T> {
   map<U>(func: (content: T) => U): Option<U> {
     return this.#present
       ? Option.of(func(this.#content as T))
-      : Option.ofEmpty();
+      : (this as unknown as Option<U>);
+  }
+
+  // if the contained value is "null" or "undefined",
+  // return an empty Option, else "this" unchanged
+  notUndefinedOrNull(): Option<T> {
+    if (
+      this.#present &&
+      (this.#content === undefined || this.#content === null)
+    ) {
+      return Option.ofEmpty();
+    }
+    return this;
   }
 
   //* factories *//

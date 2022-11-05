@@ -78,6 +78,30 @@ export default class Result<OK, ERR> {
   }
 
   static emptyErr<OK>(): Result<OK, void> {
-    return new Result<OK, void>(undefined, true);
+    return new Result<OK, void>(undefined, false);
+  }
+
+  //* Wrappers *//
+
+  static try<OK, ERR, T extends unknown[]>(
+    func: (...args: T) => OK,
+    ...args: T
+  ): Result<OK, ERR> {
+    try {
+      return Result.ok(func(...args));
+    } catch (error) {
+      return Result.err(error as ERR);
+    }
+  }
+
+  static async tryAsync<OK, ERR, T extends unknown[]>(
+    func: (...args: T) => Promise<OK>,
+    ...args: T
+  ): Promise<Result<OK, ERR>> {
+    try {
+      return Result.ok(await func(...args));
+    } catch (error) {
+      return Result.err(error as ERR);
+    }
   }
 }

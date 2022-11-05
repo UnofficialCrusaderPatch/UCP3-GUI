@@ -81,6 +81,7 @@ export async function checkForUCP3Updates(
   const sha = (await loadYaml(await resolvePath(gameFolder, 'ucp-version.yml')))
     .ok()
     .map((content) => content.sha)
+    .notUndefinedOrNull()
     .getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));

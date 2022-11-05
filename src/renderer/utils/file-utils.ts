@@ -150,17 +150,10 @@ export async function loadYaml(
     | (ParseOptions & DocumentOptions & SchemaOptions & ToJSOptions)
     | undefined
 ): Promise<Result<Yaml, Error>> {
-  const readResult = await readTextFile(path);
-  if (readResult.isErr()) {
-    return readResult; // will be error
-  }
-
-  try {
-    // errors are thrown outside, so the loss of the error should be no problem
-    return readResult.mapOk((content) => yamlParse(content, yamlOptions));
-  } catch (error) {
-    return Result.err(error);
-  }
+  return Result.tryAsync(async () => {
+    const readContent = (await readTextFile(path)).getOrThrow();
+    return yamlParse(readContent, yamlOptions);
+  });
 }
 
 export async function loadJson(

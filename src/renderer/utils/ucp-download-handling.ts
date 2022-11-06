@@ -20,44 +20,47 @@ import {
 } from './file-utils';
 import { askInfo, showInfo, showWarning } from './dialog-util';
 import { extractZipToPath } from './tauri-invoke';
+import Result from './result';
+import Option from './option';
 
 export async function installUCPFromZip(
   zipFilePath: string,
   gameFolder: string,
   statusCallback: (status: string) => void,
   t: TFunction
-): Promise<[boolean, FileUtilError]> {
-  const binkRealPath = await resolvePath(gameFolder, 'binkw32_real.dll');
-  const binkUcpPath = await resolvePath(gameFolder, 'binkw32_ucp.dll');
-  const binkPath = await resolvePath(gameFolder, 'binkw32.dll');
+): Promise<Result<void, FileUtilError>> {
+  return Result.tryAsync(async () => {
+    const binkRealPath = await resolvePath(gameFolder, 'binkw32_real.dll');
+    const binkUcpPath = await resolvePath(gameFolder, 'binkw32_ucp.dll');
+    const binkPath = await resolvePath(gameFolder, 'binkw32.dll');
 
-  statusCallback(t('gui-download:bink.copy.real'));
-  if (!(await proxyFsExists(binkRealPath))) {
-    if (await proxyFsExists(binkPath)) {
-      // TODO: could this also be a rename?
-      const [success, error] = await copyFile(binkPath, binkRealPath);
-      if (!success) {
-        return [false, t('gui-download:bink.copy.real.error', { error })];
+    statusCallback(t('gui-download:bink.copy.real'));
+    if (!(await proxyFsExists(binkRealPath))) {
+      if (await proxyFsExists(binkPath)) {
+        // TODO: could this also be a rename?
+        (await copyFile(binkPath, binkRealPath))
+          .mapErr((error) => t('gui-download:bink.copy.real.error', { error }))
+          .throwIfErr();
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-throw-literal
+        throw t('gui-download:bink.missing');
       }
-    } else {
-      return [false, t('gui-download:bink.missing')];
     }
-  }
 
-  statusCallback(t('gui-download:zip.extract'));
-  try {
-    await extractZipToPath(zipFilePath, gameFolder);
-  } catch (error) {
-    return [false, t('gui-download:zip.extract.error', { error })];
-  }
+    statusCallback(t('gui-download:zip.extract'));
+    try {
+      await extractZipToPath(zipFilePath, gameFolder);
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-throw-literal
+      throw t('gui-download:zip.extract.error', { error });
+    }
 
-  statusCallback(t('gui-download:bink.copy.ucp'));
-  // TODO: could this also be a rename?
-  const [success, error] = await copyFile(binkUcpPath, binkPath);
-  if (!success) {
-    return [false, t('gui-download:bink.copy.ucp.error', { error })];
-  }
-  return [true, undefined];
+    statusCallback(t('gui-download:bink.copy.ucp'));
+    // TODO: could this also be a rename?
+    (await copyFile(binkUcpPath, binkPath))
+      .mapErr((error) => t('gui-download:bink.copy.real.error', { error }))
+      .throwIfErr();
+  });
 }
 
 export async function checkForUCP3Updates(
@@ -73,10 +76,11 @@ export async function checkForUCP3Updates(
   };
 
   statusCallback(t('gui-download:ucp.version.yaml.load'));
-  const [yamlRet] = await loadYaml(
-    await resolvePath(gameFolder, 'ucp-version.yml')
-  );
-  const { sha } = yamlRet || { sha: '!' };
+  const sha = (await loadYaml(await resolvePath(gameFolder, 'ucp-version.yml')))
+    .ok()
+    .map((content) => content.sha as string | undefined)
+    .notUndefinedOrNull()
+    .getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));
   const result = await checkForLatestUCP3DevReleaseUpdate(sha);
@@ -102,10 +106,7 @@ export async function checkForUCP3Updates(
   statusCallback(t('gui-download:ucp.download.download'));
   const downloadPath = `${await getLocalDataFolder()}/ucp-zip/${result.file}`;
   try {
-    let [success, error] = await recursiveCreateDir(downloadPath);
-    if (!success) {
-      throw error;
-    }
+    (await recursiveCreateDir(downloadPath)).throwIfErr();
 
     const response = await fetchBinary<BinaryFileContents>(result.downloadUrl, {
       headers: {
@@ -118,10 +119,7 @@ export async function checkForUCP3Updates(
       throw new Error('Failed to fetch update.');
     }
 
-    [success, error] = await writeBinaryFile(downloadPath, response.data);
-    if (!success) {
-      throw error;
-    }
+    (await writeBinaryFile(downloadPath, response.data)).throwIfErr();
   } catch (error) {
     statusCallback(t('gui-download:ucp.download.failed', { error }));
     return returnObject;
@@ -129,26 +127,27 @@ export async function checkForUCP3Updates(
   returnObject.downloaded = true;
 
   // has its own statusCallbacks
-  const [installResult, installError] = await installUCPFromZip(
+  const installResult = await installUCPFromZip(
     downloadPath,
     gameFolder,
     statusCallback,
     t
   );
-  if (!installResult) {
-    statusCallback(
-      t('gui-download:ucp.install.failed', { error: installError })
-    );
+  if (installResult.isErr()) {
+    installResult
+      .err()
+      .ifPresent((error) =>
+        statusCallback(t('gui-download:ucp.install.failed', { error }))
+      );
     return returnObject;
   }
 
   // TODO: in the future, use a cache?
-  const [removeResult, removeError] = await removeFile(downloadPath);
-  if (!removeResult) {
-    showWarning(
-      t('gui-download:ucp.install.zip.remove.failed', { error: removeError })
+  (await removeFile(downloadPath))
+    .err()
+    .ifPresent((error) =>
+      showWarning(t('gui-download:ucp.install.zip.remove.failed', { error }))
     );
-  }
 
   returnObject.installed = true;
   return returnObject;

@@ -31,6 +31,10 @@ import {
   SchemaOptions,
   ToJSOptions,
 } from 'yaml';
+import Result from './result';
+
+// WARNING: Tauri funcs lie about their return.
+// Void Promises return "null" as result instead of undefined.
 
 // TYPES
 
@@ -59,90 +63,53 @@ export async function resolvePath(...paths: string[]): Promise<string> {
 
 export async function recursiveCreateDir(
   path: string
-): Promise<[boolean, Error | undefined]> {
-  try {
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(async () => {
     await createDir(await dirname(path), { recursive: true });
-  } catch (error) {
-    return [false, error];
-  }
-  return [true, undefined];
+  });
 }
 
 export async function readTextFile(
   path: string
-): Promise<[string | undefined, Error | undefined]> {
-  try {
-    return [await tauriReadTextFile(path), undefined];
-  } catch (error) {
-    return [undefined, error];
-  }
+): Promise<Result<string, Error>> {
+  return Result.tryAsync(tauriReadTextFile, path);
 }
 
 export async function readBinaryFile(
   path: string
-): Promise<[Uint8Array | undefined, Error | undefined]> {
-  try {
-    return [await tauriReadBinaryFile(path), undefined];
-  } catch (error) {
-    return [undefined, error];
-  }
+): Promise<Result<Uint8Array, Error>> {
+  return Result.tryAsync(tauriReadBinaryFile, path);
 }
 
 export async function writeTextFile(
   path: string,
   contents: string
-): Promise<[boolean, Error | undefined]> {
-  const [dirSuccess, dirError] = await recursiveCreateDir(path);
-  if (!dirSuccess) {
-    return [dirSuccess, dirError || 'Unable to create directory.'];
-  }
-
-  try {
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(async () => {
+    (await recursiveCreateDir(path)).throwIfErr();
     await tauriWriteTextFile(path, contents);
-  } catch (error) {
-    return [false, error];
-  }
-  return [true, undefined];
+  });
 }
 
 export async function writeBinaryFile(
   path: string,
   contents: BinaryFileContents
-): Promise<[boolean, Error | undefined]> {
-  const [dirSuccess, dirError] = await recursiveCreateDir(path);
-  if (!dirSuccess) {
-    return [dirSuccess, dirError || 'Unable to create directory.'];
-  }
-
-  try {
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(async () => {
+    (await recursiveCreateDir(path)).throwIfErr();
     await tauriWriteBinaryFile(path, contents);
-  } catch (error) {
-    return [false, error];
-  }
-  return [true, undefined];
+  });
 }
 
 export async function copyFile(
   source: string,
   destination: string
-): Promise<[boolean, Error | undefined]> {
-  try {
-    await tauriCopyFile(source, destination);
-    return [true, undefined];
-  } catch (error) {
-    return [false, error];
-  }
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(tauriCopyFile, source, destination);
 }
 
-export async function removeFile(
-  path: string
-): Promise<[boolean, Error | undefined]> {
-  try {
-    await tauriRemoveFile(path);
-    return [true, undefined];
-  } catch (error) {
-    return [false, error];
-  }
+export async function removeFile(path: string): Promise<Result<void, Error>> {
+  return Result.tryAsync(tauriRemoveFile, path);
 }
 
 export async function loadYaml(
@@ -150,12 +117,11 @@ export async function loadYaml(
   yamlOptions?:
     | (ParseOptions & DocumentOptions & SchemaOptions & ToJSOptions)
     | undefined
-): Promise<[Yaml | undefined, Error | undefined]> {
-  const [content, error] = await readTextFile(path);
-  if (!content) {
-    return [undefined, error];
-  }
-  return [yamlParse(content, yamlOptions), undefined];
+): Promise<Result<Yaml, Error>> {
+  return Result.tryAsync(async () => {
+    const readContent = (await readTextFile(path)).getOrThrow();
+    return yamlParse(readContent, yamlOptions);
+  });
 }
 
 export async function loadJson(
@@ -163,12 +129,11 @@ export async function loadJson(
   reviver?:
     | ((this: unknown, key: string, value: unknown) => unknown)
     | undefined
-): Promise<[Json | undefined, Error | undefined]> {
-  const [content, error] = await readTextFile(path);
-  if (!content) {
-    return [undefined, error];
-  }
-  return [JSON.parse(content, reviver), undefined];
+): Promise<Result<Json, Error>> {
+  return Result.tryAsync(async () => {
+    const readContent = (await readTextFile(path)).getOrThrow();
+    return JSON.parse(readContent, reviver);
+  });
 }
 
 export async function writeJson(
@@ -178,13 +143,11 @@ export async function writeJson(
     | ((this: unknown, key: string, value: unknown) => unknown)
     | undefined,
   space?: string | number | undefined
-): Promise<[boolean, Error | undefined]> {
-  try {
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(async () => {
     const jsonStr = JSON.stringify(contents, replacer, space);
-    return await writeTextFile(path, jsonStr);
-  } catch (error) {
-    return [false, error];
-  }
+    (await writeTextFile(path, jsonStr)).throwIfErr();
+  });
 }
 
 export async function fetchBinary<T>(

@@ -106,8 +106,9 @@ pub fn close_zip(app_handle: AppHandle, id: usize) -> Result<(), String> {
 }
 
 // careless, overwrites, may leave remains on error
+// async (other thread), since it does not care about other stuff
 #[tauri::command]
-pub fn extract_zip_to_path(app_handle: AppHandle, source: &str, dest: &str) -> Result<(), String> {
+pub async fn extract_zip_to_path(app_handle: AppHandle, source: &str, dest: &str) -> Result<(), String> {
     let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
     let dist_path = get_allowed_path_with_string_error(&app_handle, dest)?;
 

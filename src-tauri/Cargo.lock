@@ -71,6 +71,7 @@ version = "0.0.9"
 dependencies = [
  "serde",
  "serde_json",
+ "sha2",
  "tauri",
  "tauri-build",
  "zip",

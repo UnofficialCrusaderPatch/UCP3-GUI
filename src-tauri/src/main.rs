@@ -6,6 +6,7 @@
 mod gui_config;
 mod utils;
 mod zip_utils;
+mod hash_utils;
 
 use std::{sync::Mutex, collections::HashMap, fs::File};
 use tauri::RunEvent;
@@ -31,6 +32,7 @@ fn main() {
             zip_utils::exist_zip_entry,
             zip_utils::get_zip_entry_as_binary,
             zip_utils::get_zip_entry_as_text,
+            hash_utils::get_sha256_of_file,
         ])
 
         // config

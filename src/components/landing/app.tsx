@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ucpBackEnd } from './fakeBackend';
+import { ucpBackEnd } from 'function/fake-backend';
 
-import 'styling/App.css';
+import './app.css';
 
+import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import LanguageSelect from './language-select';
-import { useRecentFolders } from './utils/swr-components';
-import { RecentFolderHelper } from './utils/gui-config-helper';
-
-const r = Math.floor(Math.random() * 10);
+import { useRecentFolders } from '../general/swr-components';
 
 function Landing() {
   const [landingState, setLandingState] = useState({

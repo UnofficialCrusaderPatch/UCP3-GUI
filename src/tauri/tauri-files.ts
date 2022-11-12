@@ -1,6 +1,7 @@
 import {
   exists as fileExists,
   createDir,
+  readDir as tauriReadDir,
   FsOptions,
   readTextFile as tauriReadTextFile,
   writeTextFile as tauriWriteTextFile,
@@ -9,6 +10,7 @@ import {
   copyFile as tauriCopyFile,
   removeFile as tauriRemoveFile,
   BinaryFileContents,
+  FsDirOptions,
 } from '@tauri-apps/api/fs';
 import {
   fetch,
@@ -31,7 +33,7 @@ import {
   SchemaOptions,
   ToJSOptions,
 } from 'yaml';
-import Result from '../function/renderer/utils/result';
+import Result from 'util/structs/result';
 
 // WARNING: Tauri funcs lie about their return.
 // Void Promises return "null" as result instead of undefined.
@@ -174,6 +176,10 @@ export async function fetchBinary<T>(
 }
 
 // GET FOLDER
+
+export async function readDir(dir: string, options?: FsDirOptions | undefined) {
+  return Result.tryAsync(tauriReadDir, dir, options);
+}
 
 export const getRoamingDataFolder: () => Promise<string> = (() => {
   let roamingFolder: string | null = null;

@@ -1,20 +1,13 @@
 // eslint-disable-next-line max-classes-per-file
 import type { FileEntry } from '@tauri-apps/api/fs';
-import { readTextFile, readDir } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
-import { proxyFsExists, readBinaryFile } from '../../../renderer/utils/file-utils';
+import { readDir } from 'tauri/tauri-files';
 
+import { ConfigEntry, Extension, OptionEntry } from 'config/ucp/common';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
-
-import {
-  ConfigEntry,
-  Definition,
-  Extension,
-  OptionEntry,
-} from '../../../config/common';
 
 const localeSensitiveFields = [
   'description',
@@ -190,14 +183,10 @@ const LOCALE_FILES: { [lang: string]: string } = {
 
 async function getExtensionHandles(ucpFolder: string) {
   const moduleDir = `${ucpFolder}/modules`;
-  const modDirEnts = (await proxyFsExists(moduleDir))
-    ? await readDir(moduleDir)
-    : [];
+  const modDirEnts = (await readDir(moduleDir)).ok().getOrReceive(() => []);
 
   const pluginDir = `${ucpFolder}/plugins`;
-  const pluginDirEnts = (await proxyFsExists(pluginDir))
-    ? await readDir(pluginDir)
-    : [];
+  const pluginDirEnts = (await readDir(pluginDir)).ok().getOrReceive(() => []);
 
   const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(
     (fe) =>

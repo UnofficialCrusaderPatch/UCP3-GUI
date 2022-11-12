@@ -1,5 +1,4 @@
 import { createSearchParams, useSearchParams } from 'react-router-dom';
-import { showError } from '../../tauri/tauri-dialog';
 
 // returns normal search params, but setSearchParams expects object and boolean
 

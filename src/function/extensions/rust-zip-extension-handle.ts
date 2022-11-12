@@ -4,7 +4,7 @@ import {
   getZipEntryAsBinary,
   getZipEntryAsText,
   loadZip,
-} from '../../../renderer/utils/tauri-invoke';
+} from 'tauri/tauri-invoke';
 import ExtensionHandle from './extension-handle';
 
 const REGISTRY = new FinalizationRegistry((zipID: number) => {

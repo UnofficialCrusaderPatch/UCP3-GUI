@@ -1,26 +1,19 @@
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
-import ToggleButton from 'react-bootstrap/ToggleButton';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import {
   Button,
   Col,
   Container,
-  Form,
   ListGroup,
   Row,
   Tooltip,
 } from 'react-bootstrap';
-import { useReducer, useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Extension } from '../../code/config/common';
-import ExtensionDependencySolver from '../../code/config/ExtensionDependencySolver';
+import { Extension } from 'config/ucp/common';
+import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 
-import './ExtensionManager.css';
-import { GlobalState, ExtensionsState } from '../GlobalState';
+import './extension-manager.css';
+import { GlobalState, ExtensionsState } from 'function/global-state';
 
 function ExtensionElement(props: {
   ext: Extension;

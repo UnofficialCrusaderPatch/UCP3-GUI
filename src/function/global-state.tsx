@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { Extension } from '../code/config/common';
+import { Extension } from 'config/ucp/common';
 
 type KeyValueReducerState<Type> = {
   [key: string]: Type;

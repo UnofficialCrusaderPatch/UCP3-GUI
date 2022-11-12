@@ -2,7 +2,7 @@ import {
   addGuiConfigRecentFolder,
   getGuiConfigRecentFolders,
   removeGuiConfigRecentFolder,
-} from './tauri-invoke';
+} from 'tauri/tauri-invoke';
 
 // eslint-disable-next-line import/prefer-default-export
 export class RecentFolderHelper {

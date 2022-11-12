@@ -1,39 +1,24 @@
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import { Tooltip, Form, Overlay } from 'react-bootstrap';
+import { Tooltip, Form } from 'react-bootstrap';
 
-import React, {
-  Fragment,
-  ReactElement,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, Radio } from 'react-radio-group';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { GlobalState } from '../../function/global-state';
-import { ucpBackEnd } from '../../function/fake-backend';
+import { GlobalState } from 'function/global-state';
+import { ucpBackEnd } from 'function/fake-backend';
 
 import type {
   DisplayConfigElement,
   NumberInputDisplayConfigElement,
   OptionEntry,
   SectionDescription,
-} from '../../../code/config/common';
+} from 'config/ucp/common';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',

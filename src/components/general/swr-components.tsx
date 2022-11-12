@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import useSWR, { KeyedMutator } from 'swr';
+import { KeyedMutator } from 'swr';
 import useSWRImmutable from 'swr/immutable'; // only fetches once
 import { Event, UnlistenFn } from '@tauri-apps/api/event';
-import { RecentFolderHelper } from '../../config/gui/recent-folder-helper';
-import { getGuiConfigLanguage, setGuiConfigLanguage } from './tauri-invoke';
-import { onLanguageChange } from './tauri-listen';
+import { onLanguageChange } from 'tauri/tauri-listen';
+import { getGuiConfigLanguage, setGuiConfigLanguage } from 'tauri/tauri-invoke';
+import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import {
   registerForWindowClose,
   unregisterForWindowClose,
-} from '../../tauri/tauri-hooks';
+} from 'tauri/tauri-hooks';
 
 export interface SwrResult<T> {
   data: T | undefined;

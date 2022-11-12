@@ -3,7 +3,7 @@
 // the main (landing) window is ignored)
 
 import { WebviewWindow, WindowOptions } from '@tauri-apps/api/window';
-import { getHexHashOfString } from '../util/scripts/hash';
+import { getHexHashOfString } from 'util/scripts/hash';
 
 const createdWindows: { [key: string]: WebviewWindow } = {};
 

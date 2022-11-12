@@ -1,25 +1,12 @@
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import {
-  Button,
-  Col,
-  Container,
-  Form,
-  ListGroup,
-  Modal,
-  Row,
-} from 'react-bootstrap';
-import ToggleButton from 'react-bootstrap/ToggleButton';
+import { Button, Form, Modal } from 'react-bootstrap';
 
-import { useReducer, useState, createContext, useEffect, useMemo } from 'react';
+import { useReducer, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import languages from 'localization/languages.json';
-import ConfigEditor from './editor/ConfigEditor';
-
-import ExtensionManager from './extensionManager/ExtensionManager';
-
 import {
   activeExtensionsReducer,
   configurationDefaultsReducer,
@@ -28,16 +15,17 @@ import {
   configurationWarningReducer,
   ExtensionsState,
   GlobalState,
-  UIDefinition,
-} from './GlobalState';
-
-import { ucpBackEnd } from './fakeBackend';
-import { DisplayConfigElement, Extension } from '../code/config/common';
+} from 'function/global-state';
+import { ucpBackEnd } from 'function/fake-backend';
+import { DisplayConfigElement, Extension } from 'config/ucp/common';
 import {
   checkForUCP3Updates,
   installUCPFromZip,
-} from './utils/ucp-download-handling';
-import { getGameFolderPath } from './utils/file-utils';
+} from 'function/download/ucp-download-handling';
+import { getGameFolderPath } from 'tauri/tauri-files';
+import ConfigEditor from './config-editor';
+
+import ExtensionManager from './extension-manager';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -66,11 +54,8 @@ let ucpVersion: {
   build: string;
 };
 let isUCP3Installed = false;
-let latestUCP3: unknown;
 
 let extensions: Extension[] = []; // which extension type?
-
-let activeLanguage: string;
 
 export default function Manager() {
   const [searchParams] = useSearchParams();
@@ -81,15 +66,6 @@ export default function Manager() {
     'gui-editor',
     'gui-download',
   ]);
-
-  activeLanguage = (languages as { [lang: string]: string })[i18n.language];
-
-  const warningDefaults = {
-    // 'ucp.o_default_multiplayer_speed': {
-    //   text: 'ERROR: Conflicting options selected: test warning',
-    //   level: 'error',
-    // },
-  };
 
   const [configurationWarnings, setConfigurationWarnings] = useReducer(
     configurationWarningReducer,
@@ -142,7 +118,6 @@ export default function Manager() {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
   const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] =
     useState<string>(t('gui-editor:overview.download.install'));
   const [guiUpdateStatus, setGuiUpdateStatus] = useState('');

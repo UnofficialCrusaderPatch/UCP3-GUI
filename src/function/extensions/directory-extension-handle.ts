@@ -1,9 +1,4 @@
-import { readTextFile, readDir } from '@tauri-apps/api/fs';
-
-import {
-  proxyFsExists,
-  readBinaryFile,
-} from '../../../renderer/utils/file-utils';
+import { proxyFsExists, readBinaryFile, readTextFile } from 'tauri/tauri-files';
 import ExtensionHandle from './extension-handle';
 
 class DirectoryExtensionHandle implements ExtensionHandle {
@@ -21,11 +16,9 @@ class DirectoryExtensionHandle implements ExtensionHandle {
   async getTextContents(path: string): Promise<string> {
     const p = `${this.path}/${path}`;
     if (await proxyFsExists(p)) {
-      const result = await readTextFile(p);
-      if (result === undefined) {
-        throw new Error(`Error while reading text file: ${p}`);
-      }
-      return result;
+      return (await readTextFile(p))
+        .mapErr((error) => new Error(`Error while reading text file: ${error}`))
+        .getOrThrow();
     }
     throw new Error(`${p} not found`);
   }

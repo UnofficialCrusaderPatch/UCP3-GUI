@@ -1,17 +1,8 @@
 // This file fake the backend calls. They become synchronous, though.
 
 import { downloadDir } from '@tauri-apps/api/path';
-import {
-  BinaryFileContents,
-  readTextFile,
-  writeTextFile,
-  writeBinaryFile,
-} from '@tauri-apps/api/fs';
-import {
-  open as dialogOpen,
-  save as dialogSave,
-  ask as dialogAsk,
-} from '@tauri-apps/api/dialog';
+import { writeTextFile, writeBinaryFile, loadYaml } from 'tauri/tauri-files';
+import { open as dialogOpen, askInfo } from 'tauri/tauri-dialog';
 import { getName, getVersion } from '@tauri-apps/api/app';
 
 import yaml from 'yaml';
@@ -22,15 +13,15 @@ import axios from 'axios';
 
 import semver from 'semver';
 import { dialog } from '@tauri-apps/api';
-import { UCP3_REPOS_MACHINE_TOKEN } from '../code/main/versions/github';
 import {
   DisplayConfigElement,
   Extension,
   OptionEntry,
   SectionDescription,
-} from '../code/config/common';
-import { UIDefinition } from './global-state';
-import { Discovery } from '../code/main/framework/discovery';
+} from 'config/ucp/common';
+import { BinaryFileContents } from '@tauri-apps/api/fs';
+import { UCP3_REPOS_MACHINE_TOKEN } from './download/github';
+import { Discovery } from './extensions/discovery';
 import { proxyFsExists } from '../tauri/tauri-files';
 import { createNewWindow } from '../tauri/tauri-window';
 
@@ -111,9 +102,9 @@ export const ucpBackEnd = {
 
     const curVer = await getVersion();
     if (semver.lt(curVer, latestJSON.version)) {
-      const dialogResult = await dialogAsk(
+      const dialogResult = await askInfo(
         `Do you want to download the latest GUI version?\n\n${latestJSON.version}`,
-        { title: 'Confirm', type: 'info' }
+        'Confirm'
       );
 
       if (dialogResult === true) {
@@ -181,7 +172,7 @@ export const ucpBackEnd = {
   async getUCPVersion(gameFolder: string) {
     const path = `${gameFolder}/ucp-version.yml`;
     if (await proxyFsExists(path)) {
-      return yaml.parse(await readTextFile(path));
+      return (await loadYaml(path)).getOrThrow();
     }
     return {};
   },
@@ -296,7 +287,7 @@ export const ucpBackEnd = {
           options: { [key: string]: unknown };
         };
       };
-    } = yaml.parse(await readTextFile(filePath as string)); // will only be one
+    } = (await loadYaml(filePath as string)).getOrThrow(); // will only be one
 
     if (config.modules === undefined && config.plugins === undefined) {
       return {

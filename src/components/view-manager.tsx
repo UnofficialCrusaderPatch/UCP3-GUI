@@ -5,9 +5,9 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 
-import App from './App';
+import App from './landing/app';
 import Manager from './editor/manager';
-import { useLanguage } from './utils/swr-components';
+import { useLanguage } from './general/swr-components';
 
 const pageFunctions: { [key: string]: JSX.Element } = {
   landing: <App />,

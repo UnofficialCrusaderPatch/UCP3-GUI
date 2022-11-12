@@ -103,3 +103,15 @@ export async function confirmError(
 ): Promise<boolean> {
   return confirmMessage(message, title, 'error');
 }
+
+export async function open(
+  options?: dialog.OpenDialogOptions | undefined
+): Promise<string | string[] | null> {
+  return dialog.open(options);
+}
+
+export async function save(
+  options?: dialog.SaveDialogOptions | undefined
+): Promise<string> {
+  return dialog.save(options);
+}

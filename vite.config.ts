@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitejs.dev/config/
 // https://tauri.app/v1/guides/getting-started/setup/vite/
@@ -22,5 +23,5 @@ export default defineConfig({
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
   },
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths()],
 })

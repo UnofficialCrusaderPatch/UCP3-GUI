@@ -4,7 +4,7 @@
 
 import { TauriEvent } from '@tauri-apps/api/event';
 import { WebviewWindow, WindowOptions } from '@tauri-apps/api/window';
-import { getHexHashOfString } from '../util/scripts/hash';
+import { getHexHashOfString } from 'util/scripts/hash';
 
 const createdWindows: { [key: string]: WebviewWindow } = {};
 

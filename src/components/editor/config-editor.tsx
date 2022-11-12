@@ -1,41 +1,19 @@
 /* eslint-disable react/no-unescaped-entities */
 /* global CreateUIElement */
 
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav';
-
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
 import { Form } from 'react-bootstrap';
 
-import React, {
-  Component,
-  useContext,
-  useEffect,
-  useReducer,
-  useState,
-} from 'react';
-import {
-  open as dialogOpen,
-  save as dialogSave,
-  ask as dialogAsk,
-} from '@tauri-apps/api/dialog';
+import { useContext, useEffect, useState } from 'react';
+import { open as dialogOpen, save as dialogSave } from 'tauri/tauri-dialog';
 
-import './ConfigEditor.css';
+import './config-editor.css';
 
 import { useTranslation } from 'react-i18next';
-import { escape } from 'querystring';
-import { GlobalState } from '../GlobalState';
-import { ucpBackEnd } from '../fakeBackend';
-import { UIFactory } from './factory/UIElements';
-import { Extension } from '../../code/config/common';
-import { DependencyStatement } from '../../code/config/DependencyStatement';
+import { GlobalState } from 'function/global-state';
+import { ucpBackEnd } from 'function/fake-backend';
+import { Extension } from 'config/ucp/common';
+import { DependencyStatement } from 'config/ucp/dependency-statement';
+import { UIFactory } from './ui-elements';
 
 function saveConfig(
   configuration: { [key: string]: unknown },

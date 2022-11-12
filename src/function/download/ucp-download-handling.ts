@@ -1,26 +1,24 @@
 import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { TFunction } from 'react-i18next';
-import {
-  checkForLatestUCP3DevReleaseUpdate,
-  UCP3_REPOS_MACHINE_TOKEN,
-} from '../../code/main/versions/github';
+import { askInfo, showWarning } from 'tauri/tauri-dialog';
 import {
   copyFile,
   fetchBinary,
   getLocalDataFolder,
   loadYaml,
   proxyFsExists,
-  readBinaryFile,
   recursiveCreateDir,
   removeFile,
   writeBinaryFile,
   Error as FileUtilError,
   resolvePath,
-} from '../../tauri/tauri-files';
-import { askInfo, showInfo, showWarning } from '../../tauri/tauri-dialog';
-import { extractZipToPath } from './tauri-invoke';
-import Result from './result';
-import Option from '../../util/structs/option';
+} from 'tauri/tauri-files';
+import { extractZipToPath } from 'tauri/tauri-invoke';
+import Result from 'util/structs/result';
+import {
+  checkForLatestUCP3DevReleaseUpdate,
+  UCP3_REPOS_MACHINE_TOKEN,
+} from './github';
 
 export async function installUCPFromZip(
   zipFilePath: string,

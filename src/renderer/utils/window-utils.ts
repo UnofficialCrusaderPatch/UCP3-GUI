@@ -2,6 +2,7 @@
 // currently it will just take care that only of window can be crated
 // the main (landing) window is ignored)
 
+import { TauriEvent } from '@tauri-apps/api/event';
 import { WebviewWindow, WindowOptions } from '@tauri-apps/api/window';
 import { getHexHashOfString } from './general-utils';
 
@@ -42,9 +43,12 @@ export async function createNewWindow(
   );
 
   // also expects close to go through
-  const unlistenFunc = await webview.onCloseRequested(() => {
-    delete createdWindows[windowName];
-    unlistenFunc();
-  });
+  const unlistenFunc = await webview.listen(
+    TauriEvent.WINDOW_CLOSE_REQUESTED,
+    () => {
+      delete createdWindows[windowName];
+      unlistenFunc();
+    }
+  );
   createdWindows[windowName] = webview;
 }

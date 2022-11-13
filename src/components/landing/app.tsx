@@ -6,7 +6,7 @@ import './app.css';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import LanguageSelect from './language-select';
-import { useRecentFolders } from '../general/swr-components';
+import { useRecentFolders } from '../general/swr-hooks';
 
 function Landing() {
   const [landingState, setLandingState] = useState({

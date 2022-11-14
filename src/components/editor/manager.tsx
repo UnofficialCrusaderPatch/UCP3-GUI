@@ -69,6 +69,8 @@ export default function Manager() {
     'gui-download',
   ]);
 
+  const [overviewButtonActive, setOverviewButtonActive] = useState(true);
+
   const [configurationWarnings, setConfigurationWarnings] = useReducer(
     configurationWarningReducer,
     {}
@@ -120,9 +122,6 @@ export default function Manager() {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
-  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] =
-    useState<string>(t('gui-editor:overview.download.install'));
-  const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
   const [initDone, setInitState] = useState(false);
   useEffect(() => {
@@ -221,14 +220,16 @@ export default function Manager() {
                   : t('gui-editor:overview.not.installed')}
               </div>
               <StateButton
-                buttonActive
+                buttonActive={overviewButtonActive}
                 buttonValues={{
-                  idle: t('gui-editor:overview.download.install'),
+                  idle: t('gui-editor:overview.update.idle'),
                   running: t('gui-editor:overview.update.running'),
-                  success: t('gui-editor:overview.update.done'),
+                  success: t('gui-editor:overview.update.success'),
                   failed: t('gui-editor:overview.update.failed'),
                 }}
                 buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
                 func={async (stateUpdate) => {
                   const updateResult = await checkForUCP3Updates(
                     currentFolder,
@@ -246,15 +247,18 @@ export default function Manager() {
                 }}
               />
               <StateButton
-                buttonActive
+                buttonActive={overviewButtonActive}
                 buttonValues={{
-                  idle: t('gui-editor:overview.install.from.zip'),
-                  running: t('gui-editor:overview.update.running'),
-                  success: t('gui-editor:overview.update.done'),
-                  failed: t('gui-editor:overview.update.failed'),
+                  idle: t('gui-editor:overview.zip.idle'),
+                  running: t('gui-editor:overview.zip.running'),
+                  success: t('gui-editor:overview.zip.success'),
+                  failed: t('gui-editor:overview.zip.failed'),
                 }}
                 buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
                 func={async (stateUpdate) => {
+                  setOverviewButtonActive(false);
                   const zipFilePath = await ucpBackEnd.openFileDialog(
                     currentFolder,
                     [
@@ -274,6 +278,7 @@ export default function Manager() {
                     t
                   );
                   zipInstallResult.ok().ifPresent(() => setShow(true));
+                  setOverviewButtonActive(true);
                   return zipInstallResult
                     .mapOk(() => '')
                     .mapErr((err) => String(err));
@@ -308,23 +313,27 @@ export default function Manager() {
               <StateButton
                 buttonActive={false}
                 buttonValues={{
-                  idle: t('gui-editor:overview.uninstall'),
-                  running: '',
-                  success: '',
-                  failed: '',
+                  idle: t('gui-editor:overview.uninstall.idle'),
+                  running: 'gui-editor:overview.uninstall.running',
+                  success: 'gui-editor:overview.uninstall.success',
+                  failed: 'gui-editor:overview.uninstall.failed',
                 }}
                 buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
                 func={async (stateUpdate) => Result.emptyOk()}
               />
               <StateButton
-                buttonActive
+                buttonActive={overviewButtonActive}
                 buttonValues={{
-                  idle: t('gui-editor:overview.update.gui.check'),
+                  idle: t('gui-editor:overview.update.gui.idle'),
                   running: t('gui-editor:overview.update.gui.running'),
                   success: t('gui-editor:overview.update.gui.success'),
                   failed: t('gui-editor:overview.update.gui.failed'),
                 }}
                 buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
                 func={async (stateUpdate) =>
                   Result.tryAsync(() =>
                     ucpBackEnd.checkForGUIUpdates(stateUpdate)

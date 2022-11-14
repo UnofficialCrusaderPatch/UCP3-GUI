@@ -7,7 +7,7 @@ import {
 
 import App from './landing/app';
 import Manager from './editor/manager';
-import { useLanguage } from './general/swr-components';
+import { useLanguage } from './general/swr-hooks';
 
 const pageFunctions: { [key: string]: JSX.Element } = {
   landing: <App />,

@@ -63,6 +63,10 @@ export default class Result<OK, ERR> {
     throw this.err().get();
   }
 
+  consider<T>(okFunc: (ok: OK) => T, errFunc: (err: ERR) => T) {
+    return this.isOk() ? okFunc(this.ok().get()) : errFunc(this.err().get());
+  }
+
   //* factories *//
 
   static ok<OK, ERR>(content: OK): Result<OK, ERR> {

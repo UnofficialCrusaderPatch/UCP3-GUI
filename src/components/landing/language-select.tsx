@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import languages from 'localization/languages.json';
-import { Language, useLanguage } from '../general/swr-components';
+import { Language, useLanguage } from '../general/swr-hooks';
 
 export default function LanguageSelect({
   closeLangSelect,

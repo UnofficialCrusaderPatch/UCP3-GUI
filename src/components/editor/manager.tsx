@@ -23,6 +23,8 @@ import {
   installUCPFromZip,
 } from 'function/download/ucp-download-handling';
 import { getGameFolderPath } from 'tauri/tauri-files';
+import StateButton from 'components/general/state-button';
+import Result from 'util/structs/result';
 import ConfigEditor from './config-editor';
 
 import ExtensionManager from './extension-manager';
@@ -66,6 +68,8 @@ export default function Manager() {
     'gui-editor',
     'gui-download',
   ]);
+
+  const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
   const [configurationWarnings, setConfigurationWarnings] = useReducer(
     configurationWarningReducer,
@@ -118,9 +122,6 @@ export default function Manager() {
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
-  const [checkForUpdatesButtonText, setCheckForUpdatesButtonText] =
-    useState<string>(t('gui-editor:overview.download.install'));
-  const [guiUpdateStatus, setGuiUpdateStatus] = useState('');
 
   const [initDone, setInitState] = useState(false);
   useEffect(() => {
@@ -218,62 +219,72 @@ export default function Manager() {
                     } - ${(ucpVersion.sha || '').substring(0, 8)}`
                   : t('gui-editor:overview.not.installed')}
               </div>
-              <div className="m-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={async (event) => {
-                    setCheckForUpdatesButtonText(
-                      t('gui-editor:overview.update.running')
-                    );
-                    const updateResult = await checkForUCP3Updates(
-                      currentFolder,
-                      (status) => setCheckForUpdatesButtonText(status),
-                      t
-                    );
-                    if (
-                      updateResult.update === true &&
-                      updateResult.installed === true
-                    ) {
-                      setShow(true);
-                      setCheckForUpdatesButtonText(
-                        t('gui-editor:overview.update.done')
-                      );
-                    }
-                  }}
-                >
-                  {checkForUpdatesButtonText}
-                </button>
-              </div>
-              <div className="m-3">
-                <Button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={async () => {
-                    const zipFilePath = await ucpBackEnd.openFileDialog(
-                      currentFolder,
-                      [
-                        { name: 'Zip files', extensions: ['zip'] },
-                        { name: 'All files', extensions: ['*'] },
-                      ]
-                    );
-
-                    if (zipFilePath === '') return;
-
-                    // TODO: improve feedback
-                    const zipInstallResult = await installUCPFromZip(
-                      zipFilePath,
-                      currentFolder,
-                      // can be used to transform -> although splitting into more components might be better
-                      (status) => console.log(status),
-                      t
-                    );
-
+              <StateButton
+                buttonActive={overviewButtonActive}
+                buttonValues={{
+                  idle: t('gui-editor:overview.update.idle'),
+                  running: t('gui-editor:overview.update.running'),
+                  success: t('gui-editor:overview.update.success'),
+                  failed: t('gui-editor:overview.update.failed'),
+                }}
+                buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
+                func={async (stateUpdate) => {
+                  const updateResult = await checkForUCP3Updates(
+                    currentFolder,
+                    (status) => stateUpdate(status),
+                    t
+                  );
+                  if (
+                    updateResult.update === true &&
+                    updateResult.installed === true
+                  ) {
                     setShow(true);
-                  }}
-                >
-                  {t('gui-editor:overview.install.from.zip')}
-                </Button>
+                    return Result.ok('');
+                  }
+                  return Result.emptyErr();
+                }}
+              />
+              <StateButton
+                buttonActive={overviewButtonActive}
+                buttonValues={{
+                  idle: t('gui-editor:overview.zip.idle'),
+                  running: t('gui-editor:overview.zip.running'),
+                  success: t('gui-editor:overview.zip.success'),
+                  failed: t('gui-editor:overview.zip.failed'),
+                }}
+                buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
+                func={async (stateUpdate) => {
+                  setOverviewButtonActive(false);
+                  const zipFilePath = await ucpBackEnd.openFileDialog(
+                    currentFolder,
+                    [
+                      { name: 'Zip files', extensions: ['zip'] },
+                      { name: 'All files', extensions: ['*'] },
+                    ]
+                  );
+
+                  if (zipFilePath === '') return Result.err('');
+
+                  // TODO: improve feedback
+                  const zipInstallResult = await installUCPFromZip(
+                    zipFilePath,
+                    currentFolder,
+                    // can be used to transform -> although splitting into more components might be better
+                    (status) => stateUpdate(status),
+                    t
+                  );
+                  zipInstallResult.ok().ifPresent(() => setShow(true));
+                  setOverviewButtonActive(true);
+                  return zipInstallResult
+                    .mapOk(() => '')
+                    .mapErr((err) => String(err));
+                }}
+              />
+              <div className="m-3">
                 <Modal show={show} onHide={handleClose} className="text-dark">
                   <Modal.Header closeButton>
                     <Modal.Title>
@@ -299,21 +310,36 @@ export default function Manager() {
                   </Modal.Footer>
                 </Modal>
               </div>
-              <div className="m-3">
-                <button type="button" className="btn btn-primary disabled">
-                  {t('gui-editor:overview.uninstall')}
-                </button>
-              </div>
-              <div className="m-3">
-                <Button
-                  onClick={(event) => {
-                    ucpBackEnd.checkForGUIUpdates(setGuiUpdateStatus);
-                  }}
-                >
-                  {t('gui-editor:overview.update.gui.check')}
-                </Button>
-                <span className="mx-1">{guiUpdateStatus}</span>
-              </div>
+              <StateButton
+                buttonActive={false}
+                buttonValues={{
+                  idle: t('gui-editor:overview.uninstall.idle'),
+                  running: 'gui-editor:overview.uninstall.running',
+                  success: 'gui-editor:overview.uninstall.success',
+                  failed: 'gui-editor:overview.uninstall.failed',
+                }}
+                buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
+                func={async (stateUpdate) => Result.emptyOk()}
+              />
+              <StateButton
+                buttonActive={overviewButtonActive}
+                buttonValues={{
+                  idle: t('gui-editor:overview.update.gui.idle'),
+                  running: t('gui-editor:overview.update.gui.running'),
+                  success: t('gui-editor:overview.update.gui.success'),
+                  failed: t('gui-editor:overview.update.gui.failed'),
+                }}
+                buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
+                func={async (stateUpdate) =>
+                  Result.tryAsync(() =>
+                    ucpBackEnd.checkForGUIUpdates(stateUpdate)
+                  )
+                }
+              />
               <Form className="m-3 d-none">
                 <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
               </Form>

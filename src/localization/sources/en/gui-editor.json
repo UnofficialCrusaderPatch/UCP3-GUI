@@ -3,14 +3,27 @@
         "folder.version": "UCP version in this folder:",
         "title": "Overview",
         "not.installed": "not installed",
-        "install.from.zip": "Install UCP to folder from Zip",
         "require.reload.text": "The installation process requires a reload, reload now?",
-        "download.install": "Download and install the latest UCP version",
-        "uninstall": "Uninstall UCP from this folder",
+        "uninstall": {
+            "idle": "Uninstall UCP from this folder"
+        },
+        "zip": {
+            "idle": "Install UCP to folder from Zip",
+            "running": "Extracting...",
+            "success": "Extracted!",
+            "failed": "Failed!"
+        },
         "update": {
-            "gui.check": "Check for GUI updates",
+            "idle": "Download and install the latest UCP version",
             "running": "Updating...",
-            "done": "Updated!"
+            "success": "Updated!",
+            "failed": "Failed!",
+            "gui": {
+                "idle": "Check for GUI updates",
+                "running": "Updating...",
+                "success": "Updated!",
+                "failed": "Failed!"
+            }
         }
     },
     "footer": {

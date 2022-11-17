@@ -19,7 +19,7 @@ import {
   checkForLatestUCP3DevReleaseUpdate,
   UCP3_REPOS_MACHINE_TOKEN,
 } from './github';
-import { loadUCPVersion } from './ucp-version';
+import { loadUCPVersion } from '../ucp/ucp-version';
 
 export async function installUCPFromZip(
   zipFilePath: string,

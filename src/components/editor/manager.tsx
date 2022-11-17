@@ -28,7 +28,7 @@ import {
   getEmptyUCPVersion,
   loadUCPVersion,
   UCPVersion,
-} from 'function/download/ucp-version';
+} from 'function/ucp/ucp-version';
 import ConfigEditor from './config-editor';
 
 import ExtensionManager from './extension-manager';

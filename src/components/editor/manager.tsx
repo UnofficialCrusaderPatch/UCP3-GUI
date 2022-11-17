@@ -6,7 +6,6 @@ import { useReducer, useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import languages from 'localization/languages.json';
 import {
   activeExtensionsReducer,
   configurationDefaultsReducer,
@@ -25,6 +24,11 @@ import {
 import { getGameFolderPath } from 'tauri/tauri-files';
 import StateButton from 'components/general/state-button';
 import Result from 'util/structs/result';
+import {
+  getEmptyUCPVersion,
+  loadUCPVersion,
+  UCPVersion,
+} from 'function/download/ucp-version';
 import ConfigEditor from './config-editor';
 
 import ExtensionManager from './extension-manager';
@@ -48,13 +52,7 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-let ucpVersion: {
-  major: number;
-  minor: number;
-  patch: number;
-  sha: string;
-  build: string;
-};
+let ucpVersion: UCPVersion;
 let isUCP3Installed = false;
 
 let extensions: Extension[] = []; // which extension type?
@@ -140,8 +138,12 @@ export default function Manager() {
         const optionEntries = ucpBackEnd.extensionsToOptionEntries(extensions);
         const defaults = getConfigDefaults(optionEntries);
 
-        ucpVersion = await ucpBackEnd.getUCPVersion(currentFolder);
-        if (ucpVersion.major !== undefined) isUCP3Installed = true;
+        ucpVersion = (await loadUCPVersion(currentFolder))
+          .ok()
+          .getOrReceive(getEmptyUCPVersion);
+        ucpVersion.major.ifPresent(() => {
+          isUCP3Installed = true;
+        });
         setConfiguration({
           type: 'reset',
           value: defaults,
@@ -214,9 +216,7 @@ export default function Manager() {
               <div className="m-3">
                 {t('gui-editor:overview.folder.version')}{' '}
                 {isUCP3Installed
-                  ? `${ucpVersion.major}.${ucpVersion.minor}.${
-                      ucpVersion.patch
-                    } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                  ? ucpVersion.toString()
                   : t('gui-editor:overview.not.installed')}
               </div>
               <StateButton
@@ -380,9 +380,7 @@ export default function Manager() {
                 <span className="px-2">
                   {t('gui-editor:footer.version.ucp', {
                     version: isUCP3Installed
-                      ? `${ucpVersion.major}.${ucpVersion.minor}.${
-                          ucpVersion.patch
-                        } - ${(ucpVersion.sha || '').substring(0, 8)}`
+                      ? ucpVersion.toString()
                       : t('gui-editor:footer.version.no.ucp'),
                   })}
                 </span>

@@ -8,6 +8,7 @@ import {
   readBinaryFile as tauriReadBinaryFile,
   writeBinaryFile as tauriWriteBinaryFile,
   copyFile as tauriCopyFile,
+  renameFile as tauriRenameFile,
   removeFile as tauriRemoveFile,
   BinaryFileContents,
   FsDirOptions,
@@ -108,6 +109,13 @@ export async function copyFile(
   destination: string
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(tauriCopyFile, source, destination);
+}
+
+export async function renameFile(
+  oldPath: string,
+  newPath: string
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(tauriRenameFile, oldPath, newPath);
 }
 
 export async function removeFile(path: string): Promise<Result<void, Error>> {

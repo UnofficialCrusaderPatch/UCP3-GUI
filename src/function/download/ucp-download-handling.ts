@@ -5,7 +5,6 @@ import {
   copyFile,
   fetchBinary,
   getLocalDataFolder,
-  loadYaml,
   proxyFsExists,
   recursiveCreateDir,
   removeFile,
@@ -15,10 +14,12 @@ import {
 } from 'tauri/tauri-files';
 import { extractZipToPath } from 'tauri/tauri-invoke';
 import Result from 'util/structs/result';
+import Option from 'util/structs/option';
 import {
   checkForLatestUCP3DevReleaseUpdate,
   UCP3_REPOS_MACHINE_TOKEN,
 } from './github';
+import { loadUCPVersion } from './ucp-version';
 
 export async function installUCPFromZip(
   zipFilePath: string,
@@ -73,10 +74,10 @@ export async function checkForUCP3Updates(
   };
 
   statusCallback(t('gui-download:ucp.version.yaml.load'));
-  const sha = (await loadYaml(await resolvePath(gameFolder, 'ucp-version.yml')))
+  const sha = (await loadUCPVersion(gameFolder))
     .ok()
-    .map((content) => content.sha as string | undefined)
-    .notUndefinedOrNull()
+    .map((version) => version.sha)
+    .getOrReceive(Option.ofEmpty)
     .getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));

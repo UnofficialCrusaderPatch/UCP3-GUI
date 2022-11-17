@@ -169,14 +169,6 @@ export const ucpBackEnd = {
     window.location.reload();
   },
 
-  async getUCPVersion(gameFolder: string) {
-    const path = `${gameFolder}/ucp-version.yml`;
-    if (await proxyFsExists(path)) {
-      return (await loadYaml(path)).getOrThrow();
-    }
-    return {};
-  },
-
   async getExtensions(gameFolder: string, locale?: string) {
     return Discovery.discoverExtensions(gameFolder, locale);
     // Premature optimization is the root of all evil.

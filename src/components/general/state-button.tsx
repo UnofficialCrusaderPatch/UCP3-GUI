@@ -48,7 +48,7 @@ export default function StateButton(props: StateButtonProps) {
       setDivState(null);
       setButtonValue(buttonValues.idle);
     },
-    active && buttonValue !== buttonValues.idle ? 3000 : null
+    active && buttonValue !== buttonValues.idle ? 5000 : null
   );
 
   return (

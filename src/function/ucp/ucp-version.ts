@@ -1,4 +1,4 @@
-import { loadYaml, Error } from 'tauri/tauri-files';
+import { loadYaml, Error, resolvePath } from 'tauri/tauri-files';
 import Result from 'util/structs/result';
 import Option from 'util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
@@ -77,6 +77,6 @@ export function getEmptyUCPVersion(): UCPVersion {
 export async function loadUCPVersion(
   gameFolder: string
 ): Promise<Result<UCPVersion, Error>> {
-  const path = `${gameFolder}/ucp-version.yml`;
+  const path = await resolvePath(gameFolder, 'ucp-version.yml');
   return (await loadYaml(path)).mapOk((yaml) => new UCPVersion(yaml));
 }

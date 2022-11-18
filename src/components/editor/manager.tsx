@@ -29,6 +29,7 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
+import { getUCPState, UCPState } from 'function/ucp/ucp-state';
 import ConfigEditor from './config-editor';
 
 import ExtensionManager from './extension-manager';
@@ -53,7 +54,15 @@ function getConfigDefaults(yml: unknown[]) {
 }
 
 let ucpVersion: UCPVersion;
-let isUCP3Installed = false;
+let ucpState: UCPState;
+const ucpStateArray = [
+  'wrong.folder',
+  'not.installed',
+  'active',
+  'inactive',
+  'bink.version.differences',
+  'unknown',
+];
 
 let extensions: Extension[] = []; // which extension type?
 
@@ -141,9 +150,9 @@ export default function Manager() {
         ucpVersion = (await loadUCPVersion(currentFolder))
           .ok()
           .getOrReceive(getEmptyUCPVersion);
-        ucpVersion.major.ifPresent(() => {
-          isUCP3Installed = true;
-        });
+        ucpState = (await Result.tryAsync(getUCPState, currentFolder))
+          .ok()
+          .getOrElse(UCPState.UNKNOWN);
         setConfiguration({
           type: 'reset',
           value: defaults,
@@ -203,6 +212,24 @@ export default function Manager() {
     return <p>{t('gui-general:loading')}</p>;
   }
 
+  let ucpVersionString;
+  let ucpFooterVersionString;
+  switch (ucpState) {
+    case UCPState.NOT_INSTALLED:
+      ucpVersionString = t('gui-editor:overview.not.installed');
+      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+      break;
+    case UCPState.ACTIVE:
+    case UCPState.INACTIVE:
+      ucpVersionString = ucpVersion.toString();
+      ucpFooterVersionString = ucpVersionString;
+      break;
+    default:
+      ucpVersionString = t('gui-editor:overview.unknown.state');
+      ucpFooterVersionString = t('gui-editor:footer.version.unknown');
+      break;
+  }
+
   return (
     <GlobalState.Provider value={globalStateValue}>
       <div className="editor-app m-3 fs-7">
@@ -214,10 +241,7 @@ export default function Manager() {
           >
             <Tab eventKey="overview" title={t('gui-editor:overview.title')}>
               <div className="m-3">
-                {t('gui-editor:overview.folder.version')}{' '}
-                {isUCP3Installed
-                  ? ucpVersion.toString()
-                  : t('gui-editor:overview.not.installed')}
+                {t('gui-editor:overview.folder.version')} {ucpVersionString}
               </div>
               <StateButton
                 buttonActive={overviewButtonActive}
@@ -379,14 +403,14 @@ export default function Manager() {
                 </span>
                 <span className="px-2">
                   {t('gui-editor:footer.version.ucp', {
-                    version: isUCP3Installed
-                      ? ucpVersion.toString()
-                      : t('gui-editor:footer.version.no.ucp'),
+                    version: ucpFooterVersionString,
                   })}
                 </span>
                 <span className="px-2">
-                  {t('gui-editor:footer.ucp.active', {
-                    active: isUCP3Installed,
+                  {t('gui-editor:footer.state.prefix', {
+                    state: t(
+                      `gui-editor:footer.state.${ucpStateArray[ucpState]}`
+                    ),
                   })}
                 </span>
               </div>

@@ -3,6 +3,7 @@
         "folder.version": "UCP version in this folder:",
         "title": "Overview",
         "not.installed": "not installed",
+        "unknown.state": "unknown state",
         "require.reload.text": "The installation process requires a reload, reload now?",
         "uninstall": {
             "idle": "Uninstall UCP from this folder"
@@ -31,9 +32,18 @@
         "version": {
             "gui": "GUI version: {{version}}",
             "ucp": "UCP version: {{version}}",
-            "no.ucp": "not installed"
+            "no.ucp": "not installed",
+            "unknown": "unknown state"
         },
-        "ucp.active": "UCP active: {{active}}"
+        "state": {
+            "prefix": "UCP active: {{state}}",
+            "wrong.folder": "wrong folder",
+            "not.installed": "not installed",
+            "active": "active",
+            "inactive": "inactive",
+            "bink.version.differences": "bink version differences",
+            "unknown": "unknown"
+        }
     },
     "extensions": {
         "title": "Extensions",

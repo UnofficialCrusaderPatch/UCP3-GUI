@@ -1,12 +1,13 @@
 {
     "bink": {
         "copy": {
-            "real": "Copy binkw32.dll to binkw32_ucp.dll.",
-            "real.error": "Failed to properly copy binkw32: {{error}}",
-            "ucp": "Copy binkw32_ucp.dll to binkw32.dll.",
+            "error": "Failed to properly copy binkw32: {{error}}",
+            "real.error": "Failed to properly copy binkw32_real: {{error}}",
             "ucp.error": "Failed to properly copy binkw32_ucp: {{error}}"
         },
-        "missing": "binkw32.dll does not exist in this directory, are we in a game directory?"
+        "missing": "binkw32.dll does not exist in this directory, are we in a game directory?",
+        "unknown.state": "The binkw32.dlls in the game folder are in an unknown state.",
+        "not.installed": "There was no UCP installation found."
     },
     "zip": {
         "read": "Reading zip-file.",

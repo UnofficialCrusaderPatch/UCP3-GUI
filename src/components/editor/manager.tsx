@@ -29,7 +29,12 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
-import { getUCPState, UCPState } from 'function/ucp/ucp-state';
+import {
+  activateUCP,
+  deactivateUCP,
+  getUCPState,
+  UCPState,
+} from 'function/ucp/ucp-state';
 import ConfigEditor from './config-editor';
 
 import ExtensionManager from './extension-manager';
@@ -54,7 +59,6 @@ function getConfigDefaults(yml: unknown[]) {
 }
 
 let ucpVersion: UCPVersion;
-let ucpState: UCPState;
 const ucpStateArray = [
   'wrong.folder',
   'not.installed',
@@ -77,6 +81,7 @@ export default function Manager() {
   ]);
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
+  const [ucpState, setUCPState] = useState(UCPState.UNKNOWN);
 
   const [configurationWarnings, setConfigurationWarnings] = useReducer(
     configurationWarningReducer,
@@ -150,9 +155,11 @@ export default function Manager() {
         ucpVersion = (await loadUCPVersion(currentFolder))
           .ok()
           .getOrReceive(getEmptyUCPVersion);
-        ucpState = (await Result.tryAsync(getUCPState, currentFolder))
-          .ok()
-          .getOrElse(UCPState.UNKNOWN);
+        setUCPState(
+          (await Result.tryAsync(getUCPState, currentFolder))
+            .ok()
+            .getOrElse(UCPState.UNKNOWN)
+        );
         setConfiguration({
           type: 'reset',
           value: defaults,
@@ -212,21 +219,29 @@ export default function Manager() {
     return <p>{t('gui-general:loading')}</p>;
   }
 
+  let activateButtonString;
   let ucpVersionString;
   let ucpFooterVersionString;
   switch (ucpState) {
     case UCPState.NOT_INSTALLED:
       ucpVersionString = t('gui-editor:overview.not.installed');
       ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+      activateButtonString = t('gui-editor:overview.activate.not.installed');
       break;
     case UCPState.ACTIVE:
+      ucpVersionString = ucpVersion.toString();
+      ucpFooterVersionString = ucpVersionString;
+      activateButtonString = t('gui-editor:overview.activate.do.deactivate');
+      break;
     case UCPState.INACTIVE:
       ucpVersionString = ucpVersion.toString();
       ucpFooterVersionString = ucpVersionString;
+      activateButtonString = t('gui-editor:overview.activate.do.activate');
       break;
     default:
       ucpVersionString = t('gui-editor:overview.unknown.state');
       ucpFooterVersionString = t('gui-editor:footer.version.unknown');
+      activateButtonString = t('gui-editor:overview.activate.unknown');
       break;
   }
 
@@ -243,6 +258,39 @@ export default function Manager() {
               <div className="m-3">
                 {t('gui-editor:overview.folder.version')} {ucpVersionString}
               </div>
+              <StateButton
+                buttonActive={
+                  overviewButtonActive &&
+                  (ucpState === UCPState.ACTIVE ||
+                    ucpState === UCPState.INACTIVE)
+                }
+                buttonValues={{
+                  idle: activateButtonString,
+                  running: activateButtonString,
+                  success: activateButtonString,
+                  failed: activateButtonString,
+                }}
+                buttonVariant="primary"
+                funcBefore={() => setOverviewButtonActive(false)}
+                funcAfter={() => setOverviewButtonActive(true)}
+                func={async () => {
+                  let result = Result.emptyOk<string>();
+                  if (ucpState === UCPState.ACTIVE) {
+                    result = (await deactivateUCP(currentFolder)).mapErr(
+                      String
+                    );
+                    result.ok().ifPresent(() => {
+                      setUCPState(UCPState.INACTIVE);
+                    });
+                  } else if (ucpState === UCPState.INACTIVE) {
+                    result = (await activateUCP(currentFolder)).mapErr(String);
+                    result.ok().ifPresent(() => {
+                      setUCPState(UCPState.ACTIVE);
+                    });
+                  }
+                  return result;
+                }}
+              />
               <StateButton
                 buttonActive={overviewButtonActive}
                 buttonValues={{
@@ -265,6 +313,7 @@ export default function Manager() {
                     updateResult.installed === true
                   ) {
                     setShow(true);
+                    setUCPState(UCPState.ACTIVE);
                     return Result.ok('');
                   }
                   return Result.emptyErr();
@@ -301,7 +350,10 @@ export default function Manager() {
                     (status) => stateUpdate(status),
                     t
                   );
-                  zipInstallResult.ok().ifPresent(() => setShow(true));
+                  zipInstallResult.ok().ifPresent(() => {
+                    setUCPState(UCPState.ACTIVE);
+                    setShow(true);
+                  });
                   setOverviewButtonActive(true);
                   return zipInstallResult
                     .mapOk(() => '')
@@ -338,9 +390,9 @@ export default function Manager() {
                 buttonActive={false}
                 buttonValues={{
                   idle: t('gui-editor:overview.uninstall.idle'),
-                  running: 'gui-editor:overview.uninstall.running',
-                  success: 'gui-editor:overview.uninstall.success',
-                  failed: 'gui-editor:overview.uninstall.failed',
+                  running: t('gui-editor:overview.uninstall.running'),
+                  success: t('gui-editor:overview.uninstall.success'),
+                  failed: t('gui-editor:overview.uninstall.failed'),
                 }}
                 buttonVariant="primary"
                 funcBefore={() => setOverviewButtonActive(false)}

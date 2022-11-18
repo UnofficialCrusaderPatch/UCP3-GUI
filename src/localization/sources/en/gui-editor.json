@@ -25,6 +25,12 @@
                 "success": "Updated!",
                 "failed": "Failed!"
             }
+        },
+        "activate": {
+            "not.installed": "No UCP installed",
+            "do.deactivate": "Deactivate UCP",
+            "do.activate": "Activate UCP",
+            "unknown": "Unknown UCP State"
         }
     },
     "footer": {
@@ -36,7 +42,7 @@
             "unknown": "unknown state"
         },
         "state": {
-            "prefix": "UCP active: {{state}}",
+            "prefix": "UCP state: {{state}}",
             "wrong.folder": "wrong folder",
             "not.installed": "not installed",
             "active": "active",

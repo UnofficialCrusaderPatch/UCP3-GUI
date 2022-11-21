@@ -45,8 +45,8 @@ export async function createNewWindow(
     // allows to set focus
     if (options.focus) {
       await windowForThisPath.setFocus();
-      return;
     }
+    return;
   }
   // eslint-disable-next-line no-new
   new WebviewWindow(hashOfNewWindow, options);

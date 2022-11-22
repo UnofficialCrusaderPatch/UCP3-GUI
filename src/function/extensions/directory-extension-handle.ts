@@ -1,4 +1,4 @@
-import { proxyFsExists, readBinaryFile, readTextFile } from 'tauri/tauri-files';
+import { onFsExists, readBinaryFile, readTextFile } from 'tauri/tauri-files';
 import ExtensionHandle from './extension-handle';
 
 class DirectoryExtensionHandle implements ExtensionHandle {
@@ -10,12 +10,12 @@ class DirectoryExtensionHandle implements ExtensionHandle {
 
   async doesEntryExist(path: string): Promise<boolean> {
     const p = `${this.path}/${path}`;
-    return proxyFsExists(p);
+    return onFsExists(p);
   }
 
   async getTextContents(path: string): Promise<string> {
     const p = `${this.path}/${path}`;
-    if (await proxyFsExists(p)) {
+    if (await onFsExists(p)) {
       return (await readTextFile(p))
         .mapErr((error) => new Error(`Error while reading text file: ${error}`))
         .getOrThrow();
@@ -25,7 +25,7 @@ class DirectoryExtensionHandle implements ExtensionHandle {
 
   async getBinaryContents(path: string): Promise<Uint8Array> {
     const p = `${this.path}/${path}`;
-    if (await proxyFsExists(p)) {
+    if (await onFsExists(p)) {
       const result = await readBinaryFile(p);
       result.err().ifPresent((error) => {
         throw new Error(

@@ -2,24 +2,29 @@
 // currently it will just take care that only one window per path can be created
 // the main (landing) window is ignored)
 
-import {
-  getAll as getAllWindows,
-  WebviewWindow,
-  WindowOptions,
-} from '@tauri-apps/api/window';
+import { WebviewWindow, WindowOptions } from '@tauri-apps/api/window';
 import { getHexHashOfString } from 'util/scripts/hash';
 
-// BROKEN
-// does not work between reloads currently
-// maybe this will fix it: https://github.com/tauri-apps/tauri/issues/5571
 export async function getWindowIfExists(
   windowName: string,
   isHash = false
-): Promise<undefined | WebviewWindow> {
+): Promise<null | WebviewWindow> {
   const hashedWindowName = isHash
     ? windowName
     : await getHexHashOfString(windowName);
-  return getAllWindows().find((webview) => webview.label === hashedWindowName);
+
+  // currently uses internal value found in code to not create a backend window
+  // after that, a simple visibility status function of the window is called to check for error
+  // TODO: replace with proper function once something working is available
+  try {
+    const window = new WebviewWindow(hashedWindowName, {
+      skip: true,
+    } as WindowOptions);
+    await window.isVisible();
+    return window;
+  } catch (error) {
+    return null;
+  }
 }
 
 // I do not like this solution one bit -TheRedDaemon
@@ -32,19 +37,19 @@ export async function createNewWindow(
   errorIfExists = false
 ): Promise<void> {
   const hashOfNewWindow = await getHexHashOfString(windowName);
-  const windowForThisPath = new WebviewWindow(hashOfNewWindow, options); // points to old if same name?
+  const windowForThisPath = await getWindowIfExists(hashOfNewWindow, true);
   if (windowForThisPath) {
-    // disabled and left as a reminder, maybe they fix the getAll some day
-    // if (errorIfExists) {
-    //   throw new Error(`Window with name '${windowName}' already exits!`);
-    // }
+    if (errorIfExists) {
+      throw new Error(`Window with name '${windowName}' already exits!`);
+    }
     // allows to set focus
     if (options.focus) {
-      await windowForThisPath
-        .setFocus()
-        .catch(() => console.log(`Can not set focus, window not yet present.`)); // just as a reminder
+      await windowForThisPath.setFocus();
     }
+    return;
   }
+  // eslint-disable-next-line no-new
+  new WebviewWindow(hashOfNewWindow, options);
 
   // do not forget that ".onCloseRequested" is broken if used multiple times
   // use await "webview.listen(TauriEvent.WINDOW_CLOSE_REQUESTED,..." instead

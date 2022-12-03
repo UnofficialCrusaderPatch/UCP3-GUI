@@ -13,7 +13,7 @@ import { GlobalState } from 'function/global-state';
 import { ucpBackEnd } from 'function/fake-backend';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
-import { UIFactory } from './ui-elements';
+import { UIFactory } from '../ui-elements';
 
 function saveConfig(
   configuration: { [key: string]: unknown },

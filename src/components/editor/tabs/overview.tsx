@@ -152,30 +152,6 @@ export default function Overview() {
           return zipInstallResult.mapOk(() => '').mapErr((err) => String(err));
         }}
       />
-      <div className="m-3">
-        <Modal show={show} onHide={handleClose} className="text-dark">
-          <Modal.Header closeButton>
-            <Modal.Title>{t('gui-general:require.reload.title')}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {t('gui-editor:overview.require.reload.text')}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              {t('gui-general:close')}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={(event) => {
-                handleClose();
-                ucpBackEnd.reloadWindow();
-              }}
-            >
-              {t('gui-general:reload')}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
       <StateButton
         buttonActive={false}
         buttonValues={{
@@ -204,9 +180,30 @@ export default function Overview() {
           Result.tryAsync(() => ucpBackEnd.checkForGUIUpdates(stateUpdate))
         }
       />
-      <Form className="m-3 d-none">
-        <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
-      </Form>
+      <div className="m-3">
+        <Modal show={show} onHide={handleClose} className="text-dark">
+          <Modal.Header closeButton>
+            <Modal.Title>{t('gui-general:require.reload.title')}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {t('gui-editor:overview.require.reload.text')}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              {t('gui-general:close')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={(event) => {
+                handleClose();
+                ucpBackEnd.reloadWindow();
+              }}
+            >
+              {t('gui-general:reload')}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
     </Container>
   );
 }

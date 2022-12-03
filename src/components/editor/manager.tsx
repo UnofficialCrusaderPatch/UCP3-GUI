@@ -15,18 +15,12 @@ import {
 } from 'function/global-state';
 import { ucpBackEnd } from 'function/fake-backend';
 import { DisplayConfigElement, Extension } from 'config/ucp/common';
-import { UCPVersion } from 'function/ucp/ucp-version';
-import { UCPState } from 'function/ucp/ucp-state';
 import { useCurrentGameFolder } from 'components/general/hooks';
-import {
-  UCPStateHandler,
-  useUCPState,
-  useUCPVersion,
-} from 'components/general/swr-hooks';
 import ConfigEditor from './tabs/config-editor';
 
 import ExtensionManager from './tabs/extension-manager';
 import Overview from './tabs/overview';
+import Footer from './footer';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -47,27 +41,12 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-const ucpStateArray = [
-  'wrong.folder',
-  'not.installed',
-  'active',
-  'inactive',
-  'bink.version.differences',
-  'unknown',
-];
-
 let extensions: Extension[] = []; // which extension type?
 
 export default function Manager() {
   const currentFolder = useCurrentGameFolder();
-  const ucpStateHandlerSwr = useUCPState();
-  const ucpVersionSwr = useUCPVersion();
 
-  const { t, i18n } = useTranslation([
-    'gui-general',
-    'gui-editor',
-    'gui-download',
-  ]);
+  const { t, i18n } = useTranslation(['gui-general', 'gui-editor']);
 
   const [configurationWarnings, setConfigurationWarnings] = useReducer(
     configurationWarningReducer,
@@ -91,18 +70,6 @@ export default function Manager() {
     configurationReducer,
     {}
   );
-
-  const warningCount = Object.values(configurationWarnings)
-    .map((v) =>
-      (v as { text: string; level: string }).level === 'warning' ? 1 : 0
-    )
-    .reduce((a: number, b: number) => a + b, 0);
-
-  const errorCount = Object.values(configurationWarnings)
-    .map((v) =>
-      (v as { text: string; level: string }).level === 'error' ? 1 : 0
-    )
-    .reduce((a: number, b: number) => a + b, 0);
 
   const [extensionsState, setExtensionsState] = useReducer(
     (oldState: ExtensionsState, newState: unknown): ExtensionsState => {
@@ -189,28 +156,8 @@ export default function Manager() {
     ]
   );
 
-  if (!initDone || ucpStateHandlerSwr.isLoading || ucpVersionSwr.isLoading) {
+  if (!initDone) {
     return <p>{t('gui-general:loading')}</p>;
-  }
-
-  const ucpStateHandler = ucpStateHandlerSwr.data as UCPStateHandler;
-  const ucpState = ucpStateHandler.state;
-  const ucpVersion = ucpVersionSwr.data as UCPVersion;
-
-  let ucpFooterVersionString;
-  switch (ucpState) {
-    case UCPState.NOT_INSTALLED:
-      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
-      break;
-    case UCPState.ACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
-    case UCPState.INACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
-    default:
-      ucpFooterVersionString = t('gui-editor:footer.version.unknown');
-      break;
   }
 
   return (
@@ -237,42 +184,7 @@ export default function Manager() {
             </Tab>
           </Tabs>
 
-          <div className="fixed-bottom bg-primary">
-            <div className="d-flex p-1 px-2 fs-8">
-              <div className="flex-grow-1">
-                <span className="">
-                  {t('gui-editor:footer.folder')}
-                  <span className="px-2 fst-italic">{currentFolder}</span>
-                </span>
-              </div>
-              <div>
-                <span className="px-2">
-                  {t('gui-general:messages', { count: 0 })}
-                </span>
-                <span className="px-2">
-                  {t('gui-general:warnings', { count: warningCount })}
-                </span>
-                <span className="px-2">
-                  {t('gui-general:errors', { count: errorCount })}
-                </span>
-                <span className="px-2">
-                  {t('gui-editor:footer.version.gui', { version: '1.0.0' })}
-                </span>
-                <span className="px-2">
-                  {t('gui-editor:footer.version.ucp', {
-                    version: ucpFooterVersionString,
-                  })}
-                </span>
-                <span className="px-2">
-                  {t('gui-editor:footer.state.prefix', {
-                    state: t(
-                      `gui-editor:footer.state.${ucpStateArray[ucpState]}`
-                    ),
-                  })}
-                </span>
-              </div>
-            </div>
-          </div>
+          <Footer />
         </div>
       </div>
     </GlobalState.Provider>

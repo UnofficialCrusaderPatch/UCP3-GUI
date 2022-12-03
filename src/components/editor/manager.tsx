@@ -1,9 +1,7 @@
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import { Button, Form, Modal } from 'react-bootstrap';
 
 import { useReducer, useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -17,27 +15,18 @@ import {
 } from 'function/global-state';
 import { ucpBackEnd } from 'function/fake-backend';
 import { DisplayConfigElement, Extension } from 'config/ucp/common';
+import { UCPVersion } from 'function/ucp/ucp-version';
+import { UCPState } from 'function/ucp/ucp-state';
+import { useCurrentGameFolder } from 'components/general/hooks';
 import {
-  checkForUCP3Updates,
-  installUCPFromZip,
-} from 'function/download/ucp-download-handling';
-import { getGameFolderPath } from 'tauri/tauri-files';
-import StateButton from 'components/general/state-button';
-import Result from 'util/structs/result';
-import {
-  getEmptyUCPVersion,
-  loadUCPVersion,
-  UCPVersion,
-} from 'function/ucp/ucp-version';
-import {
-  activateUCP,
-  deactivateUCP,
-  getUCPState,
-  UCPState,
-} from 'function/ucp/ucp-state';
-import ConfigEditor from './config-editor';
+  UCPStateHandler,
+  useUCPState,
+  useUCPVersion,
+} from 'components/general/swr-hooks';
+import ConfigEditor from './tabs/config-editor';
 
-import ExtensionManager from './extension-manager';
+import ExtensionManager from './tabs/extension-manager';
+import Overview from './tabs/overview';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -58,7 +47,6 @@ function getConfigDefaults(yml: unknown[]) {
   return result;
 }
 
-let ucpVersion: UCPVersion;
 const ucpStateArray = [
   'wrong.folder',
   'not.installed',
@@ -71,17 +59,15 @@ const ucpStateArray = [
 let extensions: Extension[] = []; // which extension type?
 
 export default function Manager() {
-  const [searchParams] = useSearchParams();
-  const currentFolder = getGameFolderPath(searchParams);
+  const currentFolder = useCurrentGameFolder();
+  const ucpStateHandlerSwr = useUCPState();
+  const ucpVersionSwr = useUCPVersion();
 
   const { t, i18n } = useTranslation([
     'gui-general',
     'gui-editor',
     'gui-download',
   ]);
-
-  const [overviewButtonActive, setOverviewButtonActive] = useState(true);
-  const [ucpState, setUCPState] = useState(UCPState.UNKNOWN);
 
   const [configurationWarnings, setConfigurationWarnings] = useReducer(
     configurationWarningReducer,
@@ -131,10 +117,6 @@ export default function Manager() {
     } as ExtensionsState
   );
 
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-
   const [initDone, setInitState] = useState(false);
   useEffect(() => {
     async function prepareValues() {
@@ -152,14 +134,6 @@ export default function Manager() {
         const optionEntries = ucpBackEnd.extensionsToOptionEntries(extensions);
         const defaults = getConfigDefaults(optionEntries);
 
-        ucpVersion = (await loadUCPVersion(currentFolder))
-          .ok()
-          .getOrReceive(getEmptyUCPVersion);
-        setUCPState(
-          (await Result.tryAsync(getUCPState, currentFolder))
-            .ok()
-            .getOrElse(UCPState.UNKNOWN)
-        );
         setConfiguration({
           type: 'reset',
           value: defaults,
@@ -215,33 +189,27 @@ export default function Manager() {
     ]
   );
 
-  if (!initDone) {
+  if (!initDone || ucpStateHandlerSwr.isLoading || ucpVersionSwr.isLoading) {
     return <p>{t('gui-general:loading')}</p>;
   }
 
-  let activateButtonString;
-  let ucpVersionString;
+  const ucpStateHandler = ucpStateHandlerSwr.data as UCPStateHandler;
+  const ucpState = ucpStateHandler.state;
+  const ucpVersion = ucpVersionSwr.data as UCPVersion;
+
   let ucpFooterVersionString;
   switch (ucpState) {
     case UCPState.NOT_INSTALLED:
-      ucpVersionString = t('gui-editor:overview.not.installed');
       ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
-      activateButtonString = t('gui-editor:overview.activate.not.installed');
       break;
     case UCPState.ACTIVE:
-      ucpVersionString = ucpVersion.toString();
-      ucpFooterVersionString = ucpVersionString;
-      activateButtonString = t('gui-editor:overview.activate.do.deactivate');
+      ucpFooterVersionString = ucpVersion.toString();
       break;
     case UCPState.INACTIVE:
-      ucpVersionString = ucpVersion.toString();
-      ucpFooterVersionString = ucpVersionString;
-      activateButtonString = t('gui-editor:overview.activate.do.activate');
+      ucpFooterVersionString = ucpVersion.toString();
       break;
     default:
-      ucpVersionString = t('gui-editor:overview.unknown.state');
       ucpFooterVersionString = t('gui-editor:footer.version.unknown');
-      activateButtonString = t('gui-editor:overview.activate.unknown');
       break;
   }
 
@@ -255,170 +223,7 @@ export default function Manager() {
             className="mb-3"
           >
             <Tab eventKey="overview" title={t('gui-editor:overview.title')}>
-              <div className="m-3">
-                {t('gui-editor:overview.folder.version')} {ucpVersionString}
-              </div>
-              <StateButton
-                buttonActive={
-                  overviewButtonActive &&
-                  (ucpState === UCPState.ACTIVE ||
-                    ucpState === UCPState.INACTIVE)
-                }
-                buttonValues={{
-                  idle: activateButtonString,
-                  running: activateButtonString,
-                  success: activateButtonString,
-                  failed: activateButtonString,
-                }}
-                buttonVariant="primary"
-                funcBefore={() => setOverviewButtonActive(false)}
-                funcAfter={() => setOverviewButtonActive(true)}
-                func={async () => {
-                  let result = Result.emptyOk<string>();
-                  if (ucpState === UCPState.ACTIVE) {
-                    result = (await deactivateUCP(currentFolder)).mapErr(
-                      String
-                    );
-                    result.ok().ifPresent(() => {
-                      setUCPState(UCPState.INACTIVE);
-                    });
-                  } else if (ucpState === UCPState.INACTIVE) {
-                    result = (await activateUCP(currentFolder)).mapErr(String);
-                    result.ok().ifPresent(() => {
-                      setUCPState(UCPState.ACTIVE);
-                    });
-                  }
-                  return result;
-                }}
-              />
-              <StateButton
-                buttonActive={overviewButtonActive}
-                buttonValues={{
-                  idle: t('gui-editor:overview.update.idle'),
-                  running: t('gui-editor:overview.update.running'),
-                  success: t('gui-editor:overview.update.success'),
-                  failed: t('gui-editor:overview.update.failed'),
-                }}
-                buttonVariant="primary"
-                funcBefore={() => setOverviewButtonActive(false)}
-                funcAfter={() => setOverviewButtonActive(true)}
-                func={async (stateUpdate) => {
-                  const updateResult = await checkForUCP3Updates(
-                    currentFolder,
-                    (status) => stateUpdate(status),
-                    t
-                  );
-                  if (
-                    updateResult.update === true &&
-                    updateResult.installed === true
-                  ) {
-                    setShow(true);
-                    setUCPState(UCPState.ACTIVE);
-                    return Result.ok('');
-                  }
-                  return Result.emptyErr();
-                }}
-              />
-              <StateButton
-                buttonActive={overviewButtonActive}
-                buttonValues={{
-                  idle: t('gui-editor:overview.zip.idle'),
-                  running: t('gui-editor:overview.zip.running'),
-                  success: t('gui-editor:overview.zip.success'),
-                  failed: t('gui-editor:overview.zip.failed'),
-                }}
-                buttonVariant="primary"
-                funcBefore={() => setOverviewButtonActive(false)}
-                funcAfter={() => setOverviewButtonActive(true)}
-                func={async (stateUpdate) => {
-                  setOverviewButtonActive(false);
-                  const zipFilePath = await ucpBackEnd.openFileDialog(
-                    currentFolder,
-                    [
-                      { name: 'Zip files', extensions: ['zip'] },
-                      { name: 'All files', extensions: ['*'] },
-                    ]
-                  );
-
-                  if (zipFilePath === '') return Result.err('');
-
-                  // TODO: improve feedback
-                  const zipInstallResult = await installUCPFromZip(
-                    zipFilePath,
-                    currentFolder,
-                    // can be used to transform -> although splitting into more components might be better
-                    (status) => stateUpdate(status),
-                    t
-                  );
-                  zipInstallResult.ok().ifPresent(() => {
-                    setUCPState(UCPState.ACTIVE);
-                    setShow(true);
-                  });
-                  setOverviewButtonActive(true);
-                  return zipInstallResult
-                    .mapOk(() => '')
-                    .mapErr((err) => String(err));
-                }}
-              />
-              <div className="m-3">
-                <Modal show={show} onHide={handleClose} className="text-dark">
-                  <Modal.Header closeButton>
-                    <Modal.Title>
-                      {t('gui-general:require.reload.title')}
-                    </Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    {t('gui-editor:overview.require.reload.text')}
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                      {t('gui-general:close')}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={(event) => {
-                        handleClose();
-                        ucpBackEnd.reloadWindow();
-                      }}
-                    >
-                      {t('gui-general:reload')}
-                    </Button>
-                  </Modal.Footer>
-                </Modal>
-              </div>
-              <StateButton
-                buttonActive={false}
-                buttonValues={{
-                  idle: t('gui-editor:overview.uninstall.idle'),
-                  running: t('gui-editor:overview.uninstall.running'),
-                  success: t('gui-editor:overview.uninstall.success'),
-                  failed: t('gui-editor:overview.uninstall.failed'),
-                }}
-                buttonVariant="primary"
-                funcBefore={() => setOverviewButtonActive(false)}
-                funcAfter={() => setOverviewButtonActive(true)}
-                func={async (stateUpdate) => Result.emptyOk()}
-              />
-              <StateButton
-                buttonActive={overviewButtonActive}
-                buttonValues={{
-                  idle: t('gui-editor:overview.update.gui.idle'),
-                  running: t('gui-editor:overview.update.gui.running'),
-                  success: t('gui-editor:overview.update.gui.success'),
-                  failed: t('gui-editor:overview.update.gui.failed'),
-                }}
-                buttonVariant="primary"
-                funcBefore={() => setOverviewButtonActive(false)}
-                funcAfter={() => setOverviewButtonActive(true)}
-                func={async (stateUpdate) =>
-                  Result.tryAsync(() =>
-                    ucpBackEnd.checkForGUIUpdates(stateUpdate)
-                  )
-                }
-              />
-              <Form className="m-3 d-none">
-                <Form.Switch id="activate-ucp-switch" label="Activate UCP" />
-              </Form>
+              <Overview />
             </Tab>
             <Tab eventKey="extensions" title={t('gui-editor:extensions.title')}>
               <ExtensionManager extensions={extensions} />

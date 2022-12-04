@@ -65,37 +65,31 @@ export default function Footer() {
 
   return (
     <div className="bg-primary">
-      <div className="d-flex p-1 px-2 fs-8">
-        <div className="flex-grow-1">
-          <span className="">
-            {t('gui-editor:footer.folder')}
-            <span className="px-2 fst-italic">{currentFolder}</span>
-          </span>
-        </div>
-        <div>
-          <span className="px-2">
-            {t('gui-general:messages', { count: 0 })}
-          </span>
-          <span className="px-2">
-            {t('gui-general:warnings', { count: warningCount })}
-          </span>
-          <span className="px-2">
-            {t('gui-general:errors', { count: errorCount })}
-          </span>
-          <span className="px-2">
-            {t('gui-editor:footer.version.gui', { version: '1.0.0' })}
-          </span>
-          <span className="px-2">
-            {t('gui-editor:footer.version.ucp', {
-              version: ucpFooterVersionString,
-            })}
-          </span>
-          <span className="px-2">
-            {t('gui-editor:footer.state.prefix', {
-              state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
-            })}
-          </span>
-        </div>
+      <div className="d-flex p-1 px-2 fs-8 flex-wrap justify-content-end">
+        <span className="me-auto">
+          {t('gui-editor:footer.folder')}
+          <span className="px-2 fst-italic">{currentFolder}</span>
+        </span>
+        <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
+        <span className="px-2">
+          {t('gui-general:warnings', { count: warningCount })}
+        </span>
+        <span className="px-2">
+          {t('gui-general:errors', { count: errorCount })}
+        </span>
+        <span className="px-2">
+          {t('gui-editor:footer.version.gui', { version: '1.0.0' })}
+        </span>
+        <span className="px-2">
+          {t('gui-editor:footer.version.ucp', {
+            version: ucpFooterVersionString,
+          })}
+        </span>
+        <span className="px-2">
+          {t('gui-editor:footer.state.prefix', {
+            state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+          })}
+        </span>
       </div>
     </div>
   );

@@ -184,13 +184,13 @@ export default function Manager() {
               </Nav.Item>
             </Nav>
             <Tab.Content className="overflow-auto">
-              <Tab.Pane eventKey="overview">
+              <Tab.Pane eventKey="overview" className="h-100">
                 <Overview />
               </Tab.Pane>
-              <Tab.Pane eventKey="extensions">
+              <Tab.Pane eventKey="extensions" className="h-100">
                 <ExtensionManager extensions={extensions} />
               </Tab.Pane>
-              <Tab.Pane eventKey="config" className="tabpanel-config">
+              <Tab.Pane eventKey="config" className="tabpanel-config h-100">
                 <ConfigEditor readonly={false} gameFolder={currentFolder} />
               </Tab.Pane>
             </Tab.Content>

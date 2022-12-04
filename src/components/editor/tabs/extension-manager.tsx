@@ -302,35 +302,33 @@ export default function ExtensionManager(args: { extensions: Extension[] }) {
   });
 
   return (
-    <Container className="fs-6" style={{ height: '85vh' }}>
-      <Row className="mb-3" style={{}}>
+    <Container className="fs-6 h-100">
+      <div className="pb-2 h-50 d-flex flex-column overflow-hidden">
         <h4>{t('gui-editor:extensions.activated')}</h4>
         <div
           style={{
-            height: '40vh',
             overflowY: 'scroll',
             overflowX: 'clip',
             backgroundColor: 'var(--bs-gray-800)',
           }}
-          className="border-secondary border"
+          className="border-secondary border flex-grow-1"
         >
           {activated}
         </div>
-      </Row>
-      <Row style={{}}>
+      </div>
+      <div className="pt-2 h-50 d-flex flex-column overflow-hidden">
         <h4>{t('gui-editor:extensions.available')}</h4>
         <div
           style={{
-            height: '40vh',
             overflowY: 'scroll',
             overflowX: 'clip',
             backgroundColor: 'var(--bs-gray-800)',
           }}
-          className="border-secondary border"
+          className="border-secondary border flex-grow-1"
         >
           {eUI}
         </div>
-      </Row>
+      </div>
     </Container>
   );
 }

@@ -1441,13 +1441,12 @@ const UIFactory = {
     return (
       <nav
         id="config-navbar"
-        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 pe-0 col-3"
-        style={{ justifyContent: 'flex-start' }}
+        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 pb-0 pe-0 col-3 justify-content-start h-100 flex-nowrap"
       >
         <a className="navbar-brand" href="#config-General">
           {t('gui-editor:config.table.of.contents')}
         </a>
-        <nav className="nav nav-pills flex-column">
+        <nav className="nav nav-pills flex-column overflow-auto flex-nowrap">
           <a className="nav-link" href="#config-General">
             {t('gui-editor:config.general')}
           </a>
@@ -1534,10 +1533,7 @@ const UIFactory = {
           // data-bs-offset="0"
           // // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           // tabIndex={0}
-          style={{
-            position: 'relative',
-          }}
-          className="col-9 p-3"
+          className="col-9 p-3 pb-0 h-100"
           id="config-sections"
         >
           <div id="config-General" style={{ marginLeft: `1rem` }}>

@@ -1,0 +1,5 @@
+overview.folder.version: "UCP Version in diesem Ordner:"
+overview.install.from.zip: "Installiere den UCP in diesen Ordner mittels ZIP"
+overview.not.installed: "nicht installiert"
+overview.require.reload.text: "Der Installationsprozess erfordert ein Neuladen. Jetzt durchführen?"
+overview.title: "Übersicht"

@@ -1,13 +1,11 @@
 /* @import '~bootstrap'; */
 
 .editor-app {
-  position: relative;
-  height: 95vh;
+  height: 100vh;
   font-family: sans-serif;
   overflow-y: hidden;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
 }
 
 .form-control:disabled {

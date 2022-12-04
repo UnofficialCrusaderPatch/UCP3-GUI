@@ -16,6 +16,7 @@ import {
 import { ucpBackEnd } from 'function/fake-backend';
 import { DisplayConfigElement, Extension } from 'config/ucp/common';
 import { useCurrentGameFolder } from 'components/general/hooks';
+import { Col, Nav, Row } from 'react-bootstrap';
 import ConfigEditor from './tabs/config-editor';
 
 import ExtensionManager from './tabs/extension-manager';
@@ -162,30 +163,41 @@ export default function Manager() {
 
   return (
     <GlobalState.Provider value={globalStateValue}>
-      <div className="editor-app m-3 fs-7">
-        <div className="col-12">
-          <Tabs
-            defaultActiveKey="overview"
-            id="uncontrolled-tab-example"
-            className="mb-3"
-          >
-            <Tab eventKey="overview" title={t('gui-editor:overview.title')}>
-              <Overview />
-            </Tab>
-            <Tab eventKey="extensions" title={t('gui-editor:extensions.title')}>
-              <ExtensionManager extensions={extensions} />
-            </Tab>
-            <Tab
-              eventKey="config"
-              title={t('gui-editor:config.title')}
-              className="tabpanel-config"
-            >
-              <ConfigEditor readonly={false} gameFolder={currentFolder} />
-            </Tab>
-          </Tabs>
-
-          <Footer />
+      <div className="editor-app fs-7">
+        <div className="m-3 flex-grow-1 d-flex flex-column overflow-hidden">
+          <Tab.Container defaultActiveKey="overview">
+            <Nav variant="tabs" className="mb-3">
+              <Nav.Item>
+                <Nav.Link eventKey="overview">
+                  {t('gui-editor:overview.title')}
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="extensions">
+                  {t('gui-editor:extensions.title')}
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="config">
+                  {t('gui-editor:config.title')}
+                </Nav.Link>
+              </Nav.Item>
+            </Nav>
+            <Tab.Content className="overflow-auto">
+              <Tab.Pane eventKey="overview">
+                <Overview />
+              </Tab.Pane>
+              <Tab.Pane eventKey="extensions">
+                <ExtensionManager extensions={extensions} />
+              </Tab.Pane>
+              <Tab.Pane eventKey="config" className="tabpanel-config">
+                <ConfigEditor readonly={false} gameFolder={currentFolder} />
+              </Tab.Pane>
+            </Tab.Content>
+          </Tab.Container>
         </div>
+
+        <Footer />
       </div>
     </GlobalState.Provider>
   );

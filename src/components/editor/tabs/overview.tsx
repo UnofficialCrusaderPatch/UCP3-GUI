@@ -57,7 +57,7 @@ export default function Overview() {
       break;
   }
   return (
-    <Container fluid>
+    <Container fluid className="overflow-auto">
       <div className="m-3">
         {t('gui-editor:overview.folder.version')} {ucpVersionString}
       </div>

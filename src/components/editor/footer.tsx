@@ -64,7 +64,7 @@ export default function Footer() {
     .reduce((a: number, b: number) => a + b, 0);
 
   return (
-    <div className="fixed-bottom bg-primary">
+    <div className="bg-primary">
       <div className="d-flex p-1 px-2 fs-8">
         <div className="flex-grow-1">
           <span className="">

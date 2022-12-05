@@ -112,6 +112,6 @@ export async function open(
 
 export async function save(
   options?: dialog.SaveDialogOptions | undefined
-): Promise<string> {
+): Promise<string | null> {
   return dialog.save(options);
 }

@@ -22,7 +22,7 @@ import {
 import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { UCP3_REPOS_MACHINE_TOKEN } from './download/github';
 import { Discovery } from './extensions/discovery';
-import { proxyFsExists } from '../tauri/tauri-files';
+import { onFsExists } from '../tauri/tauri-files';
 import { createNewWindow } from '../tauri/tauri-window';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
@@ -167,14 +167,6 @@ export const ucpBackEnd = {
 
   reloadWindow() {
     window.location.reload();
-  },
-
-  async getUCPVersion(gameFolder: string) {
-    const path = `${gameFolder}/ucp-version.yml`;
-    if (await proxyFsExists(path)) {
-      return (await loadYaml(path)).getOrThrow();
-    }
-    return {};
   },
 
   async getExtensions(gameFolder: string, locale?: string) {

@@ -1,5 +1,5 @@
 import {
-  exists as fileExists,
+  exists as tauriFileExists,
   createDir,
   readDir as tauriReadDir,
   FsOptions,
@@ -8,6 +8,7 @@ import {
   readBinaryFile as tauriReadBinaryFile,
   writeBinaryFile as tauriWriteBinaryFile,
   copyFile as tauriCopyFile,
+  renameFile as tauriRenameFile,
   removeFile as tauriRemoveFile,
   BinaryFileContents,
   FsDirOptions,
@@ -48,14 +49,12 @@ export type Error = unknown;
 
 const BASE_FOLDER = 'UnofficialCrusaderPatch3';
 
-// at the time of writing this, there is a typing error for fs.exists
-// this function is used to proxy every call, so that the error only needs to be ignored here
-// eslint-disable-next-line import/prefer-default-export
-export async function proxyFsExists(
+// only proxy
+export async function onFsExists(
   path: string,
   options?: FsOptions | undefined
 ): Promise<boolean> {
-  return (await fileExists(path, options)) as unknown as boolean;
+  return tauriFileExists(path, options);
 }
 
 // only proxy
@@ -108,6 +107,13 @@ export async function copyFile(
   destination: string
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(tauriCopyFile, source, destination);
+}
+
+export async function renameFile(
+  oldPath: string,
+  newPath: string
+): Promise<Result<void, Error>> {
+  return Result.tryAsync(tauriRenameFile, oldPath, newPath);
 }
 
 export async function removeFile(path: string): Promise<Result<void, Error>> {
@@ -188,7 +194,7 @@ export const getRoamingDataFolder: () => Promise<string> = (() => {
       return roamingFolder;
     }
     roamingFolder = `${await dataDir()}/${BASE_FOLDER}/`;
-    if (!(await proxyFsExists(roamingFolder))) {
+    if (!(await onFsExists(roamingFolder))) {
       await createDir(roamingFolder);
     }
     return roamingFolder;
@@ -214,7 +220,7 @@ export const getLocalDataFolder: () => Promise<string> = (() => {
       return localDataFolder;
     }
     localDataFolder = `${await localDataDir()}/${BASE_FOLDER}/`;
-    if (!(await proxyFsExists(localDataFolder))) {
+    if (!(await onFsExists(localDataFolder))) {
       await createDir(localDataFolder);
     }
     return localDataFolder;

@@ -1,17 +1,30 @@
 // for creating an managing new windows
-// currently it will just take care that only of window can be crated
+// currently it will just take care that only one window per path can be created
 // the main (landing) window is ignored)
 
-import { TauriEvent } from '@tauri-apps/api/event';
 import { WebviewWindow, WindowOptions } from '@tauri-apps/api/window';
 import { getHexHashOfString } from 'util/scripts/hash';
 
-const createdWindows: { [key: string]: WebviewWindow } = {};
+export async function getWindowIfExists(
+  windowName: string,
+  isHash = false
+): Promise<null | WebviewWindow> {
+  const hashedWindowName = isHash
+    ? windowName
+    : await getHexHashOfString(windowName);
 
-export function getWindowIfExists(
-  windowName: string
-): undefined | WebviewWindow {
-  return createdWindows[windowName];
+  // currently uses internal value found in code to not create a backend window
+  // after that, a simple visibility status function of the window is called to check for error
+  // TODO: replace with proper function once something working is available
+  try {
+    const window = new WebviewWindow(hashedWindowName, {
+      skip: true,
+    } as WindowOptions);
+    await window.isVisible();
+    return window;
+  } catch (error) {
+    return null;
+  }
 }
 
 // I do not like this solution one bit -TheRedDaemon
@@ -23,32 +36,21 @@ export async function createNewWindow(
   options: WindowOptions,
   errorIfExists = false
 ): Promise<void> {
-  // if it exits, the options are ignored and the window is given focus
-  // eslint-disable-next-line no-prototype-builtins
-  if (createdWindows.hasOwnProperty(windowName)) {
+  const hashOfNewWindow = await getHexHashOfString(windowName);
+  const windowForThisPath = await getWindowIfExists(hashOfNewWindow, true);
+  if (windowForThisPath) {
     if (errorIfExists) {
       throw new Error(`Window with name '${windowName}' already exits!`);
     }
     // allows to set focus
     if (options.focus) {
-      await createdWindows[windowName].setFocus();
+      await windowForThisPath.setFocus();
     }
     return;
   }
+  // eslint-disable-next-line no-new
+  new WebviewWindow(hashOfNewWindow, options);
 
-  // uses a hash
-  const webview = new WebviewWindow(
-    await getHexHashOfString(windowName),
-    options
-  );
-
-  // also expects close to go through
-  const unlistenFunc = await webview.listen(
-    TauriEvent.WINDOW_CLOSE_REQUESTED,
-    () => {
-      delete createdWindows[windowName];
-      unlistenFunc();
-    }
-  );
-  createdWindows[windowName] = webview;
+  // do not forget that ".onCloseRequested" is broken if used multiple times
+  // use await "webview.listen(TauriEvent.WINDOW_CLOSE_REQUESTED,..." instead
 }

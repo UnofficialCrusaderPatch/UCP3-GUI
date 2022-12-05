@@ -2,23 +2,22 @@ import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { TFunction } from 'react-i18next';
 import { askInfo, showWarning } from 'tauri/tauri-dialog';
 import {
-  copyFile,
   fetchBinary,
   getLocalDataFolder,
-  loadYaml,
-  proxyFsExists,
   recursiveCreateDir,
   removeFile,
   writeBinaryFile,
   Error as FileUtilError,
-  resolvePath,
 } from 'tauri/tauri-files';
 import { extractZipToPath } from 'tauri/tauri-invoke';
 import Result from 'util/structs/result';
+import Option from 'util/structs/option';
+import { activateUCP, createRealBink } from 'function/ucp/ucp-state';
 import {
   checkForLatestUCP3DevReleaseUpdate,
   UCP3_REPOS_MACHINE_TOKEN,
 } from './github';
+import { loadUCPVersion } from '../ucp/ucp-version';
 
 export async function installUCPFromZip(
   zipFilePath: string,
@@ -27,22 +26,7 @@ export async function installUCPFromZip(
   t: TFunction
 ): Promise<Result<void, FileUtilError>> {
   return Result.tryAsync(async () => {
-    const binkRealPath = await resolvePath(gameFolder, 'binkw32_real.dll');
-    const binkUcpPath = await resolvePath(gameFolder, 'binkw32_ucp.dll');
-    const binkPath = await resolvePath(gameFolder, 'binkw32.dll');
-
-    statusCallback(t('gui-download:bink.copy.real'));
-    if (!(await proxyFsExists(binkRealPath))) {
-      if (await proxyFsExists(binkPath)) {
-        // TODO: could this also be a rename?
-        (await copyFile(binkPath, binkRealPath))
-          .mapErr((error) => t('gui-download:bink.copy.real.error', { error }))
-          .throwIfErr();
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-throw-literal
-        throw t('gui-download:bink.missing');
-      }
-    }
+    (await createRealBink(gameFolder, t)).throwIfErr();
 
     statusCallback(t('gui-download:zip.extract'));
     try {
@@ -52,11 +36,7 @@ export async function installUCPFromZip(
       throw t('gui-download:zip.extract.error', { error });
     }
 
-    statusCallback(t('gui-download:bink.copy.ucp'));
-    // TODO: could this also be a rename?
-    (await copyFile(binkUcpPath, binkPath))
-      .mapErr((error) => t('gui-download:bink.copy.real.error', { error }))
-      .throwIfErr();
+    (await activateUCP(gameFolder, t)).throwIfErr();
   });
 }
 
@@ -73,10 +53,10 @@ export async function checkForUCP3Updates(
   };
 
   statusCallback(t('gui-download:ucp.version.yaml.load'));
-  const sha = (await loadYaml(await resolvePath(gameFolder, 'ucp-version.yml')))
+  const sha = (await loadUCPVersion(gameFolder))
     .ok()
-    .map((content) => content.sha as string | undefined)
-    .notUndefinedOrNull()
+    .map((version) => version.sha)
+    .getOrReceive(Option.ofEmpty)
     .getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));

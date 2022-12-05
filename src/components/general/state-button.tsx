@@ -23,6 +23,13 @@ interface StateButtonProps {
   funcAfter?: () => void;
 }
 
+enum ButtonState {
+  IDLE = 'idle',
+  RUNNING = 'running',
+  FAILED = 'failed',
+  SUCCESS = 'success',
+}
+
 export default function StateButton(props: StateButtonProps) {
   const {
     func,
@@ -34,10 +41,10 @@ export default function StateButton(props: StateButtonProps) {
   } = props;
   const [active, setActive] = useState(true);
   const [divState, setDivState] = useState<ReactNode>();
-  const [buttonValue, setButtonValue] = useState(buttonValues.idle);
+  const [buttonState, setButtonState] = useState(ButtonState.IDLE);
 
-  const setResState = (res: void | ReactNode, newButtonValue: string) => {
-    setButtonValue(newButtonValue);
+  const setResState = (res: void | ReactNode, newButtonState: ButtonState) => {
+    setButtonState(newButtonState);
     if (res !== undefined && res !== null) {
       setDivState(res);
     }
@@ -46,9 +53,9 @@ export default function StateButton(props: StateButtonProps) {
   useTimeout(
     () => {
       setDivState(null);
-      setButtonValue(buttonValues.idle);
+      setButtonState(ButtonState.IDLE);
     },
-    active && buttonValue !== buttonValues.idle ? 3000 : null
+    active && buttonState !== ButtonState.IDLE ? 5000 : null
   );
 
   return (
@@ -60,16 +67,16 @@ export default function StateButton(props: StateButtonProps) {
         onClick={async () => {
           if (funcBefore) funcBefore();
           setActive(false);
-          setButtonValue(buttonValues.running);
+          setButtonState(ButtonState.RUNNING);
           (await func(setDivState)).consider(
-            (ok) => setResState(ok, buttonValues.success),
-            (err) => setResState(err, buttonValues.failed)
+            (ok) => setResState(ok, ButtonState.SUCCESS),
+            (err) => setResState(err, ButtonState.FAILED)
           );
           setActive(true);
           if (funcAfter) funcAfter();
         }}
       >
-        {buttonValue}
+        {buttonValues[buttonState]}
       </Button>
       <div className="col d-flex align-items-center">{divState}</div>
     </div>

@@ -1,11 +1,17 @@
 @import 'bootstrap';
 
+
+
 html {
   overflow: hidden;
 }
 
 body {
   overflow: auto;
+}
+
+.titlebar {
+  background: #212529;
 }
 
 .landing-app {

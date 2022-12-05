@@ -67,6 +67,7 @@ function Landing() {
 
   return (
     <div className="h-100">
+      <div data-tauri-drag-region className="titlebar" />
       <div className="background-image" />
       <div className="d-flex justify-content-end">
         <div className="language-select-container">

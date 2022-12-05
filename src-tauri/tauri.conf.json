@@ -53,6 +53,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
+      "theme": "#212529",
       "identifier": "ucp.gui.tauri",
       "longDescription": "",
       "macOS": {

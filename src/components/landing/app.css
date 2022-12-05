@@ -1,5 +1,13 @@
 @import 'bootstrap';
 
+html {
+  overflow: hidden;
+}
+
+body {
+  overflow: auto;
+}
+
 .landing-app {
   position: relative;
   height: 100vh;
@@ -20,4 +28,134 @@
 
 .fs-8 {
   font-size: 0.85rem;
+}
+
+
+.language-select-container {
+  position: absolute;
+  top: 8px;
+  right:  12px;
+}
+
+.language-select-container select {
+  font-size: 16px;
+  padding: 4px 16px;
+  margin-right: 5px;
+  color: white !important;
+  border: none !important;
+}
+
+.dark-dropdown {
+  background-color: rgba(0, 0, 0, 0.521);
+  color: white !important;
+  border: none !important;
+}
+
+.dark-dropdown option {
+  background-color: rgba(0, 0, 0, 0.800) !important;
+  color: white;
+}
+
+.file-selector {
+  background-color: rgba(12, 12, 12, 0.8);
+  color: rgb(155, 155, 155) !important;
+  border: none !important;
+  margin: 1px;
+  white-space: nowrap;
+}
+
+.file-selector:hover {
+  background-color: rgba(40, 40, 40, 0.8) !important;
+  color: rgb(248, 255, 188) !important;
+}
+
+.background-image {
+  background-image: url('../../assets/ucp3/bg.png');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: -1;
+}
+
+.landingContainer {
+  margin-left: 3vw;
+  margin-right: 3vw;
+  margin-top: 5vh;
+}
+
+.textInput {
+  background:
+    url('../../assets/ucp3/textfield_left.png') left center no-repeat,
+    url('../../assets/ucp3/textfield_right.png') right center no-repeat,
+    url('../../assets/ucp3/textfield_middle.png') center center repeat-x;
+    
+  background-size: auto;
+  border: none;
+  border-radius: 0px;
+  height: 40px;
+  width: 100%
+}
+
+.death90 {
+  margin-right: 13px;
+  left: 0;
+  overflow: hidden;
+}
+
+.margin-title {
+  margin-top: 20px;
+}
+
+.btn-close {
+  margin-right: 3px;
+}
+
+.textInput input[type="text"] {
+  background-color: transparent;
+  flex-grow: 1;
+  color: white;
+  border: none;
+}
+
+.launch-button {
+  /* Other button styles here */
+  border-image: url("../../assets/ucp3/button_slice.png");
+  border-image-slice: 49% fill;
+  border-width: 20px;
+  border-style: solid;
+  background-color: transparent;  
+  color: white;
+  vertical-align: center;
+  width: 20%;
+  height: 40px;
+  min-width: 100px;
+  padding-top: -20px;
+}
+
+.launch-button:hover {
+  /* Other button styles here */
+  border-image: url("../../assets/ucp3/button_slice_hover.png");
+  border-image-slice: 49% fill;
+  border-width: 20px;
+  border-style: solid;
+  background-color: transparent;
+  color: white;
+  vertical-align: center;
+  width: 20%;
+  height: 40px;
+  min-width: 100px;
+}
+
+.launchtext{
+  margin-top: -12px;
+}
+
+.recent-folders{
+  border-image: url("../../assets/ucp3/outline.png");
+  border-image-slice: 8% fill;
+  border-width: 4px;
+  border-style: solid;
+  background-color: transparent;
 }

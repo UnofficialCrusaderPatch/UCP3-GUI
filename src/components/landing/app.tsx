@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import languages from 'localization/languages.json';
 import { ucpBackEnd } from 'function/fake-backend';
 import { Tooltip } from 'react-bootstrap';
 
@@ -7,6 +8,7 @@ import './app.css';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import { useRecentFolders } from '../general/swr-hooks';
+
 
 function LanguageSelect() {
   const [t] = useTranslation(['gui-general', 'gui-landing']);
@@ -19,12 +21,11 @@ function LanguageSelect() {
         value={i18n.language}
         onChange={(event) => i18n.changeLanguage(event.target.value)}
       >
-        <option value="de">{t('gui-landing:German')}</option>
-        <option value="en">{t('gui-landing:English')}</option>
-        <option value="fr">{t('gui-landing:French')}</option>
-        <option value="ru">{t('gui-landing:Russian')}</option>
-        <option value="po">{t('gui-landing:Polish')}</option>
-        <option value="ch">{t('gui-landing:Chinese')}</option>
+        {Object.entries(languages).map(([value, label]) => (
+          <option key={value} value={value}>
+            {t(`gui-landing:${label}`)}
+          </option>
+        ))}
       </select>
     </div>
   );

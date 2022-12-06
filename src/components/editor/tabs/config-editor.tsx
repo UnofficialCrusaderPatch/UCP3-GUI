@@ -13,7 +13,7 @@ import { GlobalState } from 'function/global-state';
 import { ucpBackEnd } from 'function/fake-backend';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
-import { UIFactory } from './ui-elements';
+import { UIFactory } from '../ui-elements';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -75,7 +75,7 @@ export default function ConfigEditor(args: {
   }, [activeExtensions]);
 
   return (
-    <>
+    <div className="h-100 d-flex flex-column">
       {!readonly ? (
         <div className="row border-bottom border-light pb-2 mx-0">
           <div className="col">
@@ -298,9 +298,12 @@ export default function ConfigEditor(args: {
           </div>
         </div>
       ) : null}
-      <div id="dynamicConfigPanel" className="row w-100 mx-0">
+      <div
+        id="dynamicConfigPanel"
+        className="row w-100 mx-0 flex-grow-1 overflow-hidden"
+      >
         <UIFactory.CreateSections readonly={readonly} />
       </div>
-    </>
+    </div>
   );
 }

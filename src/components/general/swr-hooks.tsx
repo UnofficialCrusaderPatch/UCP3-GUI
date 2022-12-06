@@ -9,6 +9,19 @@ import {
   registerForWindowClose,
   unregisterForWindowClose,
 } from 'tauri/tauri-hooks';
+import {
+  getUCPState,
+  UCPState,
+  activateUCP,
+  deactivateUCP,
+} from 'function/ucp/ucp-state';
+import Result from 'util/structs/result';
+import {
+  getEmptyUCPVersion,
+  loadUCPVersion,
+  UCPVersion,
+} from 'function/ucp/ucp-version';
+import { useCurrentGameFolder } from './hooks';
 
 export interface SwrResult<T> {
   data: T | undefined;
@@ -24,10 +37,18 @@ export interface Language {
   unlistenChangeEvent: UnlistenFn;
 }
 
+export interface UCPStateHandler {
+  state: UCPState;
+  activate: () => Promise<Result<void, unknown>>;
+  deactivate: () => Promise<Result<void, unknown>>;
+}
+
 // keys are used to identify and cache the request, so they need to be unique for different sources
 const SWR_KEYS = {
   RECENT_FOLDERS: 'ucp.gui.recent.folders',
   LANGUAGE_LOAD: 'ucp.lang.load',
+  UCP_STATE: 'ucp.state.handler',
+  UCP_VERSION: 'ucp.version.handler',
 };
 
 const LANG_WINDOW_CLOSE_KEY = 'LANG';
@@ -75,6 +96,53 @@ export function useLanguage(): SwrResult<Language> {
         unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
       };
     }
+  );
+  return {
+    data,
+    isLoading: !data,
+    isError: !!error,
+    mutate,
+  };
+}
+
+export function useUCPState(): SwrResult<UCPStateHandler> {
+  const currentFolder = useCurrentGameFolder();
+  const { t } = useTranslation('gui-download');
+
+  const { data, error, mutate } = useSWRImmutable(
+    SWR_KEYS.UCP_STATE,
+    async () => ({
+      state: (await Result.tryAsync(getUCPState, currentFolder))
+        .ok()
+        .getOrElse(UCPState.UNKNOWN),
+      activate: async () => {
+        const result = await activateUCP(currentFolder, t);
+        mutate();
+        return result;
+      },
+      deactivate: async () => {
+        const result = await deactivateUCP(currentFolder, t);
+        mutate();
+        return result;
+      },
+    })
+  );
+  return {
+    data,
+    isLoading: !data,
+    isError: !!error,
+    mutate,
+  };
+}
+
+export function useUCPVersion(): SwrResult<UCPVersion> {
+  const currentFolder = useCurrentGameFolder();
+  const { data, error, mutate } = useSWRImmutable(
+    SWR_KEYS.UCP_VERSION,
+    async () =>
+      (await loadUCPVersion(currentFolder))
+        .ok()
+        .getOrReceive(getEmptyUCPVersion)
   );
   return {
     data,

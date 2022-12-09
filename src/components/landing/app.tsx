@@ -8,11 +8,18 @@ import './app.css';
 import translateIcon from 'assets/misc/translate.svg';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
-import { useRecentFolders } from '../general/swr-hooks';
+import { Language, useLanguage, useRecentFolders } from '../general/swr-hooks';
 
 function LanguageSelect() {
-  const { t, i18n } = useTranslation('gui-landing');
+  const langResult = useLanguage();
+  const { t } = useTranslation('gui-landing');
 
+  // needs better loading site
+  if (langResult.isLoading) {
+    return <p>{t('gui-general:loading')}</p>;
+  }
+
+  const langHandler = langResult.data as Language;
   return (
     <div className="d-flex align-items-stretch">
       <div className="d-flex dark-dropdown ps-3 pe-2">
@@ -20,8 +27,13 @@ function LanguageSelect() {
       </div>
       <select
         className="dark-dropdown"
-        value={i18n.language}
-        onChange={(event) => i18n.changeLanguage(event.target.value)}
+        value={langHandler.getLanguage() as string}
+        onChange={(event) => {
+          const buttonTarget = event.target as HTMLSelectElement;
+          if (buttonTarget.value) {
+            langHandler.setLanguage(buttonTarget.value);
+          }
+        }}
       >
         {Object.entries(languages).map(([value, label]) => (
           <option key={value} value={value}>
@@ -148,7 +160,7 @@ function Landing() {
                   role="button"
                   title={recentFolder}
                 >
-                  <div className="death90"> {recentFolder}</div>
+                  <div className="death90">{recentFolder}</div>
                   <input
                     type="button"
                     style={{

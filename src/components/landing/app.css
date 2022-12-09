@@ -51,6 +51,12 @@ body {
   border: none !important;
 }
 
+.language-select-container img {
+  width: 100%;
+  height: 100%;
+  filter: invert(90%);
+}
+
 .dark-dropdown {
   background-color: rgba(0, 0, 0, 0.521);
   color: white !important;

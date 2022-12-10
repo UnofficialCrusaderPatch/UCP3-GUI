@@ -13,11 +13,10 @@ import { useTranslation } from 'react-i18next';
 import SvgHelper from 'components/general/svg-helper';
 import { useEffect, useState } from 'react';
 import {
-  registerForWindowResize,
-  unregisterForWindowResize,
+  registerTauriEventListener,
+  removeTauriEventListener,
 } from 'tauri/tauri-hooks';
-
-const TITLEBAR_RESIZE_KEY = 'titlebar.resize';
+import { TauriEvent } from '@tauri-apps/api/event';
 
 // is is currently not possible to get the title of the current window
 // so for now, this placeholder will be used
@@ -30,15 +29,16 @@ export default function Titlebar() {
 
   const currentWindow = getCurrentWindow();
   useEffect(() => {
-    registerForWindowResize(TITLEBAR_RESIZE_KEY, async () => {
+    const resizeFunc = async () => {
       setIsMax(await currentWindow.isMaximized());
-    });
+    };
+    registerTauriEventListener(TauriEvent.WINDOW_RESIZED, resizeFunc);
 
     // initial
     // eslint-disable-next-line promise/catch-or-return
     currentWindow.isMaximized().then((isMaximized) => setIsMax(isMaximized));
     return () => {
-      unregisterForWindowResize(TITLEBAR_RESIZE_KEY);
+      removeTauriEventListener(TauriEvent.WINDOW_RESIZED, resizeFunc);
     };
   }, [currentWindow]);
 
@@ -80,7 +80,8 @@ export default function Titlebar() {
       <div
         className="titlebar-button"
         id="titlebar-close"
-        onClick={() => currentWindow.close()}
+        // needed, since "close()"" currently does not trigger the event
+        onClick={() => currentWindow.emit(TauriEvent.WINDOW_CLOSE_REQUESTED)}
       >
         <SvgHelper
           href={`${closeIcon}#x-lg`}

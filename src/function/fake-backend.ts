@@ -35,10 +35,13 @@ export const ucpBackEnd = {
     await createNewWindow(gameFolder, {
       url: `index.html?window=editor&directory=${gameFolder}`,
       width: 1024,
-      height: 768,
       maximized: true,
       title: `${await getName()} - ${await getVersion()}`,
       focus: true,
+
+      // +30 height and no decorations for titlebar
+      height: 768 + 30,
+      decorations: false,
     });
   },
 

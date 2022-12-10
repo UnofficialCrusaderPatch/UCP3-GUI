@@ -2,8 +2,17 @@
 // currently it will just take care that only one window per path can be created
 // the main (landing) window is ignored)
 
-import { WebviewWindow, WindowOptions } from '@tauri-apps/api/window';
+import { TauriEvent } from '@tauri-apps/api/event';
+import {
+  appWindow,
+  WebviewWindow,
+  WindowOptions,
+} from '@tauri-apps/api/window';
 import { getHexHashOfString } from 'util/scripts/hash';
+
+export function getCurrentWindow() {
+  return appWindow;
+}
 
 export async function getWindowIfExists(
   windowName: string,
@@ -44,6 +53,7 @@ export async function createNewWindow(
     }
     // allows to set focus
     if (options.focus) {
+      await windowForThisPath.unminimize(); // does not properly return to maximize, no idea if my fault or bug
       await windowForThisPath.setFocus();
     }
     return;

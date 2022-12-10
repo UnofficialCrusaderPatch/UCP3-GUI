@@ -1,0 +1,53 @@
+.titlebar {
+  height: 100%;
+  background: #212529;
+  user-select: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.titlebar-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  pointer-events: none;
+}
+
+.titlebar-title {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 5px;
+  margin-right: auto;
+  pointer-events: none;
+  color: rgb(155, 155, 155);
+  overflow: hidden;
+}
+
+.titlebar-title div {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.titlebar-icon img {
+  height: 100%;
+}
+
+.titlebar-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 30px;
+  padding: 0px 10px 0px 10px;
+  color: rgb(155, 155, 155);
+}
+
+.titlebar-button:hover {
+  background: rgb(155, 155, 155);
+  color: #212529;
+}

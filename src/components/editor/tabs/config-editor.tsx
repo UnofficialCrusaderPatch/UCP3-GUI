@@ -10,9 +10,9 @@ import './config-editor.css';
 
 import { useTranslation } from 'react-i18next';
 import { GlobalState } from 'function/global-state';
-import { ucpBackEnd } from 'function/fake-backend';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
+import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import { UIFactory } from '../ui-elements';
 
 function saveConfig(
@@ -27,7 +27,7 @@ function saveConfig(
 
   console.log(finalConfig);
 
-  return ucpBackEnd.saveUCPConfig(finalConfig, folder, extensions);
+  return saveUCPConfig(finalConfig, folder, extensions);
 }
 
 export default function ConfigEditor(args: {
@@ -134,7 +134,7 @@ export default function ConfigEditor(args: {
                     config: { [key: string]: unknown };
                     order: string[];
                   };
-                } = await ucpBackEnd.loadConfigFromFile(result.get(), t);
+                } = await loadConfigFromFile(result.get(), t);
 
                 if (openedConfig.status !== 'OK') {
                   setConfigStatus(

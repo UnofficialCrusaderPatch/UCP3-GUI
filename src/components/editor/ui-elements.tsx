@@ -11,7 +11,6 @@ import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
 import { GlobalState } from 'function/global-state';
-import { ucpBackEnd } from 'function/fake-backend';
 
 import type {
   DisplayConfigElement,
@@ -19,6 +18,10 @@ import type {
   OptionEntry,
   SectionDescription,
 } from 'config/ucp/common';
+import {
+  extensionsToOptionEntries,
+  optionEntriesToHierarchical,
+} from 'config/ucp/extension-util';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
@@ -1458,10 +1461,10 @@ const UIFactory = {
 
   CreateSections(args: { readonly: boolean }) {
     const { activeExtensions } = useContext(GlobalState);
-    const optionEntries = ucpBackEnd
-      .extensionsToOptionEntries(activeExtensions)
-      .filter((o: OptionEntry) => o.hidden === undefined || o.hidden === false);
-    const definition = ucpBackEnd.optionEntriesToHierarchical(optionEntries);
+    const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
+      (o: OptionEntry) => o.hidden === undefined || o.hidden === false
+    );
+    const definition = optionEntriesToHierarchical(optionEntries);
     const { readonly } = args;
 
     const [t] = useTranslation(['gui-editor']);

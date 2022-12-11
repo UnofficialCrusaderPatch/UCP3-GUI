@@ -119,37 +119,14 @@ body {
   border: none;
 }
 
-.launch-button {
-  /* Other button styles here */
-  border-image: url("../../assets/ucp3/button_slice.png");
-  border-image-slice: 49% fill;
-  border-width: 20px;
-  border-style: solid;
-  background-color: transparent;  
-  color: white;
-  vertical-align: center;
+.launchbutton {
   width: 20%;
   height: 40px;
-  min-width: 100px;
-  padding-top: -20px;
 }
 
-.launch-button:hover {
-  /* Other button styles here */
-  border-image: url("../../assets/ucp3/button_slice_hover.png");
-  border-image-slice: 49% fill;
-  border-width: 20px;
-  border-style: solid;
-  background-color: transparent;
-  color: white;
-  vertical-align: center;
+.launchbutton:hover {
   width: 20%;
   height: 40px;
-  min-width: 100px;
-}
-
-.launchtext{
-  margin-top: -12px;
 }
 
 .recent-folders{

@@ -59,9 +59,9 @@ export default function StateButton(props: StateButtonProps) {
   );
 
   return (
-    <div className="row m-3">
+    <div className="m-2 ">
       <Button
-        className="col-4"
+        className="col-8 button "
         variant={buttonVariant}
         disabled={!active || !buttonActive}
         onClick={async () => {
@@ -76,7 +76,7 @@ export default function StateButton(props: StateButtonProps) {
           if (funcAfter) funcAfter();
         }}
       >
-        {buttonValues[buttonState]}
+        <div className="">{buttonValues[buttonState]} </div>
       </Button>
       <div className="col d-flex align-items-center">{divState}</div>
     </div>

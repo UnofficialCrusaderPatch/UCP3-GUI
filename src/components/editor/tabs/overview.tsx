@@ -16,6 +16,8 @@ import { useState } from 'react';
 import { Button, Container, Form, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
+import './overview.css';
+import '../../components.css';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -58,6 +60,7 @@ export default function Overview() {
   }
   return (
     <Container fluid className="overflow-auto">
+      <div className="background-image" />
       <div className="m-3">
         {t('gui-editor:overview.folder.version')} {ucpVersionString}
       </div>
@@ -180,7 +183,7 @@ export default function Overview() {
           Result.tryAsync(() => ucpBackEnd.checkForGUIUpdates(stateUpdate))
         }
       />
-      <div className="m-3">
+      <div className="m-5">
         <Modal show={show} onHide={handleClose} className="text-dark">
           <Modal.Header closeButton>
             <Modal.Title>{t('gui-general:require.reload.title')}</Modal.Title>

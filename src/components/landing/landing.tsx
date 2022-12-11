@@ -5,6 +5,7 @@ import { ucpBackEnd } from 'function/fake-backend';
 import { Tooltip } from 'react-bootstrap';
 
 import './landing.css';
+import '../components.css';
 import translateIcon from 'assets/misc/translate.svg';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
@@ -121,13 +122,13 @@ export default function Landing() {
             <button
               id="launchbutton"
               type="button"
-              className="launch-button"
+              className="button launchbutton"
               disabled={landingState.lauchButton !== true}
               onClick={() =>
                 ucpBackEnd.createEditorWindow(landingState.browseResult)
               }
             >
-              <div className="launchtext">{t('gui-landing:launch')}</div>
+              <div className="buttontext">{t('gui-landing:launch')}</div>
             </button>
           </div>
         </div>

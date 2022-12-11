@@ -1,177 +1,22 @@
 // This file fake the backend calls. They become synchronous, though.
 
-import { downloadDir } from '@tauri-apps/api/path';
-import { writeTextFile, writeBinaryFile, loadYaml } from 'tauri/tauri-files';
-import { open as dialogOpen, askInfo } from 'tauri/tauri-dialog';
-import { getName, getVersion } from '@tauri-apps/api/app';
+import { writeTextFile, loadYaml } from 'tauri/tauri-files';
+import { open as dialogOpen } from 'tauri/tauri-dialog';
 
 import yaml from 'yaml';
 
-import { fetch, ResponseType } from '@tauri-apps/api/http';
-
-import axios from 'axios';
-
-import semver from 'semver';
-import { dialog } from '@tauri-apps/api';
 import {
   DisplayConfigElement,
   Extension,
   OptionEntry,
   SectionDescription,
 } from 'config/ucp/common';
-import { BinaryFileContents } from '@tauri-apps/api/fs';
-import { UCP3_REPOS_MACHINE_TOKEN } from './download/github';
 import { Discovery } from './extensions/discovery';
-import { onFsExists } from '../tauri/tauri-files';
-import { createNewWindow } from '../tauri/tauri-window';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
-const uiCache: { [key: string]: { flat: object[]; hierarchical: object } } = {};
 
 // eslint-disable-next-line import/prefer-default-export
 export const ucpBackEnd = {
-  // create an editor window for a game folder
-  async createEditorWindow(gameFolder: string) {
-    await createNewWindow(gameFolder, {
-      url: `index.html?window=editor&directory=${gameFolder}`,
-      width: 1024,
-      maximized: true,
-      title: `${await getName()} - ${await getVersion()}`,
-      focus: true,
-
-      // +30 height and no decorations for titlebar
-      height: 768 + 30,
-      decorations: false,
-    });
-  },
-
-  async checkForGUIUpdates(setGuiUpdateStatus: (newText: string) => void) {
-    setGuiUpdateStatus('Contacting GitHub...');
-    const res: {
-      data: {
-        assets: {
-          browser_download_url: any;
-          name: string;
-          url: string;
-          id: string;
-        }[];
-      };
-    } = await axios.get(
-      `https://api.github.com/repos/UnofficialCrusaderPatch/UCP3-GUI/releases/tags/latest-tauri`,
-      {
-        auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
-      }
-    );
-
-    const latestJSONAsset = res.data.assets.filter(
-      (asset) => asset.name === 'latest.json'
-    )[0];
-
-    setGuiUpdateStatus('Fetching latest version info...');
-    const latestJSON: {
-      version: string;
-      pub_date: string;
-      notes: string;
-      platforms: {
-        'windows-x86_64': {
-          url: string;
-          signature: string;
-        };
-      };
-    } = (
-      await fetch(latestJSONAsset.url, {
-        method: 'GET',
-        responseType: ResponseType.JSON,
-        headers: {
-          Accept: 'application/octet-stream',
-          Authorization: `Basic ${window.btoa(
-            `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
-          )}`,
-        },
-      })
-    ).data as {
-      version: string;
-      pub_date: string;
-      notes: string;
-      platforms: {
-        'windows-x86_64': {
-          url: string;
-          signature: string;
-        };
-      };
-    };
-
-    console.log(latestJSON);
-
-    const curVer = await getVersion();
-    if (semver.lt(curVer, latestJSON.version)) {
-      const dialogResult = await askInfo(
-        `Do you want to download the latest GUI version?\n\n${latestJSON.version}`,
-        'Confirm'
-      );
-
-      if (dialogResult === true) {
-        const downloadPath = `${await downloadDir()}UCP3-GUI-${
-          latestJSON.version
-        }.exe`;
-        const guiExeAsset = res.data.assets.filter(
-          (asset) => asset.name === 'UCP3-GUI.exe'
-        )[0];
-
-        setGuiUpdateStatus('Downloading newer version...');
-        const response = await fetch(guiExeAsset.url, {
-          method: 'GET',
-          responseType: ResponseType.Binary, // important, because we are downloading inside a browser
-          headers: {
-            Accept: 'application/octet-stream',
-            Authorization: `Basic ${window.btoa(
-              `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
-            )}`,
-          },
-        });
-
-        if (response.ok) {
-          setGuiUpdateStatus('Writing file...');
-          await writeBinaryFile(
-            downloadPath,
-            response.data as BinaryFileContents
-          );
-        } else {
-          setGuiUpdateStatus('Failed...');
-          window.alert('Failed to download GUI update.');
-          return;
-        }
-
-        setGuiUpdateStatus(`New version downloaded to: ${downloadPath}`);
-        console.log(downloadPath);
-
-        // await dialog.message('New GUI version downloaded', { title: `New GUI exe downloaded to: ${downloadPath}`, type: 'info'});
-      } else {
-        setGuiUpdateStatus('');
-      }
-    } else {
-      await dialog.message('GUI is up to date', {
-        title: 'Up to date!',
-        type: 'info',
-      });
-    }
-  },
-
-  // Install or deinstalls UCP from these folders.
-  installUCPToGameFolder(gameFolder: number) {},
-  uninstallUCPFromGameFolder(gameFolder: number) {},
-
-  // Install extension
-  installExtension(extensionNameIncludingVersion: string) {},
-  uninstallExtension(extensionNameIncludingVersion: string) {},
-
-  // An installed extension will involve settings to be set, which means reloading the window.
-  rebuildOptionsWindow() {},
-
-  reloadWindow() {
-    window.location.reload();
-  },
-
   async getExtensions(gameFolder: string, locale?: string) {
     return Discovery.discoverExtensions(gameFolder, locale);
     // Premature optimization is the root of all evil.
@@ -309,11 +154,6 @@ export const ucpBackEnd = {
         order: config.order || [],
       },
     };
-  },
-
-  // Load configuration
-  loadUCPConfig() {
-    return {};
   },
 
   // Save configuration

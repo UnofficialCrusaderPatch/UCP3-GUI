@@ -9,6 +9,7 @@ import translateIcon from 'assets/misc/translate.svg';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import SvgHelper from 'components/general/svg-helper';
+import { createEditorWindow } from 'function/window-actions';
 import { Language, useLanguage, useRecentFolders } from '../general/swr-hooks';
 
 function LanguageSelect() {
@@ -123,9 +124,7 @@ export default function Landing() {
               type="button"
               className="launch-button"
               disabled={landingState.lauchButton !== true}
-              onClick={() =>
-                ucpBackEnd.createEditorWindow(landingState.browseResult)
-              }
+              onClick={() => createEditorWindow(landingState.browseResult)}
             >
               <div className="launchtext">{t('gui-landing:launch')}</div>
             </button>

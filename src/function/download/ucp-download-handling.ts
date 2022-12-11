@@ -2,9 +2,8 @@ import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { TFunction } from 'react-i18next';
 import { askInfo, showWarning } from 'tauri/tauri-dialog';
 import {
-  fetchBinary,
   getLocalDataFolder,
-  recursiveCreateDir,
+  recursiveCreateDirForFile,
   removeFile,
   writeBinaryFile,
   Error as FileUtilError,
@@ -13,11 +12,10 @@ import { extractZipToPath } from 'tauri/tauri-invoke';
 import Result from 'util/structs/result';
 import Option from 'util/structs/option';
 import { activateUCP, createRealBink } from 'function/ucp/ucp-state';
-import {
-  checkForLatestUCP3DevReleaseUpdate,
-  UCP3_REPOS_MACHINE_TOKEN,
-} from './github';
+import { getBinary } from 'tauri/tauri-http';
+import { checkForLatestUCP3DevReleaseUpdate } from './github';
 import { loadUCPVersion } from '../ucp/ucp-version';
+import { GITHUB_AUTH_HEADER } from './download-enums';
 
 export async function installUCPFromZip(
   zipFilePath: string,
@@ -83,15 +81,12 @@ export async function checkForUCP3Updates(
   statusCallback(t('gui-download:ucp.download.download'));
   const downloadPath = `${await getLocalDataFolder()}/ucp-zip/${result.file}`;
   try {
-    (await recursiveCreateDir(downloadPath)).throwIfErr();
+    (await recursiveCreateDirForFile(downloadPath)).throwIfErr();
 
-    const response = await fetchBinary<BinaryFileContents>(result.downloadUrl, {
-      headers: {
-        Authorization: `Basic ${window.btoa(
-          `ucp3-machine:${UCP3_REPOS_MACHINE_TOKEN}`
-        )}`,
-      },
-    });
+    const response = await getBinary<BinaryFileContents>(
+      result.downloadUrl,
+      GITHUB_AUTH_HEADER
+    );
     if (!response.ok) {
       throw new Error('Failed to fetch update.');
     }

@@ -4,10 +4,11 @@ import languages from 'localization/languages.json';
 import { ucpBackEnd } from 'function/fake-backend';
 import { Tooltip } from 'react-bootstrap';
 
-import './app.css';
+import './landing.css';
 import translateIcon from 'assets/misc/translate.svg';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
+import SvgHelper from 'components/general/svg-helper';
 import { Language, useLanguage, useRecentFolders } from '../general/swr-hooks';
 
 function LanguageSelect() {
@@ -23,7 +24,10 @@ function LanguageSelect() {
   return (
     <div className="d-flex align-items-stretch">
       <div className="d-flex dark-dropdown ps-3 pe-2">
-        <img src={translateIcon} alt={t('gui-general:select.language')} />
+        <SvgHelper
+          href={`${translateIcon}#translate`}
+          title={t('gui-landing:select.language')}
+        />
       </div>
       <select
         className="dark-dropdown"
@@ -45,7 +49,7 @@ function LanguageSelect() {
   );
 }
 
-function Landing() {
+export default function Landing() {
   const [landingState, setLandingState] = useState({
     lauchButton: false,
     browseResult: '',
@@ -81,15 +85,14 @@ function Landing() {
   }
 
   return (
-    <div className="h-100">
-      <div data-tauri-drag-region className="titlebar" />
+    <div className="h-100 position-relative">
       <div className="background-image" />
-      <div className="d-flex justify-content-end">
-        <div className="language-select-container">
-          <LanguageSelect />
-        </div>
+      <div className="language-select-container">
+        <LanguageSelect />
       </div>
-      <div className="landingContainer">
+
+      <div className="margin-blocker" />
+      <div className="landing-container">
         <div className="mb-5">
           <h1 className="mb-4" style={{ marginTop: 60 }}>
             {t('gui-landing:title')}
@@ -183,16 +186,6 @@ function Landing() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default function App() {
-  const [t] = useTranslation(['gui-landing']);
-
-  return (
-    <div className="vh-100 d-flex flex-column justify-content-center">
-      <Landing key="landing" />
     </div>
   );
 }

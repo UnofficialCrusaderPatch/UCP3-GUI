@@ -10,20 +10,6 @@ body {
   overflow: auto;
 }
 
-.titlebar {
-  background: #212529;
-}
-
-.landing-app {
-  position: relative;
-  height: 100vh;
-  font-family: sans-serif;
-  overflow-y: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .btn-gyntsmaller {
   font-size: 10px;
 }
@@ -51,10 +37,12 @@ body {
   border: none !important;
 }
 
-.language-select-container img {
-  width: 100%;
-  height: 100%;
-  filter: invert(90%);
+.language-select-container svg {
+  height: 1.2em;
+  width: 1.2em;
+  margin-top: auto;
+  margin-bottom: auto;
+  color: white;
 }
 
 .dark-dropdown {
@@ -85,16 +73,16 @@ body {
   background-image: url('../../assets/ucp3/bg.png');
   background-size: cover;
   background-position: center;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
+  width: 100%;
   position: absolute;
   z-index: -1;
 }
 
-.landingContainer {
-  margin-left: 3vw;
-  margin-right: 3vw;
-  margin-top: 5vh;
+.landing-container {
+  margin-left: 3%;
+  margin-right: 3%;
+  margin-top: 5%;
 }
 
 .textInput {
@@ -170,4 +158,8 @@ body {
   border-width: 4px;
   border-style: solid;
   background-color: transparent;
+}
+
+.margin-blocker {
+  display: flex;
 }

@@ -14,8 +14,8 @@ i18next
       import(`./sources/${language}/${namespace}.yaml?raw`)
         .then(({ default: resources }) =>
           Result.try<unknown, unknown, [string]>(yamlParse, resources).consider(
-            (ok) => callback(null, ok),
-            (err) => callback(err, null)
+            (ok) => callback(null, ok as object),
+            (err) => callback(err as Error, null)
           )
         )
         .catch((error) => callback(error, null));

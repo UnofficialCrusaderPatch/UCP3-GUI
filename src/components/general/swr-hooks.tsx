@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { KeyedMutator } from 'swr';
 import useSWRImmutable from 'swr/immutable'; // only fetches once
-import { Event, UnlistenFn } from '@tauri-apps/api/event';
+import { Event, TauriEvent, UnlistenFn } from '@tauri-apps/api/event';
 import { onLanguageChange } from 'tauri/tauri-listen';
 import { getGuiConfigLanguage, setGuiConfigLanguage } from 'tauri/tauri-invoke';
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import {
-  registerForWindowClose,
-  unregisterForWindowClose,
+  registerTauriEventListener,
+  removeTauriEventListener,
 } from 'tauri/tauri-hooks';
 import {
   getUCPState,
@@ -21,6 +21,7 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
+import { useRef, useState } from 'react';
 import { useCurrentGameFolder } from './hooks';
 
 export interface SwrResult<T> {
@@ -51,8 +52,6 @@ const SWR_KEYS = {
   UCP_VERSION: 'ucp.version.handler',
 };
 
-const LANG_WINDOW_CLOSE_KEY = 'LANG';
-
 // eslint-disable-next-line import/prefer-default-export
 export function useRecentFolders(): SwrResult<RecentFolderHelper> {
   // normal swr, since refetching is ok
@@ -75,6 +74,7 @@ export function useRecentFolders(): SwrResult<RecentFolderHelper> {
 }
 
 export function useLanguage(): SwrResult<Language> {
+  const unregisterFunc = useRef<() => Promise<void>>();
   const { i18n } = useTranslation();
 
   const { data, error, mutate } = useSWRImmutable(
@@ -88,8 +88,19 @@ export function useLanguage(): SwrResult<Language> {
           i18n.changeLanguage(lang || undefined);
         }
       );
-      unregisterForWindowClose(LANG_WINDOW_CLOSE_KEY);
-      registerForWindowClose(LANG_WINDOW_CLOSE_KEY, async () => unlistenFunc());
+
+      if (unregisterFunc.current) {
+        removeTauriEventListener(
+          TauriEvent.WINDOW_CLOSE_REQUESTED,
+          unregisterFunc.current
+        );
+      }
+      const newUnregisterFunc = async () => unlistenFunc();
+      registerTauriEventListener(
+        TauriEvent.WINDOW_CLOSE_REQUESTED,
+        newUnregisterFunc
+      );
+      unregisterFunc.current = newUnregisterFunc;
       return {
         getLanguage: () => lang,
         setLanguage: setGuiConfigLanguage,

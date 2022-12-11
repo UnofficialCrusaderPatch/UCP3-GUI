@@ -1,7 +1,7 @@
 /* @import '~bootstrap'; */
 
 .editor-app {
-  height: 100vh;
+  height: 100%;
   font-family: sans-serif;
   overflow-y: hidden;
   display: flex;

@@ -80,10 +80,11 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 630,
         "resizable": true,
         "title": "UCP3-GUI",
-        "width": 800
+        "width": 800,
+        "decorations": false
       }
     ]
   }

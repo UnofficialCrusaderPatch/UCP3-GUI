@@ -1,3 +1,4 @@
+import { showError } from 'tauri/tauri-dialog';
 import {
   loadZip,
   closeZip,
@@ -6,8 +7,16 @@ import {
   getZipEntryAsText,
 } from 'tauri/tauri-invoke';
 
-// eslint-disable-next-line import/prefer-default-export
-export class ZipHandler {
+const ZIP_GC_REGISTRY = new FinalizationRegistry((id: number) => {
+  closeZip(id).catch((err) =>
+    showError(
+      `Error cleaning up zip handler:\n${err}\nWas close called on this GC collected zip?`,
+      'Zip Handler'
+    )
+  );
+});
+
+export default class ZipHandler {
   #path: string;
 
   #id: number;
@@ -33,6 +42,14 @@ export class ZipHandler {
   static async open(path: string): Promise<ZipHandler> {
     const id = await loadZip(path);
     return new ZipHandler(path, id);
+  }
+
+  // if this is called, the close is triggered when the object is GC
+  static async openGC(path: string): Promise<ZipHandler> {
+    const id = await loadZip(path);
+    const handler = new ZipHandler(path, id);
+    ZIP_GC_REGISTRY.register(handler, id);
+    return handler;
   }
 
   async close() {

@@ -1,7 +1,5 @@
-import { ZipHandler } from 'util/structs/zip-handler';
+import ZipHandler from 'util/structs/zip-handler';
 import ExtensionHandle from './extension-handle';
-
-const REGISTRY = new FinalizationRegistry((zip: ZipHandler) => zip.close());
 
 class RustZipExtensionHandle implements ExtensionHandle {
   #zip: ZipHandler;
@@ -11,11 +9,10 @@ class RustZipExtensionHandle implements ExtensionHandle {
   private constructor(path: string, zip: ZipHandler) {
     this.path = path;
     this.#zip = zip;
-    REGISTRY.register(this, this.#zip);
   }
 
   static async fromPath(path: string) {
-    return new RustZipExtensionHandle(path, await ZipHandler.open(path));
+    return new RustZipExtensionHandle(path, await ZipHandler.openGC(path));
   }
 
   async getTextContents(path: string): Promise<string> {

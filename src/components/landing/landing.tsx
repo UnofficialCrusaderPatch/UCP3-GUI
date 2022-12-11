@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import languages from 'localization/languages.json';
-import { ucpBackEnd } from 'function/fake-backend';
-import { Tooltip } from 'react-bootstrap';
 
 import './landing.css';
 import translateIcon from 'assets/misc/translate.svg';
@@ -10,6 +8,7 @@ import translateIcon from 'assets/misc/translate.svg';
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import SvgHelper from 'components/general/svg-helper';
 import { createEditorWindow } from 'function/window-actions';
+import { openFolderDialog } from 'tauri/tauri-dialog';
 import { Language, useLanguage, useRecentFolders } from '../general/swr-hooks';
 
 function LanguageSelect() {
@@ -108,14 +107,11 @@ export default function Landing() {
                 className="form-control"
                 readOnly
                 role="button"
-                onClick={async () => {
-                  const folder = await ucpBackEnd.openFolderDialog(
-                    landingState.browseResult
-                  );
-                  if (folder !== undefined && folder.length > 0) {
-                    updateCurrentFolderSelectState(folder);
-                  }
-                }}
+                onClick={async () =>
+                  (await openFolderDialog(landingState.browseResult)).ifPresent(
+                    updateCurrentFolderSelectState
+                  )
+                }
                 value={landingState.browseResult}
               />
             </div>

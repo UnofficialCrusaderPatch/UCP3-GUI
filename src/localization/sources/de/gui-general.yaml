@@ -1,3 +1,6 @@
 confirm: "Bestätigen"
+file.all: "Alle Dateien"
+file.config: "Konfigurationsdateien"
+file.zip: "Zip-Dateien"
 loading: "Laden..."
 require.reload.title: "Neuladen erforderlich"

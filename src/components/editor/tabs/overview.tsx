@@ -10,13 +10,13 @@ import {
   checkForUCP3Updates,
   installUCPFromZip,
 } from 'function/download/ucp-download-handling';
-import { ucpBackEnd } from 'function/fake-backend';
 import { UCPState } from 'function/ucp/ucp-state';
 import { UCPVersion } from 'function/ucp/ucp-version';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
 import { Button, Container, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
 
 export default function Overview() {
@@ -129,16 +129,16 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => {
           setOverviewButtonActive(false);
-          const zipFilePath = await ucpBackEnd.openFileDialog(currentFolder, [
-            { name: 'Zip files', extensions: ['zip'] },
-            { name: 'All files', extensions: ['*'] },
+          const zipFilePath = await openFileDialog(currentFolder, [
+            { name: t('gui-general:file.zip'), extensions: ['zip'] },
+            { name: t('gui-general:file.all'), extensions: ['*'] },
           ]);
 
-          if (zipFilePath === '') return Result.err('');
+          if (zipFilePath.isEmpty()) return Result.err('');
 
           // TODO: improve feedback
           const zipInstallResult = await installUCPFromZip(
-            zipFilePath,
+            zipFilePath.get(),
             currentFolder,
             // can be used to transform -> although splitting into more components might be better
             (status) => stateUpdate(status),

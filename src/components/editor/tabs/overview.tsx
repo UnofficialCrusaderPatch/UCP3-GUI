@@ -5,6 +5,7 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'components/general/swr-hooks';
+import { checkForGUIUpdates } from 'function/download/gui-update';
 import {
   checkForUCP3Updates,
   installUCPFromZip,
@@ -12,8 +13,9 @@ import {
 import { ucpBackEnd } from 'function/fake-backend';
 import { UCPState } from 'function/ucp/ucp-state';
 import { UCPVersion } from 'function/ucp/ucp-version';
+import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
-import { Button, Container, Form, Modal } from 'react-bootstrap';
+import { Button, Container, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
 
@@ -177,7 +179,7 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) =>
-          Result.tryAsync(() => ucpBackEnd.checkForGUIUpdates(stateUpdate))
+          Result.tryAsync(() => checkForGUIUpdates(stateUpdate, t))
         }
       />
       <div className="m-3">
@@ -196,7 +198,7 @@ export default function Overview() {
               variant="primary"
               onClick={(event) => {
                 handleClose();
-                ucpBackEnd.reloadWindow();
+                reloadCurrentWindow();
               }}
             >
               {t('gui-general:reload')}

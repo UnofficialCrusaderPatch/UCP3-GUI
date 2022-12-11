@@ -14,15 +14,10 @@ import {
   FsDirOptions,
 } from '@tauri-apps/api/fs';
 import {
-  fetch,
-  FetchOptions,
-  HttpVerb,
-  Response,
-  ResponseType,
-} from '@tauri-apps/api/http';
-import {
   dataDir,
   dirname,
+  downloadDir,
+  join,
   localDataDir,
   normalize as normalizePath,
   resolve,
@@ -62,11 +57,15 @@ export async function resolvePath(...paths: string[]): Promise<string> {
   return resolve(...paths);
 }
 
-export async function recursiveCreateDir(
-  path: string
+// WARNING: directly writting in DOWNLOAD for example does not work,
+// since interacting with this folder (like in this function), is forbidden,
+// which might be better, actually
+export async function recursiveCreateDirForFile(
+  filepath: string
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
-    await createDir(await dirname(path), { recursive: true });
+    const folderpath = await dirname(filepath); // may cause issues if not file path
+    await createDir(folderpath, { recursive: true });
   });
 }
 
@@ -87,7 +86,7 @@ export async function writeTextFile(
   contents: string
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
-    (await recursiveCreateDir(path)).throwIfErr();
+    (await recursiveCreateDirForFile(path)).throwIfErr();
     await tauriWriteTextFile(path, contents);
   });
 }
@@ -97,7 +96,7 @@ export async function writeBinaryFile(
   contents: BinaryFileContents
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
-    (await recursiveCreateDir(path)).throwIfErr();
+    (await recursiveCreateDirForFile(path)).throwIfErr();
     await tauriWriteBinaryFile(path, contents);
   });
 }
@@ -158,33 +157,18 @@ export async function writeJson(
   });
 }
 
-export async function fetchBinary<T>(
-  url: string,
-  addOptions?:
-    | (Omit<FetchOptions, 'method'> & { method?: HttpVerb })
-    | undefined
-): Promise<Response<T>> {
-  let options: FetchOptions = {
-    method: 'GET',
-    responseType: ResponseType.Binary, // important, because we are downloading inside a browser
-    headers: {
-      Accept: 'application/octet-stream',
-    },
-  };
-  // merge with addOptions, with special handling for the records
-  // others are overwritten
-  if (addOptions) {
-    const headersToUse = { ...options.headers, ...addOptions?.headers };
-    options = { ...options, ...addOptions };
-    options.headers = headersToUse;
-  }
-  return fetch<T>(url, options);
-}
-
 // GET FOLDER
 
 export async function readDir(dir: string, options?: FsDirOptions | undefined) {
   return Result.tryAsync(tauriReadDir, dir, options);
+}
+
+export async function getDownloadFolder() {
+  return downloadDir();
+}
+
+export async function joinPaths(...paths: string[]) {
+  return join(...paths);
 }
 
 export const getRoamingDataFolder: () => Promise<string> = (() => {
@@ -208,7 +192,6 @@ export const getExeFolder: () => Promise<string> = (() => {
       return f;
     }
     f = `${await normalizePath('.')}`;
-    console.log(`Executable path: ${f}`);
     return f;
   };
 })();

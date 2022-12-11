@@ -36,7 +36,9 @@ import Result from 'util/structs/result';
 
 // TYPES
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Yaml = any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Json = any;
 export type Error = unknown;
 

@@ -4,7 +4,7 @@
 import { Form } from 'react-bootstrap';
 
 import { useContext, useEffect, useState } from 'react';
-import { open as dialogOpen, save as dialogSave } from 'tauri/tauri-dialog';
+import { openFileDialog, save as dialogSave } from 'tauri/tauri-dialog';
 
 import './config-editor.css';
 
@@ -69,10 +69,12 @@ export default function ConfigEditor(args: {
   useEffect(() => {
     setConfigStatus(
       activeExtensions.length === 0
-        ? `Nothing to display, no extensions are active: ${activeExtensions.length}`
+        ? t('gui-editor:config.status.nothing.active', {
+            number: activeExtensions.length,
+          })
         : ''
     );
-  }, [activeExtensions]);
+  }, [activeExtensions, t]);
 
   return (
     <div className="h-100 d-flex flex-column">
@@ -114,18 +116,15 @@ export default function ConfigEditor(args: {
               className="col-auto btn btn-primary mx-1"
               type="button"
               onClick={async () => {
-                const result = await dialogOpen({
-                  directory: false,
-                  multiple: false,
-                  defaultPath: gameFolder,
-                  filters: [
-                    { name: 'All Files', extensions: ['*'] },
-                    { name: 'Config files', extensions: ['yml', 'yaml'] },
-                  ],
-                });
-
-                if (result === null) {
-                  setConfigStatus('No file selected');
+                const result = await openFileDialog(gameFolder, [
+                  {
+                    name: t('gui-general:file.config'),
+                    extensions: ['yml', 'yaml'],
+                  },
+                  { name: t('gui-general:file.all'), extensions: ['*'] },
+                ]);
+                if (result.isEmpty()) {
+                  setConfigStatus(t('gui-editor:config.status.no.file'));
                 }
 
                 const openedConfig: {
@@ -135,7 +134,7 @@ export default function ConfigEditor(args: {
                     config: { [key: string]: unknown };
                     order: string[];
                   };
-                } = await ucpBackEnd.loadConfigFromFile(result as string);
+                } = await ucpBackEnd.loadConfigFromFile(result.get(), t);
 
                 if (openedConfig.status !== 'OK') {
                   setConfigStatus(
@@ -145,7 +144,7 @@ export default function ConfigEditor(args: {
                 }
 
                 if (openedConfig.result === undefined) {
-                  setConfigStatus(`Failed to load config: unknown error`);
+                  setConfigStatus(t('gui-editor:config.status.failed.unknown'));
                   return;
                 }
 
@@ -162,9 +161,11 @@ export default function ConfigEditor(args: {
                     );
                     if (options.length === 0) {
                       setConfigStatus(
-                        `Could not import configuration. Missing extension: ${e}`
+                        t('gui-editor:config.status.missing.extension', {
+                          extension: e,
+                        })
                       );
-                      return; // `Could not import configuration. Missing extension: ${e}`;
+                      return;
                     }
                     es.push(options[0]);
                   }
@@ -240,7 +241,7 @@ export default function ConfigEditor(args: {
               onClick={async () => {
                 let filePath = await dialogSave({});
                 if (filePath === null || filePath === undefined) {
-                  setConfigStatus('Config export cancelled');
+                  setConfigStatus(t('gui-editor:config.status.cancelled'));
                   return;
                 }
 
@@ -252,7 +253,9 @@ export default function ConfigEditor(args: {
                   configurationTouched,
                   activeExtensions
                 )
-                  .then(() => setConfigStatus(`Configuration exported!`))
+                  .then(() =>
+                    setConfigStatus(t('gui-editor:config.status.exported'))
+                  )
                   .catch((e) => {
                     throw new Error(e);
                   });

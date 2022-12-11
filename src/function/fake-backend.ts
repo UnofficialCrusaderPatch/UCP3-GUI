@@ -11,6 +11,8 @@ import {
   OptionEntry,
   SectionDescription,
 } from 'config/ucp/common';
+import Result from 'util/structs/result';
+import { TFunction } from 'react-i18next';
 import { Discovery } from './extensions/discovery';
 
 const extensionsCache: { [key: string]: Extension[] } = {};
@@ -83,56 +85,40 @@ export const ucpBackEnd = {
     return uiCollection;
   },
 
-  async openFileDialog(
-    gameFolder: string,
-    filters: { name: string; extensions: string[] }[]
-  ) {
-    const result = await dialogOpen({
-      directory: false,
-      multiple: false,
-      defaultPath: gameFolder,
-      filters: filters || [{ name: 'All Files', extensions: ['*'] }],
-    });
+  async loadConfigFromFile(filePath: string, t: TFunction) {
+    const configRes: Result<
+      {
+        order: string[];
+        modules: {
+          [key: string]: {
+            active: boolean;
+            version: string;
+            options: { [key: string]: unknown };
+          };
+        };
+        plugins: {
+          [key: string]: {
+            active: boolean;
+            version: string;
+            options: { [key: string]: unknown };
+          };
+        };
+      },
+      unknown
+    > = await loadYaml(filePath); // will only be one
 
-    if (result === null) {
-      window.alert('Opening: Operation cancelled');
-      return '';
+    if (configRes.isErr()) {
+      return {
+        status: 'FAIL',
+        message: `${configRes.err().get()}`,
+      };
     }
-    return result as string;
-  },
 
-  async openFolderDialog(gameFolder: string): Promise<string | undefined> {
-    const result = await dialogOpen({
-      directory: true,
-      multiple: false,
-      defaultPath: gameFolder,
-    });
-    return result !== null ? (result as string) : undefined;
-  },
-
-  async loadConfigFromFile(filePath: string) {
-    const config: {
-      order: string[];
-      modules: {
-        [key: string]: {
-          active: boolean;
-          version: string;
-          options: { [key: string]: unknown };
-        };
-      };
-      plugins: {
-        [key: string]: {
-          active: boolean;
-          version: string;
-          options: { [key: string]: unknown };
-        };
-      };
-    } = (await loadYaml(filePath as string)).getOrThrow(); // will only be one
-
+    const config = configRes.getOrThrow();
     if (config.modules === undefined && config.plugins === undefined) {
       return {
         status: 'FAIL',
-        message: 'Not a valid config file',
+        message: t('gui-editor:config.not.valid'),
       };
     }
 

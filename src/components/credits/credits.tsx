@@ -1,0 +1,43 @@
+import {
+  OverlayContentProps,
+  useOverlayContent,
+} from 'components/overlay/overlay';
+import { useTranslation } from 'react-i18next';
+
+import './credits.css';
+
+// eslint-disable-next-line import/no-unresolved
+import credits from './credits.txt?raw';
+
+function Credits(props: OverlayContentProps) {
+  const { closeFunc } = props;
+
+  const [t] = useTranslation(['gui-general', 'gui-landing']);
+
+  return (
+    <div className="flex-default">
+      <div className="credits-container">
+        <h1 className="credits-title">{t('gui-landing:credits.title')}</h1>
+        <div className="credits-text">{credits}</div>
+        <button type="button" className="credits-close" onClick={closeFunc}>
+          {t('gui-general:close')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function CreditsButton() {
+  const { setOverlayContent } = useOverlayContent();
+
+  const [t] = useTranslation(['gui-landing']);
+  return (
+    <button
+      type="button"
+      className="credits-button"
+      onClick={() => setOverlayContent(Credits)}
+    >
+      {t('gui-landing:credits.open')}
+    </button>
+  );
+}

@@ -10,9 +10,10 @@ import { createEditorWindow } from 'function/window-actions';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import { useRecentFolders } from './general/swr-hooks';
 import LanguageSelect from './language-select/language-select';
-import { Overlay } from './overlay/overlay';
+import { Overlay, useOverlayContent } from './overlay/overlay';
 
 import './main-page.css';
+import CreditsButton from './credits/credits';
 
 export default function Main() {
   const [landingState, setLandingState] = useState({
@@ -23,6 +24,8 @@ export default function Main() {
 
   // lang
   const [t] = useTranslation(['gui-general', 'gui-landing']);
+
+  const { setOverlayContent } = useOverlayContent();
 
   // needs better loading site
   if (recentFolderResult.isLoading) {
@@ -60,6 +63,7 @@ export default function Main() {
   return (
     <>
       <div className="background-image" />
+      <CreditsButton />
       <LanguageSelect />
       <Overlay />
 

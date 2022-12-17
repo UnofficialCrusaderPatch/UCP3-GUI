@@ -1,0 +1,6 @@
+/* Base file for all CSS variables. Might be used later to get different stylings */
+
+:root {
+    --ucp-main-grey: rgb(155, 155, 155);
+    --ucp-main-brown: #212529;
+}

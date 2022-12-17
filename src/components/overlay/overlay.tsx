@@ -1,24 +1,27 @@
 import { createGlobalState } from 'react-hooks-global-state';
 import './overlay.css';
 
-export type OverlayContent = (props: { closeFunc: () => void }) => JSX.Element;
+export type OverlayContentProps = { closeFunc: () => void };
+export type OverlayContent = (props: OverlayContentProps) => JSX.Element;
 
 export interface OverlayContentContainer {
-  overlayContent: OverlayContent | null;
+  getOverlayContent: () => OverlayContent | null;
   setOverlayContent: (overlayContent: OverlayContent | null) => void;
 }
 
 const OVERLAY_CONTENT_KEY = 'overlayContent';
 const GLOBAL_OVERLAY_CONTENT_STATE = createGlobalState<{
-  overlayContent: OverlayContent | null;
+  overlayContent: { component: OverlayContent | null } | null;
 }>({ overlayContent: null });
 
 export function useOverlayContent(): OverlayContentContainer {
-  const [overlayContent, setOverlayContent] =
+  const [overlayContentContainer, setOverlayContent] =
     GLOBAL_OVERLAY_CONTENT_STATE.useGlobalState(OVERLAY_CONTENT_KEY);
   return {
-    overlayContent,
-    setOverlayContent,
+    getOverlayContent: () =>
+      overlayContentContainer ? overlayContentContainer.component : null,
+    setOverlayContent: (overlayContent) =>
+      setOverlayContent({ component: overlayContent }),
   };
 }
 
@@ -28,13 +31,14 @@ export function Overlay() {
   const closeFunc = () => overlayContentContainer.setOverlayContent(null);
 
   // no overlay
-  if (!overlayContentContainer.overlayContent) {
+  const OverlayContent = overlayContentContainer.getOverlayContent();
+  if (!OverlayContent) {
     return null;
   }
 
   return (
     <div className="overlay">
-      <overlayContentContainer.overlayContent closeFunc={closeFunc} />
+      <OverlayContent closeFunc={closeFunc} />
     </div>
   );
 }

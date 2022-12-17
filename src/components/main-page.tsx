@@ -11,6 +11,8 @@ export default function Main() {
     <>
       <CreditsButton />
       <LanguageSelect />
+      {/* Last, to hide everything */}
+      <Overlay />
       <div className="flex-default">
         <div className="tabs-wrapper">
           <UcpTabs />
@@ -19,8 +21,6 @@ export default function Main() {
           <Footer />
         </div>
       </div>
-      {/* Last, to hide everything */}
-      <Overlay />
     </>
   );
 }

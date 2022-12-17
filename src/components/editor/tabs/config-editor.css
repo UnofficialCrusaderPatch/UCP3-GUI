@@ -1,13 +1,5 @@
 /* @import '~bootstrap'; */
 
-.editor-app {
-  height: 100%;
-  font-family: sans-serif;
-  overflow-y: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
 .form-control:disabled {
   opacity: 0.5;
 }

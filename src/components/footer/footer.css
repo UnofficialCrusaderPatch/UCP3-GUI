@@ -1,0 +1,10 @@
+.footer {
+  border-top: 8px solid;
+  border-image: var(--ucp-main-border-image);
+  background-color: var(--ucp-main-brown);
+  cursor: pointer;
+}
+
+.footer-closed {
+  height: 0px;
+}

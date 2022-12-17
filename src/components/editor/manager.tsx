@@ -24,7 +24,7 @@ import ConfigEditor from './tabs/config-editor';
 
 import ExtensionManager from './tabs/extension-manager';
 import Overview from './tabs/overview';
-import Footer from './footer';
+import Footer from '../footer/footer';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};

@@ -1,10 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import ViewManager from 'components/view-manager';
-import 'localization/i18n';
+import Window from 'components/window';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <ViewManager />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Window />} />
+        <Route path="/index.html" element={<Window />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );

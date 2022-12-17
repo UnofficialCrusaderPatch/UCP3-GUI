@@ -1,3 +1,5 @@
+@import 'bootstrap';
+
 #root{
   height: 100vh;
 }
@@ -7,5 +9,6 @@
 }
 
 .page-main{
+  position: relative;
   height: calc(100vh - 30px);
 }

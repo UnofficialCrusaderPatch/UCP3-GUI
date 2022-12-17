@@ -21,7 +21,7 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useCurrentGameFolder } from './hooks';
 
 export interface SwrResult<T> {
@@ -45,7 +45,7 @@ export interface UCPStateHandler {
 }
 
 // keys are used to identify and cache the request, so they need to be unique for different sources
-const SWR_KEYS = {
+export const SWR_KEYS = {
   RECENT_FOLDERS: 'ucp.gui.recent.folders',
   LANGUAGE_LOAD: 'ucp.lang.load',
   UCP_STATE: 'ucp.state.handler',
@@ -74,7 +74,9 @@ export function useRecentFolders(): SwrResult<RecentFolderHelper> {
 }
 
 export function useLanguage(): SwrResult<Language> {
+  // this is likely only used by the context that triggered the last mutation
   const unregisterFunc = useRef<() => Promise<void>>();
+
   const { i18n } = useTranslation();
 
   const { data, error, mutate } = useSWRImmutable(

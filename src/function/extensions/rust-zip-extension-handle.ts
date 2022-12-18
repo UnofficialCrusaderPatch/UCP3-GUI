@@ -1,47 +1,36 @@
-import {
-  closeZip,
-  existZipEntry,
-  getZipEntryAsBinary,
-  getZipEntryAsText,
-  loadZip,
-} from 'tauri/tauri-invoke';
+import ZipHandler from 'util/structs/zip-handler';
 import ExtensionHandle from './extension-handle';
 
-const REGISTRY = new FinalizationRegistry((zipID: number) => {
-  closeZip(zipID);
-});
-
 class RustZipExtensionHandle implements ExtensionHandle {
+  #zip: ZipHandler;
+
   path: string;
 
-  zip: number;
-
-  constructor(path: string, zip: number) {
+  private constructor(path: string, zip: ZipHandler) {
     this.path = path;
-    this.zip = zip;
-    REGISTRY.register(this, this.zip);
+    this.#zip = zip;
   }
 
   static async fromPath(path: string) {
-    return new RustZipExtensionHandle(path, await loadZip(path));
+    return new RustZipExtensionHandle(path, await ZipHandler.openGC(path));
   }
 
   async getTextContents(path: string): Promise<string> {
     if (!(await this.doesEntryExist(path))) {
       throw Error(`/File does not exist: ${path}`);
     }
-    return getZipEntryAsText(this.zip, path);
+    return this.#zip.getEntryAsText(path);
   }
 
   async getBinaryContents(path: string): Promise<Uint8Array> {
     if (!(await this.doesEntryExist(path))) {
       throw Error(`/File does not exist: ${path}`);
     }
-    return getZipEntryAsBinary(this.zip, path);
+    return this.#zip.getEntryAsBinary(path);
   }
 
   async doesEntryExist(path: string): Promise<boolean> {
-    return existZipEntry(this.zip, path);
+    return this.#zip.doesEntryExist(path);
   }
 }
 

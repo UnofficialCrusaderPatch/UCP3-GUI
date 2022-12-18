@@ -1,8 +1,5 @@
 import axios from 'axios';
-
-const UCP3_REPO_URL = 'UnofficialCrusaderPatch/UnofficialCrusaderPatch3';
-const UCP3_REPO_URL_API = `https://api.github.com/repos/${UCP3_REPO_URL}`;
-const UCP3_REPOS_MACHINE_TOKEN = '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';
+import { UCP3_REPOS_MACHINE_TOKEN, UCP3_REPO_URL_API } from './download-enums';
 
 async function checkForLatestUCP3DevReleaseUpdate(
   currentSHA: string

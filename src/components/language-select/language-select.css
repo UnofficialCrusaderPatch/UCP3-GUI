@@ -1,0 +1,33 @@
+
+.language-select-container {
+  position: absolute;
+  top: 8px;
+  right:  12px;
+}
+
+.language-select-container select {
+  font-size: 16px;
+  padding: 4px 16px;
+  margin-right: 5px;
+  color: white !important;
+  border: none !important;
+}
+
+.language-select-container svg {
+  height: 1.2em;
+  width: 1.2em;
+  margin-top: auto;
+  margin-bottom: auto;
+  color: white;
+}
+
+.dark-dropdown {
+  background-color: rgba(0, 0, 0, 0.521);
+  color: white !important;
+  border: none !important;
+}
+
+.dark-dropdown option {
+  background-color: rgba(0, 0, 0, 0.800) !important;
+  color: white;
+}

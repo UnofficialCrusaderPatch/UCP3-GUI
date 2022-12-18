@@ -13,15 +13,18 @@ import {
   ExtensionsState,
   GlobalState,
 } from 'function/global-state';
-import { ucpBackEnd } from 'function/fake-backend';
 import { DisplayConfigElement, Extension } from 'config/ucp/common';
 import { useCurrentGameFolder } from 'components/general/hooks';
-import { Col, Nav, Row } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
+import {
+  extensionsToOptionEntries,
+  getExtensions,
+} from 'config/ucp/extension-util';
 import ConfigEditor from './tabs/config-editor';
 
 import ExtensionManager from './tabs/extension-manager';
 import Overview from './tabs/overview';
-import Footer from './footer';
+import Footer from '../footer/footer';
 
 function getConfigDefaults(yml: unknown[]) {
   const result: { [url: string]: unknown } = {};
@@ -93,13 +96,13 @@ export default function Manager() {
 
       // TODO: currently only set on initial render and folder selection
       // TODO: resolve this type badness
-      extensions = (await ucpBackEnd.getExtensions(
+      extensions = (await getExtensions(
         currentFolder,
         i18n.language
       )) as unknown as Extension[];
 
       if (currentFolder.length > 0) {
-        const optionEntries = ucpBackEnd.extensionsToOptionEntries(extensions);
+        const optionEntries = extensionsToOptionEntries(extensions);
         const defaults = getConfigDefaults(optionEntries);
 
         setConfiguration({

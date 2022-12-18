@@ -1,0 +1,23 @@
+.credits-button {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+}
+
+.credits-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.credits-title {
+
+}
+
+.credits-text {
+
+}
+
+.credits-close{
+  margin-left: auto;
+}

@@ -1,0 +1,16 @@
+
+.ucp-tabs {
+  height: 100%;
+  font-family: sans-serif;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ucp-tabs-header {
+  padding-top: 80px;
+  background-image: url("/src/assets/ucp3/bg.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}

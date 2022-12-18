@@ -7,8 +7,10 @@ import {
 import { GlobalState } from 'function/global-state';
 import { UCPState } from 'function/ucp/ucp-state';
 import { UCPVersion } from 'function/ucp/ucp-version';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import './footer.css';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -23,6 +25,7 @@ export default function Footer() {
   const currentFolder = useCurrentGameFolder();
   const ucpStateHandlerSwr = useUCPState();
   const ucpVersionSwr = useUCPVersion();
+  const [isFooterOpen, setFooterOpen] = useState(false);
 
   const { configurationWarnings } = useContext(GlobalState);
 
@@ -64,7 +67,12 @@ export default function Footer() {
     .reduce((a: number, b: number) => a + b, 0);
 
   return (
-    <div className="bg-primary">
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
+    <div
+      role="button"
+      className={`footer${isFooterOpen ? '' : ' footer-closed'}`}
+      onClick={() => setFooterOpen(!isFooterOpen)}
+    >
       <div className="d-flex p-1 px-2 fs-8 flex-wrap justify-content-end">
         <span className="me-auto">
           {t('gui-editor:footer.folder')}

@@ -1,0 +1,8 @@
+/* Base file for all CSS variables. Might be used later to get different stylings */
+
+:root {
+    --ucp-main-grey: rgb(155, 155, 155);
+    --ucp-main-brown: #212529;
+    --ucp-main-border-image: url("/src/assets/ucp3/outline.png") 8%;
+    --ucp-main-border: 4px solid;
+}

@@ -21,7 +21,7 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useCurrentGameFolder } from './hooks';
 
 export interface SwrResult<T> {
@@ -45,7 +45,7 @@ export interface UCPStateHandler {
 }
 
 // keys are used to identify and cache the request, so they need to be unique for different sources
-const SWR_KEYS = {
+export const SWR_KEYS = {
   RECENT_FOLDERS: 'ucp.gui.recent.folders',
   LANGUAGE_LOAD: 'ucp.lang.load',
   UCP_STATE: 'ucp.state.handler',
@@ -73,8 +73,8 @@ export function useRecentFolders(): SwrResult<RecentFolderHelper> {
   };
 }
 
+let LANGUAGE_UNREGISTER_FUNC: (() => Promise<void>) | null = null; // global unregister func, saw no real other way
 export function useLanguage(): SwrResult<Language> {
-  const unregisterFunc = useRef<() => Promise<void>>();
   const { i18n } = useTranslation();
 
   const { data, error, mutate } = useSWRImmutable(
@@ -89,10 +89,10 @@ export function useLanguage(): SwrResult<Language> {
         }
       );
 
-      if (unregisterFunc.current) {
+      if (LANGUAGE_UNREGISTER_FUNC) {
         removeTauriEventListener(
           TauriEvent.WINDOW_CLOSE_REQUESTED,
-          unregisterFunc.current
+          LANGUAGE_UNREGISTER_FUNC
         );
       }
       const newUnregisterFunc = async () => unlistenFunc();
@@ -100,7 +100,7 @@ export function useLanguage(): SwrResult<Language> {
         TauriEvent.WINDOW_CLOSE_REQUESTED,
         newUnregisterFunc
       );
-      unregisterFunc.current = newUnregisterFunc;
+      LANGUAGE_UNREGISTER_FUNC = newUnregisterFunc;
       return {
         getLanguage: () => lang,
         setLanguage: setGuiConfigLanguage,

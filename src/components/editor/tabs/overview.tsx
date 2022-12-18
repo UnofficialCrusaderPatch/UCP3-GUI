@@ -5,6 +5,7 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'components/general/swr-hooks';
+import RecentFolders from 'components/ucp-tabs/recent-folders';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import {
   checkForUCP3Updates,
@@ -60,6 +61,7 @@ export default function Overview() {
   }
   return (
     <Container fluid className="overflow-auto">
+      <RecentFolders />
       <div className="m-3">
         {t('gui-editor:overview.folder.version')} {ucpVersionString}
       </div>

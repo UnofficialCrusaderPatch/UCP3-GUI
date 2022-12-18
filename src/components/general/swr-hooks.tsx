@@ -73,10 +73,8 @@ export function useRecentFolders(): SwrResult<RecentFolderHelper> {
   };
 }
 
+let LANGUAGE_UNREGISTER_FUNC: (() => Promise<void>) | null = null; // global unregister func, saw no real other way
 export function useLanguage(): SwrResult<Language> {
-  // this is likely only used by the context that triggered the last mutation
-  const unregisterFunc = useRef<() => Promise<void>>();
-
   const { i18n } = useTranslation();
 
   const { data, error, mutate } = useSWRImmutable(
@@ -91,10 +89,10 @@ export function useLanguage(): SwrResult<Language> {
         }
       );
 
-      if (unregisterFunc.current) {
+      if (LANGUAGE_UNREGISTER_FUNC) {
         removeTauriEventListener(
           TauriEvent.WINDOW_CLOSE_REQUESTED,
-          unregisterFunc.current
+          LANGUAGE_UNREGISTER_FUNC
         );
       }
       const newUnregisterFunc = async () => unlistenFunc();
@@ -102,7 +100,7 @@ export function useLanguage(): SwrResult<Language> {
         TauriEvent.WINDOW_CLOSE_REQUESTED,
         newUnregisterFunc
       );
-      unregisterFunc.current = newUnregisterFunc;
+      LANGUAGE_UNREGISTER_FUNC = newUnregisterFunc;
       return {
         getLanguage: () => lang,
         setLanguage: setGuiConfigLanguage,

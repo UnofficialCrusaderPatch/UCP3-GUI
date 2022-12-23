@@ -21,7 +21,7 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
-import { useRef } from 'react';
+import { createFunctionForAsyncAtomWithMutate } from 'util/scripts/jotai-util';
 import { useCurrentGameFolder } from './hooks';
 
 export interface SwrResult<T> {
@@ -52,26 +52,16 @@ export const SWR_KEYS = {
   UCP_VERSION: 'ucp.version.handler',
 };
 
-// eslint-disable-next-line import/prefer-default-export
-export function useRecentFolders(): SwrResult<RecentFolderHelper> {
-  // normal swr, since refetching is ok
-  const { data, error, mutate } = useSWRImmutable(
-    SWR_KEYS.RECENT_FOLDERS,
-    async () => {
-      const recentFolderHelper = new RecentFolderHelper();
-      // the folders will only be loaded once, so multiple landing pages will not work
-      // since the object here needs to copy the backend behavior and will not query again
-      await recentFolderHelper.loadRecentFolders();
-      return recentFolderHelper;
-    }
-  );
-  return {
-    data,
-    isLoading: !data,
-    isError: !!error,
-    mutate,
-  };
-}
+export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
+  RecentFolderHelper,
+  []
+>(async () => {
+  const recentFolderHelper = new RecentFolderHelper();
+  // the folders will only be loaded once, so multiple landing pages will not work
+  // since the object here needs to copy the backend behavior and will not query again
+  await recentFolderHelper.loadRecentFolders();
+  return recentFolderHelper;
+});
 
 let LANGUAGE_UNREGISTER_FUNC: (() => Promise<void>) | null = null; // global unregister func, saw no real other way
 export function useLanguage(): SwrResult<Language> {

@@ -56,17 +56,19 @@ export default function Landing() {
     lauchButton: false,
     browseResult: '',
   });
-  const recentFolderResult = useRecentFolders();
+  const [recentFolderResult] = useRecentFolders();
 
   // lang
   const [t] = useTranslation(['gui-general', 'gui-landing']);
 
   // needs better loading site
-  if (recentFolderResult.isLoading) {
+  if (recentFolderResult.isEmpty()) {
     return <p>{t('gui-general:loading')}</p>;
   }
 
-  const recentFolderHelper = recentFolderResult.data as RecentFolderHelper;
+  const recentFolderHelper = recentFolderResult
+    .get()
+    .getOrThrow() as RecentFolderHelper;
 
   const updateCurrentFolderSelectState = (folder: string) => {
     recentFolderHelper.addToRecentFolders(folder);

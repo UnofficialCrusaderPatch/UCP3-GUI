@@ -8,18 +8,22 @@ import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import { useSearchParamsCustom } from 'util/scripts/hooks';
+import Result from 'util/structs/result';
 
 import './recent-folders.css';
 
 export default function RecentFolders() {
   const [, setSearchParams] = useSearchParamsCustom();
   const currentFolder = useCurrentGameFolder();
-  const recentFolderResult = useRecentFolders();
+  const [recentFolderResult] = useRecentFolders();
 
   // lang
   const [t] = useTranslation(['gui-general', 'gui-landing']);
 
-  const recentFolderHelper = recentFolderResult.data as RecentFolderHelper;
+  const recentFolderHelper = recentFolderResult
+    .getOrReceive(Result.emptyErr)
+    .ok()
+    .getOrElse(null as unknown as RecentFolderHelper);
 
   const updateCurrentFolderSelectState = (folder: string) => {
     recentFolderHelper.addToRecentFolders(folder);
@@ -34,7 +38,7 @@ export default function RecentFolders() {
   };
 
   useEffect(() => {
-    if (recentFolderResult.isLoading) {
+    if (recentFolderResult.isEmpty()) {
       return;
     }
 
@@ -47,7 +51,7 @@ export default function RecentFolders() {
   });
 
   // needs better loading site
-  if (recentFolderResult.isLoading) {
+  if (recentFolderResult.isEmpty()) {
     return <p>{t('gui-general:loading')}</p>;
   }
 

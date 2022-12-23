@@ -10,7 +10,7 @@ import './window.css';
 export default function Window() {
   const languageState = useLanguage();
 
-  if (languageState.isLoading) {
+  if (languageState.isEmpty()) {
     return <div />;
   }
 

@@ -48,7 +48,6 @@ function resolveLoadableState<T>(
   }
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export function createFunctionForAsyncAtomWithMutate<T, U extends unknown[]>(
   fn: (previousValue?: T, ...args: U) => T | Promise<T>,
   ...initialArgs: U
@@ -63,5 +62,23 @@ export function createFunctionForAsyncAtomWithMutate<T, U extends unknown[]>(
       resolveLoadableState(loadableState),
       (...args: U) => setState(args),
     ];
+  };
+}
+
+export function createHookInitializedFunctionForAsyncAtomWithMutate<
+  T,
+  U extends unknown[]
+>(fn: (previousValue?: T, ...args: U) => T | Promise<T>) {
+  let functionForAsyncAtomWithMutate:
+    | (() => [Option<Result<T, unknown>>, (...args: U) => Promise<void>])
+    | null = null;
+  return (...initialArgs: U) => {
+    if (functionForAsyncAtomWithMutate === null) {
+      functionForAsyncAtomWithMutate = createFunctionForAsyncAtomWithMutate(
+        fn,
+        ...initialArgs
+      );
+    }
+    return functionForAsyncAtomWithMutate();
   };
 }

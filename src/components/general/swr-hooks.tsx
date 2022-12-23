@@ -21,7 +21,11 @@ import {
   loadUCPVersion,
   UCPVersion,
 } from 'function/ucp/ucp-version';
-import { createFunctionForAsyncAtomWithMutate } from 'util/scripts/jotai-util';
+import {
+  createFunctionForAsyncAtomWithMutate,
+  createHookInitializedFunctionForAsyncAtomWithMutate,
+} from 'util/scripts/jotai-util';
+import { i18n as i18nInterface } from 'i18next';
 import { useCurrentGameFolder } from './hooks';
 
 export interface SwrResult<T> {
@@ -46,7 +50,6 @@ export interface UCPStateHandler {
 
 // keys are used to identify and cache the request, so they need to be unique for different sources
 export const SWR_KEYS = {
-  RECENT_FOLDERS: 'ucp.gui.recent.folders',
   LANGUAGE_LOAD: 'ucp.lang.load',
   UCP_STATE: 'ucp.state.handler',
   UCP_VERSION: 'ucp.version.handler',
@@ -63,8 +66,39 @@ export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
   return recentFolderHelper;
 });
 
+const useLanguageHook = createHookInitializedFunctionForAsyncAtomWithMutate<
+  Language,
+  [i18nInterface]
+>(async (prev: undefined | Language, i18n: i18nInterface) => {
+  let lang = await getGuiConfigLanguage();
+  i18n.changeLanguage(lang || undefined);
+  const unlistenFunc = await onLanguageChange((langEvent: Event<string>) => {
+    lang = langEvent.payload;
+    i18n.changeLanguage(lang || undefined);
+  });
+
+  if (prev?.unlistenChangeEvent) {
+    removeTauriEventListener(
+      TauriEvent.WINDOW_CLOSE_REQUESTED,
+      prev.unlistenChangeEvent
+    );
+  }
+  registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, unlistenFunc);
+  return {
+    getLanguage: () => lang,
+    setLanguage: setGuiConfigLanguage,
+    unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
+  };
+});
+
+export function useLanguage() {
+  const { i18n } = useTranslation();
+  const [languageState] = useLanguageHook(i18n);
+  return languageState;
+}
+
 let LANGUAGE_UNREGISTER_FUNC: (() => Promise<void>) | null = null; // global unregister func, saw no real other way
-export function useLanguage(): SwrResult<Language> {
+export function useLanguage2(): SwrResult<Language> {
   const { i18n } = useTranslation();
 
   const { data, error, mutate } = useSWRImmutable(

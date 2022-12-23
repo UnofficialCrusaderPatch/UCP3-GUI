@@ -18,11 +18,11 @@ function LanguageSelect() {
   const { t } = useTranslation('gui-landing');
 
   // needs better loading site
-  if (langResult.isLoading) {
+  if (langResult.isEmpty()) {
     return <p>{t('gui-general:loading')}</p>;
   }
 
-  const langHandler = langResult.data as Language;
+  const langHandler = langResult.get().getOrThrow() as Language;
   return (
     <div className="d-flex align-items-stretch">
       <div className="d-flex dark-dropdown ps-3 pe-2">

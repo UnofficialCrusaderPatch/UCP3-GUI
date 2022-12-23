@@ -11,11 +11,11 @@ export default function LanguageSelect() {
   const { t } = useTranslation('gui-landing');
 
   // needs better loading site
-  if (langResult.isLoading) {
+  if (langResult.isEmpty()) {
     return <p>{t('gui-general:loading')}</p>;
   }
 
-  const langHandler = langResult.data as Language;
+  const langHandler = langResult.get().getOrThrow() as Language;
   return (
     <div className="language-select-container">
       <div className="d-flex align-items-stretch">

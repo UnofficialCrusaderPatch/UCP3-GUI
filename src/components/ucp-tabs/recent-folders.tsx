@@ -1,20 +1,20 @@
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useCurrentGameFolder } from 'components/general/hooks';
-import { useRecentFolders } from 'components/general/jotai-hooks';
+import {
+  useGameFolder,
+  useRecentFolders,
+} from 'components/general/jotai-hooks';
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import { createEditorWindow } from 'function/window-actions';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
-import { useSearchParamsCustom } from 'util/scripts/hooks';
 import Result from 'util/structs/result';
 
 import './recent-folders.css';
 
 export default function RecentFolders() {
-  const [, setSearchParams] = useSearchParamsCustom();
-  const currentFolder = useCurrentGameFolder();
+  const [currentFolder, setFolder] = useGameFolder();
   const [recentFolderResult] = useRecentFolders();
 
   // lang
@@ -27,7 +27,7 @@ export default function RecentFolders() {
 
   const updateCurrentFolderSelectState = (folder: string) => {
     recentFolderHelper.addToRecentFolders(folder);
-    setSearchParams({ directory: folder });
+    setFolder(folder);
   };
 
   const onClickUpdateRecentFolder = (event: MouseEvent<HTMLDivElement>) => {

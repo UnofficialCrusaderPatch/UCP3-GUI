@@ -1,10 +1,6 @@
 import { useCurrentGameFolder } from 'components/general/hooks';
 import StateButton from 'components/general/state-button';
-import {
-  UCPStateHandler,
-  useUCPState,
-  useUCPVersion,
-} from 'components/general/jotai-hooks';
+import { useUCPState, useUCPVersion } from 'components/general/jotai-hooks';
 import RecentFolders from 'components/ucp-tabs/recent-folders';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import {
@@ -12,7 +8,6 @@ import {
   installUCPFromZip,
 } from 'function/download/ucp-download-handling';
 import { UCPState } from 'function/ucp/ucp-state';
-import { UCPVersion } from 'function/ucp/ucp-version';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
 import { Button, Container, Modal } from 'react-bootstrap';
@@ -32,33 +27,40 @@ export default function Overview() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
-  if (ucpStateHandlerResult.isEmpty() || ucpVersionResult.isEmpty()) {
-    return <p>{t('gui-general:loading')}</p>;
-  }
-  const ucpStateHandler = ucpStateHandlerResult.get().getOrThrow();
-  const ucpState = ucpStateHandler.state;
-  const ucpVersion = ucpVersionResult.get().getOrThrow();
+  const ucpStateHandler = ucpStateHandlerResult
+    .getOrReceive(Result.emptyErr)
+    .ok();
+  const ucpState = ucpStateHandler
+    .map((handler) => handler.state)
+    .getOrElse(UCPState.UNKNOWN);
 
-  let activateButtonString;
-  let ucpVersionString;
-  switch (ucpState) {
-    case UCPState.NOT_INSTALLED:
-      ucpVersionString = t('gui-editor:overview.not.installed');
-      activateButtonString = t('gui-editor:overview.activate.not.installed');
-      break;
-    case UCPState.ACTIVE:
-      ucpVersionString = ucpVersion.toString();
-      activateButtonString = t('gui-editor:overview.activate.do.deactivate');
-      break;
-    case UCPState.INACTIVE:
-      ucpVersionString = ucpVersion.toString();
-      activateButtonString = t('gui-editor:overview.activate.do.activate');
-      break;
-    default:
-      ucpVersionString = t('gui-editor:overview.unknown.state');
-      activateButtonString = t('gui-editor:overview.activate.unknown');
-      break;
+  let activateButtonString = null;
+  let ucpVersionString = null;
+  if (ucpVersionResult.isEmpty()) {
+    ucpVersionString = t('gui-general:loading');
+    activateButtonString = ucpVersionString;
+  } else {
+    const ucpVersion = ucpVersionResult.get().getOrThrow();
+    switch (ucpState) {
+      case UCPState.NOT_INSTALLED:
+        ucpVersionString = t('gui-editor:overview.not.installed');
+        activateButtonString = t('gui-editor:overview.activate.not.installed');
+        break;
+      case UCPState.ACTIVE:
+        ucpVersionString = ucpVersion.toString();
+        activateButtonString = t('gui-editor:overview.activate.do.deactivate');
+        break;
+      case UCPState.INACTIVE:
+        ucpVersionString = ucpVersion.toString();
+        activateButtonString = t('gui-editor:overview.activate.do.activate');
+        break;
+      default:
+        ucpVersionString = t('gui-editor:overview.unknown.state');
+        activateButtonString = t('gui-editor:overview.activate.unknown');
+        break;
+    }
   }
+
   return (
     <Container fluid className="overflow-auto">
       <RecentFolders />
@@ -81,10 +83,14 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => {
           let result = Result.emptyOk<string>();
+          if (ucpStateHandler.isEmpty()) {
+            return result;
+          }
+
           if (ucpState === UCPState.ACTIVE) {
-            result = (await ucpStateHandler.deactivate()).mapErr(String);
+            result = (await ucpStateHandler.get().deactivate()).mapErr(String);
           } else if (ucpState === UCPState.INACTIVE) {
-            result = (await ucpStateHandler.activate()).mapErr(String);
+            result = (await ucpStateHandler.get().activate()).mapErr(String);
           }
           return result;
         }}

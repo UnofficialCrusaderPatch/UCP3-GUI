@@ -25,6 +25,8 @@ import {
 } from 'util/scripts/jotai-util';
 import { i18n as i18nInterface } from 'i18next';
 import Option from 'util/structs/option';
+import { useSearchParamsCustom } from 'util/scripts/hooks';
+import { getGameFolderPath } from 'tauri/tauri-files';
 import { useCurrentGameFolder } from './hooks';
 
 export interface Language {
@@ -51,42 +53,44 @@ export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
   return recentFolderHelper;
 });
 
-const useLanguageHook = createHookInitializedFunctionForAsyncAtomWithMutate<
-  Language,
-  [i18nInterface]
->(async (prev: undefined | Language, i18n: i18nInterface) => {
-  let lang = await getGuiConfigLanguage();
-  i18n.changeLanguage(lang || undefined);
-  const unlistenFunc = await onLanguageChange((langEvent: Event<string>) => {
-    lang = langEvent.payload;
+export const useLanguageHook =
+  createHookInitializedFunctionForAsyncAtomWithMutate<
+    Language,
+    [i18nInterface]
+  >(async (prev: undefined | Language, i18n: i18nInterface) => {
+    let lang = await getGuiConfigLanguage();
     i18n.changeLanguage(lang || undefined);
-  });
+    const unlistenFunc = await onLanguageChange((langEvent: Event<string>) => {
+      lang = langEvent.payload;
+      i18n.changeLanguage(lang || undefined);
+    });
 
-  if (prev?.unlistenChangeEvent) {
-    removeTauriEventListener(
-      TauriEvent.WINDOW_CLOSE_REQUESTED,
-      prev.unlistenChangeEvent
-    );
-  }
-  registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, unlistenFunc);
-  return {
-    getLanguage: () => lang,
-    setLanguage: setGuiConfigLanguage,
-    unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
-  };
-});
+    if (prev?.unlistenChangeEvent) {
+      removeTauriEventListener(
+        TauriEvent.WINDOW_CLOSE_REQUESTED,
+        prev.unlistenChangeEvent
+      );
+    }
+    registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, unlistenFunc);
+    return {
+      getLanguage: () => lang,
+      setLanguage: setGuiConfigLanguage,
+      unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
+    };
+  });
 export function useLanguage() {
   const { i18n } = useTranslation();
   const [languageState] = useLanguageHook(i18n);
   return languageState;
 }
 
-const useUCPStateHook = createHookInitializedFunctionForAsyncAtomWithMutate(
-  async (_prev, currentFolder: string) =>
-    (await Result.tryAsync(getUCPState, currentFolder))
-      .ok()
-      .getOrElse(UCPState.UNKNOWN)
-);
+export const useUCPStateHook =
+  createHookInitializedFunctionForAsyncAtomWithMutate(
+    async (_prev, currentFolder: string) =>
+      (await Result.tryAsync(getUCPState, currentFolder))
+        .ok()
+        .getOrElse(UCPState.UNKNOWN)
+  );
 export function useUCPState(): [
   Option<Result<UCPStateHandler, unknown>>,
   () => Promise<void>
@@ -113,10 +117,13 @@ export function useUCPState(): [
   return [ucpStateHandlerResult, () => receiveState(currentFolder)];
 }
 
-const useUCPVersionHook = createHookInitializedFunctionForAsyncAtomWithMutate(
-  async (_prev, currentFolder: string) =>
-    (await loadUCPVersion(currentFolder)).ok().getOrReceive(getEmptyUCPVersion)
-);
+export const useUCPVersionHook =
+  createHookInitializedFunctionForAsyncAtomWithMutate(
+    async (_prev, currentFolder: string) =>
+      (await loadUCPVersion(currentFolder))
+        .ok()
+        .getOrReceive(getEmptyUCPVersion)
+  );
 export function useUCPVersion(): [
   Option<Result<UCPVersion, unknown>>,
   () => Promise<void>
@@ -124,4 +131,28 @@ export function useUCPVersion(): [
   const currentFolder = useCurrentGameFolder();
   const [ucpVersionResult, receiveVersion] = useUCPVersionHook(currentFolder);
   return [ucpVersionResult, () => receiveVersion(currentFolder)];
+}
+
+export function useGameFolder(): [
+  string,
+  (newFolder: string) => Promise<void>
+] {
+  const [searchParams, setSearchParams] = useSearchParamsCustom();
+  const currentFolder = getGameFolderPath(searchParams);
+
+  const [stateResult, receiveState] = useUCPStateHook(currentFolder);
+  const [versionResult, receiveVersion] = useUCPVersionHook(currentFolder);
+
+  return [
+    getGameFolderPath(searchParams),
+    async (newFolder: string) => {
+      // kinda bad, it might skip a folder switch
+      if (stateResult.isEmpty() || versionResult.isEmpty()) {
+        return;
+      }
+      setSearchParams({ directory: newFolder });
+      await receiveState(newFolder);
+      await receiveVersion(newFolder);
+    },
+  ];
 }

@@ -9,6 +9,7 @@ import { UCPState } from 'function/ucp/ucp-state';
 import { UCPVersion } from 'function/ucp/ucp-version';
 import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Result from 'util/structs/result';
 
 import './footer.css';
 
@@ -31,27 +32,31 @@ export default function Footer() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
-  if (ucpStateHandlerResult.isEmpty() || ucpVersionResult.isEmpty()) {
-    return <p>{t('gui-general:loading')}</p>;
-  }
-  const ucpStateHandler = ucpStateHandlerResult.get().getOrThrow();
-  const ucpState = ucpStateHandler.state;
-  const ucpVersion = ucpVersionResult.get().getOrThrow();
+  const state = ucpStateHandlerResult
+    .getOrReceive(Result.emptyErr)
+    .ok()
+    .map((handler) => handler.state)
+    .getOrElse(UCPState.UNKNOWN);
 
-  let ucpFooterVersionString;
-  switch (ucpState) {
-    case UCPState.NOT_INSTALLED:
-      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
-      break;
-    case UCPState.ACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
-    case UCPState.INACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
-    default:
-      ucpFooterVersionString = t('gui-editor:footer.version.unknown');
-      break;
+  let ucpFooterVersionString = null;
+  if (ucpVersionResult.isEmpty()) {
+    ucpFooterVersionString = t('gui-general:loading');
+  } else {
+    const ucpVersion = ucpVersionResult.get().getOrThrow();
+    switch (state) {
+      case UCPState.NOT_INSTALLED:
+        ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+        break;
+      case UCPState.ACTIVE:
+        ucpFooterVersionString = ucpVersion.toString();
+        break;
+      case UCPState.INACTIVE:
+        ucpFooterVersionString = ucpVersion.toString();
+        break;
+      default:
+        ucpFooterVersionString = t('gui-editor:footer.version.unknown');
+        break;
+    }
   }
 
   const warningCount = Object.values(configurationWarnings)
@@ -95,7 +100,7 @@ export default function Footer() {
         </span>
         <span className="px-2">
           {t('gui-editor:footer.state.prefix', {
-            state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+            state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
           })}
         </span>
       </div>

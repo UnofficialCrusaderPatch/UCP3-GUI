@@ -4,7 +4,7 @@ import {
   UCPStateHandler,
   useUCPState,
   useUCPVersion,
-} from 'components/general/swr-hooks';
+} from 'components/general/jotai-hooks';
 import RecentFolders from 'components/ucp-tabs/recent-folders';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import {
@@ -22,8 +22,8 @@ import Result from 'util/structs/result';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
-  const ucpStateHandlerSwr = useUCPState();
-  const ucpVersionSwr = useUCPVersion();
+  const [ucpStateHandlerResult, receiveState] = useUCPState();
+  const [ucpVersionResult, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
@@ -32,12 +32,12 @@ export default function Overview() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
-  if (ucpStateHandlerSwr.isLoading || ucpVersionSwr.isLoading) {
+  if (ucpStateHandlerResult.isEmpty() || ucpVersionResult.isEmpty()) {
     return <p>{t('gui-general:loading')}</p>;
   }
-  const ucpStateHandler = ucpStateHandlerSwr.data as UCPStateHandler;
+  const ucpStateHandler = ucpStateHandlerResult.get().getOrThrow();
   const ucpState = ucpStateHandler.state;
-  const ucpVersion = ucpVersionSwr.data as UCPVersion;
+  const ucpVersion = ucpVersionResult.get().getOrThrow();
 
   let activateButtonString;
   let ucpVersionString;
@@ -110,8 +110,8 @@ export default function Overview() {
             setShow(true);
 
             // load new state
-            await ucpStateHandlerSwr.mutate();
-            await ucpVersionSwr.mutate();
+            await receiveState();
+            await receiveVersion();
 
             return Result.ok('');
           }
@@ -148,8 +148,8 @@ export default function Overview() {
           );
           if (zipInstallResult.ok().isPresent()) {
             // load new state
-            await ucpStateHandlerSwr.mutate();
-            await ucpVersionSwr.mutate();
+            await receiveState();
+            await receiveVersion();
             setShow(true);
           }
           setOverviewButtonActive(true);

@@ -1,5 +1,5 @@
 import 'localization/i18n';
-import { useLanguage } from './general/swr-hooks';
+import { useLanguage } from './general/jotai-hooks';
 import Main from './main-page';
 import Titlebar from './titlebar/titlebar';
 

@@ -1,6 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { KeyedMutator } from 'swr';
-import useSWRImmutable from 'swr/immutable'; // only fetches once
 import { Event, TauriEvent, UnlistenFn } from '@tauri-apps/api/event';
 import { onLanguageChange } from 'tauri/tauri-listen';
 import { getGuiConfigLanguage, setGuiConfigLanguage } from 'tauri/tauri-invoke';
@@ -26,14 +24,8 @@ import {
   createHookInitializedFunctionForAsyncAtomWithMutate,
 } from 'util/scripts/jotai-util';
 import { i18n as i18nInterface } from 'i18next';
+import Option from 'util/structs/option';
 import { useCurrentGameFolder } from './hooks';
-
-export interface SwrResult<T> {
-  data: T | undefined;
-  isLoading: boolean;
-  isError: boolean;
-  mutate: KeyedMutator<T>;
-}
 
 export interface Language {
   getLanguage: () => string | null;
@@ -47,13 +39,6 @@ export interface UCPStateHandler {
   activate: () => Promise<Result<void, unknown>>;
   deactivate: () => Promise<Result<void, unknown>>;
 }
-
-// keys are used to identify and cache the request, so they need to be unique for different sources
-export const SWR_KEYS = {
-  LANGUAGE_LOAD: 'ucp.lang.load',
-  UCP_STATE: 'ucp.state.handler',
-  UCP_VERSION: 'ucp.version.handler',
-};
 
 export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
   RecentFolderHelper,
@@ -90,99 +75,53 @@ const useLanguageHook = createHookInitializedFunctionForAsyncAtomWithMutate<
     unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
   };
 });
-
 export function useLanguage() {
   const { i18n } = useTranslation();
   const [languageState] = useLanguageHook(i18n);
   return languageState;
 }
 
-let LANGUAGE_UNREGISTER_FUNC: (() => Promise<void>) | null = null; // global unregister func, saw no real other way
-export function useLanguage2(): SwrResult<Language> {
-  const { i18n } = useTranslation();
-
-  const { data, error, mutate } = useSWRImmutable(
-    SWR_KEYS.LANGUAGE_LOAD,
-    async () => {
-      let lang = await getGuiConfigLanguage();
-      i18n.changeLanguage(lang || undefined);
-      const unlistenFunc = await onLanguageChange(
-        (langEvent: Event<string>) => {
-          lang = langEvent.payload;
-          i18n.changeLanguage(lang || undefined);
-        }
-      );
-
-      if (LANGUAGE_UNREGISTER_FUNC) {
-        removeTauriEventListener(
-          TauriEvent.WINDOW_CLOSE_REQUESTED,
-          LANGUAGE_UNREGISTER_FUNC
-        );
-      }
-      const newUnregisterFunc = async () => unlistenFunc();
-      registerTauriEventListener(
-        TauriEvent.WINDOW_CLOSE_REQUESTED,
-        newUnregisterFunc
-      );
-      LANGUAGE_UNREGISTER_FUNC = newUnregisterFunc;
-      return {
-        getLanguage: () => lang,
-        setLanguage: setGuiConfigLanguage,
-        unlistenChangeEvent: unlistenFunc, // before a receiving mutate, unlisten needs to be called
-      };
-    }
-  );
-  return {
-    data,
-    isLoading: !data,
-    isError: !!error,
-    mutate,
-  };
-}
-
-export function useUCPState(): SwrResult<UCPStateHandler> {
+const useUCPStateHook = createHookInitializedFunctionForAsyncAtomWithMutate(
+  async (_prev, currentFolder: string) =>
+    (await Result.tryAsync(getUCPState, currentFolder))
+      .ok()
+      .getOrElse(UCPState.UNKNOWN)
+);
+export function useUCPState(): [
+  Option<Result<UCPStateHandler, unknown>>,
+  () => Promise<void>
+] {
   const currentFolder = useCurrentGameFolder();
   const { t } = useTranslation('gui-download');
+  const [ucpStateResult, receiveState] = useUCPStateHook(currentFolder);
 
-  const { data, error, mutate } = useSWRImmutable(
-    SWR_KEYS.UCP_STATE,
-    async () => ({
-      state: (await Result.tryAsync(getUCPState, currentFolder))
-        .ok()
-        .getOrElse(UCPState.UNKNOWN),
+  const ucpStateHandlerResult = ucpStateResult.map((res) =>
+    res.mapOk((state) => ({
+      state,
       activate: async () => {
         const result = await activateUCP(currentFolder, t);
-        mutate();
+        receiveState(currentFolder);
         return result;
       },
       deactivate: async () => {
         const result = await deactivateUCP(currentFolder, t);
-        mutate();
+        receiveState(currentFolder);
         return result;
       },
-    })
+    }))
   );
-  return {
-    data,
-    isLoading: !data,
-    isError: !!error,
-    mutate,
-  };
+  return [ucpStateHandlerResult, () => receiveState(currentFolder)];
 }
 
-export function useUCPVersion(): SwrResult<UCPVersion> {
+const useUCPVersionHook = createHookInitializedFunctionForAsyncAtomWithMutate(
+  async (_prev, currentFolder: string) =>
+    (await loadUCPVersion(currentFolder)).ok().getOrReceive(getEmptyUCPVersion)
+);
+export function useUCPVersion(): [
+  Option<Result<UCPVersion, unknown>>,
+  () => Promise<void>
+] {
   const currentFolder = useCurrentGameFolder();
-  const { data, error, mutate } = useSWRImmutable(
-    SWR_KEYS.UCP_VERSION,
-    async () =>
-      (await loadUCPVersion(currentFolder))
-        .ok()
-        .getOrReceive(getEmptyUCPVersion)
-  );
-  return {
-    data,
-    isLoading: !data,
-    isError: !!error,
-    mutate,
-  };
+  const [ucpVersionResult, receiveVersion] = useUCPVersionHook(currentFolder);
+  return [ucpVersionResult, () => receiveVersion(currentFolder)];
 }

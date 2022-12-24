@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCurrentGameFolder } from 'components/general/hooks';
-import { useRecentFolders } from 'components/general/swr-hooks';
+import { useRecentFolders } from 'components/general/jotai-hooks';
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import { createEditorWindow } from 'function/window-actions';
 import { MouseEvent, useEffect, useState } from 'react';

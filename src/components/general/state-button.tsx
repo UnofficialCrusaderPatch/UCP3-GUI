@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { useTimeout } from 'util/scripts/hooks';
+import { useTimeout } from 'hooks/general/util';
 import Result from 'util/structs/result';
 
 interface ButtonStateValues {

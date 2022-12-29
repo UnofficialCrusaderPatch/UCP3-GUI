@@ -1,7 +1,7 @@
 import ConfigEditor from 'components/editor/tabs/config-editor';
 import ExtensionManager from 'components/editor/tabs/extension-manager';
 import Overview from 'components/editor/tabs/overview';
-import { useCurrentGameFolder } from 'components/general/hooks';
+import { useCurrentGameFolder } from 'hooks/general/hooks';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 

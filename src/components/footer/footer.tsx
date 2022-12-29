@@ -1,17 +1,12 @@
-import { useCurrentGameFolder } from 'components/general/hooks';
-import {
-  UCPStateHandler,
-  useUCPState,
-  useUCPVersion,
-} from 'components/general/jotai-hooks';
+import { useCurrentGameFolder } from 'hooks/general/hooks';
 import { GlobalState } from 'function/global-state';
 import { UCPState } from 'function/ucp/ucp-state';
-import { UCPVersion } from 'function/ucp/ucp-version';
 import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
 
 import './footer.css';
+import { useUCPState, useUCPVersion } from 'hooks/jotai/helper';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',

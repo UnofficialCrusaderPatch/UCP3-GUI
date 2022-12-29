@@ -1,11 +1,10 @@
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import {
-  useGameFolder,
-  useRecentFolders,
-} from 'components/general/jotai-hooks';
+
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import { createEditorWindow } from 'function/window-actions';
+import { useGameFolder } from 'hooks/jotai/helper';
+import { useRecentFolders } from 'hooks/jotai/hooks';
 import { MouseEvent, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';

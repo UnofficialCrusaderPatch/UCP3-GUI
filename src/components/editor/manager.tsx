@@ -14,7 +14,7 @@ import {
   GlobalState,
 } from 'function/global-state';
 import { DisplayConfigElement, Extension } from 'config/ucp/common';
-import { useCurrentGameFolder } from 'components/general/hooks';
+import { useCurrentGameFolder } from 'hooks/general/hooks';
 import { Nav } from 'react-bootstrap';
 import {
   extensionsToOptionEntries,

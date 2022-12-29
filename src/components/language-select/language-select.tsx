@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import translateIcon from 'assets/misc/translate.svg';
 import languages from 'localization/languages.json';
-import SvgHelper from '../general/svg-helper';
-import { Language, useLanguage } from '../general/jotai-hooks';
 
 import './language-select.css';
+import { Language } from 'hooks/jotai/hooks';
+import { useLanguage } from 'hooks/jotai/helper';
+import SvgHelper from 'components/general/svg-helper';
 
 export default function LanguageSelect() {
   const langResult = useLanguage();

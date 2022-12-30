@@ -14,6 +14,19 @@ import {
   createHookInitializedFunctionForAsyncAtomWithMutate,
 } from 'hooks/jotai/base';
 import { i18n as i18nInterface } from 'i18next';
+import {
+  extensionsToOptionEntries,
+  getConfigDefaults,
+  getExtensions,
+} from 'config/ucp/extension-util';
+import { Extension } from 'config/ucp/common';
+import {
+  useConfigurationDefaultsReducer,
+  useConfigurationReducer,
+  useExtensionsReducer,
+  useExtensionStateReducer,
+  useInitDone,
+} from './globals-wrapper';
 
 export interface Language {
   getLanguage: () => string | null;
@@ -79,4 +92,70 @@ export const useUCPVersionHook =
       (await loadUCPVersion(currentFolder))
         .ok()
         .getOrReceive(getEmptyUCPVersion)
+  );
+
+export const useInitGlobalConfigurationHook =
+  createHookInitializedFunctionForAsyncAtomWithMutate(
+    async (
+      _prev,
+      newState: {
+        newFolder: string;
+        language: string;
+        globalHooks: {
+          initDone: ReturnType<typeof useInitDone>;
+          configurationReducer: ReturnType<typeof useConfigurationReducer>;
+          extensionsReducer: ReturnType<typeof useExtensionsReducer>;
+          configurationDefaultsReducer: ReturnType<
+            typeof useConfigurationDefaultsReducer
+          >;
+          extensionStateReducer: ReturnType<typeof useExtensionStateReducer>;
+        };
+      }
+    ) => {
+      const { newFolder, language, globalHooks } = newState;
+      const [, setInitDone] = globalHooks.initDone;
+      const [, setExtensions] = globalHooks.extensionsReducer;
+      const [, setConfiguration] = globalHooks.configurationReducer;
+      const [, setConfigurationDefaults] =
+        globalHooks.configurationDefaultsReducer;
+      const [, setExtensionsState] = globalHooks.extensionStateReducer;
+
+      setInitDone(false);
+
+      let extensions: Extension[] = [];
+      let defaults = {};
+      if (newFolder.length > 0) {
+        console.log(`Current folder: ${newFolder}`);
+        console.log(`Current locale: ${language}`);
+
+        // TODO: currently only set on initial render and folder selection
+        // TODO: resolve this type badness
+        extensions = await getExtensions(newFolder, language);
+        setExtensions(extensions);
+
+        const optionEntries = extensionsToOptionEntries(extensions);
+        defaults = getConfigDefaults(optionEntries);
+      } else {
+        console.log('No folder active.');
+      }
+
+      setExtensions(extensions);
+      setConfiguration({
+        type: 'reset',
+        value: defaults,
+      });
+      setConfigurationDefaults({
+        type: 'reset',
+        value: defaults,
+      });
+      setExtensionsState({
+        allExtensions: [...extensions],
+        activeExtensions: [],
+        activatedExtensions: [],
+        installedExtensions: [...extensions],
+      });
+
+      console.log('Finished loading');
+      setInitDone(true);
+    }
   );

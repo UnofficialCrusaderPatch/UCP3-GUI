@@ -12,38 +12,20 @@ import {
   configurationWarningReducer,
   ExtensionsState,
   GlobalState,
-} from 'function/global-state';
+} from 'function/global-state_old';
 import { DisplayConfigElement, Extension } from 'config/ucp/common';
-import { useCurrentGameFolder } from 'hooks/general/hooks';
 import { Nav } from 'react-bootstrap';
 import {
   extensionsToOptionEntries,
+  getConfigDefaults,
   getExtensions,
 } from 'config/ucp/extension-util';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import ConfigEditor from './tabs/config-editor';
 
 import ExtensionManager from './tabs/extension-manager';
 import Overview from './tabs/overview';
 import Footer from '../footer/footer';
-
-function getConfigDefaults(yml: unknown[]) {
-  const result: { [url: string]: unknown } = {};
-
-  function yieldDefaults(part: any | DisplayConfigElement): void {
-    if (typeof part === 'object') {
-      if (Object.keys(part).indexOf('url') > -1) {
-        result[part.url as string] = (part.value || {}).default;
-      }
-      if (Object.keys(part).indexOf('children') > -1) {
-        part.children.forEach((child: unknown) => yieldDefaults(child));
-      }
-    }
-  }
-
-  yml.forEach((element: unknown) => yieldDefaults(element));
-
-  return result;
-}
 
 let extensions: Extension[] = []; // which extension type?
 

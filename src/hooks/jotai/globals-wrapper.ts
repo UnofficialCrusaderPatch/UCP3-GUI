@@ -5,20 +5,16 @@ import { useAtom } from 'jotai';
 
 // "normal" atoms
 
+export function useInitDone() {
+  return useAtom(globalAtoms.INIT_DONE);
+}
+
 export function useFile() {
   return useAtom(globalAtoms.FILE_ATOM);
 }
 
 export function useFolder() {
   return useAtom(globalAtoms.FOLDER_ATOM);
-}
-
-export function useExtensions() {
-  return useAtom(globalAtoms.EXTENSIONS_ATOM);
-}
-
-export function useExtensionState() {
-  return useAtom(globalAtoms.EXTENSION_STATE_ATOM);
 }
 
 // reducer atoms
@@ -31,8 +27,12 @@ export function useConfigurationTouchedReducer() {
   return useAtom(globalAtoms.CONFIGURATION_TOUCHED_REDUCER_ATOM);
 }
 
-export function useConfigurationWarningReducer() {
-  return useAtom(globalAtoms.CONFIGURATION_WARNING_REDUCER_ATOM);
+export function useConfigurationWarningsReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_WARNINGS_REDUCER_ATOM);
+}
+
+export function useExtensionsReducer() {
+  return useAtom(globalAtoms.EXTENSIONS_REDUCER_ATOM);
 }
 
 export function useActiveExtensionsReducer() {
@@ -41,4 +41,8 @@ export function useActiveExtensionsReducer() {
 
 export function useConfigurationDefaultsReducer() {
   return useAtom(globalAtoms.CONFIGURATION_DEFAULTS_REDUCER_ATOM);
+}
+
+export function useExtensionStateReducer() {
+  return useAtom(globalAtoms.EXTENSION_STATE_REDUCER_ATOM);
 }

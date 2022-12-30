@@ -1,30 +1,7 @@
-import { createSearchParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 
-// returns normal search params, but setSearchParams expects object and boolean
-
-// eslint-disable-next-line import/prefer-default-export
-export function useSearchParamsCustom(): [
-  URLSearchParams,
-  (
-    newParams: { [keys: string]: string | string[] },
-    keepNonOverwritten?: boolean
-  ) => void
-] {
-  const [searchParams, setSearchParams] = useSearchParams();
-  return [
-    searchParams,
-    (newParams, keepNonOverwritten = true) => {
-      setSearchParams(
-        createSearchParams(
-          keepNonOverwritten ? { ...searchParams, ...newParams } : newParams
-        )
-      );
-    },
-  ];
-}
-
 // source: https://usehooks-ts.com/react-hook/use-timeout
+// eslint-disable-next-line import/prefer-default-export
 export function useTimeout(callback: () => void, delay: number | null) {
   const savedCallback = useRef(callback);
 

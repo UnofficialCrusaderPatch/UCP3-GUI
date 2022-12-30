@@ -9,7 +9,7 @@ import { openFileDialog, save as dialogSave } from 'tauri/tauri-dialog';
 import './config-editor.css';
 
 import { useTranslation } from 'react-i18next';
-import { GlobalState } from 'function/global-state';
+import { GlobalState } from 'function/global-state_old';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';

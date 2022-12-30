@@ -34,21 +34,24 @@ function ArrayReducer<Type>() {
 
 const configurationReducer = KeyValueReducer<unknown>();
 const configurationTouchedReducer = KeyValueReducer<boolean>();
-const configurationWarningReducer = KeyValueReducer<Warning>();
+const configurationWarningsReducer = KeyValueReducer<Warning>();
+const extensionsReducer = ArrayReducer<Extension>();
 const activeExtensionsReducer = ArrayReducer<Extension>();
 const configurationDefaultsReducer = KeyValueReducer<unknown>();
 
+const extensionStateReducer = (
+  oldState: ExtensionsState,
+  newState: Partial<ExtensionsState>
+): ExtensionsState => {
+  const state = { ...oldState, ...newState };
+  return state;
+};
+
 // normal atoms
 
+export const INIT_DONE = atom(false);
 export const FILE_ATOM = atom('');
 export const FOLDER_ATOM = atom(''); // unused
-export const EXTENSIONS_ATOM = atom([]); // how is this used?
-export const EXTENSION_STATE_ATOM = atom({
-  allExtensions: [],
-  activeExtensions: [],
-  activatedExtensions: [],
-  installedExtensions: [],
-} as ExtensionsState);
 
 // reducer atoms
 
@@ -62,10 +65,12 @@ export const CONFIGURATION_TOUCHED_REDUCER_ATOM = atomWithReducer(
   configurationTouchedReducer
 );
 
-export const CONFIGURATION_WARNING_REDUCER_ATOM = atomWithReducer(
+export const CONFIGURATION_WARNINGS_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationWarningReducer
+  configurationWarningsReducer
 );
+
+export const EXTENSIONS_REDUCER_ATOM = atomWithReducer([], extensionsReducer);
 
 export const ACTIVE_EXTENSIONS_REDUCER_ATOM = atomWithReducer(
   [],
@@ -75,4 +80,14 @@ export const ACTIVE_EXTENSIONS_REDUCER_ATOM = atomWithReducer(
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationDefaultsReducer
+);
+
+export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
+  {
+    allExtensions: [],
+    activeExtensions: [],
+    activatedExtensions: [],
+    installedExtensions: [],
+  },
+  extensionStateReducer
 );

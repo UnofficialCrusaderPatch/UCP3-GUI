@@ -11,6 +11,8 @@ import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import SvgHelper from 'components/general/svg-helper';
 import { createEditorWindow } from 'function/window-actions';
 import { openFolderDialog } from 'tauri/tauri-dialog';
+import { useLanguage } from 'hooks/jotai/helper';
+import { Language, useRecentFolders } from 'hooks/jotai/hooks';
 
 function LanguageSelect() {
   const langResult = useLanguage();

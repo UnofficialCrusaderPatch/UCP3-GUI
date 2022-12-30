@@ -10,7 +10,7 @@ import { RadioGroup, Radio } from 'react-radio-group';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { GlobalState } from 'function/global-state';
+import { GlobalState } from 'function/global-state_old';
 
 import type {
   DisplayConfigElement,

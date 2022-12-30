@@ -211,7 +211,3 @@ export const getLocalDataFolder: () => Promise<string> = (() => {
     return localDataFolder;
   };
 })();
-
-export function getGameFolderPath(urlParams: URLSearchParams) {
-  return urlParams.get('directory') || '';
-}

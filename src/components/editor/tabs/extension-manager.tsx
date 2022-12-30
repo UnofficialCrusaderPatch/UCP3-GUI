@@ -13,7 +13,7 @@ import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 
 import './extension-manager.css';
-import { GlobalState, ExtensionsState } from 'function/global-state';
+import { GlobalState, ExtensionsState } from 'function/global-state_old';
 
 function ExtensionElement(props: {
   ext: Extension;

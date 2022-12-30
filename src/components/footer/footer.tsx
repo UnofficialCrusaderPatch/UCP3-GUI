@@ -1,12 +1,15 @@
-import { useCurrentGameFolder } from 'hooks/general/hooks';
-import { GlobalState } from 'function/global-state';
 import { UCPState } from 'function/ucp/ucp-state';
-import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
 
 import './footer.css';
-import { useUCPState, useUCPVersion } from 'hooks/jotai/helper';
+import {
+  useCurrentGameFolder,
+  useUCPState,
+  useUCPVersion,
+} from 'hooks/jotai/helper';
+import { useConfigurationWarningsReducer } from 'hooks/jotai/globals-wrapper';
+import { useState } from 'react';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -23,7 +26,7 @@ export default function Footer() {
   const [ucpVersionResult] = useUCPVersion();
   const [isFooterOpen, setFooterOpen] = useState(false);
 
-  const { configurationWarnings } = useContext(GlobalState);
+  const [configurationWarnings] = useConfigurationWarningsReducer();
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
@@ -55,15 +58,11 @@ export default function Footer() {
   }
 
   const warningCount = Object.values(configurationWarnings)
-    .map((v) =>
-      (v as { text: string; level: string }).level === 'warning' ? 1 : 0
-    )
+    .map((v) => (v.level === 'warning' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
   const errorCount = Object.values(configurationWarnings)
-    .map((v) =>
-      (v as { text: string; level: string }).level === 'error' ? 1 : 0
-    )
+    .map((v) => (v.level === 'error' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
   return (

@@ -1,11 +1,11 @@
 import 'localization/i18n';
+import { useLanguage } from 'hooks/jotai/helper';
 import Main from './main-page';
 import Titlebar from './titlebar/titlebar';
 
 import './variables.css';
 import './base.css';
 import './window.css';
-import { useLanguage } from 'hooks/jotai/helper';
 
 export default function Window() {
   const languageState = useLanguage();

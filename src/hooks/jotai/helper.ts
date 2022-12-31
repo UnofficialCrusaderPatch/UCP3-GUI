@@ -1,3 +1,9 @@
+import { Extension } from 'config/ucp/common';
+import {
+  extensionsToOptionEntries,
+  getConfigDefaults,
+  getExtensions,
+} from 'config/ucp/extension-util';
 import { activateUCP, deactivateUCP } from 'function/ucp/ucp-state';
 import { UCPVersion } from 'function/ucp/ucp-version';
 import { useTranslation } from 'react-i18next';
@@ -8,12 +14,16 @@ import {
   useConfigurationReducer,
   useExtensionsReducer,
   useExtensionStateReducer,
+  useUcpConfigFile,
   useFolder,
   useInitDone,
+  useInitRunning,
+  useConfigurationTouchedReducer,
+  useConfigurationWarningsReducer,
+  useActiveExtensionsReducer,
 } from './globals-wrapper';
 import {
   UCPStateHandler,
-  useInitGlobalConfigurationHook,
   useLanguageHook,
   useUCPStateHook,
   useUCPVersionHook,
@@ -65,33 +75,79 @@ export function useUCPVersion(): [
 }
 
 export function useInitGlobalConfiguration(): [
-  Option<Result<void, unknown>>,
+  boolean,
   (newFolder: string, language: string) => Promise<void>
 ] {
-  const initDoneHook = useInitDone();
-  const configurationReducerHook = useConfigurationReducer();
-  const extensionsReducerHook = useExtensionsReducer();
-  const configurationDefaultsReducerHook = useConfigurationDefaultsReducer();
-  const extensionStateReducerHook = useExtensionStateReducer();
+  const [, setInitDone] = useInitDone();
+  const [isInitRunning, setInitRunning] = useInitRunning();
+  const [, setFile] = useUcpConfigFile();
+  const [, setExtensions] = useExtensionsReducer();
+  const [, setConfiguration] = useConfigurationReducer();
+  const [, setConfigurationDefaults] = useConfigurationDefaultsReducer();
+  const [, setExtensionsState] = useExtensionStateReducer();
 
-  const globalHooks = {
-    initDone: initDoneHook,
-    configurationReducer: configurationReducerHook,
-    extensionsReducer: extensionsReducerHook,
-    configurationDefaultsReducer: configurationDefaultsReducerHook,
-    extensionStateReducer: extensionStateReducerHook,
-  };
-
-  const [res, init] = useInitGlobalConfigurationHook({
-    newFolder: '',
-    language: '',
-    globalHooks,
-  });
+  // currently simply reset:
+  const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+  const [, setConfigurationWarnings] = useConfigurationWarningsReducer();
+  const [, setActiveExtensions] = useActiveExtensionsReducer();
 
   return [
-    res,
-    async (newFolder: string, language: string) =>
-      init({ newFolder, language, globalHooks }),
+    isInitRunning,
+    async (newFolder: string, language: string) => {
+      setInitRunning(true);
+      setInitDone(false);
+
+      let extensions: Extension[] = [];
+      let defaults = {};
+      let file = '';
+      if (newFolder.length > 0) {
+        console.log(`Current folder: ${newFolder}`);
+        console.log(`Current locale: ${language}`);
+
+        // TODO: currently only set on initial render and folder selection
+        // TODO: resolve this type badness
+        extensions = await getExtensions(newFolder, language);
+        setExtensions(extensions);
+
+        const optionEntries = extensionsToOptionEntries(extensions);
+        defaults = getConfigDefaults(optionEntries);
+        file = `${newFolder}/ucp-config.yml`; // better be moved to const file?
+      } else {
+        console.log('No folder active.');
+      }
+
+      setExtensions(extensions);
+      setConfiguration({
+        type: 'reset',
+        value: defaults,
+      });
+      setConfigurationDefaults({
+        type: 'reset',
+        value: defaults,
+      });
+      setExtensionsState({
+        allExtensions: [...extensions],
+        activeExtensions: [],
+        activatedExtensions: [],
+        installedExtensions: [...extensions],
+      });
+      setFile(file);
+
+      // currently simply reset:
+      setConfigurationTouched({
+        type: 'reset',
+        value: defaults,
+      });
+      setConfigurationWarnings({
+        type: 'reset',
+        value: defaults,
+      });
+      setActiveExtensions([]);
+
+      console.log('Finished loading');
+      setInitDone(true);
+      setInitRunning(false);
+    },
   ];
 }
 
@@ -105,7 +161,7 @@ export function useGameFolder(): [
   const [versionResult, receiveVersion] = useUCPVersionHook(currentFolder);
 
   const languageState = useLanguage();
-  const [initResult, initConfig] = useInitGlobalConfiguration();
+  const [isInitRunning, initConfig] = useInitGlobalConfiguration();
 
   return [
     currentFolder,
@@ -115,7 +171,7 @@ export function useGameFolder(): [
         stateResult.isEmpty() ||
         versionResult.isEmpty() ||
         languageState.isEmpty() ||
-        initResult.isEmpty()
+        isInitRunning
       ) {
         return;
       }

@@ -1,5 +1,4 @@
 import StateButton from 'components/general/state-button';
-import RecentFolders from 'components/ucp-tabs/recent-folders';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import {
   checkForUCP3Updates,
@@ -17,6 +16,9 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
+
+import './overview.css';
+import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();

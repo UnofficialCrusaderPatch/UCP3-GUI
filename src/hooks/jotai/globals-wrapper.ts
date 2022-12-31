@@ -9,12 +9,16 @@ export function useInitDone() {
   return useAtom(globalAtoms.INIT_DONE);
 }
 
-export function useFile() {
-  return useAtom(globalAtoms.FILE_ATOM);
+export function useInitRunning() {
+  return useAtom(globalAtoms.INIT_RUNNING);
+}
+
+export function useUcpConfigFile() {
+  return useAtom(globalAtoms.UCP_CONFIG_FILE_ATOM);
 }
 
 export function useFolder() {
-  return useAtom(globalAtoms.FOLDER_ATOM);
+  return useAtom(globalAtoms.GAME_FOLDER_ATOM);
 }
 
 // reducer atoms

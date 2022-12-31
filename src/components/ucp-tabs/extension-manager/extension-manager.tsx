@@ -7,13 +7,17 @@ import {
   Row,
   Tooltip,
 } from 'react-bootstrap';
-import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
+import {
+  useActiveExtensionsReducer,
+  useExtensionsReducer,
+  useExtensionStateReducer,
+} from 'hooks/jotai/globals-wrapper';
+import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
-import { GlobalState, ExtensionsState } from 'function/global-state_old';
 
 function ExtensionElement(props: {
   ext: Extension;
@@ -129,10 +133,10 @@ function ExtensionElement(props: {
   );
 }
 
-export default function ExtensionManager(args: { extensions: Extension[] }) {
-  const { extensions } = args;
-  const { setActiveExtensions, extensionsState, setExtensionsState } =
-    useContext(GlobalState);
+export default function ExtensionManager() {
+  const [extensions] = useExtensionsReducer();
+  const [, setActiveExtensions] = useActiveExtensionsReducer();
+  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 

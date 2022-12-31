@@ -2,18 +2,30 @@
 /* global CreateUIElement */
 
 import { Form } from 'react-bootstrap';
-
-import { useContext, useEffect, useState } from 'react';
-import { openFileDialog, save as dialogSave } from 'tauri/tauri-dialog';
-
-import './config-editor.css';
-
+import { useEffect, useState } from 'react';
+import {
+  openFileDialog,
+  save as dialogSave,
+  saveFileDialog,
+} from 'tauri/tauri-dialog';
 import { useTranslation } from 'react-i18next';
-import { GlobalState } from 'function/global-state_old';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
-import { UIFactory } from '../ui-elements';
+import {
+  useActiveExtensionsReducer,
+  useConfigurationDefaultsReducer,
+  useConfigurationReducer,
+  useConfigurationTouchedReducer,
+  useConfigurationWarningsReducer,
+  useExtensionsReducer,
+  useExtensionStateReducer,
+  useUcpConfigFile,
+} from 'hooks/jotai/globals-wrapper';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import { UIFactory } from './ui-elements';
+
+import './config-editor.css';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -30,25 +42,19 @@ function saveConfig(
   return saveUCPConfig(finalConfig, folder, extensions);
 }
 
-export default function ConfigEditor(args: {
-  readonly: boolean;
-  gameFolder: string;
-}) {
-  const { readonly, gameFolder } = args;
-  const {
-    configurationDefaults,
-    file,
-    configurationWarnings,
-    configuration,
-    setConfiguration,
-    configurationTouched,
-    setConfigurationTouched,
-    activeExtensions,
-    setActiveExtensions,
-    extensions,
-    extensionsState,
-    setExtensionsState,
-  } = useContext(GlobalState);
+export default function ConfigEditor(args: { readonly: boolean }) {
+  const { readonly } = args;
+
+  const gameFolder = useCurrentGameFolder();
+  const [configurationDefaults] = useConfigurationDefaultsReducer();
+  const [file] = useUcpConfigFile();
+  const [configurationWarnings] = useConfigurationWarningsReducer();
+  const [configuration, setConfiguration] = useConfigurationReducer();
+  const [configurationTouched, setConfigurationTouched] =
+    useConfigurationTouchedReducer();
+  const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
+  const [extensions] = useExtensionsReducer();
+  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -239,11 +245,18 @@ export default function ConfigEditor(args: {
               className="col-auto btn btn-primary mx-1"
               type="button"
               onClick={async () => {
-                let filePath = await dialogSave({});
-                if (filePath === null || filePath === undefined) {
+                const filePathOptional = await saveFileDialog(gameFolder, [
+                  {
+                    name: t('gui-general:file.config'),
+                    extensions: ['yml', 'yaml'],
+                  },
+                  { name: t('gui-general:file.all'), extensions: ['*'] },
+                ]);
+                if (filePathOptional.isEmpty()) {
                   setConfigStatus(t('gui-editor:config.status.cancelled'));
                   return;
                 }
+                let filePath = filePathOptional.get();
 
                 if (!filePath.endsWith('.yml')) filePath = `${filePath}.yml`;
 

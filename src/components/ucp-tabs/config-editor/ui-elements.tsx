@@ -1,16 +1,22 @@
+// TODO: The whole thing is deeply linked to the config currently.
+// As a result, every update to the object triggers a redraw of everything that uses the config
+// Including every single option, despite only one of them changes.
+// once the basic structure is set, here is a big place for optimization
+// for example: the state is kept in the config, but also the elements,
+// the config is not replaced, so it does not trigger a redraw of everything
+// the number of warnings could be kept in an extra value, or be coupled with a redraw trigger;
+
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import { Tooltip, Form } from 'react-bootstrap';
 
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, Radio } from 'react-radio-group';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
-
-import { GlobalState } from 'function/global-state_old';
 
 import type {
   DisplayConfigElement,
@@ -22,6 +28,13 @@ import {
   extensionsToOptionEntries,
   optionEntriesToHierarchical,
 } from 'config/ucp/extension-util';
+import {
+  useActiveExtensionsReducer,
+  useConfigurationDefaultsReducer,
+  useConfigurationReducer,
+  useConfigurationTouchedReducer,
+  useConfigurationWarningsReducer,
+} from 'hooks/jotai/globals-wrapper';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
@@ -166,14 +179,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, header } = spec;
     const { choices } = spec as unknown as {
@@ -287,14 +297,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, min, max, step, header } = spec;
     const { [url]: value } = configuration as {
@@ -415,14 +422,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, header } = spec;
     const { [url]: value } = configuration;
@@ -471,14 +475,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, header, choices } =
       spec as DisplayConfigElement & {
@@ -825,14 +826,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, min, max, step } = spec;
     const { [url]: value } = configuration as {
@@ -898,14 +896,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
@@ -958,14 +953,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
@@ -1044,14 +1036,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, choices } = spec;
     const { [url]: value } = configuration;
@@ -1132,14 +1121,10 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const [configurationWarnings] = useConfigurationWarningsReducer();
+    const [, setConfigurationTouched] = useConfigurationTouchedReducer();
+    const [configurationDefaults] = useConfigurationDefaultsReducer();
 
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, choices } = spec;
@@ -1460,7 +1445,8 @@ const UIFactory = {
   },
 
   CreateSections(args: { readonly: boolean }) {
-    const { activeExtensions } = useContext(GlobalState);
+    const [activeExtensions] = useActiveExtensionsReducer();
+
     const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
       (o: OptionEntry) => o.hidden === undefined || o.hidden === false
     );

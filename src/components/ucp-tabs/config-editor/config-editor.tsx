@@ -14,13 +14,13 @@ import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
   useActiveExtensionsReducer,
-  useConfigurationDefaultsReducer,
+  useConfigurationDefaults,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
-  useConfigurationWarningsReducer,
-  useExtensionsReducer,
+  useConfigurationWarnings,
+  useExtensions,
   useExtensionStateReducer,
-  useUcpConfigFile,
+  useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { UIFactory } from './ui-elements';
@@ -46,14 +46,14 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
 
   const gameFolder = useCurrentGameFolder();
-  const [configurationDefaults] = useConfigurationDefaultsReducer();
-  const [file] = useUcpConfigFile();
-  const [configurationWarnings] = useConfigurationWarningsReducer();
+  const configurationDefaults = useConfigurationDefaults();
+  const file = useUcpConfigFileValue();
+  const configurationWarnings = useConfigurationWarnings();
   const [configuration, setConfiguration] = useConfigurationReducer();
   const [configurationTouched, setConfigurationTouched] =
     useConfigurationTouchedReducer();
   const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
-  const [extensions] = useExtensionsReducer();
+  const extensions = useExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);

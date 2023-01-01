@@ -8,7 +8,7 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
-import { useConfigurationWarningsReducer } from 'hooks/jotai/globals-wrapper';
+import { useConfigurationWarnings } from 'hooks/jotai/globals-wrapper';
 import { useState } from 'react';
 
 const UCP_STATE_ARRAY = [
@@ -26,7 +26,7 @@ export default function Footer() {
   const [ucpVersionResult] = useUCPVersion();
   const [isFooterOpen, setFooterOpen] = useState(false);
 
-  const [configurationWarnings] = useConfigurationWarningsReducer();
+  const configurationWarnings = useConfigurationWarnings();
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 

@@ -1,4 +1,7 @@
-import { useInitDone, useInitRunning } from 'hooks/jotai/globals-wrapper';
+import {
+  useInitDoneValue,
+  useInitRunningValue,
+} from 'hooks/jotai/globals-wrapper';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import ConfigEditor from './config-editor/config-editor';
@@ -8,8 +11,8 @@ import Overview from './overview/overview';
 import './ucp-tabs.css';
 
 export default function UcpTabs() {
-  const [isInit] = useInitDone();
-  const [isInitRunning] = useInitRunning();
+  const isInit = useInitDoneValue();
+  const isInitRunning = useInitRunningValue();
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 

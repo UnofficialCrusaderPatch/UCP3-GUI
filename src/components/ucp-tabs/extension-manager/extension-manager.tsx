@@ -11,9 +11,9 @@ import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import {
-  useActiveExtensionsReducer,
-  useExtensionsReducer,
+  useExtensions,
   useExtensionStateReducer,
+  useSetActiveExtensions,
 } from 'hooks/jotai/globals-wrapper';
 import { ExtensionsState } from 'function/global/types';
 
@@ -134,8 +134,8 @@ function ExtensionElement(props: {
 }
 
 export default function ExtensionManager() {
-  const [extensions] = useExtensionsReducer();
-  const [, setActiveExtensions] = useActiveExtensionsReducer();
+  const extensions = useExtensions();
+  const setActiveExtensions = useSetActiveExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);

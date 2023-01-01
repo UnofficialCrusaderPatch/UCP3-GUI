@@ -10,17 +10,18 @@ import { useTranslation } from 'react-i18next';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';
 import {
-  useConfigurationDefaultsReducer,
-  useConfigurationReducer,
-  useExtensionsReducer,
-  useExtensionStateReducer,
-  useUcpConfigFile,
   useFolder,
-  useInitDone,
   useInitRunning,
-  useConfigurationTouchedReducer,
-  useConfigurationWarningsReducer,
-  useActiveExtensionsReducer,
+  useSetInitDone,
+  useSetUcpConfigFile,
+  useSetExtensions,
+  useSetConfiguration,
+  useSetConfigurationDefaults,
+  useSetExtensionState,
+  useFolderValue,
+  useSetConfigurationTouched,
+  useSetConfigurationWarnings,
+  useSetActiveExtensions,
 } from './globals-wrapper';
 import {
   UCPStateHandler,
@@ -30,7 +31,7 @@ import {
 } from './hooks';
 
 export function useCurrentGameFolder() {
-  return useFolder()[0];
+  return useFolderValue(); // only a proxy
 }
 
 export function useLanguage() {
@@ -78,18 +79,18 @@ export function useInitGlobalConfiguration(): [
   boolean,
   (newFolder: string, language: string) => Promise<void>
 ] {
-  const [, setInitDone] = useInitDone();
+  const setInitDone = useSetInitDone();
   const [isInitRunning, setInitRunning] = useInitRunning();
-  const [, setFile] = useUcpConfigFile();
-  const [, setExtensions] = useExtensionsReducer();
-  const [, setConfiguration] = useConfigurationReducer();
-  const [, setConfigurationDefaults] = useConfigurationDefaultsReducer();
-  const [, setExtensionsState] = useExtensionStateReducer();
+  const setFile = useSetUcpConfigFile();
+  const setExtensions = useSetExtensions();
+  const setConfiguration = useSetConfiguration();
+  const setConfigurationDefaults = useSetConfigurationDefaults();
+  const setExtensionsState = useSetExtensionState();
 
   // currently simply reset:
-  const [, setConfigurationTouched] = useConfigurationTouchedReducer();
-  const [, setConfigurationWarnings] = useConfigurationWarningsReducer();
-  const [, setActiveExtensions] = useActiveExtensionsReducer();
+  const setConfigurationTouched = useSetConfigurationTouched();
+  const setConfigurationWarnings = useSetConfigurationWarnings();
+  const setActiveExtensions = useSetActiveExtensions();
 
   return [
     isInitRunning,

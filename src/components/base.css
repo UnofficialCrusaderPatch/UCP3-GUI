@@ -26,6 +26,10 @@
   since it uses Edge, which is Chromium-based
 */
 
+::-webkit-scrollbar {
+  width: 12px;
+}
+
 ::-webkit-scrollbar-track-piece:start {
   background-image: url("/src/assets/ucp3/scroll_bar_middle.png");
   background-repeat: no-repeat repeat;

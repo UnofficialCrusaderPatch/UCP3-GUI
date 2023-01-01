@@ -11,7 +11,7 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import { Tooltip, Form } from 'react-bootstrap';
 
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, Radio } from 'react-radio-group';
@@ -1429,7 +1429,7 @@ const UIFactory = {
     return (
       <nav
         id="config-navbar"
-        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 pb-0 pe-0 col-3 justify-content-start h-100 flex-nowrap"
+        className="navbar navbar-dark bg-dark flex-column align-items-stretch justify-content-start p-3 h-100 flex-nowrap"
       >
         <a className="navbar-brand" href="#config-General">
           {t('gui-editor:config.table.of.contents')}
@@ -1444,7 +1444,10 @@ const UIFactory = {
     );
   },
 
-  CreateSections(args: { readonly: boolean }) {
+  CreateSections(args: { readonly: boolean }): {
+    nav: ReactElement | null;
+    content: ReactElement | null;
+  } {
     const activeExtensions = useActiveExtensions();
 
     const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
@@ -1468,23 +1471,24 @@ const UIFactory = {
     });
 
     if (optionEntries.length === 0) {
-      // Display message that no config options can be displayed
-      return (
-        // <h3
-        //   style={{
-        //     display: 'flex',
-        //     justifyContent: 'center',
-        //     alignItems: 'center',
-        //     textAlign: 'center',
-        //     minHeight: '85vh',
-        //   }}
-        // >
-        //   No extensions are active, so there are no options to display! Go to
-        //   the Extensions tab to activate an Extension.
-        // </h3>
-        // eslint-disable-next-line react/jsx-no-useless-fragment
-        <></>
-      );
+      return { nav: null, content: null };
+      // // Display message that no config options can be displayed
+      // return (
+      //   // <h3
+      //   //   style={{
+      //   //     display: 'flex',
+      //   //     justifyContent: 'center',
+      //   //     alignItems: 'center',
+      //   //     textAlign: 'center',
+      //   //     minHeight: '85vh',
+      //   //   }}
+      //   // >
+      //   //   No extensions are active, so there are no options to display! Go to
+      //   //   the Extensions tab to activate an Extension.
+      //   // </h3>
+      //   // eslint-disable-next-line react/jsx-no-useless-fragment
+      //   <></>
+      // );
     }
 
     const elements = (definition.elements as DisplayConfigElement[]).map(
@@ -1513,26 +1517,26 @@ const UIFactory = {
     });
 
     // https://getbootstrap.com/docs/5.0/components/scrollspy/#list-item-4
-    return (
-      <>
-        <UIFactory.CreateSectionsNav spec={definition} />
+    return {
+      nav: <UIFactory.CreateSectionsNav spec={definition} />,
+      content: (
         <div
           // data-bs-spy="scroll"
           // data-bs-target="#config-navbar"
           // data-bs-offset="0"
           // // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           // tabIndex={0}
-          className="col-9 p-3 pb-0 h-100"
+          className="h-100"
           id="config-sections"
         >
-          <div id="config-General" style={{ marginLeft: `1rem` }}>
+          <div id="config-General">
             <h1 id="config-General">{t('gui-editor:config.general')}</h1>
             {elements}
           </div>
-          <div style={{ marginLeft: `1rem` }}>{children}</div>
+          <div>{children}</div>
         </div>
-      </>
-    );
+      ),
+    };
   },
 };
 

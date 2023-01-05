@@ -22,7 +22,7 @@
 }
 
 .dark-dropdown {
-  background-color: rgba(0, 0, 0, 0.521);
+  background-color: var(--ucp-menu-shade);
   color: white !important;
   border: none !important;
 }

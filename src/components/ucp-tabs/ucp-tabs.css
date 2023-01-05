@@ -8,9 +8,35 @@
 }
 
 .ucp-tabs-header {
-  padding-top: 80px;
+  padding-top: 100px;
   background-image: url("/src/assets/ucp3/bg.png");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  align-items: end;
+}
+
+.nav-link {
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  background-color: transparent !important;
+  border-image-source: url("/src/assets/ucp3/tab.png") !important;
+  border-image-slice: 18 19 0 18 fill !important;
+  border-image-width: 20px 20px 0px 20px !important;
+  border-image-outset: 0px 0px 0px 0px !important;
+  border-image-repeat: repeat repeat !important;
+  border-width: 20px 20px 0px 20px !important;
+  height: 50px;
+  width: 160px;
+  text-align: center;
+  color: white !important;
+}
+
+.nav-link.active {
+  background-color: transparent !important;
+  border-image-source: url("/src/assets/ucp3/tab_hover.png") !important;
+  border-style: solid;
+  height: 60px;
+  color: white !important;
 }

@@ -63,7 +63,7 @@ export default function Overview() {
   }
   return (
     <Container fluid className="overflow-auto">
-      <div className="background-image" />
+      <RecentFolders />
       <div className="m-3">
         {t('gui-editor:overview.folder.version')} {ucpVersionString}
       </div>

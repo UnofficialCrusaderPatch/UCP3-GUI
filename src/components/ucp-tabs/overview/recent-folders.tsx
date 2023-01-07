@@ -5,7 +5,7 @@ import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import { createEditorWindow } from 'function/window-actions';
 import { useGameFolder } from 'hooks/jotai/helper';
 import { useRecentFolders } from 'hooks/jotai/hooks';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
@@ -15,6 +15,7 @@ import './recent-folders.css';
 export default function RecentFolders() {
   const [currentFolder, setFolder] = useGameFolder();
   const [recentFolderResult] = useRecentFolders();
+  const [showRecentFolders, setShowRecentFolders] = useState(false);
 
   // lang
   const [t] = useTranslation(['gui-general', 'gui-landing']);
@@ -55,74 +56,65 @@ export default function RecentFolders() {
   }
 
   return (
-    <>
-      <div className="mb-5">
-        <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
-        <div className="d-flex mt-2">
-          <div className="textInput">
-            <input
-              id="browseresult"
-              type="text"
-              className="form-control"
-              readOnly
-              role="button"
-              onClick={async () =>
-                (await openFolderDialog(currentFolder)).ifPresent(
-                  updateCurrentFolderSelectState
-                )
-              }
-              value={currentFolder}
-            />
-          </div>
+    <div className="mb-5 textInput">
+      <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
+      <div className="d-flex mt-2">
+        <div className="textInputField d-flex align-items-center">
+          <input
+            id="browseresult"
+            type="text"
+            className="form-control"
+            readOnly
+            role="button"
+            onClick={async () =>
+              (await openFolderDialog(currentFolder)).ifPresent(
+                updateCurrentFolderSelectState
+              )
+            }
+            value={currentFolder}
+          />
           <button
-            id="launchbutton"
             type="button"
-            className="launch-button"
-            disabled={currentFolder === ''}
-            onClick={() => createEditorWindow(currentFolder)}
+            className="btn btn-secondary btn-sm"
+            onClick={() => setShowRecentFolders(!showRecentFolders)}
           >
-            <div className="launchtext">{t('gui-landing:launch')}</div>
+            Recent
           </button>
         </div>
       </div>
-      <div className="flex-grow-1 overflow-hidden d-flex flex-column justify-content-start">
-        <label htmlFor="recentfolders" style={{ color: 'rgb(155, 155, 155)' }}>
-          {t('gui-landing:old.folders')}
-        </label>
-        <div id="recentfolders" className="overflow-hidden mt-2 recent-folders">
-          {recentFolderHelper
-            .getRecentGameFolders()
-            .filter((_, index) => index !== 0)
-            .map((recentFolder) => (
-              <div
-                key={recentFolder}
-                className="px-2 file-selector d-flex justify-content-between align-items-center"
-                role="button"
-                title={recentFolder}
-                onClick={onClickUpdateRecentFolder}
-              >
-                <div className="death90">{recentFolder}</div>
-                <input
-                  type="button"
-                  style={{
-                    width: '0.25em',
-                    height: '0.25em',
-                    color: 'white',
-                  }}
-                  className="btn-close btn-close-white"
-                  aria-label="Close"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    recentFolderHelper.removeFromRecentFolders(recentFolder);
-                    updateCurrentFolderSelectState(
-                      recentFolderHelper.getMostRecentGameFolder()
-                    );
-                  }}
-                />
-              </div>
-            ))}
-        </div>
+      <button
+        id="launchbutton"
+        type="button"
+        className="ucp-button"
+        disabled={currentFolder === ''}
+        onClick={() => createEditorWindow(currentFolder)}
+      >
+        <div className="ucp-button-text">{t('gui-landing:launch')}</div>
+      </button>
+      <div
+        className="recent-folders-dropdown"
+        style={{ display: showRecentFolders ? 'block' : 'none' }}
+      >
+        {recentFolderHelper
+          .getRecentGameFolders()
+          .filter((_, index) => index !== 0)
+          .map((recentFolder) => (
+            <div
+              key={recentFolder}
+              className="px-2 file-selector d-flex justify-content-between align-items-center"
+              role="button"
+              title={recentFolder}
+              onClick={onClickUpdateRecentFolder}
+            >
+              <div className="death90">{recentFolder}</div>
+              <input
+                type="button"
+                style={{ display: 'none' }}
+                onClick={(event) => event.stopPropagation()}
+              />
+            </div>
+          ))}
       </div>
-    </>
+    </div>
   );
 }

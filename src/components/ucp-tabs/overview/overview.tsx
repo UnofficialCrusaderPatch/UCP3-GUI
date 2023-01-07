@@ -16,9 +16,9 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
+import RecentFolders from './recent-folders';
 
 import './overview.css';
-import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -195,7 +195,7 @@ export default function Overview() {
           Result.tryAsync(() => checkForGUIUpdates(stateUpdate, t))
         }
       />
-      <div className="m-3">
+      <div className="m-5">
         <Modal show={show} onHide={handleClose} className="text-dark">
           <Modal.Header closeButton>
             <Modal.Title>{t('gui-general:require.reload.title')}</Modal.Title>

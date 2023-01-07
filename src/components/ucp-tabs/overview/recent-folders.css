@@ -12,7 +12,13 @@
   color: rgb(248, 255, 188) !important;
 }
 
-.textInput {
+.death90 {
+  margin-right: 13px;
+  left: 0;
+  overflow: hidden;
+}
+
+.textInputField {
   background:
     url('/src/assets/ucp3/textfield_left.png') left center no-repeat,
     url('/src/assets/ucp3/textfield_right.png') right center no-repeat,
@@ -22,16 +28,16 @@
   border: none;
   border-radius: 0px;
   height: 40px;
-  width: 100%
+  width: 100%;
+  padding-top: 2px;
 }
 
-.death90 {
-  margin-right: 13px;
-  left: 0;
-  overflow: hidden;
+.textInput {
+  width: 80%;
+  margin: auto;
 }
 
-.textInput input[type="text"] {
+.textInputField input[type="text"] {
   background-color: transparent;
   flex-grow: 1;
   color: white;
@@ -47,10 +53,13 @@
   background-color: transparent;  
   color: white;
   vertical-align: center;
-  width: 20%;
   height: 40px;
   min-width: 100px;
   padding-top: -20px;
+  width: 40%;
+  margin-left: 30%;
+  margin-right: 30%;
+  position: relative;
 }
 
 .launch-button:hover {
@@ -62,13 +71,15 @@
   background-color: transparent;
   color: white;
   vertical-align: center;
-  width: 20%;
   height: 40px;
   min-width: 100px;
+  width: 40%;
+  margin-left: 30%;
+  margin-right: 30%;
 }
 
 .launchtext{
-  margin-top: -12px;
+  margin-top: -10px;
 }
 
 .recent-folders{
@@ -76,4 +87,26 @@
   border-width: 4px;
   border-style: solid;
   background-color: transparent;
+}
+
+
+.recent-folders-dropdown {
+  left: 0px;
+  background-color: white;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  max-height: 250px;
+  overflow-y: hidden;
+  right: 0;
+  z-index: 1;
+}
+
+.recent-folders-dropdown .file-selector {
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.recent-folders-dropdown .file-selector:hover {
+  background-color: #e9ecef;
 }

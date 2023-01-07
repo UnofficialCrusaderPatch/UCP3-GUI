@@ -56,7 +56,7 @@ export default function RecentFolders() {
   }
 
   return (
-    <div className="mb-5 textInput">
+    <div className="textInput">
       <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
       <div className="d-flex mt-2">
         <div className="textInputField d-flex align-items-center">
@@ -82,38 +82,31 @@ export default function RecentFolders() {
           </button>
         </div>
       </div>
-      <button
-        id="launchbutton"
-        type="button"
-        className="ucp-button"
-        disabled={currentFolder === ''}
-        onClick={() => createEditorWindow(currentFolder)}
-      >
-        <div className="ucp-button-text">{t('gui-landing:launch')}</div>
-      </button>
-      <div
-        className="recent-folders-dropdown"
-        style={{ display: showRecentFolders ? 'block' : 'none' }}
-      >
-        {recentFolderHelper
-          .getRecentGameFolders()
-          .filter((_, index) => index !== 0)
-          .map((recentFolder) => (
-            <div
-              key={recentFolder}
-              className="px-2 file-selector d-flex justify-content-between align-items-center"
-              role="button"
-              title={recentFolder}
-              onClick={onClickUpdateRecentFolder}
-            >
-              <div className="death90">{recentFolder}</div>
-              <input
-                type="button"
-                style={{ display: 'none' }}
-                onClick={(event) => event.stopPropagation()}
-              />
-            </div>
-          ))}
+      <div className="dropdown-wrapper">
+        <div
+          className="recent-folders-dropdown"
+          style={{ display: showRecentFolders ? 'block' : 'none' }}
+        >
+          {recentFolderHelper
+            .getRecentGameFolders()
+            .filter((_, index) => index !== 0)
+            .map((recentFolder) => (
+              <div
+                key={recentFolder}
+                className="px-2 file-selector d-flex justify-content-between align-items-center"
+                role="button"
+                title={recentFolder}
+                onClick={onClickUpdateRecentFolder}
+              >
+                <div className="death90">{recentFolder}</div>
+                <input
+                  type="button"
+                  style={{ display: 'none' }}
+                  onClick={(event) => event.stopPropagation()}
+                />
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );

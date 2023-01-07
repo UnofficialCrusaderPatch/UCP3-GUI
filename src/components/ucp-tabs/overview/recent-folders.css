@@ -82,6 +82,12 @@
   margin-top: -10px;
 }
 
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+
 .recent-folders{
   border-image: var(--ucp-main-outline-image) fill;
   border-width: 4px;
@@ -100,12 +106,15 @@
   overflow-y: hidden;
   right: 0;
   z-index: 1;
+  position: absolute;
 }
+
 
 .recent-folders-dropdown .file-selector {
   cursor: pointer;
   white-space: nowrap;
 }
+
 
 .recent-folders-dropdown .file-selector:hover {
   background-color: #e9ecef;

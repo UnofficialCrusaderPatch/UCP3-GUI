@@ -43,21 +43,14 @@
   /* Other button styles here */
   border-image: url("/src/assets/ucp3/button_slice_hover.png");
   border-image-slice: 49% fill;
-  border-width: 20px;
   border-style: solid;
-  background-color: transparent;
-  color: white;
-  vertical-align: center;
-  height: 40px;
-  min-width: 100px;
-  width: 40%;
-  margin-left: 30%;
-  margin-right: 30%;
 }
+
 
 .ucp-button-text{
   margin-top: -10px;
 }
+
 
 /*
   Custom scrollbar.
@@ -84,4 +77,14 @@
     radial-gradient(40% 100% at center bottom, var(--ucp-main-grey) 0%, rgba(0,0,0,0) 100%);
   background-repeat: no-repeat no-repeat, no-repeat repeat, no-repeat no-repeat;
   background-position: center bottom, center bottom, center center;
+}
+
+
+.buttontext{
+  margin-top: -12px;
+}
+
+
+.icon-button {
+  background-color: transparent;
 }

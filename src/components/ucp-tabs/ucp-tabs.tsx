@@ -9,7 +9,6 @@ import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
 
 import './ucp-tabs.css';
-import './components.css';
 
 export default function UcpTabs() {
   const isInit = useInitDoneValue();

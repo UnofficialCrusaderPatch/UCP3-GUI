@@ -69,9 +69,6 @@ export default function Overview() {
   return (
     <Container fluid className="overflow-auto">
       <RecentFolders />
-      <div className="m-3">
-        {t('gui-editor:overview.folder.version')} {ucpVersionString}
-      </div>
       <StateButton
         buttonActive={
           overviewButtonActive &&
@@ -83,7 +80,7 @@ export default function Overview() {
           success: activateButtonString,
           failed: activateButtonString,
         }}
-        buttonVariant="primary"
+        buttonVariant="ucp-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => {
@@ -100,7 +97,8 @@ export default function Overview() {
           return result;
         }}
       />
-      <StateButton
+
+      {/*      <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{
           idle: t('gui-editor:overview.update.idle'),
@@ -128,7 +126,7 @@ export default function Overview() {
           }
           return Result.emptyErr();
         }}
-      />
+      /> */}
       <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{
@@ -137,7 +135,7 @@ export default function Overview() {
           success: t('gui-editor:overview.zip.success'),
           failed: t('gui-editor:overview.zip.failed'),
         }}
-        buttonVariant="primary"
+        buttonVariant="icon-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => {

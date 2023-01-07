@@ -19,8 +19,6 @@ import {
 import RecentFolders from './recent-folders';
 
 import './overview.css';
-import '../../components.css';
-
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();

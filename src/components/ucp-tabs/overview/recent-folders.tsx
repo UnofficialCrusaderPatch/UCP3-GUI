@@ -5,7 +5,7 @@ import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import { createEditorWindow } from 'function/window-actions';
 import { useGameFolder } from 'hooks/jotai/helper';
 import { useRecentFolders } from 'hooks/jotai/hooks';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';

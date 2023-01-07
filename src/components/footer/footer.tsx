@@ -1,16 +1,15 @@
-import { useCurrentGameFolder } from 'components/general/hooks';
-import {
-  UCPStateHandler,
-  useUCPState,
-  useUCPVersion,
-} from 'components/general/swr-hooks';
-import { GlobalState } from 'function/global-state';
 import { UCPState } from 'function/ucp/ucp-state';
-import { UCPVersion } from 'function/ucp/ucp-version';
-import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import Result from 'util/structs/result';
 
 import './footer.css';
+import {
+  useCurrentGameFolder,
+  useUCPState,
+  useUCPVersion,
+} from 'hooks/jotai/helper';
+import { useConfigurationWarnings } from 'hooks/jotai/globals-wrapper';
+import { useState } from 'react';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -23,47 +22,47 @@ const UCP_STATE_ARRAY = [
 
 export default function Footer() {
   const currentFolder = useCurrentGameFolder();
-  const ucpStateHandlerSwr = useUCPState();
-  const ucpVersionSwr = useUCPVersion();
+  const [ucpStateHandlerResult] = useUCPState();
+  const [ucpVersionResult] = useUCPVersion();
   const [isFooterOpen, setFooterOpen] = useState(false);
 
-  const { configurationWarnings } = useContext(GlobalState);
+  const configurationWarnings = useConfigurationWarnings();
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
-  if (ucpStateHandlerSwr.isLoading || ucpVersionSwr.isLoading) {
-    return <p>{t('gui-general:loading')}</p>;
-  }
-  const ucpStateHandler = ucpStateHandlerSwr.data as UCPStateHandler;
-  const ucpState = ucpStateHandler.state;
-  const ucpVersion = ucpVersionSwr.data as UCPVersion;
+  const state = ucpStateHandlerResult
+    .getOrReceive(Result.emptyErr)
+    .ok()
+    .map((handler) => handler.state)
+    .getOrElse(UCPState.UNKNOWN);
 
-  let ucpFooterVersionString;
-  switch (ucpState) {
-    case UCPState.NOT_INSTALLED:
-      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
-      break;
-    case UCPState.ACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
-    case UCPState.INACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
-    default:
-      ucpFooterVersionString = t('gui-editor:footer.version.unknown');
-      break;
+  let ucpFooterVersionString = null;
+  if (ucpVersionResult.isEmpty()) {
+    ucpFooterVersionString = t('gui-general:loading');
+  } else {
+    const ucpVersion = ucpVersionResult.get().getOrThrow();
+    switch (state) {
+      case UCPState.NOT_INSTALLED:
+        ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+        break;
+      case UCPState.ACTIVE:
+        ucpFooterVersionString = ucpVersion.toString();
+        break;
+      case UCPState.INACTIVE:
+        ucpFooterVersionString = ucpVersion.toString();
+        break;
+      default:
+        ucpFooterVersionString = t('gui-editor:footer.version.unknown');
+        break;
+    }
   }
 
   const warningCount = Object.values(configurationWarnings)
-    .map((v) =>
-      (v as { text: string; level: string }).level === 'warning' ? 1 : 0
-    )
+    .map((v) => (v.level === 'warning' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
   const errorCount = Object.values(configurationWarnings)
-    .map((v) =>
-      (v as { text: string; level: string }).level === 'error' ? 1 : 0
-    )
+    .map((v) => (v.level === 'error' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
   return (
@@ -95,7 +94,7 @@ export default function Footer() {
         </span>
         <span className="px-2">
           {t('gui-editor:footer.state.prefix', {
-            state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+            state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
           })}
         </span>
       </div>

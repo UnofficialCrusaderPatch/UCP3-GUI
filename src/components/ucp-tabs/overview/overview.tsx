@@ -1,31 +1,31 @@
-import { useCurrentGameFolder } from 'components/general/hooks';
 import StateButton from 'components/general/state-button';
-import {
-  UCPStateHandler,
-  useUCPState,
-  useUCPVersion,
-} from 'components/general/swr-hooks';
-import RecentFolders from 'components/ucp-tabs/recent-folders';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import {
   checkForUCP3Updates,
   installUCPFromZip,
 } from 'function/download/ucp-download-handling';
 import { UCPState } from 'function/ucp/ucp-state';
-import { UCPVersion } from 'function/ucp/ucp-version';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
 import { Button, Container, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
+import {
+  useCurrentGameFolder,
+  useUCPState,
+  useUCPVersion,
+} from 'hooks/jotai/helper';
+import RecentFolders from './recent-folders';
+
 import './overview.css';
 import '../../components.css';
 
+
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
-  const ucpStateHandlerSwr = useUCPState();
-  const ucpVersionSwr = useUCPVersion();
+  const [ucpStateHandlerResult, receiveState] = useUCPState();
+  const [ucpVersionResult, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
@@ -34,33 +34,40 @@ export default function Overview() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
-  if (ucpStateHandlerSwr.isLoading || ucpVersionSwr.isLoading) {
-    return <p>{t('gui-general:loading')}</p>;
-  }
-  const ucpStateHandler = ucpStateHandlerSwr.data as UCPStateHandler;
-  const ucpState = ucpStateHandler.state;
-  const ucpVersion = ucpVersionSwr.data as UCPVersion;
+  const ucpStateHandler = ucpStateHandlerResult
+    .getOrReceive(Result.emptyErr)
+    .ok();
+  const ucpState = ucpStateHandler
+    .map((handler) => handler.state)
+    .getOrElse(UCPState.UNKNOWN);
 
-  let activateButtonString;
-  let ucpVersionString;
-  switch (ucpState) {
-    case UCPState.NOT_INSTALLED:
-      ucpVersionString = t('gui-editor:overview.not.installed');
-      activateButtonString = t('gui-editor:overview.activate.not.installed');
-      break;
-    case UCPState.ACTIVE:
-      ucpVersionString = ucpVersion.toString();
-      activateButtonString = t('gui-editor:overview.activate.do.deactivate');
-      break;
-    case UCPState.INACTIVE:
-      ucpVersionString = ucpVersion.toString();
-      activateButtonString = t('gui-editor:overview.activate.do.activate');
-      break;
-    default:
-      ucpVersionString = t('gui-editor:overview.unknown.state');
-      activateButtonString = t('gui-editor:overview.activate.unknown');
-      break;
+  let activateButtonString = null;
+  let ucpVersionString = null;
+  if (ucpVersionResult.isEmpty()) {
+    ucpVersionString = t('gui-general:loading');
+    activateButtonString = ucpVersionString;
+  } else {
+    const ucpVersion = ucpVersionResult.get().getOrThrow();
+    switch (ucpState) {
+      case UCPState.NOT_INSTALLED:
+        ucpVersionString = t('gui-editor:overview.not.installed');
+        activateButtonString = t('gui-editor:overview.activate.not.installed');
+        break;
+      case UCPState.ACTIVE:
+        ucpVersionString = ucpVersion.toString();
+        activateButtonString = t('gui-editor:overview.activate.do.deactivate');
+        break;
+      case UCPState.INACTIVE:
+        ucpVersionString = ucpVersion.toString();
+        activateButtonString = t('gui-editor:overview.activate.do.activate');
+        break;
+      default:
+        ucpVersionString = t('gui-editor:overview.unknown.state');
+        activateButtonString = t('gui-editor:overview.activate.unknown');
+        break;
+    }
   }
+
   return (
     <Container fluid className="overflow-auto">
       <RecentFolders />
@@ -83,10 +90,14 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => {
           let result = Result.emptyOk<string>();
+          if (ucpStateHandler.isEmpty()) {
+            return result;
+          }
+
           if (ucpState === UCPState.ACTIVE) {
-            result = (await ucpStateHandler.deactivate()).mapErr(String);
+            result = (await ucpStateHandler.get().deactivate()).mapErr(String);
           } else if (ucpState === UCPState.INACTIVE) {
-            result = (await ucpStateHandler.activate()).mapErr(String);
+            result = (await ucpStateHandler.get().activate()).mapErr(String);
           }
           return result;
         }}
@@ -112,8 +123,8 @@ export default function Overview() {
             setShow(true);
 
             // load new state
-            await ucpStateHandlerSwr.mutate();
-            await ucpVersionSwr.mutate();
+            await receiveState();
+            await receiveVersion();
 
             return Result.ok('');
           }
@@ -150,8 +161,8 @@ export default function Overview() {
           );
           if (zipInstallResult.ok().isPresent()) {
             // load new state
-            await ucpStateHandlerSwr.mutate();
-            await ucpVersionSwr.mutate();
+            await receiveState();
+            await receiveVersion();
             setShow(true);
           }
           setOverviewButtonActive(true);

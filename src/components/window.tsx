@@ -1,5 +1,5 @@
 import 'localization/i18n';
-import { useLanguage } from './general/swr-hooks';
+import { useLanguage } from 'hooks/jotai/helper';
 import Main from './main-page';
 import Titlebar from './titlebar/titlebar';
 
@@ -10,7 +10,7 @@ import './window.css';
 export default function Window() {
   const languageState = useLanguage();
 
-  if (languageState.isLoading) {
+  if (languageState.isEmpty()) {
     return <div />;
   }
 

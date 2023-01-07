@@ -7,11 +7,11 @@ import { appWindow } from '@tauri-apps/api/window';
 import { showError } from './tauri-dialog';
 
 class TauriEventHandler {
-  intern_funcs: (() => Promise<void>)[] = [];
+  intern_funcs: (() => void | Promise<void>)[] = [];
 
   intern_handledEvent: TauriEvent;
 
-  intern_getFuncIndex(func: () => Promise<void>) {
+  intern_getFuncIndex(func: () => void | Promise<void>) {
     return this.intern_funcs.indexOf(func);
   }
 
@@ -37,7 +37,7 @@ class TauriEventHandler {
     this.intern_registerTauriEventListener();
   }
 
-  registerListener(func: () => Promise<void>): boolean {
+  registerListener(func: () => void | Promise<void>): boolean {
     if (this.intern_getFuncIndex(func) > -1) {
       showError(
         `The following function was already registered for ${this.intern_handledEvent}:\n\n${func}`
@@ -49,7 +49,7 @@ class TauriEventHandler {
   }
 
   // source: https://stackoverflow.com/a/5767357
-  removeListener(func: () => Promise<void>): boolean {
+  removeListener(func: () => void | Promise<void>): boolean {
     const index = this.intern_getFuncIndex(func);
     if (index > -1) {
       // only splice array when item is found
@@ -77,7 +77,7 @@ const tauriEventHandlers = new Map<TauriEvent, TauriEventHandler>();
 
 export function registerTauriEventListener(
   tauriEvent: TauriEvent,
-  func: () => Promise<void>
+  func: () => void | Promise<void>
 ) {
   const handler = tauriEventHandlers.get(tauriEvent);
   if (handler) {
@@ -101,7 +101,7 @@ export function registerTauriEventListener(
 
 export function removeTauriEventListener(
   tauriEvent: TauriEvent,
-  func: () => Promise<void>
+  func: () => void | Promise<void>
 ) {
   const handler = tauriEventHandlers.get(tauriEvent);
   return handler ? handler.removeListener(func) : false;

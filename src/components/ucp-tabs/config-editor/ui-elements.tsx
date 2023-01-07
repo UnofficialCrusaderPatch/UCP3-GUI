@@ -1,16 +1,22 @@
+// TODO: The whole thing is deeply linked to the config currently.
+// As a result, every update to the object triggers a redraw of everything that uses the config
+// Including every single option, despite only one of them changes.
+// once the basic structure is set, here is a big place for optimization
+// for example: the state is kept in the config, but also the elements,
+// the config is not replaced, so it does not trigger a redraw of everything
+// the number of warnings could be kept in an extra value, or be coupled with a redraw trigger;
+
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import { Tooltip, Form } from 'react-bootstrap';
 
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import * as bootstrap from 'bootstrap';
 import { useTranslation } from 'react-i18next';
 import { RadioGroup, Radio } from 'react-radio-group';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
-
-import { GlobalState } from 'function/global-state';
 
 import type {
   DisplayConfigElement,
@@ -22,6 +28,13 @@ import {
   extensionsToOptionEntries,
   optionEntriesToHierarchical,
 } from 'config/ucp/extension-util';
+import {
+  useActiveExtensions,
+  useConfigurationDefaults,
+  useConfigurationReducer,
+  useConfigurationWarnings,
+  useSetConfigurationTouched,
+} from 'hooks/jotai/globals-wrapper';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
@@ -166,14 +179,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, header } = spec;
     const { choices } = spec as unknown as {
@@ -287,14 +297,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, min, max, step, header } = spec;
     const { [url]: value } = configuration as {
@@ -415,14 +422,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, header } = spec;
     const { [url]: value } = configuration;
@@ -471,14 +475,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, header, choices } =
       spec as DisplayConfigElement & {
@@ -825,14 +826,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, min, max, step } = spec;
     const { [url]: value } = configuration as {
@@ -898,14 +896,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled } = spec;
     const { [url]: value } = configuration;
@@ -958,14 +953,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, min, max, enabled } =
       spec as NumberInputDisplayConfigElement;
@@ -1044,14 +1036,11 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
+
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, choices } = spec;
     const { [url]: value } = configuration;
@@ -1132,14 +1121,10 @@ const UIFactory = {
     disabled: boolean;
     className: string;
   }) {
-    const {
-      configuration,
-      setConfiguration,
-      configurationWarnings,
-      setConfigurationWarnings,
-      setConfigurationTouched,
-      configurationDefaults,
-    } = useContext(GlobalState);
+    const [configuration, setConfiguration] = useConfigurationReducer();
+    const configurationWarnings = useConfigurationWarnings();
+    const setConfigurationTouched = useSetConfigurationTouched();
+    const configurationDefaults = useConfigurationDefaults();
 
     const { spec, disabled, className } = args;
     const { url, text, tooltip, enabled, choices } = spec;
@@ -1444,7 +1429,7 @@ const UIFactory = {
     return (
       <nav
         id="config-navbar"
-        className="navbar navbar-dark bg-dark flex-column align-items-stretch p-3 pb-0 pe-0 col-3 justify-content-start h-100 flex-nowrap"
+        className="navbar navbar-dark bg-dark flex-column align-items-stretch justify-content-start p-3 h-100 flex-nowrap"
       >
         <a className="navbar-brand" href="#config-General">
           {t('gui-editor:config.table.of.contents')}
@@ -1459,8 +1444,12 @@ const UIFactory = {
     );
   },
 
-  CreateSections(args: { readonly: boolean }) {
-    const { activeExtensions } = useContext(GlobalState);
+  CreateSections(args: { readonly: boolean }): {
+    nav: ReactElement | null;
+    content: ReactElement | null;
+  } {
+    const activeExtensions = useActiveExtensions();
+
     const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
       (o: OptionEntry) => o.hidden === undefined || o.hidden === false
     );
@@ -1482,23 +1471,24 @@ const UIFactory = {
     });
 
     if (optionEntries.length === 0) {
-      // Display message that no config options can be displayed
-      return (
-        // <h3
-        //   style={{
-        //     display: 'flex',
-        //     justifyContent: 'center',
-        //     alignItems: 'center',
-        //     textAlign: 'center',
-        //     minHeight: '85vh',
-        //   }}
-        // >
-        //   No extensions are active, so there are no options to display! Go to
-        //   the Extensions tab to activate an Extension.
-        // </h3>
-        // eslint-disable-next-line react/jsx-no-useless-fragment
-        <></>
-      );
+      return { nav: null, content: null };
+      // // Display message that no config options can be displayed
+      // return (
+      //   // <h3
+      //   //   style={{
+      //   //     display: 'flex',
+      //   //     justifyContent: 'center',
+      //   //     alignItems: 'center',
+      //   //     textAlign: 'center',
+      //   //     minHeight: '85vh',
+      //   //   }}
+      //   // >
+      //   //   No extensions are active, so there are no options to display! Go to
+      //   //   the Extensions tab to activate an Extension.
+      //   // </h3>
+      //   // eslint-disable-next-line react/jsx-no-useless-fragment
+      //   <></>
+      // );
     }
 
     const elements = (definition.elements as DisplayConfigElement[]).map(
@@ -1527,26 +1517,26 @@ const UIFactory = {
     });
 
     // https://getbootstrap.com/docs/5.0/components/scrollspy/#list-item-4
-    return (
-      <>
-        <UIFactory.CreateSectionsNav spec={definition} />
+    return {
+      nav: <UIFactory.CreateSectionsNav spec={definition} />,
+      content: (
         <div
           // data-bs-spy="scroll"
           // data-bs-target="#config-navbar"
           // data-bs-offset="0"
           // // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           // tabIndex={0}
-          className="col-9 p-3 pb-0 h-100"
+          className="h-100"
           id="config-sections"
         >
-          <div id="config-General" style={{ marginLeft: `1rem` }}>
+          <div id="config-General">
             <h1 id="config-General">{t('gui-editor:config.general')}</h1>
             {elements}
           </div>
-          <div style={{ marginLeft: `1rem` }}>{children}</div>
+          <div>{children}</div>
         </div>
-      </>
-    );
+      ),
+    };
   },
 };
 

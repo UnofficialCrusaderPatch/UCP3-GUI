@@ -27,7 +27,7 @@
   border-image-slice: 49% fill;
   border-width: 20px;
   border-style: solid;
-  background-color: transparent;  
+  background-color: transparent;
   color: white;
   vertical-align: center;
   height: 40px;
@@ -80,11 +80,35 @@
 }
 
 
-.buttontext{
+.buttontext {
   margin-top: -12px;
 }
 
 
 .icon-button {
   background-color: transparent;
+}
+
+
+/* Define all icons for buttons */
+.zip-icon > .icon-placeholder {
+  background-image: url("/src/assets/ucp3/zip.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
+
+.zip-icon:hover > .icon-placeholder {
+  background-image: url("/src/assets/ucp3/zip_hover.png");
+}
+
+.download-icon > .icon-placeholder {
+  background-image: url("/src/assets/ucp3/download.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
+
+.download-icon:hover > .icon-placeholder {
+  background-image: url("/src/assets/ucp3/download_hover.png");
 }

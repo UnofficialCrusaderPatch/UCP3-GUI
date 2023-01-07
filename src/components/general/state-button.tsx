@@ -77,7 +77,7 @@ export default function StateButton(props: StateButtonProps) {
         }}
       >
         <div className="buttontext">
-          <div className=""> </div>
+          <div className="icon-placeholder" />
           {buttonValues[buttonState]}
         </div>
       </button>

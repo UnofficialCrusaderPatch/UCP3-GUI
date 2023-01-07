@@ -23,7 +23,7 @@
     url('/src/assets/ucp3/textfield_left.png') left center no-repeat,
     url('/src/assets/ucp3/textfield_right.png') right center no-repeat,
     url('/src/assets/ucp3/textfield_middle.png') center center repeat-x;
-    
+
   background-size: auto;
   border: none;
   border-radius: 0px;
@@ -50,7 +50,7 @@
   border-image-slice: 49% fill;
   border-width: 20px;
   border-style: solid;
-  background-color: transparent;  
+  background-color: transparent;
   color: white;
   vertical-align: center;
   height: 40px;

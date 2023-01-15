@@ -34,6 +34,7 @@ fn main() {
             zip_utils::get_zip_entry_as_binary,
             zip_utils::get_zip_entry_as_text,
             hash_utils::get_sha256_of_file,
+            logging::log,
         ])
         // logger
         .manage::<Mutex<log4rs::Handle>>(Mutex::new(logging::init_logging()))

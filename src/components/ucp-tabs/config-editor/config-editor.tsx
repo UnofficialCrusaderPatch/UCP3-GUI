@@ -23,6 +23,7 @@ import {
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import { info } from 'util/scripts/logging';
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
@@ -37,7 +38,7 @@ function saveConfig(
     Object.entries(configuration).filter(([key]) => touched[key])
   );
 
-  console.log(finalConfig);
+  info(finalConfig);
 
   return saveUCPConfig(finalConfig, folder, extensions);
 }

@@ -5,6 +5,7 @@ import yaml from 'yaml';
 import { readDir } from 'tauri/tauri-files';
 
 import { ConfigEntry, Extension, OptionEntry } from 'config/ucp/common';
+import { info } from 'util/scripts/logging';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
@@ -234,7 +235,7 @@ const Discovery = {
     gameFolder: string,
     locale?: string
   ): Promise<Extension[]> => {
-    console.log(`Discovering extensions`);
+    info(`Discovering extensions`);
     const currentLocale =
       locale === undefined ? 'English' : LOCALE_FILES[locale]; // Dummy location for this code
 

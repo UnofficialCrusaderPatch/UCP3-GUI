@@ -35,6 +35,7 @@ import {
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
+import { warn } from 'util/scripts/logging';
 
 const DisplayDefaults: { [key: string]: string } = {
   boolean: 'Switch',
@@ -1197,7 +1198,7 @@ const UIFactory = {
       }
     }
     if (spec.display === undefined) {
-      console.warn(
+      warn(
         t('gui-editor:config.element.unsupported.type', {
           url: spec.url,
           type: spec.type,
@@ -1313,7 +1314,7 @@ const UIFactory = {
         />
       );
     }
-    console.warn(
+    warn(
       t('gui-editor:config.element.unsupported.type', {
         url: spec.url,
         type: spec.type,

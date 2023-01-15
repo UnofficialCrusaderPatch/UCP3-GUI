@@ -18,6 +18,7 @@ import {
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
+import { info } from 'util/scripts/logging';
 
 function ExtensionElement(props: {
   ext: Extension;
@@ -204,7 +205,7 @@ export default function ExtensionManager() {
         const final = [...dependencies, ...remainder];
 
         const localEDS = new ExtensionDependencySolver(final);
-        console.log(localEDS.solve());
+        info(localEDS.solve());
         const order = localEDS
           .solve()
           .reverse()

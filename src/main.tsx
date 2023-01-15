@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client';
 import Window from 'components/window';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
+// import for basic functionality:
+import 'util/scripts/logging';
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>

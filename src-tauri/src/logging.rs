@@ -1,4 +1,12 @@
-use log::{debug, info, LevelFilter};
+// Tauri actually has its own logging:
+// https://github.com/tauri-apps/tauri-plugin-log
+//
+// I forgot to search before implementing.
+// I keep the custom solution until it seems more convenient to switch.
+
+use std::str::FromStr;
+
+use log::{debug, info, Level, LevelFilter};
 use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
 use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
 use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
@@ -51,23 +59,43 @@ pub fn init_logging() -> Handle {
     handle
 }
 
-fn get_level_or_default(level_as_string: &str) -> LevelFilter {
-    match level_as_string.to_uppercase().as_str() {
-        "OFF" => LevelFilter::Off,
-        "ERROR" => LevelFilter::Error,
-        "WARN" => LevelFilter::Warn,
-        "INFO" => LevelFilter::Info,
-        "DEBUG" => LevelFilter::Debug,
-        "TRACE" => LevelFilter::Trace,
-        _ => get_level_or_default(LOG_LEVEL_DEFAULT),
-    }
+fn get_level_or_default_from_string(level_as_string: &str) -> LevelFilter {
+    LevelFilter::from_str(level_as_string.to_uppercase().as_str())
+        .unwrap_or_else(|_err| LevelFilter::from_str(LOG_LEVEL_DEFAULT).unwrap())
+}
+
+// copied, since "from_usize" are not public
+fn get_level_from_usize(level_number: usize) -> Result<Level, String> {
+    let level = match level_number {
+        1 => Level::Error,
+        2 => Level::Warn,
+        3 => Level::Info,
+        4 => Level::Debug,
+        5 => Level::Trace,
+        _ => return Err(String::from("Received invalid log level number.")),
+    };
+    Ok(level)
 }
 
 pub fn set_root_log_level_with_string(config_handle: &Handle, level_as_string: &str) {
-    set_root_log_level(config_handle, get_level_or_default(level_as_string));
+    set_root_log_level(
+        config_handle,
+        get_level_or_default_from_string(level_as_string),
+    );
 }
 
 pub fn set_root_log_level(config_handle: &Handle, level: LevelFilter) {
     config_handle.set_config(create_config(level));
     debug!("Set log level to {}", level);
 }
+
+// Tauri binds:
+
+#[tauri::command]
+pub fn log(level: usize, message: &str) -> Result<(), String> {
+    let log_level = get_level_from_usize(level)?;
+    log::log!(log_level, "{}", message);
+    Ok(())
+}
+
+// TODO: event to send logs to browser console

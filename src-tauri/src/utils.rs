@@ -2,12 +2,9 @@ use std::{
     path::{Path, PathBuf},
     sync::{Mutex, MutexGuard},
 };
-
 use tauri::{AppHandle, Error, Manager, State};
 
-// CONSTANTS
-
-const BASE_FOLDER: &str = "UnofficialCrusaderPatch3";
+use crate::constants::BASE_FOLDER;
 
 // will panic if not present, but state should exists
 pub fn do_with_mutex_state<T: std::marker::Send + 'static, F>(

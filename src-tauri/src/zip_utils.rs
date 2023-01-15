@@ -9,6 +9,8 @@ use zip::{result::ZipError, ZipArchive};
 
 use crate::utils::{do_with_mutex_state, get_allowed_path_with_string_error};
 
+// if zips are properly released, this should never run into issues
+// however, if one is kept, this run into "theoretical" issues
 static ID_KEEPER: AtomicUsize = AtomicUsize::new(0);
 fn get_id() -> usize {
     ID_KEEPER.fetch_add(1, Ordering::Relaxed)

@@ -2,6 +2,7 @@
 import { TauriEvent } from '@tauri-apps/api/event';
 import { registerTauriEventListener } from 'tauri/tauri-hooks';
 import { log } from 'tauri/tauri-invoke';
+import { onBackendLog } from 'tauri/tauri-listen';
 
 const LOG_LEVEL = {
   ERROR: 1,
@@ -62,3 +63,28 @@ registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, () => {
   window.removeEventListener('error', handleUncaughtError, true);
   window.removeEventListener('unhandledrejection', handleUncaughtPromise, true);
 });
+
+const backendLogUnlistenPromise = onBackendLog(({ payload }) => {
+  switch (payload.level) {
+    case LOG_LEVEL.ERROR:
+      console.error(payload.message);
+      break;
+    case LOG_LEVEL.WARN:
+      console.warn(payload.message);
+      break;
+    case LOG_LEVEL.INFO:
+      console.info(payload.message);
+      break;
+    case LOG_LEVEL.DEBUG:
+      console.debug(payload.message);
+      break;
+    case LOG_LEVEL.TRACE:
+      console.debug(payload.message);
+      break;
+    default:
+      break;
+  }
+});
+registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, async () =>
+  (await backendLogUnlistenPromise)()
+);

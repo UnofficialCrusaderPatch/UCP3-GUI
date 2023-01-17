@@ -21,6 +21,7 @@ tauri = { version = "1.2.0", features = ["devtools", "dialog-all", "fs-all", "ht
 zip = { version = "0.6.3" } # currently uses all features
 sha2 = { version = "0.10" }
 log = "0.4.17"
+anyhow = "1.0.68" # sadly needed to implement the appender for the web console
 log4rs = { version = "1.2.0", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller"] }
 
 [features]

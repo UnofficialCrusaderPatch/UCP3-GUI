@@ -45,12 +45,13 @@ fn main() {
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 
-    tauri_app.run(|_app_handle, event| match event {
+    tauri_app.run(|app_handle, event| match event {
         RunEvent::Ready {} => {
-            do_with_mutex_state::<GuiConfig, _>(_app_handle, |gui_config| {
-                gui_config.load_saved_config(_app_handle);
-                do_with_mutex_state::<log4rs::Handle, _>(_app_handle, |log_handle| {
+            do_with_mutex_state::<GuiConfig, _>(app_handle, |gui_config| {
+                gui_config.load_saved_config(app_handle);
+                do_with_mutex_state::<log4rs::Handle, _>(app_handle, |log_handle| {
                     logging::set_root_log_level_with_string(
+                        app_handle,
                         log_handle,
                         gui_config
                             .get_log_level()
@@ -60,7 +61,7 @@ fn main() {
             });
         }
         RunEvent::Exit {} => {
-            do_with_mutex_state::<GuiConfig, _>(_app_handle, |gui_config| {
+            do_with_mutex_state::<GuiConfig, _>(app_handle, |gui_config| {
                 gui_config.save_config();
             });
         }

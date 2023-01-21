@@ -5,12 +5,15 @@ This software provides a GUI to configure and manage installations of the [Unoff
 
 The first version of the GUI as well as the UCP3 itself are heavy work in progress and may currently change without further notice.
 
+
 ### Table of Contents
 - [Installation and Usage](#Installation%20and%20Usage)
 - [Contributing](#Contributing)
     - [Basics](#Basics)
     - [Technology](#Technology)
     - [Setup](#Setup)
+    - [Build and Run](#Build%20and%20Run)
+- [Special Thanks](#Special%20Thanks)
 
 
 
@@ -25,9 +28,12 @@ The support will include **at least** Windows 10/11, however, it should go down 
 This section will be restructured and extended once the first version is ready for release.
 (If we forget, please inform us :upside_down_face:.)
 
+
+
 ## Contributing
 
 Contributions and help are always welcome!
+
 
 ### Basics
 
@@ -36,6 +42,11 @@ The application is written using [Tauri](https://tauri.app/). It is therefore a 
 The separation is rather strict. Frontend code can not interact "normally" with the filesystem or the OS like some of you are maybe used to from [Node](https://nodejs.org/). Instead, it relies on specific provided or custom-written API functions in Rust. The window with its frontend code essentially behaves like a webpage.
 
 More information are better taken from Tauri sources :smiley:.
+
+Something is very important, however:  
+**You do not need to know both Rust and Javascript to help.**  
+Most work is done in the frontend. In terms of knowledge for the frontend part: Knowing React or being willing to learn the basics is essential. Styling alone might also be helpful, but due to the usage of React, there is little need for HTML alone.
+
 
 ### Technology
 
@@ -62,15 +73,55 @@ Nothing outside what appears to be the "normal" Rust setup using [Cargo](https:/
     - To make sure we have a common code style, at least in our Javascript-Code.
 
 
+### Setup
 
-Steps for setup:
-0. Clone the repo and navigate your shell there
-1. Install [Rust](https://www.rust-lang.org/tools/install)
-- You might need [Visual Studios Buildtools](visualstudio.microsoft.com/visual-cpp-build-tools/)
-2. Install [npm node](https://nodejs.org/en/)
-3. npm install
-4. npm update
-5. npm run dev
+To develope and build the application, you need to fullfil some requirements.
 
-Alternatively if you want to just build the project you can do 
-5. run npm build
+0. Install and setup [Git](https://git-scm.com/).
+    - If you are new to this and since we are using Github anyway, you may use its [tutorial](https://docs.github.com/en/get-started/quickstart/set-up-git).
+    - Get at least a bit familiar with what it does an how it works. There are many tutorials online.
+    - If your are ready, pull a version of this repo using a way of your liking.
+    - There are many support tools, some for IDEs, some stand-alone, some for terminal, some with UIs. Feel free to use any.
+
+1. Install and setup the prerequisites like explained in the [Tauri Docs](https://tauri.app/v1/guides/getting-started/prerequisites). This depends on the OS you are developing on and essentially involves:
+    - Getting the build tools needed to build Rust (Visual Studio C++ Build Tools for Windows) and display the frontend window (WebView2 for Windows).
+        - If you use [Visual Studio](https://visualstudio.microsoft.com), you may already have the interface to manage its dependencies, which include the option to install Rust tools.
+    - Installing and setting up Rust development.
+        - This may become rather tricky. On one of our setups, even changing the antivirus software was required, since it would always block the first build steps of the projects dependencies. There is no other way then trying.
+
+2. Install [Node](https://nodejs.org).
+    - We use [NPM](https://www.npmjs.com/) for dependencies and build commands, which in turn use Node to run.
+    - Since our frontend is a Node project, it helps to be a bit familiar with the [package.json](https://docs.npmjs.com/cli/v9/configuring-npm/package-json).
+    - You may also use [NVM](https://github.com/nvm-sh/nvm) to install Node and manage its version. Note that this project is exclusive to Unix systems. For Windows you can use [THIS](https://github.com/coreybutler/nvm-windows).
+
+3. Install the frontend dependencies.
+    - Navigate into the projects root and run `npm install` to install the frontend dependencies into the folder. You need to repeat this step if the dependencies are changed by you or someone else. At best you just run it whenever you pull something from the repository.
+    - The Rust dependencies should be installed by the run and build commands of the application.
+
+4. Setup your favorite IDEs and install plugins for the parts you want to work on.
+    - For the frontend, in case of [Visual Studio Code](https://code.visualstudio.com/) for example, at least the ESLint plugin is recommended. You can even set it up to format your code when the files are saved!
+    - For the backend, also for [Visual Studio Code](https://code.visualstudio.com/) as example, the `rust-analyzer` is heavily recommended (it also is a bit heavy on the system) to get proper code validation und suggestions.
+    - Feel free to install and use other plugins!
+
+To get get better idea of the structure of the project, you can take a look at this [Getting Started Guide](https://tauri.app/v1/guides/getting-started/setup/vite) for setting up a Tauri project using Vite. **However, it is important to not follow the steps in it, since they are meant to setup an entirely new project!**
+
+We also currently do not monitor which versions should be used of Rust, Node and NPM. We recommend the newest versions. Should something break with them, please inform use, so that we can update the code.
+
+
+### Build and Run
+
+There are currently two commands set up. Both are run through npm:
+
+- `npm run dev` - Installs the Rust dependencies, starts the frontend development server and opens the window. Vite takes care of hot reloads of changed frontend files.  
+Changes of Rust files, however, require a re-compile, and are currently also triggered on change. Depending on your system, you therefore may better develop in Rust without the dev-server being active.
+
+- `npm run build` - Installs the Rust dependencies and builds the application.  
+The results are an executable under `src-tauri\target\release\` and an installer under `src-tauri\target\release\bundle`. In case of Windows, it will currently create a msi-installer using the bitness of your system (x32 or x64).
+
+Currently, both the build and the dev versions of the window allow to open the web console by typing F12.
+
+
+
+### Special Thanks
+
+[Firefly Studios](https://fireflyworlds.com/) for the creation of the Stronghold Crusader.

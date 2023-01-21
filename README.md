@@ -7,13 +7,13 @@ The first version of the GUI as well as the UCP3 itself are heavy work in progre
 
 
 ### Table of Contents
-- [Installation and Usage](#Installation%20and%20Usage)
-- [Contributing](#Contributing)
-    - [Basics](#Basics)
-    - [Technology](#Technology)
-    - [Setup](#Setup)
-    - [Build and Run](#Build%20and%20Run)
-- [Special Thanks](#Special%20Thanks)
+- [Installation and Usage](#installation-and-usage)
+- [Contributing](#contributing)
+    - [Basics](#basics)
+    - [Technology](#technology)
+    - [Setup](#setup)
+    - [Build and Run](#build-and-run)
+- [Special Thanks](#special-thanks)
 
 
 

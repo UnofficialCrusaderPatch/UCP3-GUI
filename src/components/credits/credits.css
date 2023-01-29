@@ -14,7 +14,7 @@
   padding-left:100px;
   padding-right:100px;
   padding-bottom:100px;
-  width: 90%;
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -35,13 +35,19 @@
   border-image-repeat: repeat repeat;
   width: 100%;
   height: 100%;
-  padding: 25px;
+  padding: 6px;
   overflow: hidden;
 }
 
-.credits-text {
+.credits-text-wrapper {
   height:100%;
-  overflow-y: scroll;
+  overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
+}
+
+/* TODO: The current text is really hard to read, so either the font or the background need changes. */
+.credits-text {
+  padding: 15px 10px;
 }
 
 .credits-close{

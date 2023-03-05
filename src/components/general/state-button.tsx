@@ -62,7 +62,7 @@ export default function StateButton(props: StateButtonProps) {
     <div className="m-2 ">
       <button
         type="button"
-        className={`col-8 ${buttonVariant}`}
+        className={`${buttonVariant}`}
         disabled={!active || !buttonActive}
         onClick={async () => {
           if (funcBefore) funcBefore();
@@ -76,10 +76,8 @@ export default function StateButton(props: StateButtonProps) {
           if (funcAfter) funcAfter();
         }}
       >
-        <div className="buttontext">
-          <div className="icon-placeholder" />
-          {buttonValues[buttonState]}
-        </div>
+        <div className="icon-placeholder" />
+        <div className="button-text">{buttonValues[buttonState]}</div>
       </button>
       <div className="col d-flex align-items-center">{divState}</div>
     </div>

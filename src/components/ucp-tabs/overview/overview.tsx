@@ -67,7 +67,8 @@ export default function Overview() {
   }
 
   return (
-    <Container fluid className="overflow-auto">
+    <Container fluid className="overflow-auto overview-background-image ">
+      {/* <div id="overview-background-image" /> */}
       <RecentFolders />
       <StateButton
         buttonActive={
@@ -135,7 +136,7 @@ export default function Overview() {
           success: t('gui-editor:overview.zip.success'),
           failed: t('gui-editor:overview.zip.failed'),
         }}
-        buttonVariant="icon-button"
+        buttonVariant="zip-icon icon-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => {
@@ -165,6 +166,7 @@ export default function Overview() {
           return zipInstallResult.mapOk(() => '').mapErr((err) => String(err));
         }}
       />
+      <div id="decor" />
       <StateButton
         buttonActive={false}
         buttonValues={{
@@ -173,7 +175,7 @@ export default function Overview() {
           success: t('gui-editor:overview.uninstall.success'),
           failed: t('gui-editor:overview.uninstall.failed'),
         }}
-        buttonVariant="primary"
+        buttonVariant="ucp-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => Result.emptyOk()}
@@ -186,7 +188,7 @@ export default function Overview() {
           success: t('gui-editor:overview.update.gui.success'),
           failed: t('gui-editor:overview.update.gui.failed'),
         }}
-        buttonVariant="primary"
+        buttonVariant="ucp-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) =>

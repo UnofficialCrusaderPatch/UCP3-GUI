@@ -18,7 +18,7 @@ function Credits(props: OverlayContentProps) {
     <div className="flex-default">
       <div className="credits-container">
         <h1 className="credits-title">{t('gui-landing:credits.title')}</h1>
-        <div className="credits-text-box">
+        <div className="credits-text-box parchment-box">
           <div className="credits-text">{credits}</div>
         </div>
         <button type="button" className="credits-close" onClick={closeFunc}>

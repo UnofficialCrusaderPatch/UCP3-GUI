@@ -65,26 +65,66 @@ function ExtensionElement(props: {
   };
 
   const arrows = active ? (
-    <>
-      <Col
-        className="col-auto arrow-container"
-        disabled={!movability.up}
-        onClick={() => {
-          if (movability.up) moveCallback({ name: ext.name, type: 'up' });
-        }}
-      >
-        <div className="arrow up" />
-      </Col>
-      <Col
-        className="col-auto arrow-container"
-        disabled={!movability.down}
-        onClick={() => {
-          if (movability.down) moveCallback({ name: ext.name, type: 'down' });
-        }}
-      >
-        <div className="arrow down" />
-      </Col>
-    </>
+    <Col className="col-2">
+      <Row className="flex-column">
+        <Button
+          className="arrow-container"
+          disabled={!movability.up}
+          onClick={() => {
+            if (movability.up) moveCallback({ name: ext.name, type: 'up' });
+          }}
+        >
+          <div className="arrow up" />
+        </Button>
+        <Button
+          className="arrow-container"
+          disabled={!movability.down}
+          onClick={() => {
+            if (movability.down) moveCallback({ name: ext.name, type: 'down' });
+          }}
+        >
+          <div className="arrow down" />
+        </Button>
+      </Row>
+    </Col>
+  ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <></>
+  );
+
+  const enablearrow = !active ? (
+    <Col className="col-2">
+      <OverlayTrigger placement="left" overlay={renderTooltip}>
+        <div>
+          <Button
+            className="fs-8"
+            onClick={clickCallback}
+            disabled={revDeps.length > 0}
+          >
+            {buttonText}
+          </Button>
+        </div>
+      </OverlayTrigger>
+    </Col>
+  ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <></>
+  );
+
+  const disablearrow = active ? (
+    <Col className="col-2">
+      <OverlayTrigger placement="left" overlay={renderTooltip}>
+        <div>
+          <Button
+            className="fs-8"
+            onClick={clickCallback}
+            disabled={revDeps.length > 0}
+          >
+            {buttonText}
+          </Button>
+        </div>
+      </OverlayTrigger>
+    </Col>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
@@ -94,40 +134,28 @@ function ExtensionElement(props: {
   return (
     <ListGroup.Item
       key={`${name}-${version}-${author}`}
-      style={{ backgroundColor: 'var(--bs-gray-800)' }}
-      className="text-light border-secondary container border-bottom p-1"
+      className="light-shade-item"
     >
       <Row className="align-items-center">
-        {arrows}
+        {disablearrow}
         <Col>
           <Row>
-            <Col className="col-2">
+            {/* <Col className="col-2">
               <span className="mx-2">{displayName || name}</span>
-            </Col>
-            <Col className="col-3">
+            </Col> */}
+            <Col className="col-8">
               <span className="mx-2 text-secondary">-</span>
               <span className="mx-2" style={{ fontSize: 'smaller' }}>
                 {name}-{version}
               </span>
             </Col>
-            <Col>
+            {/* <Col>
               <span className="mx-2">{description || ''}</span>
-            </Col>
+             </Col> */}
           </Row>
         </Col>
-        <Col className="col-auto">
-          <OverlayTrigger placement="left" overlay={renderTooltip}>
-            <div>
-              <Button
-                className="fs-8"
-                onClick={clickCallback}
-                disabled={revDeps.length > 0}
-              >
-                {buttonText}
-              </Button>
-            </div>
-          </OverlayTrigger>
-        </Col>
+        {arrows}
+        {enablearrow}
       </Row>
     </ListGroup.Item>
   );
@@ -306,31 +334,23 @@ export default function ExtensionManager() {
   });
 
   return (
-    <Container className="fs-6 h-100">
-      <div className="pb-2 h-50 d-flex flex-column overflow-hidden">
-        <h4>{t('gui-editor:extensions.activated')}</h4>
-        <div
-          style={{
-            overflowY: 'scroll',
-            overflowX: 'clip',
-            backgroundColor: 'var(--bs-gray-800)',
-          }}
-          className="border-secondary border flex-grow-1"
-        >
-          {activated}
+    <Container className="fs-6 h-100 vertical-container">
+      <div className="row h-100">
+        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
+          <div>
+            <h4>{t('gui-editor:extensions.available')}</h4>
+          </div>
+          <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
+            <div className="parchment-box-item-list"> {eUI} </div>
+          </div>
         </div>
-      </div>
-      <div className="pt-2 h-50 d-flex flex-column overflow-hidden">
-        <h4>{t('gui-editor:extensions.available')}</h4>
-        <div
-          style={{
-            overflowY: 'scroll',
-            overflowX: 'clip',
-            backgroundColor: 'var(--bs-gray-800)',
-          }}
-          className="border-secondary border flex-grow-1"
-        >
-          {eUI}
+        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
+          <div>
+            <h4>{t('gui-editor:extensions.activated')}</h4>
+          </div>
+          <div className="flex-grow-1 parchment-box-inside parchment-box d-flex flex-column overflow-auto">
+            <div className="parchment-box-item-list">{activated}</div>
+          </div>
         </div>
       </div>
     </Container>

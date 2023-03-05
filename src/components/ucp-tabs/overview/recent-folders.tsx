@@ -56,7 +56,7 @@ export default function RecentFolders() {
   }
 
   return (
-    <div className="textInput">
+    <div className="textInput mt-2">
       <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
       <div className="d-flex mt-2">
         <div className="textInputField d-flex align-items-center">
@@ -75,11 +75,9 @@ export default function RecentFolders() {
           />
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="dropdown-button"
             onClick={() => setShowRecentFolders(!showRecentFolders)}
-          >
-            Recent
-          </button>
+          />
         </div>
       </div>
       <div className="dropdown-wrapper">

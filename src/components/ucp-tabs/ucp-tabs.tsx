@@ -38,7 +38,7 @@ export default function UcpTabs() {
             </Nav.Link>
           </Nav.Item>
         </Nav>
-        <Tab.Content className="overflow-auto">
+        <Tab.Content className="overflow-auto h-100">
           <Tab.Pane eventKey="overview" className="h-100">
             <Overview />
           </Tab.Pane>

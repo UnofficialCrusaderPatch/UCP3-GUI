@@ -10,6 +10,15 @@
   font-size: 0.85rem;
 }
 
+.light-shade-item {
+  background-color: rgba(245, 245, 227, 0.420);
+  border: 2px solid rgba(0, 0, 0, 0);
+  color: black;
+  margin:2px;
+  margin-right:-1px;
+  overflow-x: visible;
+}
+
 /* full available size, column, centered */
 .flex-default {
   height: 100%;
@@ -32,7 +41,6 @@
   vertical-align: center;
   height: 40px;
   min-width: 100px;
-  padding-top: -20px;
   width: 40%;
   margin-left: 30%;
   margin-right: 30%;
@@ -46,11 +54,9 @@
   border-style: solid;
 }
 
-
-.ucp-button-text{
+.ucp-button > .button-text{
   margin-top: -10px;
 }
-
 
 /*
   Custom scrollbar.
@@ -79,36 +85,19 @@
   background-position: center bottom, center bottom, center center;
 }
 
-
-.buttontext {
-  margin-top: -12px;
-}
-
-
 .icon-button {
   background-color: transparent;
 }
 
-
-/* Define all icons for buttons */
-.zip-icon > .icon-placeholder {
-  background-image: url("/src/assets/ucp3/zip.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100%;
-}
-
-.zip-icon:hover > .icon-placeholder {
-  background-image: url("/src/assets/ucp3/zip_hover.png");
-}
-
-.download-icon > .icon-placeholder {
-  background-image: url("/src/assets/ucp3/download.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100%;
-}
-
-.download-icon:hover > .icon-placeholder {
-  background-image: url("/src/assets/ucp3/download_hover.png");
+.parchment-box {
+  background-image: url("/src/assets/ucp3/crdits_bg.png");
+  border-image: url("/src/assets/ucp3/credit_background.png");
+  border-style: solid;
+  border-image-slice: 17 16 17 17;
+  border-image-width: 17px 16px 17px 17px;
+  border-image-outset: 0px 0px 0px 0px;
+  border-image-repeat: repeat repeat;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }

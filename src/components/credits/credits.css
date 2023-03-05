@@ -22,28 +22,22 @@
 }
 
 .credits-title {
-
+  color: white;
 }
 
 .credits-text-box {
-  background-image: url("/src/assets/ucp3/crdits_bg.png");
-  border-image: url("/src/assets/ucp3/credit_background.png");
-  border-style: solid;
-  border-image-slice: 17 16 17 17;
-  border-image-width: 17px 16px 17px 17px;
-  border-image-outset: 0px 0px 0px 0px;
-  border-image-repeat: repeat repeat;
-  width: 100%;
-  height: 100%;
-  padding: 25px;
-  overflow: hidden;
+  padding: 15px;
 }
 
 .credits-text {
   height:100%;
   overflow-y: scroll;
+  color:black;
 }
 
 .credits-close{
   margin-left: auto;
+  color: white;
+  background-color: transparent;
+  border: none;
 }

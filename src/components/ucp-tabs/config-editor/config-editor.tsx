@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* global CreateUIElement */
 
-import { Form } from 'react-bootstrap';
+import { Form, Row } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import {
   openFileDialog,
@@ -82,14 +82,14 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   return (
     <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">
       {/* Still has issues with x-Overflow */}
-      <div className="col-4 h-100 p-0">{nav}</div>
-      <div className="col-8 h-100 p-0">
-        <div className="h-75">{content}</div>
+      <div className="col-auto">{nav}</div>
+      <div className="config-section h-100">
+        <div className="content-box">{content}</div>
         {!readonly ? (
           <div className="row pb-2 mx-0">
             <div className="col">
               <button
-                className="col-auto btn btn-primary mx-1"
+                className="col-auto icons-button reset mx-1"
                 type="button"
                 onClick={() => {
                   setConfiguration({
@@ -101,26 +101,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     value: {},
                   });
                 }}
-              >
-                {t('gui-general:reset')}
-              </button>
-
+              />
               <button
-                className="col-auto btn btn-primary mx-1"
-                type="button"
-                onClick={() =>
-                  saveConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    activeExtensions
-                  )
-                }
-              >
-                {t('gui-general:apply')}
-              </button>
-              <button
-                className="col-auto btn btn-primary mx-1"
+                className="col-auto icons-button import mx-1"
                 type="button"
                 onClick={async () => {
                   const result = await openFileDialog(gameFolder, [
@@ -244,11 +227,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     ),
                   });
                 }}
-              >
-                {t('gui-general:import')}
-              </button>
+              />
               <button
-                className="col-auto btn btn-primary mx-1"
+                className="col-auto icons-button export mx-1"
                 type="button"
                 onClick={async () => {
                   const filePathOptional = await saveFileDialog(gameFolder, [
@@ -279,8 +260,21 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       throw new Error(e);
                     });
                 }}
+              />
+
+              <button
+                className="col-auto mx-1 ucp-button-variant"
+                type="button"
+                onClick={() =>
+                  saveConfig(
+                    configuration,
+                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                    configurationTouched,
+                    activeExtensions
+                  )
+                }
               >
-                {t('gui-general:export')}
+                {t('gui-general:apply')}
               </button>
 
               <Form.Switch

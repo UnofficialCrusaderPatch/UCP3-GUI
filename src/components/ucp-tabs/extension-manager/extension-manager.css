@@ -1,3 +1,7 @@
+.arrow-margin {
+  margin-right: 14px;
+}
+
 .arrow-container {
   display: inline-block;
   background-color: transparent !important;
@@ -35,6 +39,8 @@
 
 .parchment-box-inside {
   padding: 6px;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .parchment-box-item-list {
@@ -42,3 +48,31 @@
   overflow-x: clip;
 }
 
+.enable-arrow {
+  background-image: url("/src/assets/ucp3/add.png");
+  background-color: transparent !important;
+  width: 18px !important;
+  height: 17px !important;
+  border: none !important;
+  border-radius: 0px !important;
+  padding: 0px !important;
+}
+
+.enable-arrow:hover {
+  background-image: url("/src/assets/ucp3/add_hover.png");
+}
+
+
+.disable-arrow {
+  background-image: url("/src/assets/ucp3/remove.png");
+  background-color: transparent !important;
+  width: 18px !important;
+  height: 17px !important;
+  border: none !important;
+  border-radius: 0px !important;
+  padding: 0px !important;
+}
+
+.disable-arrow:hover {
+  background-image: url("/src/assets/ucp3/remove_hover.png");
+}

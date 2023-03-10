@@ -10,12 +10,109 @@
 
 #config-sections {
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-#config-navbar * .nav-link {
+#config-navbar {
   /* color: #f8f9fa; */
   padding: 0;
 }
+
+.content-box {
+  overflow: scroll;
+  height: calc(100% - 50px);
+}
+
+.icons-button {
+  display: inline-block;
+  background-color: transparent;
+  width: 32px !important;
+  height: 28px !important;
+  border: none;
+  padding: 0px;
+}
+
+.ucp-button-variant {
+  margin-top: 0px;
+  border-image: url("/src/assets/ucp3/button_slice.png");
+  border-image-slice: 49% fill;
+  border-width: 17px;
+  border-style: solid;
+  background-color: transparent;
+  color: white;
+  vertical-align: center;
+  height: 34px;
+  min-width: 150px;
+  position: relative;
+}
+
+.ucp-button-variant:hover {
+  /* Other button styles here */
+  border-image: url("/src/assets/ucp3/button_slice_hover.png");
+  border-image-slice: 49% fill;
+  border-style: solid;
+}
+
+.ucp-button-variant > .button-text{
+  margin-top: -9px !important;
+}
+
+.reset {
+  background-image: url("/src/assets/ucp3/reset.png");
+}
+
+.reset:hover {
+  background-image: url("/src/assets/ucp3/reset_hover.png");
+}
+
+.reset:disabled {
+  background-image: url("/src/assets/ucp3/reset_active.png");
+}
+
+.import {
+  background-image: url("/src/assets/ucp3/import.png");
+}
+
+.import:hover {
+  background-image: url("/src/assets/ucp3/import_hover.png");
+}
+
+.import:disabled {
+  background-image: url("/src/assets/ucp3/import_active.png");
+}
+
+.export {
+  background-image: url("/src/assets/ucp3/export.png");
+}
+
+.export:hover {
+  background-image: url("/src/assets/ucp3/export_hover.png");
+}
+
+.export:disabled {
+  background-image: url("/src/assets/ucp3/export_active.png");
+}
+
+.apply {
+  background-image: url("/src/assets/ucp3/reset.png");
+  display: inline-block;
+  background-color: transparent;
+  width: 32px !important;
+  height: 28px !important;
+  border: none;
+  padding: 0px;
+}
+
+.apply:hover {
+  background-image: url("/src/assets/ucp3/reset_hover.png");
+}
+
+.apply:disabled {
+  background-image: url("/src/assets/ucp3/reset_active.png");
+}
+
 /* 
 #config-navbar > nav > nav > a {
   font-size: medium;

@@ -1,6 +1,8 @@
 /* eslint-disable no-debugger */
 /* eslint-disable no-console */
 
+/* npm test -- '.\tests\Config.test.tsx' */
+
 import { describe, expect, test } from 'vitest';
 import YAML from 'yaml';
 import { ConfigEntry, Extension, OptionEntry } from '../src/config/ucp/common';

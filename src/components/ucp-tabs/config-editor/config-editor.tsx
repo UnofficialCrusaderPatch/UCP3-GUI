@@ -91,7 +91,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
         </div>
         {!readonly ? (
           <div className="row pb-2 mx-0">
-            <div className="col">
+            <div className="d-inline-flex">
               <button
                 className="col-auto icons-button reset mx-1"
                 type="button"

@@ -13,6 +13,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow: clip;
 }
 
 #config-navbar {
@@ -21,8 +22,18 @@
 }
 
 .content-box {
-  overflow: scroll;
+  padding: 10px;
+  height:100%;
+  overflow-y: scroll;
+  color:black;
+}
+
+.container-parchment-box {
   height: calc(100% - 50px);
+}
+
+.parchment-box {
+  height: 100%;
 }
 
 .icons-button {
@@ -35,17 +46,17 @@
 }
 
 .ucp-button-variant {
-  margin-top: 0px;
-  border-image: url("/src/assets/ucp3/button_slice.png");
-  border-image-slice: 49% fill;
-  border-width: 17px;
-  border-style: solid;
-  background-color: transparent;
-  color: white;
-  vertical-align: center;
-  height: 34px;
-  min-width: 150px;
-  position: relative;
+  border-image: url("/src/assets/ucp3/button_slice.png") !important;
+  border-image-slice: 49% fill  !important;
+  border-width: 17px  !important;
+  border-style: solid  !important;
+  background-color: transparent  !important;
+  color: white  !important;
+  min-width: 150px  !important;
+  height: 34px  !important;
+  position: relative  !important;
+  padding: 0px  !important;
+  margin: 0px  !important;
 }
 
 .ucp-button-variant:hover {
@@ -55,8 +66,11 @@
   border-style: solid;
 }
 
-.ucp-button-variant > .button-text{
-  margin-top: -9px !important;
+.ucp-button-variant-button-text {
+}
+
+.inside-text {
+  margin-top: -9px;
 }
 
 .reset {
@@ -113,7 +127,7 @@
   background-image: url("/src/assets/ucp3/reset_active.png");
 }
 
-/* 
+/*
 #config-navbar > nav > nav > a {
   font-size: medium;
 }

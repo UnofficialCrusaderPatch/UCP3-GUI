@@ -83,8 +83,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
     <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">
       {/* Still has issues with x-Overflow */}
       <div className="col-auto">{nav}</div>
-      <div className="config-section h-100">
-        <div className="content-box">{content}</div>
+      <div className="mb-1 config-section h-100">
+        <div className="m-2 container-parchment-box">
+          <div className="flex-grow-1 d-flex flex-column overflow-auto parchment-box-inside parchment-box ">
+            <div className="content-box parchment-box-item-list">{content}</div>
+          </div>
+        </div>
         {!readonly ? (
           <div className="row pb-2 mx-0">
             <div className="col">
@@ -261,9 +265,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     });
                 }}
               />
-
               <button
-                className="col-auto mx-1 ucp-button-variant"
+                className="ucp-button-variant"
                 type="button"
                 onClick={() =>
                   saveConfig(
@@ -274,9 +277,10 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   )
                 }
               >
-                {t('gui-general:apply')}
+                <div className="ucp-button-variant-button-text">
+                  {t('gui-general:apply')}
+                </div>
               </button>
-
               <Form.Switch
                 id="config-allow-user-override-switch"
                 label={t('gui-editor:config.allow.override')}

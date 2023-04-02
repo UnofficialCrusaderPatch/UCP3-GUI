@@ -31,6 +31,13 @@ function collectOptions(
   }
 }
 
+/**
+ * Expects
+ *
+ * @param collection
+ * @param obj
+ * @param url
+ */
 function collectConfigs(
   collection: { [key: string]: unknown },
   obj: { value: unknown; [key: string]: unknown },

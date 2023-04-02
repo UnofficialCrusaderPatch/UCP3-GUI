@@ -76,6 +76,19 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         }
       }
 
+      // Check value statement if present
+      if (configEntry.value !== undefined) {
+        const p = isValuePermitted(configEntry.value, spec, extensions);
+        if (p.status !== 'OK') {
+          return {
+            status: 'CONFLICT',
+            reason: `required values (for "${ce}") by ${ext.name} conflicts with specifications of ${p.by}`,
+            detail: p,
+          };
+        }
+      }
+
+      // What to do here? Currently I do not do anything, but maybe
       return undefined;
     })
     .filter((r) => r !== undefined);

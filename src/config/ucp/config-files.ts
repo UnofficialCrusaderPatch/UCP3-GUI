@@ -12,14 +12,14 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
         [key: string]: {
           active: boolean;
           version: string;
-          options: { [key: string]: unknown };
+          config: { [key: string]: unknown };
         };
       };
       plugins: {
         [key: string]: {
           active: boolean;
           version: string;
-          options: { [key: string]: unknown };
+          config: { [key: string]: unknown };
         };
       };
     },
@@ -44,11 +44,11 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
   const finalConfig: { [key: string]: unknown } = {};
 
   Object.entries(config.modules || {}).forEach(([key, value]) => {
-    finalConfig[key] = value.options;
+    finalConfig[key] = value.config;
   });
 
   Object.entries(config.plugins || {}).forEach(([key, value]) => {
-    finalConfig[key] = value.options;
+    finalConfig[key] = value.config;
   });
 
   return {
@@ -73,20 +73,21 @@ export async function saveUCPConfig(
       [key: string]: {
         active: boolean;
         version: string;
-        options: { [key: string]: unknown };
+        config: { [key: string]: unknown };
       };
     };
     plugins: {
       [key: string]: {
         active: boolean;
         version: string;
-        options: { [key: string]: unknown };
+        config: { [key: string]: unknown };
       };
     };
   } = { modules: {}, plugins: {}, order: [] };
   finalConfig.order = extensions.map(
     (e: Extension) => `${e.name} == ${e.version}`
   );
+  console.debug(config);
   Object.entries(config)
     .filter(([key, value]) => value !== undefined)
     .forEach(([key, value]) => {
@@ -95,12 +96,16 @@ export async function saveUCPConfig(
 
       const ext = extensions.filter((ex) => ex.name === extName)[0];
 
+      if (ext === undefined || ext === null) {
+        console.error(`No extension found with name: ${extName}`);
+      }
+
       const type = ext.type === 'module' ? 'modules' : 'plugins';
 
       if (finalConfig[type][extName] === undefined) {
         finalConfig[type][extName] = {
           version: ext.version,
-          options: {},
+          config: {},
           active: true,
         };
       }
@@ -108,7 +113,7 @@ export async function saveUCPConfig(
       const configParts = parts.slice(1);
       const partsdrop1 = configParts.slice(0, -1);
       const finalpart = configParts.slice(-1)[0];
-      let fcp = finalConfig[type][extName].options;
+      let fcp = finalConfig[type][extName].config;
       partsdrop1.forEach((part: string) => {
         if (fcp[part] === undefined) {
           fcp[part] = {};
@@ -123,7 +128,7 @@ export async function saveUCPConfig(
       if (finalConfig.modules[e.name] === undefined) {
         finalConfig.modules[e.name] = {
           version: e.version,
-          options: {},
+          config: {},
           active: true,
         };
       }
@@ -132,7 +137,7 @@ export async function saveUCPConfig(
       if (finalConfig.plugins[e.name] === undefined) {
         finalConfig.plugins[e.name] = {
           version: e.version,
-          options: {},
+          config: {},
           active: true,
         };
       }

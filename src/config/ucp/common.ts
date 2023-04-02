@@ -113,9 +113,16 @@ type ConfigEntry = {
   url: string;
 };
 
+type ConfigFileExtensionEntry = {
+  version: string;
+  config: { [key: string]: unknown };
+};
+
 type ConfigFile = {
-  modules: { [key: string]: unknown | ConfigEntry };
-  plugins: { [key: string]: unknown | ConfigEntry };
+  modules: {
+    [key: string]: ConfigFileExtensionEntry;
+  };
+  plugins: { [key: string]: ConfigFileExtensionEntry };
   order: string[];
 };
 
@@ -191,8 +198,9 @@ type SectionDescription = {
 };
 
 export type {
-  ConfigEntry,
+  // ConfigEntry,
   ConfigFile,
+  ConfigFileExtensionEntry,
   Configs,
   Definition,
   Extension,

@@ -111,8 +111,10 @@ export function useInitGlobalConfiguration(): [
         extensions = await getExtensions(newFolder, language);
         setExtensions(extensions);
 
-        const optionEntries = extensionsToOptionEntries(extensions);
-        defaults = getConfigDefaults(optionEntries);
+        // TODO: this should not be done now, it only makes sense when options are actually presented on screen, e.g., when an extension is made active
+        // const optionEntries = extensionsToOptionEntries(extensions);
+        // defaults = getConfigDefaults(optionEntries);
+        defaults = {};
         file = `${newFolder}/ucp-config.yml`; // better be moved to const file?
       } else {
         info('No folder active.');
@@ -127,14 +129,6 @@ export function useInitGlobalConfiguration(): [
         type: 'reset',
         value: defaults,
       });
-      setExtensionsState({
-        allExtensions: [...extensions],
-        activeExtensions: [],
-        activatedExtensions: [],
-        installedExtensions: [...extensions],
-      });
-      setFile(file);
-
       // currently simply reset:
       setConfigurationTouched({
         type: 'reset',
@@ -144,6 +138,15 @@ export function useInitGlobalConfiguration(): [
         type: 'reset',
         value: defaults,
       });
+
+      setExtensionsState({
+        allExtensions: [...extensions],
+        activeExtensions: [],
+        activatedExtensions: [],
+        installedExtensions: [...extensions],
+      });
+      setFile(file);
+
       setActiveExtensions([]);
 
       info('Finished loading');

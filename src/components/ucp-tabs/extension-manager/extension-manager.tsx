@@ -11,128 +11,26 @@ import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import {
+  useConfigurationDefaults,
+  useConfigurationDefaultsReducer,
+  useConfigurationLocksReducer,
   useExtensions,
   useExtensionStateReducer,
   useSetActiveExtensions,
+  useSetConfiguration,
+  useSetConfigurationTouched,
+  useSetConfigurationWarnings,
 } from 'hooks/jotai/globals-wrapper';
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
 import { info } from 'util/scripts/logging';
 
-function ExtensionElement(props: {
-  ext: Extension;
-  active: boolean;
-  movability: { up: boolean; down: boolean };
-  buttonText: string;
-  clickCallback: (event: unknown) => void;
-  moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
-  revDeps: string[];
-}) {
-  const {
-    ext,
-    active,
-    movability,
-    buttonText,
-    clickCallback,
-    moveCallback,
-    revDeps,
-  } = props;
-  const {
-    name,
-    version,
-    author,
-    'display-name': displayName,
-    description,
-  } = ext.definition;
-
-  const [t] = useTranslation(['gui-editor']);
-
-  const renderTooltip = (p: unknown) => {
-    if (revDeps.length > 0) {
-      return (
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        <Tooltip {...(p as object)}>
-          {revDeps.length > 0
-            ? t('gui-editor:extensions.is.dependency', {
-                dependencies: revDeps.join(', '),
-              })
-            : ''}
-        </Tooltip>
-      );
-    }
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    return <></>;
-  };
-
-  const arrows = active ? (
-    <>
-      <Col
-        className="col-auto arrow-container"
-        disabled={!movability.up}
-        onClick={() => {
-          if (movability.up) moveCallback({ name: ext.name, type: 'up' });
-        }}
-      >
-        <div className="arrow up" />
-      </Col>
-      <Col
-        className="col-auto arrow-container"
-        disabled={!movability.down}
-        onClick={() => {
-          if (movability.down) moveCallback({ name: ext.name, type: 'down' });
-        }}
-      >
-        <div className="arrow down" />
-      </Col>
-    </>
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
-
-  // my-auto is also possible instead of align-items-center
-  return (
-    <ListGroup.Item
-      key={`${name}-${version}-${author}`}
-      style={{ backgroundColor: 'var(--bs-gray-800)' }}
-      className="text-light border-secondary container border-bottom p-1"
-    >
-      <Row className="align-items-center">
-        {arrows}
-        <Col>
-          <Row>
-            <Col className="col-2">
-              <span className="mx-2">{displayName || name}</span>
-            </Col>
-            <Col className="col-3">
-              <span className="mx-2 text-secondary">-</span>
-              <span className="mx-2" style={{ fontSize: 'smaller' }}>
-                {name}-{version}
-              </span>
-            </Col>
-            <Col>
-              <span className="mx-2">{description || ''}</span>
-            </Col>
-          </Row>
-        </Col>
-        <Col className="col-auto">
-          <OverlayTrigger placement="left" overlay={renderTooltip}>
-            <div>
-              <Button
-                className="fs-8"
-                onClick={clickCallback}
-                disabled={revDeps.length > 0}
-              >
-                {buttonText}
-              </Button>
-            </div>
-          </OverlayTrigger>
-        </Col>
-      </Row>
-    </ListGroup.Item>
-  );
-}
+import {
+  extensionsToOptionEntries,
+  getConfigDefaults,
+} from 'config/ucp/extension-util';
+import ExtensionElement from './extension-element';
 
 export default function ExtensionManager() {
   const extensions = useExtensions();
@@ -140,6 +38,63 @@ export default function ExtensionManager() {
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
+
+  const [configurationLocks, setConfigurationLocks] =
+    useConfigurationLocksReducer();
+
+  const [configurationDefaults, setConfigurationDefaults] =
+    useConfigurationDefaultsReducer();
+
+  const setConfiguration = useSetConfiguration();
+
+  // currently simply reset:
+  const setConfigurationTouched = useSetConfigurationTouched();
+  const setConfigurationWarnings = useSetConfigurationWarnings();
+
+  function onActiveExtensionsUpdate(exts: Extension[]) {
+    // Defer here to a processor for the current list of active extensions to yield the
+
+    console.log(`Updating defaults based on active extensions:`);
+    console.log(exts);
+
+    const newDefaults = { ...configurationDefaults };
+
+    const optionEntries = extensionsToOptionEntries(exts);
+    const defaults = getConfigDefaults(optionEntries);
+
+    setConfiguration({
+      type: 'reset',
+      value: defaults,
+    });
+    setConfigurationDefaults({
+      type: 'reset',
+      value: defaults,
+    });
+    // currently simply reset:
+    setConfigurationTouched({
+      type: 'reset',
+      value: Object.fromEntries(
+        Object.entries(defaults).map((pair) => [pair[0], false])
+      ),
+    });
+    setConfigurationWarnings({
+      type: 'reset',
+      value: Object.fromEntries(
+        Object.entries(defaults).map((pair) => [
+          pair[0],
+          {
+            text: '',
+            level: 'info',
+          },
+        ])
+      ),
+    });
+
+    exts
+      .slice()
+      .reverse()
+      .forEach((ext: Extension) => {});
+  }
 
   const eds = new ExtensionDependencySolver(extensions);
   const revDeps = Object.fromEntries(
@@ -211,6 +166,7 @@ export default function ExtensionManager() {
           .reverse()
           .map((a: string[]) => a.map((v: string) => extensionsByName[v]));
 
+        onActiveExtensionsUpdate(final);
         setExtensionsState({
           allExtensions: extensionsState.allExtensions,
           activatedExtensions: [...extensionsState.activatedExtensions, ext],
@@ -263,6 +219,7 @@ export default function ExtensionManager() {
           const ae = extensionsState.activeExtensions.filter((e) =>
             relevantExtensions.has(e.name)
           );
+          onActiveExtensionsUpdate(ae);
           setExtensionsState({
             allExtensions: extensionsState.allExtensions,
             activatedExtensions: extensionsState.activatedExtensions.filter(
@@ -291,6 +248,7 @@ export default function ExtensionManager() {
               : newIndex;
           extensionsState.activeExtensions.splice(aei, 1);
           extensionsState.activeExtensions.splice(newIndex, 0, element);
+          onActiveExtensionsUpdate(extensionsState.activatedExtensions);
           setExtensionsState({
             activeExtensions: extensionsState.activeExtensions,
           } as unknown as ExtensionsState);

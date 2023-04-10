@@ -31,7 +31,10 @@ function CreateUCP2Slider(args: {
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, min, max, step, header } = spec;
-  const { [url]: value } = configuration as {
+  let { [url]: value } = configuration as {
+    [url: string]: { enabled: boolean; sliderValue: number };
+  };
+  const { [url]: defaultValue } = configurationDefaults as {
     [url: string]: { enabled: boolean; sliderValue: number };
   };
   const isEnabled = parseEnabledLogic(
@@ -45,6 +48,19 @@ function CreateUCP2Slider(args: {
   const { hasHeader } = spec as NumberInputDisplayConfigElement & {
     hasHeader: boolean;
   };
+
+  if (value === undefined) {
+    console.error(`value not defined (no default specified?) for: ${url}`);
+
+    if (defaultValue === undefined) {
+      console.error(`default value not defined for: ${url}`);
+    }
+
+    console.log(`default value for ${url}:`);
+    console.log(defaultValue);
+    value = defaultValue;
+  }
+
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
   if (hasHeader) {

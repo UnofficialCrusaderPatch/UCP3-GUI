@@ -27,7 +27,10 @@ function CreateUCP2RadioGroup(args: {
   const { choices } = spec as unknown as {
     choices: { name: string; text: string; subtext: string }[];
   };
-  const { [url]: value } = configuration as {
+  let { [url]: value } = configuration as {
+    [url: string]: { enabled: boolean; choice: string };
+  };
+  const { [url]: defaultValue } = configurationDefaults as {
     [url: string]: { enabled: boolean; choice: string };
   };
   const isEnabled = parseEnabledLogic(
@@ -41,6 +44,19 @@ function CreateUCP2RadioGroup(args: {
   const { hasHeader } = spec as DisplayConfigElement & {
     hasHeader: boolean;
   };
+
+  if (value === undefined) {
+    console.error(`value not defined (no default specified?) for: ${url}`);
+
+    if (defaultValue === undefined) {
+      console.error(`default value not defined for: ${url}`);
+    }
+
+    console.log(`default value for ${url}:`);
+    console.log(defaultValue);
+    value = defaultValue;
+  }
+
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
   if (hasHeader) {

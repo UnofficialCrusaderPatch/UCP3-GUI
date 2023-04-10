@@ -88,6 +88,7 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
     allExtensions: [],
     activeExtensions: [],
     activatedExtensions: [],
+    // I should have called this: inactiveExtensions
     installedExtensions: [],
   },
   extensionStateReducer

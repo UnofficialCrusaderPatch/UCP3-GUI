@@ -14,6 +14,7 @@ import {
   useConfigurationDefaults,
   useConfigurationDefaultsReducer,
   useConfigurationLocksReducer,
+  useConfigurationTouched,
   useExtensions,
   useExtensionStateReducer,
   useSetActiveExtensions,
@@ -31,6 +32,7 @@ import {
   getConfigDefaults,
 } from 'config/ucp/extension-util';
 import ExtensionElement from './extension-element';
+import { propagateActiveExtensionsChange } from '../helpers';
 
 export default function ExtensionManager() {
   const extensions = useExtensions();
@@ -48,52 +50,21 @@ export default function ExtensionManager() {
   const setConfiguration = useSetConfiguration();
 
   // currently simply reset:
+  const configurationTouched = useConfigurationTouched();
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
   function onActiveExtensionsUpdate(exts: Extension[]) {
     // Defer here to a processor for the current list of active extensions to yield the
 
-    console.log(`Updating defaults based on active extensions:`);
-    console.log(exts);
-
-    const newDefaults = { ...configurationDefaults };
-
-    const optionEntries = extensionsToOptionEntries(exts);
-    const defaults = getConfigDefaults(optionEntries);
-
-    setConfiguration({
-      type: 'reset',
-      value: defaults,
-    });
-    setConfigurationDefaults({
-      type: 'reset',
-      value: defaults,
-    });
-    // currently simply reset:
-    setConfigurationTouched({
-      type: 'reset',
-      value: Object.fromEntries(
-        Object.entries(defaults).map((pair) => [pair[0], false])
-      ),
-    });
-    setConfigurationWarnings({
-      type: 'reset',
-      value: Object.fromEntries(
-        Object.entries(defaults).map((pair) => [
-          pair[0],
-          {
-            text: '',
-            level: 'info',
-          },
-        ])
-      ),
-    });
-
-    exts
-      .slice()
-      .reverse()
-      .forEach((ext: Extension) => {});
+    const touchedOptions = Object.entries(configurationTouched).filter(
+      (pair) => pair[1] === true
+    );
+    if (touchedOptions.length > 0) {
+      window.alert(
+        `WARNING: Changing the active extensions will reset your configuration`
+      );
+    }
   }
 
   const eds = new ExtensionDependencySolver(extensions);
@@ -167,10 +138,20 @@ export default function ExtensionManager() {
           .map((a: string[]) => a.map((v: string) => extensionsByName[v]));
 
         onActiveExtensionsUpdate(final);
+        propagateActiveExtensionsChange(final, {
+          setActiveExtensions,
+          extensionsState,
+          setExtensionsState,
+          setConfiguration,
+          setConfigurationDefaults,
+          setConfigurationTouched,
+          setConfigurationWarnings,
+          setConfigurationLocks,
+        });
         setExtensionsState({
-          allExtensions: extensionsState.allExtensions,
+          // allExtensions: extensionsState.allExtensions,
           activatedExtensions: [...extensionsState.activatedExtensions, ext],
-          activeExtensions: final,
+          //  activeExtensions: final,
           installedExtensions: extensionsState.installedExtensions.filter(
             (e: Extension) =>
               final
@@ -248,7 +229,7 @@ export default function ExtensionManager() {
               : newIndex;
           extensionsState.activeExtensions.splice(aei, 1);
           extensionsState.activeExtensions.splice(newIndex, 0, element);
-          onActiveExtensionsUpdate(extensionsState.activatedExtensions);
+          onActiveExtensionsUpdate(extensionsState.activeExtensions);
           setExtensionsState({
             activeExtensions: extensionsState.activeExtensions,
           } as unknown as ExtensionsState);

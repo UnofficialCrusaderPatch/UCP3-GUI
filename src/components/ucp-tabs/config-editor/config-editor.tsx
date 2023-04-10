@@ -15,18 +15,26 @@ import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
   useActiveExtensionsReducer,
   useConfigurationDefaults,
+  useConfigurationDefaultsReducer,
+  useConfigurationLocksReducer,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
   useConfigurationWarnings,
+  useConfigurationWarningsReducer,
   useExtensions,
   useExtensionStateReducer,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { info } from 'util/scripts/logging';
+import {
+  extensionsToOptionEntries,
+  getConfigDefaults,
+} from 'config/ucp/extension-util';
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
+import { propagateActiveExtensionsChange } from '../helpers';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -47,15 +55,19 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
 
   const gameFolder = useCurrentGameFolder();
-  const configurationDefaults = useConfigurationDefaults();
+  const [configurationDefaults, setConfigurationDefaults] =
+    useConfigurationDefaultsReducer();
   const file = useUcpConfigFileValue();
-  const configurationWarnings = useConfigurationWarnings();
+  const [configurationWarnings, setConfigurationWarnings] =
+    useConfigurationWarningsReducer();
   const [configuration, setConfiguration] = useConfigurationReducer();
   const [configurationTouched, setConfigurationTouched] =
     useConfigurationTouchedReducer();
   const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
   const extensions = useExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const [configurationLocks, setConfigurationLocks] =
+    useConfigurationLocksReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -180,17 +192,15 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       es.push(options[0]);
                     }
 
-                    setActiveExtensions(es);
-                    setExtensionsState({
-                      allExtensions: extensionsState.allExtensions,
-                      activatedExtensions: es,
-                      activeExtensions: es,
-                      installedExtensions: extensionsState.allExtensions.filter(
-                        (e: Extension) =>
-                          es
-                            .map((ex: Extension) => `${ex.name}-${ex.version}`)
-                            .indexOf(`${e.name}-${e.version}`) === -1
-                      ),
+                    propagateActiveExtensionsChange(es, {
+                      setActiveExtensions,
+                      extensionsState,
+                      setExtensionsState,
+                      setConfiguration,
+                      setConfigurationDefaults,
+                      setConfigurationTouched,
+                      setConfigurationWarnings,
+                      setConfigurationLocks,
                     });
                   }
 
@@ -217,6 +227,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     type: 'reset',
                     value: configurationDefaults,
                   });
+
+                  console.log('opened config');
+                  console.log(openedConfig.result);
 
                   const newConfiguration: { [key: string]: unknown } = {};
                   Object.keys(configuration).forEach((url) => {

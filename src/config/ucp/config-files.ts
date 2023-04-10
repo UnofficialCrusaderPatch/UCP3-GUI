@@ -10,16 +10,12 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
       order: string[];
       modules: {
         [key: string]: {
-          active: boolean;
-          version: string;
-          config: { [key: string]: unknown };
+          [key: string]: unknown;
         };
       };
       plugins: {
         [key: string]: {
-          active: boolean;
-          version: string;
-          config: { [key: string]: unknown };
+          [key: string]: unknown;
         };
       };
     },
@@ -44,11 +40,11 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
   const finalConfig: { [key: string]: unknown } = {};
 
   Object.entries(config.modules || {}).forEach(([key, value]) => {
-    finalConfig[key] = value.config;
+    finalConfig[key] = value;
   });
 
   Object.entries(config.plugins || {}).forEach(([key, value]) => {
-    finalConfig[key] = value.config;
+    finalConfig[key] = value;
   });
 
   return {
@@ -71,16 +67,12 @@ export async function saveUCPConfig(
     order: string[];
     modules: {
       [key: string]: {
-        active: boolean;
-        version: string;
-        config: { [key: string]: unknown };
+        [key: string]: unknown;
       };
     };
     plugins: {
       [key: string]: {
-        active: boolean;
-        version: string;
-        config: { [key: string]: unknown };
+        [key: string]: unknown;
       };
     };
   } = { modules: {}, plugins: {}, order: [] };
@@ -103,17 +95,13 @@ export async function saveUCPConfig(
       const type = ext.type === 'module' ? 'modules' : 'plugins';
 
       if (finalConfig[type][extName] === undefined) {
-        finalConfig[type][extName] = {
-          version: ext.version,
-          config: {},
-          active: true,
-        };
+        finalConfig[type][extName] = {};
       }
 
       const configParts = parts.slice(1);
       const partsdrop1 = configParts.slice(0, -1);
       const finalpart = configParts.slice(-1)[0];
-      let fcp = finalConfig[type][extName].config;
+      let fcp = finalConfig[type][extName];
       partsdrop1.forEach((part: string) => {
         if (fcp[part] === undefined) {
           fcp[part] = {};
@@ -126,20 +114,12 @@ export async function saveUCPConfig(
   extensions.forEach((e: Extension) => {
     if (e.type === 'module') {
       if (finalConfig.modules[e.name] === undefined) {
-        finalConfig.modules[e.name] = {
-          version: e.version,
-          config: {},
-          active: true,
-        };
+        finalConfig.modules[e.name] = {};
       }
     }
     if (e.type === 'plugin') {
       if (finalConfig.plugins[e.name] === undefined) {
-        finalConfig.plugins[e.name] = {
-          version: e.version,
-          config: {},
-          active: true,
-        };
+        finalConfig.plugins[e.name] = {};
       }
     }
   });

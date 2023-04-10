@@ -156,7 +156,7 @@ function collectConfigEntries(
         throw new Error(`url already has a value: ${url}`);
       }
       // eslint-disable-next-line no-param-reassign
-      collection[url] = o;
+      collection[url] = o.value as unknown as ConfigEntry;
     } else {
       Object.keys(obj).forEach((key) => {
         let newUrl = url;

@@ -114,8 +114,7 @@ type ConfigEntry = {
 };
 
 type ConfigFileExtensionEntry = {
-  version: string;
-  config: { [key: string]: unknown };
+  [key: string]: unknown;
 };
 
 type ConfigFile = {
@@ -198,7 +197,7 @@ type SectionDescription = {
 };
 
 export type {
-  // ConfigEntry,
+  ConfigEntry,
   ConfigFile,
   ConfigFileExtensionEntry,
   Configs,

@@ -1,6 +1,7 @@
 import {
   useActiveExtensions,
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -21,6 +22,7 @@ function CreateUCP2Switch(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -50,7 +52,9 @@ function CreateUCP2Switch(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={!isEnabled || disabled}
+        disabled={
+          !isEnabled || disabled || configurationLocks[url] !== undefined
+        }
       />
       <Form.Switch.Label className="fs-6" htmlFor={`${url}`}>
         {header}

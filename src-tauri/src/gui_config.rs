@@ -6,12 +6,11 @@ use std::{
 };
 use tauri::{api::dialog::message, AppHandle, Manager};
 
+use crate::constants::{
+    CONFIG_FILE_NAME, LANGUAGE_CHANGE_EVENT, LOG_LEVEL_DEFAULT, MESSAGE_TITLE,
+    NUMBER_OF_RECENT_FOLDERS,
+};
 use crate::utils::{do_with_mutex_state, get_roaming_folder_path};
-
-const NUMBER_OF_RECENT_FOLDERS: usize = 10;
-const CONFIG_FILE_NAME: &str = "recent.json";
-const MESSAGE_TITLE: &str = "GUI-Configuration";
-const LANGUAGE_CHANGE_EVENT: &str = "language-change";
 
 #[derive(Serialize, Deserialize)]
 struct RecentFolder {
@@ -47,6 +46,7 @@ pub struct GuiConfig {
 
     lang: String,
     recent_folders: Vec<RecentFolder>,
+    log_level: String,
 }
 
 impl GuiConfig {
@@ -92,6 +92,7 @@ impl GuiConfig {
             init: false,
             lang: String::from("en"),
             recent_folders: Vec::with_capacity(NUMBER_OF_RECENT_FOLDERS),
+            log_level: String::from(LOG_LEVEL_DEFAULT),
         }
     }
 
@@ -119,6 +120,13 @@ impl GuiConfig {
                             self.recent_folders.push(recent_folder);
                         }
                     }
+                }
+            }
+
+            // get log level
+            if let Some(log_level_value) = value.get("log_level") {
+                if let Some(log_level) = log_level_value.as_str() {
+                    self.log_level = String::from(log_level);
                 }
             }
 
@@ -226,7 +234,7 @@ impl GuiConfig {
         }
         self.sort_recent_folders(); // not really efficient
 
-        if  self.recent_folders.len() > NUMBER_OF_RECENT_FOLDERS {
+        if self.recent_folders.len() > NUMBER_OF_RECENT_FOLDERS {
             self.recent_folders.truncate(NUMBER_OF_RECENT_FOLDERS);
         }
     }
@@ -240,6 +248,14 @@ impl GuiConfig {
         // during the programs lifetime
         self.recent_folders
             .retain(|recent_folder| !recent_folder.path.eq(path));
+    }
+
+    pub fn get_log_level(&self) -> Option<&String> {
+        if self.check_if_init() {
+            Some(&self.log_level)
+        } else {
+            None
+        }
     }
 }
 

@@ -119,3 +119,13 @@ export function useExtensionState() {
 export function useSetExtensionState() {
   return useSetAtom(globalAtoms.EXTENSION_STATE_REDUCER_ATOM);
 }
+
+export function useConfigurationLocksReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
+}
+export function useConfigurationLocks() {
+  return useAtomValue(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
+}
+export function useSetConfigurationLocks() {
+  return useSetAtom(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
+}

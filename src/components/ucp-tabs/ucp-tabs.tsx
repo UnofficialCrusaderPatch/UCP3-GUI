@@ -21,7 +21,7 @@ export default function UcpTabs() {
   return (
     <div className="ucp-tabs fs-7">
       <Tab.Container defaultActiveKey="overview">
-        <Nav variant="tabs" className="ucp-tabs-header">
+        <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
           <Nav.Item>
             <Nav.Link eventKey="overview">
               {t('gui-editor:overview.title')}

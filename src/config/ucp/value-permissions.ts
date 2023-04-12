@@ -51,9 +51,11 @@ function isValuePermittedByConfigs(
     const config = ext.configEntries;
     const configDemands = config[spec.url];
 
-    const r = isValuePermittedByConfig(value, configDemands, ext.name);
-    if (r.status !== 'OK') {
-      return r;
+    if (configDemands !== undefined) {
+      const r = isValuePermittedByConfig(value, configDemands, ext.name);
+      if (r.status !== 'OK') {
+        return r;
+      }
     }
   }
 

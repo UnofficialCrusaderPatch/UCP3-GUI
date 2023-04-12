@@ -16,6 +16,7 @@ const TAURI_COMMAND = {
   ZIP_GET_ENTRY_AS_BINARY: 'get_zip_entry_as_binary',
   ZIP_GET_ENTRY_AS_TEXT: 'get_zip_entry_as_text',
   HASH_GET_SHA256_OF_FILE: 'get_sha256_of_file',
+  LOGGING_LOG: 'log',
 };
 
 export async function setGuiConfigLanguage(lang: string): Promise<void> {
@@ -80,4 +81,8 @@ export async function getZipEntryAsText(
 
 export async function getSha256OfFile(path: string): Promise<string> {
   return invoke(TAURI_COMMAND.HASH_GET_SHA256_OF_FILE, { path });
+}
+
+export async function log(level: number, message: string): Promise<void> {
+  return invoke(TAURI_COMMAND.LOGGING_LOG, { level, message });
 }

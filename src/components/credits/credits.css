@@ -22,7 +22,7 @@
 }
 
 .credits-title {
-
+  color: white;
 }
 
 .credits-text-box {
@@ -43,6 +43,7 @@
   height:100%;
   overflow-y: auto;
   scrollbar-gutter: stable both-edges;
+  color:black;
 }
 
 /* TODO: The current text is really hard to read, so either the font or the background need changes. */
@@ -52,4 +53,7 @@
 
 .credits-close{
   margin-left: auto;
+  color: white;
+  background-color: transparent;
+  border: none;
 }

@@ -1,34 +1,44 @@
 .arrow-container {
-  border-color: var(--bs-light);
+  display: inline-block;
+  background-color: transparent !important;
+  width: 12px !important;
+  height: 7px !important;
+  border: none !important;
 }
 
 .arrow-container[disabled] .arrow {
-  border-color: var(--bs-secondary);
+  display: inline-block;
+  background-color: transparent !important;
+  background: transparent;
+  width: 12px !important;
+  height: 7px !important;
+  border: none !important;
+  padding: none !important;
+  margin: none !important;
 }
 
 .arrow {
-  border: solid;
-  border-width: 0 3px 3px 0;
-  display: inline-block;
-  padding: 3px;
-}
-
-.right {
-  transform: rotate(-45deg);
-  -webkit-transform: rotate(-45deg);
-}
-
-.left {
-  transform: rotate(135deg);
-  -webkit-transform: rotate(135deg);
-}
-
-.up {
-  transform: rotate(-135deg);
-  -webkit-transform: rotate(-135deg);
+  width: 12px;
+  height: 7px;
+  border: none;
+  padding: none;
+  margin: none;
 }
 
 .down {
-  transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
+  background-image: url("/src/assets/ucp3/move_down.png");
 }
+
+.up {
+  background-image: url("/src/assets/ucp3/move_up.png");
+}
+
+.parchment-box-inside {
+  padding: 6px;
+}
+
+.parchment-box-item-list {
+  overflow-y: scroll;
+  overflow-x: clip;
+}
+

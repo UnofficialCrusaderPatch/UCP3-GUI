@@ -1,24 +1,9 @@
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import {
-  Button,
-  Col,
-  Container,
-  ListGroup,
-  Row,
-  Tooltip,
-} from 'react-bootstrap';
+import { Button, Col, ListGroup, Row, Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
-import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
-import {
-  useExtensions,
-  useExtensionStateReducer,
-  useSetActiveExtensions,
-} from 'hooks/jotai/globals-wrapper';
-import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
-import { info } from 'util/scripts/logging';
 
 export default function ExtensionElement(props: {
   ext: Extension;
@@ -38,13 +23,7 @@ export default function ExtensionElement(props: {
     moveCallback,
     revDeps,
   } = props;
-  const {
-    name,
-    version,
-    author,
-    'display-name': displayName,
-    description,
-  } = ext.definition;
+  const { name, version, author } = ext.definition;
 
   const [t] = useTranslation(['gui-editor']);
 
@@ -66,69 +45,95 @@ export default function ExtensionElement(props: {
   };
 
   const arrows = active ? (
-    <>
-      <Col
-        className="col-auto arrow-container"
-        disabled={!movability.up}
-        onClick={() => {
-          if (movability.up) moveCallback({ name: ext.name, type: 'up' });
-        }}
-      >
-        <div className="arrow up" />
-      </Col>
-      <Col
-        className="col-auto arrow-container"
-        disabled={!movability.down}
-        onClick={() => {
-          if (movability.down) moveCallback({ name: ext.name, type: 'down' });
-        }}
-      >
-        <div className="arrow down" />
-      </Col>
-    </>
+    <Col className="col-2">
+      <Row className="flex-column">
+        <Button
+          className="arrow-container"
+          disabled={!movability.up}
+          onClick={() => {
+            if (movability.up) moveCallback({ name: ext.name, type: 'up' });
+          }}
+        >
+          <div className="arrow up" />
+        </Button>
+        <Button
+          className="arrow-container"
+          disabled={!movability.down}
+          onClick={() => {
+            if (movability.down) moveCallback({ name: ext.name, type: 'down' });
+          }}
+        >
+          <div className="arrow down" />
+        </Button>
+      </Row>
+    </Col>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
 
-  // my-auto is also possible instead of align-items-center
+  const enableButton = !active ? (
+    <Col className="col-2">
+      <OverlayTrigger placement="left" overlay={renderTooltip}>
+        <div>
+          <Button
+            className="fs-8"
+            onClick={clickCallback}
+            disabled={revDeps.length > 0}
+          >
+            {buttonText}
+          </Button>
+        </div>
+      </OverlayTrigger>
+    </Col>
+  ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <></>
+  );
+  const disableButton = active ? (
+    <Col className="col-2">
+      <OverlayTrigger placement="left" overlay={renderTooltip}>
+        <div>
+          <Button
+            className="fs-8"
+            onClick={clickCallback}
+            disabled={revDeps.length > 0}
+          >
+            {buttonText}
+          </Button>
+        </div>
+      </OverlayTrigger>
+    </Col>
+  ) : (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    <></>
+  );
+
   return (
     <ListGroup.Item
       key={`${name}-${version}-${author}`}
-      style={{ backgroundColor: 'var(--bs-gray-800)' }}
-      className="text-light border-secondary container border-bottom p-1"
+      className="light-shade-item"
     >
       <Row className="align-items-center">
-        {arrows}
+        {disableButton}
         <Col>
           <Row>
-            <Col className="col-2">
-              <span className="mx-2">{displayName || name}</span>
-            </Col>
-            <Col className="col-3">
+            {/* <Col className="col-2">
+                <span className="mx-2">{displayName || name}</span>
+              </Col> */}
+            <Col className="col-8">
               <span className="mx-2 text-secondary">-</span>
               <span className="mx-2" style={{ fontSize: 'smaller' }}>
                 {name}-{version}
               </span>
             </Col>
-            <Col>
-              <span className="mx-2">{description || ''}</span>
-            </Col>
+            {/* <Col>
+                <span className="mx-2">{description || ''}</span>
+               </Col> */}
           </Row>
         </Col>
-        <Col className="col-auto">
-          <OverlayTrigger placement="left" overlay={renderTooltip}>
-            <div>
-              <Button
-                className="fs-8"
-                onClick={clickCallback}
-                disabled={revDeps.length > 0}
-              >
-                {buttonText}
-              </Button>
-            </div>
-          </OverlayTrigger>
-        </Col>
+        {arrows}
+        {enableButton}
       </Row>
     </ListGroup.Item>
   );

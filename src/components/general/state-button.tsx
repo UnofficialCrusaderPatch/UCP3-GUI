@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { Button } from 'react-bootstrap';
+// import { Button } from 'react-bootstrap';
 import { useTimeout } from 'hooks/general/util';
 import Result from 'util/structs/result';
 
@@ -60,9 +60,9 @@ export default function StateButton(props: StateButtonProps) {
 
   return (
     <div className="m-2 ">
-      <Button
-        className="col-8 button "
-        variant={buttonVariant}
+      <button
+        type="button"
+        className={`${buttonVariant}`}
         disabled={!active || !buttonActive}
         onClick={async () => {
           if (funcBefore) funcBefore();
@@ -76,8 +76,9 @@ export default function StateButton(props: StateButtonProps) {
           if (funcAfter) funcAfter();
         }}
       >
-        <div className="">{buttonValues[buttonState]} </div>
-      </Button>
+        <div className="icon-placeholder" />
+        <div className="button-text">{buttonValues[buttonState]}</div>
+      </button>
       <div className="col d-flex align-items-center">{divState}</div>
     </div>
   );

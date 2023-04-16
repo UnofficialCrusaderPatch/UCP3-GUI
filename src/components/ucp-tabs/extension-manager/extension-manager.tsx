@@ -1,19 +1,10 @@
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import {
-  Button,
-  Col,
-  Container,
-  ListGroup,
-  Row,
-  Tooltip,
-} from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import {
-  useConfigurationDefaults,
-  useConfigurationDefaultsReducer,
-  useConfigurationLocksReducer,
+  useSetConfigurationDefaults,
+  useSetConfigurationLocks,
   useConfigurationTouched,
   useExtensions,
   useExtensionStateReducer,
@@ -27,10 +18,6 @@ import { ExtensionsState } from 'function/global/types';
 import './extension-manager.css';
 import { info } from 'util/scripts/logging';
 
-import {
-  extensionsToOptionEntries,
-  getConfigDefaults,
-} from 'config/ucp/extension-util';
 import ExtensionElement from './extension-element';
 import { propagateActiveExtensionsChange } from '../helpers';
 
@@ -41,11 +28,9 @@ export default function ExtensionManager() {
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
-  const [configurationLocks, setConfigurationLocks] =
-    useConfigurationLocksReducer();
+  const setConfigurationLocks = useSetConfigurationLocks();
 
-  const [configurationDefaults, setConfigurationDefaults] =
-    useConfigurationDefaultsReducer();
+  const setConfigurationDefaults = useSetConfigurationDefaults();
 
   const setConfiguration = useSetConfiguration();
 
@@ -246,31 +231,23 @@ export default function ExtensionManager() {
   });
 
   return (
-    <Container className="fs-6 h-100">
-      <div className="pb-2 h-50 d-flex flex-column overflow-hidden">
-        <h4>{t('gui-editor:extensions.activated')}</h4>
-        <div
-          style={{
-            overflowY: 'scroll',
-            overflowX: 'clip',
-            backgroundColor: 'var(--bs-gray-800)',
-          }}
-          className="border-secondary border flex-grow-1"
-        >
-          {activated}
+    <Container className="fs-6 h-100 vertical-container">
+      <div className="row h-100">
+        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
+          <div>
+            <h4>{t('gui-editor:extensions.available')}</h4>
+          </div>
+          <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
+            <div className="parchment-box-item-list"> {eUI} </div>
+          </div>
         </div>
-      </div>
-      <div className="pt-2 h-50 d-flex flex-column overflow-hidden">
-        <h4>{t('gui-editor:extensions.available')}</h4>
-        <div
-          style={{
-            overflowY: 'scroll',
-            overflowX: 'clip',
-            backgroundColor: 'var(--bs-gray-800)',
-          }}
-          className="border-secondary border flex-grow-1"
-        >
-          {eUI}
+        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
+          <div>
+            <h4>{t('gui-editor:extensions.activated')}</h4>
+          </div>
+          <div className="flex-grow-1 parchment-box-inside parchment-box d-flex flex-column overflow-auto">
+            <div className="parchment-box-item-list">{activated}</div>
+          </div>
         </div>
       </div>
     </Container>

@@ -15,16 +15,16 @@ function Credits(props: OverlayContentProps) {
   const [t] = useTranslation(['gui-general', 'gui-landing']);
 
   return (
-    <div className="flex-default">
-      <div className="credits-container">
-        <h1 className="credits-title">{t('gui-landing:credits.title')}</h1>
-        <div className="credits-text-box parchment-box">
+    <div className="credits-container">
+      <h1 className="credits-title">{t('gui-landing:credits.title')}</h1>
+      <div className="credits-text-box">
+        <div className="credits-text-wrapper">
           <div className="credits-text">{credits}</div>
         </div>
-        <button type="button" className="credits-close" onClick={closeFunc}>
-          {t('gui-general:close')}
-        </button>
       </div>
+      <button type="button" className="credits-close" onClick={closeFunc}>
+        {t('gui-general:close')}
+      </button>
     </div>
   );
 }

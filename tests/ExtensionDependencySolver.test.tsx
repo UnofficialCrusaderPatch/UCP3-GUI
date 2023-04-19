@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import YAML from 'yaml';
-import ExtensionDependencySolver from '../src/common/config/ExtensionDependencySolver';
+import ExtensionDependencySolver from '../src/config/ucp/extension-dependency-solver';
 
 const test1Yaml = `
 - name: extension1

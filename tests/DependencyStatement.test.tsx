@@ -3,7 +3,7 @@ import {
   DependencyStatement,
   Version,
   VersionRange,
-} from '../src/common/config/DependencyStatement';
+} from '../src/config/ucp/dependency-statement';
 
 const dep1 = DependencyStatement.fromString('test >= 1.0.0');
 const dep2 = DependencyStatement.fromString('test < 2.0.0');

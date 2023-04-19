@@ -88,7 +88,20 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
     allExtensions: [],
     activeExtensions: [],
     activatedExtensions: [],
+    // I should have called this: inactiveExtensions
     installedExtensions: [],
   },
   extensionStateReducer
+);
+
+type ConfigurationLock = {
+  lockedBy: string;
+  lockedValue: unknown;
+};
+
+const configurationLocksReducer = KeyValueReducer<ConfigurationLock>();
+
+export const CONFIGURATION_LOCKS_REDUCER_ATOM = atomWithReducer(
+  {},
+  configurationLocksReducer
 );

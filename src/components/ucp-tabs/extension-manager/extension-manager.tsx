@@ -1,161 +1,25 @@
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import {
-  Button,
-  Col,
-  Container,
-  ListGroup,
-  Row,
-  Tooltip,
-} from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import {
+  useSetConfigurationDefaults,
+  useSetConfigurationLocks,
+  useConfigurationTouched,
   useExtensions,
   useExtensionStateReducer,
   useSetActiveExtensions,
+  useSetConfiguration,
+  useSetConfigurationTouched,
+  useSetConfigurationWarnings,
 } from 'hooks/jotai/globals-wrapper';
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
+import { info } from 'util/scripts/logging';
 
-function ExtensionElement(props: {
-  ext: Extension;
-  active: boolean;
-  movability: { up: boolean; down: boolean };
-  buttonText: string;
-  clickCallback: (event: unknown) => void;
-  moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
-  revDeps: string[];
-}) {
-  const {
-    ext,
-    active,
-    movability,
-    buttonText,
-    clickCallback,
-    moveCallback,
-    revDeps,
-  } = props;
-  const {
-    name,
-    version,
-    author,
-    'display-name': displayName,
-    description,
-  } = ext.definition;
-
-  const [t] = useTranslation(['gui-editor']);
-
-  const renderTooltip = (p: unknown) => {
-    if (revDeps.length > 0) {
-      return (
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        <Tooltip {...(p as object)}>
-          {revDeps.length > 0
-            ? t('gui-editor:extensions.is.dependency', {
-                dependencies: revDeps.join(', '),
-              })
-            : ''}
-        </Tooltip>
-      );
-    }
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    return <></>;
-  };
-
-  const arrows = active ? (
-    <Col className="col-auto arrow-margin">
-      <Row className="flex-column">
-        <Button
-          className="arrow-container"
-          disabled={!movability.up}
-          onClick={() => {
-            if (movability.up) moveCallback({ name: ext.name, type: 'up' });
-          }}
-        >
-          <div className="arrow up" />
-        </Button>
-        <Button
-          className="arrow-container"
-          disabled={!movability.down}
-          onClick={() => {
-            if (movability.down) moveCallback({ name: ext.name, type: 'down' });
-          }}
-        >
-          <div className="arrow down" />
-        </Button>
-      </Row>
-    </Col>
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
-
-  const enablearrow = !active ? (
-    <Col className="col-auto">
-      <OverlayTrigger placement="left" overlay={renderTooltip}>
-        <div>
-          <Button
-            className="fs-8 enable-arrow "
-            onClick={clickCallback}
-            disabled={revDeps.length > 0}
-          />
-        </div>
-      </OverlayTrigger>
-    </Col>
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
-
-  const disablearrow = active ? (
-    <Col className="col-auto">
-      <OverlayTrigger placement="left" overlay={renderTooltip}>
-        <div>
-          <Button
-            className="fs-8 disable-arrow "
-            onClick={clickCallback}
-            disabled={revDeps.length > 0}
-          />
-        </div>
-      </OverlayTrigger>
-    </Col>
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
-
-  // my-auto is also possible instead of align-items-center
-  return (
-    <ListGroup.Item
-      key={`${name}-${version}-${author}`}
-      className="light-shade-item"
-    >
-      <Row className="align-items-center">
-        {disablearrow}
-        <Col>
-          <Row>
-            {/* <Col className="col-2">
-              <span className="mx-2">{displayName || name}</span>
-            </Col> */}
-            <Col className="col-12">
-              <span className="mx-2 text-secondary">-</span>
-              <span className="mx-2" style={{ fontSize: 'smaller' }}>
-                {name}-{version}
-              </span>
-            </Col>
-            {/* <Col>
-              <span className="mx-2">{description || ''}</span>
-             </Col> */}
-          </Row>
-        </Col>
-        {arrows}
-        {enablearrow}
-      </Row>
-    </ListGroup.Item>
-  );
-}
+import ExtensionElement from './extension-element';
+import { propagateActiveExtensionsChange } from '../helpers';
 
 export default function ExtensionManager() {
   const extensions = useExtensions();
@@ -163,6 +27,30 @@ export default function ExtensionManager() {
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
+
+  const setConfigurationLocks = useSetConfigurationLocks();
+
+  const setConfigurationDefaults = useSetConfigurationDefaults();
+
+  const setConfiguration = useSetConfiguration();
+
+  // currently simply reset:
+  const configurationTouched = useConfigurationTouched();
+  const setConfigurationTouched = useSetConfigurationTouched();
+  const setConfigurationWarnings = useSetConfigurationWarnings();
+
+  function onActiveExtensionsUpdate(exts: Extension[]) {
+    // Defer here to a processor for the current list of active extensions to yield the
+
+    const touchedOptions = Object.entries(configurationTouched).filter(
+      (pair) => pair[1] === true
+    );
+    if (touchedOptions.length > 0) {
+      window.alert(
+        `WARNING: Changing the active extensions will reset your configuration`
+      );
+    }
+  }
 
   const eds = new ExtensionDependencySolver(extensions);
   const revDeps = Object.fromEntries(
@@ -228,16 +116,27 @@ export default function ExtensionManager() {
         const final = [...dependencies, ...remainder];
 
         const localEDS = new ExtensionDependencySolver(final);
-        console.log(localEDS.solve());
+        info(localEDS.solve());
         const order = localEDS
           .solve()
           .reverse()
           .map((a: string[]) => a.map((v: string) => extensionsByName[v]));
 
+        onActiveExtensionsUpdate(final);
+        propagateActiveExtensionsChange(final, {
+          setActiveExtensions,
+          extensionsState,
+          setExtensionsState,
+          setConfiguration,
+          setConfigurationDefaults,
+          setConfigurationTouched,
+          setConfigurationWarnings,
+          setConfigurationLocks,
+        });
         setExtensionsState({
-          allExtensions: extensionsState.allExtensions,
+          // allExtensions: extensionsState.allExtensions,
           activatedExtensions: [...extensionsState.activatedExtensions, ext],
-          activeExtensions: final,
+          //  activeExtensions: final,
           installedExtensions: extensionsState.installedExtensions.filter(
             (e: Extension) =>
               final
@@ -286,6 +185,7 @@ export default function ExtensionManager() {
           const ae = extensionsState.activeExtensions.filter((e) =>
             relevantExtensions.has(e.name)
           );
+          onActiveExtensionsUpdate(ae);
           setExtensionsState({
             allExtensions: extensionsState.allExtensions,
             activatedExtensions: extensionsState.activatedExtensions.filter(
@@ -314,6 +214,7 @@ export default function ExtensionManager() {
               : newIndex;
           extensionsState.activeExtensions.splice(aei, 1);
           extensionsState.activeExtensions.splice(newIndex, 0, element);
+          onActiveExtensionsUpdate(extensionsState.activeExtensions);
           setExtensionsState({
             activeExtensions: extensionsState.activeExtensions,
           } as unknown as ExtensionsState);

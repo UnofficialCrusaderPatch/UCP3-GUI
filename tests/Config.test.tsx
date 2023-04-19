@@ -1,19 +1,17 @@
 /* eslint-disable no-debugger */
 /* eslint-disable no-console */
 
+/* npm test -- '.\tests\Config.test.tsx' */
+
 import { describe, expect, test } from 'vitest';
 import YAML from 'yaml';
-import {
-  ConfigEntry,
-  Extension,
-  OptionEntry,
-} from '../src/common/config/common';
-import { isValuePermitted } from '../src/common/config/value-permissions';
-import { collectConfigs, Config } from '../src/common/config/Config';
+import { ConfigEntry, Extension, OptionEntry } from '../src/config/ucp/common';
+import { isValuePermitted } from '../src/config/ucp/value-permissions';
+import { collectConfigs, Config } from '../src/config/ucp/config';
 import {
   isValidExtensionConfigOrder,
   isAllValidExtensionConfigOrder,
-} from '../src/common/config/extension-permissions';
+} from '../src/config/ucp/extension-permissions';
 
 describe('Test 1', () => {
   test('should fail because of a missing spec.type value', () => {

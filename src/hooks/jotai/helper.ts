@@ -9,6 +9,7 @@ import { UCPVersion } from 'function/ucp/ucp-version';
 import { useTranslation } from 'react-i18next';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';
+import { info } from 'util/scripts/logging';
 import {
   useFolder,
   useInitRunning,
@@ -102,19 +103,21 @@ export function useInitGlobalConfiguration(): [
       let defaults = {};
       let file = '';
       if (newFolder.length > 0) {
-        console.log(`Current folder: ${newFolder}`);
-        console.log(`Current locale: ${language}`);
+        info(`Current folder: ${newFolder}`);
+        info(`Current locale: ${language}`);
 
         // TODO: currently only set on initial render and folder selection
         // TODO: resolve this type badness
         extensions = await getExtensions(newFolder, language);
         setExtensions(extensions);
 
-        const optionEntries = extensionsToOptionEntries(extensions);
-        defaults = getConfigDefaults(optionEntries);
+        // TODO: this should not be done now, it only makes sense when options are actually presented on screen, e.g., when an extension is made active
+        // const optionEntries = extensionsToOptionEntries(extensions);
+        // defaults = getConfigDefaults(optionEntries);
+        defaults = {};
         file = `${newFolder}/ucp-config.yml`; // better be moved to const file?
       } else {
-        console.log('No folder active.');
+        info('No folder active.');
       }
 
       setExtensions(extensions);
@@ -126,14 +129,6 @@ export function useInitGlobalConfiguration(): [
         type: 'reset',
         value: defaults,
       });
-      setExtensionsState({
-        allExtensions: [...extensions],
-        activeExtensions: [],
-        activatedExtensions: [],
-        installedExtensions: [...extensions],
-      });
-      setFile(file);
-
       // currently simply reset:
       setConfigurationTouched({
         type: 'reset',
@@ -143,9 +138,18 @@ export function useInitGlobalConfiguration(): [
         type: 'reset',
         value: defaults,
       });
+
+      setExtensionsState({
+        allExtensions: [...extensions],
+        activeExtensions: [],
+        activatedExtensions: [],
+        installedExtensions: [...extensions],
+      });
+      setFile(file);
+
       setActiveExtensions([]);
 
-      console.log('Finished loading');
+      info('Finished loading');
       setInitDone(true);
       setInitRunning(false);
     },

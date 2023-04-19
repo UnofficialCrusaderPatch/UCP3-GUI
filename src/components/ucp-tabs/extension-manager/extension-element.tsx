@@ -94,7 +94,7 @@ export default function ExtensionElement(props: {
       <OverlayTrigger placement="left" overlay={renderTooltip}>
         <div>
           <Button
-            className="fs-8"
+            className="fs-8 disable-arrow"
             onClick={clickCallback}
             disabled={revDeps.length > 0}
           />

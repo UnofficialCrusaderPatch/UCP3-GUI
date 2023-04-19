@@ -1,36 +1,26 @@
 /* eslint-disable react/no-unescaped-entities */
 /* global CreateUIElement */
 
-import { Form, Row } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import {
-  openFileDialog,
-  save as dialogSave,
-  saveFileDialog,
-} from 'tauri/tauri-dialog';
+import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
   useActiveExtensionsReducer,
-  useConfigurationDefaults,
   useConfigurationDefaultsReducer,
-  useConfigurationLocksReducer,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
-  useConfigurationWarnings,
   useConfigurationWarningsReducer,
   useExtensions,
   useExtensionStateReducer,
+  useSetConfigurationLocks,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { info } from 'util/scripts/logging';
-import {
-  extensionsToOptionEntries,
-  getConfigDefaults,
-} from 'config/ucp/extension-util';
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
@@ -66,8 +56,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
   const extensions = useExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
-  const [configurationLocks, setConfigurationLocks] =
-    useConfigurationLocksReducer();
+  const setConfigurationLocks = useSetConfigurationLocks();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 

@@ -37,21 +37,13 @@ const UIFactory = {
   CreateGroupBox,
   CreateSlider,
   CreateSwitch,
-
   CreateNumberInput,
-
   CreateChoice,
-
   CreateRadioGroup,
-
   CreateUIElement,
-
   CreateSection,
-
   NavSection,
-
   CreateSectionsNav,
-
   CreateSections,
 };
 

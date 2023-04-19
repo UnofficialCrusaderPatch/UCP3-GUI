@@ -45,7 +45,7 @@ export default function ExtensionElement(props: {
   };
 
   const arrows = active ? (
-    <Col className="col-2">
+    <Col className="col-auto arrow-margin">
       <Row className="flex-column">
         <Button
           className="arrow-container"
@@ -73,16 +73,14 @@ export default function ExtensionElement(props: {
   );
 
   const enableButton = !active ? (
-    <Col className="col-2">
+    <Col className="col-auto">
       <OverlayTrigger placement="left" overlay={renderTooltip}>
         <div>
           <Button
-            className="fs-8"
+            className="fs-8 enable-arrow"
             onClick={clickCallback}
             disabled={revDeps.length > 0}
-          >
-            {buttonText}
-          </Button>
+          />
         </div>
       </OverlayTrigger>
     </Col>
@@ -90,17 +88,16 @@ export default function ExtensionElement(props: {
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
+
   const disableButton = active ? (
-    <Col className="col-2">
+    <Col className="col-auto">
       <OverlayTrigger placement="left" overlay={renderTooltip}>
         <div>
           <Button
-            className="fs-8"
+            className="fs-8 disable-arrow"
             onClick={clickCallback}
             disabled={revDeps.length > 0}
-          >
-            {buttonText}
-          </Button>
+          />
         </div>
       </OverlayTrigger>
     </Col>
@@ -121,7 +118,7 @@ export default function ExtensionElement(props: {
             {/* <Col className="col-2">
                 <span className="mx-2">{displayName || name}</span>
               </Col> */}
-            <Col className="col-8">
+            <Col className="col-12">
               <span className="mx-2 text-secondary">-</span>
               <span className="mx-2" style={{ fontSize: 'smaller' }}>
                 {name}-{version}

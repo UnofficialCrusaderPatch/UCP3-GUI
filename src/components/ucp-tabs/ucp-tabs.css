@@ -16,7 +16,7 @@
   align-items: end;
 }
 
-.nav-link {
+.tab-link {
   display: flex;
   align-items: start;
   justify-content: center;
@@ -33,7 +33,7 @@
   color: white !important;
 }
 
-.nav-link.active {
+.tab-link.active {
   background-color: transparent !important;
   border-image-source: url("/src/assets/ucp3/tab_hover.png") !important;
   border-style: solid;

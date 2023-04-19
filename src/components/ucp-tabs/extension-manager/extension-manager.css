@@ -1,3 +1,7 @@
+.arrow-margin {
+  margin-right: 14px;
+}
+
 .arrow-container {
   display: inline-block;
   background-color: transparent !important;
@@ -13,16 +17,12 @@
   width: 12px !important;
   height: 7px !important;
   border: none !important;
-  padding: none !important;
-  margin: none !important;
 }
 
 .arrow {
   width: 12px;
   height: 7px;
   border: none;
-  padding: none;
-  margin: none;
 }
 
 .down {
@@ -33,12 +33,31 @@
   background-image: url("/src/assets/ucp3/move_up.png");
 }
 
-.parchment-box-inside {
-  padding: 6px;
+.enable-arrow {
+  background-image: url("/src/assets/ucp3/add.png");
+  background-color: transparent !important;
+  width: 18px !important;
+  height: 17px !important;
+  border: none !important;
+  border-radius: 0px !important;
+  padding: 0px !important;
 }
 
-.parchment-box-item-list {
-  overflow-y: scroll;
-  overflow-x: clip;
+.enable-arrow:hover {
+  background-image: url("/src/assets/ucp3/add_hover.png");
 }
 
+
+.disable-arrow {
+  background-image: url("/src/assets/ucp3/remove.png");
+  background-color: transparent !important;
+  width: 18px !important;
+  height: 17px !important;
+  border: none !important;
+  border-radius: 0px !important;
+  padding: 0px !important;
+}
+
+.disable-arrow:hover {
+  background-image: url("/src/assets/ucp3/remove_hover.png");
+}

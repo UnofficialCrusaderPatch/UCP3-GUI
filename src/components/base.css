@@ -97,7 +97,16 @@
   border-image-width: 17px 16px 17px 17px;
   border-image-outset: 0px 0px 0px 0px;
   border-image-repeat: repeat repeat;
-  width: 100%;
-  height: 100%;
   overflow: hidden;
+}
+
+.parchment-box-inside {
+  padding: 6px;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.parchment-box-item-list {
+  overflow-y: scroll;
+  overflow-x: clip;
 }

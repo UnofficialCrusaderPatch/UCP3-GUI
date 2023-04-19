@@ -68,7 +68,6 @@ export default function Overview() {
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
-      {/* <div id="overview-background-image" /> */}
       <RecentFolders />
       <StateButton
         buttonActive={

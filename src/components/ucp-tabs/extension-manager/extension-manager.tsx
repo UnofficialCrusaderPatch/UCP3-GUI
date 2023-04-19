@@ -245,7 +245,7 @@ export default function ExtensionManager() {
           <div>
             <h4>{t('gui-editor:extensions.activated')}</h4>
           </div>
-          <div className="flex-grow-1 parchment-box-inside parchment-box d-flex flex-column overflow-auto">
+          <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
             <div className="parchment-box-item-list">{activated}</div>
           </div>
         </div>

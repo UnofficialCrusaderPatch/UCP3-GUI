@@ -100,7 +100,6 @@ function CreateSections(args: { readonly: boolean }): {
         // data-bs-offset="0"
         // // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         // tabIndex={0}
-        className="h-100"
         id="config-sections"
       >
         <div id="config-General">

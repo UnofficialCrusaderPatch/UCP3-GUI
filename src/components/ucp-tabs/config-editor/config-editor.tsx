@@ -3,34 +3,24 @@
 
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import {
-  openFileDialog,
-  save as dialogSave,
-  saveFileDialog,
-} from 'tauri/tauri-dialog';
+import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
   useActiveExtensionsReducer,
-  useConfigurationDefaults,
   useConfigurationDefaultsReducer,
-  useConfigurationLocksReducer,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
-  useConfigurationWarnings,
   useConfigurationWarningsReducer,
   useExtensions,
   useExtensionStateReducer,
+  useSetConfigurationLocks,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { info } from 'util/scripts/logging';
-import {
-  extensionsToOptionEntries,
-  getConfigDefaults,
-} from 'config/ucp/extension-util';
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
@@ -66,8 +56,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
   const extensions = useExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
-  const [configurationLocks, setConfigurationLocks] =
-    useConfigurationLocksReducer();
+  const setConfigurationLocks = useSetConfigurationLocks();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -95,14 +84,18 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   return (
     <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">
       {/* Still has issues with x-Overflow */}
-      <div className="col-4 h-100 p-0">{nav}</div>
-      <div className="col-8 h-100 p-0">
-        <div className="h-75">{content}</div>
+      <div className="col-auto">{nav}</div>
+      <div className="mb-1 config-section h-100">
+        <div className="m-2 container-parchment-box">
+          <div className="flex-grow-1 d-flex flex-column overflow-auto parchment-box-inside parchment-box ">
+            <div className="content-box parchment-box-item-list">{content}</div>
+          </div>
+        </div>
         {!readonly ? (
           <div className="row pb-2 mx-0">
-            <div className="col">
+            <div className="d-inline-flex">
               <button
-                className="col-auto btn btn-primary mx-1"
+                className="col-auto icons-button reset mx-1"
                 type="button"
                 onClick={() => {
                   setConfiguration({
@@ -114,26 +107,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     value: {},
                   });
                 }}
-              >
-                {t('gui-general:reset')}
-              </button>
-
+              />
               <button
-                className="col-auto btn btn-primary mx-1"
-                type="button"
-                onClick={() =>
-                  saveConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    activeExtensions
-                  )
-                }
-              >
-                {t('gui-general:apply')}
-              </button>
-              <button
-                className="col-auto btn btn-primary mx-1"
+                className="col-auto icons-button import mx-1"
                 type="button"
                 onClick={async () => {
                   const result = await openFileDialog(gameFolder, [
@@ -258,11 +234,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     ),
                   });
                 }}
-              >
-                {t('gui-general:import')}
-              </button>
+              />
               <button
-                className="col-auto btn btn-primary mx-1"
+                className="col-auto icons-button export mx-1"
                 type="button"
                 onClick={async () => {
                   const filePathOptional = await saveFileDialog(gameFolder, [
@@ -293,10 +267,23 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       throw new Error(e);
                     });
                 }}
+              />
+              <button
+                className="ucp-button-variant"
+                type="button"
+                onClick={() =>
+                  saveConfig(
+                    configuration,
+                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                    configurationTouched,
+                    activeExtensions
+                  )
+                }
               >
-                {t('gui-general:export')}
+                <div className="ucp-button-variant-button-text">
+                  {t('gui-general:apply')}
+                </div>
               </button>
-
               <Form.Switch
                 id="config-allow-user-override-switch"
                 label={t('gui-editor:config.allow.override')}

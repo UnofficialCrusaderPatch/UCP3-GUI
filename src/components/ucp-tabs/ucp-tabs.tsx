@@ -23,17 +23,25 @@ export default function UcpTabs() {
       <Tab.Container defaultActiveKey="overview">
         <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
           <Nav.Item>
-            <Nav.Link eventKey="overview">
+            <Nav.Link eventKey="overview" className="tab-link">
               {t('gui-editor:overview.title')}
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey="extensions" disabled={!displayConfigTabs}>
+            <Nav.Link
+              eventKey="extensions"
+              className="tab-link"
+              disabled={!displayConfigTabs}
+            >
               {t('gui-editor:extensions.title')}
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey="config" disabled={!displayConfigTabs}>
+            <Nav.Link
+              eventKey="config"
+              className="tab-link"
+              disabled={!displayConfigTabs}
+            >
               {t('gui-editor:config.title')}
             </Nav.Link>
           </Nav.Item>

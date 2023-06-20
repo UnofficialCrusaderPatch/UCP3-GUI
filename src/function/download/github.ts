@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { info, error as logError } from 'util/scripts/logging';
 import { UCP3_REPOS_MACHINE_TOKEN, UCP3_REPO_URL_API } from './download-enums';
 
 async function checkForLatestUCP3DevReleaseUpdate(
@@ -41,7 +42,7 @@ async function checkForLatestUCP3DevReleaseUpdate(
       }
     )
     .catch((error: Error) => {
-      console.error(error);
+      logError(error);
       window.alert(error);
     });
 
@@ -56,11 +57,11 @@ async function getLatestUCP3Artifacts() {
       auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },
     })
     .then((res: { data: { artifacts: unknown } }) => {
-      console.log(res);
+      info(res);
       return res.data.artifacts;
     })
     .catch((error: Error) => {
-      console.error(error);
+      logError(error);
     });
   return result;
 }

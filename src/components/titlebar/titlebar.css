@@ -1,6 +1,6 @@
 .titlebar {
   height: 100%;
-  background: #212529;
+  background: var(--ucp-main-brown);
   user-select: none;
   display: flex;
   justify-content: flex-end;
@@ -23,7 +23,7 @@
   padding: 5px;
   margin-right: auto;
   pointer-events: none;
-  color: rgb(155, 155, 155);
+  color: var(--ucp-main-grey);
   overflow: hidden;
 }
 
@@ -44,10 +44,10 @@
   width: 40px;
   height: 30px;
   padding: 0px 10px 0px 10px;
-  color: rgb(155, 155, 155);
+  color: var(--ucp-main-grey);
 }
 
 .titlebar-button:hover {
-  background: rgb(155, 155, 155);
-  color: #212529;
+  background: var(--ucp-main-grey);
+  color: var(--ucp-main-brown);
 }

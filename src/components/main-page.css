@@ -1,0 +1,12 @@
+
+.tabs-wrapper {
+  width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.footer-wrapper {
+  width: 100%;
+  flex-shrink: 0;
+  overflow: hidden;
+}

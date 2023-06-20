@@ -1,0 +1,141 @@
+/* @import '~bootstrap'; */
+
+.form-control:disabled {
+  opacity: 0.5;
+}
+
+.label-disabled > label {
+  opacity: 0.5;
+}
+
+#config-sections {
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: clip;
+}
+
+#config-navbar {
+  /* color: #f8f9fa; */
+  padding: 0;
+}
+
+.content-box {
+  padding: 10px;
+  height:100%;
+  overflow-y: scroll;
+  color:black;
+}
+
+.container-parchment-box {
+  height: calc(100% - 50px);
+}
+
+.parchment-box {
+  height: 100%;
+}
+
+.icons-button {
+  display: inline-block;
+  background-color: transparent;
+  width: 32px !important;
+  height: 28px !important;
+  border: none;
+  padding: 0px;
+}
+
+.ucp-button-variant {
+  border-image: url("/src/assets/ucp3/button_slice.png") !important;
+  border-image-slice: 49% fill  !important;
+  border-width: 14px  !important;
+  border-style: solid  !important;
+  background-color: transparent  !important;
+  color: white  !important;
+  min-width: 150px  !important;
+  height: 28px  !important;
+  padding: 0px  !important;
+  margin: 0px  !important;
+}
+
+.ucp-button-variant:hover {
+  /* Other button styles here */
+  border-image: url("/src/assets/ucp3/button_slice_hover.png");
+  border-image-slice: 49% fill;
+  border-style: solid;
+}
+
+.ucp-button-variant-button-text {
+    margin-top: -9px;
+}
+
+
+.reset {
+  background-image: url("/src/assets/ucp3/reset.png");
+}
+
+.reset:hover {
+  background-image: url("/src/assets/ucp3/reset_hover.png");
+}
+
+.reset:disabled {
+  background-image: url("/src/assets/ucp3/reset_active.png");
+}
+
+.import {
+  background-image: url("/src/assets/ucp3/import.png");
+}
+
+.import:hover {
+  background-image: url("/src/assets/ucp3/import_hover.png");
+}
+
+.import:disabled {
+  background-image: url("/src/assets/ucp3/import_active.png");
+}
+
+.export {
+  background-image: url("/src/assets/ucp3/export.png");
+}
+
+.export:hover {
+  background-image: url("/src/assets/ucp3/export_hover.png");
+}
+
+.export:disabled {
+  background-image: url("/src/assets/ucp3/export_active.png");
+}
+
+.apply {
+  background-image: url("/src/assets/ucp3/reset.png");
+  display: inline-block;
+  background-color: transparent;
+  width: 32px !important;
+  height: 28px !important;
+  border: none;
+  padding: 0px;
+}
+
+.apply:hover {
+  background-image: url("/src/assets/ucp3/reset_hover.png");
+}
+
+.apply:disabled {
+  background-image: url("/src/assets/ucp3/reset_active.png");
+}
+
+/*
+#config-navbar > nav > nav > a {
+  font-size: medium;
+}
+
+#config-navbar > nav > nav > nav > a {
+  font-size: medium;
+}
+
+#config-navbar > nav > nav > nav > a {
+  font-size: medium;
+}
+#config-navbar > nav > nav > nav > nav > a {
+  font-size: medium;
+} */

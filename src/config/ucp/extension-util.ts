@@ -74,3 +74,22 @@ export function extensionsToOptionEntries(exts: Extension[]) {
   });
   return uiCollection;
 }
+
+export function getConfigDefaults(yml: unknown[]) {
+  const result: { [url: string]: unknown } = {};
+
+  function yieldDefaults(part: any | DisplayConfigElement): void {
+    if (typeof part === 'object') {
+      if (Object.keys(part).indexOf('url') > -1) {
+        result[part.url as string] = (part.value || {}).default;
+      }
+      if (Object.keys(part).indexOf('children') > -1) {
+        part.children.forEach((child: unknown) => yieldDefaults(child));
+      }
+    }
+  }
+
+  yml.forEach((element: unknown) => yieldDefaults(element));
+
+  return result;
+}

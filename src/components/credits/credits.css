@@ -1,0 +1,51 @@
+.credits-button {
+  background-color: var(--ucp-menu-shade);
+  color: white;
+  position: absolute;
+  border: none;
+  font-size: 16px;
+  padding: 4px 16px;
+  top: 8px;
+  left: 12px;
+}
+
+.credits-container {
+  padding-top:100px;
+  padding-left:100px;
+  padding-right:100px;
+  padding-bottom:100px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.credits-title {
+  color: white;
+}
+
+.credits-text-box {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+}
+
+.credits-text-wrapper {
+  height:100%;
+  overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
+  color:black;
+}
+
+/* TODO: The current text is really hard to read, so either the font or the background need changes. */
+.credits-text {
+  padding: 15px 10px;
+}
+
+.credits-close{
+  margin-left: auto;
+  color: white;
+  background-color: transparent;
+  border: none;
+}

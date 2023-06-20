@@ -119,6 +119,19 @@ export async function save(
 
 // helper functions:
 
+export async function saveFileDialog(
+  baseFolder?: string,
+  filters?: { name: string; extensions: string[] }[],
+  title?: string
+): Promise<Option<string>> {
+  const result = await save({
+    defaultPath: baseFolder,
+    filters,
+    title,
+  });
+  return result ? Option.of(result) : Option.ofEmpty();
+}
+
 export async function openFileDialog(
   baseFolder?: string,
   filters?: { name: string; extensions: string[] }[],

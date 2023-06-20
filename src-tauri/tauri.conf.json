@@ -81,9 +81,11 @@
       {
         "fullscreen": false,
         "height": 630,
+        "minHeight": 630,
         "resizable": true,
         "title": "UCP3-GUI",
         "width": 800,
+        "minWidth": 800,
         "decorations": false
       }
     ]

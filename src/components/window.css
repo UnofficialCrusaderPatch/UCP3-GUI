@@ -1,0 +1,13 @@
+#root {
+  user-select: none;
+  height: 100vh;
+}
+
+.titlebar-container {
+  height: 30px;
+}
+
+.page-main {
+  position: relative;
+  height: calc(100vh - 30px);
+}

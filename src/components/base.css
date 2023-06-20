@@ -1,0 +1,112 @@
+/* used for very common stuff */
+
+@import 'bootstrap';
+
+.fs-7 {
+  font-size: 0.9rem;
+}
+
+.fs-8 {
+  font-size: 0.85rem;
+}
+
+.light-shade-item {
+  background-color: rgba(245, 245, 227, 0.420);
+  border: 2px solid rgba(0, 0, 0, 0);
+  color: black;
+  margin:2px;
+  margin-right:-1px;
+  overflow-x: visible;
+}
+
+/* full available size, column, centered */
+.flex-default {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.ucp-button {
+  /* Other button styles here */
+  border-image: url("/src/assets/ucp3/button_slice.png");
+  border-image-slice: 49% fill;
+  border-width: 20px;
+  border-style: solid;
+  background-color: transparent;
+  color: white;
+  vertical-align: center;
+  height: 40px;
+  min-width: 100px;
+  width: 40%;
+  margin-left: 30%;
+  margin-right: 30%;
+  position: relative;
+}
+
+.ucp-button:hover {
+  /* Other button styles here */
+  border-image: url("/src/assets/ucp3/button_slice_hover.png");
+  border-image-slice: 49% fill;
+  border-style: solid;
+}
+
+.ucp-button > .button-text{
+  margin-top: -10px;
+}
+
+/*
+  Custom scrollbar.
+  Used webkit stylings, which should work at least on windows,
+  since it uses Edge, which is Chromium-based
+*/
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track-piece:start {
+  background-image: url("/src/assets/ucp3/scroll_bar_middle.png");
+  background-repeat: no-repeat repeat;
+  background-position: center bottom;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  box-shadow: none;
+  background-image:
+    url("/src/assets/ucp3/scroll_bar_bottom.png"),
+    url("/src/assets/ucp3/scroll_bar_middle.png"),
+    radial-gradient(40% 100% at center bottom, var(--ucp-main-grey) 0%, rgba(0,0,0,0) 100%);
+  background-repeat: no-repeat no-repeat, no-repeat repeat, no-repeat no-repeat;
+  background-position: center bottom, center bottom, center center;
+}
+
+.icon-button {
+  background-color: transparent;
+}
+
+.parchment-box {
+  background-image: url("/src/assets/ucp3/crdits_bg.png");
+  border-image: url("/src/assets/ucp3/credit_background.png");
+  border-style: solid;
+  border-image-slice: 17 16 17 17;
+  border-image-width: 17px 16px 17px 17px;
+  border-image-outset: 0px 0px 0px 0px;
+  border-image-repeat: repeat repeat;
+  overflow: hidden;
+}
+
+.parchment-box-inside {
+  padding: 6px;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.parchment-box-item-list {
+  overflow-y: scroll;
+  overflow-x: clip;
+}

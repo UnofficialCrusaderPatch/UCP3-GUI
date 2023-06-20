@@ -1,25 +1,28 @@
 [package]
-name = "app"
+name = "ucp_gui"
 version = "0.0.9"
 description = "UCP3 GUI"
 authors = ["gynt", "TheRedDaemon"]
 license = ""
 repository = ""
-default-run = "app"
+default-run = "ucp_gui"
 edition = "2021"
 rust-version = "1.64"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.2", features = [] }
+tauri-build = { version = "1.2.0", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2", features = ["devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
+tauri = { version = "1.2.0", features = ["devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
 zip = { version = "0.6.3" } # currently uses all features
 sha2 = { version = "0.10" }
+log = "0.4.17"
+anyhow = "1.0.68" # sadly needed to implement the appender for the web console
+log4rs = { version = "1.2.0", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller"] }
 
 [features]
 # by default Tauri runs in production mode

@@ -1,3 +1,5 @@
+/* eslint-disable promise/catch-or-return */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
@@ -18,16 +20,17 @@ import {
 } from 'tauri/tauri-hooks';
 import { TauriEvent } from '@tauri-apps/api/event';
 
-// is is currently not possible to get the title of the current window
-// so for now, this placeholder will be used
-const TITLE_PLACEHOLDER = 'Unofficial Crusader Patch 3 - GUI';
-
 export default function Titlebar() {
+  const [title, setTitle] = useState('');
   const [isMax, setIsMax] = useState(false);
 
   const [t] = useTranslation('gui-general');
 
   const currentWindow = getCurrentWindow();
+  useEffect(() => {
+    currentWindow.title().then((loadedTitle) => setTitle(loadedTitle));
+  }, []);
+
   useEffect(() => {
     const resizeFunc = async () => {
       setIsMax(await currentWindow.isMaximized());
@@ -35,7 +38,6 @@ export default function Titlebar() {
     registerTauriEventListener(TauriEvent.WINDOW_RESIZED, resizeFunc);
 
     // initial
-    // eslint-disable-next-line promise/catch-or-return
     currentWindow.isMaximized().then((isMaximized) => setIsMax(isMaximized));
     return () => {
       removeTauriEventListener(TauriEvent.WINDOW_RESIZED, resizeFunc);
@@ -48,7 +50,7 @@ export default function Titlebar() {
         <img src={mainIcon} alt={t('gui-general:titlebar.alt.icon')} />
       </div>
       <div className="titlebar-title" id="titlebar-title">
-        <div>{TITLE_PLACEHOLDER}</div>
+        <div>{title}</div>
       </div>
       <div
         className="titlebar-button"

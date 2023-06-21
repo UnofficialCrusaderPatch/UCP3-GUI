@@ -10,7 +10,7 @@ function isNumberValuePermittedByConfig(
   config: ConfigEntry,
   configName: string
 ): PermissionStatus {
-  const configValueDef = config.value;
+  const configValueDef = config.contents;
   const requiredValue = configValueDef['required-value'];
   if (requiredValue !== undefined) {
     if (requiredValue !== value) {
@@ -21,19 +21,22 @@ function isNumberValuePermittedByConfig(
       };
     }
   }
-  const requiredRange = configValueDef['required-range'];
-  if (requiredRange !== undefined) {
-    if (value < requiredRange.min) {
+  const requiredMin = configValueDef['required-min'];
+  if (requiredMin !== undefined) {
+    if (value < requiredMin) {
       return {
         status: 'illegal',
-        reason: `value (${value}) too low (${requiredRange.min})`,
+        reason: `value (${value}) too low (${requiredMin})`,
         by: config.name,
       };
     }
-    if (value > requiredRange.max) {
+  }
+  const requiredMax = configValueDef['required-max'];
+  if (requiredMax !== undefined) {
+    if (value > requiredMax) {
       return {
         status: 'illegal',
-        reason: `value (${value}) too high (${requiredRange.max})`,
+        reason: `value (${value}) too high (${requiredMax})`,
         by: config.name,
       };
     }
@@ -47,19 +50,22 @@ function isNumberValuePermittedByConfig(
       by: config.name,
     };
   }
-  const suggestedRange = configValueDef['suggested-range'];
-  if (suggestedRange !== undefined) {
-    if (value < suggestedRange.min) {
+  const suggestedMin = configValueDef['suggested-min'];
+  const suggestedMax = configValueDef['suggested-max'];
+  if (suggestedMin !== undefined) {
+    if (value < suggestedMin) {
       return {
         status: 'warning',
-        reason: `value (${value}) might be too low (${suggestedRange.min}) as suggested by ${config.name}`,
+        reason: `value (${value}) might be too low (${suggestedMin}) as suggested by ${config.name}`,
         by: config.name,
       };
     }
-    if (value > suggestedRange.max) {
+  }
+  if (suggestedMax !== undefined) {
+    if (value > suggestedMax) {
       return {
         status: 'warning',
-        reason: `value (${value}) might be too high (${suggestedRange.max}) as suggested by ${config.name}`,
+        reason: `value (${value}) might be too high (${suggestedMax}) as suggested by ${config.name}`,
         by: config.name,
       };
     }

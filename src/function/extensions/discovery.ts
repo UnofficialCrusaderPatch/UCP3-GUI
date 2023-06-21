@@ -10,9 +10,15 @@ import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
 
+const OPTIONS_FILE = 'options.yml';
+const CONFIG_FILE = 'config.yml';
+const DEFINITION_FILE = 'definition.yml';
+const LOCALE_FOLDER = 'locale';
+
 const localeSensitiveFields = [
   'description',
   'text',
+  'subtext',
   'tooltip',
   'header',
   'choices',
@@ -21,18 +27,18 @@ const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
 async function readUISpec(
   eh: ExtensionHandle
-): Promise<{ [key: string]: unknown }[]> {
-  if (await eh.doesEntryExist('ui.yml')) {
-    return yaml.parse(await eh.getTextContents('ui.yml'));
+): Promise<{ options: { [key: string]: unknown }[] }> {
+  if (await eh.doesEntryExist(OPTIONS_FILE)) {
+    return yaml.parse(await eh.getTextContents(OPTIONS_FILE));
   }
-  return [];
+  return { options: [] };
 }
 
 async function readConfig(
   eh: ExtensionHandle
 ): Promise<{ [key: string]: unknown }> {
-  if (await eh.doesEntryExist('config.yml')) {
-    return yaml.parse(await eh.getTextContents('config.yml'));
+  if (await eh.doesEntryExist(CONFIG_FILE)) {
+    return yaml.parse(await eh.getTextContents(CONFIG_FILE));
   }
   return {};
 }
@@ -76,13 +82,13 @@ function changeLocale(
         }
       }
     }
-    if (typeof obj[field] === 'object') {
+    if (typeof obj[field] === 'object' && obj[field] !== null) {
       changeLocaleOfObj(locale, obj[field] as { [key: string]: string });
     }
   });
 
   Object.entries(obj).forEach(([key, value]) => {
-    if (typeof obj[key] === 'object') {
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
       changeLocale(locale, value as { [key: string]: unknown });
     }
   });
@@ -93,17 +99,19 @@ async function setLocale(
   ext: Extension,
   language: string
 ): Promise<void> {
-  if (await eh.doesEntryExist('locale')) {
-    if (await eh.doesEntryExist(`locale/${language}.yml`)) {
-      const locale = yaml.parse(
-        await eh.getTextContents(`locale/${language}.yml`)
-      );
+  // TODO: folder checking is broken. Why?
+  // const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}`);
+  // if (locFolder) {
+  if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
+    const locale = yaml.parse(
+      await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`)
+    );
 
-      ext.ui.forEach((uiElement) => {
-        changeLocale(locale, uiElement as { [key: string]: unknown });
-      });
-    }
+    ext.ui.forEach((uiElement) => {
+      changeLocale(locale, uiElement as { [key: string]: unknown });
+    });
   }
+  // }
 }
 
 function collectOptionEntries(
@@ -114,8 +122,9 @@ function collectOptionEntries(
   // eslint-disable-next-line no-param-reassign
   if (collection === undefined) collection = {};
 
-  if (typeof obj === 'object') {
-    if (obj.url !== undefined) {
+  // WHY IS typeof(null) == 'object'
+  if (typeof obj === 'object' && obj !== null) {
+    if (obj.url !== undefined && obj.url !== null) {
       const oeObj = obj as OptionEntry;
       if (collection[oeObj.url] !== undefined) {
         throw new Error(`url already has a value: ${oeObj.url}`);
@@ -140,7 +149,7 @@ function collectOptionEntries(
 }
 
 function collectConfigEntries(
-  obj: { value: unknown; [key: string]: unknown },
+  obj: { contents: unknown; [key: string]: unknown },
   url?: string,
   collection?: { [key: string]: ConfigEntry }
 ) {
@@ -156,7 +165,7 @@ function collectConfigEntries(
         throw new Error(`url already has a value: ${url}`);
       }
       // eslint-disable-next-line no-param-reassign
-      collection[url] = o.value as unknown as ConfigEntry;
+      collection[url] = o.contents as unknown as ConfigEntry;
     } else {
       Object.keys(obj).forEach((key) => {
         let newUrl = url;
@@ -166,7 +175,7 @@ function collectConfigEntries(
         }
         newUrl += key;
         collectConfigEntries(
-          obj[key] as { value: unknown; [key: string]: unknown },
+          obj[key] as { contents: unknown; [key: string]: unknown },
           newUrl,
           collection
         );
@@ -245,7 +254,7 @@ const Discovery = {
       ehs.map(async (eh) => {
         const type = eh.path.indexOf('/modules/') ? 'module' : 'plugin';
         const definition = yaml.parse(
-          await eh.getTextContents(`definition.yml`)
+          await eh.getTextContents(`${DEFINITION_FILE}`)
         );
         const { name, version } = definition;
 
@@ -258,7 +267,8 @@ const Discovery = {
           definition,
         } as unknown as Extension;
 
-        ext.ui = await readUISpec(eh);
+        const uiRaw = await readUISpec(eh);
+        ext.ui = uiRaw.options || uiRaw || [];
         await setLocale(eh, ext, currentLocale);
         ext.config = await readConfig(eh);
 
@@ -269,10 +279,10 @@ const Discovery = {
 
         ext.configEntries = {
           ...collectConfigEntries(
-            ext.config.modules as { [key: string]: unknown; value: unknown }
+            ext.config.modules as { [key: string]: unknown; contents: unknown }
           ),
           ...collectConfigEntries(
-            ext.config.plugins as { [key: string]: unknown; value: unknown }
+            ext.config.plugins as { [key: string]: unknown; contents: unknown }
           ),
         };
 

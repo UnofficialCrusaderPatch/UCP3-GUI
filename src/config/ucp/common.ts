@@ -90,17 +90,17 @@ modules:
 */
 
 type ConfigEntry = {
-  value: {
+  contents: {
+    // TODO: is the default value required or suggested? I would prefer required
+    value: undefined;
     'required-value': unknown;
     'suggested-value': unknown;
-    'required-range': {
-      min: number;
-      max: number;
-    };
-    'suggested-range': {
-      min: number;
-      max: number;
-    };
+    'required-min': number;
+    'required-max': number;
+    'suggested-min': number;
+    'suggested-max': number;
+
+    // These are fancy extras for set manipulations. Simplify?
     'suggested-values': unknown[];
     'required-values': unknown[];
     'required-inclusive': boolean;
@@ -129,16 +129,15 @@ type OptionEntry = {
   name: string;
   text: string;
   tooltip: string;
-  type: string;
   display: string;
   url: string;
-  value: {
+  contents: {
+    value: unknown;
+    type: string;
     default: unknown;
     choices: unknown[];
-    range: {
-      min: unknown;
-      max: unknown;
-    };
+    min: unknown;
+    max: unknown;
   };
   hidden: boolean;
   category: string[];
@@ -169,26 +168,33 @@ type Configs = { [key: string]: ConfigEntry }[];
 
 type PermissionStatus = { status: string; reason: string; by: string };
 
+type BasicContents = {
+  value: unknown;
+  type: string;
+};
+
+type ChoiceContents = BasicContents & {
+  choices: { name: string; text: string; enabled: string; subtext: string }[];
+};
+
+type NumberContents = BasicContents & {
+  min: number;
+  max: number;
+  step: number;
+};
+
 type DisplayConfigElement = {
-  choices: { name: string; text: string }[];
   name: string;
   description: string;
   header: string;
   text: string;
-  type: string;
   display: string;
   children: DisplayConfigElement[];
-  default: unknown;
   url: string;
   columns: number;
   tooltip: string;
   enabled: string;
-};
-
-type NumberInputDisplayConfigElement = DisplayConfigElement & {
-  min: number;
-  max: number;
-  step: number;
+  contents: BasicContents | ChoiceContents | NumberContents;
 };
 
 type SectionDescription = {
@@ -206,6 +212,8 @@ export type {
   OptionEntry,
   PermissionStatus,
   DisplayConfigElement,
-  NumberInputDisplayConfigElement,
   SectionDescription,
+  NumberContents,
+  ChoiceContents,
+  BasicContents,
 };

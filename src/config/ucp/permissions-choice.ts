@@ -5,7 +5,7 @@ function isChoiceValuePermittedByConfig(
   config: ConfigEntry,
   configName: string
 ) {
-  const configValueDef = config.value;
+  const configValueDef = config.contents;
 
   const requiredValue = configValueDef['required-value'];
   if (requiredValue !== undefined && value !== requiredValue) {

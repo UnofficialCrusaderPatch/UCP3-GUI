@@ -194,9 +194,9 @@ class Config {
       const specName = ce.split('.')[0];
       const spec = this.extensions[specName].optionEntries[ce];
 
-      if (configEntry.value['required-value'] !== undefined) {
+      if (configEntry.contents['required-value'] !== undefined) {
         const p = isValuePermitted(
-          configEntry.value['required-value'],
+          configEntry.contents['required-value'],
           spec,
           this.activeExtensions()
         );
@@ -209,9 +209,9 @@ class Config {
         }
       }
 
-      if (configEntry.value['required-values'] !== undefined) {
+      if (configEntry.contents['required-values'] !== undefined) {
         const p = isValuePermitted(
-          configEntry.value['required-values'],
+          configEntry.contents['required-values'],
           spec,
           this.activeExtensions()
         );
@@ -247,11 +247,11 @@ class Config {
       (ae) => this.extensions[ae].configEntries
     )) {
       if (config[url] !== undefined) {
-        if (config[url].value !== undefined) {
-          const requiredValue = config[url].value['required-value'];
-          const requiredValues = config[url].value['required-values'];
-          const suggestedValue = config[url].value['suggested-value'];
-          const suggestedValues = config[url].value['suggested-values'];
+        if (config[url].contents !== undefined) {
+          const requiredValue = config[url].contents['required-value'];
+          const requiredValues = config[url].contents['required-values'];
+          const suggestedValue = config[url].contents['suggested-value'];
+          const suggestedValues = config[url].contents['suggested-values'];
 
           if (requiredValue !== undefined) {
             return requiredValue;
@@ -272,7 +272,7 @@ class Config {
     if (spec === undefined) {
       throw new Error(`url does not exist: ${url}`);
     }
-    return spec.value.default;
+    return spec.contents.value;
   }
 
   setValue(url: string, value: unknown) {

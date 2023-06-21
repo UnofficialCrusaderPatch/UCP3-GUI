@@ -6,7 +6,7 @@ import {
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
 
-import { DisplayConfigElement } from 'config/ucp/common';
+import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
 import { parseEnabledLogic } from '../enabled-logic';
@@ -24,9 +24,8 @@ function CreateUCP2RadioGroup(args: {
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
-  const { choices } = spec as unknown as {
-    choices: { name: string; text: string; subtext: string }[];
-  };
+  const { contents } = spec;
+  const { choices } = contents as ChoiceContents;
   let { [url]: value } = configuration as {
     [url: string]: { enabled: boolean; choice: string };
   };

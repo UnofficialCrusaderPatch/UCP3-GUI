@@ -6,7 +6,11 @@ import {
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
 
-import { NumberInputDisplayConfigElement } from 'config/ucp/common';
+import {
+  NumberContents,
+  ChoiceContents,
+  DisplayConfigElement,
+} from 'config/ucp/common';
 
 import { Form } from 'react-bootstrap';
 
@@ -20,7 +24,7 @@ import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 
 function CreateUCP2Slider(args: {
-  spec: NumberInputDisplayConfigElement;
+  spec: DisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {
@@ -30,7 +34,9 @@ function CreateUCP2Slider(args: {
   const configurationDefaults = useConfigurationDefaults();
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, min, max, step, header } = spec;
+  const { url, text, tooltip, enabled, header } = spec;
+  const { contents } = spec;
+  const { min, max, step } = contents as NumberContents;
   let { [url]: value } = configuration as {
     [url: string]: { enabled: boolean; sliderValue: number };
   };
@@ -45,7 +51,7 @@ function CreateUCP2Slider(args: {
   const fullToolTip = formatToolTip(tooltip, url);
 
   const hasWarning = configurationWarnings[url] !== undefined;
-  const { hasHeader } = spec as NumberInputDisplayConfigElement & {
+  const { hasHeader } = spec as DisplayConfigElement & {
     hasHeader: boolean;
   };
 

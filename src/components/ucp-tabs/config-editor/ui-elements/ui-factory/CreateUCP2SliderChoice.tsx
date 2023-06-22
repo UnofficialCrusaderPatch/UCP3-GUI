@@ -8,7 +8,8 @@ import {
 
 import {
   DisplayConfigElement,
-  NumberInputDisplayConfigElement,
+  NumberContents,
+  ChoiceContents,
 } from 'config/ucp/common';
 
 import { Form } from 'react-bootstrap';
@@ -23,6 +24,19 @@ import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
 
+type UCP2SliderChoiceContent = {
+  name: string;
+  text: string;
+  enabled: string;
+  min: number;
+  max: number;
+  step: number;
+};
+
+type UCP2SliderChoiceContents = ChoiceContents & {
+  choices: UCP2SliderChoiceContent[];
+};
+
 function CreateUCP2SliderChoice(args: {
   spec: DisplayConfigElement;
   disabled: boolean;
@@ -34,18 +48,24 @@ function CreateUCP2SliderChoice(args: {
   const configurationDefaults = useConfigurationDefaults();
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, header, choices } =
-    spec as DisplayConfigElement & {
-      choices: {
-        name: string;
-        enabled: boolean;
-        slider: number;
-        min: number;
-        max: number;
-        step: number;
-        text: string;
-      }[];
-    };
+  const { url, text, tooltip, enabled, header } = spec;
+  const { contents } = spec;
+  const { choices } = contents as UCP2SliderChoiceContents;
+  // (
+  //   spec as DisplayConfigElement & {
+  //     contents: {
+  //       choices: {
+  //         name: string;
+  //         enabled: boolean;
+  //         slider: number;
+  //         min: number;
+  //         max: number;
+  //         step: number;
+  //         text: string;
+  //       }[];
+  //     };
+  //   }
+  // ).contents;
   let { [url]: value } = configuration as {
     [url: string]: {
       enabled: boolean;
@@ -70,7 +90,7 @@ function CreateUCP2SliderChoice(args: {
   const fullToolTip = formatToolTip(tooltip, url);
 
   const hasWarning = configurationWarnings[url] !== undefined;
-  const { hasHeader } = spec as NumberInputDisplayConfigElement & {
+  const { hasHeader } = spec as DisplayConfigElement & {
     hasHeader: boolean;
   };
 
@@ -119,113 +139,103 @@ function CreateUCP2SliderChoice(args: {
     );
   }
 
-  const radios = choices.map(
-    (choice: {
-      name: string;
-      enabled: boolean;
-      slider: number;
-      min: number;
-      max: number;
-      step: number;
-      text: string;
-    }) => {
-      const factor =
-        1 /
-        // eslint-disable-next-line no-nested-ternary
-        (choice.step === undefined ? 1 : choice.step === 0 ? 1 : choice.step);
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const [localValue, setLocalValue] = useState(
-        value.choices[choice.name].slider === undefined
-          ? 0
-          : (value.choices[choice.name].slider as number) * factor
-      );
-      return (
-        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-        <div key={choice.name} className="form-check">
-          <Radio
-            className="form-check-input"
-            value={choice.name}
-            id={`${url}-radio-${choice.name}`}
-            disabled={!value.enabled}
-          />
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
-            <div className="pb-1">
-              <label
-                className="form-check-label"
-                htmlFor={`${url}-radio-${choice.name}`}
+  const radios = choices.map((choice: UCP2SliderChoiceContent) => {
+    const factor =
+      1 /
+      // eslint-disable-next-line no-nested-ternary
+      (choice.step === undefined ? 1 : choice.step === 0 ? 1 : choice.step);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [localValue, setLocalValue] = useState(
+      value.choices[choice.name].slider === undefined
+        ? 0
+        : (value.choices[choice.name].slider as number) * factor
+    );
+    return (
+      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+      <div key={choice.name} className="form-check">
+        <Radio
+          className="form-check-input"
+          value={choice.name}
+          id={`${url}-radio-${choice.name}`}
+          disabled={!value.enabled}
+        />
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
+          <div className="pb-1">
+            <label
+              className="form-check-label"
+              htmlFor={`${url}-radio-${choice.name}`}
+            >
+              {choice.text}
+            </label>
+          </div>
+          <div className="row">
+            <div className="col-auto">
+              <Form.Label
+                disabled={
+                  !isEnabled ||
+                  disabled ||
+                  !value.enabled ||
+                  value.choice !== choice.name
+                }
               >
-                {choice.text}
-              </label>
+                {choice.min}
+              </Form.Label>
             </div>
-            <div className="row">
-              <div className="col-auto">
-                <Form.Label
-                  disabled={
-                    !isEnabled ||
-                    disabled ||
-                    !value.enabled ||
-                    value.choice !== choice.name
-                  }
-                >
-                  {choice.min}
-                </Form.Label>
-              </div>
-              <div className="col-4">
-                <RangeSlider
-                  min={choice.min * factor}
-                  max={choice.max * factor}
-                  step={choice.step * factor}
-                  id={`${url}-slider`}
-                  size="sm"
-                  variant="primary"
-                  value={localValue}
-                  tooltipLabel={(currentValue) =>
-                    (currentValue / factor).toString()
-                  }
-                  onChange={(event) => {
-                    setLocalValue(parseInt(event.target.value, 10));
-                  }}
-                  onAfterChange={(event) => {
-                    setLocalValue(parseInt(event.target.value, 10));
-                    const newValue = { ...value };
-                    newValue.choices[choice.name].slider =
-                      parseInt(event.target.value, 10) / factor;
-                    setConfiguration({
-                      type: 'set-multiple',
-                      value: Object.fromEntries([[url, newValue]]),
-                    });
-                    setConfigurationTouched({
-                      type: 'set-multiple',
-                      value: Object.fromEntries([[url, true]]),
-                    });
-                  }}
-                  disabled={
-                    !isEnabled ||
-                    disabled ||
-                    !value.enabled ||
-                    value.choice !== choice.name
-                  }
-                />
-              </div>
-              <div className="col-auto">
-                <Form.Label
-                  disabled={
-                    !isEnabled ||
-                    disabled ||
-                    !value.enabled ||
-                    value.choice !== choice.name
-                  }
-                >
-                  {choice.max}
-                </Form.Label>
-              </div>
+            <div className="col-4">
+              <RangeSlider
+                min={choice.min * factor}
+                max={choice.max * factor}
+                step={choice.step * factor}
+                id={`${url}-slider`}
+                size="sm"
+                variant="primary"
+                value={localValue}
+                tooltipLabel={(currentValue) =>
+                  (currentValue / factor).toString()
+                }
+                onChange={(event) => {
+                  setLocalValue(parseInt(event.target.value, 10));
+                }}
+                onAfterChange={(event) => {
+                  setLocalValue(parseInt(event.target.value, 10));
+                  const newValue = { ...value };
+                  newValue.choices[choice.name].slider =
+                    parseInt(event.target.value, 10) / factor;
+                  setConfiguration({
+                    type: 'set-multiple',
+                    value: Object.fromEntries([[url, newValue]]),
+                  });
+                  setConfigurationTouched({
+                    type: 'set-multiple',
+                    value: Object.fromEntries([[url, true]]),
+                  });
+                }}
+                disabled={
+                  !isEnabled ||
+                  disabled ||
+                  !value.enabled ||
+                  value.choice !== choice.name
+                }
+              />
+            </div>
+            <div className="col-auto">
+              <Form.Label
+                disabled={
+                  !isEnabled ||
+                  disabled ||
+                  !value.enabled ||
+                  value.choice !== choice.name
+                }
+              >
+                {choice.max}
+              </Form.Label>
             </div>
           </div>
         </div>
-      );
-    }
-  );
+      </div>
+    );
+  });
 
   let enabledOption = '';
   if (value !== undefined) {

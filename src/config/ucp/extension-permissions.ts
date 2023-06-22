@@ -43,9 +43,9 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
       const spec = es[0].optionEntries[ce];
       if (spec === undefined) throw new Error(`spec not found for '${ce}'`);
 
-      if (configEntry.value['required-value'] !== undefined) {
+      if (configEntry.contents['required-value'] !== undefined) {
         const p = isValuePermitted(
-          configEntry.value['required-value'],
+          configEntry.contents['required-value'],
           spec,
           extensions
         );
@@ -61,9 +61,9 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         }
       }
 
-      if (configEntry.value['required-values'] !== undefined) {
+      if (configEntry.contents['required-values'] !== undefined) {
         const p = isValuePermitted(
-          configEntry.value['required-values'],
+          configEntry.contents['required-values'],
           spec,
           extensions
         );
@@ -77,8 +77,12 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
       }
 
       // Check value statement if present
-      if (configEntry.value !== undefined) {
-        const p = isValuePermitted(configEntry.value, spec, extensions);
+      if (configEntry.contents.value !== undefined) {
+        const p = isValuePermitted(
+          configEntry.contents.value,
+          spec,
+          extensions
+        );
         if (p.status !== 'OK') {
           return {
             status: 'CONFLICT',

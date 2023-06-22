@@ -12,7 +12,7 @@ function isSetValuePermittedByConfig(
 ): PermissionStatus {
   const valueSet = new Set(values);
 
-  const configValueDef = config.value;
+  const configValueDef = config.contents;
 
   const requiredExclusive = configValueDef['required-exclusive'];
   if (requiredExclusive !== undefined) {

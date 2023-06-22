@@ -13,7 +13,7 @@ function isValuePermittedByConfig(
   config: ConfigEntry,
   configName: string
 ): PermissionStatus {
-  const configValueDef = config.value;
+  const configValueDef = config.contents;
 
   const requiredValue = configValueDef['required-value'];
   const suggestedValue = configValueDef['suggested-value'];
@@ -78,24 +78,26 @@ function isValuePermitted(
               by: "spec",
           };
       } */
-  const valueDef = spec.value;
-  if (spec.type === 'number') {
+  const valueDef = spec.contents.value;
+  if (spec.contents.type === 'number') {
     const numberValue = value as number;
 
-    const valueRange = valueDef.range;
+    const { min, max } = spec.contents;
 
-    if (valueRange !== undefined) {
-      if (numberValue < (valueRange.min as number)) {
+    if (min !== undefined) {
+      if (numberValue < (min as number)) {
         return {
           status: 'illegal',
-          reason: `value (${numberValue}) too low (${valueRange.min})`,
+          reason: `value (${numberValue}) too low (${min})`,
           by: 'spec',
         };
       }
-      if (numberValue > (valueRange.max as number)) {
+    }
+    if (max !== undefined) {
+      if (numberValue > (max as number)) {
         return {
           status: 'illegal',
-          reason: `value (${numberValue}) too high (${valueRange.max})`,
+          reason: `value (${numberValue}) too high (${max})`,
           by: 'spec',
         };
       }
@@ -103,9 +105,9 @@ function isValuePermitted(
     return isNumberValuePermittedByConfigs(numberValue, spec, extensions);
   }
 
-  if (spec.type === 'choice') {
+  if (spec.contents.type === 'choice') {
     const choiceValue = value as string;
-    const { choices } = valueDef;
+    const { choices } = spec.contents;
     const valueIndex = choices.indexOf(choiceValue);
     if (valueIndex === -1) {
       return {
@@ -120,23 +122,23 @@ function isValuePermitted(
     return isChoiceValuePermittedByConfigs(choiceValue, spec, extensions);
   }
 
-  if (spec.type === 'set') {
+  if (spec.contents.type === 'set') {
     return isSetValuePermittedByConfigs(value as [], spec, extensions);
   }
 
-  if (spec.type === 'boolean') {
+  if (spec.contents.type === 'boolean') {
     return isValuePermittedByConfigs(value as boolean, spec, extensions);
   }
 
-  if (spec.type === 'string') {
+  if (spec.contents.type === 'string') {
     return isValuePermittedByConfigs(value as string, spec, extensions);
   }
 
-  if (spec.type === 'filepath') {
+  if (spec.contents.type === 'filepath') {
     return isValuePermittedByConfigs(value as string, spec, extensions);
   }
 
-  throw new Error(`unrecognized type: ${spec.type}`);
+  throw new Error(`unrecognized type: ${spec.contents.type}`);
 }
 
 export {

@@ -30,15 +30,24 @@ function saveConfig(
   configuration: { [key: string]: unknown },
   folder: string,
   touched: { [key: string]: boolean },
-  extensions: Extension[]
+  allExtensions: Extension[],
+  sparseExtensions: Extension[]
 ) {
-  const finalConfig = Object.fromEntries(
+  const sparseConfig = Object.fromEntries(
     Object.entries(configuration).filter(([key]) => touched[key])
   );
 
-  info(finalConfig);
+  const fullConfig = configuration;
 
-  return saveUCPConfig(finalConfig, folder, extensions);
+  info(fullConfig);
+
+  return saveUCPConfig(
+    sparseConfig,
+    fullConfig,
+    sparseExtensions,
+    allExtensions,
+    folder
+  );
 }
 
 export default function ConfigEditor(args: { readonly: boolean }) {
@@ -258,6 +267,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configuration,
                     filePath,
                     configurationTouched,
+                    extensionsState.activatedExtensions,
                     activeExtensions
                   )
                     .then(() =>
@@ -276,6 +286,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configuration,
                     file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
                     configurationTouched,
+                    extensionsState.activatedExtensions,
                     activeExtensions
                   )
                 }

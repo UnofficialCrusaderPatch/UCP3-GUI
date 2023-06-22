@@ -10,11 +10,12 @@ const TAURI_COMMAND = {
   CONFIG_ADD_RECENT_FOLDER: 'add_config_recent_folder',
   CONFIG_REMOVE_RECENT_FOLDER: 'remove_config_recent_folder',
   ZIP_EXTRACT_TO_PATH: 'extract_zip_to_path',
-  ZIP_LOAD: 'load_zip',
-  ZIP_CLOSE: 'close_zip',
-  ZIP_EXIST_ENTRY: 'exist_zip_entry',
-  ZIP_GET_ENTRY_AS_BINARY: 'get_zip_entry_as_binary',
-  ZIP_GET_ENTRY_AS_TEXT: 'get_zip_entry_as_text',
+  ZIP_LOAD: 'tauri-plugin-ucp-zip_support|load_zip',
+  ZIP_CLOSE: 'tauri-plugin-ucp-zip_support|close_zip',
+  ZIP_EXIST_ENTRY: 'tauri-plugin-ucp-zip_support|exist_zip_entry',
+  ZIP_GET_ENTRY_AS_BINARY:
+    'tauri-plugin-ucp-zip_support|get_zip_entry_as_binary',
+  ZIP_GET_ENTRY_AS_TEXT: 'tauri-plugin-ucp-zip_support|get_zip_entry_as_text',
   HASH_GET_SHA256_OF_FILE: 'get_sha256_of_file',
   LOGGING_LOG: 'log',
 };

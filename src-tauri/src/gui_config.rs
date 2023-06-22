@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
     time::{SystemTime, UNIX_EPOCH},
 };
-use tauri::{api::dialog::message, AppHandle, Manager};
+use tauri::{api::dialog::message, AppHandle, Manager, Wry};
 
 use crate::constants::{
     CONFIG_FILE_NAME, LANGUAGE_CHANGE_EVENT, LOG_LEVEL_DEFAULT, MESSAGE_TITLE,
@@ -266,7 +266,7 @@ impl GuiConfig {
 
 #[tauri::command]
 pub fn set_config_language(app_handle: tauri::AppHandle, lang: &str) {
-    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
         gui_config.set_language(&app_handle, lang);
     });
 }
@@ -274,7 +274,7 @@ pub fn set_config_language(app_handle: tauri::AppHandle, lang: &str) {
 #[tauri::command]
 pub fn get_config_language(app_handle: tauri::AppHandle) -> Option<String> {
     let mut lang_str = None;
-    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
         if let Some(lang_str_ref) = gui_config.get_language() {
             lang_str = Some(String::from(lang_str_ref));
         }
@@ -285,7 +285,7 @@ pub fn get_config_language(app_handle: tauri::AppHandle) -> Option<String> {
 #[tauri::command]
 pub fn get_config_recent_folders(app_handle: tauri::AppHandle) -> Vec<String> {
     let mut return_vector = Vec::new();
-    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
         return_vector = gui_config
             .get_recent_folders()
             .iter()
@@ -298,7 +298,7 @@ pub fn get_config_recent_folders(app_handle: tauri::AppHandle) -> Vec<String> {
 #[tauri::command]
 pub fn get_config_most_recent_folder(app_handle: tauri::AppHandle) -> Option<String> {
     let mut recent_folder_path_str = None;
-    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
         if let Some(recent_folder_path_str_ref) = gui_config.get_most_recent_folder() {
             recent_folder_path_str = Some(String::from(recent_folder_path_str_ref));
         }
@@ -308,14 +308,14 @@ pub fn get_config_most_recent_folder(app_handle: tauri::AppHandle) -> Option<Str
 
 #[tauri::command]
 pub fn add_config_recent_folder(app_handle: tauri::AppHandle, path: &str) {
-    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
         gui_config.add_recent_folder(path);
     });
 }
 
 #[tauri::command]
 pub fn remove_config_recent_folder(app_handle: tauri::AppHandle, path: &str) {
-    do_with_mutex_state::<GuiConfig, _>(&app_handle, |gui_config| {
+    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
         gui_config.remove_recent_folder(path);
     });
 }

@@ -2,13 +2,13 @@ use std::{
     path::{Path, PathBuf},
     sync::{Mutex, MutexGuard},
 };
-use tauri::{AppHandle, Error, Manager, State};
+use tauri::{AppHandle, Error, Manager, Runtime, State};
 
 use crate::constants::BASE_FOLDER;
 
 // will panic if not present, but state should exists
-pub fn do_with_mutex_state<T: std::marker::Send + 'static, F>(
-    app_handle: &AppHandle,
+pub fn do_with_mutex_state<R: Runtime, T: std::marker::Send + 'static, F>(
+    app_handle: &AppHandle<R>,
     mut do_with_state: F,
 ) where
     F: FnMut(&mut MutexGuard<T>) -> (),
@@ -23,7 +23,10 @@ pub fn get_roaming_folder_path() -> PathBuf {
     data_path
 }
 
-pub fn get_allowed_path<'a>(app_handle: &AppHandle, path: &'a str) -> Result<&'a Path, Error> {
+pub fn get_allowed_path<'a, R: Runtime>(
+    app_handle: &AppHandle<R>,
+    path: &'a str,
+) -> Result<&'a Path, Error> {
     let path_object = Path::new(path);
     if app_handle.fs_scope().is_allowed(path_object) {
         Ok(path_object)
@@ -32,8 +35,8 @@ pub fn get_allowed_path<'a>(app_handle: &AppHandle, path: &'a str) -> Result<&'a
     }
 }
 
-pub fn get_allowed_path_with_string_error<'a>(
-    app_handle: &AppHandle,
+pub fn get_allowed_path_with_string_error<'a, R: Runtime>(
+    app_handle: &AppHandle<R>,
     path: &'a str,
 ) -> Result<&'a Path, String> {
     let result = get_allowed_path(app_handle, path);

@@ -9,13 +9,13 @@ import {
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { NumberInputDisplayConfigElement } from 'config/ucp/common';
+import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import { useState } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 
 function CreateSlider(args: {
-  spec: NumberInputDisplayConfigElement;
+  spec: DisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {
@@ -25,7 +25,9 @@ function CreateSlider(args: {
   const configurationDefaults = useConfigurationDefaults();
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, min, max, step } = spec;
+  const { url, text, tooltip, enabled } = spec;
+  const { contents } = spec;
+  const { min, max, step } = contents as NumberContents;
   const { [url]: value } = configuration as {
     [url: string]: { enabled: boolean; sliderValue: number };
   };

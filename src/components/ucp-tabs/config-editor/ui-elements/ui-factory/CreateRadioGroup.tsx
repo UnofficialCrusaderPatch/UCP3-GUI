@@ -8,7 +8,7 @@ import {
 
 import { RadioGroup, Radio } from 'react-radio-group';
 
-import { DisplayConfigElement } from 'config/ucp/common';
+import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
@@ -25,7 +25,9 @@ function CreateRadioGroup(args: {
   const configurationDefaults = useConfigurationDefaults();
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, choices } = spec;
+  const { url, text, tooltip, enabled } = spec;
+  const { contents } = spec;
+  const { choices } = contents as ChoiceContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,

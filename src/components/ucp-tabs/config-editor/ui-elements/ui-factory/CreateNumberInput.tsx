@@ -1,7 +1,4 @@
-import {
-  DisplayConfigElement,
-  NumberInputDisplayConfigElement,
-} from 'config/ucp/common';
+import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import {
   useActiveExtensions,
   useConfigurationDefaults,
@@ -26,8 +23,8 @@ function CreateNumberInput(args: {
   const configurationDefaults = useConfigurationDefaults();
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, min, max, enabled } =
-    spec as NumberInputDisplayConfigElement;
+  const { url, text, tooltip, enabled, contents } = spec;
+  const { min, max } = contents as NumberContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,

@@ -2,8 +2,6 @@ import React, { ReactElement, useEffect, useState } from 'react';
 
 import type {
   DisplayConfigElement,
-  NumberInputDisplayConfigElement,
-  OptionEntry,
   SectionDescription,
 } from 'config/ucp/common';
 

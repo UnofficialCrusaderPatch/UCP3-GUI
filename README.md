@@ -95,7 +95,7 @@ To develope and build the application, you need to fullfil some requirements.
     - You may also use [NVM](https://github.com/nvm-sh/nvm) to install Node and manage its version. Note that this project is exclusive to Unix systems. For Windows you can use [THIS](https://github.com/coreybutler/nvm-windows).
 
 3. Install the frontend dependencies.
-    - Navigate into the projects root and run `npm install` to install the frontend dependencies into the folder. You need to repeat this step if the dependencies are changed by you or someone else. At best you just run it whenever you pull something from the repository.
+    - Navigate into the projects root and run `npm ci` to install the frontend dependencies into the folder. You need to repeat this step if the dependencies were changed by someone else. At best you just run it whenever you pull something from the repository. `npm install` should only be used if you want to change or add dependencies.
     - The Rust dependencies should be installed by the run and build commands of the application.
 
 4. Setup your favorite IDEs and install plugins for the parts you want to work on.

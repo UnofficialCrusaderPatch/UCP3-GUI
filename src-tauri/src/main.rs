@@ -18,6 +18,7 @@ use utils::do_with_mutex_state;
 
 fn main() {
     let tauri_app = tauri::Builder::default()
+        .plugin(logging::init())
         .plugin(zip_support::init())
         // all frontend funcs (TODO: is there a better way to collect them?)
         .invoke_handler(tauri::generate_handler![
@@ -28,10 +29,7 @@ fn main() {
             gui_config::add_config_recent_folder,
             gui_config::remove_config_recent_folder,
             hash_utils::get_sha256_of_file,
-            logging::log,
         ])
-        // logger
-        .manage::<Mutex<log4rs::Handle>>(Mutex::new(logging::init_logging()))
         // config
         .manage::<Mutex<GuiConfig>>(Mutex::new(GuiConfig::new()))
         .build(tauri::generate_context!())

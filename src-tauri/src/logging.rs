@@ -6,6 +6,7 @@
 
 use std::io::Write;
 use std::str::FromStr;
+use std::sync::Mutex;
 
 use log::{debug, info, Level, LevelFilter};
 use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
@@ -13,14 +14,17 @@ use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
 use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
 use log4rs::append::rolling_file::RollingFileAppender;
 use log4rs::append::Append;
-use log4rs::config::{Appender, Config, Root, Logger};
+use log4rs::config::{Appender, Config, Logger, Root};
 use log4rs::encode::pattern::PatternEncoder;
 use log4rs::encode::writer::simple::SimpleWriter;
 use log4rs::encode::Encode;
 use log4rs::filter::threshold::ThresholdFilter;
 use log4rs::Handle;
 use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use tauri::{
+    plugin::{Builder, TauriPlugin},
+    AppHandle, Manager, Runtime,
+};
 
 use crate::constants::{
     LOG_BACKEND_EVENT, LOG_BYTE_SIZE, LOG_COUNT, LOG_FILE_PATTERN, LOG_FOLDER, LOG_LEVEL_DEFAULT,
@@ -143,16 +147,18 @@ pub fn create_config(app_handle: Option<&AppHandle>, level: LevelFilter) -> Conf
                 .filter(Box::new(ThresholdFilter::new(level)))
                 .build(file_appender_name, Box::new(rolling_appender)),
         )
-        .logger(Logger::builder()
-            .appender(file_appender_name)
-            .additive(false)
-            .build(FROM_FRONTEND_LOG_TARGET, level))
+        .logger(
+            Logger::builder()
+                .appender(file_appender_name)
+                .additive(false)
+                .build(FROM_FRONTEND_LOG_TARGET, level),
+        )
         .build(root_builder.appender(file_appender_name).build(level))
         .unwrap()
 }
 
 // currently panics on error
-pub fn init_logging() -> Handle {
+fn init_logging() -> Handle {
     // using debug as unset default here
     let handle = log4rs::init_config(create_config(None, LevelFilter::Debug)).unwrap();
     info!("Initialized Logger!");
@@ -197,8 +203,18 @@ pub fn set_root_log_level(app_handle: &AppHandle, config_handle: &Handle, level:
 // Tauri binds:
 
 #[tauri::command]
-pub fn log(level: usize, message: &str) -> Result<(), String> {
+fn log(level: usize, message: &str) -> Result<(), String> {
     let log_level = get_level_from_usize(level)?;
     log::log!(target: FROM_FRONTEND_LOG_TARGET, log_level, "{}", message);
     Ok(())
+}
+
+pub fn init<R: Runtime>() -> TauriPlugin<R> {
+    Builder::new("tauri-plugin-ucp-logging")
+        .invoke_handler(tauri::generate_handler![log])
+        .setup(|app_handle| {
+            app_handle.manage::<Mutex<log4rs::Handle>>(Mutex::new(init_logging()));
+            Ok(())
+        })
+        .build()
 }

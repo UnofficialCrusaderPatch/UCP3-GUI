@@ -41,13 +41,13 @@ struct BackendLog {
 }
 
 #[derive(Debug)]
-struct WebConsoleAppender {
-    app_handle: AppHandle,
+struct WebConsoleAppender<R: Runtime> {
+    app_handle: AppHandle<R>,
     encoder: Box<dyn Encode>,
 }
 
-impl WebConsoleAppender {
-    fn builder(app_handle: &AppHandle) -> WebConsoleAppenderBuilder {
+impl<R: Runtime> WebConsoleAppender<R> {
+    fn builder(app_handle: &AppHandle<R>) -> WebConsoleAppenderBuilder<R> {
         WebConsoleAppenderBuilder {
             app_handle: app_handle.to_owned(),
             encoder: None,
@@ -62,7 +62,7 @@ impl WebConsoleAppender {
     }
 }
 
-impl Append for WebConsoleAppender {
+impl<R: Runtime> Append for WebConsoleAppender<R> {
     fn append(&self, record: &log::Record) -> anyhow::Result<()> {
         let mut buffer = Vec::new();
         self.fill_vec_with_log(&mut buffer, record)?;
@@ -82,18 +82,18 @@ impl Append for WebConsoleAppender {
 }
 
 // taken from the ConsoleAppender code
-struct WebConsoleAppenderBuilder {
-    app_handle: AppHandle,
+struct WebConsoleAppenderBuilder<R: Runtime> {
+    app_handle: AppHandle<R>,
     encoder: Option<Box<dyn Encode>>,
 }
 
-impl WebConsoleAppenderBuilder {
-    fn encoder(mut self, encoder: Box<dyn Encode>) -> WebConsoleAppenderBuilder {
+impl<R: Runtime> WebConsoleAppenderBuilder<R> {
+    fn encoder(mut self, encoder: Box<dyn Encode>) -> WebConsoleAppenderBuilder<R> {
         self.encoder = Some(encoder);
         self
     }
 
-    fn build(self) -> WebConsoleAppender {
+    fn build(self) -> WebConsoleAppender<R> {
         WebConsoleAppender {
             app_handle: self.app_handle,
             encoder: self
@@ -104,7 +104,7 @@ impl WebConsoleAppenderBuilder {
 }
 
 // source: https://stackoverflow.com/a/56347061
-pub fn create_config(app_handle: Option<&AppHandle>, level: LevelFilter) -> Config {
+pub fn create_config<R: Runtime>(app_handle: Option<&AppHandle<R>>, level: LevelFilter) -> Config {
     let file_appender_name: &str = "file_logger";
 
     let mut log_files_path = get_roaming_folder_path();
@@ -158,9 +158,9 @@ pub fn create_config(app_handle: Option<&AppHandle>, level: LevelFilter) -> Conf
 }
 
 // currently panics on error
-fn init_logging() -> Handle {
+fn init_logging<R: Runtime>() -> Handle {
     // using debug as unset default here
-    let handle = log4rs::init_config(create_config(None, LevelFilter::Debug)).unwrap();
+    let handle = log4rs::init_config(create_config::<R>(None, LevelFilter::Debug)).unwrap();
     info!("Initialized Logger!");
     handle
 }
@@ -183,8 +183,8 @@ fn get_level_from_usize(level_number: usize) -> Result<Level, String> {
     Ok(level)
 }
 
-pub fn set_root_log_level_with_string(
-    app_handle: &AppHandle,
+pub fn set_root_log_level_with_string<R: Runtime>(
+    app_handle: &AppHandle<R>,
     config_handle: &Handle,
     level_as_string: &str,
 ) {
@@ -195,7 +195,11 @@ pub fn set_root_log_level_with_string(
     );
 }
 
-pub fn set_root_log_level(app_handle: &AppHandle, config_handle: &Handle, level: LevelFilter) {
+pub fn set_root_log_level<R: Runtime>(
+    app_handle: &AppHandle<R>,
+    config_handle: &Handle,
+    level: LevelFilter,
+) {
     config_handle.set_config(create_config(Some(app_handle), level));
     debug!("Re-init logging with log level {}", level);
 }
@@ -213,7 +217,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tauri-plugin-ucp-logging")
         .invoke_handler(tauri::generate_handler![log])
         .setup(|app_handle| {
-            app_handle.manage::<Mutex<log4rs::Handle>>(Mutex::new(init_logging()));
+            app_handle.manage::<Mutex<log4rs::Handle>>(Mutex::new(init_logging::<R>()));
             Ok(())
         })
         .build()

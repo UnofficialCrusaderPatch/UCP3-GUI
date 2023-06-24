@@ -1,16 +1,25 @@
+use log4rs::Handle;
 use serde::{Deserialize, Serialize};
 use std::{
     fs, io,
     path::PathBuf,
+    sync::Mutex,
     time::{SystemTime, UNIX_EPOCH},
 };
-use tauri::{api::dialog::message, AppHandle, Manager, Wry};
-
-use crate::constants::{
-    CONFIG_FILE_NAME, LANGUAGE_CHANGE_EVENT, LOG_LEVEL_DEFAULT, MESSAGE_TITLE,
-    NUMBER_OF_RECENT_FOLDERS,
+use tauri::{
+    api::dialog::message,
+    plugin::{Builder, TauriPlugin},
+    AppHandle, Manager, RunEvent, Runtime,
 };
-use crate::utils::{do_with_mutex_state, get_roaming_folder_path};
+
+use crate::{
+    constants::{
+        CONFIG_FILE_NAME, LANGUAGE_CHANGE_EVENT, LOG_LEVEL_DEFAULT, MESSAGE_TITLE,
+        NUMBER_OF_RECENT_FOLDERS,
+    },
+    utils::get_state_mutex_from_handle,
+};
+use crate::{logging, utils::get_roaming_folder_path};
 
 #[derive(Serialize, Deserialize)]
 struct RecentFolder {
@@ -71,7 +80,7 @@ impl GuiConfig {
         self.recent_folders.sort_by(|a, b| b.date.cmp(&a.date));
     }
 
-    fn add_loaded_recent_to_scope(&self, app_handle: &AppHandle) {
+    fn add_loaded_recent_to_scope<R: Runtime>(&self, app_handle: &AppHandle<R>) {
         for recent_folder in &self.recent_folders {
             if let Some(error) = app_handle
                 .fs_scope()
@@ -96,7 +105,7 @@ impl GuiConfig {
         }
     }
 
-    pub fn load_saved_config(&mut self, app_handle: &AppHandle) {
+    pub fn load_saved_config<R: Runtime>(&mut self, app_handle: &AppHandle<R>) {
         let load_result = || -> Result<(), io::Error> {
             let path = GuiConfig::get_config_file_path();
             let file = fs::File::open(path)?;
@@ -177,7 +186,7 @@ impl GuiConfig {
         }
     }
 
-    pub fn set_language(&mut self, app_handle: &AppHandle, lang: &str) {
+    pub fn set_language<R: Runtime>(&mut self, app_handle: &AppHandle<R>, lang: &str) {
         if self.check_if_init() {
             self.lang = String::from(lang);
 
@@ -262,60 +271,81 @@ impl GuiConfig {
 // These functions are not async, and will run in the Rust main thread.
 // It should therefore kinda behave like JS in a way.
 // Truly async stuff (other thread) is possible by using "async"
-// Currently it is not possible to delete them, and it will add the complete folder.
+// Currently it is not possible to delete enabled folders, and it will add the complete folder.
 
 #[tauri::command]
-pub fn set_config_language(app_handle: tauri::AppHandle, lang: &str) {
-    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
-        gui_config.set_language(&app_handle, lang);
-    });
+fn set_config_language<R: Runtime>(app_handle: AppHandle<R>, lang: &str) {
+    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle).set_language(&app_handle, lang);
 }
 
 #[tauri::command]
-pub fn get_config_language(app_handle: tauri::AppHandle) -> Option<String> {
-    let mut lang_str = None;
-    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
-        if let Some(lang_str_ref) = gui_config.get_language() {
-            lang_str = Some(String::from(lang_str_ref));
-        }
-    });
-    lang_str
+fn get_config_language<R: Runtime>(app_handle: AppHandle<R>) -> Option<String> {
+    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle)
+        .get_language()
+        .map(String::from)
 }
 
 #[tauri::command]
-pub fn get_config_recent_folders(app_handle: tauri::AppHandle) -> Vec<String> {
-    let mut return_vector = Vec::new();
-    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
-        return_vector = gui_config
-            .get_recent_folders()
-            .iter()
-            .map(|path_ref| String::from(*path_ref))
-            .collect();
-    });
-    return_vector
+fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String> {
+    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle)
+        .get_recent_folders()
+        .iter()
+        .map(|path_ref| String::from(*path_ref))
+        .collect()
 }
 
 #[tauri::command]
-pub fn get_config_most_recent_folder(app_handle: tauri::AppHandle) -> Option<String> {
-    let mut recent_folder_path_str = None;
-    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
-        if let Some(recent_folder_path_str_ref) = gui_config.get_most_recent_folder() {
-            recent_folder_path_str = Some(String::from(recent_folder_path_str_ref));
-        }
-    });
-    recent_folder_path_str
+fn get_config_most_recent_folder<R: Runtime>(app_handle: AppHandle<R>) -> Option<String> {
+    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle)
+        .get_most_recent_folder()
+        .map(String::from)
 }
 
 #[tauri::command]
-pub fn add_config_recent_folder(app_handle: tauri::AppHandle, path: &str) {
-    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
-        gui_config.add_recent_folder(path);
-    });
+fn add_config_recent_folder<R: Runtime>(app_handle: AppHandle<R>, path: &str) {
+    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle).add_recent_folder(path);
 }
 
 #[tauri::command]
-pub fn remove_config_recent_folder(app_handle: tauri::AppHandle, path: &str) {
-    do_with_mutex_state::<Wry, GuiConfig, _>(&app_handle, |gui_config| {
-        gui_config.remove_recent_folder(path);
-    });
+fn remove_config_recent_folder<R: Runtime>(app_handle: AppHandle<R>, path: &str) {
+    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle).remove_recent_folder(path);
+}
+
+pub fn init<R: Runtime>() -> TauriPlugin<R> {
+    Builder::new("tauri-plugin-ucp-config")
+        .invoke_handler(tauri::generate_handler![
+            set_config_language,
+            get_config_language,
+            get_config_recent_folders,
+            get_config_most_recent_folder,
+            add_config_recent_folder,
+            remove_config_recent_folder,
+        ])
+        .setup(|app_handle| {
+            app_handle.manage::<Mutex<GuiConfig>>(Mutex::new(GuiConfig::new()));
+            Ok(())
+        })
+        .on_event(|app_handle: &AppHandle<R>, event| {
+            match event {
+                RunEvent::Ready {} => {
+                    let mut gui_config = get_state_mutex_from_handle::<R, GuiConfig>(app_handle);
+                    gui_config.load_saved_config(app_handle);
+
+                    // set logging to config value
+                    let log_handle = get_state_mutex_from_handle::<R, Handle>(app_handle);
+                    logging::set_root_log_level_with_string(
+                        app_handle,
+                        &log_handle,
+                        gui_config
+                            .get_log_level()
+                            .map_or("", |log_level| log_level.as_str()),
+                    );
+                }
+                RunEvent::Exit {} => {
+                    get_state_mutex_from_handle::<R, GuiConfig>(app_handle).save_config();
+                }
+                _ => {}
+            }
+        })
+        .build()
 }

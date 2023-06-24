@@ -2,6 +2,7 @@
 
 import { invoke } from '@tauri-apps/api/tauri';
 
+const PLUGIN_CONFIG = 'tauri-plugin-ucp-config';
 const PLUGIN_LOGGING = 'tauri-plugin-ucp-logging';
 const PLUGIN_ZIP = 'tauri-plugin-ucp-zip-support';
 
@@ -10,12 +11,24 @@ function buildPluginCmd(pluginName: string, command: string) {
 }
 
 const TAURI_COMMAND = {
-  CONFIG_SET_LANGUAGE: 'set_config_language',
-  CONFIG_GET_LANGUAGE: 'get_config_language',
-  CONFIG_GET_RECENT_FOLDERS: 'get_config_recent_folders',
-  CONFIG_GET_MOST_RECENT_FOLDER: 'get_config_most_recent_folder',
-  CONFIG_ADD_RECENT_FOLDER: 'add_config_recent_folder',
-  CONFIG_REMOVE_RECENT_FOLDER: 'remove_config_recent_folder',
+  CONFIG_SET_LANGUAGE: buildPluginCmd(PLUGIN_CONFIG, 'set_config_language'),
+  CONFIG_GET_LANGUAGE: buildPluginCmd(PLUGIN_CONFIG, 'get_config_language'),
+  CONFIG_GET_RECENT_FOLDERS: buildPluginCmd(
+    PLUGIN_CONFIG,
+    'get_config_recent_folders'
+  ),
+  CONFIG_GET_MOST_RECENT_FOLDER: buildPluginCmd(
+    PLUGIN_CONFIG,
+    'get_config_most_recent_folder'
+  ),
+  CONFIG_ADD_RECENT_FOLDER: buildPluginCmd(
+    PLUGIN_CONFIG,
+    'add_config_recent_folder'
+  ),
+  CONFIG_REMOVE_RECENT_FOLDER: buildPluginCmd(
+    PLUGIN_CONFIG,
+    'remove_config_recent_folder'
+  ),
   ZIP_EXTRACT_TO_PATH: buildPluginCmd(PLUGIN_ZIP, 'extract_zip_to_path'),
   ZIP_LOAD: buildPluginCmd(PLUGIN_ZIP, 'load_zip'),
   ZIP_CLOSE: buildPluginCmd(PLUGIN_ZIP, 'close_zip'),

@@ -7,6 +7,7 @@ use tauri::{AppHandle, Error, Manager, Runtime, State};
 use crate::constants::BASE_FOLDER;
 
 // will panic if not present, but state should exists
+#[allow(dead_code)]
 pub fn do_with_mutex_state<R: Runtime, T: std::marker::Send + 'static, F>(
     app_handle: &AppHandle<R>,
     mut do_with_state: F,
@@ -18,6 +19,7 @@ pub fn do_with_mutex_state<R: Runtime, T: std::marker::Send + 'static, F>(
 }
 
 // will panic if not present, but state should exists
+#[allow(dead_code)]
 pub fn get_state_mutex<'a, T: std::marker::Send + 'static>(
     state: &'a State<'a, Mutex<T>>
 ) -> MutexGuard<'a, T>
@@ -26,6 +28,7 @@ pub fn get_state_mutex<'a, T: std::marker::Send + 'static>(
 }
 
 // will panic if not present, but state should exists
+#[allow(dead_code)]
 pub fn get_state_mutex_from_handle<R: Runtime, T: std::marker::Send + 'static>(
     app_handle: &AppHandle<R>
 ) -> MutexGuard<T>

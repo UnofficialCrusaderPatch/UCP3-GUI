@@ -11,10 +11,11 @@ mod utils;
 mod zip_support;
 
 use std::sync::Mutex;
+use log4rs::Handle;
 use tauri::{RunEvent, Wry};
 
 use gui_config::GuiConfig;
-use utils::do_with_mutex_state;
+use utils::{do_with_mutex_state, get_state_mutex_from_handle};
 
 fn main() {
     let tauri_app = tauri::Builder::default()
@@ -37,23 +38,20 @@ fn main() {
 
     tauri_app.run(|app_handle, event| match event {
         RunEvent::Ready {} => {
-            do_with_mutex_state::<Wry, GuiConfig, _>(app_handle, |gui_config| {
-                gui_config.load_saved_config(app_handle);
-                do_with_mutex_state::<Wry, log4rs::Handle, _>(app_handle, |log_handle| {
-                    logging::set_root_log_level_with_string(
-                        app_handle,
-                        log_handle,
-                        gui_config
-                            .get_log_level()
-                            .map_or("", |log_level| log_level.as_str()),
-                    )
-                });
-            });
+            let mut gui_config  = get_state_mutex_from_handle::<Wry, GuiConfig>(app_handle);
+            gui_config.load_saved_config(app_handle);
+
+            let log_handle = get_state_mutex_from_handle::<Wry, Handle>(app_handle);
+            logging::set_root_log_level_with_string(
+                app_handle,
+                &log_handle,
+                gui_config
+                    .get_log_level()
+                    .map_or("", |log_level| log_level.as_str()),
+            );
         }
         RunEvent::Exit {} => {
-            do_with_mutex_state::<Wry, GuiConfig, _>(app_handle, |gui_config| {
-                gui_config.save_config();
-            });
+            get_state_mutex_from_handle::<Wry, GuiConfig>(app_handle).save_config();
         }
         _ => {}
     });

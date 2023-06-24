@@ -1,6 +1,6 @@
 use std::{
     path::{Path, PathBuf},
-    sync::{Mutex, MutexGuard, LockResult},
+    sync::{Mutex, MutexGuard},
 };
 use tauri::{AppHandle, Error, Manager, Runtime, State};
 

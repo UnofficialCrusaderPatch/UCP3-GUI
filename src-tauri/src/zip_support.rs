@@ -11,7 +11,7 @@ use tauri::{
 };
 use zip::{result::ZipError, ZipArchive};
 
-use crate::utils::{do_with_mutex_state, get_allowed_path_with_string_error};
+use crate::utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle};
 
 // if zips are properly released, this should never run into issues
 // however, if one is kept, this run into "theoretical" issues
@@ -20,38 +20,37 @@ fn get_id() -> usize {
     ID_KEEPER.fetch_add(1, Ordering::Relaxed)
 }
 
-fn do_with_zip<R: Runtime, Res, F>(app_handle: &AppHandle<R>, id: usize, mut do_with_zip: F) -> Result<Res, String>
+fn do_with_zip<R: Runtime, Res, F>(
+    app_handle: &AppHandle<R>,
+    id: usize,
+    mut do_with_zip: F,
+) -> Result<Res, String>
 where
     F: FnMut(&mut ZipArchive<File>) -> Result<Res, String>,
 {
-    let mut result = Err(String::from("zip.id.missing"));
-    do_with_mutex_state::<R, HashMap<usize, ZipArchive<File>>, _>(&app_handle, |map| {
-        if let Some(archive) = map.get_mut(&id) {
-            result = do_with_zip(archive);
-        }
-    });
-    result
+    let mut map = get_state_mutex_from_handle::<R, HashMap<usize, ZipArchive<File>>>(app_handle);
+    match map.get_mut(&id) {
+        Some(archive) => do_with_zip(archive),
+        None => Err(String::from("zip.id.missing")),
+    }
 }
 
 #[tauri::command]
 fn load_zip<R: Runtime>(app_handle: AppHandle<R>, source: &str) -> Result<usize, String> {
     let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
 
-    let mut result = Err(String::from("zip.id.present"));
-    do_with_mutex_state::<R, HashMap<usize, ZipArchive<File>>, _>(&app_handle, |map| {
-        let id = get_id();
-        if map.contains_key(&id) {
-            return;
-        }
-        let create_result = || -> Result<usize, ZipError> {
-            let file = fs::File::open(source_path)?;
-            let archive = ZipArchive::new(file)?;
-            map.insert(id, archive);
-            Ok(id)
-        }();
-        result = create_result.map_err(|error| error.to_string());
-    });
-    result
+    let mut map = get_state_mutex_from_handle::<R, HashMap<usize, ZipArchive<File>>>(&app_handle);
+    let id = get_id();
+    if map.contains_key(&id) {
+        return Err(String::from("zip.id.present"));
+    }
+    let create_result = || -> Result<usize, ZipError> {
+        let file = fs::File::open(source_path)?;
+        let archive = ZipArchive::new(file)?;
+        map.insert(id, archive);
+        Ok(id)
+    }();
+    create_result.map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -60,11 +59,9 @@ fn exist_zip_entry<R: Runtime>(
     id: usize,
     path: &str,
 ) -> Result<bool, String> {
-    do_with_zip(&app_handle, id, |archive| {
-        if let Some(_error) = archive.by_name(path).err() {
-            return Ok(false);
-        }
-        Ok(true)
+    do_with_zip(&app_handle, id, |archive| match archive.by_name(path) {
+        Ok(_) => Ok(true),
+        Err(_) => Ok(false),
     })
 }
 
@@ -106,13 +103,11 @@ fn get_zip_entry_as_text<R: Runtime>(
 
 #[tauri::command]
 fn close_zip<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<(), String> {
-    let mut result = Ok(());
-    do_with_mutex_state::<R, HashMap<usize, ZipArchive<File>>, _>(&app_handle, |map| {
-        if let None = map.remove(&id) {
-            result = Err(String::from("zip.id.missing"));
-        }
-    });
-    result
+    let mut map = get_state_mutex_from_handle::<R, HashMap<usize, ZipArchive<File>>>(&app_handle);
+    match map.remove(&id) {
+        Some(_) => Ok(()),
+        None => Err(String::from("zip.id.missing")),
+    }
 }
 
 // careless, overwrites, may leave remains on error
@@ -131,10 +126,7 @@ async fn extract_zip_to_path<R: Runtime>(
         let mut archive = ZipArchive::new(file)?;
         archive.extract(dist_path)
     }();
-    if let Some(error) = extract_result.err() {
-        return Err(error.to_string());
-    }
-    Ok(())
+    extract_result.map_err(|error| error.to_string())
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {

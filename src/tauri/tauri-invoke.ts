@@ -2,6 +2,13 @@
 
 import { invoke } from '@tauri-apps/api/tauri';
 
+const PLUGIN_LOGGING = 'tauri-plugin-ucp-logging';
+const PLUGIN_ZIP = 'tauri-plugin-ucp-zip-support';
+
+function buildPluginCmd(pluginName: string, command: string) {
+  return `plugin:${pluginName}|${command}`;
+}
+
 const TAURI_COMMAND = {
   CONFIG_SET_LANGUAGE: 'set_config_language',
   CONFIG_GET_LANGUAGE: 'get_config_language',
@@ -9,15 +16,17 @@ const TAURI_COMMAND = {
   CONFIG_GET_MOST_RECENT_FOLDER: 'get_config_most_recent_folder',
   CONFIG_ADD_RECENT_FOLDER: 'add_config_recent_folder',
   CONFIG_REMOVE_RECENT_FOLDER: 'remove_config_recent_folder',
-  ZIP_EXTRACT_TO_PATH: 'extract_zip_to_path',
-  ZIP_LOAD: 'tauri-plugin-ucp-zip_support|load_zip',
-  ZIP_CLOSE: 'tauri-plugin-ucp-zip_support|close_zip',
-  ZIP_EXIST_ENTRY: 'tauri-plugin-ucp-zip_support|exist_zip_entry',
-  ZIP_GET_ENTRY_AS_BINARY:
-    'tauri-plugin-ucp-zip_support|get_zip_entry_as_binary',
-  ZIP_GET_ENTRY_AS_TEXT: 'tauri-plugin-ucp-zip_support|get_zip_entry_as_text',
+  ZIP_EXTRACT_TO_PATH: buildPluginCmd(PLUGIN_ZIP, 'extract_zip_to_path'),
+  ZIP_LOAD: buildPluginCmd(PLUGIN_ZIP, 'load_zip'),
+  ZIP_CLOSE: buildPluginCmd(PLUGIN_ZIP, 'close_zip'),
+  ZIP_EXIST_ENTRY: buildPluginCmd(PLUGIN_ZIP, 'exist_zip_entry'),
+  ZIP_GET_ENTRY_AS_BINARY: buildPluginCmd(
+    PLUGIN_ZIP,
+    'get_zip_entry_as_binary'
+  ),
+  ZIP_GET_ENTRY_AS_TEXT: buildPluginCmd(PLUGIN_ZIP, 'get_zip_entry_as_text'),
   HASH_GET_SHA256_OF_FILE: 'get_sha256_of_file',
-  LOGGING_LOG: 'log',
+  LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
 
 export async function setGuiConfigLanguage(lang: string): Promise<void> {

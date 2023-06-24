@@ -1,6 +1,6 @@
 use std::{
     path::{Path, PathBuf},
-    sync::{Mutex, MutexGuard},
+    sync::{Mutex, MutexGuard, LockResult},
 };
 use tauri::{AppHandle, Error, Manager, Runtime, State};
 
@@ -15,6 +15,22 @@ pub fn do_with_mutex_state<R: Runtime, T: std::marker::Send + 'static, F>(
 {
     let state: State<Mutex<T>> = app_handle.state();
     do_with_state(&mut state.lock().unwrap());
+}
+
+// will panic if not present, but state should exists
+pub fn get_state_mutex<'a, T: std::marker::Send + 'static>(
+    state: &'a State<'a, Mutex<T>>
+) -> MutexGuard<'a, T>
+{
+    state.lock().unwrap()
+}
+
+// will panic if not present, but state should exists
+pub fn get_state_mutex_from_handle<R: Runtime, T: std::marker::Send + 'static>(
+    app_handle: &AppHandle<R>
+) -> MutexGuard<T>
+{
+    app_handle.state::<Mutex<T>>().inner().lock().unwrap()
 }
 
 pub fn get_roaming_folder_path() -> PathBuf {

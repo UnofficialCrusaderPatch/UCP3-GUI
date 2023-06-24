@@ -34,7 +34,7 @@ where
 }
 
 #[tauri::command]
-pub fn load_zip<R: Runtime>(app_handle: AppHandle<R>, source: &str) -> Result<usize, String> {
+fn load_zip<R: Runtime>(app_handle: AppHandle<R>, source: &str) -> Result<usize, String> {
     let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
 
     let mut result = Err(String::from("zip.id.present"));
@@ -55,7 +55,7 @@ pub fn load_zip<R: Runtime>(app_handle: AppHandle<R>, source: &str) -> Result<us
 }
 
 #[tauri::command]
-pub fn exist_zip_entry<R: Runtime>(
+fn exist_zip_entry<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
@@ -69,7 +69,7 @@ pub fn exist_zip_entry<R: Runtime>(
 }
 
 #[tauri::command]
-pub fn get_zip_entry_as_binary<R: Runtime>(
+fn get_zip_entry_as_binary<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
@@ -87,7 +87,7 @@ pub fn get_zip_entry_as_binary<R: Runtime>(
 }
 
 #[tauri::command]
-pub fn get_zip_entry_as_text<R: Runtime>(
+fn get_zip_entry_as_text<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
@@ -105,7 +105,7 @@ pub fn get_zip_entry_as_text<R: Runtime>(
 }
 
 #[tauri::command]
-pub fn close_zip<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<(), String> {
+fn close_zip<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<(), String> {
     let mut result = Ok(());
     do_with_mutex_state::<R, HashMap<usize, ZipArchive<File>>, _>(&app_handle, |map| {
         if let None = map.remove(&id) {
@@ -118,7 +118,7 @@ pub fn close_zip<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<(), 
 // careless, overwrites, may leave remains on error
 // async (other thread), since it does not care about other stuff
 #[tauri::command]
-pub async fn extract_zip_to_path<R: Runtime>(
+async fn extract_zip_to_path<R: Runtime>(
     app_handle: AppHandle<R>,
     source: &str,
     dest: &str,
@@ -138,7 +138,7 @@ pub async fn extract_zip_to_path<R: Runtime>(
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("tauri-plugin-ucp-zip_support")
+    Builder::new("tauri-plugin-ucp-zip-support")
         .invoke_handler(tauri::generate_handler![
             extract_zip_to_path,
             load_zip,

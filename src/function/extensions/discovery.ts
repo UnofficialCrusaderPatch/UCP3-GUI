@@ -268,7 +268,7 @@ const Discovery = {
         } as unknown as Extension;
 
         const uiRaw = await readUISpec(eh);
-        ext.ui = uiRaw.options || uiRaw || [];
+        ext.ui = (uiRaw || {}).options || [];
         await setLocale(eh, ext, currentLocale);
         ext.config = await readConfig(eh);
 

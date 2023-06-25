@@ -159,5 +159,8 @@ export async function saveUCPConfig(
     sparseExtensions
   );
 
-  await writeTextFile(filePath, yamlStringify(finalConfig));
+  await writeTextFile(
+    filePath,
+    yamlStringify(finalConfig, { aliasDuplicateObjects: false })
+  );
 }

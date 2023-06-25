@@ -12,7 +12,7 @@ class RustZipExtensionHandle implements ExtensionHandle {
   }
 
   static async fromPath(path: string) {
-    return new RustZipExtensionHandle(path, await ZipHandler.openGC(path));
+    return new RustZipExtensionHandle(path, await ZipHandler.open(path));
   }
 
   async getTextContents(path: string): Promise<string> {
@@ -31,6 +31,10 @@ class RustZipExtensionHandle implements ExtensionHandle {
 
   async doesEntryExist(path: string): Promise<boolean> {
     return this.#zip.doesEntryExist(path);
+  }
+
+  async close(): Promise<void> {
+    return this.#zip.close();
   }
 }
 

@@ -40,6 +40,11 @@ class DirectoryExtensionHandle implements ExtensionHandle {
     }
     throw new Error(`${p} not found`);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  async close(): Promise<void> {
+    return undefined;
+  }
 }
 
 export default DirectoryExtensionHandle;

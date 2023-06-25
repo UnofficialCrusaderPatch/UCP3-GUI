@@ -50,10 +50,11 @@ async function setLocale(
       ext.ui.forEach((uiElement) => {
         changeLocale(locale, uiElement as { [key: string]: unknown });
       });
+    } else {
+      console.log(
+        `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
+      );
     }
-    console.log(
-      `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
-    );
   }
 }
 
@@ -230,6 +231,8 @@ const Discovery = {
             ext.config.plugins as { [key: string]: unknown; contents: unknown }
           ),
         };
+
+        eh.close();
 
         return ext;
       })

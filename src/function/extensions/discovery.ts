@@ -9,21 +9,12 @@ import { info } from 'util/scripts/logging';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
+import { changeLocale } from './locale';
 
 const OPTIONS_FILE = 'options.yml';
 const CONFIG_FILE = 'config.yml';
 const DEFINITION_FILE = 'definition.yml';
 const LOCALE_FOLDER = 'locale';
-
-const localeSensitiveFields = [
-  'description',
-  'text',
-  'subtext',
-  'tooltip',
-  'header',
-  'choices',
-];
-const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
 async function readUISpec(
   eh: ExtensionHandle
@@ -43,57 +34,6 @@ async function readConfig(
   return {};
 }
 
-function changeLocaleOfObj(
-  locale: { [key: string]: string },
-  obj: { [key: string]: string }
-) {
-  Object.entries(obj).forEach(([k, v]) => {
-    if (typeof v === 'string') {
-      const search = localeRegExp.exec(v);
-
-      if (search !== undefined && search !== null) {
-        const keyword = search[1];
-        const loc = locale[keyword];
-        if (loc !== undefined) {
-          // eslint-disable-next-line no-param-reassign
-          obj[k] = loc;
-        }
-      }
-    } else if (typeof v === 'object') {
-      changeLocaleOfObj(locale, obj[k] as unknown as { [key: string]: string });
-    }
-  });
-}
-
-function changeLocale(
-  locale: { [key: string]: string },
-  obj: { [key: string]: unknown }
-): void {
-  localeSensitiveFields.forEach((field) => {
-    if (typeof obj[field] === 'string') {
-      const search = localeRegExp.exec(obj[field] as string);
-
-      if (search !== undefined && search !== null) {
-        const keyword = search[1];
-        const loc = locale[keyword];
-        if (loc !== undefined) {
-          // eslint-disable-next-line no-param-reassign
-          obj[field] = loc;
-        }
-      }
-    }
-    if (typeof obj[field] === 'object' && obj[field] !== null) {
-      changeLocaleOfObj(locale, obj[field] as { [key: string]: string });
-    }
-  });
-
-  Object.entries(obj).forEach(([key, value]) => {
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      changeLocale(locale, value as { [key: string]: unknown });
-    }
-  });
-}
-
 async function setLocale(
   eh: ExtensionHandle,
   ext: Extension,
@@ -111,6 +51,9 @@ async function setLocale(
       changeLocale(locale, uiElement as { [key: string]: unknown });
     });
   }
+  console.log(
+    `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
+  );
   // }
 }
 
@@ -206,8 +149,17 @@ async function getExtensionHandles(ucpFolder: string) {
   const den = de.map((f) => f.name);
   const dirEnts = de.filter((e) => {
     // Zip files supersede folders
-    if (e.children !== null && e.children !== undefined) {
-      if (den.indexOf(`${e.name}.zip`) !== -1) {
+    // const isDirectory = e.children !== null && e.children !== undefined;
+    // if (isDirectory) {
+    //   const zipFileName = `${e.name}.zip`;
+    //   if (den.indexOf(zipFileName) !== -1) {
+    //     return false;
+    //   }
+    // }
+    // Folders supersede zip files?
+    if (e.name?.endsWith('.zip')) {
+      const dirName = e.name.split('.zip')[0];
+      if (den.indexOf(`${dirName}`) !== -1) {
         return false;
       }
     }
@@ -224,7 +176,7 @@ async function getExtensionHandles(ucpFolder: string) {
           : `${ucpFolder}/plugins/${fe.name}`;
 
       if (fe.name !== undefined && fe.name.endsWith('.zip')) {
-        // Do hash check here!
+        // TODO: Do hash check here!
         const result = await ZipExtensionHandle.fromPath(folder);
         return result as ExtensionHandle;
       }
@@ -245,8 +197,6 @@ const Discovery = {
     locale?: string
   ): Promise<Extension[]> => {
     info(`Discovering extensions`);
-    const currentLocale =
-      locale === undefined ? 'English' : LOCALE_FILES[locale]; // Dummy location for this code
 
     const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
 
@@ -269,7 +219,7 @@ const Discovery = {
 
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
-        await setLocale(eh, ext, currentLocale);
+        await setLocale(eh, ext, locale || 'en');
         ext.config = await readConfig(eh);
 
         ext.optionEntries = collectOptionEntries(

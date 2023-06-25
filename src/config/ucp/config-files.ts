@@ -58,17 +58,29 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
   };
 }
 
+type Contents = {
+  value: unknown;
+};
+
+type SubObjectOrContents = {
+  [key: string]:
+    | SubObjectOrContents
+    | {
+        contents: Contents;
+      };
+};
+
+type ConfigExtensionPart = {
+  config: SubObjectOrContents;
+};
+
 type ConfigPart = {
   'load-order': string[];
   modules: {
-    [key: string]: {
-      [key: string]: unknown;
-    };
+    [key: string]: ConfigExtensionPart;
   };
   plugins: {
-    [key: string]: {
-      [key: string]: unknown;
-    };
+    [key: string]: ConfigExtensionPart;
   };
 };
 
@@ -81,13 +93,13 @@ type UCP3SerializedUserConfig = {
 
 function saveUCPConfigPart(
   finalConfig: UCP3SerializedUserConfig,
-  configPart: 'config-full' | 'config-sparse',
+  subConfig: 'config-full' | 'config-sparse',
   config: { [key: string]: unknown },
   extensions: Extension[]
 ) {
-  console.debug(finalConfig[configPart]);
+  console.debug(finalConfig[subConfig]);
 
-  finalConfig[configPart]['load-order'] = extensions.map(
+  finalConfig[subConfig]['load-order'] = extensions.map(
     (e: Extension) => `${e.name} == ${e.version}`
   );
 
@@ -105,32 +117,38 @@ function saveUCPConfigPart(
 
       const type = ext.type === 'module' ? 'modules' : 'plugins';
 
-      if (finalConfig[configPart][type][extName] === undefined) {
-        finalConfig[configPart][type][extName] = {};
+      if (finalConfig[subConfig][type][extName] === undefined) {
+        finalConfig[subConfig][type][extName] = {
+          config: {},
+        };
       }
 
       const configParts = parts.slice(1);
       const partsdrop1 = configParts.slice(0, -1);
       const finalpart = configParts.slice(-1)[0];
-      let fcp = finalConfig[configPart][type][extName];
+      let fcp = finalConfig[subConfig][type][extName].config;
       partsdrop1.forEach((part: string) => {
         if (fcp[part] === undefined) {
           fcp[part] = {};
         }
-        fcp = fcp[part] as { [key: string]: unknown };
+        fcp = fcp[part] as SubObjectOrContents;
       });
-      fcp[finalpart] = value;
+      if (fcp[finalpart] === undefined) {
+        fcp[finalpart] = { contents: {} };
+      }
+      const c = fcp[finalpart].contents as Contents;
+      c.value = value;
     });
 
   extensions.forEach((e: Extension) => {
     if (e.type === 'module') {
-      if (finalConfig[configPart].modules[e.name] === undefined) {
-        finalConfig[configPart].modules[e.name] = {};
+      if (finalConfig[subConfig].modules[e.name] === undefined) {
+        finalConfig[subConfig].modules[e.name] = { config: {} };
       }
     }
     if (e.type === 'plugin') {
-      if (finalConfig[configPart].plugins[e.name] === undefined) {
-        finalConfig[configPart].plugins[e.name] = {};
+      if (finalConfig[subConfig].plugins[e.name] === undefined) {
+        finalConfig[subConfig].plugins[e.name] = { config: {} };
       }
     }
   });

@@ -40,21 +40,21 @@ async function setLocale(
   language: string
 ): Promise<void> {
   // TODO: folder checking is broken. Why?
-  // const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}`);
-  // if (locFolder) {
-  if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
-    const locale = yaml.parse(
-      await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`)
-    );
+  const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}/`);
+  if (locFolder) {
+    if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
+      const locale = yaml.parse(
+        await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`)
+      );
 
-    ext.ui.forEach((uiElement) => {
-      changeLocale(locale, uiElement as { [key: string]: unknown });
-    });
+      ext.ui.forEach((uiElement) => {
+        changeLocale(locale, uiElement as { [key: string]: unknown });
+      });
+    }
+    console.log(
+      `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
+    );
   }
-  console.log(
-    `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
-  );
-  // }
 }
 
 function collectOptionEntries(
@@ -128,11 +128,6 @@ function collectConfigEntries(
 
   return collection;
 }
-
-const LOCALE_FILES: { [lang: string]: string } = {
-  en: 'English',
-  de: 'German',
-};
 
 async function getExtensionHandles(ucpFolder: string) {
   const moduleDir = `${ucpFolder}/modules`;

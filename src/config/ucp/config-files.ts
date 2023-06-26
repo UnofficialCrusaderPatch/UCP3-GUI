@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { TFunction } from 'react-i18next';
+import { TFunction } from 'i18next';
 import { writeTextFile, loadYaml } from 'tauri/tauri-files';
 import Result from 'util/structs/result';
 import { stringify as yamlStringify } from 'yaml';

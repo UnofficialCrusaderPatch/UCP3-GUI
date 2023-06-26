@@ -1,5 +1,5 @@
 import { BinaryFileContents } from '@tauri-apps/api/fs';
-import { TFunction } from 'react-i18next';
+import { TFunction } from 'i18next';
 import { askInfo, showWarning } from 'tauri/tauri-dialog';
 import {
   getLocalDataFolder,

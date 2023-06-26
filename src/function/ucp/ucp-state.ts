@@ -1,6 +1,6 @@
 import Result from 'util/structs/result';
 import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
-import { TFunction } from 'react-i18next';
+import { TFunction } from 'i18next';
 import { getHexHashOfFile } from 'util/scripts/hash';
 
 export enum UCPState {

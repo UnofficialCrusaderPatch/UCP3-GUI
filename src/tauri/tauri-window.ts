@@ -2,7 +2,7 @@
 // currently it will just take care that only one window per path can be created
 // the main (landing) window is ignored)
 
-import { TauriEvent } from '@tauri-apps/api/event';
+// import { TauriEvent } from '@tauri-apps/api/event';
 import {
   appWindow,
   WebviewWindow,

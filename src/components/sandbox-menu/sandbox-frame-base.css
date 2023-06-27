@@ -1,0 +1,8 @@
+@import "../variables.css";
+
+@import "../scrollbar.css";
+
+html {
+    height: 100%;
+    width: 100%;
+}

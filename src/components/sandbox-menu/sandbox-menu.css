@@ -30,6 +30,17 @@
 .sandbox-container {
     width: 100%;
     flex-grow: 1;
+    background-color: var(--ucp-main-brown);
+    border-image: var(--ucp-main-border-image);
+    border-top: var(--ucp-main-border);
+    border-bottom: var(--ucp-main-border);
+    border-left: var(--ucp-main-border);
+    border-right: var(--ucp-main-border);
+}
+
+.sandbox-frame {
+    width: 100%;
+    height: 100%;
 }
 
 .sandbox-menu-container {

@@ -21,6 +21,16 @@ interface SandboxSource {
   js: string;
 }
 
+async function receiveLocalizedString(id: string): Promise<string> {
+  // TODO -> use module localization
+  const test: Record<string, string> = {
+    header: 'I am a header.',
+    text: 'I am text.',
+  };
+
+  return test[id];
+}
+
 function SandboxMenu(props: OverlayContentProps) {
   const { closeFunc } = props;
 
@@ -60,7 +70,7 @@ function SandboxMenu(props: OverlayContentProps) {
     }
 
     const sand: PluginInstance = Sandbox.create(
-      {},
+      { receiveLocalizedString },
       {
         frameContainer: sandboxDiv.current as unknown as Element,
         frameClassName: 'sandbox-frame',

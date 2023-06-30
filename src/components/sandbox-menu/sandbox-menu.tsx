@@ -1,6 +1,6 @@
 import {
   OverlayContentProps,
-  useOverlayContent,
+  useSetOverlayContent,
 } from 'components/overlay/overlay';
 import { useEffect, useRef, useState } from 'react';
 import Sandbox, { PluginInstance } from 'websandbox';
@@ -123,7 +123,7 @@ function SandboxMenu(props: OverlayContentProps) {
 }
 
 export default function SandboxMenuButton() {
-  const { setOverlayContent } = useOverlayContent();
+  const setOverlayContent = useSetOverlayContent();
 
   return (
     <button

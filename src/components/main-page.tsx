@@ -5,13 +5,11 @@ import Footer from './footer/footer';
 import UcpTabs from './ucp-tabs/ucp-tabs';
 
 import './main-page.css';
-import SandboxMenuButton from './sandbox-menu/sandbox-menu';
 
 export default function Main() {
   return (
     <>
       <CreditsButton />
-      <SandboxMenuButton />
       <LanguageSelect />
       {/* Last, to hide everything */}
       <Overlay />

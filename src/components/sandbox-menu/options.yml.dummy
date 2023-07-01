@@ -1,0 +1,19 @@
+specification-version: 1.0.0
+options:
+- display: GroupBox
+  header: '{{general}}'
+  text: '{{general_descr}}'
+  hasHeader: true
+  category: [Input Handler]
+  children:
+  
+  - url: inputHandler.alias
+    header: '{{alias}}'
+    text: '{{alias_descr}}'
+    hasHeader: true
+    display: CustomMenu
+    contents:
+      type: custom
+      value:
+        "B": "CONTROL+B"
+        "CONTROL+B": "B"

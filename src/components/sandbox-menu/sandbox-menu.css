@@ -1,4 +1,4 @@
-.sandbox-menu-button {
+.sandbox-menu-button-dummy {
     background-color: var(--ucp-menu-shade);
     color: white;
     position: absolute;
@@ -9,6 +9,15 @@
     left: 0;
     right: 0;
     margin: auto;
+    width: max-content;
+}
+
+.sandbox-menu-button {
+    background-color: var(--ucp-menu-shade);
+    color: white;
+    border: none;
+    font-size: 16px;
+    padding: 4px 16px;
     width: max-content;
 }
 

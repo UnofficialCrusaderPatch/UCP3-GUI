@@ -9,10 +9,9 @@ import { readTextFile, resolvePath } from 'tauri/tauri-files';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import i18next from 'i18next';
 
-// eslint-disable-next-line import/no-unresolved
-import { n } from '@tauri-apps/api/event-41a9edf5';
-import Option from 'util/structs/option';
 import Result from 'util/structs/result';
+
+// eslint-disable-next-line import/no-unresolved
 import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
@@ -23,6 +22,17 @@ interface SandboxSource {
   html: string;
   css: string;
   js: string;
+}
+
+export interface SandboxSourcePaths {
+  htmlPath: string;
+  cssPath: string;
+  jsPath: string;
+}
+
+export interface SandboxArgs {
+  url: string;
+  sourcePaths: SandboxSourcePaths;
 }
 
 async function getLanguage(): Promise<string> {
@@ -40,14 +50,16 @@ async function getLocalizedString(id: string): Promise<string> {
   return test[id];
 }
 
-async function getConfigState(id: string): Promise<unknown> {
+async function getConfigState(url: string): Promise<unknown> {
   // TODO: should be able to get a config value of other modules to perform logic
   // (it should copy on transmit anyway, so it should not be needed to copy it here)
   return null;
 }
 
-function SandboxMenu(props: OverlayContentProps) {
-  const { closeFunc } = props;
+export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
+  const { closeFunc, args } = props;
+  const { url, sourcePaths } = args;
+  console.log(url);
 
   const currentFolder = useCurrentGameFolder();
 
@@ -64,15 +76,9 @@ function SandboxMenu(props: OverlayContentProps) {
 
       // eslint-disable-next-line promise/catch-or-return
       Promise.all([
-        readTextFile(
-          `${currentFolder}/ucp/modules/inputHandler-0.1.0/menu/test.html`
-        ),
-        readTextFile(
-          `${currentFolder}/ucp/modules/inputHandler-0.1.0/menu/test.css`
-        ),
-        readTextFile(
-          `${currentFolder}/ucp/modules/inputHandler-0.1.0/menu/test.js`
-        ),
+        readTextFile(sourcePaths.htmlPath),
+        readTextFile(sourcePaths.cssPath),
+        readTextFile(sourcePaths.jsPath),
       ]).then((sourceStrings) =>
         // should these be sanitized?
         // css and js could also be made accessible through assets
@@ -103,6 +109,7 @@ function SandboxMenu(props: OverlayContentProps) {
           )
             .ok()
             .getOrElse(null),
+        getCurrentConfig: async () => null, // TODO: this method should return the current config value, do allow the menu to initialize
         // TODO: resources, like pictures?
       },
       {
@@ -168,19 +175,5 @@ function SandboxMenu(props: OverlayContentProps) {
         </button>
       </div>
     </div>
-  );
-}
-
-export default function SandboxMenuButton() {
-  const setOverlayContent = useSetOverlayContent();
-
-  return (
-    <button
-      type="button"
-      className="sandbox-menu-button"
-      onClick={() => setOverlayContent(SandboxMenu)}
-    >
-      SANDBOX_TEST
-    </button>
   );
 }

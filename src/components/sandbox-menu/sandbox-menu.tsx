@@ -5,10 +5,14 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import Sandbox, { PluginInstance } from 'websandbox';
 
-import { readTextFile } from 'tauri/tauri-files';
+import { readTextFile, resolvePath } from 'tauri/tauri-files';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import i18next from 'i18next';
 
 // eslint-disable-next-line import/no-unresolved
+import { n } from '@tauri-apps/api/event-41a9edf5';
+import Option from 'util/structs/option';
+import Result from 'util/structs/result';
 import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
@@ -21,7 +25,12 @@ interface SandboxSource {
   js: string;
 }
 
-async function receiveLocalizedString(id: string): Promise<string> {
+async function getLanguage(): Promise<string> {
+  return i18next.language; // is kinda enough, using the hook might be overkill
+}
+
+// dummy
+async function getLocalizedString(id: string): Promise<string> {
   // TODO -> use module localization
   const test: Record<string, string> = {
     header: 'I am a header.',
@@ -29,6 +38,12 @@ async function receiveLocalizedString(id: string): Promise<string> {
   };
 
   return test[id];
+}
+
+async function getConfigState(id: string): Promise<unknown> {
+  // TODO: should be able to get a config value of other modules to perform logic
+  // (it should copy on transmit anyway, so it should not be needed to copy it here)
+  return null;
 }
 
 function SandboxMenu(props: OverlayContentProps) {
@@ -40,6 +55,8 @@ function SandboxMenu(props: OverlayContentProps) {
 
   const sandboxDiv = useRef(null);
   const [sandbox, setSandbox] = useState<null | PluginInstance>(null);
+
+  const [initDone, setInitDone] = useState(false);
 
   useEffect(() => {
     if (!sources) {
@@ -70,7 +87,24 @@ function SandboxMenu(props: OverlayContentProps) {
     }
 
     const sand: PluginInstance = Sandbox.create(
-      { receiveLocalizedString },
+      {
+        confirmInit: async () => {
+          // could be done to do stuff after init
+          setInitDone(true);
+        },
+        getLanguage,
+        getLocalizedString,
+        getConfigState,
+        getTextFile: async (path): Promise<null | string> =>
+          (
+            (await readTextFile(
+              await resolvePath(currentFolder, path)
+            )) as Result<string | null, unknown>
+          )
+            .ok()
+            .getOrElse(null),
+        // TODO: resources, like pictures?
+      },
       {
         frameContainer: sandboxDiv.current as unknown as Element,
         frameClassName: 'sandbox-frame',
@@ -104,10 +138,25 @@ function SandboxMenu(props: OverlayContentProps) {
       
       <a href="https://www.w3schools.com/tags/img_girl.jpg">TEst</a> */}
       <div className="sandbox-control-menu">
-        <button type="button" className="sandbox-control-button">
+        <button
+          type="button"
+          className="sandbox-control-button"
+          disabled={!initDone}
+          onClick={async () =>
+            console.log(await sandbox?.connection.remote.getConfig())
+          }
+        >
           SAVE
         </button>
-        <button type="button" className="sandbox-control-button">
+        <button
+          type="button"
+          className="sandbox-control-button"
+          disabled={!initDone}
+          onClick={async () => {
+            console.log(await sandbox?.connection.remote.getConfig());
+            closeFunc();
+          }}
+        >
           SAVE_AND_CLOSE
         </button>
         <button

@@ -95,7 +95,8 @@ function saveUCPConfigPart(
   finalConfig: UCP3SerializedUserConfig,
   subConfig: 'config-full' | 'config-sparse',
   config: { [key: string]: unknown },
-  extensions: Extension[]
+  extensions: Extension[],
+  allExtensions: Extension[]
 ) {
   console.debug(finalConfig[subConfig]);
 
@@ -109,7 +110,7 @@ function saveUCPConfigPart(
       const parts = key.split('.');
       const extName = parts[0];
 
-      const ext = extensions.filter((ex) => ex.name === extName)[0];
+      const ext = allExtensions.filter((ex) => ex.name === extName)[0];
 
       if (ext === undefined || ext === null) {
         console.error(`No extension found with name: ${extName}`);
@@ -169,12 +170,19 @@ export async function saveUCPConfig(
     'config-full': { modules: {}, plugins: {}, 'load-order': [] },
   };
 
-  saveUCPConfigPart(finalConfig, 'config-full', fullConfig, fullExtensions);
+  saveUCPConfigPart(
+    finalConfig,
+    'config-full',
+    fullConfig,
+    fullExtensions,
+    fullExtensions
+  );
   saveUCPConfigPart(
     finalConfig,
     'config-sparse',
     sparseConfig,
-    sparseExtensions
+    sparseExtensions,
+    fullExtensions
   );
 
   await writeTextFile(

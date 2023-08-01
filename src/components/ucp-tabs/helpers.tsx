@@ -3,11 +3,12 @@ import {
   extensionsToOptionEntries,
   getConfigDefaults,
 } from 'config/ucp/extension-util';
+import { ExtensionsState } from 'function/global/types';
 
 function propagateActiveExtensionsChange(
   activeExtensions: Extension[],
   stateFunctions: {
-    extensionsState: any;
+    extensionsState: ExtensionsState;
     setExtensionsState: any;
     setConfiguration: any;
     setConfigurationDefaults: any;
@@ -72,17 +73,17 @@ function propagateActiveExtensionsChange(
     type: 'reset',
     value: locks,
   });
-  // All extensions that are not active are deemed inactive...
-  const inactiveExtensions = extensionsState.extensions.filter(
-    (e: Extension) =>
-      activeExtensions
-        .map((ex: Extension) => `${ex.name}-${ex.version}`)
-        .indexOf(`${e.name}-${e.version}`) === -1
-  );
+  // // All extensions that are not active are deemed inactive...
+  // const inactiveExtensions = extensionsState.extensions.filter(
+  //   (e: Extension) =>
+  //     activeExtensions
+  //       .map((ex: Extension) => `${ex.name}-${ex.version}`)
+  //       .indexOf(`${e.name}-${e.version}`) === -1
+  // );
   setExtensionsState({
     ...extensionsState,
     activeExtensions,
-    installedExtensions: inactiveExtensions,
+    // installedExtensions: inactiveExtensions,
   });
 }
 

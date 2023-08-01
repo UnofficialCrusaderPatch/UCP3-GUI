@@ -1,4 +1,5 @@
 import { Extension } from 'config/ucp/common';
+import { ConfigMetaObjectDB } from 'config/ucp/config-merge/objects';
 
 export type KeyValueReducerState<Type> = {
   [key: string]: Type;
@@ -47,4 +48,9 @@ export type ExtensionsState = {
    * Extensions that are explicitly set to active
    */
   explicitlyActivatedExtensions: Extension[];
+
+  /**
+   * Configuration that is associated with the current extensions ordering
+   */
+  configuration: ConfigMetaObjectDB;
 };

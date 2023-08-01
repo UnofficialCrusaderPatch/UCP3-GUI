@@ -108,9 +108,9 @@ type ConfigEntry = {
     'suggested-inclusive': boolean;
     'suggested-exclusive': boolean;
   };
-  'all-else': boolean;
-  name: string;
-  url: string;
+  // 'all-else': boolean;
+  // name: string;
+  // url: string;
 };
 
 type ConfigFileExtensionEntry = {
@@ -118,11 +118,20 @@ type ConfigFileExtensionEntry = {
 };
 
 type ConfigFile = {
-  modules: {
-    [key: string]: ConfigFileExtensionEntry;
+  'specification-version': string;
+  'config-sparse': {
+    modules: {
+      [key: string]: {
+        config: ConfigFileExtensionEntry;
+      };
+    };
+    plugins: {
+      [key: string]: {
+        config: ConfigFileExtensionEntry;
+      };
+    };
+    'load-order': string[];
   };
-  plugins: { [key: string]: ConfigFileExtensionEntry };
-  order: string[];
 };
 
 type OptionEntry = {
@@ -153,12 +162,13 @@ type Definition = {
 };
 
 type Extension = {
+  'specification-version': string;
   name: string;
   type: string;
   version: string;
   definition: Definition;
   ui: { [key: string]: unknown }[];
-  config: { [key: string]: unknown };
+  config: ConfigFile;
   path: string;
   configEntries: { [key: string]: ConfigEntry };
   optionEntries: { [key: string]: OptionEntry };

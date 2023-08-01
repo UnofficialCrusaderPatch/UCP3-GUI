@@ -23,6 +23,7 @@ import {
   moveExtension,
   removeExtensionFromExplicitlyActivatedExtensions,
 } from './extensions-state';
+import { buildExtensionConfigurationDB } from './extension-configuration';
 
 export default function ExtensionManager() {
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
@@ -40,7 +41,7 @@ export default function ExtensionManager() {
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
-  function onActiveExtensionsUpdate(exts: Extension[]) {
+  function warnClearingOfConfiguration(exts: Extension[]) {
     // Defer here to a processor for the current list of active extensions to yield the
 
     const touchedOptions = Object.entries(configurationTouched).filter(
@@ -99,9 +100,9 @@ export default function ExtensionManager() {
 
         const newActiveExtensions = newExtensionState.activeExtensions;
 
-        onActiveExtensionsUpdate(newActiveExtensions);
+        warnClearingOfConfiguration(newActiveExtensions);
         propagateActiveExtensionsChange(newActiveExtensions, {
-          extensionsState,
+          extensionsState, // Hmm why this state passed here?
           setExtensionsState,
           setConfiguration,
           setConfigurationDefaults,
@@ -109,6 +110,7 @@ export default function ExtensionManager() {
           setConfigurationWarnings,
           setConfigurationLocks,
         });
+        buildExtensionConfigurationDB(newExtensionState);
         setExtensionsState(newExtensionState);
       }}
       moveCallback={(event: { type: 'up' | 'down' }) => {}}
@@ -145,13 +147,13 @@ export default function ExtensionManager() {
               ext
             );
           const ae = newExtensionState.activeExtensions;
-          onActiveExtensionsUpdate(ae);
+          warnClearingOfConfiguration(ae);
           setExtensionsState(newExtensionState);
         }}
         moveCallback={(event: { name: string; type: 'up' | 'down' }) => {
           const newExtensionsState = moveExtension(extensionsState, event);
 
-          onActiveExtensionsUpdate(newExtensionsState.activeExtensions);
+          warnClearingOfConfiguration(newExtensionsState.activeExtensions);
           setExtensionsState(newExtensionsState);
         }}
         revDeps={revDeps[ext.name].filter(

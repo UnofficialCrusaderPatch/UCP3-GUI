@@ -60,7 +60,7 @@ const addExtensionToExplicityActivatedExtensions = (
           .map((ex: Extension) => `${ex.name}-${ex.version}`)
           .indexOf(`${e.name}-${e.version}`) === -1
     ),
-  } as ExtensionsState;
+  };
 };
 
 const removeExtensionFromExplicitlyActivatedExtensions = (

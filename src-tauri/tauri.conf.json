@@ -17,7 +17,9 @@
         "scope": [
           "$DATA/*",
           "$DOWNLOAD/*",
-          "$LOCALDATA/*"
+          "$LOCALDATA/*",
+          "$APP/*",
+          "$HOME/**/*"
         ]
       },
       "path": {

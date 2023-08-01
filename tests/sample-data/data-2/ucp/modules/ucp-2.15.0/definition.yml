@@ -1,0 +1,6 @@
+# The name of your module
+name: ucp
+version: 2.15.0
+default: true
+game: [SHC==1.41, SHCE==1.41]
+specification-version: 1.0.0

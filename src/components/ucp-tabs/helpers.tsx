@@ -80,11 +80,11 @@ function propagateActiveExtensionsChange(
   //       .map((ex: Extension) => `${ex.name}-${ex.version}`)
   //       .indexOf(`${e.name}-${e.version}`) === -1
   // );
-  setExtensionsState({
-    ...extensionsState,
-    activeExtensions,
-    // installedExtensions: inactiveExtensions,
-  });
+  // setExtensionsState({
+  //   ...extensionsState,
+  //   activeExtensions,
+  //   // installedExtensions: inactiveExtensions,
+  // });
 }
 
 // eslint-disable-next-line import/prefer-default-export

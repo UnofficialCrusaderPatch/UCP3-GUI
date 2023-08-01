@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-throw-literal */
 import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { ResponseType } from '@tauri-apps/api/http';
-import { TFunction } from 'react-i18next';
+import { TFunction } from 'i18next';
 import semver from 'semver';
 import { askInfo } from 'tauri/tauri-dialog';
 import {

@@ -28,7 +28,7 @@ function asyncAtomWithMutate<T, U extends unknown[]>(
   const mutateableAtom = atom(
     async (get) => fn(get(previousValue), ...get(argsAtom)),
     async (_get, set, args: U) => {
-      set(previousValue, _get(mutateableAtom));
+      set(previousValue, await _get(mutateableAtom));
       set(argsAtom, args);
     }
   );

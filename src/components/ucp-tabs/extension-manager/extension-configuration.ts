@@ -11,6 +11,8 @@ type ConfigurationDBBuildingResult = {
   state: ExtensionsState;
 };
 
+// TODO: also do range checks in this function? Better in a separate function I guess
+// Or perhaps better to do range checks on discovery of extension
 function buildExtensionConfigurationDB(extensionsState: ExtensionsState) {
   // ae has the order that the highest is the last added.
   const ae = [...extensionsState.activeExtensions];
@@ -108,17 +110,14 @@ function buildExtensionConfigurationDB(extensionsState: ExtensionsState) {
   }
 
   return {
-    status: {
+    ...extensionsState,
+    configuration: {
+      state: db,
       warnings,
       errors,
-      code: statusCode,
+      statusCode,
     },
-
-    state: {
-      ...extensionsState,
-      configuration: db,
-    } as ExtensionsState,
-  };
+  } as ExtensionsState;
 }
 
 // eslint-disable-next-line import/prefer-default-export

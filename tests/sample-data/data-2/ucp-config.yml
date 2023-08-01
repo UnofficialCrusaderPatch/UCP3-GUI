@@ -2,11 +2,11 @@ specification-version: 1.0.0
 active: true
 config-sparse:
   modules:
-    example:
+    conflicting-config-example:
       config: {}
   plugins: {}
   load-order:
-    - example == 0.0.1
+    - conflicting-config-example == 0.0.1
 config-full:
   modules:
     ucp:
@@ -26,8 +26,8 @@ config-full:
             contents:
               value:
                 contents:
-                  value:
-                    enabled: true
+                  suggested-value:
+                    enabled: false
                     sliderValue: 200
         ai_assaultswitch:
           enabled:
@@ -43,7 +43,7 @@ config-full:
             contents:
               value:
                 contents:
-                  required-value: true
+                  required-value: false
         ai_access:
           enabled:
             contents:
@@ -258,7 +258,7 @@ config-full:
             contents:
               value:
                 contents:
-                  value: true
+                  suggested-value: false
         o_seed_modification_possibility_title:
           contents:
             value:
@@ -272,9 +272,9 @@ config-full:
           enabled:
             contents:
               value: false
-    example:
+    conflicting-config-example:
       config: {}
   plugins: {}
   load-order:
-    - example == 0.0.1
+    - conflicting-config-example == 0.0.1
     - ucp == 2.15.0

@@ -156,6 +156,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   if (openedConfig.result.order.length > 0) {
                     const es: Extension[] = [];
 
+                    // TODO: process explicitly activated configs
                     // eslint-disable-next-line no-restricted-syntax
                     for (const e of openedConfig.result.order) {
                       const ds = DependencyStatement.fromString(e);
@@ -175,15 +176,20 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       es.push(options[0]);
                     }
 
-                    propagateActiveExtensionsChange(es, {
-                      extensionsState,
-                      setExtensionsState,
-                      setConfiguration,
-                      setConfigurationDefaults,
-                      setConfigurationTouched,
-                      setConfigurationWarnings,
-                      setConfigurationLocks,
-                    });
+                    propagateActiveExtensionsChange(
+                      {
+                        ...extensionsState,
+                        activeExtensions: es,
+                        explicitlyActivatedExtensions: es,
+                      },
+                      {
+                        setConfiguration,
+                        setConfigurationDefaults,
+                        setConfigurationTouched,
+                        setConfigurationWarnings,
+                        setConfigurationLocks,
+                      }
+                    );
                   }
 
                   function findValue(

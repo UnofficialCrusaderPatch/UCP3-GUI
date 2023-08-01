@@ -23,6 +23,13 @@ export type UIDefinition = {
   hierarchical: { elements: object[]; sections: { [key: string]: object } };
 };
 
+type ConfigurationState = {
+  state: ConfigMetaObjectDB;
+  warnings: string[];
+  errors: string[];
+  statusCode: number;
+};
+
 export type ExtensionsState = {
   /**
    * Array of Extension keeping track of all available Extensions that were discovered at some point
@@ -52,5 +59,5 @@ export type ExtensionsState = {
   /**
    * Configuration that is associated with the current extensions ordering
    */
-  configuration: ConfigMetaObjectDB;
+  configuration: ConfigurationState;
 };

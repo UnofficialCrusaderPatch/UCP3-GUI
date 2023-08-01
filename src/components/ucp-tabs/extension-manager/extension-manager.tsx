@@ -104,23 +104,21 @@ export default function ExtensionManager() {
 
         const res = buildExtensionConfigurationDB(newExtensionState);
 
-        if (res.status.code !== 0) {
-          if (res.status.code === 2) {
+        if (res.configuration.statusCode !== 0) {
+          if (res.configuration.statusCode === 2) {
             window.alert(
-              `Error, invalid extension configuration. New configuration has ${res.status.errors.length} errors.`
+              `Error, invalid extension configuration. New configuration has ${res.configuration.errors.length} errors.`
             );
             return;
           }
           window.alert(
-            `Be warned, new configuration has ${res.status.warnings.length} warings`
+            `Be warned, new configuration has ${res.configuration.warnings.length} warings`
           );
         } else {
           console.log(`New configuration build without errors or warnings`);
         }
 
-        propagateActiveExtensionsChange(newActiveExtensions, {
-          extensionsState, // Hmm why this state passed here?
-          setExtensionsState,
+        propagateActiveExtensionsChange(res, {
           setConfiguration,
           setConfigurationDefaults,
           setConfigurationTouched,
@@ -128,8 +126,8 @@ export default function ExtensionManager() {
           setConfigurationLocks,
         });
 
-        setExtensionsState(res.state);
-        console.log('New extension state', res.state);
+        setExtensionsState(res);
+        console.log('New extension state', res);
       }}
       moveCallback={(event: { type: 'up' | 'down' }) => {}}
       revDeps={revDeps[ext.name].filter(

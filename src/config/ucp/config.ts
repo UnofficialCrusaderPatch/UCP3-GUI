@@ -138,16 +138,17 @@ class Config {
 
       const processedOptions: { [key: string]: ConfigEntry } = {};
 
-      collectConfigs(
-        processedOptions,
-        ext.config.modules as { value: unknown; [key: string]: unknown },
-        ''
-      );
-      collectConfigs(
-        processedOptions,
-        ext.config.plugins as { value: unknown; [key: string]: unknown },
-        ''
-      );
+      // WARNING: deprecated code
+      // collectConfigs(
+      //   processedOptions,
+      //   ext.config.modules as { value: unknown; [key: string]: unknown },
+      //   ''
+      // );
+      // collectConfigs(
+      //   processedOptions,
+      //   ext.config.plugins as { value: unknown; [key: string]: unknown },
+      //   ''
+      // );
 
       if (this.extensions[name] !== undefined) {
         // Multiple versions detected of same extension, allow?

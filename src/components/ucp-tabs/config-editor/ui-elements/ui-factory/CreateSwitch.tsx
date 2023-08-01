@@ -1,7 +1,6 @@
 import { DisplayConfigElement } from 'config/ucp/common';
 
 import {
-  useActiveExtensions,
   useConfigurationDefaults,
   useConfigurationReducer,
   useConfigurationWarnings,

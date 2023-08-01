@@ -1,5 +1,4 @@
 import {
-  useActiveExtensions,
   useConfigurationDefaults,
   useConfigurationLocks,
   useConfigurationReducer,

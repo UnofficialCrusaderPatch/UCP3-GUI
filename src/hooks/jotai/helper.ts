@@ -1,7 +1,7 @@
 import { Extension } from 'config/ucp/common';
 import { getExtensions } from 'config/ucp/extension-util';
-import { activateUCP, deactivateUCP } from 'function/ucp/ucp-state';
-import { UCPVersion } from 'function/ucp/ucp-version';
+import { activateUCP, deactivateUCP } from 'function/ucp-files/ucp-state';
+import { UCPVersion } from 'function/ucp-files/ucp-version';
 import { useTranslation } from 'react-i18next';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';

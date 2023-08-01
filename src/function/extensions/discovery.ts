@@ -4,8 +4,15 @@ import yaml from 'yaml';
 
 import { readDir } from 'tauri/tauri-files';
 
-import { ConfigEntry, Extension, OptionEntry } from 'config/ucp/common';
+import {
+  ConfigEntry,
+  ConfigFile,
+  ConfigFileExtensionEntry,
+  Extension,
+  OptionEntry,
+} from 'config/ucp/common';
 import { info } from 'util/scripts/logging';
+import { Config } from 'config/ucp/config';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
@@ -25,13 +32,18 @@ async function readUISpec(
   return { options: [] };
 }
 
-async function readConfig(
-  eh: ExtensionHandle
-): Promise<{ [key: string]: unknown }> {
+async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
   if (await eh.doesEntryExist(CONFIG_FILE)) {
     return yaml.parse(await eh.getTextContents(CONFIG_FILE));
   }
-  return {};
+  return {
+    'specification-version': '0.0.0',
+    'config-sparse': {
+      modules: {},
+      plugins: {},
+      'load-order': [],
+    },
+  };
 }
 
 async function setLocale(
@@ -103,13 +115,13 @@ function collectConfigEntries(
   if (url === undefined) url = '';
 
   if (obj !== null && obj !== undefined && typeof obj === 'object') {
-    if (obj.value !== undefined) {
+    if (obj.contents !== undefined) {
       const o = obj as ConfigEntry;
       if (collection[url] !== undefined) {
-        throw new Error(`url already has a value: ${url}`);
+        throw new Error(`url already has been set: ${url}`);
       }
       // eslint-disable-next-line no-param-reassign
-      collection[url] = o.contents as unknown as ConfigEntry;
+      collection[url] = { ...o };
     } else {
       Object.keys(obj).forEach((key) => {
         let newUrl = url;
@@ -223,14 +235,27 @@ const Discovery = {
           ext.name
         );
 
-        ext.configEntries = {
-          ...collectConfigEntries(
-            ext.config.modules as { [key: string]: unknown; contents: unknown }
-          ),
-          ...collectConfigEntries(
-            ext.config.plugins as { [key: string]: unknown; contents: unknown }
-          ),
+        ext.configEntries = {};
+
+        const parseEntry = ([extensionName, data]: [
+          string,
+          {
+            config: ConfigFileExtensionEntry;
+          }
+        ]) => {
+          const result = collectConfigEntries(
+            data.config as {
+              [key: string]: unknown;
+              contents: unknown;
+            },
+            extensionName
+          );
+
+          ext.configEntries = { ...ext.configEntries, ...result };
         };
+
+        Object.entries(ext.config['config-sparse'].modules).forEach(parseEntry);
+        Object.entries(ext.config['config-sparse'].plugins).forEach(parseEntry);
 
         eh.close();
 

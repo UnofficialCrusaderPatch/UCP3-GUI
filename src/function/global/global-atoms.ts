@@ -83,6 +83,7 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
     installedExtensions: [],
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
+    configuration: {},
   },
   extensionStateReducer
 );

@@ -1,9 +1,5 @@
 import { Extension } from 'config/ucp/common';
-import {
-  extensionsToOptionEntries,
-  getConfigDefaults,
-  getExtensions,
-} from 'config/ucp/extension-util';
+import { getExtensions } from 'config/ucp/extension-util';
 import { activateUCP, deactivateUCP } from 'function/ucp/ucp-state';
 import { UCPVersion } from 'function/ucp/ucp-version';
 import { useTranslation } from 'react-i18next';
@@ -15,14 +11,12 @@ import {
   useInitRunning,
   useSetInitDone,
   useSetUcpConfigFile,
-  useSetExtensions,
   useSetConfiguration,
   useSetConfigurationDefaults,
-  useSetExtensionState,
   useFolderValue,
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
-  useSetActiveExtensions,
+  useExtensionStateReducer,
 } from './globals-wrapper';
 import {
   UCPStateHandler,
@@ -83,15 +77,13 @@ export function useInitGlobalConfiguration(): [
   const setInitDone = useSetInitDone();
   const [isInitRunning, setInitRunning] = useInitRunning();
   const setFile = useSetUcpConfigFile();
-  const setExtensions = useSetExtensions();
   const setConfiguration = useSetConfiguration();
   const setConfigurationDefaults = useSetConfigurationDefaults();
-  const setExtensionsState = useSetExtensionState();
+  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   // currently simply reset:
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
-  const setActiveExtensions = useSetActiveExtensions();
 
   return [
     isInitRunning,
@@ -109,7 +101,8 @@ export function useInitGlobalConfiguration(): [
         // TODO: currently only set on initial render and folder selection
         // TODO: resolve this type badness
         extensions = await getExtensions(newFolder, language);
-        setExtensions(extensions);
+        console.log('Discovered extensions:', extensions);
+        console.log('pre extensionState: ', extensionsState);
 
         // TODO: this should not be done now, it only makes sense when options are actually presented on screen, e.g., when an extension is made active
         // const optionEntries = extensionsToOptionEntries(extensions);
@@ -120,7 +113,6 @@ export function useInitGlobalConfiguration(): [
         info('No folder active.');
       }
 
-      setExtensions(extensions);
       setConfiguration({
         type: 'reset',
         value: defaults,
@@ -140,14 +132,14 @@ export function useInitGlobalConfiguration(): [
       });
 
       setExtensionsState({
-        allExtensions: [...extensions],
+        ...extensionsState,
         activeExtensions: [],
-        activatedExtensions: [],
+        explicitlyActivatedExtensions: [],
         installedExtensions: [...extensions],
+        extensions,
       });
-      setFile(file);
 
-      setActiveExtensions([]);
+      setFile(file);
 
       info('Finished loading');
       setInitDone(true);

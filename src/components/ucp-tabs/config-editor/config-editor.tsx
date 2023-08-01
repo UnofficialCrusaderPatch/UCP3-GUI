@@ -9,12 +9,10 @@ import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
-  useActiveExtensionsReducer,
   useConfigurationDefaultsReducer,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
   useConfigurationWarningsReducer,
-  useExtensions,
   useExtensionStateReducer,
   useSetConfigurationLocks,
   useUcpConfigFileValue,
@@ -62,9 +60,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const [configuration, setConfiguration] = useConfigurationReducer();
   const [configurationTouched, setConfigurationTouched] =
     useConfigurationTouchedReducer();
-  const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
-  const extensions = useExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const { activeExtensions } = extensionsState;
+  const { extensions } = extensionsState;
   const setConfigurationLocks = useSetConfigurationLocks();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
@@ -178,7 +176,6 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     }
 
                     propagateActiveExtensionsChange(es, {
-                      setActiveExtensions,
                       extensionsState,
                       setExtensionsState,
                       setConfiguration,
@@ -267,7 +264,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configuration,
                     filePath,
                     configurationTouched,
-                    extensionsState.activatedExtensions,
+                    extensionsState.explicitlyActivatedExtensions,
                     activeExtensions
                   )
                     .then(() =>
@@ -286,7 +283,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configuration,
                     file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
                     configurationTouched,
-                    extensionsState.activatedExtensions,
+                    extensionsState.explicitlyActivatedExtensions,
                     activeExtensions
                   )
                 }

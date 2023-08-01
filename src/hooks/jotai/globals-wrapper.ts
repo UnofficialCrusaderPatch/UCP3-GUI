@@ -80,26 +80,6 @@ export function useSetConfigurationWarnings() {
   return useSetAtom(globalAtoms.CONFIGURATION_WARNINGS_REDUCER_ATOM);
 }
 
-export function useExtensionsReducer() {
-  return useAtom(globalAtoms.EXTENSIONS_REDUCER_ATOM);
-}
-export function useExtensions() {
-  return useAtomValue(globalAtoms.EXTENSIONS_REDUCER_ATOM);
-}
-export function useSetExtensions() {
-  return useSetAtom(globalAtoms.EXTENSIONS_REDUCER_ATOM);
-}
-
-export function useActiveExtensionsReducer() {
-  return useAtom(globalAtoms.ACTIVE_EXTENSIONS_REDUCER_ATOM);
-}
-export function useActiveExtensions() {
-  return useAtomValue(globalAtoms.ACTIVE_EXTENSIONS_REDUCER_ATOM);
-}
-export function useSetActiveExtensions() {
-  return useSetAtom(globalAtoms.ACTIVE_EXTENSIONS_REDUCER_ATOM);
-}
-
 export function useConfigurationDefaultsReducer() {
   return useAtom(globalAtoms.CONFIGURATION_DEFAULTS_REDUCER_ATOM);
 }

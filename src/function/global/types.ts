@@ -23,9 +23,28 @@ export type UIDefinition = {
 };
 
 export type ExtensionsState = {
-  allExtensions: Extension[];
-  // Explicitly activated
-  activatedExtensions: Extension[];
-  activeExtensions: Extension[];
+  /**
+   * Array of Extension keeping track of all available Extensions that were discovered at some point
+   */
+  extensions: Extension[];
+
+  /**
+   * Extensions that are available in an online repository but currently not installed.
+   */
+  onlineAvailableExtensions: Extension[];
+
+  /**
+   *  Extensions that are installed and can thus be activated.
+   */
   installedExtensions: Extension[];
+
+  /**
+   * Extensions that are currently active. Used to determine UI option display
+   */
+  activeExtensions: Extension[];
+
+  /**
+   * Extensions that are explicitly set to active
+   */
+  explicitlyActivatedExtensions: Extension[];
 };

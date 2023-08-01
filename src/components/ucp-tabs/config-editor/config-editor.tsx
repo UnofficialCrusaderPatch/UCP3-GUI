@@ -28,8 +28,8 @@ function saveConfig(
   configuration: { [key: string]: unknown },
   folder: string,
   touched: { [key: string]: boolean },
-  allExtensions: Extension[],
-  sparseExtensions: Extension[]
+  sparseExtensions: Extension[],
+  allExtensions: Extension[]
 ) {
   const sparseConfig = Object.fromEntries(
     Object.entries(configuration).filter(([key]) => touched[key])

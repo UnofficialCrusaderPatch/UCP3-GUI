@@ -131,10 +131,10 @@ function collectConfigEntries(
 }
 
 async function getExtensionHandles(ucpFolder: string) {
-  const moduleDir = `${ucpFolder}/modules`;
+  const moduleDir = `${ucpFolder}/modules/`;
   const modDirEnts = (await readDir(moduleDir)).ok().getOrReceive(() => []);
 
-  const pluginDir = `${ucpFolder}/plugins`;
+  const pluginDir = `${ucpFolder}/plugins/`;
   const pluginDirEnts = (await readDir(pluginDir)).ok().getOrReceive(() => []);
 
   const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(

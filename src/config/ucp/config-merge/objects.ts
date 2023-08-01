@@ -20,6 +20,10 @@ type ConfigMetaContent = {
   content: unknown;
 };
 
+type ConfigMetaContentDB = {
+  [key: string]: ConfigMetaContent;
+};
+
 // Attached to a OptionEntry, or separate mapping with url based dictionary.
 type ConfigMetaObject = {
   // The url of the option that this meta info is about
@@ -57,6 +61,7 @@ export type {
   ConfigMetaObject,
   ConfigMetaContent,
   ConfigMetaObjectDB,
+  ConfigMetaContentDB,
   UserValueDB,
   ValueDefinition,
   ConfigDB,

@@ -101,6 +101,23 @@ export default function ExtensionManager() {
         const newActiveExtensions = newExtensionState.activeExtensions;
 
         warnClearingOfConfiguration(newActiveExtensions);
+
+        const res = buildExtensionConfigurationDB(newExtensionState);
+
+        if (res.status.code !== 0) {
+          if (res.status.code === 2) {
+            window.alert(
+              `Error, invalid extension configuration. New configuration has ${res.status.errors.length} errors.`
+            );
+            return;
+          }
+          window.alert(
+            `Be warned, new configuration has ${res.status.warnings.length} warings`
+          );
+        } else {
+          console.log(`New configuration build without errors or warnings`);
+        }
+
         propagateActiveExtensionsChange(newActiveExtensions, {
           extensionsState, // Hmm why this state passed here?
           setExtensionsState,
@@ -110,8 +127,9 @@ export default function ExtensionManager() {
           setConfigurationWarnings,
           setConfigurationLocks,
         });
-        buildExtensionConfigurationDB(newExtensionState);
-        setExtensionsState(newExtensionState);
+
+        setExtensionsState(res.state);
+        console.log('New extension state', res.state);
       }}
       moveCallback={(event: { type: 'up' | 'down' }) => {}}
       revDeps={revDeps[ext.name].filter(

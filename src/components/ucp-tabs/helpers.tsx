@@ -3,23 +3,10 @@ import {
   extensionsToOptionEntries,
   getConfigDefaults,
 } from 'config/ucp/extension-util';
-import {
-  useActiveExtensionsReducer,
-  useConfigurationDefaults,
-  useConfigurationDefaultsReducer,
-  useConfigurationReducer,
-  useConfigurationTouchedReducer,
-  useConfigurationWarnings,
-  useConfigurationWarningsReducer,
-  useExtensions,
-  useExtensionStateReducer,
-  useUcpConfigFileValue,
-} from 'hooks/jotai/globals-wrapper';
 
 function propagateActiveExtensionsChange(
   activeExtensions: Extension[],
   stateFunctions: {
-    setActiveExtensions: any;
     extensionsState: any;
     setExtensionsState: any;
     setConfiguration: any;
@@ -30,7 +17,6 @@ function propagateActiveExtensionsChange(
   }
 ) {
   const {
-    setActiveExtensions,
     extensionsState,
     setExtensionsState,
     setConfiguration,
@@ -87,18 +73,17 @@ function propagateActiveExtensionsChange(
     value: locks,
   });
   // All extensions that are not active are deemed inactive...
-  const inactiveExtensions = extensionsState.allExtensions.filter(
+  const inactiveExtensions = extensionsState.extensions.filter(
     (e: Extension) =>
       activeExtensions
         .map((ex: Extension) => `${ex.name}-${ex.version}`)
         .indexOf(`${e.name}-${e.version}`) === -1
   );
   setExtensionsState({
-    allExtensions: extensionsState.allExtensions,
+    ...extensionsState,
     activeExtensions,
     installedExtensions: inactiveExtensions,
   });
-  setActiveExtensions(activeExtensions);
 }
 
 // eslint-disable-next-line import/prefer-default-export

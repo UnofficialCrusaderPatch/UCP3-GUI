@@ -6,9 +6,7 @@ import {
   useSetConfigurationDefaults,
   useSetConfigurationLocks,
   useConfigurationTouched,
-  useExtensions,
   useExtensionStateReducer,
-  useSetActiveExtensions,
   useSetConfiguration,
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
@@ -27,8 +25,6 @@ import {
 } from './extensions-state';
 
 export default function ExtensionManager() {
-  const extensions = useExtensions();
-  const setActiveExtensions = useSetActiveExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
@@ -57,15 +53,15 @@ export default function ExtensionManager() {
     }
   }
 
-  const eds = new ExtensionDependencySolver(extensions);
+  const eds = new ExtensionDependencySolver(extensionsState.extensions);
   const revDeps = Object.fromEntries(
-    extensions.map((e: Extension) => [
+    extensionsState.extensions.map((e: Extension) => [
       e.name,
       eds.reverseDependenciesFor(e.name),
     ])
   );
   const depsFor = Object.fromEntries(
-    extensions.map((e: Extension) => [
+    extensionsState.extensions.map((e: Extension) => [
       e.name,
       eds
         .dependenciesFor(e.name)
@@ -74,10 +70,13 @@ export default function ExtensionManager() {
     ])
   );
   const extensionsByName = Object.fromEntries(
-    extensions.map((ext: Extension) => [ext.name, ext])
+    extensionsState.extensions.map((ext: Extension) => [ext.name, ext])
   );
   const extensionsByNameVersionString = Object.fromEntries(
-    extensions.map((ext: Extension) => [`${ext.name}-${ext.version}`, ext])
+    extensionsState.extensions.map((ext: Extension) => [
+      `${ext.name}-${ext.version}`,
+      ext,
+    ])
   );
 
   const eUI = extensionsState.installedExtensions.map((ext) => (
@@ -102,7 +101,6 @@ export default function ExtensionManager() {
 
         onActiveExtensionsUpdate(newActiveExtensions);
         propagateActiveExtensionsChange(newActiveExtensions, {
-          setActiveExtensions,
           extensionsState,
           setExtensionsState,
           setConfiguration,
@@ -112,7 +110,6 @@ export default function ExtensionManager() {
           setConfigurationLocks,
         });
         setExtensionsState(newExtensionState);
-        setActiveExtensions(newActiveExtensions);
       }}
       moveCallback={(event: { type: 'up' | 'down' }) => {}}
       revDeps={revDeps[ext.name].filter(
@@ -144,20 +141,18 @@ export default function ExtensionManager() {
             removeExtensionFromExplicitlyActivatedExtensions(
               extensionsState,
               eds,
-              extensions,
+              extensionsState.extensions,
               ext
             );
           const ae = newExtensionState.activeExtensions;
           onActiveExtensionsUpdate(ae);
           setExtensionsState(newExtensionState);
-          setActiveExtensions(ae);
         }}
         moveCallback={(event: { name: string; type: 'up' | 'down' }) => {
           const newExtensionsState = moveExtension(extensionsState, event);
 
           onActiveExtensionsUpdate(newExtensionsState.activeExtensions);
           setExtensionsState(newExtensionsState);
-          setActiveExtensions(newExtensionsState.activeExtensions);
         }}
         revDeps={revDeps[ext.name].filter(
           (e: string) =>

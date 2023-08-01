@@ -1,67 +1,9 @@
-import { Container } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
-import {
-  useSetConfigurationDefaults,
-  useSetConfigurationLocks,
-  useConfigurationTouched,
-  useExtensions,
-  useExtensionStateReducer,
-  useSetActiveExtensions,
-  useSetConfiguration,
-  useSetConfigurationTouched,
-  useSetConfigurationWarnings,
-} from 'hooks/jotai/globals-wrapper';
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
 import { info } from 'util/scripts/logging';
-
-import ExtensionElement from './extension-element';
-import { propagateActiveExtensionsChange } from '../helpers';
-
-// Stub documentation for now
-type ExtensionStateDoc = {
-  /**
-   * Array of Extension keeping track of all available Extensions that were discovered at some point
-   */
-  extensions: Extension[];
-
-  /**
-   * Extensions that are currently active. Used to determine UI option display
-   */
-  activeExtensions: Extension[];
-
-  /**
-   * Extensions that are explicitly set to active
-   */
-  explicitlyActivatedExtensions: Extension[];
-
-  /**
-   * Extensions that are available in an online repository but currently not installed.
-   */
-  onlineAvailableExtensions: Extension[];
-};
-
-class GlobalExtensionsState {
-  private constructor() {
-    console.log('Instance created');
-  }
-
-  // Singleton pattern
-  static #instance: GlobalExtensionsState | undefined;
-
-  public static instance() {
-    if (this.#instance === undefined) {
-      // no error, since the code is inside the class
-      this.#instance = new GlobalExtensionsState();
-    }
-    return this.#instance;
-  }
-}
-
-const GLOBAL_EXTENSIONS_STATE = GlobalExtensionsState.instance();
 
 const addExtensionToExplicityActivatedExtensions = (
   extensionsState: ExtensionsState,
@@ -107,8 +49,10 @@ const addExtensionToExplicityActivatedExtensions = (
 
   return {
     ...extensionsState,
-    // allExtensions: extensionsState.allExtensions,
-    activatedExtensions: [...extensionsState.activatedExtensions, ext],
+    explicitlyActivatedExtensions: [
+      ...extensionsState.explicitlyActivatedExtensions,
+      ext,
+    ],
     activeExtensions: final,
     installedExtensions: extensionsState.installedExtensions.filter(
       (e: Extension) =>
@@ -126,7 +70,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = (
   ext: Extension
 ) => {
   const relevantExtensions = new Set(
-    extensionsState.activatedExtensions
+    extensionsState.explicitlyActivatedExtensions
       .filter((e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`)
       .map((e: Extension) => eds.dependenciesFor(e.name).flat())
       .flat()
@@ -139,10 +83,11 @@ const removeExtensionFromExplicitlyActivatedExtensions = (
 
   return {
     ...extensionsState,
-    allExtensions: extensionsState.allExtensions,
-    activatedExtensions: extensionsState.activatedExtensions.filter(
-      (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
-    ),
+    extensions: extensionsState.extensions,
+    explicitlyActivatedExtensions:
+      extensionsState.explicitlyActivatedExtensions.filter(
+        (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
+      ),
     activeExtensions: ae,
     installedExtensions: extensions
       .filter((e: Extension) => !relevantExtensions.has(e.name))

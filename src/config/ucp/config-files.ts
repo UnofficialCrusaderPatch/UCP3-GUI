@@ -3,58 +3,47 @@ import { TFunction } from 'i18next';
 import { writeTextFile, loadYaml } from 'tauri/tauri-files';
 import Result from 'util/structs/result';
 import { stringify as yamlStringify } from 'yaml';
-import { Extension } from './common';
+import { ConfigFile, Extension } from './common';
 
 export async function loadConfigFromFile(filePath: string, t: TFunction) {
-  const configRes: Result<
-    {
-      order: string[];
-      modules: {
-        [key: string]: {
-          [key: string]: unknown;
-        };
-      };
-      plugins: {
-        [key: string]: {
-          [key: string]: unknown;
-        };
-      };
-    },
-    unknown
-  > = await loadYaml(filePath); // will only be one
+  const configRes: Result<ConfigFile, unknown> = await loadYaml(filePath); // will only be one
 
   if (configRes.isErr()) {
     return {
       status: 'FAIL',
       message: `${configRes.err().get()}`,
+      result: {} as ConfigFile,
     };
   }
 
   const config = configRes.getOrThrow();
-  if (config.modules === undefined && config.plugins === undefined) {
+  // TODO: improve
+  if (config['config-sparse'] === undefined) {
     return {
       status: 'FAIL',
       message: t('gui-editor:config.not.valid'),
+      result: {} as ConfigFile,
     };
   }
 
-  const finalConfig: { [key: string]: unknown } = {};
+  // const finalConfig: { [key: string]: unknown } = {};
 
-  Object.entries(config.modules || {}).forEach(([key, value]) => {
-    finalConfig[key] = value;
-  });
+  // Object.entries(config['config-sparse'].modules || {}).forEach(
+  //   ([key, value]) => {
+  //     finalConfig[key] = value;
+  //   }
+  // );
 
-  Object.entries(config.plugins || {}).forEach(([key, value]) => {
-    finalConfig[key] = value;
-  });
+  // Object.entries(config['config-sparse'].plugins || {}).forEach(
+  //   ([key, value]) => {
+  //     finalConfig[key] = value;
+  //   }
+  // );
 
   return {
     status: 'OK',
     message: '',
-    result: {
-      config: finalConfig,
-      order: config.order || [],
-    },
+    result: config,
   };
 }
 
@@ -95,7 +84,8 @@ function saveUCPConfigPart(
   finalConfig: UCP3SerializedUserConfig,
   subConfig: 'config-full' | 'config-sparse',
   config: { [key: string]: unknown },
-  extensions: Extension[]
+  extensions: Extension[],
+  allExtensions: Extension[]
 ) {
   console.debug(finalConfig[subConfig]);
 
@@ -109,7 +99,7 @@ function saveUCPConfigPart(
       const parts = key.split('.');
       const extName = parts[0];
 
-      const ext = extensions.filter((ex) => ex.name === extName)[0];
+      const ext = allExtensions.filter((ex) => ex.name === extName)[0];
 
       if (ext === undefined || ext === null) {
         console.error(`No extension found with name: ${extName}`);
@@ -169,12 +159,19 @@ export async function saveUCPConfig(
     'config-full': { modules: {}, plugins: {}, 'load-order': [] },
   };
 
-  saveUCPConfigPart(finalConfig, 'config-full', fullConfig, fullExtensions);
+  saveUCPConfigPart(
+    finalConfig,
+    'config-full',
+    fullConfig,
+    fullExtensions,
+    fullExtensions
+  );
   saveUCPConfigPart(
     finalConfig,
     'config-sparse',
     sparseConfig,
-    sparseExtensions
+    sparseExtensions,
+    fullExtensions
   );
 
   await writeTextFile(

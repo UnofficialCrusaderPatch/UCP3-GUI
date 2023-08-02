@@ -11,10 +11,10 @@ import {
 import { extractZipToPath } from 'tauri/tauri-invoke';
 import Result from 'util/structs/result';
 import Option from 'util/structs/option';
-import { activateUCP, createRealBink } from 'function/ucp/ucp-state';
+import { activateUCP, createRealBink } from 'function/ucp-files/ucp-state';
 import { getBinary } from 'tauri/tauri-http';
 import { checkForLatestUCP3DevReleaseUpdate } from './github';
-import { loadUCPVersion } from '../ucp/ucp-version';
+import { loadUCPVersion } from '../ucp-files/ucp-version';
 import { GITHUB_AUTH_HEADER } from './download-enums';
 
 export async function installUCPFromZip(

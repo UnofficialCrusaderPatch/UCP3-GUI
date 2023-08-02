@@ -6,9 +6,7 @@ import {
   useSetConfigurationDefaults,
   useSetConfigurationLocks,
   useConfigurationTouched,
-  useExtensions,
   useExtensionStateReducer,
-  useSetActiveExtensions,
   useSetConfiguration,
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
@@ -20,10 +18,30 @@ import { info } from 'util/scripts/logging';
 
 import ExtensionElement from './extension-element';
 import { propagateActiveExtensionsChange } from '../helpers';
+import {
+  addExtensionToExplicityActivatedExtensions,
+  moveExtension,
+  removeExtensionFromExplicitlyActivatedExtensions,
+} from './extensions-state';
+import { buildExtensionConfigurationDB } from './extension-configuration';
+import { createHelperObjects } from './extension-helper-objects';
+
+function warnClearingOfConfiguration(configurationTouched: {
+  [key: string]: boolean;
+}) {
+  // Defer here to a processor for the current list of active extensions to yield the
+
+  const touchedOptions = Object.entries(configurationTouched).filter(
+    (pair) => pair[1] === true
+  );
+  if (touchedOptions.length > 0) {
+    window.alert(
+      `WARNING: Changing the active extensions will reset your configuration`
+    );
+  }
+}
 
 export default function ExtensionManager() {
-  const extensions = useExtensions();
-  const setActiveExtensions = useSetActiveExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
@@ -39,41 +57,13 @@ export default function ExtensionManager() {
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
-  function onActiveExtensionsUpdate(exts: Extension[]) {
-    // Defer here to a processor for the current list of active extensions to yield the
-
-    const touchedOptions = Object.entries(configurationTouched).filter(
-      (pair) => pair[1] === true
-    );
-    if (touchedOptions.length > 0) {
-      window.alert(
-        `WARNING: Changing the active extensions will reset your configuration`
-      );
-    }
-  }
-
-  const eds = new ExtensionDependencySolver(extensions);
-  const revDeps = Object.fromEntries(
-    extensions.map((e: Extension) => [
-      e.name,
-      eds.reverseDependenciesFor(e.name),
-    ])
-  );
-  const depsFor = Object.fromEntries(
-    extensions.map((e: Extension) => [
-      e.name,
-      eds
-        .dependenciesFor(e.name)
-        .flat()
-        .filter((s) => s !== e.name),
-    ])
-  );
-  const extensionsByName = Object.fromEntries(
-    extensions.map((ext: Extension) => [ext.name, ext])
-  );
-  const extensionsByNameVersionString = Object.fromEntries(
-    extensions.map((ext: Extension) => [`${ext.name}-${ext.version}`, ext])
-  );
+  const {
+    eds,
+    extensionsByName,
+    extensionsByNameVersionString,
+    revDeps,
+    depsFor,
+  } = createHelperObjects(extensionsState.extensions);
 
   const eUI = extensionsState.installedExtensions.map((ext) => (
     <ExtensionElement
@@ -85,66 +75,42 @@ export default function ExtensionManager() {
       clickCallback={(event) => {
         // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
-        const dependencyExtensionNames = eds.dependenciesFor(ext.name).flat();
-
-        const dependencies: Extension[] = dependencyExtensionNames
-          .filter(
-            (v: string) =>
-              extensionsState.activeExtensions
-                .map((e: Extension) => e.name)
-                .indexOf(v) === -1
-          )
-          .map((v: string) => {
-            if (extensionsByName[v] !== undefined) {
-              return extensionsByName[v];
-            }
-            throw new Error();
-          }) //           .filter((e: Extension) => dependencyExtensionNames.indexOf(e.name) !== -1)
-          .reverse();
-
-        const remainder = extensionsState.activeExtensions
-          .flat()
-          .map((e: Extension) => `${e.name}-${e.version}`)
-          .filter(
-            (es) =>
-              dependencies
-                .map((e: Extension) => `${e.name}-${e.version}`)
-                .indexOf(es) === -1
-          )
-          .map((es: string) => extensionsByNameVersionString[es]);
-
-        const final = [...dependencies, ...remainder];
-
-        const localEDS = new ExtensionDependencySolver(final);
-        info(localEDS.solve());
-        const order = localEDS
-          .solve()
-          .reverse()
-          .map((a: string[]) => a.map((v: string) => extensionsByName[v]));
-
-        onActiveExtensionsUpdate(final);
-        propagateActiveExtensionsChange(final, {
-          setActiveExtensions,
+        const newExtensionState = addExtensionToExplicityActivatedExtensions(
           extensionsState,
-          setExtensionsState,
+          eds,
+          extensionsByName,
+          extensionsByNameVersionString,
+          ext
+        );
+
+        warnClearingOfConfiguration(configurationTouched);
+
+        const res = buildExtensionConfigurationDB(newExtensionState);
+
+        if (res.configuration.statusCode !== 0) {
+          if (res.configuration.statusCode === 2) {
+            window.alert(
+              `Error, invalid extension configuration. New configuration has ${res.configuration.errors.length} errors.`
+            );
+            return;
+          }
+          window.alert(
+            `Be warned, new configuration has ${res.configuration.warnings.length} warings`
+          );
+        } else {
+          console.log(`New configuration build without errors or warnings`);
+        }
+
+        propagateActiveExtensionsChange(res, {
           setConfiguration,
           setConfigurationDefaults,
           setConfigurationTouched,
           setConfigurationWarnings,
           setConfigurationLocks,
         });
-        setExtensionsState({
-          // allExtensions: extensionsState.allExtensions,
-          activatedExtensions: [...extensionsState.activatedExtensions, ext],
-          //  activeExtensions: final,
-          installedExtensions: extensionsState.installedExtensions.filter(
-            (e: Extension) =>
-              final
-                .map((ex: Extension) => `${ex.name}-${ex.version}`)
-                .indexOf(`${e.name}-${e.version}`) === -1
-          ),
-        });
-        setActiveExtensions(final);
+
+        setExtensionsState(res);
+        console.log('New extension state', res);
       }}
       moveCallback={(event: { type: 'up' | 'down' }) => {}}
       revDeps={revDeps[ext.name].filter(
@@ -172,53 +138,22 @@ export default function ExtensionManager() {
         movability={movability}
         buttonText={t('gui-general:deactivate')}
         clickCallback={(event) => {
-          const relevantExtensions = new Set(
-            extensionsState.activatedExtensions
-              .filter(
-                (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
-              )
-              .map((e: Extension) => eds.dependenciesFor(e.name).flat())
-              .flat()
-          );
-
-          // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
-          const ae = extensionsState.activeExtensions.filter((e) =>
-            relevantExtensions.has(e.name)
-          );
-          onActiveExtensionsUpdate(ae);
-          setExtensionsState({
-            allExtensions: extensionsState.allExtensions,
-            activatedExtensions: extensionsState.activatedExtensions.filter(
-              (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
-            ),
-            activeExtensions: ae,
-            installedExtensions: extensions
-              .filter((e: Extension) => !relevantExtensions.has(e.name))
-              .sort((a: Extension, b: Extension) =>
-                a.name.localeCompare(b.name)
-              ),
-          } as unknown as ExtensionsState);
-          setActiveExtensions(ae);
+          const newExtensionState =
+            removeExtensionFromExplicitlyActivatedExtensions(
+              extensionsState,
+              eds,
+              extensionsState.extensions,
+              ext
+            );
+          const ae = newExtensionState.activeExtensions;
+          warnClearingOfConfiguration(configurationTouched);
+          setExtensionsState(newExtensionState);
         }}
         moveCallback={(event: { name: string; type: 'up' | 'down' }) => {
-          const { name, type } = event;
-          const aei = extensionsState.activeExtensions
-            .map((e) => e.name)
-            .indexOf(name);
-          const element = extensionsState.activeExtensions[aei];
-          let newIndex = type === 'up' ? aei - 1 : aei + 1;
-          newIndex = newIndex < 0 ? 0 : newIndex;
-          newIndex =
-            newIndex > extensionsState.activeExtensions.length - 1
-              ? extensionsState.activeExtensions.length - 1
-              : newIndex;
-          extensionsState.activeExtensions.splice(aei, 1);
-          extensionsState.activeExtensions.splice(newIndex, 0, element);
-          onActiveExtensionsUpdate(extensionsState.activeExtensions);
-          setExtensionsState({
-            activeExtensions: extensionsState.activeExtensions,
-          } as unknown as ExtensionsState);
-          setActiveExtensions(extensionsState.activeExtensions);
+          const newExtensionsState = moveExtension(extensionsState, event);
+
+          warnClearingOfConfiguration(configurationTouched);
+          setExtensionsState(newExtensionsState);
         }}
         revDeps={revDeps[ext.name].filter(
           (e: string) =>
@@ -253,3 +188,6 @@ export default function ExtensionManager() {
     </Container>
   );
 }
+
+// eslint-disable-next-line @typescript-eslint/no-use-before-define
+export { warnClearingOfConfiguration };

@@ -1,0 +1,4 @@
+name: example
+version: 0.0.1
+specification-version: 1.0.0
+depends: [ucp >= 2.15.0]

@@ -2,6 +2,7 @@ import { loadYaml, Error, resolvePath } from 'tauri/tauri-files';
 import Result from 'util/structs/result';
 import Option from 'util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
+import { UCP_VERSION_FILE } from 'function/global/constants/file-constants';
 
 export interface UCPVersion {
   major: Option<number>;
@@ -77,6 +78,6 @@ export function getEmptyUCPVersion(): UCPVersion {
 export async function loadUCPVersion(
   gameFolder: string
 ): Promise<Result<UCPVersion, Error>> {
-  const path = await resolvePath(gameFolder, 'ucp-version.yml');
+  const path = await resolvePath(gameFolder, UCP_VERSION_FILE);
   return (await loadYaml(path)).mapOk((yaml) => new UCPVersion(yaml));
 }

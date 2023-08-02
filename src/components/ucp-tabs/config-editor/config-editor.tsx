@@ -287,6 +287,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       modifications: m,
                     };
                     // TODO: do checking here if the user part is not conflicting?
+                    // TODO: memorize the ConfigMetaObjectDB somewhere!
                   });
 
                   const newConfiguration: { [key: string]: unknown } = {};

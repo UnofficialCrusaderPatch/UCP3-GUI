@@ -40,7 +40,9 @@ function propagateActiveExtensionsChange(
   // TODO: make this rely on the extension state?
   Object.entries(extensionsState.configuration.state).forEach(([url, cmo]) => {
     defaults[url] = cmo.modifications.value.content;
-    locks[url] = true;
+    if (cmo.modifications.value.qualifier === 'required') {
+      locks[url] = true;
+    }
   });
 
   // Here the values are set

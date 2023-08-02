@@ -128,7 +128,6 @@ function buildExtensionConfigurationDBFromActiveExtensions(
         } as ConfigMetaContent;
       });
 
-      // TODO: do conflict checking now!
       db[url] = {
         ...currentCMO,
         modifications: {

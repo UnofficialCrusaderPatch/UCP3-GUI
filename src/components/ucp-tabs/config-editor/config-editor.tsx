@@ -194,7 +194,6 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   if (lo !== undefined && lo.length > 0) {
                     const explicitActiveExtensions: Extension[] = [];
 
-                    // TODO: process explicitly activated configs
                     // eslint-disable-next-line no-restricted-syntax
                     for (const e of lo) {
                       const ds = DependencyStatement.fromString(e);

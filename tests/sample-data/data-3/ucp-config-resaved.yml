@@ -1,0 +1,286 @@
+specification-version: 1.0.0
+active: true
+config-sparse:
+  modules:
+    ucp:
+      config:
+        ai_addattack:
+          contents:
+            value:
+              enabled: true
+              choice: absolute
+              choices:
+                absolute:
+                  slider: 5
+                relative:
+                  slider: 0.3
+    example:
+      config: {}
+  plugins: {}
+  load-order:
+    - example == 0.0.1
+config-full:
+  modules:
+    ucp:
+      config:
+        ai_addattack:
+          contents:
+            value:
+              enabled: true
+              choice: absolute
+              choices:
+                absolute:
+                  slider: 5
+                relative:
+                  slider: 0.3
+        ai_attacklimit:
+          value:
+            contents:
+              value:
+                enabled: true
+                sliderValue: 200
+        ai_assaultswitch:
+          enabled:
+            contents:
+              value: false
+        ai_attacktarget:
+          contents:
+            value:
+              enabled: false
+              choice: ''
+        ai_attackwave:
+          enabled:
+            contents:
+              value: true
+        ai_access:
+          enabled:
+            contents:
+              value: false
+        ai_demolish:
+          ai_demolish_walls:
+            enabled:
+              contents:
+                value: false
+          ai_demolish_trapped:
+            enabled:
+              contents:
+                value: false
+          ai_demolish_eco:
+            enabled:
+              contents:
+                value: false
+        ai_housing:
+          build_housing:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 0
+          campfire_housing:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 0
+          delete_housing:
+            enabled:
+              contents:
+                value: false
+        ai_nosleep:
+          enabled:
+            contents:
+              value: false
+        ai_rebuild:
+          enabled:
+            contents:
+              value: false
+        ai_tethers:
+          enabled:
+            contents:
+              value: false
+        ai_buywood:
+          enabled:
+            contents:
+              value: false
+        ai_defense:
+          enabled:
+            contents:
+              value: false
+        ai_fix_crusader_archers_pitch:
+          enabled:
+            contents:
+              value: false
+        ai_fix_laddermen_with_enclosed_keep:
+          enabled:
+            contents:
+              value: false
+        ai_recruitinterval:
+          enabled:
+            contents:
+              value: false
+        ai_recruitstate_initialtimer:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 6
+        ai_towerengines:
+          enabled:
+            contents:
+              value: false
+        o_freetrader:
+          enabled:
+            contents:
+              value: false
+        o_responsivegates:
+          enabled:
+            contents:
+              value: false
+        o_stop_player_keep_rotation:
+          enabled:
+            contents:
+              value: false
+        o_firecooldown:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 2000
+        o_gamespeed:
+          enabled:
+            contents:
+              value: false
+        o_healer:
+          enabled:
+            contents:
+              value: false
+        o_moatvisibility:
+          enabled:
+            contents:
+              value: false
+        o_shfy:
+          o_shfy_beer:
+            enabled:
+              contents:
+                value: false
+          o_shfy_religion:
+            enabled:
+              contents:
+                value: false
+          o_shfy_peasantspawnrate:
+            enabled:
+              contents:
+                value: false
+          o_shfy_resourcequantity:
+            enabled:
+              contents:
+                value: false
+        o_xtreme:
+          enabled:
+            contents:
+              value: false
+        u_arabwall:
+          enabled:
+            contents:
+              value: false
+        u_arabxbow:
+          enabled:
+            contents:
+              value: false
+        u_fireballistafix:
+          enabled:
+            contents:
+              value: false
+        u_laddermen:
+          enabled:
+            contents:
+              value: null
+        u_spearmen:
+          enabled:
+            contents:
+              value: false
+        u_spearmen_run:
+          enabled:
+            contents:
+              value: false
+        u_tanner_fix:
+          enabled:
+            contents:
+              value: false
+        fix_apple_orchard_build_size:
+          enabled:
+            contents:
+              value: false
+        o_armory_marketplace_weapon_order_fix:
+          enabled:
+            contents:
+              value: false
+        o_change_siege_engine_spawn_position_catapult:
+          enabled:
+            contents:
+              value: false
+        o_fix_baker_disappear:
+          enabled:
+            contents:
+              value: false
+        o_fix_fletcher_bug:
+          enabled:
+            contents:
+              value: false
+        o_fix_ladderclimb:
+          enabled:
+            contents:
+              value: false
+        o_fix_moat_digging_unit_disappearing:
+          enabled:
+            contents:
+              value: false
+        u_fix_applefarm_blocking:
+          enabled:
+            contents:
+              value: false
+        o_playercolor:
+          contents:
+            value:
+              enabled: false
+              choice: red
+        u_fix_lord_animation_stuck_movement:
+          enabled:
+            contents:
+              value: false
+        o_keys:
+          enabled:
+            contents:
+              value: false
+        o_default_multiplayer_speed:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 40
+        o_increase_path_update_tick_rate:
+          enabled:
+            contents:
+              value: false
+        o_engineertent:
+          enabled:
+            contents:
+              value: false
+        o_onlyai:
+          enabled:
+            contents:
+              value: true
+        o_seed_modification_possibility_title:
+          contents:
+            value:
+              enabled: false
+              choice: ''
+        o_restore_arabian_engineer_speech:
+          enabled:
+            contents:
+              value: false
+        o_override_identity_menu:
+          enabled:
+            contents:
+              value: false
+    example:
+      config: {}
+  plugins: {}
+  load-order:
+    - example == 0.0.1
+    - ucp == 2.15.0

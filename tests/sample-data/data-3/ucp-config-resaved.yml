@@ -6,7 +6,7 @@ config-sparse:
       config:
         ai_addattack:
           contents:
-            value:
+            required-value:
               enabled: true
               choice: absolute
               choices:
@@ -25,7 +25,7 @@ config-full:
       config:
         ai_addattack:
           contents:
-            value:
+            required-value:
               enabled: true
               choice: absolute
               choices:

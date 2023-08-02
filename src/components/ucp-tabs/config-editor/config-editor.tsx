@@ -15,6 +15,7 @@ import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
   useConfigurationDefaultsReducer,
+  useConfigurationQualifierReducer,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
   useConfigurationWarningsReducer,
@@ -24,7 +25,7 @@ import {
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { info } from 'util/scripts/logging';
-import { ExtensionsState } from 'function/global/types';
+import { ConfigurationQualifier, ExtensionsState } from 'function/global/types';
 import { collectConfigEntries } from 'function/extensions/discovery';
 import {
   ConfigMetaContentDB,
@@ -49,7 +50,8 @@ function saveConfig(
   folder: string,
   touched: { [key: string]: boolean },
   sparseExtensions: Extension[],
-  allExtensions: Extension[]
+  allExtensions: Extension[],
+  configurationQualifier: { [key: string]: ConfigurationQualifier }
 ) {
   const sparseConfig = Object.fromEntries(
     Object.entries(configuration).filter(([key]) => touched[key])
@@ -64,7 +66,8 @@ function saveConfig(
     fullConfig,
     sparseExtensions,
     allExtensions,
-    folder
+    folder,
+    configurationQualifier
   );
 }
 
@@ -84,6 +87,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const { activeExtensions } = extensionsState;
   const { extensions } = extensionsState;
   const setConfigurationLocks = useSetConfigurationLocks();
+
+  const [configurationQualifier, setConfigurationQualifier] =
+    useConfigurationQualifierReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -160,14 +166,6 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     explicitlyActivatedExtensions: [],
                   } as ExtensionsState;
 
-                  propagateActiveExtensionsChange(newExtensionsState, {
-                    setConfiguration,
-                    setConfigurationDefaults,
-                    setConfigurationTouched,
-                    setConfigurationWarnings,
-                    setConfigurationLocks,
-                  });
-
                   const parsingResult: {
                     status: string;
                     message: string;
@@ -237,15 +235,15 @@ export default function ConfigEditor(args: { readonly: boolean }) {
 
                     newExtensionsState =
                       buildExtensionConfigurationDB(newExtensionsState);
-
-                    propagateActiveExtensionsChange(newExtensionsState, {
-                      setConfiguration,
-                      setConfigurationDefaults,
-                      setConfigurationTouched,
-                      setConfigurationWarnings,
-                      setConfigurationLocks,
-                    });
                   }
+
+                  propagateActiveExtensionsChange(newExtensionsState, {
+                    setConfiguration,
+                    setConfigurationDefaults,
+                    setConfigurationTouched,
+                    setConfigurationWarnings,
+                    setConfigurationLocks,
+                  });
 
                   setExtensionsState(newExtensionsState);
 
@@ -280,6 +278,14 @@ export default function ConfigEditor(args: { readonly: boolean }) {
 
                   const db: ConfigMetaObjectDB = {};
 
+                  const newConfigurationQualifier: {
+                    [key: string]: ConfigurationQualifier;
+                  } = {};
+                  setConfigurationQualifier({
+                    type: 'set-multiple',
+                    value: {},
+                  });
+
                   Object.entries(userConfigEntries).forEach(([url, data]) => {
                     const m = buildConfigMetaContentDB('user', data);
                     db[url] = {
@@ -287,7 +293,11 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       modifications: m,
                     };
                     // TODO: do checking here if the user part is not conflicting?
-                    // TODO: memorize the ConfigMetaObjectDB somewhere!
+
+                    let q = m.value.qualifier;
+                    if (q === 'unspecified') q = 'required';
+                    newConfigurationQualifier[url] =
+                      q as ConfigurationQualifier;
                   });
 
                   const newConfiguration: { [key: string]: unknown } = {};
@@ -306,6 +316,10 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   setConfigurationTouched({
                     type: 'set-multiple',
                     value: newConfigurationTouched,
+                  });
+                  setConfigurationQualifier({
+                    type: 'set-multiple',
+                    value: newConfigurationQualifier,
                   });
                 }}
               />
@@ -333,7 +347,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     filePath,
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions
+                    activeExtensions,
+                    configurationQualifier
                   )
                     .then(() =>
                       setConfigStatus(t('gui-editor:config.status.exported'))
@@ -352,7 +367,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions
+                    activeExtensions,
+                    configurationQualifier
                   )
                 }
               >

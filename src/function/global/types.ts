@@ -61,3 +61,5 @@ export type ExtensionsState = {
    */
   configuration: ConfigurationState;
 };
+
+export type ConfigurationQualifier = 'required' | 'suggested';

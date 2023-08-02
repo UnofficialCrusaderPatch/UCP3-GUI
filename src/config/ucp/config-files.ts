@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import { ConfigurationQualifier } from 'function/global/types';
 import { TFunction } from 'i18next';
 import { writeTextFile, loadYaml } from 'tauri/tauri-files';
 import Result from 'util/structs/result';
@@ -49,6 +50,10 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
 
 type Contents = {
   value: unknown;
+} & {
+  'required-value': unknown;
+} & {
+  'suggested-value': unknown;
 };
 
 type SubObjectOrContents = {
@@ -85,7 +90,8 @@ function saveUCPConfigPart(
   subConfig: 'config-full' | 'config-sparse',
   config: { [key: string]: unknown },
   extensions: Extension[],
-  allExtensions: Extension[]
+  allExtensions: Extension[],
+  configurationQualifier: { [key: string]: ConfigurationQualifier }
 ) {
   console.debug(finalConfig[subConfig]);
 
@@ -127,7 +133,18 @@ function saveUCPConfigPart(
         fcp[finalpart] = { contents: {} };
       }
       const c = fcp[finalpart].contents as Contents;
-      c.value = value;
+
+      if (configurationQualifier[key] !== undefined) {
+        if (configurationQualifier[key] === 'required') {
+          c['required-value'] = value;
+        } else if (configurationQualifier[key] === 'suggested') {
+          c['suggested-value'] = value;
+        } else {
+          c['required-value'] = value;
+        }
+      } else {
+        c.value = value;
+      }
     });
 
   extensions.forEach((e: Extension) => {
@@ -150,7 +167,8 @@ export async function saveUCPConfig(
   fullConfig: { [key: string]: unknown },
   sparseExtensions: Extension[],
   fullExtensions: Extension[],
-  filePath: string
+  filePath: string,
+  configurationQualifier: { [key: string]: ConfigurationQualifier }
 ) {
   const finalConfig: UCP3SerializedUserConfig = {
     'specification-version': '1.0.0',
@@ -164,14 +182,16 @@ export async function saveUCPConfig(
     'config-full',
     fullConfig,
     fullExtensions,
-    fullExtensions
+    fullExtensions,
+    configurationQualifier
   );
   saveUCPConfigPart(
     finalConfig,
     'config-sparse',
     sparseConfig,
     sparseExtensions,
-    fullExtensions
+    fullExtensions,
+    configurationQualifier
   );
 
   await writeTextFile(

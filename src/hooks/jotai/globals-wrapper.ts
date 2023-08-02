@@ -109,3 +109,15 @@ export function useConfigurationLocks() {
 export function useSetConfigurationLocks() {
   return useSetAtom(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
 }
+
+export function useConfigurationQualifierReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}
+
+export function useConfigurationQualifier() {
+  return useAtomValue(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}
+
+export function useSetConfigurationQualifier() {
+  return useSetAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}

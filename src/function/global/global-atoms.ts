@@ -4,6 +4,7 @@ import { atom } from 'jotai';
 import {
   ArrayReducerArgs,
   ArrayReducerState,
+  ConfigurationQualifier,
   ExtensionsState,
   KeyValueReducerArgs,
   KeyValueReducerState,
@@ -38,6 +39,8 @@ const configurationWarningsReducer = KeyValueReducer<Warning>();
 const extensionsReducer = ArrayReducer<Extension>();
 const activeExtensionsReducer = ArrayReducer<Extension>();
 const configurationDefaultsReducer = KeyValueReducer<unknown>();
+
+const configurationQualifierReducer = KeyValueReducer<ConfigurationQualifier>();
 
 const extensionStateReducer = (
   oldState: ExtensionsState,
@@ -103,4 +106,9 @@ const configurationLocksReducer = KeyValueReducer<ConfigurationLock>();
 export const CONFIGURATION_LOCKS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationLocksReducer
+);
+
+export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
+  {},
+  configurationQualifierReducer
 );

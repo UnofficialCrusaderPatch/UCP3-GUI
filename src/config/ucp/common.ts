@@ -89,25 +89,27 @@ modules:
 ```
 */
 
-type ConfigEntry = {
-  contents: {
-    // TODO: is the default value required or suggested? I would prefer required
-    value: undefined;
-    'required-value': unknown;
-    'suggested-value': unknown;
-    'required-min': number;
-    'required-max': number;
-    'suggested-min': number;
-    'suggested-max': number;
+type ConfigEntryContents = {
+  // TODO: is the default value required or suggested? I would prefer required
+  value: undefined;
+  'required-value': unknown;
+  'suggested-value': unknown;
+  'required-min': number;
+  'required-max': number;
+  'suggested-min': number;
+  'suggested-max': number;
 
-    // These are fancy extras for set manipulations. Simplify?
-    'suggested-values': unknown[];
-    'required-values': unknown[];
-    'required-inclusive': boolean;
-    'required-exclusive': boolean;
-    'suggested-inclusive': boolean;
-    'suggested-exclusive': boolean;
-  };
+  // These are fancy extras for set manipulations. Simplify?
+  'suggested-values': unknown[];
+  'required-values': unknown[];
+  'required-inclusive': boolean;
+  'required-exclusive': boolean;
+  'suggested-inclusive': boolean;
+  'suggested-exclusive': boolean;
+};
+
+type ConfigEntry = {
+  contents: ConfigEntryContents;
   // 'all-else': boolean;
   // name: string;
   // url: string;
@@ -226,4 +228,5 @@ export type {
   NumberContents,
   ChoiceContents,
   BasicContents,
+  ConfigEntryContents,
 };

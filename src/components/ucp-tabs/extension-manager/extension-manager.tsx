@@ -24,6 +24,22 @@ import {
   removeExtensionFromExplicitlyActivatedExtensions,
 } from './extensions-state';
 import { buildExtensionConfigurationDB } from './extension-configuration';
+import { createHelperObjects } from './extension-helper-objects';
+
+function warnClearingOfConfiguration(configurationTouched: {
+  [key: string]: boolean;
+}) {
+  // Defer here to a processor for the current list of active extensions to yield the
+
+  const touchedOptions = Object.entries(configurationTouched).filter(
+    (pair) => pair[1] === true
+  );
+  if (touchedOptions.length > 0) {
+    window.alert(
+      `WARNING: Changing the active extensions will reset your configuration`
+    );
+  }
+}
 
 export default function ExtensionManager() {
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
@@ -41,44 +57,13 @@ export default function ExtensionManager() {
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
-  function warnClearingOfConfiguration(exts: Extension[]) {
-    // Defer here to a processor for the current list of active extensions to yield the
-
-    const touchedOptions = Object.entries(configurationTouched).filter(
-      (pair) => pair[1] === true
-    );
-    if (touchedOptions.length > 0) {
-      window.alert(
-        `WARNING: Changing the active extensions will reset your configuration`
-      );
-    }
-  }
-
-  const eds = new ExtensionDependencySolver(extensionsState.extensions);
-  const revDeps = Object.fromEntries(
-    extensionsState.extensions.map((e: Extension) => [
-      e.name,
-      eds.reverseDependenciesFor(e.name),
-    ])
-  );
-  const depsFor = Object.fromEntries(
-    extensionsState.extensions.map((e: Extension) => [
-      e.name,
-      eds
-        .dependenciesFor(e.name)
-        .flat()
-        .filter((s) => s !== e.name),
-    ])
-  );
-  const extensionsByName = Object.fromEntries(
-    extensionsState.extensions.map((ext: Extension) => [ext.name, ext])
-  );
-  const extensionsByNameVersionString = Object.fromEntries(
-    extensionsState.extensions.map((ext: Extension) => [
-      `${ext.name}-${ext.version}`,
-      ext,
-    ])
-  );
+  const {
+    eds,
+    extensionsByName,
+    extensionsByNameVersionString,
+    revDeps,
+    depsFor,
+  } = createHelperObjects(extensionsState.extensions);
 
   const eUI = extensionsState.installedExtensions.map((ext) => (
     <ExtensionElement
@@ -98,9 +83,7 @@ export default function ExtensionManager() {
           ext
         );
 
-        const newActiveExtensions = newExtensionState.activeExtensions;
-
-        warnClearingOfConfiguration(newActiveExtensions);
+        warnClearingOfConfiguration(configurationTouched);
 
         const res = buildExtensionConfigurationDB(newExtensionState);
 
@@ -163,13 +146,13 @@ export default function ExtensionManager() {
               ext
             );
           const ae = newExtensionState.activeExtensions;
-          warnClearingOfConfiguration(ae);
+          warnClearingOfConfiguration(configurationTouched);
           setExtensionsState(newExtensionState);
         }}
         moveCallback={(event: { name: string; type: 'up' | 'down' }) => {
           const newExtensionsState = moveExtension(extensionsState, event);
 
-          warnClearingOfConfiguration(newExtensionsState.activeExtensions);
+          warnClearingOfConfiguration(configurationTouched);
           setExtensionsState(newExtensionsState);
         }}
         revDeps={revDeps[ext.name].filter(
@@ -205,3 +188,6 @@ export default function ExtensionManager() {
     </Container>
   );
 }
+
+// eslint-disable-next-line @typescript-eslint/no-use-before-define
+export { warnClearingOfConfiguration };

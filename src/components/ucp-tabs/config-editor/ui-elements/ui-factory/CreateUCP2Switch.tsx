@@ -36,7 +36,7 @@ function CreateUCP2Switch(args: {
 
   const hasWarning = configurationWarnings[url] !== undefined;
   const headerElement = (
-    <Form.Switch>
+    <Form.Switch className="sword-checkbox">
       <Form.Switch.Input
         className="me-2 test123"
         id={`${url}`}

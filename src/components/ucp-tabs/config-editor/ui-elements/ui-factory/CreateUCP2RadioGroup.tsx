@@ -60,7 +60,7 @@ function CreateUCP2RadioGroup(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <Form.Switch className="">
+      <Form.Switch>
         <Form.Switch.Input
           className="me-2 test123"
           id={`${url}-header`}

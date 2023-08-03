@@ -154,7 +154,7 @@ function CreateUCP2SliderChoice(args: {
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div key={choice.name} className="form-check">
         <Radio
-          className="form-check-input"
+          className="form-check-input sword-checkbox"
           value={choice.name}
           id={`${url}-radio-${choice.name}`}
           disabled={!value.enabled}

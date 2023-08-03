@@ -38,7 +38,7 @@ function CreateUCP2Switch(args: {
   const headerElement = (
     <Form.Switch>
       <Form.Switch.Input
-        className="me-2"
+        className="me-2 test123"
         id={`${url}`}
         key={`${url}-switch`}
         checked={value === undefined ? false : (value as boolean)}

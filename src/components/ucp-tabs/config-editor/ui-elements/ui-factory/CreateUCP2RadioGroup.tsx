@@ -60,9 +60,9 @@ function CreateUCP2RadioGroup(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <Form.Switch>
+      <Form.Switch className="">
         <Form.Switch.Input
-          className="me-2"
+          className="me-2 test123"
           id={`${url}-header`}
           key={`${url}-header`}
           checked={
@@ -120,7 +120,7 @@ function CreateUCP2RadioGroup(args: {
             // eslint-disable-next-line jsx-a11y/label-has-associated-control
             <div key={choice.name} className="form-check">
               <Radio
-                className="form-check-input"
+                className="form-check-input sword-checkbox"
                 value={choice.name}
                 id={`${url}-radio-${choice.name}`}
                 disabled={!value.enabled}

@@ -110,8 +110,9 @@ function CreateUCP2SliderChoice(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <Form.Switch>
-        <Form.Switch.Input
+      <div className="sword-checkbox">
+        <input
+          type="checkbox"
           className="me-2"
           id={`${url}-header`}
           key={`${url}-header`}
@@ -132,10 +133,10 @@ function CreateUCP2SliderChoice(args: {
           }}
           disabled={!isEnabled || disabled}
         />
-        <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
+        <label className="fs-6" htmlFor={`${url}-header`}>
           {header}
-        </Form.Switch.Label>
-      </Form.Switch>
+        </label>
+      </div>
     );
   }
 
@@ -153,22 +154,22 @@ function CreateUCP2SliderChoice(args: {
     return (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div key={choice.name} className="form-check">
-        <Radio
-          className="form-check-input sword-checkbox"
-          value={choice.name}
-          id={`${url}-radio-${choice.name}`}
-          disabled={!value.enabled}
-        />
+        <div className="sword-checkbox">
+          <Radio
+            className="form-check-input"
+            value={choice.name}
+            id={`${url}-radio-${choice.name}`}
+            disabled={!value.enabled}
+          />
+          <label
+            className="form-check-label"
+            htmlFor={`${url}-radio-${choice.name}`}
+          >
+            {choice.text}
+          </label>
+        </div>
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
         <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
-          <div className="pb-1">
-            <label
-              className="form-check-label"
-              htmlFor={`${url}-radio-${choice.name}`}
-            >
-              {choice.text}
-            </label>
-          </div>
           <div className="row">
             <div className="col-auto">
               <Form.Label
@@ -182,7 +183,7 @@ function CreateUCP2SliderChoice(args: {
                 {choice.min}
               </Form.Label>
             </div>
-            <div className="col-4">
+            <div className="col-6">
               <RangeSlider
                 min={choice.min * factor}
                 max={choice.max * factor}

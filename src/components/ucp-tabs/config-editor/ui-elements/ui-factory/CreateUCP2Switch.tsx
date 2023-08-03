@@ -36,9 +36,11 @@ function CreateUCP2Switch(args: {
 
   const hasWarning = configurationWarnings[url] !== undefined;
   const headerElement = (
-    <Form.Switch className="sword-checkbox">
-      <Form.Switch.Input
-        className="me-2 test123"
+    <div className="sword-checkbox ucp2-switch">
+      <input
+        type="checkbox"
+        comment="ucp-switch"
+        className="me-2"
         id={`${url}`}
         key={`${url}-switch`}
         checked={value === undefined ? false : (value as boolean)}
@@ -56,10 +58,10 @@ function CreateUCP2Switch(args: {
           !isEnabled || disabled || configurationLocks[url] !== undefined
         }
       />
-      <Form.Switch.Label className="fs-6" htmlFor={`${url}`}>
+      <label className="fs-6" htmlFor={`${url}`}>
         {header}
-      </Form.Switch.Label>
-    </Form.Switch>
+      </label>
+    </div>
   );
 
   return (

@@ -60,9 +60,10 @@ function CreateUCP2RadioGroup(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <Form.Switch>
-        <Form.Switch.Input
-          className="me-2 test123"
+      <div className="sword-checkbox">
+        <input
+          type="checkbox"
+          className="me-2"
           id={`${url}-header`}
           key={`${url}-header`}
           checked={
@@ -82,14 +83,14 @@ function CreateUCP2RadioGroup(args: {
           }}
           disabled={!isEnabled || disabled}
         />
-        <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
+        <label className="fs-6" htmlFor={`${url}-header`}>
           {header}
-        </Form.Switch.Label>
-      </Form.Switch>
+        </label>
+      </div>
     );
   }
   return (
-    <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div className="" style={{ marginLeft: 0, marginBottom: 0 }}>
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-choice`}>
@@ -118,9 +119,9 @@ function CreateUCP2RadioGroup(args: {
         >
           {choices.map((choice) => (
             // eslint-disable-next-line jsx-a11y/label-has-associated-control
-            <div key={choice.name} className="form-check">
+            <div key={choice.name} className="form-check sword-checkbox">
               <Radio
-                className="form-check-input sword-checkbox"
+                className="form-check-input"
                 value={choice.name}
                 id={`${url}-radio-${choice.name}`}
                 disabled={!value.enabled}

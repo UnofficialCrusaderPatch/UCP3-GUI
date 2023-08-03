@@ -71,8 +71,9 @@ function CreateUCP2Slider(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <Form.Switch>
-        <Form.Switch.Input
+      <div className="sword-checkbox">
+        <input
+          type="checkbox"
           className="me-2"
           id={`${url}-header`}
           key={`${url}-header`}
@@ -93,10 +94,10 @@ function CreateUCP2Slider(args: {
           }}
           disabled={!isEnabled || disabled}
         />
-        <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
+        <label className="fs-6" htmlFor={`${url}-header`}>
           {header}
-        </Form.Switch.Label>
-      </Form.Switch>
+        </label>
+      </div>
     );
   }
   // eslint-disable-next-line no-nested-ternary
@@ -106,7 +107,7 @@ function CreateUCP2Slider(args: {
     value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
   );
   return (
-    <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div className="" style={{ marginLeft: 0, marginBottom: 0 }}>
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>
@@ -118,7 +119,7 @@ function CreateUCP2Slider(args: {
         <div className="col-auto">
           <Form.Label>{min}</Form.Label>
         </div>
-        <div className="col">
+        <div className="col col-6">
           <RangeSlider
             min={min * factor}
             max={max * factor}

@@ -107,7 +107,7 @@ function CreateUCP2Slider(args: {
     value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
   );
   return (
-    <div className="" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div className="sword-checkbox test123" style={{ marginLeft: 0, marginBottom: 0 }}>
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>
@@ -121,6 +121,7 @@ function CreateUCP2Slider(args: {
         </div>
         <div className="col col-6">
           <RangeSlider
+            className="ucp-slider"
             min={min * factor}
             max={max * factor}
             step={step * factor}

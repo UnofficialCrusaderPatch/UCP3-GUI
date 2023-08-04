@@ -49,6 +49,7 @@ function CreateSlider(args: {
   return (
     <div>
       <RangeSlider
+        className="ucp-slider"
         min={min * factor}
         max={max * factor}
         step={step * factor}

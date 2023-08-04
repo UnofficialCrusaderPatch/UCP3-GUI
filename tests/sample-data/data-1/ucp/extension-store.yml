@@ -1,0 +1,30 @@
+ucp-build: 3.0.0
+extensions:
+  - name: aicloader-0.1.0
+    hash: 00bec97c1f2b1f3227d5c1bab4970cfef3285a2d7c23b7b8bc7165aac6eeb0ee
+  - name: aiSwapper-0.1.0
+    hash: c367283c14d8c48218c4eb2bdd967f8918b3d8ee57ecd861b8d5c24c11fb2f78
+  - name: aivloader-0.1.0
+    hash: a2af8dae30dc03eb735e8c061f7edc6c423ea7f5d9f85476f38da0c7fc63799b
+  - name: debugcommands-0.0.1
+    hash: 0ba03b739f78bf1f363fd69fac2fcea220f419c5d3032d1c7b4ec879128226af
+  - name: files-0.1.0
+    hash: e02f759daee66025ff4f39267e164e102d2f49cee93c140b403fecbf84ecff62
+  - name: gmResourceModifier-0.1.0
+    hash: 56e1aa8e528fc0216d174c4aed392a3ec132eab8ddce45fb715b4651bf898688
+  - name: graphicsApiReplacer-1.1.0
+    hash: 9e95249ec588ba50c86cf3bfab5718db36e20bf9c28e771471c388238b99394f
+  - name: inputHandler-0.1.0
+    hash: c2c74087de41c02d31568f7742e6d182e7078401d65956491b1a42395c3364e9
+  - name: maploader-0.0.1
+    hash: 2945a8b9c76f62b473cb79f8de6d701d0e2349dd543e3deea5545f55ce570533
+  - name: textResourceModifier-0.2.0
+    hash: c474b0930617c76f898b28a722482fb328f42047ef4fd552d7f4ebbc72dce509
+  - name: ucp-2.15.0
+    hash: a201be692aadbaf1e71e115227649ab2a5c403e9efe7be85c1bd27a16f90c0f5
+  - name: ucp3-module-development-template-0.0.1
+    hash: 76adbd81470cc90e8131adfca098ed53f942b0a149544f7a9fd2e89f3bb2d9f0
+  - name: winProcHandler-0.1.0
+    hash: a91347a0907d7f60d71694a18c318d7ce93120404ef145353d24f5d35d9b2e99
+  - name: code
+    hash: 00e716eca434bd4cc0b22491920a0364d9be4ee8541df5882a49ee2e3345529b

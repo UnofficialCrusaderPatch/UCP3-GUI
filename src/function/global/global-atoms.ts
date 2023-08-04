@@ -4,6 +4,7 @@ import { atom } from 'jotai';
 import {
   ArrayReducerArgs,
   ArrayReducerState,
+  ConfigurationQualifier,
   ExtensionsState,
   KeyValueReducerArgs,
   KeyValueReducerState,
@@ -39,6 +40,8 @@ const extensionsReducer = ArrayReducer<Extension>();
 const activeExtensionsReducer = ArrayReducer<Extension>();
 const configurationDefaultsReducer = KeyValueReducer<unknown>();
 
+const configurationQualifierReducer = KeyValueReducer<ConfigurationQualifier>();
+
 const extensionStateReducer = (
   oldState: ExtensionsState,
   newState: Partial<ExtensionsState>
@@ -71,13 +74,6 @@ export const CONFIGURATION_WARNINGS_REDUCER_ATOM = atomWithReducer(
   configurationWarningsReducer
 );
 
-export const EXTENSIONS_REDUCER_ATOM = atomWithReducer([], extensionsReducer);
-
-export const ACTIVE_EXTENSIONS_REDUCER_ATOM = atomWithReducer(
-  [],
-  activeExtensionsReducer
-);
-
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationDefaultsReducer
@@ -85,11 +81,17 @@ export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
 
 export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
   {
-    allExtensions: [],
-    activeExtensions: [],
-    activatedExtensions: [],
-    // I should have called this: inactiveExtensions
+    extensions: [],
+    onlineAvailableExtensions: [],
     installedExtensions: [],
+    activeExtensions: [],
+    explicitlyActivatedExtensions: [],
+    configuration: {
+      statusCode: 0,
+      errors: [],
+      warnings: [],
+      state: {},
+    },
   },
   extensionStateReducer
 );
@@ -104,4 +106,9 @@ const configurationLocksReducer = KeyValueReducer<ConfigurationLock>();
 export const CONFIGURATION_LOCKS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationLocksReducer
+);
+
+export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
+  {},
+  configurationQualifierReducer
 );

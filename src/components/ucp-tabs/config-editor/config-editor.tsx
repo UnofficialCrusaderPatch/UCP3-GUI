@@ -5,33 +5,53 @@ import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { useTranslation } from 'react-i18next';
-import { Extension } from 'config/ucp/common';
+import {
+  ConfigEntry,
+  ConfigFile,
+  ConfigFileExtensionEntry,
+  Extension,
+} from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
 import {
-  useActiveExtensionsReducer,
   useConfigurationDefaultsReducer,
+  useConfigurationQualifierReducer,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
   useConfigurationWarningsReducer,
-  useExtensions,
   useExtensionStateReducer,
   useSetConfigurationLocks,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { info } from 'util/scripts/logging';
+import { ConfigurationQualifier, ExtensionsState } from 'function/global/types';
+import { collectConfigEntries } from 'function/extensions/discovery';
+import {
+  ConfigMetaContentDB,
+  ConfigMetaObjectDB,
+} from 'config/ucp/config-merge/objects';
+import {
+  buildConfigMetaContent,
+  buildConfigMetaContentDB,
+  buildExtensionConfigurationDB,
+} from '../extension-manager/extension-configuration';
+
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
 import { propagateActiveExtensionsChange } from '../helpers';
+import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
+import { createHelperObjects } from '../extension-manager/extension-helper-objects';
+import { warnClearingOfConfiguration } from '../extension-manager/extension-manager';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
   folder: string,
   touched: { [key: string]: boolean },
+  sparseExtensions: Extension[],
   allExtensions: Extension[],
-  sparseExtensions: Extension[]
+  configurationQualifier: { [key: string]: ConfigurationQualifier }
 ) {
   const sparseConfig = Object.fromEntries(
     Object.entries(configuration).filter(([key]) => touched[key])
@@ -46,7 +66,8 @@ function saveConfig(
     fullConfig,
     sparseExtensions,
     allExtensions,
-    folder
+    folder,
+    configurationQualifier
   );
 }
 
@@ -62,10 +83,13 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const [configuration, setConfiguration] = useConfigurationReducer();
   const [configurationTouched, setConfigurationTouched] =
     useConfigurationTouchedReducer();
-  const [activeExtensions, setActiveExtensions] = useActiveExtensionsReducer();
-  const extensions = useExtensions();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const { activeExtensions } = extensionsState;
+  const { extensions } = extensionsState;
   const setConfigurationLocks = useSetConfigurationLocks();
+
+  const [configurationQualifier, setConfigurationQualifier] =
+    useConfigurationQualifierReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -90,6 +114,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   }, [activeExtensions, t]);
 
   const { nav, content } = UIFactory.CreateSections({ readonly });
+
   return (
     <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">
       {/* Still has issues with x-Overflow */}
@@ -121,45 +146,54 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                 className="col-auto icons-button import mx-1"
                 type="button"
                 onClick={async () => {
-                  const result = await openFileDialog(gameFolder, [
+                  const path = await openFileDialog(gameFolder, [
                     {
                       name: t('gui-general:file.config'),
                       extensions: ['yml', 'yaml'],
                     },
                     { name: t('gui-general:file.all'), extensions: ['*'] },
                   ]);
-                  if (result.isEmpty()) {
+                  if (path.isEmpty()) {
                     setConfigStatus(t('gui-editor:config.status.no.file'));
+                    return;
                   }
 
-                  const openedConfig: {
+                  warnClearingOfConfiguration(configurationTouched);
+
+                  let newExtensionsState = {
+                    ...extensionsState,
+                    activeExtensions: [],
+                    explicitlyActivatedExtensions: [],
+                  } as ExtensionsState;
+
+                  const parsingResult: {
                     status: string;
                     message: string;
-                    result?: {
-                      config: { [key: string]: unknown };
-                      order: string[];
-                    };
-                  } = await loadConfigFromFile(result.get(), t);
+                    result: ConfigFile;
+                  } = await loadConfigFromFile(path.get(), t);
 
-                  if (openedConfig.status !== 'OK') {
+                  if (parsingResult.status !== 'OK') {
                     setConfigStatus(
-                      `${openedConfig.status}: ${openedConfig.message}`
+                      `${parsingResult.status}: ${parsingResult.message}`
                     );
                     return;
                   }
 
-                  if (openedConfig.result === undefined) {
+                  if (parsingResult.result === undefined) {
                     setConfigStatus(
                       t('gui-editor:config.status.failed.unknown')
                     );
                     return;
                   }
 
-                  if (openedConfig.result.order.length > 0) {
-                    const es: Extension[] = [];
+                  const config = parsingResult.result;
+
+                  const lo = config['config-sparse']['load-order'];
+                  if (lo !== undefined && lo.length > 0) {
+                    const explicitActiveExtensions: Extension[] = [];
 
                     // eslint-disable-next-line no-restricted-syntax
-                    for (const e of openedConfig.result.order) {
+                    for (const e of lo) {
                       const ds = DependencyStatement.fromString(e);
                       const options = extensions.filter(
                         (ext: Extension) =>
@@ -174,59 +208,105 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                         );
                         return;
                       }
-                      es.push(options[0]);
+                      explicitActiveExtensions.push(options[0]);
                     }
 
-                    propagateActiveExtensionsChange(es, {
-                      setActiveExtensions,
-                      extensionsState,
-                      setExtensionsState,
-                      setConfiguration,
-                      setConfigurationDefaults,
-                      setConfigurationTouched,
-                      setConfigurationWarnings,
-                      setConfigurationLocks,
-                    });
+                    const {
+                      eds,
+                      extensionsByName,
+                      extensionsByNameVersionString,
+                      revDeps,
+                      depsFor,
+                    } = createHelperObjects(newExtensionsState.extensions);
+
+                    explicitActiveExtensions
+                      .slice()
+                      .reverse()
+                      .forEach((ext) => {
+                        newExtensionsState =
+                          addExtensionToExplicityActivatedExtensions(
+                            newExtensionsState,
+                            eds,
+                            extensionsByName,
+                            extensionsByNameVersionString,
+                            ext
+                          );
+                      });
+
+                    newExtensionsState =
+                      buildExtensionConfigurationDB(newExtensionsState);
                   }
 
-                  function findValue(
-                    obj: { [key: string]: unknown },
-                    url: string
-                  ): unknown {
-                    const dot = url.indexOf('.');
-                    if (dot === -1) {
-                      return obj[url];
-                    }
-                    const key = url.slice(0, dot);
-                    const rest = url.slice(dot + 1);
-
-                    if (obj[key] === undefined) return undefined;
-
-                    return findValue(
-                      obj[key] as { [key: string]: unknown },
-                      rest
-                    );
-                  }
-
-                  setConfiguration({
-                    type: 'reset',
-                    value: configurationDefaults,
+                  propagateActiveExtensionsChange(newExtensionsState, {
+                    setConfiguration,
+                    setConfigurationDefaults,
+                    setConfigurationTouched,
+                    setConfigurationWarnings,
+                    setConfigurationLocks,
                   });
 
+                  setExtensionsState(newExtensionsState);
+
                   console.log('opened config');
-                  console.log(openedConfig.result);
+                  console.log(parsingResult.result);
+
+                  let userConfigEntries: { [key: string]: ConfigEntry } = {};
+
+                  const parseEntry = ([extensionName, data]: [
+                    string,
+                    {
+                      config: ConfigFileExtensionEntry;
+                    }
+                  ]) => {
+                    const result = collectConfigEntries(
+                      data.config as {
+                        [key: string]: unknown;
+                        contents: unknown;
+                      },
+                      extensionName
+                    );
+
+                    userConfigEntries = { ...userConfigEntries, ...result };
+                  };
+
+                  Object.entries(config['config-sparse'].modules).forEach(
+                    parseEntry
+                  );
+                  Object.entries(config['config-sparse'].plugins).forEach(
+                    parseEntry
+                  );
+
+                  const db: ConfigMetaObjectDB = {};
+
+                  const newConfigurationQualifier: {
+                    [key: string]: ConfigurationQualifier;
+                  } = {};
+                  setConfigurationQualifier({
+                    type: 'set-multiple',
+                    value: {},
+                  });
+
+                  Object.entries(userConfigEntries).forEach(([url, data]) => {
+                    const m = buildConfigMetaContentDB('user', data);
+                    db[url] = {
+                      url,
+                      modifications: m,
+                    };
+                    // TODO: do checking here if the user part is not conflicting?
+
+                    let q = m.value.qualifier;
+                    if (q === 'unspecified') q = 'required';
+                    newConfigurationQualifier[url] =
+                      q as ConfigurationQualifier;
+                  });
 
                   const newConfiguration: { [key: string]: unknown } = {};
-                  Object.keys(configuration).forEach((url) => {
-                    const value = findValue(
-                      (openedConfig.result || {}).config as {
-                        [key: string]: unknown;
-                      },
-                      url
-                    );
-                    if (value !== undefined) {
-                      newConfiguration[url] = value;
-                    }
+                  const newConfigurationTouched: { [key: string]: boolean } =
+                    {};
+
+                  Object.entries(db).forEach(([url, cmo]) => {
+                    newConfiguration[url] = cmo.modifications.value.content;
+                    newConfigurationTouched[url] = true;
                   });
 
                   setConfiguration({
@@ -235,12 +315,11 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   });
                   setConfigurationTouched({
                     type: 'set-multiple',
-                    value: Object.fromEntries(
-                      Object.entries(newConfiguration).map(([key]) => [
-                        key,
-                        true,
-                      ])
-                    ),
+                    value: newConfigurationTouched,
+                  });
+                  setConfigurationQualifier({
+                    type: 'set-multiple',
+                    value: newConfigurationQualifier,
                   });
                 }}
               />
@@ -267,8 +346,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configuration,
                     filePath,
                     configurationTouched,
-                    extensionsState.activatedExtensions,
-                    activeExtensions
+                    extensionsState.explicitlyActivatedExtensions,
+                    activeExtensions,
+                    configurationQualifier
                   )
                     .then(() =>
                       setConfigStatus(t('gui-editor:config.status.exported'))
@@ -286,8 +366,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configuration,
                     file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
                     configurationTouched,
-                    extensionsState.activatedExtensions,
-                    activeExtensions
+                    extensionsState.explicitlyActivatedExtensions,
+                    activeExtensions,
+                    configurationQualifier
                   )
                 }
               >

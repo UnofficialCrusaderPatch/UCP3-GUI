@@ -3,25 +3,11 @@ import {
   extensionsToOptionEntries,
   getConfigDefaults,
 } from 'config/ucp/extension-util';
-import {
-  useActiveExtensionsReducer,
-  useConfigurationDefaults,
-  useConfigurationDefaultsReducer,
-  useConfigurationReducer,
-  useConfigurationTouchedReducer,
-  useConfigurationWarnings,
-  useConfigurationWarningsReducer,
-  useExtensions,
-  useExtensionStateReducer,
-  useUcpConfigFileValue,
-} from 'hooks/jotai/globals-wrapper';
+import { ExtensionsState } from 'function/global/types';
 
 function propagateActiveExtensionsChange(
-  activeExtensions: Extension[],
+  extensionsState: ExtensionsState,
   stateFunctions: {
-    setActiveExtensions: any;
-    extensionsState: any;
-    setExtensionsState: any;
     setConfiguration: any;
     setConfigurationDefaults: any;
     setConfigurationTouched: any;
@@ -30,9 +16,6 @@ function propagateActiveExtensionsChange(
   }
 ) {
   const {
-    setActiveExtensions,
-    extensionsState,
-    setExtensionsState,
     setConfiguration,
     setConfigurationDefaults,
     setConfigurationTouched,
@@ -41,27 +24,26 @@ function propagateActiveExtensionsChange(
   } = stateFunctions;
 
   // This section is meant to allow the config editor to display the options.
-  const optionEntries = extensionsToOptionEntries(activeExtensions);
+  const optionEntries = extensionsToOptionEntries(
+    extensionsState.activeExtensions
+  );
   const defaults = getConfigDefaults(optionEntries);
 
   console.log(`Updating defaults based on imported extensions:`);
-  console.log(activeExtensions);
+  console.log(extensionsState.activeExtensions);
   console.log('Default settings: ');
   console.log(defaults);
 
   const locks: { [key: string]: boolean } = {};
 
   // This small section is meant to process the extensions and create an improved default configuration based on active extensions
-  activeExtensions
-    .slice()
-    .reverse()
-    .forEach((ext: Extension) => {
-      Object.entries(ext.configEntries).forEach((pair) => {
-        const [url, value] = pair;
-        defaults[url] = value;
-        locks[url] = true;
-      });
-    });
+  // TODO: make this rely on the extension state?
+  Object.entries(extensionsState.configuration.state).forEach(([url, cmo]) => {
+    defaults[url] = cmo.modifications.value.content;
+    if (cmo.modifications.value.qualifier === 'required') {
+      locks[url] = true;
+    }
+  });
 
   // Here the values are set
   setConfiguration({
@@ -78,6 +60,7 @@ function propagateActiveExtensionsChange(
       Object.entries(defaults).map((pair) => [pair[0], false])
     ),
   });
+  // Not implemented currently. Could store them in configuration of extensionsState?
   setConfigurationWarnings({
     type: 'reset',
     value: {},
@@ -86,19 +69,6 @@ function propagateActiveExtensionsChange(
     type: 'reset',
     value: locks,
   });
-  // All extensions that are not active are deemed inactive...
-  const inactiveExtensions = extensionsState.allExtensions.filter(
-    (e: Extension) =>
-      activeExtensions
-        .map((ex: Extension) => `${ex.name}-${ex.version}`)
-        .indexOf(`${e.name}-${e.version}`) === -1
-  );
-  setExtensionsState({
-    allExtensions: extensionsState.allExtensions,
-    activeExtensions,
-    installedExtensions: inactiveExtensions,
-  });
-  setActiveExtensions(activeExtensions);
 }
 
 // eslint-disable-next-line import/prefer-default-export

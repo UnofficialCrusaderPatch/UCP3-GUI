@@ -42,13 +42,6 @@ addEventListener(
     dispatchEvent(new Event(DONE_EVENT_NAME));
     Websandbox.connection.setLocalApi(SANDBOX_FUNCTIONS);
 
-    // TODO: remove, dummy
-    console.log(
-      await HOST_FUNCTIONS.getTextFile(
-        'ucp/modules/inputHandler-0.1.0/menu/test.html'
-      )
-    );
-
     await HOST_FUNCTIONS.confirmInit();
   },
   { once: true }

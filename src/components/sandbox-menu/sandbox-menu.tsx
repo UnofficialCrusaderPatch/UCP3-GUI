@@ -59,7 +59,6 @@ async function getConfigState(url: string): Promise<unknown> {
 export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
   const { closeFunc, args } = props;
   const { url, sourcePaths } = args;
-  console.log(url);
 
   const currentFolder = useCurrentGameFolder();
 

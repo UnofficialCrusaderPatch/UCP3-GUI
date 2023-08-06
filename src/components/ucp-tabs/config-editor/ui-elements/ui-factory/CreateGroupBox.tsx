@@ -52,7 +52,7 @@ function CreateGroupBox(args: {
   return (
     // <Form key={`${name}-groupbox`}>
     <Container
-      className={`border-bottom border-light my-2 px-0 ${className}`}
+      className={`border-light my-2 px-0 ${className}`}
       style={{ margin: 0 }}
     >
       <Row className="my-3">
@@ -62,9 +62,9 @@ function CreateGroupBox(args: {
         </div>
       </Row>
       <Row className="mt-1">{cs}</Row>
-      <Row>
+      {/* <Row>
         <span className="text-muted text-end">module-name-v1.0.0</span>
-      </Row>
+      </Row> */}
     </Container>
     // </Form>
   );

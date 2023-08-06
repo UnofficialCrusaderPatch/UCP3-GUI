@@ -4,7 +4,7 @@ import {
   checkForUCP3Updates,
   installUCPFromZip,
 } from 'function/download/ucp-download-handling';
-import { UCPState } from 'function/ucp/ucp-state';
+import { UCPState } from 'function/ucp-files/ucp-state';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
 import { Button, Container, Modal } from 'react-bootstrap';

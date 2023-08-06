@@ -71,13 +71,6 @@ export const CONFIGURATION_WARNINGS_REDUCER_ATOM = atomWithReducer(
   configurationWarningsReducer
 );
 
-export const EXTENSIONS_REDUCER_ATOM = atomWithReducer([], extensionsReducer);
-
-export const ACTIVE_EXTENSIONS_REDUCER_ATOM = atomWithReducer(
-  [],
-  activeExtensionsReducer
-);
-
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationDefaultsReducer
@@ -85,11 +78,17 @@ export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
 
 export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
   {
-    allExtensions: [],
-    activeExtensions: [],
-    activatedExtensions: [],
-    // I should have called this: inactiveExtensions
+    extensions: [],
+    onlineAvailableExtensions: [],
     installedExtensions: [],
+    activeExtensions: [],
+    explicitlyActivatedExtensions: [],
+    configuration: {
+      statusCode: 0,
+      errors: [],
+      warnings: [],
+      state: {},
+    },
   },
   extensionStateReducer
 );

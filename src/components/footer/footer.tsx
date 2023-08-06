@@ -1,4 +1,4 @@
-import { UCPState } from 'function/ucp/ucp-state';
+import { UCPState } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
 

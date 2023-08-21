@@ -5,6 +5,7 @@ import Footer from './footer/footer';
 import UcpTabs from './ucp-tabs/ucp-tabs';
 
 import './main-page.css';
+import { ModalOkCancel } from './modals/ModalOkCancel';
 
 export default function Main() {
   return (
@@ -21,6 +22,7 @@ export default function Main() {
           <Footer />
         </div>
       </div>
+      <ModalOkCancel />
     </>
   );
 }

@@ -16,6 +16,8 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
+import { useGeneralOkayCancelModalWindowReducer } from 'hooks/jotai/globals-wrapper';
+import { confirm } from '@tauri-apps/api/dialog';
 import RecentFolders from './recent-folders';
 
 import './overview.css';
@@ -27,10 +29,10 @@ export default function Overview() {
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
+
+  const [generalModalWindow, setGeneralModalWindow] =
+    useGeneralOkayCancelModalWindowReducer();
 
   const ucpStateHandler = ucpStateHandlerResult
     .getOrReceive(Result.emptyErr)
@@ -159,7 +161,30 @@ export default function Overview() {
             // load new state
             await receiveState();
             await receiveVersion();
-            setShow(true);
+
+            const confirmed = await new Promise<boolean>((resolve) => {
+              setGeneralModalWindow({
+                ...generalModalWindow,
+                show: true,
+                title: t('gui-general:require.reload.title'),
+                message: t('gui-editor:overview.require.reload.text'),
+                handleAction: () => {
+                  // reloadCurrentWindow();
+                  resolve(true);
+                },
+                handleClose: () => {
+                  resolve(false);
+                },
+              });
+            });
+            // const confirmed = await confirm(
+            //   t('gui-editor:overview.require.reload.text'),
+            //   { title: t('gui-general:require.reload.title'), type: 'warning' }
+            // );
+
+            if (confirmed) {
+              reloadCurrentWindow();
+            }
           }
           setOverviewButtonActive(true);
           return zipInstallResult.mapOk(() => '').mapErr((err) => String(err));
@@ -194,30 +219,6 @@ export default function Overview() {
           Result.tryAsync(() => checkForGUIUpdates(stateUpdate, t))
         }
       />
-      <div className="m-5">
-        <Modal show={show} onHide={handleClose} className="text-dark">
-          <Modal.Header closeButton>
-            <Modal.Title>{t('gui-general:require.reload.title')}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {t('gui-editor:overview.require.reload.text')}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              {t('gui-general:close')}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={(event) => {
-                handleClose();
-                reloadCurrentWindow();
-              }}
-            >
-              {t('gui-general:reload')}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
     </Container>
   );
 }

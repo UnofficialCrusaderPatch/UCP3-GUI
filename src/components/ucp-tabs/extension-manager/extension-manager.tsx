@@ -10,8 +10,12 @@ import {
   useSetConfiguration,
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
+  useGeneralOkayCancelModalWindowReducer,
 } from 'hooks/jotai/globals-wrapper';
-import { ExtensionsState } from 'function/global/types';
+import {
+  ExtensionsState,
+  GeneralOkCancelModalWindow,
+} from 'function/global/types';
 
 import './extension-manager.css';
 import { info } from 'util/scripts/logging';
@@ -26,25 +30,53 @@ import {
 import { buildExtensionConfigurationDB } from './extension-configuration';
 import { createHelperObjects } from './extension-helper-objects';
 
-function warnClearingOfConfiguration(configurationTouched: {
-  [key: string]: boolean;
-}) {
+async function warnClearingOfConfiguration(
+  configurationTouched: {
+    [key: string]: boolean;
+  },
+  modalWindow: {
+    generalOkCancelModalWindow: GeneralOkCancelModalWindow;
+    setGeneralOkCancelModalWindow: (arg0: GeneralOkCancelModalWindow) => void;
+  }
+) {
   // Defer here to a processor for the current list of active extensions to yield the
 
   const touchedOptions = Object.entries(configurationTouched).filter(
     (pair) => pair[1] === true
   );
   if (touchedOptions.length > 0) {
-    window.alert(
-      `WARNING: Changing the active extensions will reset your configuration`
-    );
+    const confirmed = await new Promise<boolean>((resolve) => {
+      modalWindow.setGeneralOkCancelModalWindow({
+        ...modalWindow.generalOkCancelModalWindow,
+        show: true,
+        title: 'Warning',
+        message:
+          'Changing the active extensions will reset your configuration. Proceed anyway?',
+        ok: 'Yes',
+        cancel: 'No',
+        handleAction: () => {
+          // reloadCurrentWindow();
+          resolve(true);
+        },
+        handleClose: () => {
+          resolve(false);
+        },
+      });
+    });
+
+    return confirmed;
   }
+
+  return true;
 }
 
 export default function ExtensionManager() {
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
+
+  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
+    useGeneralOkayCancelModalWindowReducer();
 
   const setConfigurationLocks = useSetConfigurationLocks();
 
@@ -72,8 +104,20 @@ export default function ExtensionManager() {
       active={false}
       movability={{ up: false, down: false }}
       buttonText={t('gui-general:activate')}
-      clickCallback={(event) => {
+      clickCallback={async (event) => {
         // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
+
+        const confirmed = await warnClearingOfConfiguration(
+          configurationTouched,
+          {
+            generalOkCancelModalWindow,
+            setGeneralOkCancelModalWindow,
+          }
+        );
+
+        if (!confirmed) {
+          return;
+        }
 
         const newExtensionState = addExtensionToExplicityActivatedExtensions(
           extensionsState,
@@ -83,20 +127,43 @@ export default function ExtensionManager() {
           ext
         );
 
-        warnClearingOfConfiguration(configurationTouched);
-
         const res = buildExtensionConfigurationDB(newExtensionState);
 
         if (res.configuration.statusCode !== 0) {
           if (res.configuration.statusCode === 2) {
-            window.alert(
-              `Error, invalid extension configuration. New configuration has ${res.configuration.errors.length} errors.`
-            );
-            return;
+            const confirmed1 = await new Promise<boolean>((resolve) => {
+              setGeneralOkCancelModalWindow({
+                ...generalOkCancelModalWindow,
+                show: true,
+                title: 'Error',
+                message: `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`,
+                handleAction: () => {
+                  // reloadCurrentWindow();
+                  resolve(true);
+                },
+                handleClose: () => {
+                  resolve(false);
+                },
+              });
+            });
+            if (confirmed1) return;
           }
-          window.alert(
-            `Be warned, new configuration has ${res.configuration.warnings.length} warings`
-          );
+          const confirmed2 = await new Promise<boolean>((resolve) => {
+            setGeneralOkCancelModalWindow({
+              ...generalOkCancelModalWindow,
+              show: true,
+              title: 'Warning',
+              message: `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`,
+              handleAction: () => {
+                // reloadCurrentWindow();
+                resolve(true);
+              },
+              handleClose: () => {
+                resolve(false);
+              },
+            });
+          });
+          if (confirmed2) return;
         } else {
           console.log(`New configuration build without errors or warnings`);
         }
@@ -137,7 +204,17 @@ export default function ExtensionManager() {
         active
         movability={movability}
         buttonText={t('gui-general:deactivate')}
-        clickCallback={(event) => {
+        clickCallback={async (event) => {
+          const confirmed = await warnClearingOfConfiguration(
+            configurationTouched,
+            {
+              generalOkCancelModalWindow,
+              setGeneralOkCancelModalWindow,
+            }
+          );
+          if (!confirmed) {
+            return;
+          }
           const newExtensionState =
             removeExtensionFromExplicitlyActivatedExtensions(
               extensionsState,
@@ -146,13 +223,23 @@ export default function ExtensionManager() {
               ext
             );
           const ae = newExtensionState.activeExtensions;
-          warnClearingOfConfiguration(configurationTouched);
+
           setExtensionsState(newExtensionState);
         }}
-        moveCallback={(event: { name: string; type: 'up' | 'down' }) => {
+        moveCallback={async (event: { name: string; type: 'up' | 'down' }) => {
+          const confirmed = await warnClearingOfConfiguration(
+            configurationTouched,
+            {
+              generalOkCancelModalWindow,
+              setGeneralOkCancelModalWindow,
+            }
+          );
+          if (!confirmed) {
+            return;
+          }
+
           const newExtensionsState = moveExtension(extensionsState, event);
 
-          warnClearingOfConfiguration(configurationTouched);
           setExtensionsState(newExtensionsState);
         }}
         revDeps={revDeps[ext.name].filter(

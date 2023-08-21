@@ -63,3 +63,14 @@ export type ExtensionsState = {
 };
 
 export type ConfigurationQualifier = 'required' | 'suggested';
+
+export type GeneralOkCancelModalWindow = {
+  type: 'ok_cancel';
+  title: string;
+  message: string;
+  handleClose: () => void;
+  handleAction: () => void;
+  show: boolean;
+  ok: string;
+  cancel: string;
+};

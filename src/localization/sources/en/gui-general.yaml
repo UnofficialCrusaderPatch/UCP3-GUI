@@ -1,6 +1,8 @@
 activate: "Activate"
 apply: "Enable"
 close: "Close"
+ok: "Ok"
+cancel: "Cancel"
 confirm: "Confirm"
 deactivate: "Deactivate"
 errors_one: "{{count}} error"

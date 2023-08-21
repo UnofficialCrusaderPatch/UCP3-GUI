@@ -121,3 +121,7 @@ export function useConfigurationQualifier() {
 export function useSetConfigurationQualifier() {
   return useSetAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
 }
+
+export function useGeneralOkayCancelModalWindowReducer() {
+  return useAtom(globalAtoms.GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM);
+}

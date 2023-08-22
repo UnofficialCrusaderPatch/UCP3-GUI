@@ -1,3 +1,4 @@
+import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { tryResolveDependencies } from 'function/extensions/discovery';
 import {
   useExtensionStateReducer,
@@ -8,6 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { warn } from 'util/scripts/logging';
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
@@ -51,18 +53,17 @@ export default function UcpTabs() {
                   extensionsState.extensions
                 );
 
-                setGeneralOkCancelModalWindow({
-                  ...generalOkCancelModalWindow,
-                  show: true,
-                  title: 'Error',
-                  message: `Proceed despite errors?\n\n${messages}`,
-                  handleAction: () => {
-                    setShowErrorsWarning(false);
+                const confirmed = await showGeneralModalOkCancel(
+                  {
+                    title: 'Error',
+                    message: `Proceed despite errors?\n\n${messages}`,
+                    handleAction: () => setShowErrorsWarning(false),
+                    handleClose: () => setShowErrorsWarning(false),
                   },
-                  handleClose: () => {
-                    setShowErrorsWarning(false);
-                  },
-                });
+                  setGeneralOkCancelModalWindow
+                );
+
+                warn('unhandled modal dialog output');
               }}
             >
               {t('gui-editor:extensions.title')}

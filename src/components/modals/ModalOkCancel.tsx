@@ -3,6 +3,42 @@ import { useGeneralOkayCancelModalWindowReducer } from 'hooks/jotai/globals-wrap
 import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
+export const DEFAULT_OK_CANCEL_MODAL_WINDOW: GeneralOkCancelModalWindow = {
+  type: 'ok_cancel',
+  show: false,
+  message: '',
+  title: '',
+  handleAction: () => {},
+  handleClose: () => {},
+  ok: '',
+  cancel: '',
+};
+
+export async function showGeneralModalOkCancel(
+  spec: Partial<GeneralOkCancelModalWindow>,
+  setGeneralOkCancelModalWindow: (arg0: GeneralOkCancelModalWindow) => void
+) {
+  const fullSpec: GeneralOkCancelModalWindow = {
+    ...DEFAULT_OK_CANCEL_MODAL_WINDOW,
+    ...spec,
+  };
+
+  return new Promise<boolean>((resolve) => {
+    setGeneralOkCancelModalWindow({
+      ...fullSpec,
+      show: true,
+      handleAction: () => {
+        fullSpec.handleAction();
+        resolve(true);
+      },
+      handleClose: () => {
+        fullSpec.handleClose();
+        resolve(false);
+      },
+    });
+  });
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function ModalOkCancel() {
   const [generalModalWindow, setGeneralModalWindow] =

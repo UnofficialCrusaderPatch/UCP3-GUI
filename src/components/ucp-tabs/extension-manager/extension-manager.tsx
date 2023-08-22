@@ -22,6 +22,10 @@ import { info } from 'util/scripts/logging';
 
 import { tryResolveDependencies } from 'function/extensions/discovery';
 import { useEffect } from 'react';
+import {
+  DEFAULT_OK_CANCEL_MODAL_WINDOW,
+  showGeneralModalOkCancel,
+} from 'components/modals/ModalOkCancel';
 import ExtensionElement from './extension-element';
 import { propagateActiveExtensionsChange } from '../helpers';
 import {
@@ -47,24 +51,35 @@ async function warnClearingOfConfiguration(
     (pair) => pair[1] === true
   );
   if (touchedOptions.length > 0) {
-    const confirmed = await new Promise<boolean>((resolve) => {
-      modalWindow.setGeneralOkCancelModalWindow({
-        ...modalWindow.generalOkCancelModalWindow,
-        show: true,
+    // const confirmed = await new Promise<boolean>((resolve) => {
+    //   modalWindow.setGeneralOkCancelModalWindow({
+    //     ...modalWindow.generalOkCancelModalWindow,
+    //     show: true,
+    //     title: 'Warning',
+    //     message:
+    //       'Changing the active extensions will reset your configuration. Proceed anyway?',
+    //     ok: 'Yes',
+    //     cancel: 'No',
+    //     handleAction: () => {
+    //       // reloadCurrentWindow();
+    //       resolve(true);
+    //     },
+    //     handleClose: () => {
+    //       resolve(false);
+    //     },
+    //   });
+    // });
+
+    const confirmed = await showGeneralModalOkCancel(
+      {
         title: 'Warning',
         message:
           'Changing the active extensions will reset your configuration. Proceed anyway?',
         ok: 'Yes',
         cancel: 'No',
-        handleAction: () => {
-          // reloadCurrentWindow();
-          resolve(true);
-        },
-        handleClose: () => {
-          resolve(false);
-        },
-      });
-    });
+      },
+      modalWindow.setGeneralOkCancelModalWindow
+    );
 
     return confirmed;
   }
@@ -133,38 +148,22 @@ export default function ExtensionManager() {
 
         if (res.configuration.statusCode !== 0) {
           if (res.configuration.statusCode === 2) {
-            const confirmed1 = await new Promise<boolean>((resolve) => {
-              setGeneralOkCancelModalWindow({
-                ...generalOkCancelModalWindow,
-                show: true,
+            const confirmed1 = await showGeneralModalOkCancel(
+              {
                 title: 'Error',
                 message: `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`,
-                handleAction: () => {
-                  // reloadCurrentWindow();
-                  resolve(true);
-                },
-                handleClose: () => {
-                  resolve(false);
-                },
-              });
-            });
+              },
+              setGeneralOkCancelModalWindow
+            );
             if (confirmed1) return;
           }
-          const confirmed2 = await new Promise<boolean>((resolve) => {
-            setGeneralOkCancelModalWindow({
-              ...generalOkCancelModalWindow,
-              show: true,
+          const confirmed2 = await showGeneralModalOkCancel(
+            {
               title: 'Warning',
               message: `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`,
-              handleAction: () => {
-                // reloadCurrentWindow();
-                resolve(true);
-              },
-              handleClose: () => {
-                resolve(false);
-              },
-            });
-          });
+            },
+            setGeneralOkCancelModalWindow
+          );
           if (confirmed2) return;
         } else {
           console.log(`New configuration build without errors or warnings`);

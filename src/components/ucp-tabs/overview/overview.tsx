@@ -18,6 +18,7 @@ import {
 } from 'hooks/jotai/helper';
 import { useGeneralOkayCancelModalWindowReducer } from 'hooks/jotai/globals-wrapper';
 import { confirm } from '@tauri-apps/api/dialog';
+import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import RecentFolders from './recent-folders';
 
 import './overview.css';
@@ -31,7 +32,7 @@ export default function Overview() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
-  const [generalModalWindow, setGeneralModalWindow] =
+  const [generalOkayCancelModalWindow, setGeneralOkayCancelModalWindow] =
     useGeneralOkayCancelModalWindowReducer();
 
   const ucpStateHandler = ucpStateHandlerResult
@@ -162,21 +163,13 @@ export default function Overview() {
             await receiveState();
             await receiveVersion();
 
-            const confirmed = await new Promise<boolean>((resolve) => {
-              setGeneralModalWindow({
-                ...generalModalWindow,
-                show: true,
+            const confirmed = await showGeneralModalOkCancel(
+              {
                 title: t('gui-general:require.reload.title'),
                 message: t('gui-editor:overview.require.reload.text'),
-                handleAction: () => {
-                  // reloadCurrentWindow();
-                  resolve(true);
-                },
-                handleClose: () => {
-                  resolve(false);
-                },
-              });
-            });
+              },
+              setGeneralOkayCancelModalWindow
+            );
             // const confirmed = await confirm(
             //   t('gui-editor:overview.require.reload.text'),
             //   { title: t('gui-general:require.reload.title'), type: 'warning' }

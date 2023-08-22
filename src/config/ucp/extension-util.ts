@@ -6,16 +6,8 @@ import {
   SectionDescription,
 } from './common';
 
-const extensionsCache: { [key: string]: Extension[] } = {};
 export async function getExtensions(gameFolder: string, locale?: string) {
   return Discovery.discoverExtensions(gameFolder, locale);
-  // Premature optimization is the root of all evil.
-  if (extensionsCache[gameFolder] === undefined) {
-    extensionsCache[gameFolder] = await Discovery.discoverExtensions(
-      gameFolder
-    );
-  }
-  return extensionsCache[gameFolder];
 }
 
 export function optionEntriesToHierarchical(

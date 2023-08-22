@@ -1,7 +1,11 @@
+import { tryResolveDependencies } from 'function/extensions/discovery';
 import {
+  useExtensionStateReducer,
+  useGeneralOkayCancelModalWindowReducer,
   useInitDoneValue,
   useInitRunningValue,
 } from 'hooks/jotai/globals-wrapper';
+import { useEffect, useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import ConfigEditor from './config-editor/config-editor';
@@ -18,6 +22,12 @@ export default function UcpTabs() {
 
   const displayConfigTabs = isInit && !isInitRunning;
 
+  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
+    useGeneralOkayCancelModalWindowReducer();
+  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+
+  const [showErrorsWarning, setShowErrorsWarning] = useState(true);
+
   return (
     <div className="ucp-tabs fs-7">
       <Tab.Container defaultActiveKey="overview">
@@ -32,6 +42,28 @@ export default function UcpTabs() {
               eventKey="extensions"
               className="tab-link"
               disabled={!displayConfigTabs}
+              onClick={async () => {
+                if (!showErrorsWarning) {
+                  return;
+                }
+
+                const messages = tryResolveDependencies(
+                  extensionsState.extensions
+                );
+
+                setGeneralOkCancelModalWindow({
+                  ...generalOkCancelModalWindow,
+                  show: true,
+                  title: 'Error',
+                  message: `Proceed despite errors?\n\n${messages}`,
+                  handleAction: () => {
+                    setShowErrorsWarning(false);
+                  },
+                  handleClose: () => {
+                    setShowErrorsWarning(false);
+                  },
+                });
+              }}
             >
               {t('gui-editor:extensions.title')}
             </Nav.Link>

@@ -20,6 +20,8 @@ import {
 import './extension-manager.css';
 import { info } from 'util/scripts/logging';
 
+import { tryResolveDependencies } from 'function/extensions/discovery';
+import { useEffect } from 'react';
 import ExtensionElement from './extension-element';
 import { propagateActiveExtensionsChange } from '../helpers';
 import {

@@ -17,7 +17,12 @@ export function ModalOkCancel() {
     <>
       {/* General modal popup window */}
       <div className="m-5">
-        <Modal show={show} onHide={handleClose} className="text-dark">
+        <Modal
+          show={show}
+          onHide={handleClose}
+          className="text-dark"
+          style={{ whiteSpace: 'pre-line' }}
+        >
           <Modal.Header closeButton>
             <Modal.Title>{title}</Modal.Title>
           </Modal.Header>

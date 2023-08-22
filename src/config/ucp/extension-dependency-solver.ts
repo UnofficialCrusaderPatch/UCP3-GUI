@@ -1,3 +1,4 @@
+import { warn } from 'util/scripts/logging';
 import { Extension } from './common';
 import { DependencyStatement } from './dependency-statement';
 
@@ -38,6 +39,36 @@ class ExtensionDependencySolver {
       .filter((v) => v !== undefined) as string[];
   }
 
+  tryDependenciesFor(extName: string) {
+    const messages: string[] = [];
+    const result: string[] = [extName];
+
+    const ed2 = JSON.parse(JSON.stringify(this.extensionDependencies));
+
+    const todo: string[] = ed2[extName];
+    const done: string[] = [];
+    while (todo.length > 0) {
+      const item = todo[0];
+
+      if (done.indexOf(item) !== -1) {
+        todo.splice(0, 1);
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      result.push(item);
+      done.push(item);
+
+      todo.splice(0, 1);
+      if (ed2[item] === undefined) {
+        messages.push(`Missing extension dependency: ${item}`);
+      }
+      (ed2[item] || []).forEach((dep: string) => todo.push(dep));
+    }
+
+    return messages;
+  }
+
   dependenciesFor(extName: string) {
     const result: string[] = [extName];
 
@@ -59,7 +90,7 @@ class ExtensionDependencySolver {
 
       todo.splice(0, 1);
       if (ed2[item] === undefined) {
-        window.alert(`Missing extension dependency: ${item}`);
+        warn(`Missing extension dependency: ${item}`);
       }
       (ed2[item] || []).forEach((dep: string) => todo.push(dep));
     }

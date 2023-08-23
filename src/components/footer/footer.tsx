@@ -24,7 +24,7 @@ export default function Footer() {
   const currentFolder = useCurrentGameFolder();
   const [ucpStateHandlerResult] = useUCPState();
   const [ucpVersionResult] = useUCPVersion();
-  const [isFooterOpen, setFooterOpen] = useState(false);
+  const [isFooterOpen, setFooterOpen] = useState(true);
 
   const configurationWarnings = useConfigurationWarnings();
 
@@ -65,6 +65,17 @@ export default function Footer() {
     .map((v) => (v.level === 'error' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
+  const folderDisplayWidth = 33;
+  let displayCurrentFolder = currentFolder;
+  if (displayCurrentFolder.length > folderDisplayWidth) {
+    displayCurrentFolder = `${currentFolder.substring(
+      0,
+      (folderDisplayWidth - 3) / 2
+    )}...${currentFolder.substring(
+      displayCurrentFolder.length - (folderDisplayWidth - 3) / 2
+    )}`;
+  }
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
@@ -73,9 +84,14 @@ export default function Footer() {
       onClick={() => setFooterOpen(!isFooterOpen)}
     >
       <div className="d-flex p-1 px-2 fs-8 flex-wrap justify-content-end">
-        <span className="me-auto">
-          {t('gui-editor:footer.folder')}
-          <span className="px-2 fst-italic">{currentFolder}</span>
+        <span
+          className="me-auto"
+          data-toggle="tooltip"
+          data-placement="top"
+          title={currentFolder}
+        >
+          {/* t('gui-editor:footer.folder') */}
+          <span className="px-2 fst-italic">{displayCurrentFolder}</span>
         </span>
         <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
         <span className="px-2">

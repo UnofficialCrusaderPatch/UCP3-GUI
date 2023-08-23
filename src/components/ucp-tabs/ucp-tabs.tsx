@@ -1,15 +1,17 @@
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { tryResolveDependencies } from 'function/extensions/discovery';
 import {
   useExtensionStateReducer,
   useGeneralOkayCancelModalWindowReducer,
+  useGeneralOkModalWindowReducer,
   useInitDoneValue,
   useInitRunningValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useEffect, useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { warn } from 'util/scripts/logging';
+import { error, warn } from 'util/scripts/logging';
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
@@ -24,8 +26,8 @@ export default function UcpTabs() {
 
   const displayConfigTabs = isInit && !isInitRunning;
 
-  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
-    useGeneralOkayCancelModalWindowReducer();
+  const [generalOkModalWindow, setGeneralOkModalWindow] =
+    useGeneralOkModalWindowReducer();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
@@ -53,17 +55,16 @@ export default function UcpTabs() {
                   extensionsState.extensions
                 );
 
-                const confirmed = await showGeneralModalOkCancel(
+                await showGeneralModalOk(
                   {
-                    title: 'Error',
-                    message: `Proceed despite errors?\n\n${messages}`,
+                    title: 'Error: missing dependencies',
+                    message: `Please be aware of the following missing dependencies:\n\n${messages}`,
                     handleAction: () => setShowErrorsWarning(false),
-                    handleClose: () => setShowErrorsWarning(false),
                   },
-                  setGeneralOkCancelModalWindow
+                  setGeneralOkModalWindow
                 );
 
-                warn('unhandled modal dialog output');
+                error(`Missing dependencies: ${messages}`);
               }}
             >
               {t('gui-editor:extensions.title')}

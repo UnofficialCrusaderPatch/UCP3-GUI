@@ -7,6 +7,7 @@ import {
   ConfigurationQualifier,
   ExtensionsState,
   GeneralOkCancelModalWindow,
+  GeneralOkModalWindow,
   KeyValueReducerArgs,
   KeyValueReducerState,
   Warning,
@@ -134,4 +135,24 @@ export const GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
     cancel: '',
   },
   generalOkCancelModalWindowReducer
+);
+
+const generalOkModalWindowReducer = (
+  oldState: GeneralOkModalWindow,
+  newState: Partial<GeneralOkModalWindow>
+): GeneralOkModalWindow => {
+  const state = { ...oldState, ...newState };
+  return state;
+};
+
+export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
+  {
+    type: 'ok',
+    show: false,
+    message: '',
+    title: '',
+    handleAction: () => {},
+    ok: '',
+  },
+  generalOkModalWindowReducer
 );

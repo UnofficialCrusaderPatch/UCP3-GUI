@@ -6,6 +6,7 @@ import UcpTabs from './ucp-tabs/ucp-tabs';
 
 import './main-page.css';
 import { ModalOkCancel } from './modals/ModalOkCancel';
+import { ModalOk } from './modals/ModalOk';
 
 export default function Main() {
   return (
@@ -23,6 +24,7 @@ export default function Main() {
         </div>
       </div>
       <ModalOkCancel />
+      <ModalOk />
     </>
   );
 }

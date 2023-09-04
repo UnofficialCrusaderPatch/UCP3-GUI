@@ -3,16 +3,32 @@ import {
   extensionsToOptionEntries,
   getConfigDefaults,
 } from 'config/ucp/extension-util';
-import { ExtensionsState } from 'function/global/types';
+import { ConfigurationLock } from 'function/global/global-atoms';
+import {
+  ExtensionsState,
+  KeyValueReducerArgs,
+  Warning,
+} from 'function/global/types';
 
 function propagateActiveExtensionsChange(
   extensionsState: ExtensionsState,
   stateFunctions: {
-    setConfiguration: any;
-    setConfigurationDefaults: any;
-    setConfigurationTouched: any;
-    setConfigurationWarnings: any;
-    setConfigurationLocks: any;
+    setConfiguration: (arg0: {
+      type: string;
+      value: { [key: string]: unknown };
+    }) => void;
+    setConfigurationDefaults: (arg0: {
+      type: string;
+      value: { [key: string]: unknown };
+    }) => void;
+    setConfigurationTouched: (arg0: {
+      type: string;
+      value: { [key: string]: boolean };
+    }) => void;
+    setConfigurationWarnings: (args_0: KeyValueReducerArgs<Warning>) => void;
+    setConfigurationLocks: (
+      args_0: KeyValueReducerArgs<ConfigurationLock | boolean>
+    ) => void;
   }
 ) {
   const {

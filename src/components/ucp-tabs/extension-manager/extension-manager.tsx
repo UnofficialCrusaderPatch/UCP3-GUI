@@ -1,4 +1,4 @@
-import { Container } from 'react-bootstrap';
+import { Container, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
@@ -11,6 +11,12 @@ import {
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
   useGeneralOkayCancelModalWindowReducer,
+  useConfigurationDefaultsReducer,
+  useConfigurationReducer,
+  useConfigurationQualifierReducer,
+  useConfigurationTouchedReducer,
+  useConfigurationWarningsReducer,
+  useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import {
   ExtensionsState,
@@ -21,11 +27,14 @@ import './extension-manager.css';
 import { info } from 'util/scripts/logging';
 
 import { tryResolveDependencies } from 'function/extensions/discovery';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DEFAULT_OK_CANCEL_MODAL_WINDOW,
   showGeneralModalOkCancel,
 } from 'components/modals/ModalOkCancel';
+import { useAtom } from 'jotai';
+import { GUI_SETTINGS_REDUCER_ATOM } from 'function/global/global-atoms';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import ExtensionElement from './extension-element';
 import { propagateActiveExtensionsChange } from '../helpers';
 import {
@@ -35,38 +44,15 @@ import {
 } from './extensions-state';
 import { buildExtensionConfigurationDB } from './extension-configuration';
 import { createHelperObjects } from './extension-helper-objects';
-
-async function warnClearingOfConfiguration(
-  configurationTouched: {
-    [key: string]: boolean;
-  },
-  modalWindow: {
-    generalOkCancelModalWindow: GeneralOkCancelModalWindow;
-    setGeneralOkCancelModalWindow: (arg0: GeneralOkCancelModalWindow) => void;
-  }
-) {
-  // Defer here to a processor for the current list of active extensions to yield the
-
-  const touchedOptions = Object.entries(configurationTouched).filter(
-    (pair) => pair[1] === true
-  );
-  if (touchedOptions.length > 0) {
-    const confirmed = await showGeneralModalOkCancel(
-      {
-        title: 'Warning',
-        message:
-          'Changing the active extensions will reset your configuration. Proceed anyway?',
-        ok: 'Yes',
-        cancel: 'No',
-      },
-      modalWindow.setGeneralOkCancelModalWindow
-    );
-
-    return confirmed;
-  }
-
-  return true;
-}
+import exportButtonCallback from '../common/ExportButtonCallback';
+import importButtonCallback from '../common/ImportButtonCallback';
+import saveConfig from '../common/SaveConfig';
+import ApplyButton from '../config-editor/ApplyButton';
+import ExportButton from '../config-editor/ExportButton';
+import ImportButton from '../config-editor/ImportButton';
+import ResetButton from '../config-editor/ResetButton';
+import warnClearingOfConfiguration from '../common/WarnClearingOfConfiguration';
+import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 
 export default function ExtensionManager() {
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
@@ -80,12 +66,20 @@ export default function ExtensionManager() {
 
   const setConfigurationDefaults = useSetConfigurationDefaults();
 
-  const setConfiguration = useSetConfiguration();
+  const [configuration, setConfiguration] = useConfigurationReducer();
 
   // currently simply reset:
   const configurationTouched = useConfigurationTouched();
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
+  const file = useUcpConfigFileValue();
+  const { activeExtensions } = extensionsState;
+  const { extensions } = extensionsState;
+
+  const [configStatus, setConfigStatus] = useState('');
+
+  const [configurationQualifier, setConfigurationQualifier] =
+    useConfigurationQualifierReducer();
 
   const {
     eds,
@@ -95,72 +89,37 @@ export default function ExtensionManager() {
     depsFor,
   } = createHelperObjects(extensionsState.extensions);
 
-  const eUI = extensionsState.installedExtensions.map((ext) => (
+  const [guiSettings] = useAtom(GUI_SETTINGS_REDUCER_ATOM);
+
+  const extensionsToDisplay = guiSettings.advancedMode
+    ? extensionsState.installedExtensions
+    : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
+
+  const eUI = extensionsToDisplay.map((ext) => (
     <ExtensionElement
       key={`${ext.name}-${ext.version}`}
       ext={ext}
       active={false}
       movability={{ up: false, down: false }}
       buttonText={t('gui-general:activate')}
-      clickCallback={async (event) => {
-        // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
-
-        const confirmed = await warnClearingOfConfiguration(
+      clickCallback={(event) =>
+        inactiveExtensionElementClickCallback(
           configurationTouched,
-          {
-            generalOkCancelModalWindow,
-            setGeneralOkCancelModalWindow,
-          }
-        );
-
-        if (!confirmed) {
-          return;
-        }
-
-        const newExtensionState = addExtensionToExplicityActivatedExtensions(
+          generalOkCancelModalWindow,
+          setGeneralOkCancelModalWindow,
           extensionsState,
           eds,
           extensionsByName,
           extensionsByNameVersionString,
-          ext
-        );
-
-        const res = buildExtensionConfigurationDB(newExtensionState);
-
-        if (res.configuration.statusCode !== 0) {
-          if (res.configuration.statusCode === 2) {
-            const confirmed1 = await showGeneralModalOkCancel(
-              {
-                title: 'Error',
-                message: `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`,
-              },
-              setGeneralOkCancelModalWindow
-            );
-            if (confirmed1) return;
-          }
-          const confirmed2 = await showGeneralModalOkCancel(
-            {
-              title: 'Warning',
-              message: `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`,
-            },
-            setGeneralOkCancelModalWindow
-          );
-          if (confirmed2) return;
-        } else {
-          console.log(`New configuration build without errors or warnings`);
-        }
-
-        propagateActiveExtensionsChange(res, {
+          ext,
+          setExtensionsState,
           setConfiguration,
           setConfigurationDefaults,
           setConfigurationTouched,
           setConfigurationWarnings,
-          setConfigurationLocks,
-        });
-
-        setExtensionsState(res);
-        console.log('New extension state', res);
-      }}
+          setConfigurationLocks
+        )
+      }
       moveCallback={(event: { type: 'up' | 'down' }) => {}}
       revDeps={revDeps[ext.name].filter(
         (e: string) =>
@@ -172,7 +131,10 @@ export default function ExtensionManager() {
     />
   ));
 
-  const activated = extensionsState.activeExtensions.map((ext, index, arr) => {
+  const displayedActiveExtensions = guiSettings.advancedMode
+    ? extensionsState.activeExtensions
+    : extensionsState.activeExtensions.filter((e) => e.type === 'plugin');
+  const activated = displayedActiveExtensions.map((ext, index, arr) => {
     const movability = {
       up: index > 0 && revDeps[ext.name].indexOf(arr[index - 1].name) === -1,
       down:
@@ -234,6 +196,9 @@ export default function ExtensionManager() {
     );
   });
 
+  const [configurationDefaults] = useConfigurationDefaultsReducer();
+  const gameFolder = useCurrentGameFolder();
+
   return (
     <Container className="fs-6 h-100 vertical-container">
       <div className="row h-100">
@@ -252,11 +217,79 @@ export default function ExtensionManager() {
           <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
             <div className="parchment-box-item-list">{activated}</div>
           </div>
+          <div className="row pb-2 mx-0">
+            <div className="d-inline-flex">
+              <ResetButton
+                onClick={() => {
+                  setConfiguration({
+                    type: 'reset',
+                    value: configurationDefaults,
+                  });
+                  setConfigurationTouched({
+                    type: 'reset',
+                    value: {},
+                  });
+                }}
+              />
+              <ImportButton
+                onClick={async () =>
+                  importButtonCallback(
+                    gameFolder,
+                    setConfigStatus,
+                    configurationTouched,
+                    generalOkCancelModalWindow,
+                    setGeneralOkCancelModalWindow,
+                    extensionsState,
+                    extensions,
+                    setConfiguration,
+                    setConfigurationDefaults,
+                    setConfigurationTouched,
+                    setConfigurationWarnings,
+                    setConfigurationLocks,
+                    setExtensionsState,
+                    setConfigurationQualifier,
+                    t
+                  )
+                }
+              />
+              <ExportButton
+                onClick={() =>
+                  exportButtonCallback(
+                    gameFolder,
+                    setConfigStatus,
+                    configuration,
+                    configurationTouched,
+                    extensionsState,
+                    activeExtensions,
+                    configurationQualifier,
+                    t
+                  )
+                }
+              />
+              <ApplyButton
+                onClick={async () => {
+                  const result: string = await saveConfig(
+                    configuration,
+                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                    configurationTouched,
+                    extensionsState.explicitlyActivatedExtensions,
+                    activeExtensions,
+                    configurationQualifier
+                  );
+
+                  setConfigStatus(result);
+                }}
+              />
+              <Form.Switch
+                id="config-allow-user-override-switch"
+                label={t('gui-editor:config.allow.override')}
+                className="col-auto d-inline-block ms-1 d-none"
+              />
+              <span className="text-warning fs-6">{configStatus}</span>
+            </div>
+          </div>
         </div>
       </div>
     </Container>
   );
 }
-
-// eslint-disable-next-line @typescript-eslint/no-use-before-define
-export { warnClearingOfConfiguration };

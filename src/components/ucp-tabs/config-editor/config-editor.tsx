@@ -20,6 +20,7 @@ import {
   useConfigurationTouchedReducer,
   useConfigurationWarningsReducer,
   useExtensionStateReducer,
+  useGeneralOkayCancelModalWindowReducer,
   useSetConfigurationLocks,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
@@ -43,33 +44,13 @@ import './config-editor.css';
 import { propagateActiveExtensionsChange } from '../helpers';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
 import { createHelperObjects } from '../extension-manager/extension-helper-objects';
-import { warnClearingOfConfiguration } from '../extension-manager/extension-manager';
-
-function saveConfig(
-  configuration: { [key: string]: unknown },
-  folder: string,
-  touched: { [key: string]: boolean },
-  sparseExtensions: Extension[],
-  allExtensions: Extension[],
-  configurationQualifier: { [key: string]: ConfigurationQualifier }
-) {
-  const sparseConfig = Object.fromEntries(
-    Object.entries(configuration).filter(([key]) => touched[key])
-  );
-
-  const fullConfig = configuration;
-
-  info(fullConfig);
-
-  return saveUCPConfig(
-    sparseConfig,
-    fullConfig,
-    sparseExtensions,
-    allExtensions,
-    folder,
-    configurationQualifier
-  );
-}
+import ExportButton from './ExportButton';
+import ApplyButton from './ApplyButton';
+import ImportButton from './ImportButton';
+import ResetButton from './ResetButton';
+import importButtonCallback from '../common/ImportButtonCallback';
+import exportButtonCallback from '../common/ExportButtonCallback';
+import saveConfig from '../common/SaveConfig';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -115,6 +96,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
 
   const { nav, content } = UIFactory.CreateSections({ readonly });
 
+  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
+    useGeneralOkayCancelModalWindowReducer();
+
   return (
     <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">
       {/* Still has issues with x-Overflow */}
@@ -128,9 +112,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
         {!readonly ? (
           <div className="row pb-2 mx-0">
             <div className="d-inline-flex">
-              <button
-                className="col-auto icons-button reset mx-1"
-                type="button"
+              <ResetButton
                 onClick={() => {
                   setConfiguration({
                     type: 'reset',
@@ -142,240 +124,55 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   });
                 }}
               />
-              <button
-                className="col-auto icons-button import mx-1"
-                type="button"
-                onClick={async () => {
-                  const path = await openFileDialog(gameFolder, [
-                    {
-                      name: t('gui-general:file.config'),
-                      extensions: ['yml', 'yaml'],
-                    },
-                    { name: t('gui-general:file.all'), extensions: ['*'] },
-                  ]);
-                  if (path.isEmpty()) {
-                    setConfigStatus(t('gui-editor:config.status.no.file'));
-                    return;
-                  }
-
-                  warnClearingOfConfiguration(configurationTouched);
-
-                  let newExtensionsState = {
-                    ...extensionsState,
-                    activeExtensions: [],
-                    explicitlyActivatedExtensions: [],
-                  } as ExtensionsState;
-
-                  const parsingResult: {
-                    status: string;
-                    message: string;
-                    result: ConfigFile;
-                  } = await loadConfigFromFile(path.get(), t);
-
-                  if (parsingResult.status !== 'OK') {
-                    setConfigStatus(
-                      `${parsingResult.status}: ${parsingResult.message}`
-                    );
-                    return;
-                  }
-
-                  if (parsingResult.result === undefined) {
-                    setConfigStatus(
-                      t('gui-editor:config.status.failed.unknown')
-                    );
-                    return;
-                  }
-
-                  const config = parsingResult.result;
-
-                  const lo = config['config-sparse']['load-order'];
-                  if (lo !== undefined && lo.length > 0) {
-                    const explicitActiveExtensions: Extension[] = [];
-
-                    // eslint-disable-next-line no-restricted-syntax
-                    for (const e of lo) {
-                      const ds = DependencyStatement.fromString(e);
-                      const options = extensions.filter(
-                        (ext: Extension) =>
-                          ext.name === ds.extension &&
-                          ext.version === ds.version.toString()
-                      );
-                      if (options.length === 0) {
-                        setConfigStatus(
-                          t('gui-editor:config.status.missing.extension', {
-                            extension: e,
-                          })
-                        );
-                        return;
-                      }
-                      explicitActiveExtensions.push(options[0]);
-                    }
-
-                    const {
-                      eds,
-                      extensionsByName,
-                      extensionsByNameVersionString,
-                      revDeps,
-                      depsFor,
-                    } = createHelperObjects(newExtensionsState.extensions);
-
-                    explicitActiveExtensions
-                      .slice()
-                      .reverse()
-                      .forEach((ext) => {
-                        newExtensionsState =
-                          addExtensionToExplicityActivatedExtensions(
-                            newExtensionsState,
-                            eds,
-                            extensionsByName,
-                            extensionsByNameVersionString,
-                            ext
-                          );
-                      });
-
-                    newExtensionsState =
-                      buildExtensionConfigurationDB(newExtensionsState);
-                  }
-
-                  propagateActiveExtensionsChange(newExtensionsState, {
+              <ImportButton
+                onClick={async () =>
+                  importButtonCallback(
+                    gameFolder,
+                    setConfigStatus,
+                    configurationTouched,
+                    generalOkCancelModalWindow,
+                    setGeneralOkCancelModalWindow,
+                    extensionsState,
+                    extensions,
                     setConfiguration,
                     setConfigurationDefaults,
                     setConfigurationTouched,
                     setConfigurationWarnings,
                     setConfigurationLocks,
-                  });
-
-                  setExtensionsState(newExtensionsState);
-
-                  console.log('opened config');
-                  console.log(parsingResult.result);
-
-                  let userConfigEntries: { [key: string]: ConfigEntry } = {};
-
-                  const parseEntry = ([extensionName, data]: [
-                    string,
-                    {
-                      config: ConfigFileExtensionEntry;
-                    }
-                  ]) => {
-                    const result = collectConfigEntries(
-                      data.config as {
-                        [key: string]: unknown;
-                        contents: unknown;
-                      },
-                      extensionName
-                    );
-
-                    userConfigEntries = { ...userConfigEntries, ...result };
-                  };
-
-                  Object.entries(config['config-sparse'].modules).forEach(
-                    parseEntry
-                  );
-                  Object.entries(config['config-sparse'].plugins).forEach(
-                    parseEntry
-                  );
-
-                  const db: ConfigMetaObjectDB = {};
-
-                  const newConfigurationQualifier: {
-                    [key: string]: ConfigurationQualifier;
-                  } = {};
-                  setConfigurationQualifier({
-                    type: 'set-multiple',
-                    value: {},
-                  });
-
-                  Object.entries(userConfigEntries).forEach(([url, data]) => {
-                    const m = buildConfigMetaContentDB('user', data);
-                    db[url] = {
-                      url,
-                      modifications: m,
-                    };
-                    // TODO: do checking here if the user part is not conflicting?
-
-                    let q = m.value.qualifier;
-                    if (q === 'unspecified') q = 'required';
-                    newConfigurationQualifier[url] =
-                      q as ConfigurationQualifier;
-                  });
-
-                  const newConfiguration: { [key: string]: unknown } = {};
-                  const newConfigurationTouched: { [key: string]: boolean } =
-                    {};
-
-                  Object.entries(db).forEach(([url, cmo]) => {
-                    newConfiguration[url] = cmo.modifications.value.content;
-                    newConfigurationTouched[url] = true;
-                  });
-
-                  setConfiguration({
-                    type: 'set-multiple',
-                    value: newConfiguration,
-                  });
-                  setConfigurationTouched({
-                    type: 'set-multiple',
-                    value: newConfigurationTouched,
-                  });
-                  setConfigurationQualifier({
-                    type: 'set-multiple',
-                    value: newConfigurationQualifier,
-                  });
-                }}
-              />
-              <button
-                className="col-auto icons-button export mx-1"
-                type="button"
-                onClick={async () => {
-                  const filePathOptional = await saveFileDialog(gameFolder, [
-                    {
-                      name: t('gui-general:file.config'),
-                      extensions: ['yml', 'yaml'],
-                    },
-                    { name: t('gui-general:file.all'), extensions: ['*'] },
-                  ]);
-                  if (filePathOptional.isEmpty()) {
-                    setConfigStatus(t('gui-editor:config.status.cancelled'));
-                    return;
-                  }
-                  let filePath = filePathOptional.get();
-
-                  if (!filePath.endsWith('.yml')) filePath = `${filePath}.yml`;
-
-                  saveConfig(
-                    configuration,
-                    filePath,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier
+                    setExtensionsState,
+                    setConfigurationQualifier,
+                    t
                   )
-                    .then(() =>
-                      setConfigStatus(t('gui-editor:config.status.exported'))
-                    )
-                    .catch((e) => {
-                      throw new Error(e);
-                    });
-                }}
+                }
               />
-              <button
-                className="ucp-button-variant"
-                type="button"
+              <ExportButton
                 onClick={() =>
-                  saveConfig(
+                  exportButtonCallback(
+                    gameFolder,
+                    setConfigStatus,
+                    configuration,
+                    configurationTouched,
+                    extensionsState,
+                    activeExtensions,
+                    configurationQualifier,
+                    t
+                  )
+                }
+              />
+              <ApplyButton
+                onClick={async () => {
+                  const result: string = await saveConfig(
                     configuration,
                     file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
                     activeExtensions,
                     configurationQualifier
-                  )
-                }
-              >
-                <div className="ucp-button-variant-button-text">
-                  {t('gui-general:apply')}
-                </div>
-              </button>
+                  );
+
+                  setConfigStatus(result);
+                }}
+              />
               <Form.Switch
                 id="config-allow-user-override-switch"
                 label={t('gui-editor:config.allow.override')}

@@ -211,7 +211,7 @@ const Discovery = {
 
     return Promise.all(
       ehs.map(async (eh) => {
-        const type = eh.path.indexOf('/modules/') ? 'module' : 'plugin';
+        const type = eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
         const definition = yaml.parse(
           await eh.getTextContents(`${DEFINITION_FILE}`)
         );

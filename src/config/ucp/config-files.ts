@@ -198,4 +198,6 @@ export async function saveUCPConfig(
     filePath,
     yamlStringify(finalConfig, { aliasDuplicateObjects: false })
   );
+
+  return `Config file saved succesfully`;
 }

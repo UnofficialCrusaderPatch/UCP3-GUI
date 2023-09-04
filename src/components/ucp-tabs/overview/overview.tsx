@@ -7,7 +7,7 @@ import {
 import { UCPState } from 'function/ucp-files/ucp-state';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
-import { Button, Container, Modal } from 'react-bootstrap';
+import { Button, Container, Form, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
@@ -17,11 +17,14 @@ import {
   useUCPVersion,
 } from 'hooks/jotai/helper';
 import { useGeneralOkayCancelModalWindowReducer } from 'hooks/jotai/globals-wrapper';
+import { useAtom } from 'jotai';
 import { confirm } from '@tauri-apps/api/dialog';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
-import RecentFolders from './recent-folders';
 
 import './overview.css';
+
+import { GUI_SETTINGS_REDUCER_ATOM } from 'function/global/global-atoms';
+import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -68,6 +71,8 @@ export default function Overview() {
         break;
     }
   }
+
+  const [guiSettings, setGuiSettings] = useAtom(GUI_SETTINGS_REDUCER_ATOM);
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
@@ -212,6 +217,31 @@ export default function Overview() {
           Result.tryAsync(() => checkForGUIUpdates(stateUpdate, t))
         }
       />
+      <div className="m-2 ">
+        <Form
+          style={{
+            verticalAlign: 'center',
+            height: '40px',
+            minWidth: '100px',
+            width: '40%',
+            marginLeft: '31%',
+            marginRight: '30%',
+            position: 'relative',
+          }}
+        >
+          <Form.Switch
+            id="gui-settings-advanced-mode-switch"
+            label={t('gui-general:advanced.mode')}
+            checked={guiSettings.advancedMode as boolean}
+            onChange={(e) => {
+              setGuiSettings({
+                ...guiSettings,
+                advancedMode: e.target.checked,
+              });
+            }}
+          />
+        </Form>
+      </div>
     </Container>
   );
 }

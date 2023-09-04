@@ -1,5 +1,6 @@
 activate: "Activate"
-apply: "Enable"
+advanced.mode: "Advanced mode"
+apply: "Apply"
 close: "Close"
 ok: "Ok"
 cancel: "Cancel"

@@ -98,10 +98,12 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
   extensionStateReducer
 );
 
-type ConfigurationLock = {
-  lockedBy: string;
-  lockedValue: unknown;
-};
+export type ConfigurationLock =
+  | {
+      lockedBy: string;
+      lockedValue: unknown;
+    }
+  | boolean;
 
 const configurationLocksReducer = KeyValueReducer<ConfigurationLock>();
 
@@ -155,4 +157,25 @@ export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
     ok: '',
   },
   generalOkModalWindowReducer
+);
+
+export type GuiSettings = {
+  advancedMode: boolean;
+};
+
+export const DEFAULT_GUI_SETTINGS: GuiSettings = {
+  advancedMode: false,
+};
+
+const guiSettingsReducer = (
+  oldState: GuiSettings,
+  newState: Partial<GuiSettings>
+): GuiSettings => {
+  const state = { ...oldState, ...newState };
+  return state;
+};
+
+export const GUI_SETTINGS_REDUCER_ATOM = atomWithReducer(
+  DEFAULT_GUI_SETTINGS,
+  guiSettingsReducer
 );

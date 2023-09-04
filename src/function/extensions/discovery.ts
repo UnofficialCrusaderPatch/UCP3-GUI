@@ -11,7 +11,7 @@ import {
   Extension,
   OptionEntry,
 } from 'config/ucp/common';
-import { info } from 'util/scripts/logging';
+import { error, info, warn } from 'util/scripts/logging';
 import { Config } from 'config/ucp/config';
 import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import ExtensionHandle from './extension-handle';
@@ -211,18 +211,34 @@ const Discovery = {
 
     return Promise.all(
       ehs.map(async (eh) => {
-        const type = eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
+        const inferredType =
+          eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
         const definition = yaml.parse(
           await eh.getTextContents(`${DEFINITION_FILE}`)
         );
         const { name, version } = definition;
+
+        const { type } = definition;
+
+        let assumedType = inferredType;
+        if (type === undefined) {
+          warn(
+            `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`
+          );
+        } else if (type !== inferredType) {
+          error(
+            `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`
+          );
+        } else {
+          assumedType = type;
+        }
 
         definition.dependencies = definition.depends || [];
 
         const ext = {
           name,
           version,
-          type,
+          type: assumedType,
           definition,
         } as unknown as Extension;
 

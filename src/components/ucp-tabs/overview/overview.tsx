@@ -9,7 +9,7 @@ import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
 import { Button, Container, Form, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { openFileDialog } from 'tauri/tauri-dialog';
+import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
 import {
   useCurrentGameFolder,
@@ -23,7 +23,14 @@ import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 
 import './overview.css';
 
-import { GUI_SETTINGS_REDUCER_ATOM } from 'function/global/global-atoms';
+import {
+  GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM,
+  GUI_SETTINGS_REDUCER_ATOM,
+} from 'function/global/global-atoms';
+import { exists } from '@tauri-apps/api/fs';
+import { warn } from 'util/scripts/logging';
+import ExtensionPack from 'function/extensions/extension-pack';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {
@@ -73,6 +80,10 @@ export default function Overview() {
   }
 
   const [guiSettings, setGuiSettings] = useAtom(GUI_SETTINGS_REDUCER_ATOM);
+
+  const [, setGeneralOkModalWindow] = useAtom(
+    GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM
+  );
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
@@ -242,6 +253,69 @@ export default function Overview() {
           />
         </Form>
       </div>
+      <StateButton
+        buttonActive={overviewButtonActive}
+        buttonValues={{
+          idle: 'Install extensions from zip file',
+          running: 'Installing...',
+          success: 'Installed extension pack!',
+          failed: 'Failed to install extension pack',
+        }}
+        buttonVariant="ucp-button"
+        funcBefore={() => setOverviewButtonActive(false)}
+        funcAfter={() => setOverviewButtonActive(true)}
+        func={async (stateUpdate) =>
+          Result.tryAsync(async () => {
+            const result = await openFileDialog(currentFolder, [
+              { name: 'Zip files', extensions: ['zip'] },
+            ]);
+
+            if (result.isPresent()) {
+              const path = result.get();
+
+              console.log(`Trying to install extensions from: ${path}`);
+
+              if (await exists(path)) {
+                try {
+                  const ep = await ExtensionPack.fromPath(path);
+
+                  try {
+                    await ep.install(`${currentFolder}/ucp`);
+                    stateUpdate('success');
+                  } catch (e) {
+                    let msg = e;
+                    if (typeof e === 'string') {
+                      msg = e.toString(); // works, `e` narrowed to string
+                    } else if (e instanceof Error) {
+                      msg = e.message; // works, `e` narrowed to Error
+                    }
+                    await showGeneralModalOk(
+                      { title: 'ERROR', message: (msg as string).toString() },
+                      setGeneralOkModalWindow
+                    );
+                  } finally {
+                    await ep.close();
+                  }
+                } catch (e) {
+                  let msg = e;
+                  if (typeof e === 'string') {
+                    msg = e.toString(); // works, `e` narrowed to string
+                  } else if (e instanceof Error) {
+                    msg = e.message; // works, `e` narrowed to Error
+                  }
+                  await showGeneralModalOk(
+                    { title: 'ERROR', message: (msg as string).toString() },
+                    setGeneralOkModalWindow
+                  );
+                }
+              } else {
+                warn(`Path does not exist: ${path}`);
+                stateUpdate(`Path does not exist: ${path}`);
+              }
+            }
+          })
+        }
+      />
     </Container>
   );
 }

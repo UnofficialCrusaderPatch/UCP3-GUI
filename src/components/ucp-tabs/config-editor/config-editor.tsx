@@ -141,7 +141,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     setConfigurationLocks,
                     setExtensionsState,
                     setConfigurationQualifier,
-                    t
+                    t,
+                    ''
                   )
                 }
               />

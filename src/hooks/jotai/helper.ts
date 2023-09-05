@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';
 import { info } from 'util/scripts/logging';
+import { exists } from '@tauri-apps/api/fs';
+import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import {
   useFolder,
   useInitRunning,
@@ -17,6 +19,9 @@ import {
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
   useExtensionStateReducer,
+  useGeneralOkayCancelModalWindowReducer,
+  useSetConfigurationLocks,
+  useSetConfigurationQualifier,
 } from './globals-wrapper';
 import {
   UCPStateHandler,
@@ -85,6 +90,14 @@ export function useInitGlobalConfiguration(): [
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
+  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
+    useGeneralOkayCancelModalWindowReducer();
+
+  const setConfigurationLocks = useSetConfigurationLocks();
+  const setConfigurationQualifier = useSetConfigurationQualifier();
+
+  const [t] = useTranslation(['gui-general', 'gui-editor']);
+
   return [
     isInitRunning,
     async (newFolder: string, language: string) => {
@@ -131,17 +144,47 @@ export function useInitGlobalConfiguration(): [
         value: defaults,
       });
 
-      setExtensionsState({
+      const newExtensionsState = {
         ...extensionsState,
         activeExtensions: [],
         explicitlyActivatedExtensions: [],
         installedExtensions: [...extensions],
         extensions,
-      });
+      };
+      setExtensionsState(newExtensionsState);
 
       setFile(file);
 
-      info('Finished loading');
+      info('Finished extension discovery');
+      console.log(`Extensions state`, newExtensionsState);
+
+      info('Trying to loading ucp-config.yml');
+
+      if (await exists(file)) {
+        await importButtonCallback(
+          newFolder,
+          () => {},
+          defaults,
+          generalOkCancelModalWindow,
+          setGeneralOkCancelModalWindow,
+          newExtensionsState,
+          extensions,
+          setConfiguration,
+          setConfigurationDefaults,
+          setConfigurationTouched,
+          setConfigurationWarnings,
+          setConfigurationLocks,
+          setExtensionsState,
+          setConfigurationQualifier,
+          t,
+          file
+        );
+      } else {
+        info('no ucp-config.yml file found');
+      }
+
+      info('Finished loading ucp-config.yml');
+
       setInitDone(true);
       setInitRunning(false);
     },

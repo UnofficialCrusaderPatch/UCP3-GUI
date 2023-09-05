@@ -248,7 +248,8 @@ export default function ExtensionManager() {
                     setConfigurationLocks,
                     setExtensionsState,
                     setConfigurationQualifier,
-                    t
+                    t,
+                    ''
                   )
                 }
               />

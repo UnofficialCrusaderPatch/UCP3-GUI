@@ -50,19 +50,28 @@ const importButtonCallback = async (
     type: string;
     value: { [key: string]: ConfigurationQualifier };
   }) => void,
-  t: TFunction<[string, string], undefined>
+  t: TFunction<[string, string], undefined>,
+  file: string | undefined
 ) => {
-  const path = await openFileDialog(gameFolder, [
-    {
-      name: t('gui-general:file.config'),
-      extensions: ['yml', 'yaml'],
-    },
-    { name: t('gui-general:file.all'), extensions: ['*'] },
-  ]);
-  if (path.isEmpty()) {
-    setConfigStatus(t('gui-editor:config.status.no.file'));
-    return;
+  let path = file;
+
+  if (file === undefined || file.length === 0) {
+    const pathResult = await openFileDialog(gameFolder, [
+      {
+        name: t('gui-general:file.config'),
+        extensions: ['yml', 'yaml'],
+      },
+      { name: t('gui-general:file.all'), extensions: ['*'] },
+    ]);
+    if (pathResult.isEmpty()) {
+      setConfigStatus(t('gui-editor:config.status.no.file'));
+      return;
+    }
+
+    path = pathResult.get();
   }
+
+  if (path === undefined) return;
 
   warnClearingOfConfiguration(configurationTouched, {
     generalOkCancelModalWindow,
@@ -79,7 +88,7 @@ const importButtonCallback = async (
     status: string;
     message: string;
     result: ConfigFile;
-  } = await loadConfigFromFile(path.get(), t);
+  } = await loadConfigFromFile(path, t);
 
   if (parsingResult.status !== 'OK') {
     setConfigStatus(`${parsingResult.status}: ${parsingResult.message}`);

@@ -271,8 +271,22 @@ const Discovery = {
           ext.configEntries = { ...ext.configEntries, ...result };
         };
 
-        Object.entries(ext.config['config-sparse'].modules).forEach(parseEntry);
-        Object.entries(ext.config['config-sparse'].plugins).forEach(parseEntry);
+        if (
+          ext.config['config-sparse'] === undefined ||
+          ext.config['config-sparse'].modules === undefined ||
+          ext.config['config-sparse'].plugins === undefined
+        ) {
+          warn(
+            `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`
+          );
+        } else {
+          Object.entries(ext.config['config-sparse'].modules).forEach(
+            parseEntry
+          );
+          Object.entries(ext.config['config-sparse'].plugins).forEach(
+            parseEntry
+          );
+        }
 
         eh.close();
 

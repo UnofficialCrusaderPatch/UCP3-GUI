@@ -54,22 +54,16 @@ const inactiveExtensionElementClickCallback = async (
 
   if (res.configuration.statusCode !== 0) {
     if (res.configuration.statusCode === 2) {
-      const confirmed1 = await showGeneralModalOkCancel(
-        {
-          title: 'Error',
-          message: `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`,
-        },
-        setGeneralOkCancelModalWindow
-      );
+      const confirmed1 = await showGeneralModalOkCancel({
+        title: 'Error',
+        message: `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`,
+      });
       if (confirmed1) return;
     }
-    const confirmed2 = await showGeneralModalOkCancel(
-      {
-        title: 'Warning',
-        message: `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`,
-      },
-      setGeneralOkCancelModalWindow
-    );
+    const confirmed2 = await showGeneralModalOkCancel({
+      title: 'Warning',
+      message: `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`,
+    });
     if (confirmed2) return;
   } else {
     console.log(`New configuration build without errors or warnings`);

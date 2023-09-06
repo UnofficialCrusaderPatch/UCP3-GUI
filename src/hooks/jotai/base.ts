@@ -1,7 +1,11 @@
-import { atom, useAtom, useSetAtom } from 'jotai';
+import { atom, getDefaultStore, useAtom, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';
+
+export function getStore() {
+  return getDefaultStore();
+}
 
 // not exported in jotai
 type Loadable<T> =

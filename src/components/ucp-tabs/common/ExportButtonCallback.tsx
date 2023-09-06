@@ -4,18 +4,30 @@ import { ConfigurationQualifier, ExtensionsState } from 'function/global/types';
 import { SetStateAction } from 'react';
 import { saveFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
+import { getStore } from 'hooks/jotai/base';
+import {
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+} from 'function/global/global-atoms';
 import saveConfig from './SaveConfig';
 
 const exportButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (value: string) => void,
-  configuration: { [x: string]: unknown },
-  configurationTouched: { [x: string]: boolean },
-  extensionsState: ExtensionsState,
-  activeExtensions: Extension[],
-  configurationQualifier: { [x: string]: ConfigurationQualifier },
   t: TFunction<[string, string], undefined>
 ) => {
+  const configuration = getStore().get(CONFIGURATION_REDUCER_ATOM);
+  const configurationTouched = getStore().get(
+    CONFIGURATION_TOUCHED_REDUCER_ATOM
+  );
+  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const { activeExtensions } = extensionsState;
+  const configurationQualifier = getStore().get(
+    CONFIGURATION_QUALIFIER_REDUCER_ATOM
+  );
+
   const filePathOptional = await saveFileDialog(gameFolder, [
     {
       name: t('gui-general:file.config'),

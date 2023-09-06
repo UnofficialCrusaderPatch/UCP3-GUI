@@ -179,13 +179,10 @@ export default function Overview() {
             await receiveState();
             await receiveVersion();
 
-            const confirmed = await showGeneralModalOkCancel(
-              {
-                title: t('gui-general:require.reload.title'),
-                message: t('gui-editor:overview.require.reload.text'),
-              },
-              setGeneralOkayCancelModalWindow
-            );
+            const confirmed = await showGeneralModalOkCancel({
+              title: t('gui-general:require.reload.title'),
+              message: t('gui-editor:overview.require.reload.text'),
+            });
             // const confirmed = await confirm(
             //   t('gui-editor:overview.require.reload.text'),
             //   { title: t('gui-general:require.reload.title'), type: 'warning' }
@@ -289,10 +286,10 @@ export default function Overview() {
                     } else if (e instanceof Error) {
                       msg = e.message; // works, `e` narrowed to Error
                     }
-                    await showGeneralModalOk(
-                      { title: 'ERROR', message: (msg as string).toString() },
-                      setGeneralOkModalWindow
-                    );
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: (msg as string).toString(),
+                    });
                   } finally {
                     await ep.close();
                   }
@@ -303,10 +300,10 @@ export default function Overview() {
                   } else if (e instanceof Error) {
                     msg = e.message; // works, `e` narrowed to Error
                   }
-                  await showGeneralModalOk(
-                    { title: 'ERROR', message: (msg as string).toString() },
-                    setGeneralOkModalWindow
-                  );
+                  await showGeneralModalOk({
+                    title: 'ERROR',
+                    message: (msg as string).toString(),
+                  });
                 }
               } else {
                 warn(`Path does not exist: ${path}`);

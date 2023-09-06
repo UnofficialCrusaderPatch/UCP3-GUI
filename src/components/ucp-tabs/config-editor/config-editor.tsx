@@ -126,38 +126,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
               />
               <ImportButton
                 onClick={async () =>
-                  importButtonCallback(
-                    gameFolder,
-                    setConfigStatus,
-                    configurationTouched,
-                    generalOkCancelModalWindow,
-                    setGeneralOkCancelModalWindow,
-                    extensionsState,
-                    extensions,
-                    setConfiguration,
-                    setConfigurationDefaults,
-                    setConfigurationTouched,
-                    setConfigurationWarnings,
-                    setConfigurationLocks,
-                    setExtensionsState,
-                    setConfigurationQualifier,
-                    t,
-                    ''
-                  )
+                  importButtonCallback(gameFolder, setConfigStatus, t, '')
                 }
               />
               <ExportButton
                 onClick={() =>
-                  exportButtonCallback(
-                    gameFolder,
-                    setConfigStatus,
-                    configuration,
-                    configurationTouched,
-                    extensionsState,
-                    activeExtensions,
-                    configurationQualifier,
-                    t
-                  )
+                  exportButtonCallback(gameFolder, setConfigStatus, t)
                 }
               />
               <ApplyButton

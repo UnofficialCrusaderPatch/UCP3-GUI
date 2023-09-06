@@ -12,9 +12,23 @@ import {
   ExtensionsState,
   ConfigurationQualifier,
   GeneralOkCancelModalWindow,
+  KeyValueReducerArgs,
+  Warning,
 } from 'function/global/types';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
+import { getStore } from 'hooks/jotai/base';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  ConfigurationLock,
+  EXTENSION_STATE_REDUCER_ATOM,
+  GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM,
+} from 'function/global/global-atoms';
 import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,
@@ -24,35 +38,66 @@ import { addExtensionToExplicityActivatedExtensions } from '../extension-manager
 import { propagateActiveExtensionsChange } from '../helpers';
 import warnClearingOfConfiguration from './WarnClearingOfConfiguration';
 
+const setConfiguration = (arg0: {
+  type: string;
+  value: { [key: string]: unknown };
+}) => {
+  getStore().set(CONFIGURATION_REDUCER_ATOM, arg0);
+};
+
+const setConfigurationDefaults = (state: KeyValueReducerArgs<unknown>) => {
+  getStore().set(CONFIGURATION_DEFAULTS_REDUCER_ATOM, state);
+};
+
+const setConfigurationTouched = (arg0: {
+  type: string;
+  value: { [key: string]: boolean };
+}) => {
+  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, arg0);
+};
+
+const setConfigurationWarnings = (state: KeyValueReducerArgs<Warning>) => {
+  getStore().set(CONFIGURATION_WARNINGS_REDUCER_ATOM, state);
+};
+
+const setConfigurationLocks = (
+  state: KeyValueReducerArgs<ConfigurationLock>
+) => {
+  getStore().set(CONFIGURATION_LOCKS_REDUCER_ATOM, state);
+};
+
+const setExtensionsState = (arg0: ExtensionsState) => {
+  getStore().set(EXTENSION_STATE_REDUCER_ATOM, arg0);
+};
+
+const setGeneralOkCancelModalWindow = (
+  arg0: Partial<GeneralOkCancelModalWindow>
+) => {
+  getStore().set(GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM, arg0);
+};
+
+const setConfigurationQualifier = (arg0: {
+  type: string;
+  value: { [key: string]: ConfigurationQualifier };
+}) => {
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, arg0);
+};
+
 const importButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (arg0: string) => void,
-  configurationTouched: { [key: string]: boolean },
-  generalOkCancelModalWindow: GeneralOkCancelModalWindow,
-  setGeneralOkCancelModalWindow: (
-    arg0: Partial<GeneralOkCancelModalWindow>
-  ) => void,
-  extensionsState: ExtensionsState,
-  extensions: Extension[],
-  setConfiguration: (arg0: {
-    type: string;
-    value: { [key: string]: unknown };
-  }) => void,
-  setConfigurationDefaults: any,
-  setConfigurationTouched: (arg0: {
-    type: string;
-    value: { [key: string]: boolean };
-  }) => void,
-  setConfigurationWarnings: any,
-  setConfigurationLocks: any,
-  setExtensionsState: (arg0: ExtensionsState) => void,
-  setConfigurationQualifier: (arg0: {
-    type: string;
-    value: { [key: string]: ConfigurationQualifier };
-  }) => void,
   t: TFunction<[string, string], undefined>,
   file: string | undefined
 ) => {
+  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const { extensions } = extensionsState;
+  const configurationTouched = getStore().get(
+    CONFIGURATION_TOUCHED_REDUCER_ATOM
+  );
+  const generalOkCancelModalWindow = getStore().get(
+    GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM
+  );
+
   let path = file;
 
   if (file === undefined || file.length === 0) {

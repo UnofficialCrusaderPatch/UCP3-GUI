@@ -16,16 +16,13 @@ async function warnClearingOfConfiguration(
     (pair) => pair[1] === true
   );
   if (touchedOptions.length > 0) {
-    const confirmed = await showGeneralModalOkCancel(
-      {
-        title: 'Warning',
-        message:
-          'Changing the active extensions will reset your configuration. Proceed anyway?',
-        ok: 'Yes',
-        cancel: 'No',
-      },
-      modalWindow.setGeneralOkCancelModalWindow
-    );
+    const confirmed = await showGeneralModalOkCancel({
+      title: 'Warning',
+      message:
+        'Changing the active extensions will reset your configuration. Proceed anyway?',
+      ok: 'Yes',
+      cancel: 'No',
+    });
 
     return confirmed;
   }

@@ -161,24 +161,7 @@ export function useInitGlobalConfiguration(): [
       info('Trying to loading ucp-config.yml');
 
       if (await exists(file)) {
-        await importButtonCallback(
-          newFolder,
-          () => {},
-          defaults,
-          generalOkCancelModalWindow,
-          setGeneralOkCancelModalWindow,
-          newExtensionsState,
-          extensions,
-          setConfiguration,
-          setConfigurationDefaults,
-          setConfigurationTouched,
-          setConfigurationWarnings,
-          setConfigurationLocks,
-          setExtensionsState,
-          setConfigurationQualifier,
-          t,
-          file
-        );
+        await importButtonCallback(newFolder, () => {}, t, file);
       } else {
         info('no ucp-config.yml file found');
       }

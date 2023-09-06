@@ -61,14 +61,11 @@ export default function UcpTabs() {
 
                 if (messages.length === 0) return;
 
-                await showGeneralModalOk(
-                  {
-                    title: 'Error: missing dependencies',
-                    message: `Please be aware of the following missing dependencies:\n\n${messages}`,
-                    handleAction: () => setShowErrorsWarning(false),
-                  },
-                  setGeneralOkModalWindow
-                );
+                await showGeneralModalOk({
+                  title: 'Error: missing dependencies',
+                  message: `Please be aware of the following missing dependencies:\n\n${messages}`,
+                  handleAction: () => setShowErrorsWarning(false),
+                });
 
                 error(`Missing dependencies: ${messages}`);
               }}

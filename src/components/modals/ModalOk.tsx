@@ -1,4 +1,6 @@
+import { GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM } from 'function/global/global-atoms';
 import { GeneralOkModalWindow } from 'function/global/types';
+import { getStore } from 'hooks/jotai/base';
 import { useGeneralOkModalWindowReducer } from 'hooks/jotai/globals-wrapper';
 import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +14,11 @@ export const DEFAULT_OK_CANCEL_MODAL_WINDOW: GeneralOkModalWindow = {
   ok: '',
 };
 
-export async function showGeneralModalOk(
-  spec: Partial<GeneralOkModalWindow>,
-  setGeneralOkModalWindow: (arg0: GeneralOkModalWindow) => void
-) {
+function setGeneralOkModalWindow(state: GeneralOkModalWindow) {
+  getStore().set(GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM, state);
+}
+
+export async function showGeneralModalOk(spec: Partial<GeneralOkModalWindow>) {
   const fullSpec: GeneralOkModalWindow = {
     ...DEFAULT_OK_CANCEL_MODAL_WINDOW,
     ...spec,

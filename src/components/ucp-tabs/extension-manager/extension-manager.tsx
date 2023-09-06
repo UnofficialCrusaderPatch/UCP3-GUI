@@ -150,11 +150,7 @@ export default function ExtensionManager() {
         buttonText={t('gui-general:deactivate')}
         clickCallback={async (event) => {
           const confirmed = await warnClearingOfConfiguration(
-            configurationTouched,
-            {
-              generalOkCancelModalWindow,
-              setGeneralOkCancelModalWindow,
-            }
+            configurationTouched
           );
           if (!confirmed) {
             return;
@@ -172,11 +168,7 @@ export default function ExtensionManager() {
         }}
         moveCallback={async (event: { name: string; type: 'up' | 'down' }) => {
           const confirmed = await warnClearingOfConfiguration(
-            configurationTouched,
-            {
-              generalOkCancelModalWindow,
-              setGeneralOkCancelModalWindow,
-            }
+            configurationTouched
           );
           if (!confirmed) {
             return;

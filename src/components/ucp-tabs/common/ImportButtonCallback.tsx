@@ -45,10 +45,6 @@ const setConfiguration = (arg0: {
   getStore().set(CONFIGURATION_REDUCER_ATOM, arg0);
 };
 
-const setConfigurationDefaults = (state: KeyValueReducerArgs<unknown>) => {
-  getStore().set(CONFIGURATION_DEFAULTS_REDUCER_ATOM, state);
-};
-
 const setConfigurationTouched = (arg0: {
   type: string;
   value: { [key: string]: boolean };
@@ -56,24 +52,8 @@ const setConfigurationTouched = (arg0: {
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, arg0);
 };
 
-const setConfigurationWarnings = (state: KeyValueReducerArgs<Warning>) => {
-  getStore().set(CONFIGURATION_WARNINGS_REDUCER_ATOM, state);
-};
-
-const setConfigurationLocks = (
-  state: KeyValueReducerArgs<ConfigurationLock>
-) => {
-  getStore().set(CONFIGURATION_LOCKS_REDUCER_ATOM, state);
-};
-
 const setExtensionsState = (arg0: ExtensionsState) => {
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, arg0);
-};
-
-const setGeneralOkCancelModalWindow = (
-  arg0: Partial<GeneralOkCancelModalWindow>
-) => {
-  getStore().set(GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM, arg0);
 };
 
 const setConfigurationQualifier = (arg0: {
@@ -93,9 +73,6 @@ const importButtonCallback = async (
   const { extensions } = extensionsState;
   const configurationTouched = getStore().get(
     CONFIGURATION_TOUCHED_REDUCER_ATOM
-  );
-  const generalOkCancelModalWindow = getStore().get(
-    GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM
   );
 
   let path = file;
@@ -118,10 +95,7 @@ const importButtonCallback = async (
 
   if (path === undefined) return;
 
-  warnClearingOfConfiguration(configurationTouched, {
-    generalOkCancelModalWindow,
-    setGeneralOkCancelModalWindow,
-  });
+  warnClearingOfConfiguration(configurationTouched);
 
   let newExtensionsState = {
     ...extensionsState,
@@ -193,13 +167,7 @@ const importButtonCallback = async (
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
   }
 
-  propagateActiveExtensionsChange(newExtensionsState, {
-    setConfiguration,
-    setConfigurationDefaults,
-    setConfigurationTouched,
-    setConfigurationWarnings,
-    setConfigurationLocks,
-  });
+  propagateActiveExtensionsChange(newExtensionsState);
 
   setExtensionsState(newExtensionsState);
 

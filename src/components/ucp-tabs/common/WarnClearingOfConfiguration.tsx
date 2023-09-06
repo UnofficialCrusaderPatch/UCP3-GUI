@@ -1,15 +1,8 @@
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
-import { GeneralOkCancelModalWindow } from 'function/global/types';
 
-async function warnClearingOfConfiguration(
-  configurationTouched: {
-    [key: string]: boolean;
-  },
-  modalWindow: {
-    generalOkCancelModalWindow: GeneralOkCancelModalWindow;
-    setGeneralOkCancelModalWindow: (arg0: GeneralOkCancelModalWindow) => void;
-  }
-) {
+async function warnClearingOfConfiguration(configurationTouched: {
+  [key: string]: boolean;
+}) {
   // Defer here to a processor for the current list of active extensions to yield the
 
   const touchedOptions = Object.entries(configurationTouched).filter(

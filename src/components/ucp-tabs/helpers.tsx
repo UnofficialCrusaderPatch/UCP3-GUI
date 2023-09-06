@@ -3,42 +3,22 @@ import {
   extensionsToOptionEntries,
   getConfigDefaults,
 } from 'config/ucp/extension-util';
-import { ConfigurationLock } from 'function/global/global-atoms';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  ConfigurationLock,
+} from 'function/global/global-atoms';
 import {
   ExtensionsState,
   KeyValueReducerArgs,
   Warning,
 } from 'function/global/types';
+import { getStore } from 'hooks/jotai/base';
 
-function propagateActiveExtensionsChange(
-  extensionsState: ExtensionsState,
-  stateFunctions: {
-    setConfiguration: (arg0: {
-      type: string;
-      value: { [key: string]: unknown };
-    }) => void;
-    setConfigurationDefaults: (arg0: {
-      type: string;
-      value: { [key: string]: unknown };
-    }) => void;
-    setConfigurationTouched: (arg0: {
-      type: string;
-      value: { [key: string]: boolean };
-    }) => void;
-    setConfigurationWarnings: (args_0: KeyValueReducerArgs<Warning>) => void;
-    setConfigurationLocks: (
-      args_0: KeyValueReducerArgs<ConfigurationLock | boolean>
-    ) => void;
-  }
-) {
-  const {
-    setConfiguration,
-    setConfigurationDefaults,
-    setConfigurationTouched,
-    setConfigurationWarnings,
-    setConfigurationLocks,
-  } = stateFunctions;
-
+function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // This section is meant to allow the config editor to display the options.
   const optionEntries = extensionsToOptionEntries(
     extensionsState.activeExtensions
@@ -62,26 +42,26 @@ function propagateActiveExtensionsChange(
   });
 
   // Here the values are set
-  setConfiguration({
+  getStore().set(CONFIGURATION_REDUCER_ATOM, {
     type: 'reset',
     value: defaults,
   });
-  setConfigurationDefaults({
+  getStore().set(CONFIGURATION_DEFAULTS_REDUCER_ATOM, {
     type: 'reset',
     value: defaults,
   });
-  setConfigurationTouched({
+  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'reset',
     value: Object.fromEntries(
       Object.entries(defaults).map((pair) => [pair[0], false])
     ),
   });
   // Not implemented currently. Could store them in configuration of extensionsState?
-  setConfigurationWarnings({
+  getStore().set(CONFIGURATION_WARNINGS_REDUCER_ATOM, {
     type: 'reset',
     value: {},
   });
-  setConfigurationLocks({
+  getStore().set(CONFIGURATION_LOCKS_REDUCER_ATOM, {
     type: 'reset',
     value: locks,
   });

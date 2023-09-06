@@ -33,10 +33,7 @@ const inactiveExtensionElementClickCallback = async (
 ) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
-  const confirmed = await warnClearingOfConfiguration(configurationTouched, {
-    generalOkCancelModalWindow,
-    setGeneralOkCancelModalWindow,
-  });
+  const confirmed = await warnClearingOfConfiguration(configurationTouched);
 
   if (!confirmed) {
     return;
@@ -69,13 +66,7 @@ const inactiveExtensionElementClickCallback = async (
     console.log(`New configuration build without errors or warnings`);
   }
 
-  propagateActiveExtensionsChange(res, {
-    setConfiguration,
-    setConfigurationDefaults,
-    setConfigurationTouched,
-    setConfigurationWarnings,
-    setConfigurationLocks,
-  });
+  propagateActiveExtensionsChange(res);
 
   setExtensionsState(res);
   console.log('New extension state', res);

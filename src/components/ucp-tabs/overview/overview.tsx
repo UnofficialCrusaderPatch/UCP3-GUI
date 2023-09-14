@@ -211,6 +211,7 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => Result.emptyOk()}
+        tooltip={t('gui-editor:overview.uninstallationToolTip')}
       />
       <StateButton
         buttonActive={overviewButtonActive}

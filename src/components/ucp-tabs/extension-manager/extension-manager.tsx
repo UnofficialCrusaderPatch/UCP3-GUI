@@ -33,7 +33,7 @@ import {
   showGeneralModalOkCancel,
 } from 'components/modals/ModalOkCancel';
 import { useAtom } from 'jotai';
-import { GUI_SETTINGS_REDUCER_ATOM } from 'function/global/global-atoms';
+import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import ExtensionElement from './extension-element';
 import { propagateActiveExtensionsChange } from '../helpers';
@@ -89,9 +89,9 @@ export default function ExtensionManager() {
     depsFor,
   } = createHelperObjects(extensionsState.extensions);
 
-  const [guiSettings] = useAtom(GUI_SETTINGS_REDUCER_ATOM);
+  const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
-  const extensionsToDisplay = guiSettings.advancedMode
+  const extensionsToDisplay = advancedMode
     ? extensionsState.installedExtensions
     : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
 
@@ -131,7 +131,7 @@ export default function ExtensionManager() {
     />
   ));
 
-  const displayedActiveExtensions = guiSettings.advancedMode
+  const displayedActiveExtensions = advancedMode
     ? extensionsState.activeExtensions
     : extensionsState.activeExtensions.filter((e) => e.type === 'plugin');
   const activated = displayedActiveExtensions.map((ext, index, arr) => {

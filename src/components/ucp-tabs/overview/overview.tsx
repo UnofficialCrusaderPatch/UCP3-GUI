@@ -116,6 +116,7 @@ export default function Overview() {
           }
           return result;
         }}
+        tooltip={t('gui-editor:overview.activationTooltip')}
       />
 
       {/*      <StateButton

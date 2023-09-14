@@ -21,6 +21,8 @@ interface StateButtonProps {
   funcBefore?: () => void;
   // eslint-disable-next-line react/require-default-props
   funcAfter?: () => void;
+  // eslint-disable-next-line react/require-default-props
+  tooltip?: string;
 }
 
 enum ButtonState {
@@ -38,6 +40,7 @@ export default function StateButton(props: StateButtonProps) {
     buttonActive,
     funcBefore,
     funcAfter,
+    tooltip,
   } = props;
   const [active, setActive] = useState(true);
   const [divState, setDivState] = useState<ReactNode>();
@@ -75,6 +78,9 @@ export default function StateButton(props: StateButtonProps) {
           setActive(true);
           if (funcAfter) funcAfter();
         }}
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title={tooltip}
       >
         <div className="icon-placeholder" />
         <div className="button-text">{buttonValues[buttonState]}</div>

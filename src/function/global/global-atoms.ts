@@ -1,5 +1,5 @@
 import { Extension } from 'config/ucp/common';
-import { atomWithReducer } from 'jotai/utils';
+import { atomWithReducer, atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
 import {
   ArrayReducerArgs,
@@ -157,25 +157,4 @@ export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
     ok: '',
   },
   generalOkModalWindowReducer
-);
-
-export type GuiSettings = {
-  advancedMode: boolean;
-};
-
-export const DEFAULT_GUI_SETTINGS: GuiSettings = {
-  advancedMode: false,
-};
-
-const guiSettingsReducer = (
-  oldState: GuiSettings,
-  newState: Partial<GuiSettings>
-): GuiSettings => {
-  const state = { ...oldState, ...newState };
-  return state;
-};
-
-export const GUI_SETTINGS_REDUCER_ATOM = atomWithReducer(
-  DEFAULT_GUI_SETTINGS,
-  guiSettingsReducer
 );

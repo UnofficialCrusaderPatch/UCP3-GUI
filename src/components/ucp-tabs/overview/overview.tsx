@@ -21,12 +21,11 @@ import { useAtom } from 'jotai';
 import { confirm } from '@tauri-apps/api/dialog';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 
+import * as GuiSettings from 'function/global/gui-settings/guiSettings';
+
 import './overview.css';
 
-import {
-  GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM,
-  GUI_SETTINGS_REDUCER_ATOM,
-} from 'function/global/global-atoms';
+import { GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM } from 'function/global/global-atoms';
 import { exists } from '@tauri-apps/api/fs';
 import { warn } from 'util/scripts/logging';
 import ExtensionPack from 'function/extensions/extension-pack';
@@ -79,7 +78,9 @@ export default function Overview() {
     }
   }
 
-  const [guiSettings, setGuiSettings] = useAtom(GUI_SETTINGS_REDUCER_ATOM);
+  const [advancedMode, setAdvancedMode] = useAtom(
+    GuiSettings.ADVANCED_MODE_ATOM
+  );
 
   const [, setGeneralOkModalWindow] = useAtom(
     GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM
@@ -240,12 +241,11 @@ export default function Overview() {
           <Form.Switch
             id="gui-settings-advanced-mode-switch"
             label={t('gui-general:advanced.mode')}
-            checked={guiSettings.advancedMode as boolean}
+            checked={advancedMode as boolean}
             onChange={(e) => {
-              setGuiSettings({
-                ...guiSettings,
-                advancedMode: e.target.checked,
-              });
+              if (e.target.checked !== advancedMode) {
+                setAdvancedMode(e.target.checked);
+              }
             }}
           />
         </Form>

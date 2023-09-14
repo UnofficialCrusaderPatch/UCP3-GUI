@@ -13,7 +13,7 @@ import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { error, warn } from 'util/scripts/logging';
 import { useAtom } from 'jotai';
-import { GUI_SETTINGS_REDUCER_ATOM } from 'function/global/global-atoms';
+import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
@@ -34,7 +34,7 @@ export default function UcpTabs() {
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
 
-  const [guiSettings] = useAtom(GUI_SETTINGS_REDUCER_ATOM);
+  const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
   return (
     <div className="ucp-tabs fs-7">
@@ -78,7 +78,7 @@ export default function UcpTabs() {
               eventKey="config"
               className="tab-link"
               disabled={!displayConfigTabs}
-              hidden={!guiSettings.advancedMode}
+              hidden={!advancedMode}
             >
               {t('gui-editor:config.title')}
             </Nav.Link>

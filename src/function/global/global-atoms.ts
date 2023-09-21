@@ -1,6 +1,7 @@
 import { Extension } from 'config/ucp/common';
 import { atomWithReducer, atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
+import { compare } from 'semver';
 import {
   ArrayReducerArgs,
   ArrayReducerState,
@@ -158,3 +159,31 @@ export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
   },
   generalOkModalWindowReducer
 );
+
+export type PreferredExtensionVersionDictionary = {
+  [extensionName: string]: string;
+};
+
+export const PREFERRED_EXTENSION_VERSION_ATOM =
+  atom<PreferredExtensionVersionDictionary>({});
+
+export type AvailableExtensionVersionsDictionary = {
+  [extensionName: string]: string[];
+};
+
+export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
+  atom<AvailableExtensionVersionsDictionary>((get) => {
+    const allExtensions = get(EXTENSION_STATE_REDUCER_ATOM).extensions;
+    const availableVersions: { [extensionName: string]: string[] } = {};
+    allExtensions.forEach((ext: Extension) => {
+      if (availableVersions[ext.name] === undefined) {
+        availableVersions[ext.name] = [];
+      }
+      availableVersions[ext.name].push(ext.version);
+
+      // Descending order
+      availableVersions[ext.name].sort(compare);
+    });
+
+    return availableVersions;
+  });

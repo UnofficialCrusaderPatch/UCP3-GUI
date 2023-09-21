@@ -31,6 +31,11 @@ import ResetButton from '../config-editor/ResetButton';
 export default function ExtensionManager() {
   const extensionsState = useExtensionState();
 
+  console.log(
+    `Extension state at start of render of ExtensionManager`,
+    extensionsState
+  );
+
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   const [configuration, setConfiguration] = useConfigurationReducer();

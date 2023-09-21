@@ -6,29 +6,22 @@ import {
 } from 'config/ucp/common';
 import { loadConfigFromFile } from 'config/ucp/config-files';
 import { ConfigMetaObjectDB } from 'config/ucp/config-merge/objects';
-import { DependencyStatement } from 'config/ucp/dependency-statement';
+import { DependencyStatement, Version } from 'config/ucp/dependency-statement';
 import { collectConfigEntries } from 'function/extensions/discovery';
-import {
-  ExtensionsState,
-  ConfigurationQualifier,
-  GeneralOkCancelModalWindow,
-  KeyValueReducerArgs,
-  Warning,
-} from 'function/global/types';
+import { ExtensionsState, ConfigurationQualifier } from 'function/global/types';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
 import { getStore } from 'hooks/jotai/base';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  AVAILABLE_EXTENSION_VERSIONS_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  ConfigurationLock,
   EXTENSION_STATE_REDUCER_ATOM,
-  GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
+import ExtensionVersionedDependencySolver from 'config/ucp/extension-versioned-dependency-solver';
 import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,
@@ -128,20 +121,96 @@ const importButtonCallback = async (
     // eslint-disable-next-line no-restricted-syntax
     for (const e of lo) {
       const ds = DependencyStatement.fromString(e);
+
+      // TODO: support more than just == in version statements. This is hard to do though.
+
+      if (ds.operator === '') {
+        const av = getStore().get(AVAILABLE_EXTENSION_VERSIONS_ATOM)[
+          ds.extension
+        ];
+        if (av === undefined || av.length === 0) {
+          throw Error(`hmmm, how did we get here?`);
+        }
+        ds.operator = '==';
+        ds.version = Version.fromString(av[0]);
+      }
+
+      if (ds.operator !== '==') {
+        const errorMsg = `Unimplemented operator in dependency statement: ${e}`;
+
+        // eslint-disable-next-line no-await-in-loop
+        await showGeneralModalOk({
+          message: errorMsg,
+          title: `Illegal dependency statement`,
+        });
+
+        throw Error(errorMsg);
+      }
+
       const options = extensions.filter(
         (ext: Extension) =>
           ext.name === ds.extension && ext.version === ds.version.toString()
       );
+      console.log(options);
       if (options.length === 0) {
         setConfigStatus(
           t('gui-editor:config.status.missing.extension', {
             extension: e,
           })
         );
+
+        // eslint-disable-next-line no-await-in-loop
+        await showGeneralModalOk({
+          message: t('gui-editor:config.status.missing.extension', {
+            extension: e,
+          }),
+          title: `Missing extension`,
+        });
+
         return;
       }
+
+      if (options.length > 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await showGeneralModalOk({
+          message: `The same version of extension is installed multiple times: ${e}`,
+          title: `Duplicate extensions`,
+        });
+
+        return;
+      }
+
       explicitActiveExtensions.push(options[0]);
     }
+
+    const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };
+
+    explicitActiveExtensions.forEach((e: Extension) => {
+      newPrefs[e.name] = e.version;
+    });
+
+    getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
+
+    const availableVersions = getStore().get(AVAILABLE_EXTENSION_VERSIONS_ATOM);
+
+    // Now how do deal with these specific extensions.
+    // Peferably the depednency solver should understand versions.
+    //
+    const specificExtensions = newExtensionsState.extensions.filter((e) => {
+      const preferredVersion = newPrefs[e.name];
+      if (preferredVersion !== undefined) {
+        return e.version === preferredVersion;
+      }
+
+      // Select the highest version available by default
+      return e.version === availableVersions[e.name][0];
+    });
+
+    const eds2 = new ExtensionVersionedDependencySolver(
+      newExtensionsState.extensions
+    );
+
+    console.log(eds2);
 
     const {
       eds,

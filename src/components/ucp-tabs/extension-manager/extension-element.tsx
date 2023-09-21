@@ -4,25 +4,35 @@ import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 
 import './extension-manager.css';
+import {
+  useExtensionStateReducer,
+  useGeneralOkayCancelModalWindowReducer,
+  useSetConfigurationLocks,
+  useSetConfigurationDefaults,
+  useConfigurationTouched,
+  useSetConfigurationTouched,
+  useSetConfigurationWarnings,
+  useSetConfiguration,
+} from 'hooks/jotai/globals-wrapper';
+import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
+import { createHelperObjects } from './extension-helper-objects';
+import warnClearingOfConfiguration from '../common/WarnClearingOfConfiguration';
+import {
+  removeExtensionFromExplicitlyActivatedExtensions,
+  moveExtension,
+} from './extensions-state';
 
-export default function ExtensionElement(props: {
+export function ExtensionElement(props: {
   ext: Extension;
   active: boolean;
   movability: { up: boolean; down: boolean };
   buttonText: string;
-  clickCallback: (event: unknown) => void;
+  clickCallback: () => void;
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
   revDeps: string[];
 }) {
-  const {
-    ext,
-    active,
-    movability,
-    buttonText,
-    clickCallback,
-    moveCallback,
-    revDeps,
-  } = props;
+  const { ext, active, movability, moveCallback, revDeps, clickCallback } =
+    props;
   const { name, version, author } = ext.definition;
 
   const [t] = useTranslation(['gui-editor']);
@@ -133,5 +143,133 @@ export default function ExtensionElement(props: {
         {enableButton}
       </Row>
     </ListGroup.Item>
+  );
+}
+
+export function InactiveExtensionElement(props: { ext: Extension }) {
+  const { ext } = props;
+  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+
+  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
+    useGeneralOkayCancelModalWindowReducer();
+
+  const setConfigurationLocks = useSetConfigurationLocks();
+
+  const setConfigurationDefaults = useSetConfigurationDefaults();
+
+  const setConfiguration = useSetConfiguration();
+
+  // currently simply reset:
+  const configurationTouched = useConfigurationTouched();
+  const setConfigurationTouched = useSetConfigurationTouched();
+  const setConfigurationWarnings = useSetConfigurationWarnings();
+
+  const { eds, extensionsByName, extensionsByNameVersionString, revDeps } =
+    createHelperObjects(extensionsState.extensions);
+
+  const clickCallback = () =>
+    inactiveExtensionElementClickCallback(
+      configurationTouched,
+      generalOkCancelModalWindow,
+      setGeneralOkCancelModalWindow,
+      extensionsState,
+      eds,
+      extensionsByName,
+      extensionsByNameVersionString,
+      ext,
+      setExtensionsState,
+      setConfiguration,
+      setConfigurationDefaults,
+      setConfigurationTouched,
+      setConfigurationWarnings,
+      setConfigurationLocks
+    );
+
+  const [t] = useTranslation(['gui-editor']);
+
+  return (
+    <ExtensionElement
+      ext={ext}
+      active={false}
+      movability={{ up: false, down: false }}
+      buttonText={t('gui-general:activate')}
+      clickCallback={clickCallback}
+      moveCallback={() => {}}
+      revDeps={revDeps[ext.name].filter(
+        (e: string) =>
+          extensionsState.activeExtensions
+            .flat()
+            .map((ex: Extension) => ex.name)
+            .indexOf(e) !== -1
+      )}
+    />
+  );
+}
+
+export function ActiveExtensionElement(props: {
+  ext: Extension;
+  index: number;
+  arr: Extension[];
+}) {
+  const { ext, index, arr } = props;
+
+  const configurationTouched = useConfigurationTouched();
+  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+
+  const { eds, revDeps, depsFor } = createHelperObjects(
+    extensionsState.extensions
+  );
+
+  const movability = {
+    up: index > 0 && revDeps[ext.name].indexOf(arr[index - 1].name) === -1,
+    down:
+      index < arr.length - 1 &&
+      depsFor[ext.name].indexOf(arr[index + 1].name) === -1,
+  };
+
+  const [t] = useTranslation(['gui-editor']);
+
+  return (
+    <ExtensionElement
+      ext={ext}
+      active
+      movability={movability}
+      buttonText={t('gui-general:deactivate')}
+      clickCallback={async () => {
+        const confirmed = await warnClearingOfConfiguration(
+          configurationTouched
+        );
+        if (!confirmed) {
+          return;
+        }
+        const newExtensionState =
+          removeExtensionFromExplicitlyActivatedExtensions(
+            extensionsState,
+            eds,
+            extensionsState.extensions,
+            ext
+          );
+
+        setExtensionsState(newExtensionState);
+      }}
+      moveCallback={async (event: { name: string; type: 'up' | 'down' }) => {
+        const confirmed = await warnClearingOfConfiguration(
+          configurationTouched
+        );
+        if (!confirmed) {
+          return;
+        }
+
+        const newExtensionsState = moveExtension(extensionsState, event);
+
+        setExtensionsState(newExtensionsState);
+      }}
+      revDeps={revDeps[ext.name].filter(
+        (e: string) =>
+          extensionsState.activeExtensions
+            .map((ex: Extension) => ex.name)
+            .indexOf(e) !== -1
+      )}
+    />
   );
 }

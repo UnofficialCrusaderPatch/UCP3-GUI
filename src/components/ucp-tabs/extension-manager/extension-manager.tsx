@@ -1,49 +1,25 @@
 import { Container, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { Extension } from 'config/ucp/common';
-import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import {
-  useSetConfigurationDefaults,
-  useSetConfigurationLocks,
   useConfigurationTouched,
-  useExtensionStateReducer,
-  useSetConfiguration,
   useSetConfigurationTouched,
-  useSetConfigurationWarnings,
-  useGeneralOkayCancelModalWindowReducer,
   useConfigurationDefaultsReducer,
   useConfigurationReducer,
-  useConfigurationQualifierReducer,
-  useConfigurationTouchedReducer,
-  useConfigurationWarningsReducer,
   useUcpConfigFileValue,
+  useConfigurationQualifier,
+  useExtensionState,
 } from 'hooks/jotai/globals-wrapper';
-import {
-  ExtensionsState,
-  GeneralOkCancelModalWindow,
-} from 'function/global/types';
 
 import './extension-manager.css';
-import { info } from 'util/scripts/logging';
 
-import { tryResolveDependencies } from 'function/extensions/discovery';
-import { useEffect, useState } from 'react';
-import {
-  DEFAULT_OK_CANCEL_MODAL_WINDOW,
-  showGeneralModalOkCancel,
-} from 'components/modals/ModalOkCancel';
+import { useState } from 'react';
 import { useAtom } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import ExtensionElement from './extension-element';
-import { propagateActiveExtensionsChange } from '../helpers';
 import {
-  addExtensionToExplicityActivatedExtensions,
-  moveExtension,
-  removeExtensionFromExplicitlyActivatedExtensions,
-} from './extensions-state';
-import { buildExtensionConfigurationDB } from './extension-configuration';
-import { createHelperObjects } from './extension-helper-objects';
+  ActiveExtensionElement,
+  InactiveExtensionElement,
+} from './extension-element';
 import exportButtonCallback from '../common/ExportButtonCallback';
 import importButtonCallback from '../common/ImportButtonCallback';
 import saveConfig from '../common/SaveConfig';
@@ -51,43 +27,23 @@ import ApplyButton from '../config-editor/ApplyButton';
 import ExportButton from '../config-editor/ExportButton';
 import ImportButton from '../config-editor/ImportButton';
 import ResetButton from '../config-editor/ResetButton';
-import warnClearingOfConfiguration from '../common/WarnClearingOfConfiguration';
-import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 
 export default function ExtensionManager() {
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const extensionsState = useExtensionState();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
-
-  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
-    useGeneralOkayCancelModalWindowReducer();
-
-  const setConfigurationLocks = useSetConfigurationLocks();
-
-  const setConfigurationDefaults = useSetConfigurationDefaults();
 
   const [configuration, setConfiguration] = useConfigurationReducer();
 
   // currently simply reset:
   const configurationTouched = useConfigurationTouched();
   const setConfigurationTouched = useSetConfigurationTouched();
-  const setConfigurationWarnings = useSetConfigurationWarnings();
   const file = useUcpConfigFileValue();
   const { activeExtensions } = extensionsState;
-  const { extensions } = extensionsState;
 
   const [configStatus, setConfigStatus] = useState('');
 
-  const [configurationQualifier, setConfigurationQualifier] =
-    useConfigurationQualifierReducer();
-
-  const {
-    eds,
-    extensionsByName,
-    extensionsByNameVersionString,
-    revDeps,
-    depsFor,
-  } = createHelperObjects(extensionsState.extensions);
+  const configurationQualifier = useConfigurationQualifier();
 
   const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
@@ -96,97 +52,24 @@ export default function ExtensionManager() {
     : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
 
   const eUI = extensionsToDisplay.map((ext) => (
-    <ExtensionElement
-      key={`${ext.name}-${ext.version}`}
+    <InactiveExtensionElement
+      key={`inactive-extension-element-${ext.name}-${ext.version}`}
       ext={ext}
-      active={false}
-      movability={{ up: false, down: false }}
-      buttonText={t('gui-general:activate')}
-      clickCallback={(event) =>
-        inactiveExtensionElementClickCallback(
-          configurationTouched,
-          generalOkCancelModalWindow,
-          setGeneralOkCancelModalWindow,
-          extensionsState,
-          eds,
-          extensionsByName,
-          extensionsByNameVersionString,
-          ext,
-          setExtensionsState,
-          setConfiguration,
-          setConfigurationDefaults,
-          setConfigurationTouched,
-          setConfigurationWarnings,
-          setConfigurationLocks
-        )
-      }
-      moveCallback={(event: { type: 'up' | 'down' }) => {}}
-      revDeps={revDeps[ext.name].filter(
-        (e: string) =>
-          extensionsState.activeExtensions
-            .flat()
-            .map((ex: Extension) => ex.name)
-            .indexOf(e) !== -1
-      )}
     />
   ));
 
   const displayedActiveExtensions = advancedMode
     ? extensionsState.activeExtensions
     : extensionsState.activeExtensions.filter((e) => e.type === 'plugin');
-  const activated = displayedActiveExtensions.map((ext, index, arr) => {
-    const movability = {
-      up: index > 0 && revDeps[ext.name].indexOf(arr[index - 1].name) === -1,
-      down:
-        index < arr.length - 1 &&
-        depsFor[ext.name].indexOf(arr[index + 1].name) === -1,
-    };
-    return (
-      <ExtensionElement
-        key={`${ext.name}-${ext.version}`}
-        ext={ext}
-        active
-        movability={movability}
-        buttonText={t('gui-general:deactivate')}
-        clickCallback={async (event) => {
-          const confirmed = await warnClearingOfConfiguration(
-            configurationTouched
-          );
-          if (!confirmed) {
-            return;
-          }
-          const newExtensionState =
-            removeExtensionFromExplicitlyActivatedExtensions(
-              extensionsState,
-              eds,
-              extensionsState.extensions,
-              ext
-            );
-          const ae = newExtensionState.activeExtensions;
 
-          setExtensionsState(newExtensionState);
-        }}
-        moveCallback={async (event: { name: string; type: 'up' | 'down' }) => {
-          const confirmed = await warnClearingOfConfiguration(
-            configurationTouched
-          );
-          if (!confirmed) {
-            return;
-          }
-
-          const newExtensionsState = moveExtension(extensionsState, event);
-
-          setExtensionsState(newExtensionsState);
-        }}
-        revDeps={revDeps[ext.name].filter(
-          (e: string) =>
-            extensionsState.activeExtensions
-              .map((ex: Extension) => ex.name)
-              .indexOf(e) !== -1
-        )}
-      />
-    );
-  });
+  const activated = displayedActiveExtensions.map((ext, index, arr) => (
+    <ActiveExtensionElement
+      key={`active-extension-element-${ext.name}-${ext.version}`}
+      ext={ext}
+      index={index}
+      arr={arr}
+    />
+  ));
 
   const [configurationDefaults] = useConfigurationDefaultsReducer();
   const gameFolder = useCurrentGameFolder();

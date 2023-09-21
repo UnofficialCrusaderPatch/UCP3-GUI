@@ -1,8 +1,10 @@
 import { warn } from 'util/scripts/logging';
+import { Range, SemVer, satisfies } from 'semver';
 import { Extension } from './common';
 import { DependencyStatement } from './dependency-statement';
 
-const LEGAL_OPERATORS = ['=='];
+const MATCHER_SIMPLE_START = /^([a-zA-Z0-9-_]+)/;
+const LEGAL_OPERATORS = ['>=', '=='];
 
 function checkForIllegalDependencyStatements(ext: Extension) {
   const illegalOperators = ext.definition.dependencies.filter(
@@ -30,39 +32,58 @@ function SetAdd<Type>(s1: Set<Type>, s2: Set<Type>): Set<Type> {
   return new Set([...s1, ...s2]);
 }
 
+type NameRangePair = { extensionName: string; range: Range };
+
 // Class to solve dependencies
 class ExtensionVersionedDependencySolver {
   extensions: Extension[];
 
-  extensionDependencies: { [extension: string]: string[] };
+  extensionDependencies: { [extension: string]: NameRangePair[] };
 
   constructor(extensions: Extension[]) {
     this.extensions = extensions;
     this.extensionDependencies = {};
     this.extensions.forEach((e: Extension) => {
-      this.extensionDependencies[`${e.name}-${e.version}`] = [
-        ...e.definition.dependencies.map(
-          (dep) =>
-            `${DependencyStatement.fromString(dep).extension}-${
-              DependencyStatement.fromString(dep).version
-            }`
-        ),
-      ];
+      this.extensionDependencies[`${e.name}-${e.version}`] =
+        e.definition.dependencies.map((dep) => {
+          const matches = MATCHER_SIMPLE_START.exec(dep);
+          if (matches === null) {
+            throw Error(`Invalid dependency statement: ${dep}`);
+          }
+
+          const extensionName = matches[1];
+
+          const cleanedDep = dep
+            .replaceAll('==', ' == ')
+            .replaceAll('>=', ' >= ');
+
+          return {
+            extensionName,
+            range: new Range(cleanedDep, { loose: true }),
+          };
+        });
     });
 
     this.extensions.forEach((e) => checkForIllegalDependencyStatements(e));
 
-    const missing = this.getMissingDependencies();
-    if (missing.length > 0) {
-      throw Error(`Missing the following dependencies: ${missing.join(', ')}`);
-    }
+    // Not possible because a subset might be desired outcome. This just checks alll...
+    // const missing = this.getMissingDependencies();
+    // if (missing.length > 0) {
+    //   throw Error(`Missing the following dependencies: ${missing.join(', ')}`);
+    // }
   }
 
   getMissingDependencies() {
     return Object.entries(this.extensionDependencies)
       .map(([extensionName, dependencies]) => dependencies)
       .flat()
-      .filter((spec) => this.extensionDependencies[spec] === undefined);
+      .filter(
+        (spec) =>
+          this.extensions
+            .filter((e) => e.name === spec.extensionName)
+            .filter((e) => satisfies(e.version, spec.range) === true).length ===
+          0
+      );
   }
 
   reverseDependenciesFor(extSpec: string) {

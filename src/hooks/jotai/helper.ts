@@ -8,6 +8,7 @@ import Result from 'util/structs/result';
 import { info } from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
+import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 import {
   useFolder,
   useInitRunning,
@@ -146,6 +147,7 @@ export function useInitGlobalConfiguration(): [
 
       const newExtensionsState = {
         ...extensionsState,
+        tree: new ExtensionTree([...extensions]),
         activeExtensions: [],
         explicitlyActivatedExtensions: [],
         installedExtensions: [...extensions],

@@ -2,6 +2,7 @@ import { Extension } from 'config/ucp/common';
 import { atomWithReducer, atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
 import { compare } from 'semver';
+import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 import {
   ArrayReducerArgs,
   ArrayReducerState,
@@ -89,6 +90,7 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
     installedExtensions: [],
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
+    tree: new ExtensionTree([]),
     configuration: {
       statusCode: 0,
       errors: [],

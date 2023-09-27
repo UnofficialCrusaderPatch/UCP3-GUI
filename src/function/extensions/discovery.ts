@@ -12,12 +12,11 @@ import {
   OptionEntry,
 } from 'config/ucp/common';
 import { error, info, warn } from 'util/scripts/logging';
-import { Config } from 'config/ucp/config';
-import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
 import { changeLocale } from './locale';
+import { ExtensionTree } from './dependency-management/dependency-resolution';
 
 const OPTIONS_FILE = 'options.yml';
 const CONFIG_FILE = 'config.yml';
@@ -297,24 +296,7 @@ const Discovery = {
 };
 
 function tryResolveDependencies(extensions: Extension[]) {
-  const eds = new ExtensionDependencySolver(extensions);
-
-  const result = extensions
-    .map((ext: Extension) => {
-      const messages = eds.tryDependenciesFor(ext.name);
-
-      if (messages.length > 0) {
-        return `The following errors occurred while resolving dependencies for: ${
-          ext.name
-        }:\n  ${messages.join('; ')}`;
-      }
-
-      return undefined;
-    })
-    .filter((el) => el !== undefined)
-    .join('\n');
-
-  return result;
+  return new ExtensionTree(extensions).tryResolveDependencies();
 }
 
 // eslint-disable-next-line import/prefer-default-export

@@ -14,8 +14,8 @@ import {
   useSetConfigurationWarnings,
   useSetConfiguration,
 } from 'hooks/jotai/globals-wrapper';
+import { ExtensionsState } from 'function/global/types';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
-import { createHelperObjects } from './extension-helper-objects';
 import warnClearingOfConfiguration from '../common/WarnClearingOfConfiguration';
 import {
   removeExtensionFromExplicitlyActivatedExtensions,
@@ -29,7 +29,7 @@ export function ExtensionElement(props: {
   buttonText: string;
   clickCallback: () => void;
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
-  revDeps: string[];
+  revDeps: Extension[];
 }) {
   const { ext, active, movability, moveCallback, revDeps, clickCallback } =
     props;
@@ -44,7 +44,9 @@ export function ExtensionElement(props: {
         <Tooltip {...(p as object)}>
           {revDeps.length > 0
             ? t('gui-editor:extensions.is.dependency', {
-                dependencies: revDeps.join(', '),
+                dependencies: revDeps
+                  .map((e) => `${e.name}@${e.version}`)
+                  .join(', '),
               })
             : ''}
         </Tooltip>
@@ -164,18 +166,12 @@ export function InactiveExtensionElement(props: { ext: Extension }) {
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
-  const { eds, extensionsByName, extensionsByNameVersionString, revDeps } =
-    createHelperObjects(extensionsState.extensions);
-
   const clickCallback = () =>
     inactiveExtensionElementClickCallback(
       configurationTouched,
       generalOkCancelModalWindow,
       setGeneralOkCancelModalWindow,
       extensionsState,
-      eds,
-      extensionsByName,
-      extensionsByNameVersionString,
       ext,
       setExtensionsState,
       setConfiguration,
@@ -187,6 +183,8 @@ export function InactiveExtensionElement(props: { ext: Extension }) {
 
   const [t] = useTranslation(['gui-editor']);
 
+  const revDeps = extensionsState.tree.reverseDependenciesFor(ext);
+
   return (
     <ExtensionElement
       ext={ext}
@@ -195,12 +193,8 @@ export function InactiveExtensionElement(props: { ext: Extension }) {
       buttonText={t('gui-general:activate')}
       clickCallback={clickCallback}
       moveCallback={() => {}}
-      revDeps={revDeps[ext.name].filter(
-        (e: string) =>
-          extensionsState.activeExtensions
-            .flat()
-            .map((ex: Extension) => ex.name)
-            .indexOf(e) !== -1
+      revDeps={revDeps.filter(
+        (e) => extensionsState.activeExtensions.flat().indexOf(e) !== -1
       )}
     />
   );
@@ -216,15 +210,12 @@ export function ActiveExtensionElement(props: {
   const configurationTouched = useConfigurationTouched();
   const [extensionsState, setExtensionsState] = useExtensionStateReducer();
 
-  const { eds, revDeps, depsFor } = createHelperObjects(
-    extensionsState.extensions
-  );
+  const revDeps = extensionsState.tree.reverseDependenciesFor(ext);
+  const depsFor = extensionsState.tree.directDependenciesFor(ext);
 
   const movability = {
-    up: index > 0 && revDeps[ext.name].indexOf(arr[index - 1].name) === -1,
-    down:
-      index < arr.length - 1 &&
-      depsFor[ext.name].indexOf(arr[index + 1].name) === -1,
+    up: index > 0 && revDeps.indexOf(arr[index - 1]) === -1,
+    down: index < arr.length - 1 && depsFor.indexOf(arr[index + 1]) === -1,
   };
 
   const [t] = useTranslation(['gui-editor']);
@@ -245,8 +236,6 @@ export function ActiveExtensionElement(props: {
         const newExtensionState =
           removeExtensionFromExplicitlyActivatedExtensions(
             extensionsState,
-            eds,
-            extensionsState.extensions,
             ext
           );
 
@@ -264,11 +253,8 @@ export function ActiveExtensionElement(props: {
 
         setExtensionsState(newExtensionsState);
       }}
-      revDeps={revDeps[ext.name].filter(
-        (e: string) =>
-          extensionsState.activeExtensions
-            .map((ex: Extension) => ex.name)
-            .indexOf(e) !== -1
+      revDeps={revDeps.filter(
+        (e: Extension) => extensionsState.activeExtensions.indexOf(e) !== -1
       )}
     />
   );

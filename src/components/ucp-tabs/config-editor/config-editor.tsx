@@ -43,7 +43,6 @@ import { UIFactory } from './ui-elements';
 import './config-editor.css';
 import { propagateActiveExtensionsChange } from '../helpers';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
-import { createHelperObjects } from '../extension-manager/extension-helper-objects';
 import ExportButton from './ExportButton';
 import ApplyButton from './ApplyButton';
 import ImportButton from './ImportButton';

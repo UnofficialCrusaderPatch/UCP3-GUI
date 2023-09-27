@@ -1,5 +1,4 @@
 import { Extension } from 'config/ucp/common';
-import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
@@ -7,45 +6,35 @@ import { info } from 'util/scripts/logging';
 
 const addExtensionToExplicityActivatedExtensions = (
   extensionsState: ExtensionsState,
-  eds: ExtensionDependencySolver,
-  extensionsByName: { [k: string]: Extension },
-  extensionsByNameVersionString: { [k: string]: Extension },
   ext: Extension
 ) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
-  const dependencyExtensionNames = eds.dependenciesFor(ext.name).flat();
+  const { tree } = extensionsState;
 
-  const dependencies: Extension[] = dependencyExtensionNames
-    .filter(
-      (v: string) =>
-        extensionsState.activeExtensions
-          .map((e: Extension) => e.name)
-          .indexOf(v) === -1
-    )
-    .map((v: string) => {
-      if (extensionsByName[v] !== undefined) {
-        return extensionsByName[v];
-      }
-      throw new Error();
-    }) //           .filter((e: Extension) => dependencyExtensionNames.indexOf(e.name) !== -1)
+  // TODO: alternative: tree.dependenciesFor([ext, extensionsState.explicitlyActivatedExtensions])
+
+  const final = tree
+    .dependenciesForExtensions([
+      ext,
+      ...extensionsState.explicitlyActivatedExtensions,
+    ])
     .reverse();
 
-  const remainder = extensionsState.activeExtensions
-    .flat()
-    .map((e: Extension) => `${e.name}-${e.version}`)
-    .filter(
-      (es) =>
-        dependencies
-          .map((e: Extension) => `${e.name}-${e.version}`)
-          .indexOf(es) === -1
-    )
-    .map((es: string) => extensionsByNameVersionString[es]);
+  // // This version exists to preserve custom ordering applied by the user
+  // const dependenciesSorted = tree.dependenciesFor(ext);
 
-  const final = [...dependencies, ...remainder];
+  // const dependencies: Extension[] = dependenciesSorted
+  //   .filter(
+  //     (v: Extension) => extensionsState.activeExtensions.indexOf(v) === -1
+  //   )
+  //   .reverse();
 
-  const localEDS = new ExtensionDependencySolver(final);
-  info(localEDS.solve());
+  // const remainder = extensionsState.activeExtensions
+  //   .flat()
+  //   .filter((e) => dependencies.indexOf(e) === -1);
+
+  // const final = [...dependencies, ...remainder];
 
   return {
     ...extensionsState,
@@ -65,20 +54,20 @@ const addExtensionToExplicityActivatedExtensions = (
 
 const removeExtensionFromExplicitlyActivatedExtensions = (
   extensionsState: ExtensionsState,
-  eds: ExtensionDependencySolver,
-  extensions: Extension[],
   ext: Extension
 ) => {
-  const relevantExtensions = new Set(
+  const { tree } = extensionsState;
+
+  const relevantExtensions = tree.dependenciesForExtensions(
     extensionsState.explicitlyActivatedExtensions
-      .filter((e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`)
-      .map((e: Extension) => eds.dependenciesFor(e.name).flat())
-      .flat()
   );
 
+  // Only one version of each extension can be activated.
+  const relevantExtensionNames = new Set(relevantExtensions.map((e) => e.name));
+
   // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
-  const ae = extensionsState.activeExtensions.filter((e) =>
-    relevantExtensions.has(e.name)
+  const ae = extensionsState.activeExtensions.filter(
+    (e) => relevantExtensions.indexOf(e) !== -1
   );
 
   return {
@@ -89,8 +78,8 @@ const removeExtensionFromExplicitlyActivatedExtensions = (
         (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
       ),
     activeExtensions: ae,
-    installedExtensions: extensions
-      .filter((e: Extension) => !relevantExtensions.has(e.name))
+    installedExtensions: extensionsState.extensions
+      .filter((e: Extension) => !relevantExtensionNames.has(e.name))
       .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name)),
   } as ExtensionsState;
 };

@@ -1,6 +1,5 @@
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { Extension } from 'config/ucp/common';
-import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import {
   GeneralOkCancelModalWindow,
   ExtensionsState,
@@ -18,9 +17,6 @@ const inactiveExtensionElementClickCallback = async (
   generalOkCancelModalWindow: GeneralOkCancelModalWindow,
   setGeneralOkCancelModalWindow: (arg0: GeneralOkCancelModalWindow) => void,
   extensionsState: ExtensionsState,
-  eds: ExtensionDependencySolver,
-  extensionsByName: { [k: string]: Extension },
-  extensionsByNameVersionString: { [k: string]: Extension },
   ext: Extension,
   setExtensionsState: (arg0: ExtensionsState) => void,
   setConfiguration: (args_0: KeyValueReducerArgs<unknown>) => void,
@@ -41,9 +37,6 @@ const inactiveExtensionElementClickCallback = async (
 
   const newExtensionState = addExtensionToExplicityActivatedExtensions(
     extensionsState,
-    eds,
-    extensionsByName,
-    extensionsByNameVersionString,
     ext
   );
 

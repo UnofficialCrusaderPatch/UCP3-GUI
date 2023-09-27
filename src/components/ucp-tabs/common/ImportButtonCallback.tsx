@@ -21,12 +21,10 @@ import {
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
-import ExtensionVersionedDependencySolver from 'config/ucp/extension-versioned-dependency-solver';
 import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,
 } from '../extension-manager/extension-configuration';
-import { createHelperObjects } from '../extension-manager/extension-helper-objects';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
 import { propagateActiveExtensionsChange } from '../helpers';
 import warnClearingOfConfiguration from './WarnClearingOfConfiguration';
@@ -206,29 +204,12 @@ const importButtonCallback = async (
       return e.version === availableVersions[e.name][0];
     });
 
-    const eds2 = new ExtensionVersionedDependencySolver(
-      newExtensionsState.extensions
-    );
-
-    console.log(eds2);
-
-    const {
-      eds,
-      extensionsByName,
-      extensionsByNameVersionString,
-      revDeps,
-      depsFor,
-    } = createHelperObjects(newExtensionsState.extensions);
-
     explicitActiveExtensions
       .slice()
       .reverse()
       .forEach((ext) => {
         newExtensionsState = addExtensionToExplicityActivatedExtensions(
           newExtensionsState,
-          eds,
-          extensionsByName,
-          extensionsByNameVersionString,
           ext
         );
       });

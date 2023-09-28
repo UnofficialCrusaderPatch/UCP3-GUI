@@ -61,6 +61,7 @@ const importButtonCallback = async (
   file: string | undefined
 ) => {
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  console.log('state before importbuttoncallback', extensionsState);
   const { extensions } = extensionsState;
   const configurationTouched = getStore().get(
     CONFIGURATION_TOUCHED_REDUCER_ATOM
@@ -204,16 +205,14 @@ const importButtonCallback = async (
       return e.version === availableVersions[e.name][0];
     });
 
-    explicitActiveExtensions
-      .slice()
-      .reverse()
-      // TODO: does this execute still in line with what is expected, or does the promise mess things up?
-      .forEach(async (ext) => {
-        newExtensionsState = await addExtensionToExplicityActivatedExtensions(
-          newExtensionsState,
-          ext
-        );
-      });
+    // eslint-disable-next-line no-restricted-syntax
+    for (const ext of explicitActiveExtensions.slice().reverse()) {
+      // eslint-disable-next-line no-await-in-loop
+      newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+        newExtensionsState,
+        ext
+      );
+    }
 
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
   }

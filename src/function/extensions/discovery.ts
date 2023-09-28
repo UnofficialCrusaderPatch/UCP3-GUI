@@ -232,7 +232,8 @@ const Discovery = {
           assumedType = type;
         }
 
-        definition.dependencies = definition.depends || [];
+        definition.dependencies =
+          definition.dependencies || definition.depends || [];
 
         const ext = {
           name,

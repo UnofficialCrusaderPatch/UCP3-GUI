@@ -78,7 +78,21 @@ type ConfigPart = {
   };
 };
 
-type UCP3SerializedUserConfig = {
+type PluginConfigPart = {
+  modules: {
+    [key: string]: ConfigExtensionPart;
+  };
+  plugins: {
+    [key: string]: ConfigExtensionPart;
+  };
+};
+
+export type UCP3SerializedPluginConfig = {
+  'specification-version': string;
+  'config-sparse': PluginConfigPart;
+};
+
+export type UCP3SerializedUserConfig = {
   active: boolean;
   'specification-version': string;
   'config-sparse': ConfigPart;
@@ -161,13 +175,11 @@ function saveUCPConfigPart(
   });
 }
 
-// Save configuration
-export async function saveUCPConfig(
+export function serializeUCPConfig(
   sparseConfig: { [key: string]: unknown },
   fullConfig: { [key: string]: unknown },
   sparseExtensions: Extension[],
   fullExtensions: Extension[],
-  filePath: string,
   configurationQualifier: { [key: string]: ConfigurationQualifier }
 ) {
   const finalConfig: UCP3SerializedUserConfig = {
@@ -194,9 +206,33 @@ export async function saveUCPConfig(
     configurationQualifier
   );
 
+  return finalConfig;
+}
+
+export function toYaml(obj: unknown) {
+  return yamlStringify(obj, { aliasDuplicateObjects: false });
+}
+
+// Save configuration
+export async function saveUCPConfig(
+  sparseConfig: { [key: string]: unknown },
+  fullConfig: { [key: string]: unknown },
+  sparseExtensions: Extension[],
+  fullExtensions: Extension[],
+  filePath: string,
+  configurationQualifier: { [key: string]: ConfigurationQualifier }
+) {
   await writeTextFile(
     filePath,
-    yamlStringify(finalConfig, { aliasDuplicateObjects: false })
+    toYaml(
+      serializeUCPConfig(
+        sparseConfig,
+        fullConfig,
+        sparseExtensions,
+        fullExtensions,
+        configurationQualifier
+      )
+    )
   );
 
   return `Config file saved succesfully`;

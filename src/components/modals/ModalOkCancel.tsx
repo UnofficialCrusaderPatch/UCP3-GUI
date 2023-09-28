@@ -60,7 +60,10 @@ export function ModalOkCancel() {
       <div className="m-5">
         <Modal
           show={show}
-          onHide={handleClose}
+          onHide={() => {
+            setGeneralModalWindow({ ...generalModalWindow, show: false });
+            handleClose();
+          }}
           className="text-dark"
           style={{ whiteSpace: 'pre-line' }}
         >

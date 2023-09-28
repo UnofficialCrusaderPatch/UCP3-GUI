@@ -4,6 +4,7 @@ async function warnClearingOfConfiguration(configurationTouched: {
   [key: string]: boolean;
 }) {
   // Defer here to a processor for the current list of active extensions to yield the
+  console.log('displaying warning');
 
   const touchedOptions = Object.entries(configurationTouched).filter(
     (pair) => pair[1] === true

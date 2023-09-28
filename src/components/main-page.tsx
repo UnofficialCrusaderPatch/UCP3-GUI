@@ -4,9 +4,11 @@ import CreditsButton from './credits/credits';
 import Footer from './footer/footer';
 import UcpTabs from './ucp-tabs/ucp-tabs';
 
-import './main-page.css';
 import { ModalOkCancel } from './modals/ModalOkCancel';
 import { ModalOk } from './modals/ModalOk';
+import { CreatePluginModal } from './modals/CreatePluginModal';
+
+import './main-page.css';
 
 export default function Main() {
   return (
@@ -25,6 +27,7 @@ export default function Main() {
       </div>
       <ModalOkCancel />
       <ModalOk />
+      <CreatePluginModal />
     </>
   );
 }

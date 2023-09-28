@@ -8,6 +8,7 @@ import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguratio
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
 
 const activeExtensionElementClickCallback = async (ext: Extension) => {
+  console.log('deactivate', ext);
   const confirmed = await warnClearingOfConfiguration(
     getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM)
   );

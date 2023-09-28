@@ -1,8 +1,8 @@
 import { Extension } from 'config/ucp/common';
-import { saveUCPConfig } from 'config/ucp/config-files';
+import { serializeUCPConfig } from 'config/ucp/config-files';
 import { ConfigurationQualifier } from 'function/global/types';
 
-function saveConfig(
+function serializeConfig(
   configuration: { [key: string]: unknown },
   folder: string,
   touched: { [key: string]: boolean },
@@ -16,14 +16,13 @@ function saveConfig(
 
   const fullConfig = configuration;
 
-  return saveUCPConfig(
+  return serializeUCPConfig(
     sparseConfig,
     fullConfig,
     sparseExtensions,
     allExtensions,
-    folder,
     configurationQualifier
   );
 }
 
-export default saveConfig;
+export default serializeConfig;

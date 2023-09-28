@@ -13,8 +13,13 @@ import {
   useExtensionState,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import { useCurrentGameFolder, useGameFolder } from 'hooks/jotai/helper';
 
+import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
+import { DependencyStatement } from 'config/ucp/dependency-statement';
+import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
+import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
@@ -25,6 +30,8 @@ import ResetButton from './ResetButton';
 import importButtonCallback from '../common/ImportButtonCallback';
 import exportButtonCallback from '../common/ExportButtonCallback';
 import saveConfig from '../common/SaveConfig';
+import ExportAsPluginButton from './ExportAsPluginButton';
+import serializeConfig from '../common/SerializeConfig';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -112,6 +119,66 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   );
 
                   setConfigStatus(result);
+                }}
+              />
+              <ExportAsPluginButton
+                onClick={async () => {
+                  const result = await serializeConfig(
+                    configuration,
+                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                    configurationTouched,
+                    extensionsState.explicitlyActivatedExtensions,
+                    activeExtensions,
+                    configurationQualifier
+                  );
+
+                  const trimmedResult = {
+                    'config-sparse': {
+                      modules: result['config-sparse'].modules,
+                      plugins: result['config-sparse'].plugins,
+                    },
+                    'specification-version': result['specification-version'],
+                  } as UCP3SerializedPluginConfig;
+
+                  console.log(trimmedResult);
+
+                  const r = await showCreatePluginModalWindow({
+                    title: 'Create plugin',
+                    message: '',
+                  });
+
+                  console.log(r);
+
+                  if (r === undefined) return;
+
+                  // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+
+                  const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
+
+                  if (await exists(pluginDir)) {
+                    await showGeneralModalOk({
+                      message: `directory already exists: ${pluginDir}`,
+                      title: 'cannot create plugin',
+                    });
+                    return;
+                  }
+
+                  await createDir(pluginDir);
+
+                  await writeTextFile(
+                    `${pluginDir}/definition.yml`,
+                    toYaml({
+                      name: r.pluginName,
+                      author: r.pluginAuthor,
+                      version: r.pluginVersion,
+                      dependencies: result['config-sparse']['load-order'],
+                    })
+                  );
+
+                  await writeTextFile(
+                    `${pluginDir}/config.yml`,
+                    toYaml(trimmedResult)
+                  );
                 }}
               />
               <Form.Switch

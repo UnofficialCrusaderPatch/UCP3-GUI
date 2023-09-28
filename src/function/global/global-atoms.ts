@@ -175,17 +175,14 @@ export type AvailableExtensionVersionsDictionary = {
 
 export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
   atom<AvailableExtensionVersionsDictionary>((get) => {
-    const allExtensions = get(EXTENSION_STATE_REDUCER_ATOM).extensions;
-    const availableVersions: { [extensionName: string]: string[] } = {};
-    allExtensions.forEach((ext: Extension) => {
-      if (availableVersions[ext.name] === undefined) {
-        availableVersions[ext.name] = [];
-      }
-      availableVersions[ext.name].push(ext.version);
+    const { extensions } = get(EXTENSION_STATE_REDUCER_ATOM);
 
-      // Descending order
-      availableVersions[ext.name].sort(compare);
-    });
+    const { tree } = get(EXTENSION_STATE_REDUCER_ATOM);
 
-    return availableVersions;
+    return Object.fromEntries(
+      Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
+        name,
+        tree.allVersionsForName(name),
+      ])
+    ) as AvailableExtensionVersionsDictionary;
   });

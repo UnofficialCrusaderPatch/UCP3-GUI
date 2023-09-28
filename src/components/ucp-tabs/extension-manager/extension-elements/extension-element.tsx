@@ -3,24 +3,18 @@ import { Button, Col, ListGroup, Row, Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 
-import './extension-manager.css';
+import '../extension-manager.css';
 import {
   useExtensionStateReducer,
-  useGeneralOkayCancelModalWindowReducer,
-  useSetConfigurationLocks,
-  useSetConfigurationDefaults,
   useConfigurationTouched,
-  useSetConfigurationTouched,
-  useSetConfigurationWarnings,
-  useSetConfiguration,
+  useExtensionState,
 } from 'hooks/jotai/globals-wrapper';
-import { ExtensionsState } from 'function/global/types';
+import { useCallback } from 'react';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
-import warnClearingOfConfiguration from '../common/WarnClearingOfConfiguration';
-import {
-  removeExtensionFromExplicitlyActivatedExtensions,
-  moveExtension,
-} from './extensions-state';
+import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
+import { moveExtension } from '../extensions-state';
+import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
+import moveExtensionClickCallback from './MoveExtensionClickCallback';
 
 export function ExtensionElement(props: {
   ext: Extension;
@@ -150,36 +144,12 @@ export function ExtensionElement(props: {
 
 export function InactiveExtensionElement(props: { ext: Extension }) {
   const { ext } = props;
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const extensionsState = useExtensionState();
 
-  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
-    useGeneralOkayCancelModalWindowReducer();
-
-  const setConfigurationLocks = useSetConfigurationLocks();
-
-  const setConfigurationDefaults = useSetConfigurationDefaults();
-
-  const setConfiguration = useSetConfiguration();
-
-  // currently simply reset:
-  const configurationTouched = useConfigurationTouched();
-  const setConfigurationTouched = useSetConfigurationTouched();
-  const setConfigurationWarnings = useSetConfigurationWarnings();
-
-  const clickCallback = () =>
-    inactiveExtensionElementClickCallback(
-      configurationTouched,
-      generalOkCancelModalWindow,
-      setGeneralOkCancelModalWindow,
-      extensionsState,
-      ext,
-      setExtensionsState,
-      setConfiguration,
-      setConfigurationDefaults,
-      setConfigurationTouched,
-      setConfigurationWarnings,
-      setConfigurationLocks
-    );
+  const clickCallback = useCallback(
+    () => inactiveExtensionElementClickCallback(ext),
+    [ext]
+  );
 
   const [t] = useTranslation(['gui-editor']);
 
@@ -207,8 +177,7 @@ export function ActiveExtensionElement(props: {
 }) {
   const { ext, index, arr } = props;
 
-  const configurationTouched = useConfigurationTouched();
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const extensionsState = useExtensionState();
 
   const revDeps = extensionsState.tree.reverseDependenciesFor(ext);
   const depsFor = extensionsState.tree.directDependenciesFor(ext);
@@ -220,39 +189,25 @@ export function ActiveExtensionElement(props: {
 
   const [t] = useTranslation(['gui-editor']);
 
+  const clickCallback = useCallback(
+    () => activeExtensionElementClickCallback(ext),
+    [ext]
+  );
+
+  const moveCallback = useCallback(
+    (event: { name: string; type: 'up' | 'down' }) =>
+      moveExtensionClickCallback(event),
+    []
+  );
+
   return (
     <ExtensionElement
       ext={ext}
       active
       movability={movability}
       buttonText={t('gui-general:deactivate')}
-      clickCallback={async () => {
-        const confirmed = await warnClearingOfConfiguration(
-          configurationTouched
-        );
-        if (!confirmed) {
-          return;
-        }
-        const newExtensionState =
-          removeExtensionFromExplicitlyActivatedExtensions(
-            extensionsState,
-            ext
-          );
-
-        setExtensionsState(newExtensionState);
-      }}
-      moveCallback={async (event: { name: string; type: 'up' | 'down' }) => {
-        const confirmed = await warnClearingOfConfiguration(
-          configurationTouched
-        );
-        if (!confirmed) {
-          return;
-        }
-
-        const newExtensionsState = moveExtension(extensionsState, event);
-
-        setExtensionsState(newExtensionsState);
-      }}
+      clickCallback={clickCallback}
+      moveCallback={moveCallback}
       revDeps={revDeps.filter(
         (e: Extension) => extensionsState.activeExtensions.indexOf(e) !== -1
       )}

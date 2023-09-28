@@ -190,8 +190,6 @@ const importButtonCallback = async (
 
     getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
 
-    const availableVersions = getStore().get(AVAILABLE_EXTENSION_VERSIONS_ATOM);
-
     // eslint-disable-next-line no-restricted-syntax
     for (const ext of explicitActiveExtensions.slice().reverse()) {
       // eslint-disable-next-line no-await-in-loop

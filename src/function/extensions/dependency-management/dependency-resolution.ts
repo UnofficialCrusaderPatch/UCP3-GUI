@@ -2,10 +2,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
-import { Dependency } from 'lean-resolution/src/Dependency';
-import { Package } from 'lean-resolution/src/Package';
-import { Repository } from 'lean-resolution/src/Repository';
-import { Tree } from 'lean-resolution/src/core/Tree';
+import { Dependency, Package, Repository, Tree } from 'lean-resolution';
 import { rcompare } from 'semver';
 
 function extensionToID(ext: Extension) {

@@ -19,7 +19,7 @@ import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import {
   ActiveExtensionElement,
   InactiveExtensionElement,
-} from './extension-element';
+} from './extension-elements/extension-element';
 import exportButtonCallback from '../common/ExportButtonCallback';
 import importButtonCallback from '../common/ImportButtonCallback';
 import saveConfig from '../common/SaveConfig';

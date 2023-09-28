@@ -6,7 +6,6 @@ import {
   ConfigMetaObjectDB,
 } from 'config/ucp/config-merge/objects';
 import { ExtensionsState } from 'function/global/types';
-import { string } from 'yaml/dist/schema/common/string';
 
 type ConfigurationDBBuildingResult = {
   status: number;

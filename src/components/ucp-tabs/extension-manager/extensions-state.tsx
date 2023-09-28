@@ -8,47 +8,24 @@ const addExtensionToExplicityActivatedExtensions = (
   extensionsState: ExtensionsState,
   ext: Extension
 ) => {
-  // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
-
   const { tree } = extensionsState;
 
-  // TODO: alternative: tree.dependenciesFor([ext, extensionsState.explicitlyActivatedExtensions])
+  const newEAE = [...extensionsState.explicitlyActivatedExtensions, ext];
 
-  const final = tree
-    .dependenciesForExtensions([
-      ext,
-      ...extensionsState.explicitlyActivatedExtensions,
-    ])
+  const allDependenciesInLoadOrder = tree
+    .dependenciesForExtensions(newEAE)
     .reverse();
 
-  // // This version exists to preserve custom ordering applied by the user
-  // const dependenciesSorted = tree.dependenciesFor(ext);
-
-  // const dependencies: Extension[] = dependenciesSorted
-  //   .filter(
-  //     (v: Extension) => extensionsState.activeExtensions.indexOf(v) === -1
-  //   )
-  //   .reverse();
-
-  // const remainder = extensionsState.activeExtensions
-  //   .flat()
-  //   .filter((e) => dependencies.indexOf(e) === -1);
-
-  // const final = [...dependencies, ...remainder];
+  // Filter out extensions with a different version than those that are now going to be activated
+  const depNames = new Set(allDependenciesInLoadOrder.map((e) => e.name));
+  const installedExtensionsFilteredList =
+    extensionsState.installedExtensions.filter((e) => !depNames.has(e.name));
 
   return {
     ...extensionsState,
-    explicitlyActivatedExtensions: [
-      ...extensionsState.explicitlyActivatedExtensions,
-      ext,
-    ],
-    activeExtensions: final,
-    installedExtensions: extensionsState.installedExtensions.filter(
-      (e: Extension) =>
-        final
-          .map((ex: Extension) => `${ex.name}-${ex.version}`)
-          .indexOf(`${e.name}-${e.version}`) === -1
-    ),
+    explicitlyActivatedExtensions: newEAE,
+    activeExtensions: allDependenciesInLoadOrder,
+    installedExtensions: installedExtensionsFilteredList,
   };
 };
 
@@ -58,29 +35,35 @@ const removeExtensionFromExplicitlyActivatedExtensions = (
 ) => {
   const { tree } = extensionsState;
 
-  const relevantExtensions = tree.dependenciesForExtensions(
-    extensionsState.explicitlyActivatedExtensions
+  // All needed extensions without ext being active
+  const stillRelevantExtensions = tree.dependenciesForExtensions(
+    extensionsState.explicitlyActivatedExtensions.filter((e) => e !== ext)
   );
-
-  // Only one version of each extension can be activated.
-  const relevantExtensionNames = new Set(relevantExtensions.map((e) => e.name));
 
   // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
   const ae = extensionsState.activeExtensions.filter(
-    (e) => relevantExtensions.indexOf(e) !== -1
+    (e) => stillRelevantExtensions.indexOf(e) !== -1
   );
+
+  // Remove ext from the explicitly installed extensions list
+  const eae = extensionsState.explicitlyActivatedExtensions.filter(
+    (e) => e !== ext
+  );
+
+  // Only one version of each extension can be activated.
+  const relevantExtensionNames = new Set(
+    stillRelevantExtensions.map((e) => e.name)
+  );
+  const ie = extensionsState.extensions
+    .filter((e: Extension) => !relevantExtensionNames.has(e.name))
+    .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name));
 
   return {
     ...extensionsState,
     extensions: extensionsState.extensions,
-    explicitlyActivatedExtensions:
-      extensionsState.explicitlyActivatedExtensions.filter(
-        (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
-      ),
+    explicitlyActivatedExtensions: eae,
     activeExtensions: ae,
-    installedExtensions: extensionsState.extensions
-      .filter((e: Extension) => !relevantExtensionNames.has(e.name))
-      .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name)),
+    installedExtensions: ie,
   } as ExtensionsState;
 };
 

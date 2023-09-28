@@ -5,6 +5,7 @@ import { Dependency } from 'lean-resolution/src/Dependency';
 import { Package } from 'lean-resolution/src/Package';
 import { Repository } from 'lean-resolution/src/Repository';
 import { Tree } from 'lean-resolution/src/core/Tree';
+import { rcompare } from 'semver';
 
 function extensionToID(ext: Extension) {
   return `${ext.name}@${ext.version}`;
@@ -60,7 +61,9 @@ export class ExtensionTree {
   reverseDependenciesFor(ext: Extension) {
     const node = this.nodeForExtension(ext);
 
-    return node.edgesIn.map((e) => this.extensionsById[e.from.id]);
+    return node.edgesIn
+      .filter((e) => !e.from.id.startsWith('__user__'))
+      .map((e) => this.extensionsById[e.from.id]);
   }
 
   directDependenciesFor(ext: Extension) {
@@ -89,5 +92,15 @@ export class ExtensionTree {
     return this.tree
       .solve(nodes.map((n) => n.spec))
       .map((n) => this.extensionsById[n.id]);
+  }
+
+  allExtensionsForName(name: string) {
+    return this.extensions.filter((e) => e.name === name);
+  }
+
+  allVersionsForName(name: string) {
+    return this.allExtensionsForName(name)
+      .map((e) => e.version)
+      .sort(rcompare);
   }
 }

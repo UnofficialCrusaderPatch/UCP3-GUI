@@ -1,5 +1,13 @@
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import { Button, Col, ListGroup, Row, Tooltip } from 'react-bootstrap';
+import {
+  Button,
+  Col,
+  Dropdown,
+  DropdownButton,
+  ListGroup,
+  Row,
+  Tooltip,
+} from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 
@@ -10,6 +18,12 @@ import {
   useExtensionState,
 } from 'hooks/jotai/globals-wrapper';
 import { useCallback } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
+import {
+  AVAILABLE_EXTENSION_VERSIONS_ATOM,
+  AvailableExtensionVersionsDictionary,
+  PREFERRED_EXTENSION_VERSION_ATOM,
+} from 'function/global/global-atoms';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { moveExtension } from '../extensions-state';
@@ -18,15 +32,23 @@ import moveExtensionClickCallback from './MoveExtensionClickCallback';
 
 export function ExtensionElement(props: {
   ext: Extension;
+  fixedVersion: boolean;
   active: boolean;
   movability: { up: boolean; down: boolean };
   buttonText: string;
   clickCallback: () => void;
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
-  revDeps: Extension[];
+  revDeps: string[];
 }) {
-  const { ext, active, movability, moveCallback, revDeps, clickCallback } =
-    props;
+  const {
+    ext,
+    fixedVersion,
+    active,
+    movability,
+    moveCallback,
+    revDeps,
+    clickCallback,
+  } = props;
   const { name, version, author } = ext.definition;
 
   const [t] = useTranslation(['gui-editor']);
@@ -38,9 +60,7 @@ export function ExtensionElement(props: {
         <Tooltip {...(p as object)}>
           {revDeps.length > 0
             ? t('gui-editor:extensions.is.dependency', {
-                dependencies: revDeps
-                  .map((e) => `${e.name}@${e.version}`)
-                  .join(', '),
+                dependencies: revDeps.map((e) => `${e}`).join(', '),
               })
             : ''}
         </Tooltip>
@@ -112,6 +132,49 @@ export function ExtensionElement(props: {
     <></>
   );
 
+  const versions: AvailableExtensionVersionsDictionary = useAtomValue(
+    AVAILABLE_EXTENSION_VERSIONS_ATOM
+  );
+
+  const availableVersions = fixedVersion
+    ? versions[name].filter((v) => v === ext.version)
+    : versions[name];
+
+  const [preferredVersions, setPreferredVersions] = useAtom(
+    PREFERRED_EXTENSION_VERSION_ATOM
+  );
+
+  const preferredVersion =
+    preferredVersions[name] === undefined
+      ? availableVersions[0]
+      : preferredVersions[name];
+
+  const dd = (
+    <select
+      name="cars"
+      id="cars"
+      className="mx-2"
+      style={{
+        fontSize: 'smaller',
+        backgroundColor: 'transparent',
+        border: 'none',
+      }}
+      disabled={fixedVersion}
+      value={preferredVersion}
+      onChange={(event) => {
+        const newValue = event.target.value;
+        preferredVersions[name] = newValue;
+        setPreferredVersions({ ...preferredVersions });
+      }}
+    >
+      {availableVersions.map((v) => (
+        <option key={`${name}-${v}`} value={v}>
+          {v}
+        </option>
+      ))}
+    </select>
+  );
+
   return (
     <ListGroup.Item
       key={`${name}-${version}-${author}`}
@@ -121,15 +184,18 @@ export function ExtensionElement(props: {
         {disableButton}
         <Col>
           <Row>
-            {/* <Col className="col-2">
-                <span className="mx-2">{displayName || name}</span>
-              </Col> */}
-            <Col className="col-12">
-              <span className="mx-2 text-secondary">-</span>
+            <Col className="col-10">
+              <span
+                className="mx-2 text-secondary"
+                style={{ fontSize: 'smaller' }}
+              >
+                -
+              </span>
               <span className="mx-2" style={{ fontSize: 'smaller' }}>
-                {name}-{version}
+                {name}
               </span>
             </Col>
+            <Col className="col-2">{dd}</Col>
             {/* <Col>
                 <span className="mx-2">{description || ''}</span>
                </Col> */}
@@ -142,8 +208,26 @@ export function ExtensionElement(props: {
   );
 }
 
-export function InactiveExtensionElement(props: { ext: Extension }) {
-  const { ext } = props;
+export function InactiveExtensionsElement(props: { exts: Extension[] }) {
+  const { exts } = props;
+
+  const { name } = exts[0];
+
+  const versions: AvailableExtensionVersionsDictionary = useAtomValue(
+    AVAILABLE_EXTENSION_VERSIONS_ATOM
+  );
+
+  const availableVersions = versions[name];
+
+  const preferredVersions = useAtomValue(PREFERRED_EXTENSION_VERSION_ATOM);
+
+  const preferredVersion =
+    preferredVersions[name] === undefined
+      ? availableVersions[0]
+      : preferredVersions[name];
+
+  const ext = exts.filter((e) => e.version === preferredVersion)[0];
+
   const extensionsState = useExtensionState();
 
   const clickCallback = useCallback(
@@ -158,17 +242,27 @@ export function InactiveExtensionElement(props: { ext: Extension }) {
   return (
     <ExtensionElement
       ext={ext}
+      fixedVersion={false}
       active={false}
       movability={{ up: false, down: false }}
       buttonText={t('gui-general:activate')}
       clickCallback={clickCallback}
       moveCallback={() => {}}
-      revDeps={revDeps.filter(
-        (e) => extensionsState.activeExtensions.flat().indexOf(e) !== -1
-      )}
+      revDeps={revDeps
+        .map((e) => e.name)
+        .filter(
+          (n) =>
+            extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
+            -1
+        )}
     />
   );
 }
+
+export type ExtensionNameList = {
+  name: string;
+  extensions: Extension[];
+};
 
 export function ActiveExtensionElement(props: {
   ext: Extension;
@@ -179,12 +273,16 @@ export function ActiveExtensionElement(props: {
 
   const extensionsState = useExtensionState();
 
-  const revDeps = extensionsState.tree.reverseDependenciesFor(ext);
-  const depsFor = extensionsState.tree.directDependenciesFor(ext);
+  const revDeps = extensionsState.tree
+    .reverseDependenciesFor(ext)
+    .map((e) => e.name);
+  const depsFor = extensionsState.tree
+    .directDependenciesFor(ext)
+    .map((e) => e.name);
 
   const movability = {
-    up: index > 0 && revDeps.indexOf(arr[index - 1]) === -1,
-    down: index < arr.length - 1 && depsFor.indexOf(arr[index + 1]) === -1,
+    up: index > 0 && revDeps.indexOf(arr[index - 1].name) === -1,
+    down: index < arr.length - 1 && depsFor.indexOf(arr[index + 1].name) === -1,
   };
 
   const [t] = useTranslation(['gui-editor']);
@@ -203,14 +301,20 @@ export function ActiveExtensionElement(props: {
   return (
     <ExtensionElement
       ext={ext}
+      fixedVersion
       active
       movability={movability}
       buttonText={t('gui-general:deactivate')}
       clickCallback={clickCallback}
       moveCallback={moveCallback}
-      revDeps={revDeps.filter(
-        (e: Extension) => extensionsState.activeExtensions.indexOf(e) !== -1
-      )}
+      revDeps={extensionsState.tree
+        .reverseDependenciesFor(ext)
+        .map((e) => e.name)
+        .filter(
+          (n) =>
+            extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
+            -1
+        )}
     />
   );
 }

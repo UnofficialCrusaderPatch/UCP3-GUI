@@ -13,12 +13,14 @@ import {
 import './extension-manager.css';
 
 import { useState } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import { Extension } from 'config/ucp/common';
 import {
   ActiveExtensionElement,
-  InactiveExtensionElement,
+  ExtensionNameList,
+  InactiveExtensionsElement,
 } from './extension-elements/extension-element';
 import exportButtonCallback from '../common/ExportButtonCallback';
 import importButtonCallback from '../common/ImportButtonCallback';
@@ -50,16 +52,25 @@ export default function ExtensionManager() {
 
   const configurationQualifier = useConfigurationQualifier();
 
-  const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
+  const advancedMode = useAtomValue(GuiSettings.ADVANCED_MODE_ATOM);
 
   const extensionsToDisplay = advancedMode
     ? extensionsState.installedExtensions
     : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
 
-  const eUI = extensionsToDisplay.map((ext) => (
-    <InactiveExtensionElement
-      key={`inactive-extension-element-${ext.name}-${ext.version}`}
-      ext={ext}
+  const extensionsToDisplayByName = Array.from(
+    new Set(extensionsToDisplay.map((e) => e.name))
+  ).map(
+    (n) =>
+      ({
+        name: n,
+        extensions: extensionsState.extensions.filter((e) => e.name === n),
+      } as ExtensionNameList)
+  );
+  const eUI = extensionsToDisplayByName.map((enl) => (
+    <InactiveExtensionsElement
+      key={`inactive-extension-element-${enl.name}`}
+      exts={enl.extensions}
     />
   ));
 

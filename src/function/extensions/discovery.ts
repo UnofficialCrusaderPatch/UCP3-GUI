@@ -208,7 +208,7 @@ const Discovery = {
 
     const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
 
-    return Promise.all(
+    const extensions = await Promise.all(
       ehs.map(async (eh) => {
         const inferredType =
           eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
@@ -292,6 +292,20 @@ const Discovery = {
         return ext;
       })
     );
+
+    const extensionsByID: { [id: string]: Extension } = {};
+
+    extensions.forEach((e) => {
+      const id = `${e.name}@${e.version}`;
+      if (extensionsByID[id] !== undefined) {
+        throw Error(
+          `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`
+        );
+      }
+      extensionsByID[id] = e;
+    });
+
+    return extensions;
   },
 };
 

@@ -9,6 +9,7 @@ import { info } from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import {
   useFolder,
   useInitRunning,
@@ -114,7 +115,15 @@ export function useInitGlobalConfiguration(): [
 
         // TODO: currently only set on initial render and folder selection
         // TODO: resolve this type badness
-        extensions = await getExtensions(newFolder, language);
+        try {
+          extensions = await getExtensions(newFolder, language);
+        } catch (e) {
+          await showGeneralModalOk({
+            message: `${e}`,
+            title: 'Error in extensions',
+          });
+        }
+
         console.log('Discovered extensions:', extensions);
         console.log('pre extensionState: ', extensionsState);
 

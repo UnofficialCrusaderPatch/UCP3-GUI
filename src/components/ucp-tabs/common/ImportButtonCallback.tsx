@@ -207,8 +207,9 @@ const importButtonCallback = async (
     explicitActiveExtensions
       .slice()
       .reverse()
-      .forEach((ext) => {
-        newExtensionsState = addExtensionToExplicityActivatedExtensions(
+      // TODO: does this execute still in line with what is expected, or does the promise mess things up?
+      .forEach(async (ext) => {
+        newExtensionsState = await addExtensionToExplicityActivatedExtensions(
           newExtensionsState,
           ext
         );

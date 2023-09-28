@@ -3,8 +3,9 @@ import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
 import { info } from 'util/scripts/logging';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 
-const addExtensionToExplicityActivatedExtensions = (
+const addExtensionToExplicityActivatedExtensions = async (
   extensionsState: ExtensionsState,
   ext: Extension
 ) => {
@@ -12,9 +13,18 @@ const addExtensionToExplicityActivatedExtensions = (
 
   const newEAE = [...extensionsState.explicitlyActivatedExtensions, ext];
 
-  const allDependenciesInLoadOrder = tree
-    .dependenciesForExtensions(newEAE)
-    .reverse();
+  const solution = tree.dependenciesForExtensions(newEAE);
+
+  if (solution.status !== 'OK' || solution.extensions === undefined) {
+    await showGeneralModalOk({
+      message: solution.message,
+      title: 'Error in dependencies',
+    });
+
+    return extensionsState;
+  }
+
+  const allDependenciesInLoadOrder = solution.extensions.reverse();
 
   // Filter out extensions with a different version than those that are now going to be activated
   const depNames = new Set(allDependenciesInLoadOrder.map((e) => e.name));
@@ -29,16 +39,27 @@ const addExtensionToExplicityActivatedExtensions = (
   };
 };
 
-const removeExtensionFromExplicitlyActivatedExtensions = (
+const removeExtensionFromExplicitlyActivatedExtensions = async (
   extensionsState: ExtensionsState,
   ext: Extension
 ) => {
   const { tree } = extensionsState;
 
   // All needed extensions without ext being active
-  const stillRelevantExtensions = tree.dependenciesForExtensions(
+  const solution = tree.dependenciesForExtensions(
     extensionsState.explicitlyActivatedExtensions.filter((e) => e !== ext)
   );
+
+  if (solution.status !== 'OK' || solution.extensions === undefined) {
+    await showGeneralModalOk({
+      message: solution.message,
+      title: 'Error in dependencies',
+    });
+
+    return extensionsState;
+  }
+
+  const stillRelevantExtensions = solution.extensions;
 
   // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
   const ae = extensionsState.activeExtensions.filter(

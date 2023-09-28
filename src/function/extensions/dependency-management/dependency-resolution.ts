@@ -1,4 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
+// eslint-disable-next-line max-classes-per-file
 import { Extension } from 'config/ucp/common';
 import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { Dependency } from 'lean-resolution/src/Dependency';
@@ -9,6 +10,28 @@ import { rcompare } from 'semver';
 
 function extensionToID(ext: Extension) {
   return `${ext.name}@${ext.version}`;
+}
+
+export class ExtensionSolution {
+  status: string;
+
+  extensions: Extension[] | undefined;
+
+  messages: string[];
+
+  constructor(
+    status: 'OK' | 'ERROR',
+    extensions: Extension[] | undefined,
+    messages: string[]
+  ) {
+    this.status = status;
+    this.extensions = extensions;
+    this.messages = messages;
+  }
+
+  get message() {
+    return this.messages.join('\n');
+  }
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -74,24 +97,38 @@ export class ExtensionTree {
       .map((n) => this.extensionsById[n.id]);
   }
 
-  dependenciesFor(ext: Extension) {
+  dependenciesFor(ext: Extension): ExtensionSolution {
     const node = this.nodeForExtension(ext);
 
     this.tree.reset();
     this.tree.setInitialTargetForAllEdges();
 
-    return this.tree.solve([node.spec]).map((n) => this.extensionsById[n.id]);
+    try {
+      const s = this.tree
+        .solve([node.spec])
+        .map((n) => this.extensionsById[n.id]);
+
+      return new ExtensionSolution('OK', s, []);
+    } catch (e) {
+      return new ExtensionSolution('ERROR', undefined, [`${e}`]);
+    }
   }
 
-  dependenciesForExtensions(extensions: Extension[]) {
+  dependenciesForExtensions(extensions: Extension[]): ExtensionSolution {
     const nodes = extensions.map((e) => this.nodeForExtension(e));
 
     this.tree.reset();
     this.tree.setInitialTargetForAllEdges();
 
-    return this.tree
-      .solve(nodes.map((n) => n.spec))
-      .map((n) => this.extensionsById[n.id]);
+    try {
+      const s = this.tree
+        .solve(nodes.map((n) => n.spec))
+        .map((n) => this.extensionsById[n.id]);
+
+      return new ExtensionSolution('OK', s, []);
+    } catch (e) {
+      return new ExtensionSolution('ERROR', undefined, [`${e}`]);
+    }
   }
 
   allExtensionsForName(name: string) {

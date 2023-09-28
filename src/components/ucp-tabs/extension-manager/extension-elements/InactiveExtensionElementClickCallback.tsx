@@ -23,7 +23,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     return;
   }
 
-  const newExtensionState = addExtensionToExplicityActivatedExtensions(
+  const newExtensionState = await addExtensionToExplicityActivatedExtensions(
     eState,
     ext
   );

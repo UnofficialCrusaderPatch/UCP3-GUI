@@ -14,10 +14,11 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   if (!confirmed) {
     return;
   }
-  const newExtensionState = removeExtensionFromExplicitlyActivatedExtensions(
-    getStore().get(EXTENSION_STATE_REDUCER_ATOM),
-    ext
-  );
+  const newExtensionState =
+    await removeExtensionFromExplicitlyActivatedExtensions(
+      getStore().get(EXTENSION_STATE_REDUCER_ATOM),
+      ext
+    );
 
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionState);
 };

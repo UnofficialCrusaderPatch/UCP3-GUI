@@ -192,19 +192,6 @@ const importButtonCallback = async (
 
     const availableVersions = getStore().get(AVAILABLE_EXTENSION_VERSIONS_ATOM);
 
-    // Now how do deal with these specific extensions.
-    // Peferably the depednency solver should understand versions.
-    //
-    const specificExtensions = newExtensionsState.extensions.filter((e) => {
-      const preferredVersion = newPrefs[e.name];
-      if (preferredVersion !== undefined) {
-        return e.version === preferredVersion;
-      }
-
-      // Select the highest version available by default
-      return e.version === availableVersions[e.name][0];
-    });
-
     // eslint-disable-next-line no-restricted-syntax
     for (const ext of explicitActiveExtensions.slice().reverse()) {
       // eslint-disable-next-line no-await-in-loop

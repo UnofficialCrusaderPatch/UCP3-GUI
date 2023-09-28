@@ -3,46 +3,21 @@
 
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { useTranslation } from 'react-i18next';
 import {
-  ConfigEntry,
-  ConfigFile,
-  ConfigFileExtensionEntry,
-  Extension,
-} from 'config/ucp/common';
-import { DependencyStatement } from 'config/ucp/dependency-statement';
-import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
-import {
-  useConfigurationDefaultsReducer,
-  useConfigurationQualifierReducer,
+  useConfigurationDefaults,
+  useConfigurationQualifier,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
-  useConfigurationWarningsReducer,
-  useExtensionStateReducer,
-  useGeneralOkayCancelModalWindowReducer,
-  useSetConfigurationLocks,
+  useConfigurationWarnings,
+  useExtensionState,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import { info } from 'util/scripts/logging';
-import { ConfigurationQualifier, ExtensionsState } from 'function/global/types';
-import { collectConfigEntries } from 'function/extensions/discovery';
-import {
-  ConfigMetaContentDB,
-  ConfigMetaObjectDB,
-} from 'config/ucp/config-merge/objects';
-import {
-  buildConfigMetaContent,
-  buildConfigMetaContentDB,
-  buildExtensionConfigurationDB,
-} from '../extension-manager/extension-configuration';
 
 import { UIFactory } from './ui-elements';
 
 import './config-editor.css';
-import { propagateActiveExtensionsChange } from '../helpers';
-import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
 import ExportButton from './ExportButton';
 import ApplyButton from './ApplyButton';
 import ImportButton from './ImportButton';
@@ -55,21 +30,16 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
 
   const gameFolder = useCurrentGameFolder();
-  const [configurationDefaults, setConfigurationDefaults] =
-    useConfigurationDefaultsReducer();
+  const configurationDefaults = useConfigurationDefaults();
   const file = useUcpConfigFileValue();
-  const [configurationWarnings, setConfigurationWarnings] =
-    useConfigurationWarningsReducer();
+  const configurationWarnings = useConfigurationWarnings();
   const [configuration, setConfiguration] = useConfigurationReducer();
   const [configurationTouched, setConfigurationTouched] =
     useConfigurationTouchedReducer();
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const extensionsState = useExtensionState();
   const { activeExtensions } = extensionsState;
-  const { extensions } = extensionsState;
-  const setConfigurationLocks = useSetConfigurationLocks();
 
-  const [configurationQualifier, setConfigurationQualifier] =
-    useConfigurationQualifierReducer();
+  const configurationQualifier = useConfigurationQualifier();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -94,9 +64,6 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   }, [activeExtensions, t]);
 
   const { nav, content } = UIFactory.CreateSections({ readonly });
-
-  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
-    useGeneralOkayCancelModalWindowReducer();
 
   return (
     <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">

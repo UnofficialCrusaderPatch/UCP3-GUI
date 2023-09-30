@@ -20,9 +20,11 @@ import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { reloadCurrentWindow } from 'function/window-actions';
+
 import { UIFactory } from './ui-elements';
 
-import './config-editor.css';
 import ExportButton from './ExportButton';
 import ApplyButton from './ApplyButton';
 import ImportButton from './ImportButton';
@@ -32,6 +34,8 @@ import exportButtonCallback from '../common/ExportButtonCallback';
 import saveConfig from '../common/SaveConfig';
 import ExportAsPluginButton from './ExportAsPluginButton';
 import serializeConfig from '../common/SerializeConfig';
+
+import './config-editor.css';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -179,6 +183,15 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     `${pluginDir}/config.yml`,
                     toYaml(trimmedResult)
                   );
+
+                  const confirmed = await showGeneralModalOkCancel({
+                    title: t('gui-general:require.reload.title'),
+                    message: t('gui-editor:overview.require.reload.text'),
+                  });
+
+                  if (confirmed) {
+                    reloadCurrentWindow();
+                  }
                 }}
               />
               <Form.Switch

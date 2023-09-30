@@ -1,5 +1,6 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -22,6 +23,7 @@ function CreateRadioGroup(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled } = spec;
@@ -72,6 +74,7 @@ function CreateRadioGroup(args: {
           });
           configuration[url] = newValue;
         }}
+        disabled={!isEnabled || disabled || configurationLocks[url] === true}
       >
         {radios}
       </RadioGroup>

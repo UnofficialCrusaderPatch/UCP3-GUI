@@ -2,6 +2,7 @@ import { DisplayConfigElement } from 'config/ucp/common';
 
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -22,6 +23,7 @@ function CreateSwitch(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled } = spec;
@@ -64,7 +66,7 @@ function CreateSwitch(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={!isEnabled || disabled}
+        disabled={!isEnabled || disabled || configurationLocks[url] === true}
       />
     </div>
   );

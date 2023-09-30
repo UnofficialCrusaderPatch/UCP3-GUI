@@ -51,9 +51,7 @@ function CreateUCP2Switch(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={
-          !isEnabled || disabled || configurationLocks[url] !== undefined
-        }
+        disabled={!isEnabled || disabled || configurationLocks[url] === true}
       />
       <Form.Switch.Label className="fs-6" htmlFor={`${url}`}>
         {header}

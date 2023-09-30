@@ -1,5 +1,6 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -31,6 +32,7 @@ function CreateUCP2Slider(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -90,7 +92,7 @@ function CreateUCP2Slider(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={!isEnabled || disabled || configurationLocks[url] === true}
         />
         <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -149,7 +151,12 @@ function CreateUCP2Slider(args: {
                 value: Object.fromEntries([[url, true]]),
               });
             }}
-            disabled={!isEnabled || disabled || !value.enabled}
+            disabled={
+              !isEnabled ||
+              disabled ||
+              !value.enabled ||
+              configurationLocks[url] !== undefined
+            }
           />
         </div>
 

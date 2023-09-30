@@ -1,5 +1,6 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -45,6 +46,7 @@ function CreateUCP2SliderChoice(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -129,7 +131,7 @@ function CreateUCP2SliderChoice(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={!isEnabled || disabled || configurationLocks[url] === true}
         />
         <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -175,7 +177,8 @@ function CreateUCP2SliderChoice(args: {
                   !isEnabled ||
                   disabled ||
                   !value.enabled ||
-                  value.choice !== choice.name
+                  value.choice !== choice.name ||
+                  configurationLocks[url] === true
                 }
               >
                 {choice.min}
@@ -214,7 +217,8 @@ function CreateUCP2SliderChoice(args: {
                   !isEnabled ||
                   disabled ||
                   !value.enabled ||
-                  value.choice !== choice.name
+                  value.choice !== choice.name ||
+                  configurationLocks[url] === true
                 }
               />
             </div>
@@ -224,7 +228,8 @@ function CreateUCP2SliderChoice(args: {
                   !isEnabled ||
                   disabled ||
                   !value.enabled ||
-                  value.choice !== choice.name
+                  value.choice !== choice.name ||
+                  configurationLocks[url] === true
                 }
               >
                 {choice.max}
@@ -261,6 +266,7 @@ function CreateUCP2SliderChoice(args: {
           });
           configuration[url] = newValue;
         }}
+        disabled={configurationLocks[url] === true}
       >
         {radios}
       </RadioGroup>

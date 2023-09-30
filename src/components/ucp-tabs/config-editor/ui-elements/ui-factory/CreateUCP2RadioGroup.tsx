@@ -1,5 +1,6 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -20,6 +21,7 @@ function CreateUCP2RadioGroup(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -79,7 +81,7 @@ function CreateUCP2RadioGroup(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={!isEnabled || disabled || configurationLocks[url] === true}
         />
         <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -113,7 +115,7 @@ function CreateUCP2RadioGroup(args: {
             });
             configuration[url] = newValue;
           }}
-          disabled={!value.enabled}
+          disabled={!value.enabled || configurationLocks[url] === true}
         >
           {choices.map((choice) => (
             // eslint-disable-next-line jsx-a11y/label-has-associated-control
@@ -122,7 +124,7 @@ function CreateUCP2RadioGroup(args: {
                 className="form-check-input"
                 value={choice.name}
                 id={`${url}-radio-${choice.name}`}
-                disabled={!value.enabled}
+                disabled={!value.enabled || configurationLocks[url] === true}
               />
               {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label

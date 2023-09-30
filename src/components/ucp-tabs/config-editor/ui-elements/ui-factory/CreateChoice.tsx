@@ -1,5 +1,6 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -20,6 +21,7 @@ function CreateChoice(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, contents } = spec;
@@ -67,7 +69,7 @@ function CreateChoice(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={!isEnabled || disabled || configurationLocks[url] === true}
         >
           {choices.map((choice) => (
             <option key={`choice-${choice.name}`} value={choice.name}>
@@ -78,7 +80,9 @@ function CreateChoice(args: {
       </div>
       <div
         className={`flex-grow-1 px-2 ${
-          !isEnabled || disabled ? 'label-disabled' : ''
+          !isEnabled || disabled || configurationLocks[url] === true
+            ? 'label-disabled'
+            : ''
         }`}
       >
         <Form.Label
@@ -88,7 +92,7 @@ function CreateChoice(args: {
           data-bs-placement="top"
           title={fullToolTip}
           // End of tooltip stuff
-          // disabled={!isEnabled || disabled}
+          // disabled={!isEnabled || disabled || configurationLocks[url] === true}
         >
           {text}
         </Form.Label>

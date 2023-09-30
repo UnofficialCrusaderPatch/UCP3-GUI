@@ -1,6 +1,7 @@
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -20,6 +21,7 @@ function CreateNumberInput(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, contents } = spec;
@@ -70,12 +72,14 @@ function CreateNumberInput(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={!isEnabled || disabled || configurationLocks[url] === true}
         />
       </div>
       <div
         className={`flex-grow-1 px-2 ${
-          !isEnabled || disabled ? 'label-disabled' : ''
+          !isEnabled || disabled || configurationLocks[url] === true
+            ? 'label-disabled'
+            : ''
         }`}
       >
         <Form.Label

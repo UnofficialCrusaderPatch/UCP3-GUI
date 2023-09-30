@@ -1,5 +1,6 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
   useConfigurationWarnings,
   useSetConfigurationTouched,
@@ -22,6 +23,7 @@ function CreateSlider(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled } = spec;
@@ -78,7 +80,12 @@ function CreateSlider(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={!isEnabled || disabled || !value.enabled}
+        disabled={
+          !isEnabled ||
+          disabled ||
+          !value.enabled ||
+          configurationLocks[url] === true
+        }
       />
     </div>
   );

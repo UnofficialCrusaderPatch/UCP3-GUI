@@ -1,6 +1,7 @@
 import { UCPState } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
+import { CircleFill } from 'react-bootstrap-icons';
 
 import './footer.css';
 import {
@@ -9,7 +10,9 @@ import {
   useUCPVersion,
 } from 'hooks/jotai/helper';
 import { useConfigurationWarnings } from 'hooks/jotai/globals-wrapper';
-import { useState } from 'react';
+import { RefAttributes, useState } from 'react';
+import { OverlayTrigger, Tooltip, TooltipProps } from 'react-bootstrap';
+import { JSX } from 'react/jsx-runtime';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -19,6 +22,8 @@ const UCP_STATE_ARRAY = [
   'bink.version.differences',
   'unknown',
 ];
+
+const UCP_STATE_COLOR_ARRAY = ['red', 'red', 'green', 'yellow', 'red', 'red'];
 
 export default function Footer() {
   const currentFolder = useCurrentGameFolder();
@@ -52,7 +57,7 @@ export default function Footer() {
         ucpFooterVersionString = ucpVersion.toString();
         break;
       default:
-        ucpFooterVersionString = t('gui-editor:footer.version.unknown');
+        ucpFooterVersionString = '?    ';
         break;
     }
   }
@@ -76,6 +81,19 @@ export default function Footer() {
     )}`;
   }
 
+  const renderTooltip = (
+    props: JSX.IntrinsicAttributes &
+      TooltipProps &
+      RefAttributes<HTMLDivElement>
+  ) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Tooltip id="button-tooltip" {...props}>
+      {t('gui-editor:footer.state.prefix', {
+        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
+      })}
+    </Tooltip>
+  );
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
@@ -93,25 +111,24 @@ export default function Footer() {
           {/* t('gui-editor:footer.folder') */}
           <span className="px-2 fst-italic">{displayCurrentFolder}</span>
         </span>
-        <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
+        {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
         <span className="px-2">
           {t('gui-general:warnings', { count: warningCount })}
         </span>
         <span className="px-2">
           {t('gui-general:errors', { count: errorCount })}
-        </span>
+        </span> */}
+        <span className="px-2">{`GUI ${'1.0.0'}`}</span>
+        <span className="px-2">{`UCP ${ucpFooterVersionString}`}</span>
+
         <span className="px-2">
-          {t('gui-editor:footer.version.gui', { version: '1.0.0' })}
-        </span>
-        <span className="px-2">
-          {t('gui-editor:footer.version.ucp', {
-            version: ucpFooterVersionString,
-          })}
-        </span>
-        <span className="px-2">
-          {t('gui-editor:footer.state.prefix', {
-            state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
-          })}
+          <OverlayTrigger
+            placement="left"
+            delay={{ show: 250, hide: 400 }}
+            overlay={renderTooltip}
+          >
+            <CircleFill color={UCP_STATE_COLOR_ARRAY[state]} />
+          </OverlayTrigger>
         </span>
       </div>
     </div>

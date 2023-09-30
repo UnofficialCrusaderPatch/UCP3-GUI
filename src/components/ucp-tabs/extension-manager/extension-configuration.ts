@@ -114,7 +114,6 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             ) {
               const e = `Incompatible extension ('${ext.name}') and ('${currentM.extension}') because they both require different values for feature '${url}'`;
               console.warn(e);
-              window.alert(e);
               errors.push(e);
             }
           }

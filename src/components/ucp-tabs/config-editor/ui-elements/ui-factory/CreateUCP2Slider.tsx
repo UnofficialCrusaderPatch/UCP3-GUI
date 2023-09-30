@@ -12,16 +12,20 @@ import {
   DisplayConfigElement,
 } from 'config/ucp/common';
 
-import { Form } from 'react-bootstrap';
+import { Form, Tooltip } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
 import { useState } from 'react';
 
+import { useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
+
+export type UCP2SliderValue = { enabled: boolean; sliderValue: number };
 
 function CreateUCP2Slider(args: {
   spec: DisplayConfigElement;
@@ -39,10 +43,10 @@ function CreateUCP2Slider(args: {
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
   let { [url]: value } = configuration as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: UCP2SliderValue;
   };
   const { [url]: defaultValue } = configurationDefaults as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: UCP2SliderValue;
   };
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -68,6 +72,26 @@ function CreateUCP2Slider(args: {
     value = defaultValue;
   }
 
+  let disabledReason: string | undefined;
+  let isDisabled = false;
+
+  if (disabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of a parent element`;
+  } else if (!isEnabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of ${enabled}`;
+  } else if (configurationLocks[url] !== undefined) {
+    isDisabled = true;
+    disabledReason = `Can't change value because extension '${
+      configurationLocks[url].lockedBy
+    }' requires value ${(
+      configurationLocks[url].lockedValue as UCP2SliderValue
+    ).sliderValue.toString()}`;
+  }
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
   if (hasHeader) {
@@ -92,7 +116,7 @@ function CreateUCP2Slider(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled || configurationLocks[url] === true}
+          disabled={isDisabled}
         />
         <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -107,7 +131,16 @@ function CreateUCP2Slider(args: {
     value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
   );
   return (
-    <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div
+      className="col-5"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(disabledReason);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>

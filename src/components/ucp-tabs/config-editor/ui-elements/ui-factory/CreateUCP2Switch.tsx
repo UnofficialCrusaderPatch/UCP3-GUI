@@ -9,6 +9,8 @@ import {
 import { Form } from 'react-bootstrap';
 import { DisplayConfigElement } from 'config/ucp/common';
 
+import { useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 
@@ -33,6 +35,22 @@ function CreateUCP2Switch(args: {
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
+  let disabledReason: string | undefined;
+  let isDisabled = false;
+
+  if (disabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of a parent element`;
+  } else if (!isEnabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of ${enabled}`;
+  } else if (configurationLocks[url] !== undefined) {
+    isDisabled = true;
+    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
+  }
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
   const hasWarning = configurationWarnings[url] !== undefined;
   const headerElement = (
     <Form.Switch>
@@ -51,7 +69,7 @@ function CreateUCP2Switch(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={!isEnabled || disabled || configurationLocks[url] === true}
+        disabled={isDisabled}
       />
       <Form.Switch.Label className="fs-6" htmlFor={`${url}`}>
         {header}
@@ -60,7 +78,16 @@ function CreateUCP2Switch(args: {
   );
 
   return (
-    <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div
+      className="col"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(disabledReason);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       {headerElement}
       {text}
     </div>

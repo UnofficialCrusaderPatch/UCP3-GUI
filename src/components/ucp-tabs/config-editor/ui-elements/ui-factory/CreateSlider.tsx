@@ -11,6 +11,8 @@ import RangeSlider from 'react-bootstrap-range-slider';
 
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import { useState } from 'react';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 
@@ -47,8 +49,32 @@ function CreateSlider(args: {
   const [localValue, setLocalValue] = useState(
     value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
   );
+
+  let disabledReason: string | undefined;
+  let isDisabled = false;
+
+  if (disabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of a parent element`;
+  } else if (!isEnabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of ${enabled}`;
+  } else if (configurationLocks[url] !== undefined) {
+    isDisabled = true;
+    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
+  }
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
   return (
-    <div>
+    <div
+      onMouseEnter={() => {
+        setStatusBarMessage(disabledReason);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       <RangeSlider
         min={min * factor}
         max={max * factor}
@@ -80,12 +106,7 @@ function CreateSlider(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={
-          !isEnabled ||
-          disabled ||
-          !value.enabled ||
-          configurationLocks[url] === true
-        }
+        disabled={isDisabled}
       />
     </div>
   );

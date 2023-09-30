@@ -7,6 +7,8 @@ import {
 } from 'hooks/jotai/globals-wrapper';
 
 import { RadioGroup, Radio } from 'react-radio-group';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { useSetAtom } from 'jotai';
 
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
@@ -39,6 +41,22 @@ function CreateRadioGroup(args: {
 
   const hasWarning = configurationWarnings[url] !== undefined;
   const defaultChoice = choices[0];
+
+  let disabledReason: string | undefined;
+  let isDisabled = false;
+
+  if (disabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of a parent element`;
+  } else if (!isEnabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of ${enabled}`;
+  } else if (configurationLocks[url] !== undefined) {
+    isDisabled = true;
+    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
+  }
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const radios = choices.map((choice) => (
     // eslint-disable-next-line jsx-a11y/label-has-associated-control
@@ -74,7 +92,7 @@ function CreateRadioGroup(args: {
           });
           configuration[url] = newValue;
         }}
-        disabled={!isEnabled || disabled || configurationLocks[url] === true}
+        disabled={isDisabled}
       >
         {radios}
       </RadioGroup>

@@ -13,6 +13,8 @@ import { useConfigurationWarnings } from 'hooks/jotai/globals-wrapper';
 import { RefAttributes, useState } from 'react';
 import { OverlayTrigger, Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
+import { useAtom, useAtomValue } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -94,6 +96,10 @@ export default function Footer() {
     </Tooltip>
   );
 
+  const [msg, setStatusBarMessage] = useAtom(STATUS_BAR_MESSAGE_ATOM);
+  const statusBarMessage =
+    msg === undefined || msg.length === 0 ? displayCurrentFolder : msg;
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
@@ -109,7 +115,7 @@ export default function Footer() {
           title={currentFolder}
         >
           {/* t('gui-editor:footer.folder') */}
-          <span className="px-2 fst-italic">{displayCurrentFolder}</span>
+          <span className="px-2 fst-italic">{statusBarMessage}</span>
         </span>
         {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
         <span className="px-2">
@@ -122,13 +128,28 @@ export default function Footer() {
         <span className="px-2">{`UCP ${ucpFooterVersionString}`}</span>
 
         <span className="px-2">
-          <OverlayTrigger
+          {/* Option 1 */}
+          {/* <OverlayTrigger
             placement="left"
             delay={{ show: 250, hide: 400 }}
             overlay={renderTooltip}
           >
             <CircleFill color={UCP_STATE_COLOR_ARRAY[state]} />
-          </OverlayTrigger>
+          </OverlayTrigger> */}
+          {/* Option 2 */}
+          <CircleFill
+            color={UCP_STATE_COLOR_ARRAY[state]}
+            onMouseEnter={() => {
+              setStatusBarMessage(
+                t('gui-editor:footer.state.prefix', {
+                  state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
+                })
+              );
+            }}
+            onMouseLeave={() => {
+              setStatusBarMessage(undefined);
+            }}
+          />
         </span>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { Extension } from 'config/ucp/common';
+import { ConfigMetaObject } from 'config/ucp/config-merge/objects';
 import {
   extensionsToOptionEntries,
   getConfigDefaults,
@@ -7,9 +8,11 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   ConfigurationLock,
+  ConfigurationSuggestion,
 } from 'function/global/global-atoms';
 import {
   ExtensionsState,
@@ -30,16 +33,30 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   console.log('Default settings: ');
   console.log(defaults);
 
-  const locks: { [key: string]: boolean } = {};
+  const locks: { [key: string]: ConfigurationLock } = {};
+  const suggestions: { [url: string]: ConfigurationSuggestion } = {};
 
   // This small section is meant to process the extensions and create an improved default configuration based on active extensions
   // TODO: make this rely on the extension state?
-  Object.entries(extensionsState.configuration.state).forEach(([url, cmo]) => {
-    defaults[url] = cmo.modifications.value.content;
-    if (cmo.modifications.value.qualifier === 'required') {
-      locks[url] = true;
+  Object.entries(extensionsState.configuration.state).forEach(
+    ([url, cmo]: [string, ConfigMetaObject]) => {
+      defaults[url] = cmo.modifications.value.content;
+      if (
+        cmo.modifications.value.qualifier === 'required' ||
+        cmo.modifications.value.qualifier === 'unspecified'
+      ) {
+        locks[url] = {
+          lockedBy: cmo.modifications.value.extension,
+          lockedValue: cmo.modifications.value.content,
+        };
+      } else if (cmo.modifications.value.qualifier === 'suggested') {
+        suggestions[url] = {
+          suggestedBy: cmo.modifications.value.extension,
+          suggestedValue: cmo.modifications.value.content,
+        };
+      }
     }
-  });
+  );
 
   // Here the values are set
   getStore().set(CONFIGURATION_REDUCER_ATOM, {
@@ -64,6 +81,10 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   getStore().set(CONFIGURATION_LOCKS_REDUCER_ATOM, {
     type: 'reset',
     value: locks,
+  });
+  getStore().set(CONFIGURATION_SUGGESTIONS_REDUCER_ATOM, {
+    type: 'reset',
+    value: suggestions,
   });
 }
 

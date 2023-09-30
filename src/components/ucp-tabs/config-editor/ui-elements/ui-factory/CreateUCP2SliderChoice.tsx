@@ -20,6 +20,8 @@ import { useState } from 'react';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
+import { useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
@@ -107,6 +109,22 @@ function CreateUCP2SliderChoice(args: {
     value = defaultValue;
   }
 
+  let disabledReason: string | undefined;
+  let isDisabled = false;
+
+  if (disabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of a parent element`;
+  } else if (!isEnabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of ${enabled}`;
+  } else if (configurationLocks[url] !== undefined) {
+    isDisabled = true;
+    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
+  }
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
   if (hasHeader) {
@@ -131,7 +149,7 @@ function CreateUCP2SliderChoice(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled || configurationLocks[url] === true}
+          disabled={isDisabled}
         />
         <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -178,7 +196,7 @@ function CreateUCP2SliderChoice(args: {
                   disabled ||
                   !value.enabled ||
                   value.choice !== choice.name ||
-                  configurationLocks[url] === true
+                  isDisabled
                 }
               >
                 {choice.min}
@@ -218,7 +236,7 @@ function CreateUCP2SliderChoice(args: {
                   disabled ||
                   !value.enabled ||
                   value.choice !== choice.name ||
-                  configurationLocks[url] === true
+                  isDisabled
                 }
               />
             </div>
@@ -229,7 +247,7 @@ function CreateUCP2SliderChoice(args: {
                   disabled ||
                   !value.enabled ||
                   value.choice !== choice.name ||
-                  configurationLocks[url] === true
+                  isDisabled
                 }
               >
                 {choice.max}
@@ -247,7 +265,15 @@ function CreateUCP2SliderChoice(args: {
   }
 
   return (
-    <div className="pb-3">
+    <div
+      className="pb-3"
+      onMouseEnter={() => {
+        setStatusBarMessage(disabledReason);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       {headerElement}
       <p>{text}</p>
       <RadioGroup
@@ -266,7 +292,7 @@ function CreateUCP2SliderChoice(args: {
           });
           configuration[url] = newValue;
         }}
-        disabled={configurationLocks[url] === true}
+        disabled={isDisabled}
       >
         {radios}
       </RadioGroup>

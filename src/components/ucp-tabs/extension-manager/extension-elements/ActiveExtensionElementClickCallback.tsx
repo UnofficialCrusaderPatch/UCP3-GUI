@@ -28,17 +28,23 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   if (res.configuration.statusCode !== 0) {
     if (res.configuration.statusCode === 2) {
+      const msg = `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`;
+      console.error(msg);
       const confirmed1 = await showGeneralModalOkCancel({
         title: 'Error',
-        message: `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`,
+        message: msg,
       });
-      if (confirmed1) return;
+      if (!confirmed1) return;
     }
-    const confirmed2 = await showGeneralModalOkCancel({
-      title: 'Warning',
-      message: `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`,
-    });
-    if (confirmed2) return;
+    if (res.configuration.warnings.length > 0) {
+      const msg = `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`;
+      console.warn(msg);
+      const confirmed2 = await showGeneralModalOkCancel({
+        title: 'Warning',
+        message: msg,
+      });
+      if (!confirmed2) return;
+    }
   } else {
     console.log(`New configuration build without errors or warnings`);
   }

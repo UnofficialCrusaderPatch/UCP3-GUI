@@ -9,6 +9,8 @@ import {
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 
@@ -57,6 +59,22 @@ function CreateUCP2RadioGroup(args: {
     value = defaultValue;
   }
 
+  let disabledReason: string | undefined;
+  let isDisabled = false;
+
+  if (disabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of a parent element`;
+  } else if (!isEnabled) {
+    isDisabled = true;
+    disabledReason = `Can't change value because of ${enabled}`;
+  } else if (configurationLocks[url] !== undefined) {
+    isDisabled = true;
+    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
+  }
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
   if (hasHeader) {
@@ -81,7 +99,7 @@ function CreateUCP2RadioGroup(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled || configurationLocks[url] === true}
+          disabled={isDisabled}
         />
         <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -90,7 +108,16 @@ function CreateUCP2RadioGroup(args: {
     );
   }
   return (
-    <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div
+      className="col-5"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(disabledReason);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-choice`}>
@@ -115,7 +142,7 @@ function CreateUCP2RadioGroup(args: {
             });
             configuration[url] = newValue;
           }}
-          disabled={!value.enabled || configurationLocks[url] === true}
+          disabled={!value.enabled || isDisabled}
         >
           {choices.map((choice) => (
             // eslint-disable-next-line jsx-a11y/label-has-associated-control
@@ -124,7 +151,7 @@ function CreateUCP2RadioGroup(args: {
                 className="form-check-input"
                 value={choice.name}
                 id={`${url}-radio-${choice.name}`}
-                disabled={!value.enabled || configurationLocks[url] === true}
+                disabled={!value.enabled || isDisabled}
               />
               {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label

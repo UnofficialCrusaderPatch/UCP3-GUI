@@ -101,18 +101,29 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
   extensionStateReducer
 );
 
-export type ConfigurationLock =
-  | {
-      lockedBy: string;
-      lockedValue: unknown;
-    }
-  | boolean;
+export type ConfigurationLock = {
+  lockedBy: string;
+  lockedValue: unknown;
+};
 
 const configurationLocksReducer = KeyValueReducer<ConfigurationLock>();
 
 export const CONFIGURATION_LOCKS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationLocksReducer
+);
+
+export type ConfigurationSuggestion = {
+  suggestedBy: string;
+  suggestedValue: unknown;
+};
+
+const configurationSuggestionsReducer =
+  KeyValueReducer<ConfigurationSuggestion>();
+
+export const CONFIGURATION_SUGGESTIONS_REDUCER_ATOM = atomWithReducer(
+  {},
+  configurationSuggestionsReducer
 );
 
 export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
@@ -186,3 +197,5 @@ export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
       ])
     ) as AvailableExtensionVersionsDictionary;
   });
+
+export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);

@@ -110,6 +110,16 @@ export function useSetConfigurationLocks() {
   return useSetAtom(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
 }
 
+export function useConfigurationSuggestionsReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+export function useConfigurationSuggestions() {
+  return useAtomValue(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+export function useSetConfigurationSuggestions() {
+  return useSetAtom(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+
 export function useConfigurationQualifierReducer() {
   return useAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
 }

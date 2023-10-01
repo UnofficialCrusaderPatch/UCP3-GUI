@@ -2,6 +2,7 @@ import {
   useConfigurationDefaults,
   useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
@@ -25,6 +26,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
+import { createStatusBarMessage } from './StatusBarMessage';
 
 type UCP2SliderChoiceContent = {
   name: string;
@@ -49,6 +51,7 @@ function CreateUCP2SliderChoice(args: {
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
   const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -109,19 +112,17 @@ function CreateUCP2SliderChoice(args: {
     value = defaultValue;
   }
 
-  let disabledReason: string | undefined;
-  let isDisabled = false;
-
-  if (disabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of a parent element`;
-  } else if (!isEnabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of ${enabled}`;
-  } else if (configurationLocks[url] !== undefined) {
-    isDisabled = true;
-    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
-  }
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url]
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
@@ -268,7 +269,7 @@ function CreateUCP2SliderChoice(args: {
     <div
       className="pb-3"
       onMouseEnter={() => {
-        setStatusBarMessage(disabledReason);
+        setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

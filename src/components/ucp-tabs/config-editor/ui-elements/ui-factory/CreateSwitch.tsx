@@ -4,6 +4,7 @@ import {
   useConfigurationDefaults,
   useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
@@ -15,6 +16,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
+import { createStatusBarMessage } from './StatusBarMessage';
 
 function CreateSwitch(args: {
   spec: DisplayConfigElement;
@@ -26,6 +28,7 @@ function CreateSwitch(args: {
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
   const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled } = spec;
@@ -39,19 +42,17 @@ function CreateSwitch(args: {
 
   const hasWarning = configurationWarnings[url] !== undefined;
 
-  let disabledReason: string | undefined;
-  let isDisabled = false;
-
-  if (disabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of a parent element`;
-  } else if (!isEnabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of ${enabled}`;
-  } else if (configurationLocks[url] !== undefined) {
-    isDisabled = true;
-    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
-  }
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url]
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
@@ -59,7 +60,7 @@ function CreateSwitch(args: {
     <div
       className={`d-flex align-items-baseline lh-sm my-1 ${className}`}
       onMouseEnter={() => {
-        setStatusBarMessage(disabledReason);
+        setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

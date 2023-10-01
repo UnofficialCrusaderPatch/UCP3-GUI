@@ -3,6 +3,7 @@ import {
   useConfigurationDefaults,
   useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
@@ -13,6 +14,7 @@ import { useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
+import { createStatusBarMessage } from './StatusBarMessage';
 
 function CreateNumberInput(args: {
   spec: DisplayConfigElement;
@@ -24,6 +26,7 @@ function CreateNumberInput(args: {
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
   const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, contents } = spec;
@@ -38,19 +41,17 @@ function CreateNumberInput(args: {
 
   const hasWarning = configurationWarnings[url] !== undefined;
 
-  let disabledReason: string | undefined;
-  let isDisabled = false;
-
-  if (disabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of a parent element`;
-  } else if (!isEnabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of ${enabled}`;
-  } else if (configurationLocks[url] !== undefined) {
-    isDisabled = true;
-    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
-  }
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url]
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
@@ -58,7 +59,7 @@ function CreateNumberInput(args: {
     <Form.Group
       className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
       onMouseEnter={() => {
-        setStatusBarMessage(disabledReason);
+        setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

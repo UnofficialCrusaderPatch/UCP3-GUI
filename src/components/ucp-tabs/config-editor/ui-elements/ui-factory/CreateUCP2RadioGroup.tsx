@@ -2,6 +2,7 @@ import {
   useConfigurationDefaults,
   useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
@@ -13,6 +14,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
+import { createStatusBarMessage } from './StatusBarMessage';
 
 function CreateUCP2RadioGroup(args: {
   spec: DisplayConfigElement;
@@ -24,6 +26,7 @@ function CreateUCP2RadioGroup(args: {
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
   const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -59,19 +62,17 @@ function CreateUCP2RadioGroup(args: {
     value = defaultValue;
   }
 
-  let disabledReason: string | undefined;
-  let isDisabled = false;
-
-  if (disabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of a parent element`;
-  } else if (!isEnabled) {
-    isDisabled = true;
-    disabledReason = `Can't change value because of ${enabled}`;
-  } else if (configurationLocks[url] !== undefined) {
-    isDisabled = true;
-    disabledReason = `Can't change value because extension '${configurationLocks[url].lockedBy}' requires value ${configurationLocks[url].lockedValue}`;
-  }
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url]
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
@@ -112,7 +113,7 @@ function CreateUCP2RadioGroup(args: {
       className="col-5"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
-        setStatusBarMessage(disabledReason);
+        setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

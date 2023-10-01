@@ -4,7 +4,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/global/global-atoms';
-import { propagateActiveExtensionsChange } from 'components/ucp-tabs/helpers';
+import { propagateActiveExtensionsChange } from 'components/ucp-tabs/extension-manager/propagateActiveExtensionChange';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';

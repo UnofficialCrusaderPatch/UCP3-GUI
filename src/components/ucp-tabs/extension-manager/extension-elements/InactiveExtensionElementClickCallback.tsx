@@ -8,7 +8,7 @@ import {
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
-import { propagateActiveExtensionsChange } from '../../helpers';
+import { propagateActiveExtensionsChange } from '../propagateActiveExtensionChange';
 
 const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)

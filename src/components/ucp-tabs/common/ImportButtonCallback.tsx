@@ -26,7 +26,7 @@ import {
   buildConfigMetaContentDB,
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
-import { propagateActiveExtensionsChange } from '../helpers';
+import { propagateActiveExtensionsChange } from '../extension-manager/propagateActiveExtensionChange';
 import warnClearingOfConfiguration from './WarnClearingOfConfiguration';
 
 const setConfiguration = (arg0: {

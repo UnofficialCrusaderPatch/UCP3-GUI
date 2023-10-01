@@ -17,6 +17,13 @@ import { useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { Extension } from 'config/ucp/common';
+import { openFileDialog } from 'tauri/tauri-dialog';
+import { exists } from '@tauri-apps/api/fs';
+import ExtensionPack from 'function/extensions/extension-pack';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { warn } from 'util/scripts/logging';
+import { File, Files, Stack } from 'react-bootstrap-icons';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import {
   ActiveExtensionElement,
   ExtensionNameList,
@@ -47,9 +54,15 @@ export default function ExtensionManager() {
 
   const configurationQualifier = useConfigurationQualifier();
 
-  const advancedMode = useAtomValue(GuiSettings.ADVANCED_MODE_ATOM);
+  const [showAllExtensions, setShowAllExtensions] = useAtom(
+    GuiSettings.SHOW_ALL_EXTENSIONS_ATOM
+  );
 
-  const extensionsToDisplay = advancedMode
+  const [advancedMode, setAdvancedMode] = useAtom(
+    GuiSettings.ADVANCED_MODE_ATOM
+  );
+
+  const extensionsToDisplay = showAllExtensions
     ? extensionsState.installedExtensions
     : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
 
@@ -69,7 +82,7 @@ export default function ExtensionManager() {
     />
   ));
 
-  const displayedActiveExtensions = advancedMode
+  const displayedActiveExtensions = showAllExtensions
     ? extensionsState.activeExtensions
     : extensionsState.activeExtensions.filter((e) => e.type === 'plugin');
 
@@ -85,48 +98,199 @@ export default function ExtensionManager() {
   const [configurationDefaults] = useConfigurationDefaultsReducer();
   const gameFolder = useCurrentGameFolder();
 
+  const [statusBarMessage, setStatusBarMessage] = useAtom(
+    STATUS_BAR_MESSAGE_ATOM
+  );
+
   return (
-    <Container className="fs-6 h-100 vertical-container">
-      <div className="row h-100">
+    <Container className="fs-6 d-flex flex-column h-100 py-1">
+      <div className="row flex-grow-1 d-flex ">
         <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
-          <div>
-            <h4>{t('gui-editor:extensions.available')}</h4>
+          <div className="d-flex flex-wrap align-items-center container">
+            <h4 className="d-flex me-auto">
+              {t('gui-editor:extensions.available')}
+            </h4>
+            <button
+              type="button"
+              className="d-flex flex-wrap mx-1 text-light align-content-center"
+              style={{
+                height: '60%',
+                backgroundColor: 'transparent',
+                backgroundRepeat: 'no-repeat',
+                overflow: 'hidden',
+                outline: '1px',
+              }}
+              onClick={() => {
+                setShowAllExtensions(!showAllExtensions);
+              }}
+              onMouseEnter={() => {
+                setStatusBarMessage('Show all extensions / Hide modules');
+              }}
+              onMouseLeave={() => {
+                setStatusBarMessage(undefined);
+              }}
+            >
+              {showAllExtensions ? <Files /> : <File />}
+            </button>
+            <button
+              type="button"
+              className="d-flex flex-wrap mx-1 text-light align-content-center"
+              style={{
+                height: '60%',
+                backgroundColor: 'transparent',
+                backgroundRepeat: 'no-repeat',
+                overflow: 'hidden',
+                outline: '1px',
+              }}
+              onClick={async () => {
+                const result = await openFileDialog(gameFolder, [
+                  { name: 'Zip files', extensions: ['zip'] },
+                ]);
+
+                if (result.isPresent()) {
+                  const path = result.get();
+
+                  console.log(`Trying to install extensions from: ${path}`);
+
+                  if (await exists(path)) {
+                    try {
+                      const ep = await ExtensionPack.fromPath(path);
+
+                      try {
+                        await ep.install(`${gameFolder}/ucp`);
+                        await showGeneralModalOk({
+                          title: 'Succesful install',
+                          message: `Extension pack was succesfully installed`,
+                        });
+                      } catch (e) {
+                        let msg = e;
+                        if (typeof e === 'string') {
+                          msg = e.toString(); // works, `e` narrowed to string
+                        } else if (e instanceof Error) {
+                          msg = e.message; // works, `e` narrowed to Error
+                        }
+                        await showGeneralModalOk({
+                          title: 'ERROR',
+                          message: (msg as string).toString(),
+                        });
+                      } finally {
+                        await ep.close();
+                      }
+                    } catch (e) {
+                      let msg = e;
+                      if (typeof e === 'string') {
+                        msg = e.toString(); // works, `e` narrowed to string
+                      } else if (e instanceof Error) {
+                        msg = e.message; // works, `e` narrowed to Error
+                      }
+                      await showGeneralModalOk({
+                        title: 'ERROR',
+                        message: (msg as string).toString(),
+                      });
+                    }
+                  } else {
+                    warn(`Path does not exist: ${path}`);
+                    await showGeneralModalOk({
+                      title: 'Path does not exist',
+                      message: `Path does not exist: ${path}`,
+                    });
+                  }
+                }
+              }}
+              onMouseEnter={() => {
+                setStatusBarMessage(
+                  'Install extensions from a pack (a zip file)'
+                );
+              }}
+              onMouseLeave={() => {
+                setStatusBarMessage(undefined);
+              }}
+            >
+              +
+            </button>
           </div>
           <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
             <div className="parchment-box-item-list"> {eUI} </div>
           </div>
         </div>
-        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
-          <div>
+        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden ">
+          <div className="d-flex flex-wrap align-items-center container">
             <h4>{t('gui-editor:extensions.activated')}</h4>
           </div>
-          <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
+          <div className="parchment-box-inside parchment-box flex-grow-1 d-flex flex-column overflow-auto">
             <div className="parchment-box-item-list">{activated}</div>
           </div>
           <div className="row pb-2 mx-0">
             <div className="d-inline-flex">
-              <ResetButton
-                onClick={() => {
-                  setConfiguration({
-                    type: 'reset',
-                    value: configurationDefaults,
-                  });
-                  setConfigurationTouched({
-                    type: 'reset',
-                    value: {},
+              <button
+                type="button"
+                className="d-flex flex-wrap mx-1 text-light align-content-center"
+                style={{
+                  height: '100%',
+                  backgroundColor: 'transparent',
+                  backgroundRepeat: 'no-repeat',
+                  overflow: 'hidden',
+                  outline: '1px',
+                }}
+                onClick={async () => {
+                  await showGeneralModalOk({
+                    title: 'Unimplemented button',
+                    message:
+                      'When implemented, this button will let you create a pack of extensions you can share with others.',
                   });
                 }}
-              />
+                onMouseEnter={() => {
+                  setStatusBarMessage(
+                    'Zip the current extensions to a zip file for sharing'
+                  );
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
+              >
+                <Stack />
+              </button>
               <ImportButton
                 onClick={async () =>
                   importButtonCallback(gameFolder, setConfigStatus, t, '')
                 }
+                onMouseEnter={() => {
+                  setStatusBarMessage(
+                    'Import a config file, overwriting the current configuration'
+                  );
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
               />
               <ExportButton
                 onClick={() =>
                   exportButtonCallback(gameFolder, setConfigStatus, t)
                 }
+                onMouseEnter={() => {
+                  setStatusBarMessage(
+                    'Export the current configuration to a file'
+                  );
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
               />
+              <button
+                type="button"
+                className="ucp-button-variant"
+                onClick={() => {
+                  setAdvancedMode(!advancedMode);
+                }}
+                onMouseEnter={() => {
+                  setStatusBarMessage('Customize configuration options');
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
+              >
+                <div className="ucp-button-variant-button-text">Customize</div>
+              </button>
               <ApplyButton
                 onClick={async () => {
                   const result: string = await saveConfig(
@@ -140,17 +304,26 @@ export default function ExtensionManager() {
 
                   setConfigStatus(result);
                 }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(
+                    'Apply the current configuration (save to ucp-config.yml)'
+                  );
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
               />
+
               <Form.Switch
                 id="config-allow-user-override-switch"
                 label={t('gui-editor:config.allow.override')}
                 className="col-auto d-inline-block ms-1 d-none"
               />
-              <span className="text-warning fs-6">{configStatus}</span>
             </div>
           </div>
         </div>
       </div>
+      <Container className="row text-warning">{configStatus}</Container>
     </Container>
   );
 }

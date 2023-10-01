@@ -1,12 +1,11 @@
 import { useTranslation } from 'react-i18next';
 
-function ApplyButton(props: { onClick: () => void }) {
-  const { onClick } = props;
-
+function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   return (
-    <button className="ucp-button-variant" type="button" onClick={onClick}>
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <button className="ucp-button-variant" type="button" {...props}>
       <div className="ucp-button-variant-button-text">
         {t('gui-general:apply')}
       </div>

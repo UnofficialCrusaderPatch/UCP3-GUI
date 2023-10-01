@@ -16,6 +16,8 @@ function saveConfig(
 
   const fullConfig = configuration;
 
+  console.log(`Saving config: `, configuration);
+
   return saveUCPConfig(
     sparseConfig,
     fullConfig,

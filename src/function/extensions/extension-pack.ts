@@ -60,8 +60,9 @@ class ExtensionPack {
         const destination = `${ucpFolder}/plugins/${entry.name}`;
 
         if (await exists(destination)) {
-          error(`Path already exists: ${destination}`);
-          throw Error(`Path already exists: ${destination}`);
+          // error(`Path already exists: ${destination}`);
+          // throw Error(`Path already exists: ${destination}`);
+          // Just skip
         }
 
         return renameFile(entry.path, destination).catch((reason) => {
@@ -103,8 +104,9 @@ class ExtensionPack {
         const destination = `${ucpFolder}/modules/${entry.name}`;
 
         if (await exists(destination)) {
-          error(`Path already exists: ${entry.path}`);
-          throw Error(`Path already exists: ${entry.path}`);
+          // error(`Path already exists: ${destination}`);
+          // throw Error(`Path already exists: ${destination}`);
+          // Just skip
         }
 
         return renameFile(entry.path, destination).catch((reason) => {

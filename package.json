@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/UnofficialCrusaderPatch/UCP3-GUI.git"
   },
-  "license": "MIT",
+  "license": "GPLv3",
   "author": {
     "name": "UnofficialCrusaderPatch",
     "email": "UnofficialCrusaderPatch@gmail.com",

@@ -1,8 +1,9 @@
 import { Extension } from 'config/ucp/common';
-import { atomWithReducer, atomWithStorage } from 'jotai/utils';
+import { atomWithReducer, atomWithStorage, loadable } from 'jotai/utils';
 import { atom } from 'jotai';
 import { compare } from 'semver';
 import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
+import { exists } from '@tauri-apps/api/fs';
 import {
   ArrayReducerArgs,
   ArrayReducerState,
@@ -199,3 +200,21 @@ export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
   });
 
 export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);
+
+const DOES_UCP_FOLDER_EXIST_ASYNC_ATOM = atom(async (get) => {
+  const folder = get(GAME_FOLDER_ATOM);
+  if (
+    folder === undefined ||
+    folder === null ||
+    folder.length === 0 ||
+    folder === ''
+  )
+    return false;
+
+  const result = await exists(`${folder}/ucp`);
+  return result;
+});
+
+export const DOES_UCP_FOLDER_EXIST_ATOM = loadable(
+  DOES_UCP_FOLDER_EXIST_ASYNC_ATOM
+);

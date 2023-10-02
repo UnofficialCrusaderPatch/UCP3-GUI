@@ -1,10 +1,14 @@
 import {
-  loadZip,
-  closeZip,
-  existZipEntry,
-  getZipEntryAsBinary,
-  getZipEntryAsText,
+  loadZipReader,
+  closeZipReader,
+  existZipReaderEntry,
+  getZipReaderEntryAsBinary,
+  getZipReaderEntryAsText,
 } from 'tauri/tauri-invoke';
+
+// TODO: rename to reader or combine with Writer
+// TODO: recreate on cleanup close -> so that even if everything wents wrong the zip is cleaned up
+//  (use closed boolean, but only for silentClose)
 
 export default class ZipHandler {
   #path: string;
@@ -30,23 +34,23 @@ export default class ZipHandler {
 
   // TODO: no proper error handling or anything stopping an invalid id call
   static async open(path: string): Promise<ZipHandler> {
-    const id = await loadZip(path);
+    const id = await loadZipReader(path);
     return new ZipHandler(path, id);
   }
 
   async close() {
-    return closeZip(this.#id);
+    return closeZipReader(this.#id);
   }
 
   async doesEntryExist(path: string) {
-    return existZipEntry(this.#id, path);
+    return existZipReaderEntry(this.#id, path);
   }
 
   async getEntryAsBinary(path: string) {
-    return getZipEntryAsBinary(this.#id, path);
+    return getZipReaderEntryAsBinary(this.#id, path);
   }
 
   async getEntryAsText(path: string) {
-    return getZipEntryAsText(this.#id, path);
+    return getZipReaderEntryAsText(this.#id, path);
   }
 }

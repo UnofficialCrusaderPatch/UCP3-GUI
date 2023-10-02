@@ -8,7 +8,11 @@ import {
   renameFile,
 } from '@tauri-apps/api/fs';
 import ZipHandler from 'util/structs/zip-handler';
-import { existZipEntry, extractZipToPath, loadZip } from 'tauri/tauri-invoke';
+import {
+  existZipReaderEntry,
+  extractZipToPath,
+  loadZipReader,
+} from 'tauri/tauri-invoke';
 import { error, warn } from 'util/scripts/logging';
 
 class ExtensionPack {
@@ -124,9 +128,9 @@ class ExtensionPack {
 
   static async fromPath(path: string) {
     const tempPath = `ucp3-gui-pack-${new Date().getTime()}`;
-    const zip = await loadZip(path);
-    const pluginsExist = await existZipEntry(zip, 'plugins/');
-    const modulesExist = await existZipEntry(zip, 'modules/');
+    const zip = await loadZipReader(path);
+    const pluginsExist = await existZipReaderEntry(zip, 'plugins/');
+    const modulesExist = await existZipReaderEntry(zip, 'modules/');
 
     if (!pluginsExist && !modulesExist) {
       throw new Error(

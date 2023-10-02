@@ -2,22 +2,48 @@ use std::{
     collections::HashMap,
     fs::{self, File},
     io::Read,
-    sync::atomic::{AtomicUsize, Ordering},
+    pin::Pin,
     sync::Mutex,
+    sync::MutexGuard,
 };
 use tauri::{
     plugin::{Builder, TauriPlugin},
     AppHandle, Manager, Runtime,
 };
-use zip::{result::ZipError, ZipArchive};
+use zip::{result::ZipError, ZipArchive, ZipWriter};
 
 use crate::utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle};
 
-// if zips are properly released, this should never run into issues
-// however, if one is kept, this run into "theoretical" issues
-static ID_KEEPER: AtomicUsize = AtomicUsize::new(0);
-fn get_id() -> usize {
-    ID_KEEPER.fetch_add(1, Ordering::Relaxed)
+struct ZipCollectionsState {
+    reader: HashMap<usize, Pin<Box<ZipArchive<File>>>>,
+    writer: HashMap<usize, Pin<Box<ZipWriter<File>>>>,
+}
+
+impl ZipCollectionsState {
+    fn new() -> ZipCollectionsState {
+        ZipCollectionsState {
+            reader: HashMap::new(),
+            writer: HashMap::new(),
+        }
+    }
+
+    fn get_readers(&mut self) -> &mut HashMap<usize, Pin<Box<ZipArchive<File>>>> {
+        &mut self.reader
+    }
+
+    fn get_writers(&mut self) -> &mut HashMap<usize, Pin<Box<ZipWriter<File>>>> {
+        &mut self.writer
+    }
+}
+
+fn get_zip_collections_state<R: Runtime>(
+    app_handle: &AppHandle<R>,
+) -> MutexGuard<ZipCollectionsState> {
+    get_state_mutex_from_handle::<R, ZipCollectionsState>(&app_handle)
+}
+
+fn get_pin_box_mem_address<S>(obj: &Pin<Box<S>>) -> usize {
+    &**obj as *const S as usize
 }
 
 fn do_with_zip<R: Runtime, Res, F>(
@@ -28,8 +54,8 @@ fn do_with_zip<R: Runtime, Res, F>(
 where
     F: FnMut(&mut ZipArchive<File>) -> Result<Res, String>,
 {
-    let mut map = get_state_mutex_from_handle::<R, HashMap<usize, ZipArchive<File>>>(app_handle);
-    match map.get_mut(&id) {
+    let mut collections_state = get_zip_collections_state(app_handle);
+    match collections_state.get_readers().get_mut(&id) {
         Some(archive) => do_with_zip(archive),
         None => Err(String::from("zip.id.missing")),
     }
@@ -39,16 +65,14 @@ where
 fn load_zip<R: Runtime>(app_handle: AppHandle<R>, source: &str) -> Result<usize, String> {
     let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
 
-    let mut map = get_state_mutex_from_handle::<R, HashMap<usize, ZipArchive<File>>>(&app_handle);
-    let id = get_id();
-    if map.contains_key(&id) {
-        return Err(String::from("zip.id.present"));
-    }
+    let mut collections_state = get_zip_collections_state(&app_handle);
     let create_result = || -> Result<usize, ZipError> {
         let file = fs::File::open(source_path)?;
         let archive = ZipArchive::new(file)?;
-        map.insert(id, archive);
-        Ok(id)
+        let boxed_archive = Box::pin(archive);
+        let address_id = get_pin_box_mem_address(&boxed_archive);
+        collections_state.get_readers().insert(address_id, boxed_archive);
+        Ok(address_id)
     }();
     create_result.map_err(|error| error.to_string())
 }
@@ -103,8 +127,8 @@ fn get_zip_entry_as_text<R: Runtime>(
 
 #[tauri::command]
 fn close_zip<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<(), String> {
-    let mut map = get_state_mutex_from_handle::<R, HashMap<usize, ZipArchive<File>>>(&app_handle);
-    match map.remove(&id) {
+    let mut collections_state = get_zip_collections_state(&app_handle);
+    match collections_state.get_readers().remove(&id) {
         Some(_) => Ok(()),
         None => Err(String::from("zip.id.missing")),
     }
@@ -140,8 +164,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             get_zip_entry_as_text
         ])
         .setup(|app_handle| {
-            app_handle
-                .manage::<Mutex<HashMap<usize, ZipArchive<File>>>>(Mutex::new(HashMap::new()));
+            app_handle.manage::<Mutex<ZipCollectionsState>>(Mutex::new(ZipCollectionsState::new()));
             Ok(())
         })
         .build()

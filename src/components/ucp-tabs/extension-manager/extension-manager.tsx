@@ -22,7 +22,14 @@ import { exists } from '@tauri-apps/api/fs';
 import ExtensionPack from 'function/extensions/extension-pack';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { warn } from 'util/scripts/logging';
-import { File, Files, Stack } from 'react-bootstrap-icons';
+import {
+  File,
+  Files,
+  Filter,
+  Funnel,
+  FunnelFill,
+  Stack,
+} from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import {
   ActiveExtensionElement,
@@ -110,6 +117,13 @@ export default function ExtensionManager() {
             <h4 className="d-flex me-auto">
               {t('gui-editor:extensions.available')}
             </h4>
+            {!showAllExtensions ? (
+              <span className="fs-8">{`filtered: ${
+                extensionsState.extensions.length - extensionsToDisplay.length
+              } out of ${extensionsState.extensions.length}`}</span>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
               className="d-flex flex-wrap mx-1 text-light align-content-center"
@@ -130,7 +144,7 @@ export default function ExtensionManager() {
                 setStatusBarMessage(undefined);
               }}
             >
-              {showAllExtensions ? <Files /> : <File />}
+              {showAllExtensions ? <Funnel /> : <FunnelFill />}
             </button>
             <button
               type="button"

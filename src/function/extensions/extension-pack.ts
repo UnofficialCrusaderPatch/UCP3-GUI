@@ -63,6 +63,9 @@ class ExtensionPack {
           // error(`Path already exists: ${destination}`);
           // throw Error(`Path already exists: ${destination}`);
           // Just skip
+          return new Promise<void>((resolve) => {
+            resolve();
+          });
         }
 
         return renameFile(entry.path, destination).catch((reason) => {
@@ -107,6 +110,9 @@ class ExtensionPack {
           // error(`Path already exists: ${destination}`);
           // throw Error(`Path already exists: ${destination}`);
           // Just skip
+          return new Promise<void>((resolve) => {
+            resolve();
+          });
         }
 
         return renameFile(entry.path, destination).catch((reason) => {

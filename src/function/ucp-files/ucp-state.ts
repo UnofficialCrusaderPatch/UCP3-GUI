@@ -44,6 +44,12 @@ export async function getUCPState(
   const binkRealSha = await binkRealShaPromise;
   const binkUcpSha = await binkUcpShaPromise;
 
+  console.log(`File hashes: `, {
+    binkSha,
+    binkRealSha,
+    binkUcpSha,
+  });
+
   if (!binkSha) {
     return UCPState.WRONG_FOLDER;
   }

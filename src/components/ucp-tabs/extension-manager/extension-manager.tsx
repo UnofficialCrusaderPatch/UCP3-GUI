@@ -22,7 +22,17 @@ import { exists } from '@tauri-apps/api/fs';
 import ExtensionPack from 'function/extensions/extension-pack';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { warn } from 'util/scripts/logging';
-import { File, Files, Stack } from 'react-bootstrap-icons';
+import {
+  File,
+  Files,
+  Filter,
+  Funnel,
+  FunnelFill,
+  Gear,
+  GearFill,
+  PlusLg,
+  Stack,
+} from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import {
   ActiveExtensionElement,
@@ -110,11 +120,18 @@ export default function ExtensionManager() {
             <h4 className="d-flex me-auto">
               {t('gui-editor:extensions.available')}
             </h4>
+            {!showAllExtensions ? (
+              <span className="fs-8">{`filtered: ${
+                extensionsState.extensions.length - extensionsToDisplay.length
+              } out of ${extensionsState.extensions.length}`}</span>
+            ) : (
+              <span />
+            )}
             <button
               type="button"
               className="d-flex flex-wrap mx-1 text-light align-content-center"
               style={{
-                height: '60%',
+                height: '28px',
                 backgroundColor: 'transparent',
                 backgroundRepeat: 'no-repeat',
                 overflow: 'hidden',
@@ -130,13 +147,13 @@ export default function ExtensionManager() {
                 setStatusBarMessage(undefined);
               }}
             >
-              {showAllExtensions ? <Files /> : <File />}
+              {showAllExtensions ? <Funnel /> : <FunnelFill />}
             </button>
             <button
               type="button"
               className="d-flex flex-wrap mx-1 text-light align-content-center"
               style={{
-                height: '60%',
+                height: '28px',
                 backgroundColor: 'transparent',
                 backgroundRepeat: 'no-repeat',
                 overflow: 'hidden',
@@ -206,7 +223,7 @@ export default function ExtensionManager() {
                 setStatusBarMessage(undefined);
               }}
             >
-              +
+              <PlusLg />
             </button>
           </div>
           <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
@@ -278,7 +295,14 @@ export default function ExtensionManager() {
               />
               <button
                 type="button"
-                className="ucp-button-variant"
+                className="d-flex flex-wrap mx-1 text-light align-content-center"
+                style={{
+                  height: '100%',
+                  backgroundColor: 'transparent',
+                  backgroundRepeat: 'no-repeat',
+                  overflow: 'hidden',
+                  outline: '1px',
+                }}
                 onClick={() => {
                   setAdvancedMode(!advancedMode);
                 }}
@@ -289,7 +313,7 @@ export default function ExtensionManager() {
                   setStatusBarMessage(undefined);
                 }}
               >
-                <div className="ucp-button-variant-button-text">Customize</div>
+                {advancedMode ? <GearFill /> : <Gear />}
               </button>
               <ApplyButton
                 onClick={async () => {

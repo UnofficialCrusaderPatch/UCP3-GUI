@@ -72,6 +72,10 @@ export function CreatePluginModal() {
   const [pluginVersion, setPluginVersion] = useState('');
   const [createModpack, setCreateModpack] = useState(false);
 
+  const pluginVersionValid = VERSION_REGEX.exec(pluginVersion) !== null;
+
+  const [versionElementHasFocus, setVersionElementHasFocus] = useState(false);
+
   return (
     <>
       {/* General modal popup window */}
@@ -116,6 +120,19 @@ export function CreatePluginModal() {
                 onChange={(e) => {
                   setPluginVersion(e.target.value);
                 }}
+                onFocus={() => {
+                  setVersionElementHasFocus(true);
+                }}
+                onBlur={() => {
+                  setVersionElementHasFocus(false);
+                }}
+                style={
+                  !versionElementHasFocus &&
+                  pluginVersion.length > 0 &&
+                  !pluginVersionValid
+                    ? { backgroundColor: 'red' }
+                    : {}
+                }
               />
               <Form.Switch
                 id="create-plugin-include-dependencies"
@@ -133,7 +150,7 @@ export function CreatePluginModal() {
               disabled={
                 pluginName.length === 0 ||
                 pluginAuthor.length === 0 ||
-                VERSION_REGEX.exec(pluginVersion) == null
+                !pluginVersionValid
               }
               onClick={() =>
                 new Promise<void>((resolve) => {

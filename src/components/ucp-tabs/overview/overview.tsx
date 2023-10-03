@@ -71,6 +71,10 @@ export default function Overview() {
         ucpVersionString = ucpVersion.toString();
         activateButtonString = t('gui-editor:overview.activate.do.activate');
         break;
+      case UCPState.WRONG_FOLDER:
+        ucpVersionString = t('gui-editor:overview.not.installed');
+        activateButtonString = t('gui-editor:overview.wrong.folder');
+        break;
       default:
         ucpVersionString = t('gui-editor:overview.unknown.state');
         activateButtonString = t('gui-editor:overview.activate.unknown');

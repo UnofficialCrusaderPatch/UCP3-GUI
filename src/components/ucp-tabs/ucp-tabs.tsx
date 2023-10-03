@@ -8,12 +8,18 @@ import {
   useInitDoneValue,
   useInitRunningValue,
 } from 'hooks/jotai/globals-wrapper';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { error, warn } from 'util/scripts/logging';
-import { useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
+import {
+  DOES_UCP_FOLDER_EXIST_ATOM,
+  GAME_FOLDER_ATOM,
+} from 'function/global/global-atoms';
+import { exists } from '@tauri-apps/api/fs';
+
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
@@ -36,6 +42,9 @@ export default function UcpTabs() {
 
   const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
+  const l = useAtomValue(DOES_UCP_FOLDER_EXIST_ATOM);
+  const ucpFolderExists = l.state === 'hasData' && l.data === true;
+
   return (
     <div className="ucp-tabs fs-7">
       <Tab.Container defaultActiveKey="overview">
@@ -50,6 +59,7 @@ export default function UcpTabs() {
               eventKey="extensions"
               className="tab-link"
               disabled={!displayConfigTabs}
+              hidden={!ucpFolderExists}
               onClick={async () => {
                 if (!showErrorsWarning) {
                   return;
@@ -78,7 +88,7 @@ export default function UcpTabs() {
               eventKey="config"
               className="tab-link"
               disabled={!displayConfigTabs}
-              hidden={!advancedMode}
+              hidden={!advancedMode || !ucpFolderExists}
             >
               {t('gui-editor:config.title')}
             </Nav.Link>

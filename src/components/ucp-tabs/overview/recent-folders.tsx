@@ -34,6 +34,7 @@ export default function RecentFolders() {
     const inputTarget = event.target as HTMLDivElement;
     if (inputTarget.textContent) {
       updateCurrentFolderSelectState(inputTarget.textContent as string);
+      setShowRecentFolders(false);
     }
   };
 

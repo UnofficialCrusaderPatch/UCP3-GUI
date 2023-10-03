@@ -4,7 +4,7 @@ use std::{
     io::{self, BufReader, BufWriter, Read, Write},
     pin::Pin,
     sync::Mutex,
-    sync::MutexGuard,
+    sync::MutexGuard, path::Path,
 };
 use tauri::{
     plugin::{Builder, TauriPlugin},
@@ -199,13 +199,9 @@ impl ZipWriterHelper {
         self.write_entry_from_binary(path, text.as_bytes())
     }
 
-    fn write_entry_from_file<R: Runtime>(
-        &mut self,
-        app_handle: &AppHandle<R>,
-        path: &str,
-        source: &str,
-    ) -> Result<(), String> {
-        let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
+    // WARNING: There is no same file check, so this might fill until out of space or memory if it points to the same
+    // alternative would be an endless loop...
+    fn write_entry_from_file(&mut self, path: &str, source_path: &Path) -> Result<(), String> {
         let create_result = || -> Result<(), io::Error> {
             let file: File = File::open(source_path)?;
             let mut buf_reader = BufReader::new(file);
@@ -321,8 +317,9 @@ fn write_zip_writer_entry_from_file<R: Runtime>(
     path: &str,
     source: &str,
 ) -> Result<(), String> {
+    let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
     let mut state = get_zip_collections_state(&app_handle);
-    ZipWriterHelper::get_writer(&mut state, id)?.write_entry_from_file(&app_handle, path, source)
+    ZipWriterHelper::get_writer(&mut state, id)?.write_entry_from_file(path, source_path)
 }
 
 // careless, overwrites, may leave remains on error

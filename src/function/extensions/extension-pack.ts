@@ -7,13 +7,9 @@ import {
   readDir,
   renameFile,
 } from '@tauri-apps/api/fs';
-import ZipHandler from 'util/structs/zip-handler';
-import {
-  existZipReaderEntry,
-  extractZipToPath,
-  loadZipReader,
-} from 'tauri/tauri-invoke';
-import { error, warn } from 'util/scripts/logging';
+import { ZipReader } from 'util/structs/zip-handler';
+import { error } from 'util/scripts/logging';
+import { extractZipToPath } from 'tauri/tauri-invoke';
 
 class ExtensionPack {
   path: string;
@@ -128,15 +124,15 @@ class ExtensionPack {
 
   static async fromPath(path: string) {
     const tempPath = `ucp3-gui-pack-${new Date().getTime()}`;
-    const zip = await loadZipReader(path);
-    const pluginsExist = await existZipReaderEntry(zip, 'plugins/');
-    const modulesExist = await existZipReaderEntry(zip, 'modules/');
-
-    if (!pluginsExist && !modulesExist) {
-      throw new Error(
-        `Zip file does not contain a plugins nor a modules directory. Not an extension pack!`
-      );
-    }
+    await ZipReader.withZipReaderDo(path, async (reader) => {
+      const pluginsExist = await reader.doesEntryExist('plugins/');
+      const modulesExist = await reader.doesEntryExist('modules/');
+      if (!pluginsExist && !modulesExist) {
+        throw new Error(
+          `Zip file does not contain a plugins nor a modules directory. Not an extension pack!`
+        );
+      }
+    });
 
     await createDir(tempPath, { dir: BaseDirectory.Temp });
 

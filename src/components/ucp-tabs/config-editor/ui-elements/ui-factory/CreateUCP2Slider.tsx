@@ -54,7 +54,7 @@ function CreateUCP2Slider(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
@@ -82,7 +82,7 @@ function CreateUCP2Slider(args: {
     enabled,
     configurationLocks[url],
     configurationSuggestions[url] !== undefined,
-    configurationSuggestions[url]
+    configurationSuggestions[url],
   );
   const isDisabled =
     disabled || !isEnabled || configurationLocks[url] !== undefined;
@@ -125,7 +125,9 @@ function CreateUCP2Slider(args: {
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localValue, setLocalValue] = useState(
-    value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
+    value.sliderValue === undefined
+      ? 0
+      : (value.sliderValue as number) * factor,
   );
   return (
     <div

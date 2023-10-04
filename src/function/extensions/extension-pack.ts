@@ -46,14 +46,14 @@ class ExtensionPack {
         if (entry.children === null || entry.children === undefined) {
           error(`Found a non-directory file in extension pack: ${entry.path}`);
           throw Error(
-            `Found a non-directory file in extension pack: ${entry.path}`
+            `Found a non-directory file in extension pack: ${entry.path}`,
           );
         }
 
         if (entry.name === undefined) {
           error(`Found a non-valid path in extension pack: ${entry.path}`);
           throw Error(
-            `Found a non-valid path in extension pack: ${entry.path}`
+            `Found a non-valid path in extension pack: ${entry.path}`,
           );
         }
 
@@ -86,21 +86,21 @@ class ExtensionPack {
         if (entry.children !== null && entry.children !== undefined) {
           error(`Found a directory file in extension pack: ${entry.path}`);
           throw Error(
-            `Found a directory file in extension pack: ${entry.path}`
+            `Found a directory file in extension pack: ${entry.path}`,
           );
         }
 
         if (entry.name === undefined) {
           error(`Found a non-valid path in extension pack: ${entry.path}`);
           throw Error(
-            `Found a non-valid path in extension pack: ${entry.path}`
+            `Found a non-valid path in extension pack: ${entry.path}`,
           );
         }
 
         if (!entry.name.endsWith('.zip')) {
           error(`Found a non-zip file in extension pack: ${entry.path}`);
           throw Error(
-            `Found a non-valid path in extension pack: ${entry.path}`
+            `Found a non-valid path in extension pack: ${entry.path}`,
           );
         }
 
@@ -135,7 +135,7 @@ class ExtensionPack {
       const modulesExist = await reader.doesEntryExist('modules/');
       if (!pluginsExist && !modulesExist) {
         throw new Error(
-          `Zip file does not contain a plugins nor a modules directory. Not an extension pack!`
+          `Zip file does not contain a plugins nor a modules directory. Not an extension pack!`,
         );
       }
     });

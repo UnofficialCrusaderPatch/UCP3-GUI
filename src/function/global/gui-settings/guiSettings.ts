@@ -6,12 +6,12 @@ import { atomWithStorage } from 'jotai/utils';
 
 export const SHOW_ALL_EXTENSIONS_ATOM = atomWithStorage(
   'guiShowAllExtensions',
-  true
+  true,
 );
 export const ADVANCED_MODE_ATOM = atomWithStorage('guiAdvancedMode', false);
 export const RECENT_FOLDERS_ATOM = atomWithStorage(
   'guiRecentFolders',
-  [] as string[]
+  [] as string[],
 ); // Or whatever it currently is! Is current folder just the most recent? Or do we need a currentFolder field too?
 export const LANGUAGE_ATOM = atomWithStorage('guiLanguage', 'en'); // Any other language we support
 
@@ -23,13 +23,13 @@ export type CodeBranch = 'release-only' | 'pre-release';
 // If developers want the latest fixes and features before they are released to everyone
 export const GUI_BRANCH_ATOM = atomWithStorage(
   'guiBranch',
-  'release-only' as CodeBranch
+  'release-only' as CodeBranch,
 );
 
 //
 export const UCP_BRANCH_ATOM = atomWithStorage(
   'ucpBranch',
-  'release-only' as CodeBranch
+  'release-only' as CodeBranch,
 );
 
 // Config specific settings
@@ -39,12 +39,12 @@ export const UCP_BRANCH_ATOM = atomWithStorage(
 // Since warnings don't hamper config saving anyway, it could also be called 'hideWarnings'
 export const CONFIG_IGNORE_WARNINGS = atomWithStorage(
   'configMerging.ignoreWarnings',
-  false
+  false,
 );
 
 // For the expert users that want to override all errors. They do hamper applying a config, so this is a true expert override
 // This should actually be more clever, like: "don't count X as an error", rather than "ignore all merge errors"..
 export const CONFIG_IGNORE_ERRORS = atomWithStorage(
   'configMerging.ignoreErrors',
-  false
+  false,
 );

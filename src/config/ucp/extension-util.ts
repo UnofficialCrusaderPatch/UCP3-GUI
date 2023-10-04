@@ -11,7 +11,7 @@ export async function getExtensions(gameFolder: string, locale?: string) {
 }
 
 export function optionEntriesToHierarchical(
-  uiCollection: OptionEntry[]
+  uiCollection: OptionEntry[],
 ): SectionDescription {
   const result: {
     elements: DisplayConfigElement[];

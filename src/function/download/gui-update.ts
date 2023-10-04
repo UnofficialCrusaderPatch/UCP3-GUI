@@ -48,12 +48,12 @@ async function checkIfVersionNewer(latestVersion: string): Promise<boolean> {
 // eslint-disable-next-line import/prefer-default-export
 export async function checkForGUIUpdates(
   setGuiUpdateStatus: (newText: string) => void,
-  t: TFunction
+  t: TFunction,
 ) {
   setGuiUpdateStatus(t('gui-download:gui.github.contact'));
   const assetResponse = await getJSON<LatestGuiAssetInfo>(
     UCP_GUI_REPO_URL,
-    GITHUB_AUTH_HEADER
+    GITHUB_AUTH_HEADER,
   );
   if (!assetResponse.ok) {
     throw setGuiUpdateStatus(t('gui-download:gui.github.failed'));
@@ -61,7 +61,7 @@ export async function checkForGUIUpdates(
   const assetInfo = assetResponse.data;
 
   const latestJSONAsset = assetInfo.assets.filter(
-    (asset) => asset.name === 'latest.json'
+    (asset) => asset.name === 'latest.json',
   )[0];
 
   setGuiUpdateStatus(t('gui-download:gui.fetching.version'));
@@ -69,7 +69,7 @@ export async function checkForGUIUpdates(
     latestJSONAsset.url,
     ResponseType.JSON,
     latestJSONAsset.content_type,
-    GITHUB_BASIC_AUTH
+    GITHUB_BASIC_AUTH,
   );
   if (!versionResponse.ok) {
     throw setGuiUpdateStatus(t('gui-download:gui.failed.version'));
@@ -84,7 +84,7 @@ export async function checkForGUIUpdates(
     t('gui-download:gui.download.ask', {
       version: versionInfo.version,
     }),
-    t('gui-general:confirm')
+    t('gui-general:confirm'),
   );
 
   if (dialogResult !== true) {
@@ -94,16 +94,16 @@ export async function checkForGUIUpdates(
   const downloadPath = await joinPaths(
     await getDownloadFolder(),
     'UCP3-GUI', // workaround for limitation regarding the special folders
-    `UCP3-GUI-${versionInfo.version}.exe`
+    `UCP3-GUI-${versionInfo.version}.exe`,
   );
   const guiExeAsset = assetInfo.assets.filter(
-    (asset) => asset.name === 'UCP3-GUI.exe'
+    (asset) => asset.name === 'UCP3-GUI.exe',
   )[0];
 
   setGuiUpdateStatus(t('gui-download:gui.download.progress'));
   const binaryResponse = await getBinary<BinaryFileContents>(
     guiExeAsset.url,
-    GITHUB_AUTH_HEADER
+    GITHUB_AUTH_HEADER,
   );
 
   if (!binaryResponse.ok) {

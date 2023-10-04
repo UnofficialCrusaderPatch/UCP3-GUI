@@ -35,7 +35,7 @@ function CreateNumberInput(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
@@ -48,7 +48,7 @@ function CreateNumberInput(args: {
     enabled,
     configurationLocks[url],
     configurationSuggestions[url] !== undefined,
-    configurationSuggestions[url]
+    configurationSuggestions[url],
   );
   const isDisabled =
     disabled || !isEnabled || configurationLocks[url] !== undefined;

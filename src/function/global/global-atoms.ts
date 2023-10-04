@@ -19,7 +19,7 @@ import {
 function KeyValueReducer<Type>() {
   return (
     state: KeyValueReducerState<Type>,
-    action: KeyValueReducerArgs<Type>
+    action: KeyValueReducerArgs<Type>,
   ) => {
     if (action.type === 'reset') {
       return { ...action.value };
@@ -34,7 +34,7 @@ function KeyValueReducer<Type>() {
 function ArrayReducer<Type>() {
   return (
     _state: ArrayReducerState<Type>,
-    newState: ArrayReducerArgs<Type>
+    newState: ArrayReducerArgs<Type>,
   ) => [...newState];
 }
 
@@ -49,7 +49,7 @@ const configurationQualifierReducer = KeyValueReducer<ConfigurationQualifier>();
 
 const extensionStateReducer = (
   oldState: ExtensionsState,
-  newState: Partial<ExtensionsState>
+  newState: Partial<ExtensionsState>,
 ): ExtensionsState => {
   const state = { ...oldState, ...newState };
   return state;
@@ -66,22 +66,22 @@ export const GAME_FOLDER_ATOM = atom(''); // unused
 
 export const CONFIGURATION_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationReducer
+  configurationReducer,
 );
 
 export const CONFIGURATION_TOUCHED_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationTouchedReducer
+  configurationTouchedReducer,
 );
 
 export const CONFIGURATION_WARNINGS_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationWarningsReducer
+  configurationWarningsReducer,
 );
 
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationDefaultsReducer
+  configurationDefaultsReducer,
 );
 
 export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
@@ -99,7 +99,7 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
       state: {},
     },
   },
-  extensionStateReducer
+  extensionStateReducer,
 );
 
 export type ConfigurationLock = {
@@ -111,7 +111,7 @@ const configurationLocksReducer = KeyValueReducer<ConfigurationLock>();
 
 export const CONFIGURATION_LOCKS_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationLocksReducer
+  configurationLocksReducer,
 );
 
 export type ConfigurationSuggestion = {
@@ -124,17 +124,17 @@ const configurationSuggestionsReducer =
 
 export const CONFIGURATION_SUGGESTIONS_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationSuggestionsReducer
+  configurationSuggestionsReducer,
 );
 
 export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationQualifierReducer
+  configurationQualifierReducer,
 );
 
 const generalOkCancelModalWindowReducer = (
   oldState: GeneralOkCancelModalWindow,
-  newState: Partial<GeneralOkCancelModalWindow>
+  newState: Partial<GeneralOkCancelModalWindow>,
 ): GeneralOkCancelModalWindow => {
   const state = { ...oldState, ...newState };
   return state;
@@ -151,12 +151,12 @@ export const GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
     ok: '',
     cancel: '',
   },
-  generalOkCancelModalWindowReducer
+  generalOkCancelModalWindowReducer,
 );
 
 const generalOkModalWindowReducer = (
   oldState: GeneralOkModalWindow,
-  newState: Partial<GeneralOkModalWindow>
+  newState: Partial<GeneralOkModalWindow>,
 ): GeneralOkModalWindow => {
   const state = { ...oldState, ...newState };
   return state;
@@ -171,7 +171,7 @@ export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
     handleAction: () => {},
     ok: '',
   },
-  generalOkModalWindowReducer
+  generalOkModalWindowReducer,
 );
 
 export type PreferredExtensionVersionDictionary = {
@@ -195,7 +195,7 @@ export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
       Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
         name,
         tree.allVersionsForName(name),
-      ])
+      ]),
     ) as AvailableExtensionVersionsDictionary;
   });
 
@@ -216,5 +216,5 @@ const DOES_UCP_FOLDER_EXIST_ASYNC_ATOM = atom(async (get) => {
 });
 
 export const DOES_UCP_FOLDER_EXIST_ATOM = loadable(
-  DOES_UCP_FOLDER_EXIST_ASYNC_ATOM
+  DOES_UCP_FOLDER_EXIST_ASYNC_ATOM,
 );

@@ -8,10 +8,10 @@ function saveConfig(
   touched: { [key: string]: boolean },
   sparseExtensions: Extension[],
   allExtensions: Extension[],
-  configurationQualifier: { [key: string]: ConfigurationQualifier }
+  configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
   const sparseConfig = Object.fromEntries(
-    Object.entries(configuration).filter(([key]) => touched[key])
+    Object.entries(configuration).filter(([key]) => touched[key]),
   );
 
   const fullConfig = configuration;
@@ -24,7 +24,7 @@ function saveConfig(
     sparseExtensions,
     allExtensions,
     folder,
-    configurationQualifier
+    configurationQualifier,
   );
 }
 

@@ -40,7 +40,7 @@ function CreateSlider(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
@@ -50,7 +50,9 @@ function CreateSlider(args: {
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localValue, setLocalValue] = useState(
-    value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
+    value.sliderValue === undefined
+      ? 0
+      : (value.sliderValue as number) * factor,
   );
 
   const statusBarMessage = createStatusBarMessage(
@@ -60,7 +62,7 @@ function CreateSlider(args: {
     enabled,
     configurationLocks[url],
     configurationSuggestions[url] !== undefined,
-    configurationSuggestions[url]
+    configurationSuggestions[url],
   );
   const isDisabled =
     disabled || !isEnabled || configurationLocks[url] !== undefined;

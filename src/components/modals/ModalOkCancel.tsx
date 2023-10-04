@@ -21,7 +21,7 @@ function setGeneralOkCancelModalWindow(state: GeneralOkCancelModalWindow) {
 }
 
 export async function showGeneralModalOkCancel(
-  spec: Partial<GeneralOkCancelModalWindow>
+  spec: Partial<GeneralOkCancelModalWindow>,
 ) {
   const fullSpec: GeneralOkCancelModalWindow = {
     ...DEFAULT_OK_CANCEL_MODAL_WINDOW,

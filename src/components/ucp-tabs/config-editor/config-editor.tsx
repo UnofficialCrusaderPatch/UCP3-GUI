@@ -70,7 +70,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
         ? t('gui-editor:config.status.nothing.active', {
             number: activeExtensions.length,
           })
-        : ''
+        : '',
     );
   }, [activeExtensions, t]);
 
@@ -119,7 +119,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
                     activeExtensions,
-                    configurationQualifier
+                    configurationQualifier,
                   );
 
                   setConfigStatus(result);
@@ -133,7 +133,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
                     activeExtensions,
-                    configurationQualifier
+                    configurationQualifier,
                   );
 
                   const trimmedResult = {
@@ -176,12 +176,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       author: r.pluginAuthor,
                       version: r.pluginVersion,
                       dependencies: result['config-sparse']['load-order'],
-                    })
+                    }),
                   );
 
                   await writeTextFile(
                     `${pluginDir}/config.yml`,
-                    toYaml(trimmedResult)
+                    toYaml(trimmedResult),
                   );
 
                   const confirmed = await showGeneralModalOkCancel({

@@ -7,7 +7,7 @@ async function warnClearingOfConfiguration(configurationTouched: {
   console.log('displaying warning');
 
   const touchedOptions = Object.entries(configurationTouched).filter(
-    (pair) => pair[1] === true
+    (pair) => pair[1] === true,
   );
   if (touchedOptions.length > 0) {
     const confirmed = await showGeneralModalOkCancel({

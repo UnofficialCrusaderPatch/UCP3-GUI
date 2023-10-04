@@ -22,9 +22,17 @@ const OPTIONS_FILE = 'options.yml';
 const CONFIG_FILE = 'config.yml';
 const DEFINITION_FILE = 'definition.yml';
 const LOCALE_FOLDER = 'locale';
+const DESCRIPTION_FILE = 'description.md';
+
+async function readDescription(eh: ExtensionHandle): Promise<string> {
+  if (await eh.doesEntryExist(DESCRIPTION_FILE)) {
+    return eh.getTextContents(DESCRIPTION_FILE);
+  }
+  return '# No description provided';
+}
 
 async function readUISpec(
-  eh: ExtensionHandle
+  eh: ExtensionHandle,
 ): Promise<{ options: { [key: string]: unknown }[] }> {
   if (await eh.doesEntryExist(OPTIONS_FILE)) {
     return yaml.parse(await eh.getTextContents(OPTIONS_FILE));
@@ -49,14 +57,14 @@ async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
 async function setLocale(
   eh: ExtensionHandle,
   ext: Extension,
-  language: string
+  language: string,
 ): Promise<void> {
   // TODO: folder checking is broken. Why?
   const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}/`);
   if (locFolder) {
     if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
       const locale = yaml.parse(
-        await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`)
+        await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`),
       );
 
       ext.ui.forEach((uiElement) => {
@@ -64,7 +72,7 @@ async function setLocale(
       });
     } else {
       console.log(
-        `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
+        `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
       );
     }
   }
@@ -73,7 +81,7 @@ async function setLocale(
 function collectOptionEntries(
   obj: { [key: string]: unknown },
   extensionName: string,
-  collection?: { [key: string]: OptionEntry }
+  collection?: { [key: string]: OptionEntry },
 ) {
   // eslint-disable-next-line no-param-reassign
   if (collection === undefined) collection = {};
@@ -96,7 +104,7 @@ function collectOptionEntries(
         collectOptionEntries(
           obj[key] as { [key: string]: unknown },
           extensionName,
-          collection
+          collection,
         );
       });
     }
@@ -107,7 +115,7 @@ function collectOptionEntries(
 function collectConfigEntries(
   obj: { contents: unknown; [key: string]: unknown },
   url?: string,
-  collection?: { [key: string]: ConfigEntry }
+  collection?: { [key: string]: ConfigEntry },
 ) {
   // eslint-disable-next-line no-param-reassign
   if (collection === undefined) collection = {};
@@ -133,7 +141,7 @@ function collectConfigEntries(
         collectConfigEntries(
           obj[key] as { contents: unknown; [key: string]: unknown },
           newUrl,
-          collection
+          collection,
         );
       });
     }
@@ -144,15 +152,19 @@ function collectConfigEntries(
 
 async function getExtensionHandles(ucpFolder: string) {
   const moduleDir = `${ucpFolder}/modules/`;
-  const modDirEnts = (await readDir(moduleDir)).ok().getOrReceive(() => []);
+  const modDirEnts = (await readDir(moduleDir))
+    .ok()
+    .getOrReceive(() => []) as FileEntry[];
 
   const pluginDir = `${ucpFolder}/plugins/`;
-  const pluginDirEnts = (await readDir(pluginDir)).ok().getOrReceive(() => []);
+  const pluginDirEnts = (await readDir(pluginDir))
+    .ok()
+    .getOrReceive(() => []) as FileEntry[];
 
   const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(
     (fe) =>
       (fe.name || '').endsWith('.zip') ||
-      (fe.children !== null && fe.children !== undefined)
+      (fe.children !== null && fe.children !== undefined),
   );
   const den = de.map((f) => f.name);
   const dirEnts = de.filter((e) => {
@@ -193,7 +205,7 @@ async function getExtensionHandles(ucpFolder: string) {
         return new DirectoryExtensionHandle(folder) as ExtensionHandle;
       }
       throw new Error(`${folder} not a valid extension directory`);
-    })
+    }),
   );
 
   return exts;
@@ -202,7 +214,7 @@ async function getExtensionHandles(ucpFolder: string) {
 const Discovery = {
   discoverExtensions: async (
     gameFolder: string,
-    locale?: string
+    locale?: string,
   ): Promise<Extension[]> => {
     info(`Discovering extensions`);
 
@@ -213,7 +225,7 @@ const Discovery = {
         const inferredType =
           eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
         const definition = yaml.parse(
-          await eh.getTextContents(`${DEFINITION_FILE}`)
+          await eh.getTextContents(`${DEFINITION_FILE}`),
         );
         const { name, version } = definition;
 
@@ -222,11 +234,11 @@ const Discovery = {
         let assumedType = inferredType;
         if (type === undefined) {
           warn(
-            `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`
+            `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`,
           );
         } else if (type !== inferredType) {
           error(
-            `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`
+            `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`,
           );
         } else {
           assumedType = type;
@@ -249,7 +261,7 @@ const Discovery = {
 
         ext.optionEntries = collectOptionEntries(
           ext.ui as unknown as { [key: string]: unknown },
-          ext.name
+          ext.name,
         );
 
         ext.configEntries = {};
@@ -258,14 +270,14 @@ const Discovery = {
           string,
           {
             config: ConfigFileExtensionEntry;
-          }
+          },
         ]) => {
           const result = collectConfigEntries(
             data.config as {
               [key: string]: unknown;
               contents: unknown;
             },
-            extensionName
+            extensionName,
           );
 
           ext.configEntries = { ...ext.configEntries, ...result };
@@ -277,21 +289,23 @@ const Discovery = {
           ext.config['config-sparse'].plugins === undefined
         ) {
           warn(
-            `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`
+            `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`,
           );
         } else {
           Object.entries(ext.config['config-sparse'].modules).forEach(
-            parseEntry
+            parseEntry,
           );
           Object.entries(ext.config['config-sparse'].plugins).forEach(
-            parseEntry
+            parseEntry,
           );
         }
+
+        ext.descriptionMD = await readDescription(eh);
 
         eh.close();
 
         return ext;
-      })
+      }),
     );
 
     const extensionsByID: { [id: string]: Extension } = {};
@@ -300,7 +314,7 @@ const Discovery = {
       const id = `${e.name}@${e.version}`;
       if (extensionsByID[id] !== undefined) {
         throw Error(
-          `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`
+          `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`,
         );
       }
       extensionsByID[id] = e;

@@ -46,14 +46,14 @@ export function trace(message: unknown) {
 const handleUncaughtError = (e: ErrorEvent) => {
   logWithFrontendPrefix(
     LOG_LEVEL.ERROR,
-    `${e.filename}(${e.lineno}:${e.colno}) : ${e.type} : ${e.message}`
+    `${e.filename}(${e.lineno}:${e.colno}) : ${e.type} : ${e.message}`,
   );
   return false;
 };
 
 const handleUncaughtPromise = (e: PromiseRejectionEvent) => {
   error(`Promise rejected : ${e.type} : ${e.reason}`).catch((reason) =>
-    console.error(`Backend logging issue : ${e.type} : ${reason}`)
+    console.error(`Backend logging issue : ${e.type} : ${reason}`),
   );
 };
 
@@ -86,5 +86,5 @@ const backendLogUnlistenPromise = onBackendLog(({ payload }) => {
   }
 });
 registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, async () =>
-  (await backendLogUnlistenPromise)()
+  (await backendLogUnlistenPromise)(),
 );

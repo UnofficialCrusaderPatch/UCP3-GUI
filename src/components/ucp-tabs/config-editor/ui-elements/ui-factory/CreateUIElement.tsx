@@ -36,7 +36,7 @@ function CreateUIElement(args: {
       t('gui-editor:config.element.unsupported.type', {
         url: spec.url,
         type: spec.contents.type,
-      })
+      }),
     );
     return <div />;
   }
@@ -120,7 +120,7 @@ function CreateUIElement(args: {
     t('gui-editor:config.element.unsupported.type', {
       url: spec.url,
       type: spec.contents.type,
-    })
+    }),
   );
   return <div />;
 }

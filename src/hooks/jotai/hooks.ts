@@ -57,7 +57,7 @@ export const useLanguageHook =
     if (prev?.unlistenChangeEvent) {
       removeTauriEventListener(
         TauriEvent.WINDOW_CLOSE_REQUESTED,
-        prev.unlistenChangeEvent
+        prev.unlistenChangeEvent,
       );
     }
     registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, unlistenFunc);
@@ -73,7 +73,7 @@ export const useUCPStateHook =
     async (_prev, currentFolder: string) =>
       (await Result.tryAsync(getUCPState, currentFolder))
         .ok()
-        .getOrElse(UCPState.UNKNOWN)
+        .getOrElse(UCPState.UNKNOWN),
   );
 
 export const useUCPVersionHook =
@@ -81,5 +81,5 @@ export const useUCPVersionHook =
     async (_prev, currentFolder: string) =>
       (await loadUCPVersion(currentFolder))
         .ok()
-        .getOrReceive(getEmptyUCPVersion)
+        .getOrReceive(getEmptyUCPVersion),
   );

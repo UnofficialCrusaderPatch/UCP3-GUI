@@ -8,7 +8,7 @@ import {
 function isSetValuePermittedByConfig(
   values: unknown[],
   config: ConfigEntry,
-  configName: string
+  configName: string,
 ): PermissionStatus {
   const valueSet = new Set(values);
 
@@ -19,15 +19,15 @@ function isSetValuePermittedByConfig(
     if (
       configValueDef['required-values'].length !== valueSet.size ||
       ![...configValueDef['required-values']].every((value: unknown) =>
-        valueSet.has(value)
+        valueSet.has(value),
       )
     ) {
       return {
         status: 'error',
         reason: `value (${JSON.stringify(
-          valueSet
+          valueSet,
         )}) does not match value (${JSON.stringify(
-          configValueDef['required-values']
+          configValueDef['required-values'],
         )}) as required by ${configName}`,
         by: configName,
       };
@@ -39,15 +39,15 @@ function isSetValuePermittedByConfig(
     // This is elaborate javascript to check if value contains the required values
     if (
       ![...configValueDef['required-values']].every((value) =>
-        valueSet.has(value)
+        valueSet.has(value),
       )
     ) {
       return {
         status: 'error',
         reason: `value (${JSON.stringify(
-          valueSet
+          valueSet,
         )}) is missing some elements (${JSON.stringify(
-          configValueDef['required-values']
+          configValueDef['required-values'],
         )}) as required by ${configName}`,
         by: configName,
       };
@@ -59,15 +59,15 @@ function isSetValuePermittedByConfig(
     if (
       configValueDef['suggested-values'].length !== valueSet.size ||
       ![...configValueDef['suggested-values']].every((value) =>
-        valueSet.has(value)
+        valueSet.has(value),
       )
     ) {
       return {
         status: 'error',
         reason: `value (${JSON.stringify(
-          valueSet
+          valueSet,
         )}) does not match value (${JSON.stringify(
-          configValueDef['suggested-values']
+          configValueDef['suggested-values'],
         )}) as required by ${configName}`,
         by: configName,
       };
@@ -79,15 +79,15 @@ function isSetValuePermittedByConfig(
     // This is elaborate javascript to check if value contains the required values
     if (
       ![...configValueDef['suggested-values']].every((value) =>
-        valueSet.has(value)
+        valueSet.has(value),
       )
     ) {
       return {
         status: 'error',
         reason: `value (${JSON.stringify(
-          valueSet
+          valueSet,
         )}) is missing some elements (${JSON.stringify(
-          configValueDef['suggested-values']
+          configValueDef['suggested-values'],
         )}) as required by ${configName}`,
         by: configName,
       };
@@ -103,7 +103,7 @@ function isSetValuePermittedByConfig(
 function isSetValuePermittedByConfigs(
   values: unknown[],
   spec: OptionEntry,
-  extensions: Extension[]
+  extensions: Extension[],
 ) {
   // eslint-disable-next-line no-restricted-syntax
   for (const ext of extensions) {

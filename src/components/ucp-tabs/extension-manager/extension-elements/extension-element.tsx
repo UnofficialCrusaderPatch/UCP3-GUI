@@ -10,6 +10,7 @@ import {
 } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
+import Markdown from 'react-markdown';
 
 import '../extension-manager.css';
 import {
@@ -24,11 +25,17 @@ import {
   AvailableExtensionVersionsDictionary,
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
+import { useSetOverlayContent } from 'components/overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { moveExtension } from '../extensions-state';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
 import moveExtensionClickCallback from './MoveExtensionClickCallback';
+import {
+  ExtensionViewer,
+  ExtensionViewerProps,
+  MDTEST,
+} from '../extension-viewer/ExtensionViewer';
 
 export function ExtensionElement(props: {
   ext: Extension;
@@ -133,7 +140,7 @@ export function ExtensionElement(props: {
   );
 
   const versions: AvailableExtensionVersionsDictionary = useAtomValue(
-    AVAILABLE_EXTENSION_VERSIONS_ATOM
+    AVAILABLE_EXTENSION_VERSIONS_ATOM,
   );
 
   const availableVersions = fixedVersion
@@ -141,7 +148,7 @@ export function ExtensionElement(props: {
     : versions[name];
 
   const [preferredVersions, setPreferredVersions] = useAtom(
-    PREFERRED_EXTENSION_VERSION_ATOM
+    PREFERRED_EXTENSION_VERSION_ATOM,
   );
 
   const preferredVersion =
@@ -175,6 +182,8 @@ export function ExtensionElement(props: {
     </select>
   );
 
+  const setOverlayContent = useSetOverlayContent<ExtensionViewerProps>();
+
   return (
     <ListGroup.Item
       key={`${name}-${version}-${author}`}
@@ -191,7 +200,14 @@ export function ExtensionElement(props: {
               >
                 -
               </span>
-              <span className="mx-2" style={{ fontSize: 'smaller' }}>
+              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+              <span
+                className="mx-2"
+                style={{ fontSize: 'smaller', cursor: 'pointer' }}
+                onClick={() => {
+                  setOverlayContent(ExtensionViewer, { extension: ext });
+                }}
+              >
                 {name}
               </span>
             </Col>
@@ -214,7 +230,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
   const { name } = exts[0];
 
   const versions: AvailableExtensionVersionsDictionary = useAtomValue(
-    AVAILABLE_EXTENSION_VERSIONS_ATOM
+    AVAILABLE_EXTENSION_VERSIONS_ATOM,
   );
 
   const availableVersions = versions[name];
@@ -232,7 +248,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
 
   const clickCallback = useCallback(
     () => inactiveExtensionElementClickCallback(ext),
-    [ext]
+    [ext],
   );
 
   const [t] = useTranslation(['gui-editor']);
@@ -253,7 +269,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
         .filter(
           (n) =>
             extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
-            -1
+            -1,
         )}
     />
   );
@@ -289,13 +305,13 @@ export function ActiveExtensionElement(props: {
 
   const clickCallback = useCallback(
     () => activeExtensionElementClickCallback(ext),
-    [ext]
+    [ext],
   );
 
   const moveCallback = useCallback(
     (event: { name: string; type: 'up' | 'down' }) =>
       moveExtensionClickCallback(event),
-    []
+    [],
   );
 
   return (
@@ -313,7 +329,7 @@ export function ActiveExtensionElement(props: {
         .filter(
           (n) =>
             extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
-            -1
+            -1,
         )}
     />
   );

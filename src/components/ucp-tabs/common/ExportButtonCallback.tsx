@@ -16,16 +16,16 @@ import saveConfig from './SaveConfig';
 const exportButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (value: string) => void,
-  t: TFunction<[string, string], undefined>
+  t: TFunction<[string, string], undefined>,
 ) => {
   const configuration = getStore().get(CONFIGURATION_REDUCER_ATOM);
   const configurationTouched = getStore().get(
-    CONFIGURATION_TOUCHED_REDUCER_ATOM
+    CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;
   const configurationQualifier = getStore().get(
-    CONFIGURATION_QUALIFIER_REDUCER_ATOM
+    CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   );
 
   const filePathOptional = await saveFileDialog(gameFolder, [
@@ -49,7 +49,7 @@ const exportButtonCallback = async (
     configurationTouched,
     extensionsState.explicitlyActivatedExtensions,
     activeExtensions,
-    configurationQualifier
+    configurationQualifier,
   )
     .then(() => setConfigStatus(t('gui-editor:config.status.exported')))
     .catch((e) => {

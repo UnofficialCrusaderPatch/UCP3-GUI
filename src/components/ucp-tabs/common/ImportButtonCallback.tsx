@@ -58,13 +58,13 @@ const importButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (arg0: string) => void,
   t: TFunction<[string, string], undefined>,
-  file: string | undefined
+  file: string | undefined,
 ) => {
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
   console.log('state before importbuttoncallback', extensionsState);
   const { extensions } = extensionsState;
   const configurationTouched = getStore().get(
-    CONFIGURATION_TOUCHED_REDUCER_ATOM
+    CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
 
   let path = file;
@@ -148,14 +148,14 @@ const importButtonCallback = async (
 
       const options = extensions.filter(
         (ext: Extension) =>
-          ext.name === ds.extension && ext.version === ds.version.toString()
+          ext.name === ds.extension && ext.version === ds.version.toString(),
       );
       console.log(options);
       if (options.length === 0) {
         setConfigStatus(
           t('gui-editor:config.status.missing.extension', {
             extension: e,
-          })
+          }),
         );
 
         // eslint-disable-next-line no-await-in-loop
@@ -195,7 +195,7 @@ const importButtonCallback = async (
       // eslint-disable-next-line no-await-in-loop
       newExtensionsState = await addExtensionToExplicityActivatedExtensions(
         newExtensionsState,
-        ext
+        ext,
       );
     }
 
@@ -215,14 +215,14 @@ const importButtonCallback = async (
     string,
     {
       config: ConfigFileExtensionEntry;
-    }
+    },
   ]) => {
     const result = collectConfigEntries(
       data.config as {
         [key: string]: unknown;
         contents: unknown;
       },
-      extensionName
+      extensionName,
     );
 
     userConfigEntries = { ...userConfigEntries, ...result };

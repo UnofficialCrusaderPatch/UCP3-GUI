@@ -47,8 +47,11 @@ module.exports = {
     // Add your own rules here to override ones from the extended configs.
         // suppress errors for missing 'import React' in files
    "react/react-in-jsx-scope": "off",
-   "@typescript-eslint/no-empty-function": "off",
-   "prettier/prettier": "error"
+   "@typescript-eslint/no-empty-function": "warn",
+   "prettier/prettier": "error",
+   "@typescript-eslint/no-unused-vars": "warn",
+   "no-console": "warn",
+   "@typescript-eslint/no-explicit-any": "warn"
   },
   plugins: ["prettier"]
 };

@@ -26,7 +26,7 @@ function CreateSections(args: { readonly: boolean }): {
   const { activeExtensions } = extensionsState;
 
   const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
-    (o: OptionEntry) => o.hidden === undefined || o.hidden === false
+    (o: OptionEntry) => o.hidden === undefined || o.hidden === false,
   );
   const definition = optionEntriesToHierarchical(optionEntries);
   const { readonly } = args;
@@ -41,7 +41,7 @@ function CreateSections(args: { readonly: boolean }): {
         target: '#config-navbar',
         offset: 10,
         method: 'offset',
-      }
+      },
     );
   });
 
@@ -74,7 +74,7 @@ function CreateSections(args: { readonly: boolean }): {
         disabled={readonly}
         className=""
       />
-    )
+    ),
   );
 
   const children = Object.keys(definition.sections).map((key) => {

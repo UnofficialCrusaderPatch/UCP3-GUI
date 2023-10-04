@@ -77,16 +77,16 @@ export default function Footer() {
   if (displayCurrentFolder.length > folderDisplayWidth) {
     displayCurrentFolder = `${currentFolder.substring(
       0,
-      (folderDisplayWidth - 3) / 2
+      (folderDisplayWidth - 3) / 2,
     )}...${currentFolder.substring(
-      displayCurrentFolder.length - (folderDisplayWidth - 3) / 2
+      displayCurrentFolder.length - (folderDisplayWidth - 3) / 2,
     )}`;
   }
 
   const renderTooltip = (
     props: JSX.IntrinsicAttributes &
       TooltipProps &
-      RefAttributes<HTMLDivElement>
+      RefAttributes<HTMLDivElement>,
   ) => (
     // eslint-disable-next-line react/jsx-props-no-spreading
     <Tooltip id="button-tooltip" {...props}>
@@ -143,7 +143,7 @@ export default function Footer() {
               setStatusBarMessage(
                 t('gui-editor:footer.state.prefix', {
                   state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
-                })
+                }),
               );
             }}
             onMouseLeave={() => {

@@ -44,7 +44,7 @@ export function useLanguage() {
 
 export function useUCPState(): [
   Option<Result<UCPStateHandler, unknown>>,
-  () => Promise<void>
+  () => Promise<void>,
 ] {
   const currentFolder = useCurrentGameFolder();
   const { t } = useTranslation('gui-download');
@@ -63,14 +63,14 @@ export function useUCPState(): [
         receiveState(currentFolder);
         return result;
       },
-    }))
+    })),
   );
   return [ucpStateHandlerResult, () => receiveState(currentFolder)];
 }
 
 export function useUCPVersion(): [
   Option<Result<UCPVersion, unknown>>,
-  () => Promise<void>
+  () => Promise<void>,
 ] {
   const currentFolder = useCurrentGameFolder();
   const [ucpVersionResult, receiveVersion] = useUCPVersionHook(currentFolder);
@@ -79,7 +79,7 @@ export function useUCPVersion(): [
 
 export function useInitGlobalConfiguration(): [
   boolean,
-  (newFolder: string, language: string) => Promise<void>
+  (newFolder: string, language: string) => Promise<void>,
 ] {
   const setInitDone = useSetInitDone();
   const [isInitRunning, setInitRunning] = useInitRunning();
@@ -187,7 +187,7 @@ export function useInitGlobalConfiguration(): [
 
 export function useGameFolder(): [
   string,
-  (newFolder: string) => Promise<void>
+  (newFolder: string) => Promise<void>,
 ] {
   const [currentFolder, setCurrentFolder] = useFolder();
 
@@ -219,7 +219,7 @@ export function useGameFolder(): [
           .ok()
           .map((ok) => ok.getLanguage())
           .notUndefinedOrNull()
-          .getOrElse('')
+          .getOrElse(''),
       );
     },
   ];

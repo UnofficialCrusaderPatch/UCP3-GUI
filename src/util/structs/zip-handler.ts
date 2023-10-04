@@ -20,8 +20,8 @@ export class ZipReader {
     closeZipReader(id).catch((err) =>
       showError(
         `Error cleaning up not closed zip reader:\n${err}`,
-        'Zip Reader'
-      )
+        'Zip Reader',
+      ),
     );
   });
 
@@ -36,7 +36,7 @@ export class ZipReader {
 
   static async withZipReaderDo(
     path: string,
-    func: (reader: ZipReader) => Promise<void>
+    func: (reader: ZipReader) => Promise<void>,
   ): Promise<void> {
     const reader = await ZipReader.open(path);
     try {
@@ -77,8 +77,8 @@ export class ZipWriter {
     closeZipWriter(id).catch((err) =>
       showError(
         `Error cleaning up not closed zip writer:\n${err}`,
-        'Zip Writer'
-      )
+        'Zip Writer',
+      ),
     );
   });
 
@@ -93,7 +93,7 @@ export class ZipWriter {
 
   static async withZipWriterDo(
     path: string,
-    func: (writer: ZipWriter) => Promise<void>
+    func: (writer: ZipWriter) => Promise<void>,
   ): Promise<void> {
     const writer = await ZipWriter.open(path);
     try {

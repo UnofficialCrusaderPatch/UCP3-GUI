@@ -3,7 +3,7 @@ import { info, error as logError } from 'util/scripts/logging';
 import { UCP3_REPOS_MACHINE_TOKEN, UCP3_REPO_URL_API } from './download-enums';
 
 async function checkForLatestUCP3DevReleaseUpdate(
-  currentSHA: string
+  currentSHA: string,
 ): Promise<{ update: boolean; file: string; downloadUrl: string }> {
   const result = {
     update: false,
@@ -25,7 +25,7 @@ async function checkForLatestUCP3DevReleaseUpdate(
         };
       }) => {
         const devReleaseAsset = res.data.assets.filter(
-          (asset) => asset.name.indexOf('DevRelease') !== -1
+          (asset) => asset.name.indexOf('DevRelease') !== -1,
         )[0];
 
         const detectedSha = devReleaseAsset.browser_download_url
@@ -39,7 +39,7 @@ async function checkForLatestUCP3DevReleaseUpdate(
         }
 
         return result;
-      }
+      },
     )
     .catch((error: Error) => {
       logError(error);

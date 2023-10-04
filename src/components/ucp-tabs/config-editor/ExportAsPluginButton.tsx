@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 function ExportAsPluginButton(
-  props: React.ButtonHTMLAttributes<HTMLButtonElement>
+  props: React.ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
   const { onClick } = props;
 

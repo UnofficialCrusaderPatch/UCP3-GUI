@@ -83,11 +83,11 @@ export default function Overview() {
   }
 
   const [advancedMode, setAdvancedMode] = useAtom(
-    GuiSettings.ADVANCED_MODE_ATOM
+    GuiSettings.ADVANCED_MODE_ATOM,
   );
 
   const [, setGeneralOkModalWindow] = useAtom(
-    GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM
+    GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM,
   );
 
   return (
@@ -178,7 +178,7 @@ export default function Overview() {
             currentFolder,
             // can be used to transform -> although splitting into more components might be better
             (status) => stateUpdate(status),
-            t
+            t,
           );
           if (zipInstallResult.ok().isPresent()) {
             // load new state

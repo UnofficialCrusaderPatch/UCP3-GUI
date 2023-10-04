@@ -19,7 +19,7 @@ export class ExtensionSolution {
   constructor(
     status: 'OK' | 'ERROR',
     extensions: Extension[] | undefined,
-    messages: string[]
+    messages: string[],
   ) {
     this.status = status;
     this.extensions = extensions;
@@ -42,7 +42,7 @@ export class ExtensionTree {
   constructor(extensions: Extension[]) {
     this.extensions = extensions;
     this.extensionsById = Object.fromEntries(
-      extensions.map((e) => [extensionToID(e), e])
+      extensions.map((e) => [extensionToID(e), e]),
     );
     const repo: Repository = extensions.map(
       (e) =>
@@ -55,8 +55,8 @@ export class ExtensionTree {
             if (s.operator === '==') s.operator = '=';
 
             return new Dependency(s.extension, `${s.operator}${s.version}`);
-          })
-        )
+          }),
+        ),
     );
 
     this.tree = new Tree(repo);

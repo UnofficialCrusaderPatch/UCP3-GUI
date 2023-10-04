@@ -5,7 +5,7 @@ async function messageWrapper(
   func: 'show' | 'ask' | 'confirm',
   message: string,
   title?: string,
-  type?: 'info' | 'warning' | 'error'
+  type?: 'info' | 'warning' | 'error',
 ): Promise<void | boolean> {
   switch (func) {
     case 'show':
@@ -24,7 +24,7 @@ async function messageWrapper(
 async function showMessage(
   message: string,
   title?: string,
-  type?: 'info' | 'warning' | 'error'
+  type?: 'info' | 'warning' | 'error',
 ): Promise<void> {
   return messageWrapper('show', message, title, type) as Promise<void>;
 }
@@ -32,7 +32,7 @@ async function showMessage(
 async function askMessage(
   message: string,
   title?: string,
-  type?: 'info' | 'warning' | 'error'
+  type?: 'info' | 'warning' | 'error',
 ): Promise<boolean> {
   return messageWrapper('ask', message, title, type) as Promise<boolean>;
 }
@@ -40,7 +40,7 @@ async function askMessage(
 async function confirmMessage(
   message: string,
   title?: string,
-  type?: 'info' | 'warning' | 'error'
+  type?: 'info' | 'warning' | 'error',
 ): Promise<boolean> {
   return messageWrapper('confirm', message, title, type) as Promise<boolean>;
 }
@@ -51,68 +51,68 @@ export async function showInfo(message: string, title?: string): Promise<void> {
 
 export async function showWarning(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<void> {
   return showMessage(message, title, 'warning');
 }
 
 export async function showError(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<void> {
   return showMessage(message, title, 'error');
 }
 
 export async function askInfo(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<boolean> {
   return askMessage(message, title, 'info');
 }
 
 export async function askWarning(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<boolean> {
   return askMessage(message, title, 'warning');
 }
 
 export async function askError(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<boolean> {
   return askMessage(message, title, 'error');
 }
 
 export async function confirmInfo(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<boolean> {
   return confirmMessage(message, title, 'info');
 }
 
 export async function confirmWarning(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<boolean> {
   return confirmMessage(message, title, 'warning');
 }
 
 export async function confirmError(
   message: string,
-  title?: string
+  title?: string,
 ): Promise<boolean> {
   return confirmMessage(message, title, 'error');
 }
 
 export async function open(
-  options?: dialog.OpenDialogOptions | undefined
+  options?: dialog.OpenDialogOptions | undefined,
 ): Promise<string | string[] | null> {
   return dialog.open(options);
 }
 
 export async function save(
-  options?: dialog.SaveDialogOptions | undefined
+  options?: dialog.SaveDialogOptions | undefined,
 ): Promise<string | null> {
   return dialog.save(options);
 }
@@ -122,7 +122,7 @@ export async function save(
 export async function saveFileDialog(
   baseFolder?: string,
   filters?: { name: string; extensions: string[] }[],
-  title?: string
+  title?: string,
 ): Promise<Option<string>> {
   const result = await save({
     defaultPath: baseFolder,
@@ -135,7 +135,7 @@ export async function saveFileDialog(
 export async function openFileDialog(
   baseFolder?: string,
   filters?: { name: string; extensions: string[] }[],
-  title?: string
+  title?: string,
 ): Promise<Option<string>> {
   const result = await open({
     directory: false,
@@ -151,7 +151,7 @@ export async function openFileDialog(
 
 export async function openFolderDialog(
   baseFolder?: string,
-  title?: string
+  title?: string,
 ): Promise<Option<string>> {
   const result = await open({
     directory: true,

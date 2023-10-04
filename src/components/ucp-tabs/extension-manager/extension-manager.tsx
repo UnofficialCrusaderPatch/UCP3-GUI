@@ -66,11 +66,11 @@ export default function ExtensionManager() {
   const configurationQualifier = useConfigurationQualifier();
 
   const [showAllExtensions, setShowAllExtensions] = useAtom(
-    GuiSettings.SHOW_ALL_EXTENSIONS_ATOM
+    GuiSettings.SHOW_ALL_EXTENSIONS_ATOM,
   );
 
   const [advancedMode, setAdvancedMode] = useAtom(
-    GuiSettings.ADVANCED_MODE_ATOM
+    GuiSettings.ADVANCED_MODE_ATOM,
   );
 
   const extensionsToDisplay = showAllExtensions
@@ -78,13 +78,13 @@ export default function ExtensionManager() {
     : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
 
   const extensionsToDisplayByName = Array.from(
-    new Set(extensionsToDisplay.map((e) => e.name))
+    new Set(extensionsToDisplay.map((e) => e.name)),
   ).map(
     (n) =>
       ({
         name: n,
         extensions: extensionsState.extensions.filter((e) => e.name === n),
-      } as ExtensionNameList)
+      }) as ExtensionNameList,
   );
   const eUI = extensionsToDisplayByName.map((enl) => (
     <InactiveExtensionsElement
@@ -110,7 +110,7 @@ export default function ExtensionManager() {
   const gameFolder = useCurrentGameFolder();
 
   const [statusBarMessage, setStatusBarMessage] = useAtom(
-    STATUS_BAR_MESSAGE_ATOM
+    STATUS_BAR_MESSAGE_ATOM,
   );
 
   return (
@@ -217,7 +217,7 @@ export default function ExtensionManager() {
               }}
               onMouseEnter={() => {
                 setStatusBarMessage(
-                  'Install extensions from a pack (a zip file)'
+                  'Install extensions from a pack (a zip file)',
                 );
               }}
               onMouseLeave={() => {
@@ -256,7 +256,7 @@ export default function ExtensionManager() {
                   const filePathResult = await saveFileDialog(
                     `${gameFolder}`,
                     [{ name: 'Zip file', extensions: ['*.zip'] }],
-                    'Save pack as...'
+                    'Save pack as...',
                   );
 
                   if (filePathResult.isEmpty()) return;
@@ -303,7 +303,7 @@ export default function ExtensionManager() {
                         const dirs = entries
                           .filter(
                             (fe) =>
-                              fe.children !== undefined && fe.children !== null
+                              fe.children !== undefined && fe.children !== null,
                           )
                           .map(makeRelative);
 
@@ -315,7 +315,7 @@ export default function ExtensionManager() {
 
                         const files = entries.filter(
                           (fe) =>
-                            fe.children === undefined || fe.children === null
+                            fe.children === undefined || fe.children === null,
                         );
 
                         // eslint-disable-next-line no-restricted-syntax
@@ -323,7 +323,7 @@ export default function ExtensionManager() {
                           // eslint-disable-next-line no-await-in-loop
                           await zw.writeEntryFromFile(
                             makeRelative(fe),
-                            fe.path
+                            fe.path,
                           );
                         }
                       } else if (ext.type === 'module') {
@@ -360,7 +360,7 @@ export default function ExtensionManager() {
                 }}
                 onMouseEnter={() => {
                   setStatusBarMessage(
-                    'Zip the current extensions to a zip file for sharing'
+                    'Zip the current extensions to a zip file for sharing',
                   );
                 }}
                 onMouseLeave={() => {
@@ -375,7 +375,7 @@ export default function ExtensionManager() {
                 }
                 onMouseEnter={() => {
                   setStatusBarMessage(
-                    'Import a config file, overwriting the current configuration'
+                    'Import a config file, overwriting the current configuration',
                   );
                 }}
                 onMouseLeave={() => {
@@ -388,7 +388,7 @@ export default function ExtensionManager() {
                 }
                 onMouseEnter={() => {
                   setStatusBarMessage(
-                    'Export the current configuration to a file'
+                    'Export the current configuration to a file',
                   );
                 }}
                 onMouseLeave={() => {
@@ -425,14 +425,14 @@ export default function ExtensionManager() {
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
                     activeExtensions,
-                    configurationQualifier
+                    configurationQualifier,
                   );
 
                   setConfigStatus(result);
                 }}
                 onMouseEnter={() => {
                   setStatusBarMessage(
-                    'Apply the current configuration (save to ucp-config.yml)'
+                    'Apply the current configuration (save to ucp-config.yml)',
                   );
                 }}
                 onMouseLeave={() => {

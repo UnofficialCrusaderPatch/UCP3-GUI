@@ -46,7 +46,7 @@ export default function RecentFolders() {
     // set initial state
     if (currentFolder === '' && recentFolderHelper?.getMostRecentGameFolder()) {
       updateCurrentFolderSelectState(
-        recentFolderHelper.getMostRecentGameFolder()
+        recentFolderHelper.getMostRecentGameFolder(),
       );
     }
   });
@@ -69,7 +69,7 @@ export default function RecentFolders() {
             role="button"
             onClick={async () =>
               (await openFolderDialog(currentFolder)).ifPresent(
-                updateCurrentFolderSelectState
+                updateCurrentFolderSelectState,
               )
             }
             value={currentFolder}

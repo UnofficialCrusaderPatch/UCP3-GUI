@@ -10,7 +10,7 @@ const createStatusBarMessage = (
   valueStatement?: string,
   lockInformation?: ConfigurationLock,
   hasSuggestion?: boolean,
-  suggestionInformation?: ConfigurationSuggestion
+  suggestionInformation?: ConfigurationSuggestion,
 ) => {
   let statusBarMessage: string | undefined;
   if (disabledByParent) {

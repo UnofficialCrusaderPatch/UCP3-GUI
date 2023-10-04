@@ -13,7 +13,7 @@ import { buildExtensionConfigurationDB } from '../extension-configuration';
 const activeExtensionElementClickCallback = async (ext: Extension) => {
   console.log('deactivate', ext);
   const confirmed = await warnClearingOfConfiguration(
-    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM)
+    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
   );
   if (!confirmed) {
     return;
@@ -21,7 +21,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   const newExtensionState =
     await removeExtensionFromExplicitlyActivatedExtensions(
       getStore().get(EXTENSION_STATE_REDUCER_ATOM),
-      ext
+      ext,
     );
 
   const res = buildExtensionConfigurationDB(newExtensionState);

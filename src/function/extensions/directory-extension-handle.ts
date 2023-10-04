@@ -29,7 +29,7 @@ class DirectoryExtensionHandle implements ExtensionHandle {
       const result = await readBinaryFile(p);
       result.err().ifPresent((error) => {
         throw new Error(
-          `Error while reading binary file: ${p}. Error: ${error}`
+          `Error while reading binary file: ${p}. Error: ${error}`,
         );
       });
       const array = result.ok().get();

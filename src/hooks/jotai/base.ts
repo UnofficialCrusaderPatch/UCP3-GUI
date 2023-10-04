@@ -34,13 +34,13 @@ function asyncAtomWithMutate<T, U extends unknown[]>(
     async (_get, set, args: U) => {
       set(previousValue, await _get(mutateableAtom));
       set(argsAtom, args);
-    }
+    },
   );
   return mutateableAtom;
 }
 
 function resolveLoadableState<T>(
-  loadableState: Loadable<T>
+  loadableState: Loadable<T>,
 ): Option<Result<T, unknown>> {
   switch (loadableState.state) {
     case 'hasData':
@@ -71,7 +71,7 @@ export function createFunctionForAsyncAtomWithMutate<T, U extends unknown[]>(
 
 export function createHookInitializedFunctionForAsyncAtomWithMutate<
   T,
-  U extends unknown[]
+  U extends unknown[],
 >(fn: (previousValue?: T, ...args: U) => T | Promise<T>) {
   let functionForAsyncAtomWithMutate:
     | (() => [Option<Result<T, unknown>>, (...args: U) => Promise<void>])
@@ -80,7 +80,7 @@ export function createHookInitializedFunctionForAsyncAtomWithMutate<
     if (functionForAsyncAtomWithMutate === null) {
       functionForAsyncAtomWithMutate = createFunctionForAsyncAtomWithMutate(
         fn,
-        ...initialArgs
+        ...initialArgs,
       );
     }
     return functionForAsyncAtomWithMutate();

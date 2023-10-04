@@ -48,7 +48,7 @@ function buildConfigMetaContentDB(extName: string, ce: ConfigEntry) {
 }
 
 function buildExtensionConfigurationDBFromActiveExtensions(
-  activeExtensions: Extension[]
+  activeExtensions: Extension[],
 ) {
   // ae has the order that the highest is the last added.
   const ae = [...activeExtensions];
@@ -158,7 +158,7 @@ function buildExtensionConfigurationDB(extensionsState: ExtensionsState) {
   return {
     ...extensionsState,
     configuration: buildExtensionConfigurationDBFromActiveExtensions(
-      extensionsState.activeExtensions
+      extensionsState.activeExtensions,
     ),
   } as ExtensionsState;
 }

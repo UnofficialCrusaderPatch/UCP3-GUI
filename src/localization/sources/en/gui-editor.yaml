@@ -1,53 +1,54 @@
-config.allow.override: "Allow user override"
-config.element.unsupported.type: "Element {{url}} not created because of unsupported type: {{type}}"
-config.general: "General"
-config.not.valid: "Not a valid config file"
-config.status.cancelled: "Config export cancelled"
-config.status.exported: "Configuration exported!"
-config.status.failed.unknown: "Failed to load config: unknown error"
-config.status.missing.extension: "Could not import configuration. Missing extension: {{extension}}"
-config.status.no.file: "No file selected"
-config.status.nothing.active: "Nothing to display, no extensions are active: {{number}}"
-config.table.of.contents: "Table of Contents"
-config.title: "User Config"
-extensions.activated: "Activated extensions"
-extensions.available: "Available extensions"
-extensions.is.dependency: "Cannot deactivate this because this is a dependency of {{dependencies}}"
-extensions.title: "Content"
-footer.folder: "folder:"
-footer.state.active: "active"
-footer.state.bink.version.differences: "bink version differences"
-footer.state.inactive: "inactive"
-footer.state.not.installed: "not installed"
-footer.state.prefix: "UCP state: {{state}}"
-footer.state.unknown: "unknown"
-footer.state.wrong.folder: "wrong folder"
-footer.version.gui: "GUI version: {{version}}"
-footer.version.no.ucp: "not installed"
-footer.version.ucp: "UCP version: {{version}}"
-footer.version.unknown: "unknown state"
-overview.activationTooltip: "Enable or prevent UCP from running at all at game start"
-overview.activate.do.activate: "Activate UCP"
-overview.activate.do.deactivate: "Deactivate UCP"
-overview.activate.not.installed: "No UCP installed"
-overview.activate.unknown: "Unknown UCP State"
-overview.folder.version: "UCP version in this folder:"
-overview.not.installed: "not installed"
-overview.require.reload.text: "The installation process requires a reload, reload now?"
-overview.title: "Overview"
-overview.uninstallationToolTip: "Remove every trace of UCP in the game folder. NOTE: deletes all extensions (modules AND plugins)!"
-overview.uninstall.idle: "Uninstall UCP from this folder"
-overview.unknown.state: "unknown state"
-overview.update.failed: "Failed!"
-overview.update.gui.failed: "Failed!"
-overview.update.gui.idle: "Check for GUI updates"
-overview.update.gui.running: "Updating..."
-overview.update.gui.success: "Updated!"
-overview.update.idle: "Download and install the latest UCP version"
-overview.update.running: "Updating..."
-overview.update.success: "Updated!"
-overview.wrong.folder: "Not a game folder"
-overview.zip.failed: "Failed!"
-overview.zip.idle: "Install UCP to folder from Zip"
-overview.zip.running: "Extracting..."
-overview.zip.success: "Extracted!"
+config.allow.override: 'Allow user override'
+config.element.unsupported.type: 'Element {{url}} not created because of unsupported type: {{type}}'
+config.general: 'General'
+config.not.valid: 'Not a valid config file'
+config.status.cancelled: 'Config export cancelled'
+config.status.exported: 'Configuration exported!'
+config.status.failed.unknown: 'Failed to load config: unknown error'
+config.status.missing.extension: 'Could not import configuration. Missing extension: {{extension}}'
+config.status.no.file: 'No file selected'
+config.status.nothing.active: 'Nothing to display, no extensions are active: {{number}}'
+config.table.of.contents: 'Table of Contents'
+config.title: 'User Config'
+extensions.activated: 'Activated extensions'
+extensions.available: 'Available extensions'
+extensions.is.dependency: 'Cannot deactivate this because this is a dependency of {{dependencies}}'
+extensions.title: 'Content'
+extensions.viewer: 'Extension information'
+footer.folder: 'folder:'
+footer.state.active: 'active'
+footer.state.bink.version.differences: 'bink version differences'
+footer.state.inactive: 'inactive'
+footer.state.not.installed: 'not installed'
+footer.state.prefix: 'UCP state: {{state}}'
+footer.state.unknown: 'unknown'
+footer.state.wrong.folder: 'wrong folder'
+footer.version.gui: 'GUI version: {{version}}'
+footer.version.no.ucp: 'not installed'
+footer.version.ucp: 'UCP version: {{version}}'
+footer.version.unknown: 'unknown state'
+overview.activationTooltip: 'Enable or prevent UCP from running at all at game start'
+overview.activate.do.activate: 'Activate UCP'
+overview.activate.do.deactivate: 'Deactivate UCP'
+overview.activate.not.installed: 'No UCP installed'
+overview.activate.unknown: 'Unknown UCP State'
+overview.folder.version: 'UCP version in this folder:'
+overview.not.installed: 'not installed'
+overview.require.reload.text: 'The installation process requires a reload, reload now?'
+overview.title: 'Overview'
+overview.uninstallationToolTip: 'Remove every trace of UCP in the game folder. NOTE: deletes all extensions (modules AND plugins)!'
+overview.uninstall.idle: 'Uninstall UCP from this folder'
+overview.unknown.state: 'unknown state'
+overview.update.failed: 'Failed!'
+overview.update.gui.failed: 'Failed!'
+overview.update.gui.idle: 'Check for GUI updates'
+overview.update.gui.running: 'Updating...'
+overview.update.gui.success: 'Updated!'
+overview.update.idle: 'Download and install the latest UCP version'
+overview.update.running: 'Updating...'
+overview.update.success: 'Updated!'
+overview.wrong.folder: 'Not a game folder'
+overview.zip.failed: 'Failed!'
+overview.zip.idle: 'Install UCP to folder from Zip'
+overview.zip.running: 'Extracting...'
+overview.zip.success: 'Extracted!'

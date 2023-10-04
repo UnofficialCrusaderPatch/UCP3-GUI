@@ -105,12 +105,12 @@ function saveUCPConfigPart(
   config: { [key: string]: unknown },
   extensions: Extension[],
   allExtensions: Extension[],
-  configurationQualifier: { [key: string]: ConfigurationQualifier }
+  configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
   console.debug(finalConfig[subConfig]);
 
   finalConfig[subConfig]['load-order'] = extensions.map(
-    (e: Extension) => `${e.name} == ${e.version}`
+    (e: Extension) => `${e.name} == ${e.version}`,
   );
 
   Object.entries(config)
@@ -180,7 +180,7 @@ export function serializeUCPConfig(
   fullConfig: { [key: string]: unknown },
   sparseExtensions: Extension[],
   fullExtensions: Extension[],
-  configurationQualifier: { [key: string]: ConfigurationQualifier }
+  configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
   const finalConfig: UCP3SerializedUserConfig = {
     'specification-version': '1.0.0',
@@ -195,7 +195,7 @@ export function serializeUCPConfig(
     fullConfig,
     fullExtensions,
     fullExtensions,
-    configurationQualifier
+    configurationQualifier,
   );
   saveUCPConfigPart(
     finalConfig,
@@ -203,7 +203,7 @@ export function serializeUCPConfig(
     sparseConfig,
     sparseExtensions,
     fullExtensions,
-    configurationQualifier
+    configurationQualifier,
   );
 
   return finalConfig;
@@ -220,7 +220,7 @@ export async function saveUCPConfig(
   sparseExtensions: Extension[],
   fullExtensions: Extension[],
   filePath: string,
-  configurationQualifier: { [key: string]: ConfigurationQualifier }
+  configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
   await writeTextFile(
     filePath,
@@ -230,9 +230,9 @@ export async function saveUCPConfig(
         fullConfig,
         sparseExtensions,
         fullExtensions,
-        configurationQualifier
-      )
-    )
+        configurationQualifier,
+      ),
+    ),
   );
 
   return `Config file saved succesfully`;

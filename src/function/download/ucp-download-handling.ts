@@ -21,7 +21,7 @@ export async function installUCPFromZip(
   zipFilePath: string,
   gameFolder: string,
   statusCallback: (status: string) => void,
-  t: TFunction
+  t: TFunction,
 ): Promise<Result<void, FileUtilError>> {
   return Result.tryAsync(async () => {
     (await createRealBink(gameFolder, t)).throwIfErr();
@@ -41,7 +41,7 @@ export async function installUCPFromZip(
 export async function checkForUCP3Updates(
   gameFolder: string,
   statusCallback: (status: string) => void,
-  t: TFunction
+  t: TFunction,
 ) {
   const returnObject = {
     update: false,
@@ -70,7 +70,7 @@ export async function checkForUCP3Updates(
   // ask options are fixed in tauri
   const dialogResult = await askInfo(
     t('gui-download:ucp.download.request', { version: result.file }),
-    t('gui-general:confirm')
+    t('gui-general:confirm'),
   );
 
   if (dialogResult !== true) {
@@ -85,7 +85,7 @@ export async function checkForUCP3Updates(
 
     const response = await getBinary<BinaryFileContents>(
       result.downloadUrl,
-      GITHUB_AUTH_HEADER
+      GITHUB_AUTH_HEADER,
     );
     if (!response.ok) {
       throw new Error('Failed to fetch update.');
@@ -103,13 +103,13 @@ export async function checkForUCP3Updates(
     downloadPath,
     gameFolder,
     statusCallback,
-    t
+    t,
   );
   if (installResult.isErr()) {
     installResult
       .err()
       .ifPresent((error) =>
-        statusCallback(t('gui-download:ucp.install.failed', { error }))
+        statusCallback(t('gui-download:ucp.install.failed', { error })),
       );
     return returnObject;
   }
@@ -118,7 +118,7 @@ export async function checkForUCP3Updates(
   (await removeFile(downloadPath))
     .err()
     .ifPresent((error) =>
-      showWarning(t('gui-download:ucp.install.zip.remove.failed', { error }))
+      showWarning(t('gui-download:ucp.install.zip.remove.failed', { error })),
     );
 
   returnObject.installed = true;

@@ -11,7 +11,7 @@ const moveExtensionClickCallback = async (event: {
   type: 'up' | 'down';
 }) => {
   const confirmed = await warnClearingOfConfiguration(
-    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM)
+    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
   );
   if (!confirmed) {
     return;
@@ -19,7 +19,7 @@ const moveExtensionClickCallback = async (event: {
 
   const newExtensionsState = moveExtension(
     getStore().get(EXTENSION_STATE_REDUCER_ATOM),
-    event
+    event,
   );
 
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);

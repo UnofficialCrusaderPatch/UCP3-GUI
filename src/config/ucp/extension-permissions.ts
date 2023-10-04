@@ -13,14 +13,14 @@ function resolveDependencyOrder(extensions: Extension[]) {
 
 function hasDependencyRequirementsFulfilled(
   extensions: Extension[],
-  ext: Extension
+  ext: Extension,
 ) {
   return [extensions, ext]; // stub
 }
 
 function isValidExtensionDependencyOrder(
   extensions: Extension[],
-  ext: Extension
+  ext: Extension,
 ) {
   return [extensions, ext]; // stub
 }
@@ -35,7 +35,7 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
       const configEntry = ext.configEntries[ce];
       const specName = ce.split('.')[0];
       const es = extensions.filter(
-        (e: { name: string }) => e.name === specName
+        (e: { name: string }) => e.name === specName,
       );
       if (es.length === 0) {
         throw new Error('error!');
@@ -47,7 +47,7 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         const p = isValuePermitted(
           configEntry.contents['required-value'],
           spec,
-          extensions
+          extensions,
         );
         if (p === undefined) {
           throw new Error('fail!');
@@ -65,7 +65,7 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         const p = isValuePermitted(
           configEntry.contents['required-values'],
           spec,
-          extensions
+          extensions,
         );
         if (p.status !== 'OK') {
           return {
@@ -81,7 +81,7 @@ function isValidExtensionConfigOrder(extensions: Extension[], ext: Extension) {
         const p = isValuePermitted(
           configEntry.contents.value,
           spec,
-          extensions
+          extensions,
         );
         if (p.status !== 'OK') {
           return {

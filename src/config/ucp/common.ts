@@ -174,6 +174,7 @@ type Extension = {
   version: string;
   definition: Definition;
   ui: { [key: string]: unknown }[];
+  descriptionMD: string;
   config: ConfigFile;
   path: string;
   configEntries: { [key: string]: ConfigEntry };

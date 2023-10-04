@@ -1,32 +1,32 @@
-activate: "Activate"
-advanced.mode: "Advanced mode"
-apply: "Apply"
-close: "Close"
-ok: "Ok"
-cancel: "Cancel"
-confirm: "Confirm"
-deactivate: "Deactivate"
-errors_one: "{{count}} error"
-errors_other: "{{count}} errors"
-errors_zero: "{{count}} error"
-export: "Export"
-failed: "Failed"
-file.all: "All files"
-file.config: "Config files"
-file.zip: "Zip files"
-import: "Import"
-loading: "Loading..."
-messages_one: "{{count}} message"
-messages_other: "{{count}} messages"
-messages_zero: "{{count}} message"
-reload: "Reload"
-require.reload.title: "Reload required"
-reset: "Reset"
-save: "Save"
-titlebar.alt.close: "Close"
-titlebar.alt.icon: "Icon"
-titlebar.alt.maximize: "Maximize"
-titlebar.alt.minimize: "Minimize"
-warnings_one: "{{count}} warning"
-warnings_other: "{{count}} warnings"
-warnings_zero: "{{count}} warning"
+activate: 'Activate'
+advanced.mode: 'Advanced mode'
+apply: 'Apply'
+close: 'Close'
+ok: 'Ok'
+cancel: 'Cancel'
+confirm: 'Confirm'
+deactivate: 'Deactivate'
+errors_one: '{{count}} error'
+errors_other: '{{count}} errors'
+errors_zero: '{{count}} error'
+export: 'Export'
+failed: 'Failed'
+file.all: 'All files'
+file.config: 'Config files'
+file.zip: 'Zip files'
+import: 'Import'
+loading: 'Loading...'
+messages_one: '{{count}} message'
+messages_other: '{{count}} messages'
+messages_zero: '{{count}} message'
+reload: 'Reload'
+require.reload.title: 'Reload required'
+reset: 'Reset'
+save: 'Save'
+titlebar.alt.close: 'Close'
+titlebar.alt.icon: 'Icon'
+titlebar.alt.maximize: 'Maximize'
+titlebar.alt.minimize: 'Minimize'
+warnings_one: '{{count}} warning'
+warnings_other: '{{count}} warnings'
+warnings_zero: '{{count}} warning'

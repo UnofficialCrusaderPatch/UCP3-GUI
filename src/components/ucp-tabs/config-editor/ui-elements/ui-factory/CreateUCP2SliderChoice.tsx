@@ -91,7 +91,7 @@ function CreateUCP2SliderChoice(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
@@ -119,7 +119,7 @@ function CreateUCP2SliderChoice(args: {
     enabled,
     configurationLocks[url],
     configurationSuggestions[url] !== undefined,
-    configurationSuggestions[url]
+    configurationSuggestions[url],
   );
   const isDisabled =
     disabled || !isEnabled || configurationLocks[url] !== undefined;
@@ -168,7 +168,7 @@ function CreateUCP2SliderChoice(args: {
     const [localValue, setLocalValue] = useState(
       value.choices[choice.name].slider === undefined
         ? 0
-        : (value.choices[choice.name].slider as number) * factor
+        : (value.choices[choice.name].slider as number) * factor,
     );
     return (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control

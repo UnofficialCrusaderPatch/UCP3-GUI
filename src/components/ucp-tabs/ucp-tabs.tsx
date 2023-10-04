@@ -66,7 +66,7 @@ export default function UcpTabs() {
                 }
 
                 const messages = tryResolveDependencies(
-                  extensionsState.extensions
+                  extensionsState.extensions,
                 );
 
                 if (messages.length === 0) return;

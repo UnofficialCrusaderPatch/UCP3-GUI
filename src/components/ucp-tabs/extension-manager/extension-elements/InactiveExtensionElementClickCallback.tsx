@@ -14,7 +14,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
   const confirmed = await warnClearingOfConfiguration(
-    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM)
+    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
   );
 
   const eState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
@@ -25,7 +25,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
 
   const newExtensionState = await addExtensionToExplicityActivatedExtensions(
     eState,
-    ext
+    ext,
   );
 
   const res = buildExtensionConfigurationDB(newExtensionState);

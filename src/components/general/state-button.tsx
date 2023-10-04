@@ -15,7 +15,7 @@ interface StateButtonProps {
   buttonValues: ButtonStateValues;
   buttonVariant: string | undefined;
   func: (
-    updateState: (stateUpdate: ReactNode) => void
+    updateState: (stateUpdate: ReactNode) => void,
   ) => Promise<Result<void | ReactNode, void | ReactNode>>;
   // eslint-disable-next-line react/require-default-props
   funcBefore?: () => void;
@@ -58,7 +58,7 @@ export default function StateButton(props: StateButtonProps) {
       setDivState(null);
       setButtonState(ButtonState.IDLE);
     },
-    active && buttonState !== ButtonState.IDLE ? 5000 : null
+    active && buttonState !== ButtonState.IDLE ? 5000 : null,
   );
 
   return (
@@ -73,7 +73,7 @@ export default function StateButton(props: StateButtonProps) {
           setButtonState(ButtonState.RUNNING);
           (await func(setDivState)).consider(
             (ok) => setResState(ok, ButtonState.SUCCESS),
-            (err) => setResState(err, ButtonState.FAILED)
+            (err) => setResState(err, ButtonState.FAILED),
           );
           setActive(true);
           if (funcAfter) funcAfter();

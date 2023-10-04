@@ -24,7 +24,7 @@ import { getStore } from 'hooks/jotai/base';
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // This section is meant to allow the config editor to display the options.
   const optionEntries = extensionsToOptionEntries(
-    extensionsState.activeExtensions
+    extensionsState.activeExtensions,
   );
   const defaults = getConfigDefaults(optionEntries);
 
@@ -55,7 +55,7 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
           suggestedValue: cmo.modifications.value.content,
         };
       }
-    }
+    },
   );
 
   // Here the values are set
@@ -70,7 +70,7 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'reset',
     value: Object.fromEntries(
-      Object.entries(defaults).map((pair) => [pair[0], false])
+      Object.entries(defaults).map((pair) => [pair[0], false]),
     ),
   });
   // Not implemented currently. Could store them in configuration of extensionsState?

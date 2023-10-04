@@ -32,11 +32,11 @@ export const DefaultCreatePluginModalWindow: CreatePluginModalWindow = {
 };
 
 export const CREATE_PLUGIN_MODAL_WINDOW_STATE = atom<CreatePluginModalWindow>(
-  DefaultCreatePluginModalWindow
+  DefaultCreatePluginModalWindow,
 );
 
 export async function showCreatePluginModalWindow(
-  spec: Partial<CreatePluginModalWindow>
+  spec: Partial<CreatePluginModalWindow>,
 ) {
   const fullSpec: CreatePluginModalWindow = {
     ...DefaultCreatePluginModalWindow,

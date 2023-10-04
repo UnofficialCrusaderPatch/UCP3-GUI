@@ -14,5 +14,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <Route path="/index.html" element={<Window />} />
       </Routes>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

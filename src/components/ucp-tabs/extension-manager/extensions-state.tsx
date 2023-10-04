@@ -7,7 +7,7 @@ import { showGeneralModalOk } from 'components/modals/ModalOk';
 
 const addExtensionToExplicityActivatedExtensions = async (
   extensionsState: ExtensionsState,
-  ext: Extension
+  ext: Extension,
 ) => {
   const { tree } = extensionsState;
 
@@ -41,13 +41,13 @@ const addExtensionToExplicityActivatedExtensions = async (
 
 const removeExtensionFromExplicitlyActivatedExtensions = async (
   extensionsState: ExtensionsState,
-  ext: Extension
+  ext: Extension,
 ) => {
   const { tree } = extensionsState;
 
   // All needed extensions without ext being active
   const solution = tree.dependenciesForExtensions(
-    extensionsState.explicitlyActivatedExtensions.filter((e) => e !== ext)
+    extensionsState.explicitlyActivatedExtensions.filter((e) => e !== ext),
   );
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
@@ -63,17 +63,17 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
 
   // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
   const ae = extensionsState.activeExtensions.filter(
-    (e) => stillRelevantExtensions.indexOf(e) !== -1
+    (e) => stillRelevantExtensions.indexOf(e) !== -1,
   );
 
   // Remove ext from the explicitly installed extensions list
   const eae = extensionsState.explicitlyActivatedExtensions.filter(
-    (e) => e !== ext
+    (e) => e !== ext,
   );
 
   // Only one version of each extension can be activated.
   const relevantExtensionNames = new Set(
-    stillRelevantExtensions.map((e) => e.name)
+    stillRelevantExtensions.map((e) => e.name),
   );
   const ie = extensionsState.extensions
     .filter((e: Extension) => !relevantExtensionNames.has(e.name))
@@ -90,7 +90,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
 
 const moveExtension = (
   extensionsState: ExtensionsState,
-  event: { name: string; type: 'up' | 'down' }
+  event: { name: string; type: 'up' | 'down' },
 ) => {
   const { name, type } = event;
   const aei = extensionsState.activeExtensions.map((e) => e.name).indexOf(name);

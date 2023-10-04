@@ -16,6 +16,7 @@ const addExtensionToExplicityActivatedExtensions = async (
   const solution = tree.dependenciesForExtensions(newEAE);
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
+    console.error(solution.message);
     await showGeneralModalOk({
       message: solution.message,
       title: 'Error in dependencies',
@@ -51,6 +52,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
   );
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
+    console.error(solution.message);
     await showGeneralModalOk({
       message: solution.message,
       title: 'Error in dependencies',

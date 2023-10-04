@@ -112,10 +112,9 @@ export class ExtensionTree {
   }
 
   dependenciesForExtensions(extensions: Extension[]): ExtensionSolution {
-    const nodes = extensions.map((e) => this.nodeForExtension(e));
-
     this.tree.reset();
-    this.tree.setInitialTargetForAllEdges();
+
+    const nodes = extensions.map((e) => this.nodeForExtension(e));
 
     try {
       const s = this.tree

@@ -2,7 +2,10 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
-import { createEditorWindow } from 'function/window-actions';
+import {
+  createEditorWindow,
+  reloadCurrentWindow,
+} from 'function/window-actions';
 import { useGameFolder } from 'hooks/jotai/helper';
 import { useRecentFolders } from 'hooks/jotai/hooks';
 import { MouseEvent, useEffect, useState } from 'react';
@@ -35,6 +38,7 @@ export default function RecentFolders() {
     if (inputTarget.textContent) {
       updateCurrentFolderSelectState(inputTarget.textContent as string);
       setShowRecentFolders(false);
+      reloadCurrentWindow();
     }
   };
 

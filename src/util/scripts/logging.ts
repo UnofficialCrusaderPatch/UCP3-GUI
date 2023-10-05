@@ -43,9 +43,11 @@ abstract class AbstractLogger {
 class Logger extends AbstractLogger {
   #name: string;
 
-  constructor() {
+  constructor(name: string) {
     super();
-    this.#name = import.meta.url;
+    this.#name = name;
+    this.shouldKeepMsg(false);
+    this.shouldKeepSubst(false);
   }
 
   withName(name: string) {
@@ -94,7 +96,7 @@ class LoggerState extends AbstractLogger {
     const messageBase = `${this.#logger.name} : ${this.#msg}`;
 
     let replaceIndex = 0;
-    const createdMessage = messageBase.replace('{}', () =>
+    const createdMessage = messageBase.replaceAll('{}', () =>
       // eslint-disable-next-line no-plusplus
       LoggerState.#transformSubst(this.#subst[replaceIndex++]),
     );
@@ -102,18 +104,17 @@ class LoggerState extends AbstractLogger {
     return createdMessage;
   }
 
+  // calling any getter generates the message, (empties the state) and prepares the object
   #generateLoggingObject(level: number) {
-    // object used to generate message, send it to the backend provide the string
+    const message = this.#generateMsg();
+
+    // after created message, reset if said
+    this.#msg = this.keepMsg ? this.#msg : '';
+    this.#subst = this.keepSubst ? this.#subst : [];
+
     return {
       toString: () => {
-        const message = this.#generateMsg();
-
-        // after created message, reset if said
-        this.#msg = this.keepMsg ? this.#msg : '';
-        this.#subst = this.keepSubst ? this.#subst : [];
-
         logWithFrontendPrefix(level, message);
-
         return message;
       },
     };
@@ -132,8 +133,8 @@ class LoggerState extends AbstractLogger {
     return this;
   }
 
-  setSubst(msg: string) {
-    this.#msg = msg;
+  setSubst(...subst: unknown[]) {
+    this.#subst = subst;
     return this;
   }
 

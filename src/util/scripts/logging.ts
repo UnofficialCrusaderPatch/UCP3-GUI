@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable max-classes-per-file */
 /* eslint-disable no-console */
 import { TauriEvent } from '@tauri-apps/api/event';
 import { registerTauriEventListener } from 'tauri/tauri-hooks';
@@ -11,6 +13,171 @@ const LOG_LEVEL = {
   DEBUG: 4,
   TRACE: 5,
 };
+
+abstract class AbstractLogger {
+  #keepMsg: undefined | boolean;
+
+  #keepSubst: undefined | boolean;
+
+  shouldKeepMsg(keep: boolean) {
+    this.#keepMsg = keep;
+    return this;
+  }
+
+  get keepMsg() {
+    return this.#keepMsg;
+  }
+
+  shouldKeepSubst(keep: boolean) {
+    this.#keepSubst = keep;
+    return this;
+  }
+
+  get keepSubst() {
+    return this.#keepSubst;
+  }
+
+  abstract msg(msg: string, ...subst: unknown[]): AbstractLogger;
+}
+
+class Logger extends AbstractLogger {
+  #name: string;
+
+  constructor() {
+    super();
+    this.#name = import.meta.url;
+  }
+
+  withName(name: string) {
+    this.#name = name;
+    return this;
+  }
+
+  get name() {
+    return this.#name;
+  }
+
+  msg(msg: string, ...subst: unknown[]) {
+    return new LoggerState(this, msg, ...subst);
+  }
+}
+
+class LoggerState extends AbstractLogger {
+  #logger: Logger;
+
+  #msg: string;
+
+  #subst: unknown[];
+
+  constructor(logger: Logger, msg: string, ...subst: unknown[]) {
+    super();
+    this.#logger = logger;
+    this.#msg = msg;
+    this.#subst = subst;
+  }
+
+  static #transformSubst(value: unknown) {
+    return value !== null && typeof value === 'object'
+      ? JSON.stringify(value)
+      : String(value);
+  }
+
+  static #generateLogBinding(
+    loggingFunc: (...args: unknown[]) => void,
+    loggingObject: { toString: () => string },
+  ) {
+    return loggingFunc.bind(console, '%s', loggingObject);
+  }
+
+  #generateMsg() {
+    // currently hardcoded
+    const messageBase = `${this.#logger.name} : ${this.#msg}`;
+
+    let replaceIndex = 0;
+    const createdMessage = messageBase.replace('{}', () =>
+      // eslint-disable-next-line no-plusplus
+      LoggerState.#transformSubst(this.#subst[replaceIndex++]),
+    );
+
+    return createdMessage;
+  }
+
+  #generateLoggingObject(level: number) {
+    // object used to generate message, send it to the backend provide the string
+    return {
+      toString: () => {
+        const message = this.#generateMsg();
+
+        // after created message, reset if said
+        this.#msg = this.keepMsg ? this.#msg : '';
+        this.#subst = this.keepSubst ? this.#subst : [];
+
+        logWithFrontendPrefix(level, message);
+
+        return message;
+      },
+    };
+  }
+
+  get keepMsg() {
+    return super.keepMsg ?? this.#logger.keepMsg;
+  }
+
+  get keepSubst() {
+    return super.keepSubst ?? this.#logger.keepSubst;
+  }
+
+  setMsg(msg: string) {
+    this.#msg = msg;
+    return this;
+  }
+
+  setSubst(msg: string) {
+    this.#msg = msg;
+    return this;
+  }
+
+  msg(msg: string, ...subst: unknown[]): LoggerState {
+    this.#msg = msg;
+    this.#subst = subst;
+    return this;
+  }
+
+  get trace() {
+    return LoggerState.#generateLogBinding(
+      console.trace,
+      this.#generateLoggingObject(LOG_LEVEL.TRACE),
+    );
+  }
+
+  get debug() {
+    return LoggerState.#generateLogBinding(
+      console.debug,
+      this.#generateLoggingObject(LOG_LEVEL.DEBUG),
+    );
+  }
+
+  get info() {
+    return LoggerState.#generateLogBinding(
+      console.info,
+      this.#generateLoggingObject(LOG_LEVEL.INFO),
+    );
+  }
+
+  get warn() {
+    return LoggerState.#generateLogBinding(
+      console.warn,
+      this.#generateLoggingObject(LOG_LEVEL.WARN),
+    );
+  }
+
+  get error() {
+    return LoggerState.#generateLogBinding(
+      console.error,
+      this.#generateLoggingObject(LOG_LEVEL.ERROR),
+    );
+  }
+}
 
 function logWithFrontendPrefix(level: number, message: unknown) {
   return log(level, `FRONTEND - ${message}`);

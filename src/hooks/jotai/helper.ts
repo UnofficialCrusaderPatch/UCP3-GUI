@@ -5,7 +5,7 @@ import { UCPVersion } from 'function/ucp-files/ucp-version';
 import { useTranslation } from 'react-i18next';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';
-import { info } from 'util/scripts/logging';
+import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
@@ -21,9 +21,6 @@ import {
   useSetConfigurationTouched,
   useSetConfigurationWarnings,
   useExtensionStateReducer,
-  useGeneralOkayCancelModalWindowReducer,
-  useSetConfigurationLocks,
-  useSetConfigurationQualifier,
 } from './globals-wrapper';
 import {
   UCPStateHandler,
@@ -31,6 +28,8 @@ import {
   useUCPStateHook,
   useUCPVersionHook,
 } from './hooks';
+
+const LOGGER = new Logger('helper.ts');
 
 export function useCurrentGameFolder() {
   return useFolderValue(); // only a proxy
@@ -92,17 +91,13 @@ export function useInitGlobalConfiguration(): [
   const setConfigurationTouched = useSetConfigurationTouched();
   const setConfigurationWarnings = useSetConfigurationWarnings();
 
-  const [generalOkCancelModalWindow, setGeneralOkCancelModalWindow] =
-    useGeneralOkayCancelModalWindowReducer();
-
-  const setConfigurationLocks = useSetConfigurationLocks();
-  const setConfigurationQualifier = useSetConfigurationQualifier();
-
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   return [
     isInitRunning,
     async (newFolder: string, language: string) => {
+      const loggerState = LOGGER.empty();
+
       setInitRunning(true);
       setInitDone(false);
 
@@ -110,8 +105,8 @@ export function useInitGlobalConfiguration(): [
       let defaults = {};
       let file = '';
       if (newFolder.length > 0) {
-        info(`Current folder: ${newFolder}`);
-        info(`Current locale: ${language}`);
+        loggerState.setMsg(`Current folder: ${newFolder}`).info();
+        loggerState.setMsg(`Current locale: ${language}`).info();
 
         // TODO: currently only set on initial render and folder selection
         // TODO: resolve this type badness
@@ -124,8 +119,8 @@ export function useInitGlobalConfiguration(): [
           });
         }
 
-        console.log('Discovered extensions:', extensions);
-        console.log('pre extensionState: ', extensionsState);
+        ConsoleLogger.debug('Discovered extensions: ', extensions);
+        ConsoleLogger.debug('pre extensionState: ', extensionsState);
 
         // TODO: this should not be done now, it only makes sense when options are actually presented on screen, e.g., when an extension is made active
         // const optionEntries = extensionsToOptionEntries(extensions);
@@ -133,7 +128,7 @@ export function useInitGlobalConfiguration(): [
         defaults = {};
         file = `${newFolder}/ucp-config.yml`; // better be moved to const file?
       } else {
-        info('No folder active.');
+        loggerState.setMsg('No folder active.').info();
       }
 
       setConfiguration({
@@ -166,18 +161,18 @@ export function useInitGlobalConfiguration(): [
 
       setFile(file);
 
-      info('Finished extension discovery');
-      console.log(`Extensions state`, newExtensionsState);
+      loggerState.setMsg('Finished extension discovery').info();
+      ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
 
-      info('Trying to loading ucp-config.yml');
+      loggerState.setMsg('Trying to loading ucp-config.yml').info();
 
       if (await exists(file)) {
         await importButtonCallback(newFolder, () => {}, t, file);
       } else {
-        info('no ucp-config.yml file found');
+        loggerState.setMsg('no ucp-config.yml file found').info();
       }
 
-      info('Finished loading ucp-config.yml');
+      loggerState.setMsg('Finished loading ucp-config.yml').info();
 
       setInitDone(true);
       setInitRunning(false);

@@ -1,11 +1,13 @@
-import { ConfigEntry, ConfigEntryContents, Extension } from 'config/ucp/common';
+import { ConfigEntry, Extension } from 'config/ucp/common';
 import {
   ConfigMetaContent,
   ConfigMetaContentDB,
-  ConfigMetaObject,
   ConfigMetaObjectDB,
 } from 'config/ucp/config-merge/objects';
 import { ExtensionsState } from 'function/global/types';
+import Logger from 'util/scripts/logging';
+
+const LOGGER = new Logger('extension-configuration.ts');
 
 type ConfigurationDBBuildingResult = {
   status: number;
@@ -55,7 +57,11 @@ function buildExtensionConfigurationDBFromActiveExtensions(
   // So we reverse it
   ae.reverse();
 
-  console.log('Activated extensions', ae);
+  LOGGER.msg(
+    `Activated extensions ${ae
+      .map((ex) => `${ex.name}-${ex.version}`)
+      .join(', ')}`,
+  ).info();
 
   const db: ConfigMetaObjectDB = {};
 
@@ -82,7 +88,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             cmc.qualifier === 'suggested'
           ) {
             const w = `Suggested value by extension ('${ext.name}') dropped because of a required value from previously activated extension ('${currentM.extension}')`;
-            console.warn(w);
+            LOGGER.msg(w).warn();
             warnings.push(w);
             return;
           }
@@ -91,7 +97,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             cmc.qualifier === 'suggested'
           ) {
             const w = `Suggested value by extension ('${currentM.extension}') overriden by suggested value from later activated extension ('${ext.name}')`;
-            console.warn(w);
+            LOGGER.msg(w).warn();
             warnings.push(w);
             return;
           }
@@ -100,7 +106,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             cmc.qualifier === 'required'
           ) {
             const w = `Suggested value by extension ('${currentM.extension}') overriden by required value from later activated extension ('${ext.name}')`;
-            console.warn(w);
+            LOGGER.msg(w).warn();
             warnings.push(w);
             return;
           }
@@ -113,7 +119,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
               JSON.stringify(currentM.content) !== JSON.stringify(cmc.content)
             ) {
               const e = `Incompatible extension ('${ext.name}') and ('${currentM.extension}') because they both require different values for feature '${url}'`;
-              console.warn(e);
+              LOGGER.msg(e).warn();
               errors.push(e);
             }
           }

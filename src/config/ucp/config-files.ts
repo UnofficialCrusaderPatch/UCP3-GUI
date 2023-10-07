@@ -4,7 +4,10 @@ import { TFunction } from 'i18next';
 import { writeTextFile, loadYaml } from 'tauri/tauri-files';
 import Result from 'util/structs/result';
 import { stringify as yamlStringify } from 'yaml';
+import Logger from 'util/scripts/logging';
 import { ConfigFile, Extension } from './common';
+
+const LOGGER = new Logger('config-files.ts');
 
 export async function loadConfigFromFile(filePath: string, t: TFunction) {
   const configRes: Result<ConfigFile, unknown> = await loadYaml(filePath); // will only be one
@@ -107,7 +110,7 @@ function saveUCPConfigPart(
   allExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
-  console.debug(finalConfig[subConfig]);
+  LOGGER.obj(finalConfig[subConfig]).debug();
 
   finalConfig[subConfig]['load-order'] = extensions.map(
     (e: Extension) => `${e.name} == ${e.version}`,
@@ -122,7 +125,7 @@ function saveUCPConfigPart(
       const ext = allExtensions.filter((ex) => ex.name === extName)[0];
 
       if (ext === undefined || ext === null) {
-        console.error(`No extension found with name: ${extName}`);
+        LOGGER.msg(`No extension found with name: ${extName}`).error();
       }
 
       const type = ext.type === 'module' ? 'modules' : 'plugins';

@@ -1,4 +1,3 @@
-import { Extension } from 'config/ucp/common';
 import { ConfigMetaObject } from 'config/ucp/config-merge/objects';
 import {
   extensionsToOptionEntries,
@@ -14,12 +13,9 @@ import {
   ConfigurationLock,
   ConfigurationSuggestion,
 } from 'function/global/global-atoms';
-import {
-  ExtensionsState,
-  KeyValueReducerArgs,
-  Warning,
-} from 'function/global/types';
+import { ExtensionsState } from 'function/global/types';
 import { getStore } from 'hooks/jotai/base';
+import { ConsoleLogger } from 'util/scripts/logging';
 
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // This section is meant to allow the config editor to display the options.
@@ -28,10 +24,12 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   );
   const defaults = getConfigDefaults(optionEntries);
 
-  console.log(`Updating defaults based on imported extensions:`);
-  console.log(extensionsState.activeExtensions);
-  console.log('Default settings: ');
-  console.log(defaults);
+  ConsoleLogger.debug(
+    'Updating defaults based on imported extensions: ',
+    extensionsState.activeExtensions,
+    'Default settings: ',
+    defaults,
+  );
 
   const locks: { [key: string]: ConfigurationLock } = {};
   const suggestions: { [url: string]: ConfigurationSuggestion } = {};

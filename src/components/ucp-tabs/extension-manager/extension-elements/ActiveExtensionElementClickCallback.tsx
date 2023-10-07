@@ -6,12 +6,15 @@ import {
 } from 'function/global/global-atoms';
 import { propagateActiveExtensionsChange } from 'components/ucp-tabs/extension-manager/propagateActiveExtensionChange';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import Logger from 'util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 
+const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
+
 const activeExtensionElementClickCallback = async (ext: Extension) => {
-  console.log('deactivate', ext);
+  LOGGER.msg(`Deactivate ${ext.name}-${ext.version}`).info();
   const confirmed = await warnClearingOfConfiguration(
     getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
   );
@@ -29,7 +32,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   if (res.configuration.statusCode !== 0) {
     if (res.configuration.statusCode === 2) {
       const msg = `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`;
-      console.error(msg);
+      LOGGER.msg(msg).error();
       const confirmed1 = await showGeneralModalOkCancel({
         title: 'Error',
         message: msg,
@@ -38,7 +41,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     }
     if (res.configuration.warnings.length > 0) {
       const msg = `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`;
-      console.warn(msg);
+      LOGGER.msg(msg).warn();
       const confirmed2 = await showGeneralModalOkCancel({
         title: 'Warning',
         message: msg,
@@ -46,7 +49,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
       if (!confirmed2) return;
     }
   } else {
-    console.log(`New configuration build without errors or warnings`);
+    LOGGER.msg('New configuration build without errors or warnings').info();
   }
 
   propagateActiveExtensionsChange(res);

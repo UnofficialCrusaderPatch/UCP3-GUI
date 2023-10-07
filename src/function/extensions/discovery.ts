@@ -11,12 +11,14 @@ import {
   Extension,
   OptionEntry,
 } from 'config/ucp/common';
-import { error, info, warn } from 'util/scripts/logging';
+import Logger from 'util/scripts/logging';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
 import { changeLocale } from './locale';
 import { ExtensionTree } from './dependency-management/dependency-resolution';
+
+const LOGGER = new Logger('discovery.ts');
 
 const OPTIONS_FILE = 'options.yml';
 const CONFIG_FILE = 'config.yml';
@@ -71,9 +73,9 @@ async function setLocale(
         changeLocale(locale, uiElement as { [key: string]: unknown });
       });
     } else {
-      console.log(
+      LOGGER.msg(
         `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
-      );
+      ).info();
     }
   }
 }
@@ -216,7 +218,7 @@ const Discovery = {
     gameFolder: string,
     locale?: string,
   ): Promise<Extension[]> => {
-    info(`Discovering extensions`);
+    LOGGER.msg('Discovering extensions').info();
 
     const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
 
@@ -233,13 +235,16 @@ const Discovery = {
 
         let assumedType = inferredType;
         if (type === undefined) {
-          warn(
-            `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`,
-          );
+          LOGGER.msg(
+            '"type: " was not found in definition.yml of {}-{}. Extension was inferred to be a {}',
+            name,
+            version,
+            inferredType,
+          ).warn();
         } else if (type !== inferredType) {
-          error(
+          LOGGER.msg(
             `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`,
-          );
+          ).error();
         } else {
           assumedType = type;
         }
@@ -288,9 +293,9 @@ const Discovery = {
           ext.config['config-sparse'].modules === undefined ||
           ext.config['config-sparse'].plugins === undefined
         ) {
-          warn(
+          LOGGER.msg(
             `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`,
-          );
+          ).warn();
         } else {
           Object.entries(ext.config['config-sparse'].modules).forEach(
             parseEntry,

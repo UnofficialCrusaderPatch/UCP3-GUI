@@ -12,9 +12,12 @@ import { Form } from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
 import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { useSetAtom } from 'jotai';
+import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+
+const LOGGER = new Logger('CreateUCP2RadioGroup.tsx');
 
 function CreateUCP2RadioGroup(args: {
   spec: DisplayConfigElement;
@@ -51,14 +54,13 @@ function CreateUCP2RadioGroup(args: {
   };
 
   if (value === undefined) {
-    console.error(`value not defined (no default specified?) for: ${url}`);
+    LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
 
     if (defaultValue === undefined) {
-      console.error(`default value not defined for: ${url}`);
+      LOGGER.msg(`default value not defined for: ${url}`).error();
     }
 
-    console.log(`default value for ${url}:`);
-    console.log(defaultValue);
+    LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
     value = defaultValue;
   }
 

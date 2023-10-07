@@ -1,30 +1,25 @@
 import { showGeneralModalOk } from 'components/modals/ModalOk';
-import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { tryResolveDependencies } from 'function/extensions/discovery';
 import {
-  useExtensionStateReducer,
-  useGeneralOkayCancelModalWindowReducer,
-  useGeneralOkModalWindowReducer,
+  useExtensionState,
   useInitDoneValue,
   useInitRunningValue,
 } from 'hooks/jotai/globals-wrapper';
-import { Suspense, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { error, warn } from 'util/scripts/logging';
-import { atom, useAtom, useAtomValue } from 'jotai';
+import Logger from 'util/scripts/logging';
+import { useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
-import {
-  DOES_UCP_FOLDER_EXIST_ATOM,
-  GAME_FOLDER_ATOM,
-} from 'function/global/global-atoms';
-import { exists } from '@tauri-apps/api/fs';
+import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/global/global-atoms';
 
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
 
 import './ucp-tabs.css';
+
+const LOGGER = new Logger('ucp-taps.tsx');
 
 export default function UcpTabs() {
   const isInit = useInitDoneValue();
@@ -34,9 +29,7 @@ export default function UcpTabs() {
 
   const displayConfigTabs = isInit && !isInitRunning;
 
-  const [generalOkModalWindow, setGeneralOkModalWindow] =
-    useGeneralOkModalWindowReducer();
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const extensionsState = useExtensionState();
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
 
@@ -77,7 +70,7 @@ export default function UcpTabs() {
                   handleAction: () => setShowErrorsWarning(false),
                 });
 
-                error(`Missing dependencies: ${messages}`);
+                LOGGER.msg(`Missing dependencies: ${messages}`).error();
               }}
             >
               {t('gui-editor:extensions.title')}

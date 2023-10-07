@@ -7,13 +7,9 @@ import {
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
 
-import {
-  NumberContents,
-  ChoiceContents,
-  DisplayConfigElement,
-} from 'config/ucp/common';
+import { NumberContents, DisplayConfigElement } from 'config/ucp/common';
 
-import { Form, Tooltip } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
@@ -22,10 +18,13 @@ import { useState } from 'react';
 
 import { useSetAtom } from 'jotai';
 import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+
+const LOGGER = new Logger('CreateUCP2Slider.tsx');
 
 export type UCP2SliderValue = { enabled: boolean; sliderValue: number };
 
@@ -64,14 +63,13 @@ function CreateUCP2Slider(args: {
   };
 
   if (value === undefined) {
-    console.error(`value not defined (no default specified?) for: ${url}`);
+    LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
 
     if (defaultValue === undefined) {
-      console.error(`default value not defined for: ${url}`);
+      LOGGER.msg(`default value not defined for: ${url}`).error();
     }
 
-    console.log(`default value for ${url}:`);
-    console.log(defaultValue);
+    LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
     value = defaultValue;
   }
 

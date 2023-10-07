@@ -2,8 +2,10 @@ import { Extension } from 'config/ucp/common';
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
-import { info } from 'util/scripts/logging';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
+import Logger from 'util/scripts/logging';
+
+const LOGGER = new Logger('extension-state.ts');
 
 const addExtensionToExplicityActivatedExtensions = async (
   extensionsState: ExtensionsState,
@@ -16,7 +18,7 @@ const addExtensionToExplicityActivatedExtensions = async (
   const solution = tree.dependenciesForExtensions(newEAE);
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
-    console.error(solution.message);
+    LOGGER.msg(solution.message).error();
     await showGeneralModalOk({
       message: solution.message,
       title: 'Error in dependencies',
@@ -52,7 +54,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
   );
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
-    console.error(solution.message);
+    LOGGER.msg(solution.message).error();
     await showGeneralModalOk({
       message: solution.message,
       title: 'Error in dependencies',

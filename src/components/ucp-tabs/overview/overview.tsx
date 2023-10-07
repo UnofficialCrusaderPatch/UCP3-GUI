@@ -1,35 +1,22 @@
 import StateButton from 'components/general/state-button';
 import { checkForGUIUpdates } from 'function/download/gui-update';
-import {
-  checkForUCP3Updates,
-  installUCPFromZip,
-} from 'function/download/ucp-download-handling';
+import { installUCPFromZip } from 'function/download/ucp-download-handling';
 import { UCPState } from 'function/ucp-files/ucp-state';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
-import { Button, Container, Form, Modal } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
+import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
 import {
   useCurrentGameFolder,
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
-import { useGeneralOkayCancelModalWindowReducer } from 'hooks/jotai/globals-wrapper';
-import { useAtom } from 'jotai';
-import { confirm } from '@tauri-apps/api/dialog';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
-
-import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 
 import './overview.css';
 
-import { GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM } from 'function/global/global-atoms';
-import { exists } from '@tauri-apps/api/fs';
-import { warn } from 'util/scripts/logging';
-import ExtensionPack from 'function/extensions/extension-pack';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {
@@ -40,9 +27,6 @@ export default function Overview() {
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
-
-  const [generalOkayCancelModalWindow, setGeneralOkayCancelModalWindow] =
-    useGeneralOkayCancelModalWindowReducer();
 
   const ucpStateHandler = ucpStateHandlerResult
     .getOrReceive(Result.emptyErr)
@@ -81,14 +65,6 @@ export default function Overview() {
         break;
     }
   }
-
-  const [advancedMode, setAdvancedMode] = useAtom(
-    GuiSettings.ADVANCED_MODE_ATOM,
-  );
-
-  const [, setGeneralOkModalWindow] = useAtom(
-    GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM,
-  );
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
@@ -214,7 +190,7 @@ export default function Overview() {
         buttonVariant="ucp-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async (stateUpdate) => Result.emptyOk()}
+        func={async () => Result.emptyOk()}
         tooltip={t('gui-editor:overview.uninstallationToolTip')}
       />
       <StateButton

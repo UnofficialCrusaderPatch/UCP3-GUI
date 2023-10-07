@@ -21,6 +21,7 @@ import {
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { ConsoleLogger } from 'util/scripts/logging';
 import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,
@@ -61,7 +62,7 @@ const importButtonCallback = async (
   file: string | undefined,
 ) => {
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
-  console.log('state before importbuttoncallback', extensionsState);
+  ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
   const { extensions } = extensionsState;
   const configurationTouched = getStore().get(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -150,7 +151,7 @@ const importButtonCallback = async (
         (ext: Extension) =>
           ext.name === ds.extension && ext.version === ds.version.toString(),
       );
-      console.log(options);
+      ConsoleLogger.debug(options);
       if (options.length === 0) {
         setConfigStatus(
           t('gui-editor:config.status.missing.extension', {
@@ -206,8 +207,7 @@ const importButtonCallback = async (
 
   setExtensionsState(newExtensionsState);
 
-  console.log('opened config');
-  console.log(parsingResult.result);
+  ConsoleLogger.debug('opened config', parsingResult.result);
 
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
 

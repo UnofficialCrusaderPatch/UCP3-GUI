@@ -2,30 +2,24 @@ import { Container, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import {
   useConfigurationTouched,
-  useSetConfigurationTouched,
-  useConfigurationDefaultsReducer,
-  useConfigurationReducer,
   useUcpConfigFileValue,
   useConfigurationQualifier,
   useExtensionState,
+  useConfiguration,
 } from 'hooks/jotai/globals-wrapper';
 
 import './extension-manager.css';
 
 import { useState } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import { Extension } from 'config/ucp/common';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
-import { FileEntry, exists, readBinaryFile, readDir } from '@tauri-apps/api/fs';
+import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
 import ExtensionPack from 'function/extensions/extension-pack';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
-import { warn } from 'util/scripts/logging';
+import Logger from 'util/scripts/logging';
 import {
-  File,
-  Files,
-  Filter,
   Funnel,
   FunnelFill,
   Gear,
@@ -46,18 +40,18 @@ import saveConfig from '../common/SaveConfig';
 import ApplyButton from '../config-editor/ApplyButton';
 import ExportButton from '../config-editor/ExportButton';
 import ImportButton from '../config-editor/ImportButton';
-import ResetButton from '../config-editor/ResetButton';
+
+const LOGGER = new Logger('CreateUIElement.tsx');
 
 export default function ExtensionManager() {
   const extensionsState = useExtensionState();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
-  const [configuration, setConfiguration] = useConfigurationReducer();
+  const configuration = useConfiguration();
 
   // currently simply reset:
   const configurationTouched = useConfigurationTouched();
-  const setConfigurationTouched = useSetConfigurationTouched();
   const file = useUcpConfigFileValue();
   const { activeExtensions } = extensionsState;
 
@@ -106,12 +100,9 @@ export default function ExtensionManager() {
     />
   ));
 
-  const [configurationDefaults] = useConfigurationDefaultsReducer();
   const gameFolder = useCurrentGameFolder();
 
-  const [statusBarMessage, setStatusBarMessage] = useAtom(
-    STATUS_BAR_MESSAGE_ATOM,
-  );
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   return (
     <Container className="fs-6 d-flex flex-column h-100 py-1">
@@ -168,7 +159,9 @@ export default function ExtensionManager() {
                 if (result.isPresent()) {
                   const path = result.get();
 
-                  console.log(`Trying to install extensions from: ${path}`);
+                  LOGGER.msg(
+                    `Trying to install extensions from: ${path}`,
+                  ).info();
 
                   if (await exists(path)) {
                     try {
@@ -207,7 +200,7 @@ export default function ExtensionManager() {
                       });
                     }
                   } else {
-                    warn(`Path does not exist: ${path}`);
+                    LOGGER.msg(`Path does not exist: ${path}`).warn();
                     await showGeneralModalOk({
                       title: 'Path does not exist',
                       message: `Path does not exist: ${path}`,
@@ -251,7 +244,7 @@ export default function ExtensionManager() {
                   outline: '1px',
                 }}
                 onClick={async () => {
-                  console.trace(`Creating modpack`);
+                  LOGGER.msg('Creating modpack').trace();
 
                   const filePathResult = await saveFileDialog(
                     `${gameFolder}`,
@@ -349,7 +342,7 @@ export default function ExtensionManager() {
                       }
                     }
                   } catch (e) {
-                    console.error(e);
+                    LOGGER.obj(e).error();
                     await showGeneralModalOk({
                       title: 'Error',
                       message: (e as Error).toString(),

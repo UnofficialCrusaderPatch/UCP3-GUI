@@ -5,14 +5,7 @@ import { TauriEvent } from '@tauri-apps/api/event';
 import { registerTauriEventListener } from 'tauri/tauri-hooks';
 import { log } from 'tauri/tauri-invoke';
 import { onBackendLog } from 'tauri/tauri-listen';
-
-// allow support for removing cycling references for json serialization
-import './cycle';
-
-const JSON = globalThis.JSON as JSON & {
-  decycle: (value: unknown, replacer?: unknown) => unknown;
-  retrocycle: (value: unknown) => unknown;
-};
+import JSON from './jsonCycle';
 
 const LOG_LEVEL = {
   ERROR: 1,

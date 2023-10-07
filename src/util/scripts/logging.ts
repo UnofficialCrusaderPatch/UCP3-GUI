@@ -14,6 +14,10 @@ const LOG_LEVEL = {
   TRACE: 5,
 };
 
+function logWithFrontendPrefix(level: number, message: unknown) {
+  return log(level, `FRONTEND - ${message}`);
+}
+
 abstract class AbstractLogger {
   #keepMsg: undefined | boolean;
 
@@ -37,30 +41,11 @@ abstract class AbstractLogger {
     return this.#keepSubst;
   }
 
-  abstract msg(msg: string, ...subst: unknown[]): AbstractLogger;
-}
+  abstract msg(msg: string, ...subst: unknown[]): LoggerState;
 
-class Logger extends AbstractLogger {
-  #name: string;
-
-  constructor(name: string) {
-    super();
-    this.#name = name;
-    this.shouldKeepMsg(false);
-    this.shouldKeepSubst(false);
-  }
-
-  withName(name: string) {
-    this.#name = name;
-    return this;
-  }
-
-  get name() {
-    return this.#name;
-  }
-
-  msg(msg: string, ...subst: unknown[]) {
-    return new LoggerState(this, msg, ...subst);
+  // auto created fill string for every provided structure, will still only log as strings
+  obj(...subst: unknown[]): LoggerState {
+    return this.msg(Array(subst.length).fill('{}').join(' '), ...subst);
   }
 }
 
@@ -79,7 +64,8 @@ class LoggerState extends AbstractLogger {
   }
 
   static #transformSubst(value: unknown) {
-    return value !== null && typeof value === 'object'
+    return value != null &&
+      (Array.isArray(value) || value.toString === Object.prototype.toString)
       ? JSON.stringify(value)
       : String(value);
   }
@@ -92,14 +78,17 @@ class LoggerState extends AbstractLogger {
   }
 
   #generateMsg() {
-    // currently hardcoded
+    // currently hardcoded format
     const messageBase = `${this.#logger.name} : ${this.#msg}`;
 
     let replaceIndex = 0;
-    const createdMessage = messageBase.replaceAll('{}', () =>
+    const createdMessage = messageBase.replaceAll('{}', () => {
       // eslint-disable-next-line no-plusplus
-      LoggerState.#transformSubst(this.#subst[replaceIndex++]),
-    );
+      const currentIndex = replaceIndex++;
+      return currentIndex >= this.#subst.length
+        ? '{undefined}' // should be clear enough
+        : LoggerState.#transformSubst(this.#subst[currentIndex]);
+    });
 
     return createdMessage;
   }
@@ -144,35 +133,35 @@ class LoggerState extends AbstractLogger {
     return this;
   }
 
-  get trace() {
+  get trace(): () => void {
     return LoggerState.#generateLogBinding(
       console.trace,
       this.#generateLoggingObject(LOG_LEVEL.TRACE),
     );
   }
 
-  get debug() {
+  get debug(): () => void {
     return LoggerState.#generateLogBinding(
       console.debug,
       this.#generateLoggingObject(LOG_LEVEL.DEBUG),
     );
   }
 
-  get info() {
+  get info(): () => void {
     return LoggerState.#generateLogBinding(
       console.info,
       this.#generateLoggingObject(LOG_LEVEL.INFO),
     );
   }
 
-  get warn() {
+  get warn(): () => void {
     return LoggerState.#generateLogBinding(
       console.warn,
       this.#generateLoggingObject(LOG_LEVEL.WARN),
     );
   }
 
-  get error() {
+  get error(): () => void {
     return LoggerState.#generateLogBinding(
       console.error,
       this.#generateLoggingObject(LOG_LEVEL.ERROR),
@@ -180,8 +169,28 @@ class LoggerState extends AbstractLogger {
   }
 }
 
-function logWithFrontendPrefix(level: number, message: unknown) {
-  return log(level, `FRONTEND - ${message}`);
+export class Logger extends AbstractLogger {
+  #name: string;
+
+  constructor(name: string) {
+    super();
+    this.#name = name;
+    this.shouldKeepMsg(false);
+    this.shouldKeepSubst(false);
+  }
+
+  withName(name: string) {
+    this.#name = name;
+    return this;
+  }
+
+  get name() {
+    return this.#name;
+  }
+
+  msg(msg: string, ...subst: unknown[]) {
+    return new LoggerState(this, msg, ...subst);
+  }
 }
 
 export function error(message: unknown) {

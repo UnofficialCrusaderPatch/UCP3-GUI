@@ -6,6 +6,14 @@ import { registerTauriEventListener } from 'tauri/tauri-hooks';
 import { log } from 'tauri/tauri-invoke';
 import { onBackendLog } from 'tauri/tauri-listen';
 
+// allow support for removing cycling references for json serialization
+import './cycle';
+
+const JSON = globalThis.JSON as JSON & {
+  decycle: (value: unknown, replacer?: unknown) => unknown;
+  retrocycle: (value: unknown) => unknown;
+};
+
 const LOG_LEVEL = {
   ERROR: 1,
   WARN: 2,
@@ -14,14 +22,12 @@ const LOG_LEVEL = {
   TRACE: 5,
 };
 
-function logWithFrontendPrefix(level: number, message: unknown) {
-  return log(level, `FRONTEND - ${message}`);
-}
-
 abstract class AbstractLogger {
   #keepMsg: undefined | boolean;
 
   #keepSubst: undefined | boolean;
+
+  #prettyJson: undefined | boolean;
 
   shouldKeepMsg(keep: boolean) {
     this.#keepMsg = keep;
@@ -41,11 +47,26 @@ abstract class AbstractLogger {
     return this.#keepSubst;
   }
 
+  shouldPrettyJson(pretty: boolean) {
+    this.#prettyJson = pretty;
+    return this;
+  }
+
+  get prettyJson() {
+    return this.#prettyJson;
+  }
+
+  // note, that given subst without marker ({}) in the string are not used
   abstract msg(msg: string, ...subst: unknown[]): LoggerState;
 
   // auto created fill string for every provided structure, will still only log as strings
-  obj(...subst: unknown[]): LoggerState {
-    return this.msg(Array(subst.length).fill('{}').join(' '), ...subst);
+  // note, that while it allows as many values as needed, it does not support combining markers and appending objects
+  obj(...values: unknown[]): LoggerState {
+    return this.msg(Array(values.length).fill('{}').join(' '), ...values);
+  }
+
+  empty(): LoggerState {
+    return this.obj();
   }
 }
 
@@ -63,11 +84,19 @@ class LoggerState extends AbstractLogger {
     this.#subst = subst;
   }
 
-  static #transformSubst(value: unknown) {
-    return value != null &&
-      (Array.isArray(value) || value.toString === Object.prototype.toString)
-      ? JSON.stringify(value)
-      : String(value);
+  static #transformSubst(value: unknown, prettyJson: undefined | boolean) {
+    if (
+      value == null ||
+      !(Array.isArray(value) || value.toString === Object.prototype.toString)
+    ) {
+      return String(value);
+    }
+
+    try {
+      return JSON.stringify(JSON.decycle(value), null, prettyJson ? 2 : 0);
+    } catch (e) {
+      return `[Failed JSON serialization: ${e}]`;
+    }
   }
 
   static #generateLogBinding(
@@ -87,7 +116,10 @@ class LoggerState extends AbstractLogger {
       const currentIndex = replaceIndex++;
       return currentIndex >= this.#subst.length
         ? '{undefined}' // should be clear enough
-        : LoggerState.#transformSubst(this.#subst[currentIndex]);
+        : LoggerState.#transformSubst(
+            this.#subst[currentIndex],
+            this.prettyJson,
+          );
     });
 
     return createdMessage;
@@ -103,7 +135,7 @@ class LoggerState extends AbstractLogger {
 
     return {
       toString: () => {
-        logWithFrontendPrefix(level, message);
+        log(level, message);
         return message;
       },
     };
@@ -115,6 +147,10 @@ class LoggerState extends AbstractLogger {
 
   get keepSubst() {
     return super.keepSubst ?? this.#logger.keepSubst;
+  }
+
+  get prettyJson() {
+    return super.prettyJson ?? this.#logger.prettyJson;
   }
 
   setMsg(msg: string) {
@@ -133,6 +169,9 @@ class LoggerState extends AbstractLogger {
     return this;
   }
 
+  // note, that trace in JS outputs the stack trace (trace(...) here used console.debug before)
+  // after a bit of thought, this feels in line with trace being very verbose
+  // the change might be reverted, though, since it might be overkill once the log level of the backend effects the frontend
   get trace(): () => void {
     return LoggerState.#generateLogBinding(
       console.trace,
@@ -169,7 +208,7 @@ class LoggerState extends AbstractLogger {
   }
 }
 
-export class Logger extends AbstractLogger {
+class Logger extends AbstractLogger {
   #name: string;
 
   constructor(name: string) {
@@ -177,6 +216,7 @@ export class Logger extends AbstractLogger {
     this.#name = name;
     this.shouldKeepMsg(false);
     this.shouldKeepSubst(false);
+    this.shouldPrettyJson(false);
   }
 
   withName(name: string) {
@@ -193,35 +233,10 @@ export class Logger extends AbstractLogger {
   }
 }
 
-export function error(message: unknown) {
-  console.error(message);
-  return logWithFrontendPrefix(LOG_LEVEL.ERROR, message);
-}
-
-export function warn(message: unknown) {
-  console.warn(message);
-  return logWithFrontendPrefix(LOG_LEVEL.WARN, message);
-}
-
-export function info(message: unknown) {
-  console.info(message);
-  return logWithFrontendPrefix(LOG_LEVEL.INFO, message);
-}
-
-export function debug(message: unknown) {
-  console.debug(message);
-  return logWithFrontendPrefix(LOG_LEVEL.DEBUG, message);
-}
-
-export function trace(message: unknown) {
-  console.debug(message); // trace also uses debug, since "trace" in the console means something else
-  return logWithFrontendPrefix(LOG_LEVEL.TRACE, message);
-}
-
 // source: https://stackoverflow.com/a/49560222
 
 const handleUncaughtError = (e: ErrorEvent) => {
-  logWithFrontendPrefix(
+  log(
     LOG_LEVEL.ERROR,
     `${e.filename}(${e.lineno}:${e.colno}) : ${e.type} : ${e.message}`,
   );
@@ -229,7 +244,9 @@ const handleUncaughtError = (e: ErrorEvent) => {
 };
 
 const handleUncaughtPromise = (e: PromiseRejectionEvent) => {
-  error(`Promise rejected : ${e.type} : ${e.reason}`).catch((reason) =>
+  const message = `Promise rejected : ${e.type} : ${e.reason}`;
+  console.error(message);
+  log(LOG_LEVEL.ERROR, message).catch((reason) =>
     console.error(`Backend logging issue : ${e.type} : ${reason}`),
   );
 };
@@ -265,3 +282,17 @@ const backendLogUnlistenPromise = onBackendLog(({ payload }) => {
 registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, async () =>
   (await backendLogUnlistenPromise)(),
 );
+
+// Currently simply provides the console.log calls, which will not be logged in the backend
+// May or may not receive other control values (or be part of the log level)
+// Should only be used if the values are cyclic (no JSON serialization) or should be inspected
+// The lesser it is used, the better
+export const ConsoleLogger = {
+  trace: console.trace.bind(console),
+  debug: console.debug.bind(console),
+  info: console.info.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+};
+
+export default Logger;

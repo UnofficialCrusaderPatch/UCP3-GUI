@@ -12,13 +12,15 @@ import { Button, Form } from 'react-bootstrap';
 import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { useSetAtom } from 'jotai';
 import { openFileDialog } from 'tauri/tauri-dialog';
-import { useCurrentGameFolder, useGameFolder } from 'hooks/jotai/helper';
-import { MouseEvent, useState } from 'react';
-import { relative } from 'path';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import { MouseEvent } from 'react';
+import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
 import { createStatusBarMessage } from './StatusBarMessage';
+
+const LOGGER = new Logger('CreateFileInput.tsx');
 
 export type FileInputDisplayConfigElement = DisplayConfigElement & {
   generalizeExtensionPaths: boolean;
@@ -82,7 +84,7 @@ function CreateFileInput(args: {
       gameFolder.replaceAll(/[\\]+/g, '/').length + 1,
     );
 
-    console.debug(relativePath);
+    LOGGER.msg(relativePath).debug();
     let finalPath = relativePath;
 
     if (generalizeExtensionPaths) {

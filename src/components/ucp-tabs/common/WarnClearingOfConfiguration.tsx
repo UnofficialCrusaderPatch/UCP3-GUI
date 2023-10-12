@@ -1,10 +1,13 @@
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import Logger from 'util/scripts/logging';
+
+const LOGGER = new Logger('WarnClearingOfConfiguration.tsx');
 
 async function warnClearingOfConfiguration(configurationTouched: {
   [key: string]: boolean;
 }) {
   // Defer here to a processor for the current list of active extensions to yield the
-  console.log('displaying warning');
+  LOGGER.msg('Displaying warning').info();
 
   const touchedOptions = Object.entries(configurationTouched).filter(
     (pair) => pair[1] === true,

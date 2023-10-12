@@ -1,6 +1,7 @@
 import { Extension } from 'config/ucp/common';
 import { saveUCPConfig } from 'config/ucp/config-files';
 import { ConfigurationQualifier } from 'function/global/types';
+import { ConsoleLogger } from 'util/scripts/logging';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -16,7 +17,7 @@ function saveConfig(
 
   const fullConfig = configuration;
 
-  console.log(`Saving config: `, configuration);
+  ConsoleLogger.debug(`Saving config: `, configuration);
 
   return saveUCPConfig(
     sparseConfig,

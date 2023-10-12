@@ -8,8 +8,10 @@ import {
   renameFile,
 } from '@tauri-apps/api/fs';
 import { ZipReader } from 'util/structs/zip-handler';
-import { error } from 'util/scripts/logging';
+import Logger from 'util/scripts/logging';
 import { extractZipToPath } from 'tauri/tauri-invoke';
+
+const LOGGER = new Logger('extension-pack.ts');
 
 class ExtensionPack {
   path: string;
@@ -44,17 +46,15 @@ class ExtensionPack {
 
       const promises = entries.map(async (entry) => {
         if (entry.children === null || entry.children === undefined) {
-          error(`Found a non-directory file in extension pack: ${entry.path}`);
-          throw Error(
-            `Found a non-directory file in extension pack: ${entry.path}`,
-          );
+          const errorMsg = `Found a non-directory file in extension pack: ${entry.path}`;
+          LOGGER.msg(errorMsg).error();
+          throw Error(errorMsg);
         }
 
         if (entry.name === undefined) {
-          error(`Found a non-valid path in extension pack: ${entry.path}`);
-          throw Error(
-            `Found a non-valid path in extension pack: ${entry.path}`,
-          );
+          const errorMsg = `Found a non-valid path in extension pack: ${entry.path}`;
+          LOGGER.msg(errorMsg).error();
+          throw Error(errorMsg);
         }
 
         const destination = `${ucpFolder}/plugins/${entry.name}`;
@@ -69,7 +69,7 @@ class ExtensionPack {
         }
 
         return renameFile(entry.path, destination).catch((reason) => {
-          error(reason);
+          LOGGER.obj(reason).error();
         });
       });
 
@@ -84,24 +84,21 @@ class ExtensionPack {
 
       const promises = entries.map(async (entry) => {
         if (entry.children !== null && entry.children !== undefined) {
-          error(`Found a directory file in extension pack: ${entry.path}`);
-          throw Error(
-            `Found a directory file in extension pack: ${entry.path}`,
-          );
+          const errorMsg = `Found a directory file in extension pack: ${entry.path}`;
+          LOGGER.msg(errorMsg).error();
+          throw Error(errorMsg);
         }
 
         if (entry.name === undefined) {
-          error(`Found a non-valid path in extension pack: ${entry.path}`);
-          throw Error(
-            `Found a non-valid path in extension pack: ${entry.path}`,
-          );
+          const errorMsg = `Found a non-valid path in extension pack: ${entry.path}`;
+          LOGGER.msg(errorMsg).error();
+          throw Error(errorMsg);
         }
 
         if (!entry.name.endsWith('.zip')) {
-          error(`Found a non-zip file in extension pack: ${entry.path}`);
-          throw Error(
-            `Found a non-valid path in extension pack: ${entry.path}`,
-          );
+          const errorMsg = `Found a non-zip file in extension pack: ${entry.path}`;
+          LOGGER.msg(errorMsg).error();
+          throw Error(errorMsg);
         }
 
         const destination = `${ucpFolder}/modules/${entry.name}`;
@@ -116,7 +113,7 @@ class ExtensionPack {
         }
 
         return renameFile(entry.path, destination).catch((reason) => {
-          error(reason);
+          LOGGER.obj(reason).error();
         });
       });
 

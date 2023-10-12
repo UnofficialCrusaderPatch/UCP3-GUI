@@ -23,6 +23,7 @@ import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { reloadCurrentWindow } from 'function/window-actions';
 
+import { ConsoleLogger } from 'util/scripts/logging';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';
@@ -144,14 +145,14 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     'specification-version': result['specification-version'],
                   } as UCP3SerializedPluginConfig;
 
-                  console.log(trimmedResult);
+                  ConsoleLogger.debug(trimmedResult);
 
                   const r = await showCreatePluginModalWindow({
                     title: 'Create plugin',
                     message: '',
                   });
 
-                  console.log(r);
+                  ConsoleLogger.debug(r);
 
                   if (r === undefined) return;
 

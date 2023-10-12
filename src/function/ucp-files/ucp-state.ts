@@ -2,6 +2,9 @@ import Result from 'util/structs/result';
 import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
 import { TFunction } from 'i18next';
 import { getHexHashOfFile } from 'util/scripts/hash';
+import Logger from 'util/scripts/logging';
+
+const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
 export enum UCPState {
   WRONG_FOLDER, // based only on the state of the bink.dlls
@@ -44,11 +47,11 @@ export async function getUCPState(
   const binkRealSha = await binkRealShaPromise;
   const binkUcpSha = await binkUcpShaPromise;
 
-  console.log(`File hashes: `, {
+  LOGGER.msg(`File hashes: {}`, {
     binkSha,
     binkRealSha,
     binkUcpSha,
-  });
+  }).debug();
 
   if (!binkSha) {
     return UCPState.WRONG_FOLDER;

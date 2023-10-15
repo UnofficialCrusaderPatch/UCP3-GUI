@@ -1,11 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import {
-  useConfigurationDefaults,
-  useConfigurationReducer,
-  useConfigurationWarnings,
-  useExtensionState,
-  useSetConfigurationTouched,
-} from 'hooks/jotai/globals-wrapper';
+import { ReactElement, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as bootstrap from 'bootstrap';
 import {
@@ -13,6 +6,8 @@ import {
   optionEntriesToHierarchical,
 } from 'config/ucp/extension-util';
 import { DisplayConfigElement, OptionEntry } from 'config/ucp/common';
+import { useAtomValue } from 'jotai';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitizeID';
@@ -22,7 +17,7 @@ function CreateSections(args: { readonly: boolean }): {
   nav: ReactElement | null;
   content: ReactElement | null;
 } {
-  const extensionsState = useExtensionState();
+  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;
 
   const optionEntries = extensionsToOptionEntries(activeExtensions).filter(

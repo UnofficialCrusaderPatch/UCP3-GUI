@@ -9,12 +9,14 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
-import { useConfigurationWarnings } from 'hooks/jotai/globals-wrapper';
 import { RefAttributes, useState } from 'react';
-import { OverlayTrigger, Tooltip, TooltipProps } from 'react-bootstrap';
+import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
 import { useAtom, useAtomValue } from 'jotai';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import {
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  STATUS_BAR_MESSAGE_ATOM,
+} from 'function/global/global-atoms';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -33,7 +35,9 @@ export default function Footer() {
   const [ucpVersionResult] = useUCPVersion();
   const [isFooterOpen, setFooterOpen] = useState(true);
 
-  const configurationWarnings = useConfigurationWarnings();
+  const configurationWarnings = useAtomValue(
+    CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  );
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 

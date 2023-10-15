@@ -10,18 +10,18 @@ import { exists } from '@tauri-apps/api/fs';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
-  useFolder,
-  useInitRunning,
-  useSetInitDone,
-  useSetUcpConfigFile,
-  useSetConfiguration,
-  useSetConfigurationDefaults,
-  useFolderValue,
-  useSetConfigurationTouched,
-  useSetConfigurationWarnings,
-  useExtensionStateReducer,
-} from './globals-wrapper';
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+  GAME_FOLDER_ATOM,
+  INIT_DONE,
+  INIT_RUNNING,
+  UCP_CONFIG_FILE_ATOM,
+} from 'function/global/global-atoms';
 import {
   UCPStateHandler,
   useLanguageHook,
@@ -32,7 +32,7 @@ import {
 const LOGGER = new Logger('helper.ts');
 
 export function useCurrentGameFolder() {
-  return useFolderValue(); // only a proxy
+  return useAtomValue(GAME_FOLDER_ATOM); // only a proxy
 }
 
 export function useLanguage() {
@@ -80,16 +80,24 @@ export function useInitGlobalConfiguration(): [
   boolean,
   (newFolder: string, language: string) => Promise<void>,
 ] {
-  const setInitDone = useSetInitDone();
-  const [isInitRunning, setInitRunning] = useInitRunning();
-  const setFile = useSetUcpConfigFile();
-  const setConfiguration = useSetConfiguration();
-  const setConfigurationDefaults = useSetConfigurationDefaults();
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const setInitDone = useSetAtom(INIT_DONE);
+  const [isInitRunning, setInitRunning] = useAtom(INIT_RUNNING);
+  const setFile = useSetAtom(UCP_CONFIG_FILE_ATOM);
+  const setConfiguration = useSetAtom(CONFIGURATION_REDUCER_ATOM);
+  const setConfigurationDefaults = useSetAtom(
+    CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  );
+  const [extensionsState, setExtensionsState] = useAtom(
+    EXTENSION_STATE_REDUCER_ATOM,
+  );
 
   // currently simply reset:
-  const setConfigurationTouched = useSetConfigurationTouched();
-  const setConfigurationWarnings = useSetConfigurationWarnings();
+  const setConfigurationTouched = useSetAtom(
+    CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  );
+  const setConfigurationWarnings = useSetAtom(
+    CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  );
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -184,7 +192,7 @@ export function useGameFolder(): [
   string,
   (newFolder: string) => Promise<void>,
 ] {
-  const [currentFolder, setCurrentFolder] = useFolder();
+  const [currentFolder, setCurrentFolder] = useAtom(GAME_FOLDER_ATOM);
 
   const [stateResult, receiveState] = useUCPStateHook(currentFolder);
   const [versionResult, receiveVersion] = useUCPVersionHook(currentFolder);

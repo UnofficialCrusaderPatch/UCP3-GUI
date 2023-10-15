@@ -1,19 +1,18 @@
-import {
-  useConfigurationDefaults,
-  useConfigurationLocks,
-  useConfigurationReducer,
-  useConfigurationSuggestions,
-  useConfigurationWarnings,
-  useSetConfigurationTouched,
-} from 'hooks/jotai/globals-wrapper';
-
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import { useState } from 'react';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
-import { useSetAtom } from 'jotai';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  STATUS_BAR_MESSAGE_ATOM,
+} from 'function/global/global-atoms';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
@@ -23,12 +22,20 @@ function CreateSlider(args: {
   disabled: boolean;
   className: string;
 }) {
-  const [configuration, setConfiguration] = useConfigurationReducer();
-  const configurationWarnings = useConfigurationWarnings();
-  const setConfigurationTouched = useSetConfigurationTouched();
-  const configurationDefaults = useConfigurationDefaults();
-  const configurationLocks = useConfigurationLocks();
-  const configurationSuggestions = useConfigurationSuggestions();
+  const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
+  const configurationWarnings = useAtomValue(
+    CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  );
+  const setConfigurationTouched = useSetAtom(
+    CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  );
+  const configurationDefaults = useAtomValue(
+    CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  );
+  const configurationLocks = useAtomValue(CONFIGURATION_LOCKS_REDUCER_ATOM);
+  const configurationSuggestions = useAtomValue(
+    CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
+  );
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled } = spec;

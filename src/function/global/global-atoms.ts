@@ -132,48 +132,6 @@ export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
   configurationQualifierReducer,
 );
 
-const generalOkCancelModalWindowReducer = (
-  oldState: GeneralOkCancelModalWindow,
-  newState: Partial<GeneralOkCancelModalWindow>,
-): GeneralOkCancelModalWindow => {
-  const state = { ...oldState, ...newState };
-  return state;
-};
-
-export const GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
-  {
-    type: 'ok_cancel',
-    show: false,
-    message: '',
-    title: '',
-    handleAction: () => {},
-    handleClose: () => {},
-    ok: '',
-    cancel: '',
-  },
-  generalOkCancelModalWindowReducer,
-);
-
-const generalOkModalWindowReducer = (
-  oldState: GeneralOkModalWindow,
-  newState: Partial<GeneralOkModalWindow>,
-): GeneralOkModalWindow => {
-  const state = { ...oldState, ...newState };
-  return state;
-};
-
-export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
-  {
-    type: 'ok',
-    show: false,
-    message: '',
-    title: '',
-    handleAction: () => {},
-    ok: '',
-  },
-  generalOkModalWindowReducer,
-);
-
 export type PreferredExtensionVersionDictionary = {
   [extensionName: string]: string;
 };

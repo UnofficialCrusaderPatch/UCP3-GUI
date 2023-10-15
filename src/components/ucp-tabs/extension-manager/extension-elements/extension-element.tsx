@@ -10,31 +10,23 @@ import {
 } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
-import Markdown from 'react-markdown';
 
 import '../extension-manager.css';
-import {
-  useExtensionStateReducer,
-  useConfigurationTouched,
-  useExtensionState,
-} from 'hooks/jotai/globals-wrapper';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import {
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
   AvailableExtensionVersionsDictionary,
+  EXTENSION_STATE_REDUCER_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
 import { useSetOverlayContent } from 'components/overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
-import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
-import { moveExtension } from '../extensions-state';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
 import moveExtensionClickCallback from './MoveExtensionClickCallback';
 import {
   ExtensionViewer,
   ExtensionViewerProps,
-  MDTEST,
 } from '../extension-viewer/ExtensionViewer';
 
 export function ExtensionElement(props: {
@@ -244,7 +236,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
 
   const ext = exts.filter((e) => e.version === preferredVersion)[0];
 
-  const extensionsState = useExtensionState();
+  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const clickCallback = useCallback(
     () => inactiveExtensionElementClickCallback(ext),
@@ -287,7 +279,7 @@ export function ActiveExtensionElement(props: {
 }) {
   const { ext, index, arr } = props;
 
-  const extensionsState = useExtensionState();
+  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const revDeps = extensionsState.tree
     .reverseDependenciesFor(ext)

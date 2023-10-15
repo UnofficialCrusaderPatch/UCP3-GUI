@@ -88,4 +88,10 @@ export default class Option<T> {
   static ofEmpty<T>(): Option<T> {
     return new Option<T>(undefined, false);
   }
+
+  /** Simulates a Java Optional, since `undefined` or `null` will become empty */
+  static ofNullable<T>(content: T): Option<NonNullable<T>> {
+    // check fo null here includes undefined
+    return content == null ? this.ofEmpty() : this.of(content);
+  }
 }

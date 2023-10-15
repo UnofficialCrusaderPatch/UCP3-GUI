@@ -1,0 +1,27 @@
+{
+    "0000000000000000000000": {
+        "type": "VANILLA",
+        "name": "Test",
+        "region": "Germany",
+        "major": 0,
+        "minor": 0,
+        "patch": 0
+    },
+    "0000000000000000000001": {
+        "type": "EXTREME",
+        "name": "Test2",
+        "region": "Germany",
+        "major": 0,
+        "minor": 0,
+        "patch": 0
+    }
+    ,
+    "0000000000000000000002": {
+        "type": "EXTRREME",
+        "name": "Test2",
+        "region": "Germany",
+        "major": 0,
+        "minor": 0,
+        "patch": 0
+    }
+}

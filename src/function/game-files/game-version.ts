@@ -96,7 +96,7 @@ class GameVersion implements GameVersionInterface {
   }
 
   toString(): string {
-    return `${this.getDescriptionString()} - ${this.getMajorAsString()}.${this.getMinorAsString()}.${this.getPatchAsString()} - ${this.getShaRepresentation()}}`;
+    return `${this.getDescriptionString()} - ${this.getMajorAsString()}.${this.getMinorAsString()}.${this.getPatchAsString()} - ${this.getShaRepresentation()}`;
   }
 }
 
@@ -109,6 +109,11 @@ Object.entries(VERSIONS_JSON).forEach((entry) => {
   GameVersion.of(realType, sha, name, region, major, minor, patch);
 });
 
-export default function getGameVersionForHash(sha: string) {
+export type GameVersionInstance = GameVersion;
+
+export const EMPTY_GAME_VERSION: GameVersionInstance =
+  GameVersion.ofUnknown('');
+
+export function getGameVersionForHash(sha: string): GameVersionInstance {
   return GAME_VERSIONS[sha] ?? GameVersion.ofUnknown(sha);
 }

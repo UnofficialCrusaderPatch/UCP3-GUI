@@ -17,6 +17,11 @@ import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 
 import './overview.css';
 
+import GameStarter from 'components/game-starter/game-starter';
+import {
+  EXTREME_VERSION_ATOM,
+  VANILLA_VERSION_ATOM,
+} from 'function/game-files/game-version-state';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {
@@ -68,6 +73,8 @@ export default function Overview() {
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
+      <GameStarter versionAtom={VANILLA_VERSION_ATOM} />
+      <GameStarter versionAtom={EXTREME_VERSION_ATOM} />
       <RecentFolders />
       <StateButton
         buttonActive={

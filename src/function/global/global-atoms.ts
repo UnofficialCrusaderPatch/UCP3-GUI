@@ -60,7 +60,7 @@ const extensionStateReducer = (
 export const INIT_DONE = atom(false);
 export const INIT_RUNNING = atom(false);
 export const UCP_CONFIG_FILE_ATOM = atom('');
-export const GAME_FOLDER_ATOM = atom(''); // unused
+export const GAME_FOLDER_ATOM = atom('');
 
 // reducer atoms
 

@@ -38,7 +38,7 @@ async function getGameExeHashWithFallback(
   alternativeRelativeExe?: string,
 ) {
   if (!gameFolder && !alternativeRelativeExe) {
-    return Option.ofEmpty();
+    return Option.ofEmpty<string>();
   }
 
   const exePath = alternativeRelativeExe

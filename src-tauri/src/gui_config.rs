@@ -13,10 +13,7 @@ use tauri::{
 };
 
 use crate::{
-    constants::{
-        CONFIG_FILE_NAME, LANGUAGE_CHANGE_EVENT, LOG_LEVEL_DEFAULT, MESSAGE_TITLE,
-        NUMBER_OF_RECENT_FOLDERS,
-    },
+    constants::{CONFIG_FILE_NAME, LOG_LEVEL_DEFAULT, MESSAGE_TITLE, NUMBER_OF_RECENT_FOLDERS},
     utils::get_state_mutex_from_handle,
 };
 use crate::{logging, utils::get_roaming_folder_path};
@@ -53,7 +50,6 @@ pub struct GuiConfig {
     #[serde(skip_serializing)]
     init: bool,
 
-    lang: String,
     recent_folders: Vec<RecentFolder>,
     log_level: String,
 }
@@ -99,7 +95,6 @@ impl GuiConfig {
     pub fn new() -> GuiConfig {
         GuiConfig {
             init: false,
-            lang: String::from("en"),
             recent_folders: Vec::with_capacity(NUMBER_OF_RECENT_FOLDERS),
             log_level: String::from(LOG_LEVEL_DEFAULT),
         }
@@ -111,13 +106,6 @@ impl GuiConfig {
             let file = fs::File::open(path)?;
             let reader = io::BufReader::new(file);
             let value: serde_json::Value = serde_json::from_reader(reader)?;
-
-            // get lang
-            if let Some(lang_value) = value.get("lang") {
-                if let Some(lang) = lang_value.as_str() {
-                    self.lang = String::from(lang);
-                }
-            }
 
             // get folders
             if let Some(folders_value) = value.get("recent_folders") {
@@ -175,35 +163,6 @@ impl GuiConfig {
                 MESSAGE_TITLE,
                 format!("Failed to save gui config: {}", error.to_string()),
             );
-        }
-    }
-
-    pub fn get_language(&self) -> Option<&String> {
-        if self.check_if_init() {
-            Some(&self.lang)
-        } else {
-            None
-        }
-    }
-
-    pub fn set_language<R: Runtime>(&mut self, app_handle: &AppHandle<R>, lang: &str) {
-        if self.check_if_init() {
-            self.lang = String::from(lang);
-
-            // tell the frontend, that the language changed
-            if let Some(error) = app_handle
-                .emit_all(LANGUAGE_CHANGE_EVENT, self.lang.clone())
-                .err()
-            {
-                message(
-                    None::<&tauri::Window>,
-                    MESSAGE_TITLE,
-                    format!(
-                        "Failed to send language change event because: {}",
-                        error.to_string()
-                    ),
-                );
-            }
         }
     }
 
@@ -274,18 +233,6 @@ impl GuiConfig {
 // Currently it is not possible to delete enabled folders, and it will add the complete folder.
 
 #[tauri::command]
-fn set_config_language<R: Runtime>(app_handle: AppHandle<R>, lang: &str) {
-    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle).set_language(&app_handle, lang);
-}
-
-#[tauri::command]
-fn get_config_language<R: Runtime>(app_handle: AppHandle<R>) -> Option<String> {
-    get_state_mutex_from_handle::<R, GuiConfig>(&app_handle)
-        .get_language()
-        .map(String::from)
-}
-
-#[tauri::command]
 fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String> {
     get_state_mutex_from_handle::<R, GuiConfig>(&app_handle)
         .get_recent_folders()
@@ -314,8 +261,6 @@ fn remove_config_recent_folder<R: Runtime>(app_handle: AppHandle<R>, path: &str)
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tauri-plugin-ucp-config")
         .invoke_handler(tauri::generate_handler![
-            set_config_language,
-            get_config_language,
             get_config_recent_folders,
             get_config_most_recent_folder,
             add_config_recent_folder,

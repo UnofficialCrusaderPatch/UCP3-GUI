@@ -183,21 +183,21 @@ function CreateUCP2SliderChoice(args: {
               </Form.Label>
             </div>
             <div className="col-6">
-              <RangeSlider
+              <input
+                type="range"
+                className="ucp-slider"
                 min={choice.min * factor}
                 max={choice.max * factor}
                 step={choice.step * factor}
                 id={`${url}-slider`}
-                size="sm"
-                variant="primary"
+                // size="sm"
+                // variant="primary"
                 value={localValue}
-                tooltipLabel={(currentValue) =>
-                  (currentValue / factor).toString()
-                }
+                // tooltipLabel={(currentValue) =>
+                //  (currentValue / factor).toString()
+                // }
                 onChange={(event) => {
                   setLocalValue(parseInt(event.target.value, 10));
-                }}
-                onAfterChange={(event) => {
                   setLocalValue(parseInt(event.target.value, 10));
                   const newValue = { ...value };
                   newValue.choices[choice.name].slider =

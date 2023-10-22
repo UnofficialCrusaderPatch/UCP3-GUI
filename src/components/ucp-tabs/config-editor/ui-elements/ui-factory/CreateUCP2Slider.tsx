@@ -106,7 +106,7 @@ function CreateUCP2Slider(args: {
     value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
   );
   return (
-    <div className="sword-checkbox test123" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div className="sword-checkbox" style={{ marginLeft: 0, marginBottom: 0 }}>
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>
@@ -119,19 +119,18 @@ function CreateUCP2Slider(args: {
           <Form.Label>{min}</Form.Label>
         </div>
         <div className="col col-6">
-          <RangeSlider
+          <input
+            type="range"
             className="ucp-slider"
             min={min * factor}
             max={max * factor}
             step={step * factor}
             id={`${url}-slider`}
-            size="sm"
+            // size="sm"
             value={localValue}
-            tooltipLabel={(currentValue) => (currentValue / factor).toString()}
+            // tooltipLabel={(currentValue) => (currentValue / factor).toString()}
             onChange={(event) => {
               setLocalValue(parseInt(event.target.value, 10));
-            }}
-            onAfterChange={(event) => {
               setConfiguration({
                 type: 'set-multiple',
                 value: Object.fromEntries([

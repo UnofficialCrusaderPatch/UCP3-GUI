@@ -227,15 +227,18 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type="radio"]:disabled + label:before {
 }
 
+.ucp-slider:disabled {
+  opacity: 0.5;
+}
+
+/** sword-checkbox end **/
+
 .transparent-white-bg {
   background-color: rgba(255, 255, 255, 0.5);
   padding: 3px 5px 3px 10px;
   margin-bottom: 3px;
   margin-top: 2px;
 }
-
-
-/** sword-checkbox end **/
 
 
 /** slider **/
@@ -246,14 +249,25 @@ input[type="checkbox"]:disabled + .label:before {
   height: 25px; /* Specified height */
 
   /* TODO add the slider background with a border image */
-  border-image-source: url(/src/assets/ucp3/slider.png) !important;
+  background-image:
+    url('src/assets/ucp3/slider_bg_left.png'),
+    url('src/assets/ucp3/slider_bg_right.png'),
+    url('src/assets/ucp3/slider_bg_middle.png');
+  background-position:
+    left top,
+    right top,
+    center top;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    repeat-x;
+  height: 11px;
   border-image-slice: 18 19 0 18 fill !important;
   border-image-width: 20px 20px 0px 20px !important;
   border-image-outset: 0px 0px 0px 0px !important;
 
-  outline: none; /* Remove outline */
-  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  outline: none;
+  -webkit-transition: .2s;
   transition: opacity .2s;
 }
 
@@ -261,25 +275,61 @@ input[type="checkbox"]:disabled + .label:before {
 .ucp-slider::-webkit-slider-thumb {
   -webkit-appearance: none; /* Override default look */
   appearance: none;
-  width: 25px; /* Set a specific slider handle width */
-  height: 25px; /* Slider handle height */
-  background-image: url(src/assets/ucp3/slider.png);
+  width: 7px; /* Set a specific slider handle width */
+  height: 15px; /* Slider handle height */
+  background-image: url('src/assets/ucp3/slider.png');
   cursor: pointer; /* Cursor on hover */
 }
 
 .ucp-slider::-webkit-slider-thumb:active {
-  background-image: url(src/assets/ucp3/slider_active.png);
+  background-image: url('src/assets/ucp3/slider_active.png');
 }
 
 /* mozilla based */
 .ucp-slider::-moz-range-thumb {
-  width: 25px; /* Set a specific slider handle width */
-  height: 25px; /* Slider handle height */
-  background-image: url(src/assets/ucp3/slider.png);
+  width: 7px; /* Set a specific slider handle width */
+  height: 15px; /* Slider handle height */
+  background-image: url('src/assets/ucp3/slider.png');
   cursor: pointer; /* Cursor on hover */
 }
 
 .ucp-slider::-moz-range-thumb:active {
-  background-image: url(src/assets/ucp3/slider_active.png);
+  background-image: url('src/assets/ucp3/slider_active.png');
 }
+
+/* Slider track styles */
+.ucp-slider .slider-track {
+  background-image:
+    url('src/assets/ucp3/slider_bg_left.png'),
+    url('src/assets/ucp3/slider_bg_right.png'),
+    url('src/assets/ucp3/slider_bg_middle.png');
+  background-position:
+    left top,
+    right top,
+    center top;
+  background-repeat:
+    no-repeat,
+    no-repeat,
+    repeat-x;
+  height: 11px;
+}
+
+/* Thumb styles */
+.ucp-slider .slider-thumb {
+  background: url('src/assets/ucp3/slider.png') no-repeat center;
+  width: 7px;
+  height: 15px;
+  border: none;
+  transition: background-image 0.2s; /* Smooth transition */
+}
+
+.ucp-slider .slider-thumb:hover,
+.ucp-slider .slider-thumb:focus {
+  background-image: url(src/assets/ucp3/slider.png);
+}
+
+
+
+
 /** slider end **/
+

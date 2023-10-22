@@ -1,22 +1,18 @@
 import { useTranslation } from 'react-i18next';
 import translateIcon from 'assets/misc/translate.svg';
 import languages from 'localization/languages.json';
+import SvgHelper from 'components/general/svg-helper';
+import { useAtom } from 'jotai';
+import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { startTransition } from 'react';
 
 import './language-select.css';
-import { Language } from 'hooks/jotai/hooks';
-import { useLanguage } from 'hooks/jotai/helper';
-import SvgHelper from 'components/general/svg-helper';
 
 export default function LanguageSelect() {
-  const langResult = useLanguage();
+  const [lang, setLang] = useAtom(LANGUAGE_ATOM);
+
   const { t } = useTranslation('gui-landing');
 
-  // needs better loading site
-  if (langResult.isEmpty()) {
-    return <p>{t('gui-general:loading')}</p>;
-  }
-
-  const langHandler = langResult.get().getOrThrow() as Language;
   return (
     <div className="language-select-container">
       <div className="d-flex align-items-stretch">
@@ -28,11 +24,14 @@ export default function LanguageSelect() {
         </div>
         <select
           className="dark-dropdown"
-          value={langHandler.getLanguage() as string}
+          value={lang}
           onChange={(event) => {
             const buttonTarget = event.target as HTMLSelectElement;
             if (buttonTarget.value) {
-              langHandler.setLanguage(buttonTarget.value);
+              // prevents flickering, buy updating in the background
+              startTransition(() => {
+                setLang(buttonTarget.value);
+              });
             }
           }}
         >

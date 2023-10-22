@@ -1,7 +1,9 @@
 // Tut Source: https://phrase.com/blog/posts/localizing-react-apps-with-i18next/
 
+import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
 import i18next from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
+import { selectAtom } from 'jotai/utils';
 import { initReactI18next } from 'react-i18next';
 import Result from 'util/structs/result';
 import { parse as yamlParse } from 'yaml';
@@ -30,5 +32,9 @@ i18next
       escapeValue: false,
     },
   });
+
+export const LANGUAGE_STATE_ATOM = selectAtom(LANGUAGE_ATOM, async (lang) => {
+  await i18next.changeLanguage(lang);
+});
 
 export default i18next;

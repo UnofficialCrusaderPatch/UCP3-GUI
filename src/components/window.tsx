@@ -1,19 +1,15 @@
-import 'localization/i18n';
-import { useLanguage } from 'hooks/jotai/helper';
-import Main from './main-page';
+import { useAtomValue } from 'jotai';
+import { LANGUAGE_STATE_ATOM } from 'localization/i18n';
+import { Suspense } from 'react';
 import Titlebar from './titlebar/titlebar';
+import Main from './main-page';
 
 import './variables.css';
 import './base.css';
 import './window.css';
 
-export default function Window() {
-  const languageState = useLanguage();
-
-  if (languageState.isEmpty()) {
-    return <div />;
-  }
-
+function WindowContent() {
+  useAtomValue(LANGUAGE_STATE_ATOM);
   return (
     <>
       <div className="page-titlebar">
@@ -23,5 +19,13 @@ export default function Window() {
         <Main />
       </div>
     </>
+  );
+}
+
+export default function Window() {
+  return (
+    <Suspense>
+      <WindowContent />
+    </Suspense>
   );
 }

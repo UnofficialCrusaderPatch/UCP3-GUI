@@ -1,7 +1,6 @@
 import { Extension } from 'config/ucp/common';
-import { atomWithReducer, atomWithStorage, loadable } from 'jotai/utils';
+import { atomWithReducer, loadable } from 'jotai/utils';
 import { atom } from 'jotai';
-import { compare } from 'semver';
 import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 import { exists } from '@tauri-apps/api/fs';
 import {

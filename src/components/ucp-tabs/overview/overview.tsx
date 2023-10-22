@@ -22,6 +22,10 @@ import {
   EXTREME_VERSION_ATOM,
   VANILLA_VERSION_ATOM,
 } from 'function/game-files/game-version-state';
+import {
+  EXTREME_PATH_ATOM,
+  VANILLA_PATH_ATOM,
+} from 'function/game-files/game-path';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {
@@ -73,8 +77,14 @@ export default function Overview() {
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
-      <GameStarter versionAtom={VANILLA_VERSION_ATOM} />
-      <GameStarter versionAtom={EXTREME_VERSION_ATOM} />
+      <GameStarter
+        pathAtom={VANILLA_PATH_ATOM}
+        versionAtom={VANILLA_VERSION_ATOM}
+      />
+      <GameStarter
+        pathAtom={EXTREME_PATH_ATOM}
+        versionAtom={EXTREME_VERSION_ATOM}
+      />
       <RecentFolders />
       <StateButton
         buttonActive={

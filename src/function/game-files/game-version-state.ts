@@ -1,20 +1,20 @@
-import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
 import { selectAtom } from 'jotai/utils';
-import { getExtremeHash, getVanillaHash } from './game-hash';
+import getGameExeHash from './game-hash';
 import { EMPTY_GAME_VERSION, getGameVersionForHash } from './game-version';
+import { EXTREME_PATH_ATOM, VANILLA_PATH_ATOM } from './game-path';
+
+async function getGameVersionForPath(path: string) {
+  return (await getGameExeHash(path))
+    .map(getGameVersionForHash)
+    .getOrElse(EMPTY_GAME_VERSION);
+}
 
 export const VANILLA_VERSION_ATOM = selectAtom(
-  GAME_FOLDER_ATOM,
-  async (folder) =>
-    (await getVanillaHash(folder))
-      .map(getGameVersionForHash)
-      .getOrElse(EMPTY_GAME_VERSION),
+  VANILLA_PATH_ATOM,
+  getGameVersionForPath,
 );
 
 export const EXTREME_VERSION_ATOM = selectAtom(
-  GAME_FOLDER_ATOM,
-  async (folder) =>
-    (await getExtremeHash(folder))
-      .map(getGameVersionForHash)
-      .getOrElse(EMPTY_GAME_VERSION),
+  EXTREME_PATH_ATOM,
+  getGameVersionForPath,
 );

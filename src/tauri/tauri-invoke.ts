@@ -169,7 +169,7 @@ export async function log(level: number, message: string): Promise<void> {
   return invoke(TAURI_COMMAND.LOGGING_LOG, { level, message });
 }
 
-export async function runProgram(
+export async function osOpenProgram(
   path: string,
   args: string[] = [],
   envs: Record<string, string> = {},

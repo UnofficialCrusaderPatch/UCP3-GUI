@@ -18,7 +18,6 @@ import {
   STATUS_BAR_MESSAGE_ATOM,
 } from 'function/global/global-atoms';
 import Logger from 'util/scripts/logging';
-import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';

@@ -1,3 +1,4 @@
+import { Console } from 'console';
 import {
   EMPTY_GAME_VERSION,
   GameVersionInstance,
@@ -5,6 +6,7 @@ import {
 import { Atom, useAtomValue } from 'jotai';
 import { Suspense } from 'react';
 import { osOpenProgram } from 'tauri/tauri-invoke';
+import { ConsoleLogger } from 'util/scripts/logging';
 
 // TODO: Improve these components/design and error handling
 
@@ -23,7 +25,7 @@ function GameStarterButton(props: GameStarterProps) {
   return (
     <button
       type="button"
-      onClick={() => osOpenProgram(path)}
+      onClick={() => osOpenProgram(path).catch(ConsoleLogger.error)} // needs better handling
       disabled={startDisabled}
     >
       {version.toString()}

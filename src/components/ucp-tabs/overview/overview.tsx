@@ -14,19 +14,9 @@ import {
   useUCPVersion,
 } from 'hooks/jotai/helper';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import RecentFolders from './recent-folders';
 
 import './overview.css';
-
-import GameStarter from 'components/game-starter/game-starter';
-import {
-  EXTREME_VERSION_ATOM,
-  VANILLA_VERSION_ATOM,
-} from 'function/game-files/game-version-state';
-import {
-  EXTREME_PATH_ATOM,
-  VANILLA_PATH_ATOM,
-} from 'function/game-files/game-path';
-import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -77,14 +67,6 @@ export default function Overview() {
 
   return (
     <Container fluid className="overflow-auto overview-background-image ">
-      <GameStarter
-        pathAtom={VANILLA_PATH_ATOM}
-        versionAtom={VANILLA_VERSION_ATOM}
-      />
-      <GameStarter
-        pathAtom={EXTREME_PATH_ATOM}
-        versionAtom={EXTREME_VERSION_ATOM}
-      />
       <RecentFolders />
       <StateButton
         buttonActive={

@@ -138,3 +138,147 @@
 #config-navbar > nav > nav > nav > nav > a {
   font-size: medium;
 } */
+
+/* @import '~bootstrap'; */
+
+/* Hide the default switch appearance */
+input[type="checkbox"] {
+}
+
+/* Style the label element to show the switch image
+.switch-label {
+    width: 19px !important;
+    height: 19px !important;
+    background-image: url('/src/assets/ucp3/checkbox_empty.png') !important;
+    background-size: cover !important;
+    cursor: pointer !important;
+    display: inline-block;
+    align-items: center;
+}
+*/
+/* Style the checked state of the switch
+input[type="checkbox"]:checked + .label:before {
+    background-image: url('/src/assets/ucp3/checkbox_full.png') !important;
+}
+*/
+/* Style the disabled state of the switch
+input[type="checkbox"]:disabled + .label:before {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+*/
+
+/** sword-checkbox **/
+.sword-checkbox input[type="checkbox"],
+.sword-checkbox input[type="radio"] {
+  display: none;
+}
+.sword-checkbox input[type="checkbox"] + label ,
+.sword-checkbox input[type="radio"] + label {
+  display: block;
+  position: relative;
+  padding-left: 32px;
+  font: 14px/20px "Open Sans", Arial, sans-serif;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.sword-checkbox input[type="checkbox"]:hover + label:hover ,
+.sword-checkbox input[type="radio"]:hover + label:hover {
+  cursor: default;
+}
+.sword-checkbox input[type="checkbox"]:hover + label:before,
+.sword-checkbox input[type="radio"]:hover + label:before {
+}
+
+.sword-checkbox input[type="checkbox"] + label:last-child,
+.sword-checkbox input[type="radio"] + label:last-child {
+  margin-bottom: 0;
+}
+.sword-checkbox input[type="checkbox"] + label:before,
+.sword-checkbox input[type="radio"] + label:before {
+  content: "";
+  display: block;
+  background-image: url('/src/assets/ucp3/checkbox_empty.png');
+  background-size: cover;
+  width: 19px;
+  height: 19px;
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  -webkit-transition: all 0.1s, background 0.1s ease-in-out;
+  transition: all 0.1s, background 0.1s ease-in-out;
+}
+.sword-checkbox input[type="checkbox"]:checked + label:before,
+.sword-checkbox input[type="radio"]:checked + label:before {
+  background-image: url('/src/assets/ucp3/checkbox_full.png');
+}
+
+/* Styles for disabled input elements */
+.sword-checkbox input[type="checkbox"]:disabled + label,
+.sword-checkbox input[type="radio"]:disabled + label {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.sword-checkbox input[type="checkbox"]:disabled + label:before,
+.sword-checkbox input[type="radio"]:disabled + label:before {
+}
+
+.transparent-white-bg {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 3px 5px 3px 10px;
+  margin-bottom: 3px;
+  margin-top: 2px;
+}
+
+
+/** sword-checkbox end **/
+
+
+/** slider **/
+.ucp-slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 100%; /* Full-width */
+  height: 25px; /* Specified height */
+
+  /* TODO add the slider background with a border image */
+  border-image-source: url(/src/assets/ucp3/slider.png) !important;
+  border-image-slice: 18 19 0 18 fill !important;
+  border-image-width: 20px 20px 0px 20px !important;
+  border-image-outset: 0px 0px 0px 0px !important;
+
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* chrome, safari (webkit based) */
+.ucp-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background-image: url(src/assets/ucp3/slider.png);
+  cursor: pointer; /* Cursor on hover */
+}
+
+.ucp-slider::-webkit-slider-thumb:active {
+  background-image: url(src/assets/ucp3/slider_active.png);
+}
+
+/* mozilla based */
+.ucp-slider::-moz-range-thumb {
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background-image: url(src/assets/ucp3/slider.png);
+  cursor: pointer; /* Cursor on hover */
+}
+
+.ucp-slider::-moz-range-thumb:active {
+  background-image: url(src/assets/ucp3/slider_active.png);
+}
+/** slider end **/

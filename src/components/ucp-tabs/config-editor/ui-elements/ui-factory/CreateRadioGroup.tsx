@@ -18,6 +18,8 @@ import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
 import { createStatusBarMessage } from './StatusBarMessage';
 
+// TODO is this deprecated?
+
 function CreateRadioGroup(args: {
   spec: DisplayConfigElement;
   disabled: boolean;

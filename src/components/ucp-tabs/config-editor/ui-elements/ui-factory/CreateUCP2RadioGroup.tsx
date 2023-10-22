@@ -12,6 +12,7 @@ import {
 } from 'function/global/global-atoms';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Logger from 'util/scripts/logging';
+import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';

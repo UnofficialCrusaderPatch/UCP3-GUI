@@ -1,0 +1,22 @@
+specification-version: 1.0.0
+config-sparse:
+  modules:
+    ucp:
+      config:
+        ai_attacklimit:
+          value:
+            contents:
+              value:
+                enabled: true
+                sliderValue: 200
+        ai_attackwave:
+          enabled:
+            contents:
+              required-value: true
+        o_onlyai:
+          enabled:
+            contents:
+              value: true
+  plugins: {}
+  load-order:
+    - ucp == 2.15.0

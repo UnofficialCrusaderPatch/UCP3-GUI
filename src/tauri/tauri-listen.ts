@@ -10,7 +10,7 @@ export function onLanguageChange(func: EventCallback<string>) {
 }
 
 export function onBackendLog(
-  func: EventCallback<{ level: number; message: string }>
+  func: EventCallback<{ level: number; message: string }>,
 ) {
   return listen(TAURI_EVENT.LOG_BACKEND, func);
 }

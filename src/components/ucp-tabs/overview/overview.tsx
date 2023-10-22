@@ -1,13 +1,10 @@
 import StateButton from 'components/general/state-button';
 import { checkForGUIUpdates } from 'function/download/gui-update';
-import {
-  checkForUCP3Updates,
-  installUCPFromZip,
-} from 'function/download/ucp-download-handling';
-import { UCPState } from 'function/ucp/ucp-state';
+import { installUCPFromZip } from 'function/download/ucp-download-handling';
+import { UCPState } from 'function/ucp-files/ucp-state';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
-import { Button, Container, Modal } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
@@ -16,9 +13,11 @@ import {
   useUCPState,
   useUCPVersion,
 } from 'hooks/jotai/helper';
-import RecentFolders from './recent-folders';
+import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 
 import './overview.css';
+
+import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -26,9 +25,6 @@ export default function Overview() {
   const [ucpVersionResult, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
-
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
@@ -58,6 +54,10 @@ export default function Overview() {
       case UCPState.INACTIVE:
         ucpVersionString = ucpVersion.toString();
         activateButtonString = t('gui-editor:overview.activate.do.activate');
+        break;
+      case UCPState.WRONG_FOLDER:
+        ucpVersionString = t('gui-editor:overview.not.installed');
+        activateButtonString = t('gui-editor:overview.wrong.folder');
         break;
       default:
         ucpVersionString = t('gui-editor:overview.unknown.state');
@@ -96,6 +96,7 @@ export default function Overview() {
           }
           return result;
         }}
+        tooltip={t('gui-editor:overview.activationTooltip')}
       />
 
       {/*      <StateButton
@@ -153,13 +154,25 @@ export default function Overview() {
             currentFolder,
             // can be used to transform -> although splitting into more components might be better
             (status) => stateUpdate(status),
-            t
+            t,
           );
           if (zipInstallResult.ok().isPresent()) {
             // load new state
             await receiveState();
             await receiveVersion();
-            setShow(true);
+
+            const confirmed = await showGeneralModalOkCancel({
+              title: t('gui-general:require.reload.title'),
+              message: t('gui-editor:overview.require.reload.text'),
+            });
+            // const confirmed = await confirm(
+            //   t('gui-editor:overview.require.reload.text'),
+            //   { title: t('gui-general:require.reload.title'), type: 'warning' }
+            // );
+
+            if (confirmed) {
+              reloadCurrentWindow();
+            }
           }
           setOverviewButtonActive(true);
           return zipInstallResult.mapOk(() => '').mapErr((err) => String(err));
@@ -177,7 +190,8 @@ export default function Overview() {
         buttonVariant="ucp-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async (stateUpdate) => Result.emptyOk()}
+        func={async () => Result.emptyOk()}
+        tooltip={t('gui-editor:overview.uninstallationToolTip')}
       />
       <StateButton
         buttonActive={overviewButtonActive}
@@ -194,30 +208,6 @@ export default function Overview() {
           Result.tryAsync(() => checkForGUIUpdates(stateUpdate, t))
         }
       />
-      <div className="m-5">
-        <Modal show={show} onHide={handleClose} className="text-dark">
-          <Modal.Header closeButton>
-            <Modal.Title>{t('gui-general:require.reload.title')}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {t('gui-editor:overview.require.reload.text')}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              {t('gui-general:close')}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={(event) => {
-                handleClose();
-                reloadCurrentWindow();
-              }}
-            >
-              {t('gui-general:reload')}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
     </Container>
   );
 }

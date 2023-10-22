@@ -13,12 +13,13 @@ export type JSType = {
 };
 
 export function getPropertyIfExistsAndTypeOf<
-  T extends Exclude<keyof JSType, 'undefined'>
+  T extends Exclude<keyof JSType, 'undefined'>,
 >(
   object: Record<string, unknown>,
   property: string,
-  type: T
+  type: T,
 ): Option<JSType[T]> {
+  // eslint-disable-next-line valid-typeof
   return object[property] !== undefined && typeof object[property] === type
     ? Option.of(object[property] as JSType[T])
     : Option.ofEmpty();

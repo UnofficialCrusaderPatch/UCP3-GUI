@@ -1,6 +1,6 @@
 import { DisplayConfigElement } from 'config/ucp/common';
 import { useTranslation } from 'react-i18next';
-import { warn } from 'util/scripts/logging';
+import Logger from 'util/scripts/logging';
 import { DisplayDefaults } from '../display-defaults';
 import CreateChoice from './CreateChoice';
 // eslint-disable-next-line import/no-cycle
@@ -16,6 +16,11 @@ import CreateUCP2RadioGroup from './CreateUCP2RadioGroup';
 import CreateUCP2Slider from './CreateUCP2Slider';
 import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
 import CreateUCP2Switch from './CreateUCP2Switch';
+import CreateFileInput, {
+  FileInputDisplayConfigElement,
+} from './CreateFileInput';
+
+const LOGGER = new Logger('CreateUIElement.tsx');
 
 function CreateUIElement(args: {
   spec: DisplayConfigElement;
@@ -32,12 +37,12 @@ function CreateUIElement(args: {
     }
   }
   if (spec.display === undefined) {
-    warn(
+    LOGGER.msg(
       t('gui-editor:config.element.unsupported.type', {
         url: spec.url,
         type: spec.contents.type,
-      })
-    );
+      }),
+    ).warn();
     return <div />;
   }
   if (spec.display === 'UCP2Slider') {
@@ -116,12 +121,21 @@ function CreateUIElement(args: {
       <CreateRadioGroup spec={spec} disabled={disabled} className={className} />
     );
   }
-  warn(
+  if (spec.display === 'FileInput') {
+    return (
+      <CreateFileInput
+        spec={spec as FileInputDisplayConfigElement}
+        disabled={disabled}
+        className={className}
+      />
+    );
+  }
+  LOGGER.msg(
     t('gui-editor:config.element.unsupported.type', {
       url: spec.url,
       type: spec.contents.type,
-    })
-  );
+    }),
+  ).warn();
   return <div />;
 }
 

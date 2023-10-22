@@ -80,26 +80,6 @@ export function useSetConfigurationWarnings() {
   return useSetAtom(globalAtoms.CONFIGURATION_WARNINGS_REDUCER_ATOM);
 }
 
-export function useExtensionsReducer() {
-  return useAtom(globalAtoms.EXTENSIONS_REDUCER_ATOM);
-}
-export function useExtensions() {
-  return useAtomValue(globalAtoms.EXTENSIONS_REDUCER_ATOM);
-}
-export function useSetExtensions() {
-  return useSetAtom(globalAtoms.EXTENSIONS_REDUCER_ATOM);
-}
-
-export function useActiveExtensionsReducer() {
-  return useAtom(globalAtoms.ACTIVE_EXTENSIONS_REDUCER_ATOM);
-}
-export function useActiveExtensions() {
-  return useAtomValue(globalAtoms.ACTIVE_EXTENSIONS_REDUCER_ATOM);
-}
-export function useSetActiveExtensions() {
-  return useSetAtom(globalAtoms.ACTIVE_EXTENSIONS_REDUCER_ATOM);
-}
-
 export function useConfigurationDefaultsReducer() {
   return useAtom(globalAtoms.CONFIGURATION_DEFAULTS_REDUCER_ATOM);
 }
@@ -128,4 +108,34 @@ export function useConfigurationLocks() {
 }
 export function useSetConfigurationLocks() {
   return useSetAtom(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
+}
+
+export function useConfigurationSuggestionsReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+export function useConfigurationSuggestions() {
+  return useAtomValue(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+export function useSetConfigurationSuggestions() {
+  return useSetAtom(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+
+export function useConfigurationQualifierReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}
+
+export function useConfigurationQualifier() {
+  return useAtomValue(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}
+
+export function useSetConfigurationQualifier() {
+  return useSetAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}
+
+export function useGeneralOkayCancelModalWindowReducer() {
+  return useAtom(globalAtoms.GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM);
+}
+
+export function useGeneralOkModalWindowReducer() {
+  return useAtom(globalAtoms.GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM);
 }

@@ -27,7 +27,7 @@ export class RecentFolderHelper {
 
     // add to cache
     const alreadyThereIndex = this.#currentRecent.findIndex(
-      (recentFolder) => recentFolder === path
+      (recentFolder) => recentFolder === path,
     );
     if (alreadyThereIndex !== -1) {
       this.#currentRecent.splice(alreadyThereIndex, 1);
@@ -46,7 +46,7 @@ export class RecentFolderHelper {
     removeGuiConfigRecentFolder(path); // async, effects only noticeable at next get or load
 
     const alreadyThereIndex = this.#currentRecent.findIndex(
-      (recentFolder) => recentFolder === path
+      (recentFolder) => recentFolder === path,
     );
     if (alreadyThereIndex === -1) {
       // Should not happen, but okay, let's just return

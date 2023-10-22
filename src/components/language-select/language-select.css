@@ -1,8 +1,7 @@
-
 .language-select-container {
   position: absolute;
   top: 8px;
-  right:  12px;
+  right: 12px;
 }
 
 .language-select-container select {
@@ -28,6 +27,6 @@
 }
 
 .dark-dropdown option {
-  background-color: rgba(0, 0, 0, 0.800) !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
   color: white;
 }

@@ -4,20 +4,37 @@ import yaml from 'yaml';
 
 import { readDir } from 'tauri/tauri-files';
 
-import { ConfigEntry, Extension, OptionEntry } from 'config/ucp/common';
-import { info } from 'util/scripts/logging';
+import {
+  ConfigEntry,
+  ConfigFile,
+  ConfigFileExtensionEntry,
+  Extension,
+  OptionEntry,
+} from 'config/ucp/common';
+import Logger from 'util/scripts/logging';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
 import { changeLocale } from './locale';
+import { ExtensionTree } from './dependency-management/dependency-resolution';
+
+const LOGGER = new Logger('discovery.ts');
 
 const OPTIONS_FILE = 'options.yml';
 const CONFIG_FILE = 'config.yml';
 const DEFINITION_FILE = 'definition.yml';
 const LOCALE_FOLDER = 'locale';
+const DESCRIPTION_FILE = 'description.md';
+
+async function readDescription(eh: ExtensionHandle): Promise<string> {
+  if (await eh.doesEntryExist(DESCRIPTION_FILE)) {
+    return eh.getTextContents(DESCRIPTION_FILE);
+  }
+  return '# No description provided';
+}
 
 async function readUISpec(
-  eh: ExtensionHandle
+  eh: ExtensionHandle,
 ): Promise<{ options: { [key: string]: unknown }[] }> {
   if (await eh.doesEntryExist(OPTIONS_FILE)) {
     return yaml.parse(await eh.getTextContents(OPTIONS_FILE));
@@ -25,35 +42,40 @@ async function readUISpec(
   return { options: [] };
 }
 
-async function readConfig(
-  eh: ExtensionHandle
-): Promise<{ [key: string]: unknown }> {
+async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
   if (await eh.doesEntryExist(CONFIG_FILE)) {
     return yaml.parse(await eh.getTextContents(CONFIG_FILE));
   }
-  return {};
+  return {
+    'specification-version': '0.0.0',
+    'config-sparse': {
+      modules: {},
+      plugins: {},
+      'load-order': [],
+    },
+  };
 }
 
 async function setLocale(
   eh: ExtensionHandle,
   ext: Extension,
-  language: string
+  language: string,
 ): Promise<void> {
   // TODO: folder checking is broken. Why?
   const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}/`);
   if (locFolder) {
     if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
       const locale = yaml.parse(
-        await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`)
+        await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`),
       );
 
       ext.ui.forEach((uiElement) => {
         changeLocale(locale, uiElement as { [key: string]: unknown });
       });
     } else {
-      console.log(
-        `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`
-      );
+      LOGGER.msg(
+        `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
+      ).info();
     }
   }
 }
@@ -61,7 +83,7 @@ async function setLocale(
 function collectOptionEntries(
   obj: { [key: string]: unknown },
   extensionName: string,
-  collection?: { [key: string]: OptionEntry }
+  collection?: { [key: string]: OptionEntry },
 ) {
   // eslint-disable-next-line no-param-reassign
   if (collection === undefined) collection = {};
@@ -84,7 +106,7 @@ function collectOptionEntries(
         collectOptionEntries(
           obj[key] as { [key: string]: unknown },
           extensionName,
-          collection
+          collection,
         );
       });
     }
@@ -95,7 +117,7 @@ function collectOptionEntries(
 function collectConfigEntries(
   obj: { contents: unknown; [key: string]: unknown },
   url?: string,
-  collection?: { [key: string]: ConfigEntry }
+  collection?: { [key: string]: ConfigEntry },
 ) {
   // eslint-disable-next-line no-param-reassign
   if (collection === undefined) collection = {};
@@ -103,13 +125,13 @@ function collectConfigEntries(
   if (url === undefined) url = '';
 
   if (obj !== null && obj !== undefined && typeof obj === 'object') {
-    if (obj.value !== undefined) {
+    if (obj.contents !== undefined) {
       const o = obj as ConfigEntry;
       if (collection[url] !== undefined) {
-        throw new Error(`url already has a value: ${url}`);
+        throw new Error(`url already has been set: ${url}`);
       }
       // eslint-disable-next-line no-param-reassign
-      collection[url] = o.contents as unknown as ConfigEntry;
+      collection[url] = { ...o };
     } else {
       Object.keys(obj).forEach((key) => {
         let newUrl = url;
@@ -121,7 +143,7 @@ function collectConfigEntries(
         collectConfigEntries(
           obj[key] as { contents: unknown; [key: string]: unknown },
           newUrl,
-          collection
+          collection,
         );
       });
     }
@@ -131,16 +153,20 @@ function collectConfigEntries(
 }
 
 async function getExtensionHandles(ucpFolder: string) {
-  const moduleDir = `${ucpFolder}/modules`;
-  const modDirEnts = (await readDir(moduleDir)).ok().getOrReceive(() => []);
+  const moduleDir = `${ucpFolder}/modules/`;
+  const modDirEnts = (await readDir(moduleDir))
+    .ok()
+    .getOrReceive(() => []) as FileEntry[];
 
-  const pluginDir = `${ucpFolder}/plugins`;
-  const pluginDirEnts = (await readDir(pluginDir)).ok().getOrReceive(() => []);
+  const pluginDir = `${ucpFolder}/plugins/`;
+  const pluginDirEnts = (await readDir(pluginDir))
+    .ok()
+    .getOrReceive(() => []) as FileEntry[];
 
   const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(
     (fe) =>
       (fe.name || '').endsWith('.zip') ||
-      (fe.children !== null && fe.children !== undefined)
+      (fe.children !== null && fe.children !== undefined),
   );
   const den = de.map((f) => f.name);
   const dirEnts = de.filter((e) => {
@@ -181,7 +207,7 @@ async function getExtensionHandles(ucpFolder: string) {
         return new DirectoryExtensionHandle(folder) as ExtensionHandle;
       }
       throw new Error(`${folder} not a valid extension directory`);
-    })
+    }),
   );
 
   return exts;
@@ -190,26 +216,46 @@ async function getExtensionHandles(ucpFolder: string) {
 const Discovery = {
   discoverExtensions: async (
     gameFolder: string,
-    locale?: string
+    locale?: string,
   ): Promise<Extension[]> => {
-    info(`Discovering extensions`);
+    LOGGER.msg('Discovering extensions').info();
 
     const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
 
-    return Promise.all(
+    const extensions = await Promise.all(
       ehs.map(async (eh) => {
-        const type = eh.path.indexOf('/modules/') ? 'module' : 'plugin';
+        const inferredType =
+          eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
         const definition = yaml.parse(
-          await eh.getTextContents(`${DEFINITION_FILE}`)
+          await eh.getTextContents(`${DEFINITION_FILE}`),
         );
         const { name, version } = definition;
 
-        definition.dependencies = definition.depends || [];
+        const { type } = definition;
+
+        let assumedType = inferredType;
+        if (type === undefined) {
+          LOGGER.msg(
+            '"type: " was not found in definition.yml of {}-{}. Extension was inferred to be a {}',
+            name,
+            version,
+            inferredType,
+          ).warn();
+        } else if (type !== inferredType) {
+          LOGGER.msg(
+            `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`,
+          ).error();
+        } else {
+          assumedType = type;
+        }
+
+        definition.dependencies =
+          definition.dependencies || definition.depends || [];
 
         const ext = {
           name,
           version,
-          type,
+          type: assumedType,
           definition,
         } as unknown as Extension;
 
@@ -220,25 +266,72 @@ const Discovery = {
 
         ext.optionEntries = collectOptionEntries(
           ext.ui as unknown as { [key: string]: unknown },
-          ext.name
+          ext.name,
         );
 
-        ext.configEntries = {
-          ...collectConfigEntries(
-            ext.config.modules as { [key: string]: unknown; contents: unknown }
-          ),
-          ...collectConfigEntries(
-            ext.config.plugins as { [key: string]: unknown; contents: unknown }
-          ),
+        ext.configEntries = {};
+
+        const parseEntry = ([extensionName, data]: [
+          string,
+          {
+            config: ConfigFileExtensionEntry;
+          },
+        ]) => {
+          const result = collectConfigEntries(
+            data.config as {
+              [key: string]: unknown;
+              contents: unknown;
+            },
+            extensionName,
+          );
+
+          ext.configEntries = { ...ext.configEntries, ...result };
         };
+
+        if (
+          ext.config['config-sparse'] === undefined ||
+          ext.config['config-sparse'].modules === undefined ||
+          ext.config['config-sparse'].plugins === undefined
+        ) {
+          LOGGER.msg(
+            `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`,
+          ).warn();
+        } else {
+          Object.entries(ext.config['config-sparse'].modules).forEach(
+            parseEntry,
+          );
+          Object.entries(ext.config['config-sparse'].plugins).forEach(
+            parseEntry,
+          );
+        }
+
+        ext.descriptionMD = await readDescription(eh);
 
         eh.close();
 
         return ext;
-      })
+      }),
     );
+
+    const extensionsByID: { [id: string]: Extension } = {};
+
+    extensions.forEach((e) => {
+      const id = `${e.name}@${e.version}`;
+      if (extensionsByID[id] !== undefined) {
+        throw Error(
+          `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`,
+        );
+      }
+      extensionsByID[id] = e;
+    });
+
+    return extensions;
   },
 };
 
+function tryResolveDependencies(extensions: Extension[]) {
+  return new ExtensionTree(extensions).tryResolveDependencies();
+}
+
 // eslint-disable-next-line import/prefer-default-export
-export { Discovery };
+export { Discovery, collectConfigEntries, tryResolveDependencies };

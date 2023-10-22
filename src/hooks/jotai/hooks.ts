@@ -6,9 +6,12 @@ import {
   registerTauriEventListener,
   removeTauriEventListener,
 } from 'tauri/tauri-hooks';
-import { getUCPState, UCPState } from 'function/ucp/ucp-state';
+import { getUCPState, UCPState } from 'function/ucp-files/ucp-state';
 import Result from 'util/structs/result';
-import { getEmptyUCPVersion, loadUCPVersion } from 'function/ucp/ucp-version';
+import {
+  getEmptyUCPVersion,
+  loadUCPVersion,
+} from 'function/ucp-files/ucp-version';
 import {
   createFunctionForAsyncAtomWithMutate,
   createHookInitializedFunctionForAsyncAtomWithMutate,
@@ -54,7 +57,7 @@ export const useLanguageHook =
     if (prev?.unlistenChangeEvent) {
       removeTauriEventListener(
         TauriEvent.WINDOW_CLOSE_REQUESTED,
-        prev.unlistenChangeEvent
+        prev.unlistenChangeEvent,
       );
     }
     registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, unlistenFunc);
@@ -70,7 +73,7 @@ export const useUCPStateHook =
     async (_prev, currentFolder: string) =>
       (await Result.tryAsync(getUCPState, currentFolder))
         .ok()
-        .getOrElse(UCPState.UNKNOWN)
+        .getOrElse(UCPState.UNKNOWN),
   );
 
 export const useUCPVersionHook =
@@ -78,5 +81,5 @@ export const useUCPVersionHook =
     async (_prev, currentFolder: string) =>
       (await loadUCPVersion(currentFolder))
         .ok()
-        .getOrReceive(getEmptyUCPVersion)
+        .getOrReceive(getEmptyUCPVersion),
   );

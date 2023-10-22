@@ -1,9 +1,9 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import {
-  useActiveExtensions,
   useConfigurationDefaults,
   useConfigurationReducer,
   useConfigurationWarnings,
+  useExtensionState,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
 import { useTranslation } from 'react-i18next';
@@ -22,10 +22,11 @@ function CreateSections(args: { readonly: boolean }): {
   nav: ReactElement | null;
   content: ReactElement | null;
 } {
-  const activeExtensions = useActiveExtensions();
+  const extensionsState = useExtensionState();
+  const { activeExtensions } = extensionsState;
 
   const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
-    (o: OptionEntry) => o.hidden === undefined || o.hidden === false
+    (o: OptionEntry) => o.hidden === undefined || o.hidden === false,
   );
   const definition = optionEntriesToHierarchical(optionEntries);
   const { readonly } = args;
@@ -40,7 +41,7 @@ function CreateSections(args: { readonly: boolean }): {
         target: '#config-navbar',
         offset: 10,
         method: 'offset',
-      }
+      },
     );
   });
 
@@ -73,7 +74,7 @@ function CreateSections(args: { readonly: boolean }): {
         disabled={readonly}
         className=""
       />
-    )
+    ),
   );
 
   const children = Object.keys(definition.sections).map((key) => {

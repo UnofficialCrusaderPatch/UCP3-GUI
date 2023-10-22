@@ -8,7 +8,7 @@ import {
 function isNumberValuePermittedByConfig(
   value: number,
   config: ConfigEntry,
-  configName: string
+  configName: string,
 ): PermissionStatus {
   const configValueDef = config.contents;
   const requiredValue = configValueDef['required-value'];
@@ -27,7 +27,7 @@ function isNumberValuePermittedByConfig(
       return {
         status: 'illegal',
         reason: `value (${value}) too low (${requiredMin})`,
-        by: config.name,
+        by: configName,
       };
     }
   }
@@ -37,7 +37,7 @@ function isNumberValuePermittedByConfig(
       return {
         status: 'illegal',
         reason: `value (${value}) too high (${requiredMax})`,
-        by: config.name,
+        by: configName,
       };
     }
   }
@@ -46,8 +46,8 @@ function isNumberValuePermittedByConfig(
   if (suggestedValue !== undefined && value !== suggestedValue) {
     return {
       status: 'warning',
-      reason: `value (${value}) does not match value (${suggestedValue}) suggested by ${config.name}`,
-      by: config.name,
+      reason: `value (${value}) does not match value (${suggestedValue}) suggested by ${configName}`,
+      by: configName,
     };
   }
   const suggestedMin = configValueDef['suggested-min'];
@@ -56,8 +56,8 @@ function isNumberValuePermittedByConfig(
     if (value < suggestedMin) {
       return {
         status: 'warning',
-        reason: `value (${value}) might be too low (${suggestedMin}) as suggested by ${config.name}`,
-        by: config.name,
+        reason: `value (${value}) might be too low (${suggestedMin}) as suggested by ${configName}`,
+        by: configName,
       };
     }
   }
@@ -65,8 +65,8 @@ function isNumberValuePermittedByConfig(
     if (value > suggestedMax) {
       return {
         status: 'warning',
-        reason: `value (${value}) might be too high (${suggestedMax}) as suggested by ${config.name}`,
-        by: config.name,
+        reason: `value (${value}) might be too high (${suggestedMax}) as suggested by ${configName}`,
+        by: configName,
       };
     }
   }
@@ -81,7 +81,7 @@ function isNumberValuePermittedByConfig(
 function isNumberValuePermittedByConfigs(
   value: number,
   spec: OptionEntry,
-  extensions: Extension[]
+  extensions: Extension[],
 ): PermissionStatus {
   if (spec === undefined || spec.url === undefined) {
     return {

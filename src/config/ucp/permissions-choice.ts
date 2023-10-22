@@ -3,7 +3,7 @@ import { ConfigEntry, OptionEntry, Extension } from './common';
 function isChoiceValuePermittedByConfig(
   value: string,
   config: ConfigEntry,
-  configName: string
+  configName: string,
 ) {
   const configValueDef = config.contents;
 
@@ -24,7 +24,7 @@ function isChoiceValuePermittedByConfig(
     return {
       status: 'illegal',
       reason: `choice (${value}) not a valid choice (${JSON.stringify(
-        requiredValues
+        requiredValues,
       )}) as required by ${configName}`,
       by: configName,
     };
@@ -47,7 +47,7 @@ function isChoiceValuePermittedByConfig(
     return {
       status: 'warning',
       reason: `choice (${value}) not a suggested choice (${JSON.stringify(
-        suggestedValues
+        suggestedValues,
       )}) as suggested by ${configName}`,
       by: configName,
     };
@@ -60,7 +60,7 @@ function isChoiceValuePermittedByConfig(
 function isChoiceValuePermittedByConfigs(
   value: string,
   spec: OptionEntry,
-  extensions: Extension[]
+  extensions: Extension[],
 ) {
   // eslint-disable-next-line no-restricted-syntax
   for (const ext of extensions) {

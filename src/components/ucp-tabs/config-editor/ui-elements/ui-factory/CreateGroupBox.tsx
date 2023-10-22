@@ -38,14 +38,14 @@ function CreateGroupBox(args: {
             disabled={disabled}
             className=""
           />
-        </Col>
+        </Col>,
       );
     }
     // Or use key: children[i].url but that fails if no children?
     cs.push(
       <Row key={`${name}-${row}`} className="my-1">
         {rowChildren}
-      </Row>
+      </Row>,
     );
   }
 

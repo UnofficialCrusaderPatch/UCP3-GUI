@@ -40,7 +40,7 @@ async function getLatestUCP3Release() {
           fileName: asset.name,
           url: asset.url,
           downloadUrl: asset.browser_download_url,
-        } as GitReleaseAttachment)
+        }) as GitReleaseAttachment,
     ),
   } as GitRelease;
 }

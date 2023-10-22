@@ -1,18 +1,18 @@
-import ZipHandler from 'util/structs/zip-handler';
+import { ZipReader } from 'util/structs/zip-handler';
 import ExtensionHandle from './extension-handle';
 
 class RustZipExtensionHandle implements ExtensionHandle {
-  #zip: ZipHandler;
+  #zip: ZipReader;
 
   path: string;
 
-  private constructor(path: string, zip: ZipHandler) {
+  private constructor(path: string, zip: ZipReader) {
     this.path = path;
     this.#zip = zip;
   }
 
   static async fromPath(path: string) {
-    return new RustZipExtensionHandle(path, await ZipHandler.open(path));
+    return new RustZipExtensionHandle(path, await ZipReader.open(path));
   }
 
   async getTextContents(path: string): Promise<string> {

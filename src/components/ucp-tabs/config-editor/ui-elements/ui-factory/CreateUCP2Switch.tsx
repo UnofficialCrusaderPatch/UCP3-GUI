@@ -1,8 +1,8 @@
 import {
-  useActiveExtensions,
   useConfigurationDefaults,
   useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
@@ -10,8 +10,11 @@ import {
 import { Form } from 'react-bootstrap';
 import { DisplayConfigElement } from 'config/ucp/common';
 
+import { useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
+import { createStatusBarMessage } from './StatusBarMessage';
 
 function CreateUCP2Switch(args: {
   spec: DisplayConfigElement;
@@ -23,6 +26,7 @@ function CreateUCP2Switch(args: {
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
   const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -30,9 +34,23 @@ function CreateUCP2Switch(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
+
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url],
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const hasWarning = configurationWarnings[url] !== undefined;
   const headerElement = (
@@ -54,9 +72,7 @@ function CreateUCP2Switch(args: {
             value: Object.fromEntries([[url, true]]),
           });
         }}
-        disabled={
-          !isEnabled || disabled || configurationLocks[url] !== undefined
-        }
+        disabled={isDisabled}
       />
       <label className="fs-6" htmlFor={`${url}`}>
         {header}
@@ -65,7 +81,16 @@ function CreateUCP2Switch(args: {
   );
 
   return (
-    <div className="col" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div
+      className="col"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(statusBarMessage);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       {headerElement}
       {text}
     </div>

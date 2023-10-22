@@ -11,7 +11,7 @@ import { isSetValuePermittedByConfigs } from './permissions-set';
 function isValuePermittedByConfig(
   value: unknown,
   config: ConfigEntry,
-  configName: string
+  configName: string,
 ): PermissionStatus {
   const configValueDef = config.contents;
 
@@ -44,7 +44,7 @@ function isValuePermittedByConfig(
 function isValuePermittedByConfigs(
   value: unknown,
   spec: OptionEntry,
-  extensions: Extension[]
+  extensions: Extension[],
 ): PermissionStatus {
   // eslint-disable-next-line no-restricted-syntax
   for (const ext of extensions) {
@@ -69,7 +69,7 @@ function isValuePermittedByConfigs(
 function isValuePermitted(
   value: unknown,
   spec: OptionEntry,
-  extensions: Extension[]
+  extensions: Extension[],
 ) {
   /* 	if(spec.type !== typeof(value)) {
           return {
@@ -113,7 +113,7 @@ function isValuePermitted(
       return {
         status: 'illegal',
         reason: `choice (${choiceValue}) not among the available options ${JSON.stringify(
-          choices
+          choices,
         )}`,
         by: 'spec',
       };

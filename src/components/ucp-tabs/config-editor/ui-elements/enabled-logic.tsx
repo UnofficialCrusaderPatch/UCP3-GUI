@@ -1,7 +1,7 @@
 const parseEnabledLogic = (
   statement: string,
   configuration: { [key: string]: unknown },
-  configurationDefaults: { [key: string]: unknown }
+  configurationDefaults: { [key: string]: unknown },
 ) => {
   if (statement === undefined || statement === null) return true;
 

@@ -5,7 +5,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/global/global-atoms';
-import Logger from 'util/scripts/logging';
+import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
@@ -59,7 +59,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   propagateActiveExtensionsChange(res);
 
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, res);
-  LOGGER.obj('New extension state', res).info();
+  ConsoleLogger.debug('New extension state', res);
 };
 
 export default inactiveExtensionElementClickCallback;

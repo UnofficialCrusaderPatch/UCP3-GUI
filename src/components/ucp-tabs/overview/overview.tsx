@@ -14,10 +14,9 @@ import {
   useUCPVersion,
 } from 'hooks/jotai/helper';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import RecentFolders from './recent-folders';
 
 import './overview.css';
-
-import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();

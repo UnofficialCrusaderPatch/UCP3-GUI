@@ -4,19 +4,9 @@
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useConfigurationDefaults,
-  useConfigurationQualifier,
-  useConfigurationReducer,
-  useConfigurationTouchedReducer,
-  useConfigurationWarnings,
-  useExtensionState,
-  useUcpConfigFileValue,
-} from 'hooks/jotai/globals-wrapper';
-import { useCurrentGameFolder, useGameFolder } from 'hooks/jotai/helper';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
 
 import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
-import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
@@ -24,6 +14,16 @@ import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { reloadCurrentWindow } from 'function/window-actions';
 
 import { ConsoleLogger } from 'util/scripts/logging';
+import { useAtom, useAtomValue } from 'jotai';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+  UCP_CONFIG_FILE_ATOM,
+} from 'function/global/global-atoms';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';
@@ -42,16 +42,23 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
 
   const gameFolder = useCurrentGameFolder();
-  const configurationDefaults = useConfigurationDefaults();
-  const file = useUcpConfigFileValue();
-  const configurationWarnings = useConfigurationWarnings();
-  const [configuration, setConfiguration] = useConfigurationReducer();
-  const [configurationTouched, setConfigurationTouched] =
-    useConfigurationTouchedReducer();
-  const extensionsState = useExtensionState();
+  const configurationDefaults = useAtomValue(
+    CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  );
+  const file = useAtomValue(UCP_CONFIG_FILE_ATOM);
+  const configurationWarnings = useAtomValue(
+    CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  );
+  const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
+  const [configurationTouched, setConfigurationTouched] = useAtom(
+    CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  );
+  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;
 
-  const configurationQualifier = useConfigurationQualifier();
+  const configurationQualifier = useAtomValue(
+    CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  );
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 

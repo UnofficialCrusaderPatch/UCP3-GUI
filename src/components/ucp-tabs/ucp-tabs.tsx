@@ -1,17 +1,17 @@
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { tryResolveDependencies } from 'function/extensions/discovery';
-import {
-  useExtensionState,
-  useInitDoneValue,
-  useInitRunningValue,
-} from 'hooks/jotai/globals-wrapper';
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import Logger from 'util/scripts/logging';
 import { useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
-import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/global/global-atoms';
+import {
+  DOES_UCP_FOLDER_EXIST_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+  INIT_DONE,
+  INIT_RUNNING,
+} from 'function/global/global-atoms';
 
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
@@ -22,14 +22,14 @@ import './ucp-tabs.css';
 const LOGGER = new Logger('ucp-taps.tsx');
 
 export default function UcpTabs() {
-  const isInit = useInitDoneValue();
-  const isInitRunning = useInitRunningValue();
+  const isInit = useAtomValue(INIT_DONE);
+  const isInitRunning = useAtomValue(INIT_RUNNING);
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
   const displayConfigTabs = isInit && !isInitRunning;
 
-  const extensionsState = useExtensionState();
+  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
 

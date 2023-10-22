@@ -60,7 +60,7 @@ const extensionStateReducer = (
 export const INIT_DONE = atom(false);
 export const INIT_RUNNING = atom(false);
 export const UCP_CONFIG_FILE_ATOM = atom('');
-export const GAME_FOLDER_ATOM = atom(''); // unused
+export const GAME_FOLDER_ATOM = atom('');
 
 // reducer atoms
 
@@ -130,48 +130,6 @@ export const CONFIGURATION_SUGGESTIONS_REDUCER_ATOM = atomWithReducer(
 export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
   {},
   configurationQualifierReducer,
-);
-
-const generalOkCancelModalWindowReducer = (
-  oldState: GeneralOkCancelModalWindow,
-  newState: Partial<GeneralOkCancelModalWindow>,
-): GeneralOkCancelModalWindow => {
-  const state = { ...oldState, ...newState };
-  return state;
-};
-
-export const GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
-  {
-    type: 'ok_cancel',
-    show: false,
-    message: '',
-    title: '',
-    handleAction: () => {},
-    handleClose: () => {},
-    ok: '',
-    cancel: '',
-  },
-  generalOkCancelModalWindowReducer,
-);
-
-const generalOkModalWindowReducer = (
-  oldState: GeneralOkModalWindow,
-  newState: Partial<GeneralOkModalWindow>,
-): GeneralOkModalWindow => {
-  const state = { ...oldState, ...newState };
-  return state;
-};
-
-export const GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM = atomWithReducer(
-  {
-    type: 'ok',
-    show: false,
-    message: '',
-    title: '',
-    handleAction: () => {},
-    ok: '',
-  },
-  generalOkModalWindowReducer,
 );
 
 export type PreferredExtensionVersionDictionary = {

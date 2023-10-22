@@ -1,17 +1,10 @@
 import { Container, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import {
-  useConfigurationTouched,
-  useUcpConfigFileValue,
-  useConfigurationQualifier,
-  useExtensionState,
-  useConfiguration,
-} from 'hooks/jotai/globals-wrapper';
 
 import './extension-manager.css';
 
 import { useState } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
@@ -27,7 +20,14 @@ import {
   PlusLg,
   Stack,
 } from 'react-bootstrap-icons';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import {
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+  STATUS_BAR_MESSAGE_ATOM,
+  UCP_CONFIG_FILE_ATOM,
+} from 'function/global/global-atoms';
 import { ZipWriter } from 'util/structs/zip-handler';
 import {
   ActiveExtensionElement,
@@ -44,20 +44,22 @@ import ImportButton from '../config-editor/ImportButton';
 const LOGGER = new Logger('CreateUIElement.tsx');
 
 export default function ExtensionManager() {
-  const extensionsState = useExtensionState();
+  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
-  const configuration = useConfiguration();
+  const configuration = useAtomValue(CONFIGURATION_REDUCER_ATOM);
 
   // currently simply reset:
-  const configurationTouched = useConfigurationTouched();
-  const file = useUcpConfigFileValue();
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const file = useAtomValue(UCP_CONFIG_FILE_ATOM);
   const { activeExtensions } = extensionsState;
 
   const [configStatus, setConfigStatus] = useState('');
 
-  const configurationQualifier = useConfigurationQualifier();
+  const configurationQualifier = useAtomValue(
+    CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  );
 
   const [showAllExtensions, setShowAllExtensions] = useAtom(
     GuiSettings.SHOW_ALL_EXTENSIONS_ATOM,

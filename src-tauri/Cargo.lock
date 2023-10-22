@@ -3565,6 +3565,7 @@ name = "ucp_gui"
 version = "0.0.13"
 dependencies = [
  "anyhow",
+ "dunce",
  "log",
  "log4rs",
  "serde",

@@ -7,7 +7,6 @@ pub const BASE_FOLDER: &str = "UnofficialCrusaderPatch3";
 pub const NUMBER_OF_RECENT_FOLDERS: usize = 10;
 pub const CONFIG_FILE_NAME: &str = "config.json";
 pub const MESSAGE_TITLE: &str = "GUI-Configuration";
-pub const LANGUAGE_CHANGE_EVENT: &str = "language-change";
 
 pub const LOG_LEVEL_DEFAULT: &str = "INFO";
 

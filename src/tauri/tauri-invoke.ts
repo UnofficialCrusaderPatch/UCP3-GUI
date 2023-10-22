@@ -12,8 +12,6 @@ function buildPluginCmd(pluginName: string, command: string) {
 
 /* eslint-disable */
 const TAURI_COMMAND = {
-  CONFIG_SET_LANGUAGE: buildPluginCmd(PLUGIN_CONFIG, 'set_config_language'),
-  CONFIG_GET_LANGUAGE: buildPluginCmd(PLUGIN_CONFIG, 'get_config_language'),
   CONFIG_GET_RECENT_FOLDERS: buildPluginCmd(PLUGIN_CONFIG, 'get_config_recent_folders',),
   CONFIG_GET_MOST_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'get_config_most_recent_folder',),
   CONFIG_ADD_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'add_config_recent_folder',),
@@ -38,14 +36,6 @@ const TAURI_COMMAND = {
   LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
 /* eslint-enable */
-
-export async function setGuiConfigLanguage(lang: string): Promise<void> {
-  return invoke(TAURI_COMMAND.CONFIG_SET_LANGUAGE, { lang });
-}
-
-export async function getGuiConfigLanguage(): Promise<string | null> {
-  return invoke(TAURI_COMMAND.CONFIG_GET_LANGUAGE);
-}
 
 export async function getGuiConfigRecentFolders(): Promise<string[]> {
   return invoke(TAURI_COMMAND.CONFIG_GET_RECENT_FOLDERS);

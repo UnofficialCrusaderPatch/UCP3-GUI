@@ -22,23 +22,13 @@ import {
   INIT_RUNNING,
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
-import {
-  UCPStateHandler,
-  useLanguageHook,
-  useUCPStateHook,
-  useUCPVersionHook,
-} from './hooks';
+import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { UCPStateHandler, useUCPStateHook, useUCPVersionHook } from './hooks';
 
 const LOGGER = new Logger('helper.ts');
 
 export function useCurrentGameFolder() {
   return useAtomValue(GAME_FOLDER_ATOM); // only a proxy
-}
-
-export function useLanguage() {
-  const { i18n } = useTranslation();
-  const [languageState] = useLanguageHook(i18n);
-  return languageState;
 }
 
 export function useUCPState(): [
@@ -197,33 +187,23 @@ export function useGameFolder(): [
   const [stateResult, receiveState] = useUCPStateHook(currentFolder);
   const [versionResult, receiveVersion] = useUCPVersionHook(currentFolder);
 
-  const languageState = useLanguage();
+  // TODO: currently, the language for the extensions/plugins is only set on load,
+  // this is a problem at the moment, since it means the language will not switch with the GUI
+  const language = useAtomValue(LANGUAGE_ATOM);
+
   const [isInitRunning, initConfig] = useInitGlobalConfiguration();
 
   return [
     currentFolder,
     async (newFolder: string) => {
       // kinda bad, it might skip a folder switch
-      if (
-        stateResult.isEmpty() ||
-        versionResult.isEmpty() ||
-        languageState.isEmpty() ||
-        isInitRunning
-      ) {
+      if (stateResult.isEmpty() || versionResult.isEmpty() || isInitRunning) {
         return;
       }
       setCurrentFolder(newFolder);
       await receiveState(newFolder);
       await receiveVersion(newFolder);
-      await initConfig(
-        newFolder,
-        languageState
-          .get()
-          .ok()
-          .map((ok) => ok.getLanguage())
-          .notUndefinedOrNull()
-          .getOrElse(''),
-      );
+      await initConfig(newFolder, language);
     },
   ];
 }

@@ -32,7 +32,7 @@ use crate::constants::{
 };
 use crate::utils::get_roaming_folder_path;
 
-const FROM_FRONTEND_LOG_TARGET: &str = "frontent_target";
+const FROM_FRONTEND_LOG_TARGET: &str = "FRONTEND";
 
 #[derive(Serialize, Clone)]
 struct BackendLog {

@@ -1,15 +1,20 @@
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
 
 import { Form } from 'react-bootstrap';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
+import { createStatusBarMessage } from './StatusBarMessage';
 
 function CreateNumberInput(args: {
   spec: DisplayConfigElement;
@@ -20,6 +25,8 @@ function CreateNumberInput(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, contents } = spec;
@@ -28,15 +35,35 @@ function CreateNumberInput(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
   const hasWarning = configurationWarnings[url] !== undefined;
 
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url],
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
   return (
     <Form.Group
       className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
+      onMouseEnter={() => {
+        setStatusBarMessage(statusBarMessage);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
     >
       {hasWarning ? (
         <ConfigWarning
@@ -70,14 +97,10 @@ function CreateNumberInput(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={isDisabled}
         />
       </div>
-      <div
-        className={`flex-grow-1 px-2 ${
-          !isEnabled || disabled ? 'label-disabled' : ''
-        }`}
-      >
+      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
         <Form.Label
           htmlFor={`${url}-input`}
           // Tooltip stuff

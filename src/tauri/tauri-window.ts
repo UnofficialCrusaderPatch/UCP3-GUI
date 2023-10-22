@@ -16,7 +16,7 @@ export function getCurrentWindow() {
 
 export async function getWindowIfExists(
   windowName: string,
-  isHash = false
+  isHash = false,
 ): Promise<null | WebviewWindow> {
   const hashedWindowName = isHash
     ? windowName
@@ -43,7 +43,7 @@ export async function getWindowIfExists(
 export async function createNewWindow(
   windowName: string,
   options: WindowOptions,
-  errorIfExists = false
+  errorIfExists = false,
 ): Promise<void> {
   const hashOfNewWindow = await getHexHashOfString(windowName);
   const windowForThisPath = await getWindowIfExists(hashOfNewWindow, true);

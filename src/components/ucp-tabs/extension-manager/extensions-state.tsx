@@ -1,103 +1,100 @@
 import { Extension } from 'config/ucp/common';
-import ExtensionDependencySolver from 'config/ucp/extension-dependency-solver';
 import { ExtensionsState } from 'function/global/types';
 
 import './extension-manager.css';
-import { info } from 'util/scripts/logging';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
+import Logger from 'util/scripts/logging';
 
-const addExtensionToExplicityActivatedExtensions = (
+const LOGGER = new Logger('extension-state.ts');
+
+const addExtensionToExplicityActivatedExtensions = async (
   extensionsState: ExtensionsState,
-  eds: ExtensionDependencySolver,
-  extensionsByName: { [k: string]: Extension },
-  extensionsByNameVersionString: { [k: string]: Extension },
-  ext: Extension
+  ext: Extension,
 ) => {
-  // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
+  const { tree } = extensionsState;
 
-  const dependencyExtensionNames = eds.dependenciesFor(ext.name).flat();
+  const newEAE = [...extensionsState.explicitlyActivatedExtensions, ext];
 
-  const dependencies: Extension[] = dependencyExtensionNames
-    .filter(
-      (v: string) =>
-        extensionsState.activeExtensions
-          .map((e: Extension) => e.name)
-          .indexOf(v) === -1
-    )
-    .map((v: string) => {
-      if (extensionsByName[v] !== undefined) {
-        return extensionsByName[v];
-      }
-      throw new Error();
-    }) //           .filter((e: Extension) => dependencyExtensionNames.indexOf(e.name) !== -1)
-    .reverse();
+  const solution = tree.dependenciesForExtensions(newEAE);
 
-  const remainder = extensionsState.activeExtensions
-    .flat()
-    .map((e: Extension) => `${e.name}-${e.version}`)
-    .filter(
-      (es) =>
-        dependencies
-          .map((e: Extension) => `${e.name}-${e.version}`)
-          .indexOf(es) === -1
-    )
-    .map((es: string) => extensionsByNameVersionString[es]);
+  if (solution.status !== 'OK' || solution.extensions === undefined) {
+    LOGGER.msg(solution.message).error();
+    await showGeneralModalOk({
+      message: solution.message,
+      title: 'Error in dependencies',
+    });
 
-  const final = [...dependencies, ...remainder];
+    return extensionsState;
+  }
 
-  const localEDS = new ExtensionDependencySolver(final);
-  info(localEDS.solve());
+  const allDependenciesInLoadOrder = solution.extensions.reverse();
+
+  // Filter out extensions with a different version than those that are now going to be activated
+  const depNames = new Set(allDependenciesInLoadOrder.map((e) => e.name));
+  const installedExtensionsFilteredList =
+    extensionsState.installedExtensions.filter((e) => !depNames.has(e.name));
 
   return {
     ...extensionsState,
-    explicitlyActivatedExtensions: [
-      ...extensionsState.explicitlyActivatedExtensions,
-      ext,
-    ],
-    activeExtensions: final,
-    installedExtensions: extensionsState.installedExtensions.filter(
-      (e: Extension) =>
-        final
-          .map((ex: Extension) => `${ex.name}-${ex.version}`)
-          .indexOf(`${e.name}-${e.version}`) === -1
-    ),
+    explicitlyActivatedExtensions: newEAE,
+    activeExtensions: allDependenciesInLoadOrder,
+    installedExtensions: installedExtensionsFilteredList,
   };
 };
 
-const removeExtensionFromExplicitlyActivatedExtensions = (
+const removeExtensionFromExplicitlyActivatedExtensions = async (
   extensionsState: ExtensionsState,
-  eds: ExtensionDependencySolver,
-  extensions: Extension[],
-  ext: Extension
+  ext: Extension,
 ) => {
-  const relevantExtensions = new Set(
-    extensionsState.explicitlyActivatedExtensions
-      .filter((e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`)
-      .map((e: Extension) => eds.dependenciesFor(e.name).flat())
-      .flat()
+  const { tree } = extensionsState;
+
+  // All needed extensions without ext being active
+  const solution = tree.dependenciesForExtensions(
+    extensionsState.explicitlyActivatedExtensions.filter((e) => e !== ext),
   );
 
+  if (solution.status !== 'OK' || solution.extensions === undefined) {
+    LOGGER.msg(solution.message).error();
+    await showGeneralModalOk({
+      message: solution.message,
+      title: 'Error in dependencies',
+    });
+
+    return extensionsState;
+  }
+
+  const stillRelevantExtensions = solution.extensions;
+
   // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
-  const ae = extensionsState.activeExtensions.filter((e) =>
-    relevantExtensions.has(e.name)
+  const ae = extensionsState.activeExtensions.filter(
+    (e) => stillRelevantExtensions.indexOf(e) !== -1,
   );
+
+  // Remove ext from the explicitly installed extensions list
+  const eae = extensionsState.explicitlyActivatedExtensions.filter(
+    (e) => e !== ext,
+  );
+
+  // Only one version of each extension can be activated.
+  const relevantExtensionNames = new Set(
+    stillRelevantExtensions.map((e) => e.name),
+  );
+  const ie = extensionsState.extensions
+    .filter((e: Extension) => !relevantExtensionNames.has(e.name))
+    .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name));
 
   return {
     ...extensionsState,
     extensions: extensionsState.extensions,
-    explicitlyActivatedExtensions:
-      extensionsState.explicitlyActivatedExtensions.filter(
-        (e) => `${e.name}-${e.version}` !== `${ext.name}-${ext.version}`
-      ),
+    explicitlyActivatedExtensions: eae,
     activeExtensions: ae,
-    installedExtensions: extensions
-      .filter((e: Extension) => !relevantExtensions.has(e.name))
-      .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name)),
+    installedExtensions: ie,
   } as ExtensionsState;
 };
 
 const moveExtension = (
   extensionsState: ExtensionsState,
-  event: { name: string; type: 'up' | 'down' }
+  event: { name: string; type: 'up' | 'down' },
 ) => {
   const { name, type } = event;
   const aei = extensionsState.activeExtensions.map((e) => e.name).indexOf(name);

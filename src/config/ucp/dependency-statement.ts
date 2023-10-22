@@ -23,7 +23,7 @@ class Version {
       return new Version(
         parseInt(match[1], 10),
         parseInt(match[2], 10),
-        parseInt(match[3], 10)
+        parseInt(match[3], 10),
       );
     }
 
@@ -258,7 +258,7 @@ class DependencyStatement {
   // Because that means two dependency configurations are not compatible
   filterAllowedVersions(options: Version[]) {
     return [...options].filter(
-      (v) => VERSION_OPERATORS[this.operator](this.version, v) === true
+      (v) => VERSION_OPERATORS[this.operator](this.version, v) === true,
     );
   }
 

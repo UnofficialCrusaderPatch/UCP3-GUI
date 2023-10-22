@@ -1,15 +1,13 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
 
-import {
-  NumberContents,
-  ChoiceContents,
-  DisplayConfigElement,
-} from 'config/ucp/common';
+import { NumberContents, DisplayConfigElement } from 'config/ucp/common';
 
 import { Form } from 'react-bootstrap';
 
@@ -18,9 +16,17 @@ import RangeSlider from 'react-bootstrap-range-slider';
 
 import { useState } from 'react';
 
+import { useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
+import { createStatusBarMessage } from './StatusBarMessage';
+
+const LOGGER = new Logger('CreateUCP2Slider.tsx');
+
+export type UCP2SliderValue = { enabled: boolean; sliderValue: number };
 
 function CreateUCP2Slider(args: {
   spec: DisplayConfigElement;
@@ -31,21 +37,23 @@ function CreateUCP2Slider(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
   let { [url]: value } = configuration as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: UCP2SliderValue;
   };
   const { [url]: defaultValue } = configurationDefaults as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: UCP2SliderValue;
   };
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
@@ -55,16 +63,29 @@ function CreateUCP2Slider(args: {
   };
 
   if (value === undefined) {
-    console.error(`value not defined (no default specified?) for: ${url}`);
+    LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
 
     if (defaultValue === undefined) {
-      console.error(`default value not defined for: ${url}`);
+      LOGGER.msg(`default value not defined for: ${url}`).error();
     }
 
-    console.log(`default value for ${url}:`);
-    console.log(defaultValue);
+    LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
     value = defaultValue;
   }
+
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url],
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
@@ -91,7 +112,7 @@ function CreateUCP2Slider(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={isDisabled}
         />
         <label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -103,10 +124,25 @@ function CreateUCP2Slider(args: {
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localValue, setLocalValue] = useState(
-    value.sliderValue === undefined ? 0 : (value.sliderValue as number) * factor
+    value.sliderValue === undefined
+      ? 0
+      : (value.sliderValue as number) * factor,
   );
   return (
+<<<<<<< HEAD
     <div className="sword-checkbox" style={{ marginLeft: 0, marginBottom: 0 }}>
+=======
+    <div
+      className="col-5"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(statusBarMessage);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
+>>>>>>> fa7bc41b31cdd8df1277edeee16520f3a44bc5ed
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>
@@ -150,7 +186,12 @@ function CreateUCP2Slider(args: {
                 value: Object.fromEntries([[url, true]]),
               });
             }}
-            disabled={!isEnabled || disabled || !value.enabled}
+            disabled={
+              !isEnabled ||
+              disabled ||
+              !value.enabled ||
+              configurationLocks[url] !== undefined
+            }
           />
         </div>
 

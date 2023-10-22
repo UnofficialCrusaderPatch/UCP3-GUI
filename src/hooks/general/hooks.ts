@@ -7,8 +7,8 @@ export function useSearchParamsCustom(): [
   URLSearchParams,
   (
     newParams: { [keys: string]: string | string[] },
-    keepNonOverwritten?: boolean
-  ) => void
+    keepNonOverwritten?: boolean,
+  ) => void,
 ] {
   const [searchParams, setSearchParams] = useSearchParams();
   return [
@@ -16,8 +16,8 @@ export function useSearchParamsCustom(): [
     (newParams, keepNonOverwritten = true) => {
       setSearchParams(
         createSearchParams(
-          keepNonOverwritten ? { ...searchParams, ...newParams } : newParams
-        )
+          keepNonOverwritten ? { ...searchParams, ...newParams } : newParams,
+        ),
       );
     },
   ];

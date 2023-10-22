@@ -28,7 +28,7 @@ function CreateSection(args: {
           className="pt-1"
         />
       );
-    }
+    },
   );
 
   const htmlHeader = React.createElement(`h${level + 1}`, {}, header);

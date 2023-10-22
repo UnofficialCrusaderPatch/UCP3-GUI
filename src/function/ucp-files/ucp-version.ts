@@ -4,7 +4,7 @@ import Option from 'util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
 import { UCP_VERSION_FILE } from 'function/global/constants/file-constants';
 
-export interface UCPVersion {
+export interface UCPVersionInterface {
   major: Option<number>;
   minor: Option<number>;
   patch: Option<number>;
@@ -12,7 +12,7 @@ export interface UCPVersion {
   build: Option<string>;
 }
 
-export class UCPVersion {
+export class UCPVersion implements UCPVersionInterface {
   major: Option<number>;
 
   minor: Option<number>;
@@ -76,7 +76,7 @@ export function getEmptyUCPVersion(): UCPVersion {
 }
 
 export async function loadUCPVersion(
-  gameFolder: string
+  gameFolder: string,
 ): Promise<Result<UCPVersion, Error>> {
   const path = await resolvePath(gameFolder, UCP_VERSION_FILE);
   return (await loadYaml(path)).mapOk((yaml) => new UCPVersion(yaml));

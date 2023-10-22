@@ -15,11 +15,11 @@ i18next
         .then(({ default: resources }) =>
           Result.try<unknown, unknown, [string]>(yamlParse, resources).consider(
             (ok) => callback(null, ok as object),
-            (err) => callback(err as Error, null)
-          )
+            (err) => callback(err as Error, null),
+          ),
         )
         .catch((error) => callback(error, null));
-    })
+    }),
   )
   .init({
     ns: [],

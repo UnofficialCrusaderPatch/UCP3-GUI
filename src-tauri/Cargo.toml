@@ -1,6 +1,6 @@
 [package]
 name = "ucp_gui"
-version = "0.0.10"
+version = "0.0.13"
 description = "UCP3 GUI"
 authors = ["gynt", "TheRedDaemon"]
 license = ""
@@ -17,7 +17,7 @@ tauri-build = { version = "=1.4.0", features = [] }
 [dependencies]
 serde_json = "=1.0.97"
 serde = { version = "=1.0.164", features = ["derive"] }
-tauri = { version = "=1.4.1", features = ["devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
+tauri = { version = "=1.4.1", features = [ "os-all", "devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
 zip = { version = "=0.6.6" } # currently uses all features
 sha2 = { version = "=0.10.7" }
 log = "=0.4.19"

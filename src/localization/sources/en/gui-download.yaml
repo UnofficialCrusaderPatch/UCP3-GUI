@@ -1,30 +1,30 @@
-bink.copy.error: "Failed to properly copy binkw32: {{error}}"
-bink.copy.real.error: "Failed to properly copy binkw32_real: {{error}}"
-bink.copy.ucp.error: "Failed to properly copy binkw32_ucp: {{error}}"
-bink.missing: "binkw32.dll does not exist in this directory, are we in a game directory?"
-bink.not.installed: "There was no UCP installation found."
-bink.unknown.state: "The binkw32.dlls in the game folder are in an unknown state."
+bink.copy.error: 'Failed to properly copy binkw32: {{error}}'
+bink.copy.real.error: 'Failed to properly copy binkw32_real: {{error}}'
+bink.copy.ucp.error: 'Failed to properly copy binkw32_ucp: {{error}}'
+bink.missing: 'binkw32.dll does not exist in this directory, are we in a game directory?'
+bink.not.installed: 'There was no UCP installation found.'
+bink.unknown.state: 'The binkw32.dlls in the game folder are in an unknown state.'
 gui.download.ask: "Do you want to download the latest GUI version?\n\n{{version}}"
-gui.download.done: "New version downloaded to: {{path}}"
-gui.download.not: "Update canceled."
-gui.download.progress: "Downloading newer version..."
-gui.download.failed: "Downloading newer version failed."
-gui.download.write: "Writing file..."
-gui.failed.version: "Unable to get latest version info..."
-gui.fetching.version: "Fetching latest version info..."
-gui.github.contact: "Contacting GitHub..."
-gui.github.failed: "Contacting GitHub failed!"
-gui.up.to.date: "GUI is up to date!"
-ucp.download.cancelled: "User cancelled the download."
-ucp.download.download: "Downloading new UCP version."
-ucp.download.failed: "Failed to download the new UCP version: {{error}}"
+gui.download.done: 'New version downloaded to: {{path}}'
+gui.download.not: 'Update canceled.'
+gui.download.progress: 'Downloading newer version...'
+gui.download.failed: 'Downloading newer version failed.'
+gui.download.write: 'Writing file...'
+gui.failed.version: 'Unable to get latest version info...'
+gui.fetching.version: 'Fetching latest version info...'
+gui.github.contact: 'Contacting GitHub...'
+gui.github.failed: 'Contacting GitHub failed!'
+gui.up.to.date: 'GUI is up to date!'
+ucp.download.cancelled: 'User cancelled the download.'
+ucp.download.download: 'Downloading new UCP version.'
+ucp.download.failed: 'Failed to download the new UCP version: {{error}}'
 ucp.download.request: "Do you want to download the latest UCP3 version?\n\n{{version}}"
-ucp.install.failed: "Failed to install UCP: {{error}}"
-ucp.install.zip.remove.failed: "Failed to remove install zip. File remains, because: {{error}}"
-ucp.version.check: "Check for latest UCP version."
-ucp.version.not.available: "No updates available."
-ucp.version.yaml.load: "Checking current UCP version."
-zip.extract: "Extracting zip-file."
-zip.extract.error: "Error while extracting zip content. Some files may remain. Error: {{error}}"
-zip.read: "Reading zip-file."
-zip.read.error: "Error while reading zip file: {{error}}"
+ucp.install.failed: 'Failed to install UCP: {{error}}'
+ucp.install.zip.remove.failed: 'Failed to remove install zip. File remains, because: {{error}}'
+ucp.version.check: 'Check for latest UCP version.'
+ucp.version.not.available: 'No updates available.'
+ucp.version.yaml.load: 'Checking current UCP version.'
+zip.extract: 'Extracting zip-file.'
+zip.extract.error: 'Error while extracting zip content. Some files may remain. Error: {{error}}'
+zip.read: 'Reading zip-file.'
+zip.read.error: 'Error while reading zip file: {{error}}'

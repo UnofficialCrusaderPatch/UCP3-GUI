@@ -1,6 +1,6 @@
 import {
   OverlayContentProps,
-  useOverlayContent,
+  useSetOverlayContent,
 } from 'components/overlay/overlay';
 import { useTranslation } from 'react-i18next';
 
@@ -30,7 +30,7 @@ function Credits(props: OverlayContentProps) {
 }
 
 export default function CreditsButton() {
-  const { setOverlayContent } = useOverlayContent();
+  const setOverlayContent = useSetOverlayContent();
 
   const [t] = useTranslation(['gui-landing']);
   return (

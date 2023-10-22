@@ -2,6 +2,9 @@ import Result from 'util/structs/result';
 import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
 import { TFunction } from 'i18next';
 import { getHexHashOfFile } from 'util/scripts/hash';
+import Logger from 'util/scripts/logging';
+
+const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
 export enum UCPState {
   WRONG_FOLDER, // based only on the state of the bink.dlls
@@ -28,7 +31,7 @@ export async function getUCPState(
   gameFolder: string,
   binkPath?: string,
   binkRealPath?: string,
-  binkUcpPath?: string
+  binkUcpPath?: string,
 ): Promise<UCPState> {
   // eslint-disable-next-line no-param-reassign
   binkPath = binkPath || (await getBinkPath(gameFolder));
@@ -43,6 +46,12 @@ export async function getUCPState(
   const binkSha = await binkShaPromise;
   const binkRealSha = await binkRealShaPromise;
   const binkUcpSha = await binkUcpShaPromise;
+
+  LOGGER.msg(`File hashes: {}`, {
+    binkSha,
+    binkRealSha,
+    binkUcpSha,
+  }).debug();
 
   if (!binkSha) {
     return UCPState.WRONG_FOLDER;
@@ -68,7 +77,7 @@ export async function getUCPState(
 export async function createRealBink(
   gameFolder: string,
   t?: TFunction,
-  ucpState?: UCPState
+  ucpState?: UCPState,
 ): Promise<Result<void, unknown>> {
   const binkPath = await getBinkPath(gameFolder);
   const binkRealPath = await getBinkRealPath(gameFolder);
@@ -78,11 +87,11 @@ export async function createRealBink(
       return Result.err(t ? t('gui-download:bink.missing') : 'Bink missing.');
     case UCPState.NOT_INSTALLED:
       return (await copyFile(binkPath, binkRealPath)).mapErr((error) =>
-        t ? t('gui-download:bink.copy.error', { error }) : error
+        t ? t('gui-download:bink.copy.error', { error }) : error,
       );
     case UCPState.UNKNOWN:
       return Result.err(
-        t ? t('gui-download:bink.unknown.state') : 'Bink state unknown.'
+        t ? t('gui-download:bink.unknown.state') : 'Bink state unknown.',
       );
     default:
       return Result.emptyOk();
@@ -92,7 +101,7 @@ export async function createRealBink(
 export async function activateUCP(
   gameFolder: string,
   t?: TFunction,
-  ucpState?: UCPState
+  ucpState?: UCPState,
 ): Promise<Result<void, Error>> {
   const binkPath = await getBinkPath(gameFolder);
   const binkUcpPath = await getBinkUCPPath(gameFolder);
@@ -105,18 +114,18 @@ export async function activateUCP(
       return Result.err(t ? t('gui-download:bink.missing') : 'Bink missing.');
     case UCPState.NOT_INSTALLED:
       return Result.err(
-        t ? t('gui-download:bink.not.installed') : 'Not installed.'
+        t ? t('gui-download:bink.not.installed') : 'Not installed.',
       );
     case UCPState.UNKNOWN:
       return Result.err(
-        t ? t('gui-download:bink.unknown.state') : 'Bink state unknown.'
+        t ? t('gui-download:bink.unknown.state') : 'Bink state unknown.',
       );
     case UCPState.ACTIVE:
       return Result.emptyOk();
     case UCPState.INACTIVE:
     case UCPState.BINK_VERSION_DIFFERENCE:
       return (await copyFile(binkUcpPath, binkPath)).mapErr((error) =>
-        t ? t('gui-download:bink.copy.ucp.error', { error }) : error
+        t ? t('gui-download:bink.copy.ucp.error', { error }) : error,
       );
     default:
       return Result.err('Received unknown UCP state. This should not happen.');
@@ -126,7 +135,7 @@ export async function activateUCP(
 export async function deactivateUCP(
   gameFolder: string,
   t?: TFunction,
-  ucpState?: UCPState
+  ucpState?: UCPState,
 ): Promise<Result<void, Error>> {
   const binkPath = await getBinkPath(gameFolder);
   const binkRealPath = await getBinkRealPath(gameFolder);
@@ -136,18 +145,18 @@ export async function deactivateUCP(
       return Result.err(t ? t('gui-download:bink.missing') : 'Bink missing.');
     case UCPState.NOT_INSTALLED:
       return Result.err(
-        t ? t('gui-download:bink.not.installed') : 'Not installed.'
+        t ? t('gui-download:bink.not.installed') : 'Not installed.',
       );
     case UCPState.UNKNOWN:
       return Result.err(
-        t ? t('gui-download:bink.unknown.state') : 'Bink state unknown.'
+        t ? t('gui-download:bink.unknown.state') : 'Bink state unknown.',
       );
     case UCPState.INACTIVE:
       return Result.emptyOk();
     case UCPState.ACTIVE:
     case UCPState.BINK_VERSION_DIFFERENCE:
       return (await copyFile(binkRealPath, binkPath)).mapErr((error) =>
-        t ? t('gui-download:bink.copy.real.error', { error }) : error
+        t ? t('gui-download:bink.copy.real.error', { error }) : error,
       );
     default:
       return Result.err('Received unknown UCP state. This should not happen.');

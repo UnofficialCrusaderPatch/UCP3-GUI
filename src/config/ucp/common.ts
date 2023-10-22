@@ -163,13 +163,18 @@ type Definition = {
   description: string;
 };
 
+type PluginType = 'plugin';
+type ModuleType = 'module';
+type ExtensionType = PluginType | ModuleType;
+
 type Extension = {
   'specification-version': string;
   name: string;
-  type: string;
+  type: ExtensionType;
   version: string;
   definition: Definition;
   ui: { [key: string]: unknown }[];
+  descriptionMD: string;
   config: ConfigFile;
   path: string;
   configEntries: { [key: string]: ConfigEntry };
@@ -229,4 +234,7 @@ export type {
   ChoiceContents,
   BasicContents,
   ConfigEntryContents,
+  PluginType,
+  ModuleType,
+  ExtensionType,
 };

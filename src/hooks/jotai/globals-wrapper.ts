@@ -110,6 +110,16 @@ export function useSetConfigurationLocks() {
   return useSetAtom(globalAtoms.CONFIGURATION_LOCKS_REDUCER_ATOM);
 }
 
+export function useConfigurationSuggestionsReducer() {
+  return useAtom(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+export function useConfigurationSuggestions() {
+  return useAtomValue(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+export function useSetConfigurationSuggestions() {
+  return useSetAtom(globalAtoms.CONFIGURATION_SUGGESTIONS_REDUCER_ATOM);
+}
+
 export function useConfigurationQualifierReducer() {
   return useAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
 }
@@ -120,4 +130,12 @@ export function useConfigurationQualifier() {
 
 export function useSetConfigurationQualifier() {
   return useSetAtom(globalAtoms.CONFIGURATION_QUALIFIER_REDUCER_ATOM);
+}
+
+export function useGeneralOkayCancelModalWindowReducer() {
+  return useAtom(globalAtoms.GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM);
+}
+
+export function useGeneralOkModalWindowReducer() {
+  return useAtom(globalAtoms.GENERAL_OK_MODAL_WINDOW_REDUCER_ATOM);
 }

@@ -5,7 +5,7 @@ import './extension-permissions';
 function collectOptions(
   collection: { [key: string]: unknown },
   obj: { [key: string]: unknown },
-  extensionName: string
+  extensionName: string,
 ) {
   if (typeof obj === 'object') {
     if (obj.url !== undefined) {
@@ -24,7 +24,7 @@ function collectOptions(
         collectOptions(
           collection,
           obj[key] as { [key: string]: unknown },
-          extensionName
+          extensionName,
         );
       });
     }
@@ -41,7 +41,7 @@ function collectOptions(
 function collectConfigs(
   collection: { [key: string]: unknown },
   obj: { value: unknown; [key: string]: unknown },
-  url: string
+  url: string,
 ) {
   if (obj !== null && obj !== undefined && typeof obj === 'object') {
     if (obj.value !== undefined) {
@@ -61,7 +61,7 @@ function collectConfigs(
         collectConfigs(
           collection,
           obj[key] as { value: unknown; [key: string]: unknown },
-          newUrl
+          newUrl,
         );
       });
     }
@@ -129,7 +129,7 @@ class Config {
       collectOptions(
         optionsCollection,
         ui as unknown as { [key: string]: unknown },
-        name
+        name,
       );
       Object.keys(optionsCollection).forEach((key) => {
         const k = `${name}.${key}`;
@@ -176,7 +176,7 @@ class Config {
 
   activeConfigs() {
     return this.activeExtensionNames.map(
-      (ext) => this.extensions[ext].configEntries
+      (ext) => this.extensions[ext].configEntries,
     );
   }
 
@@ -199,7 +199,7 @@ class Config {
         const p = isValuePermitted(
           configEntry.contents['required-value'],
           spec,
-          this.activeExtensions()
+          this.activeExtensions(),
         );
         if (p.status !== 'OK') {
           return {
@@ -214,7 +214,7 @@ class Config {
         const p = isValuePermitted(
           configEntry.contents['required-values'],
           spec,
-          this.activeExtensions()
+          this.activeExtensions(),
         );
         if (p.status !== 'OK') {
           return {
@@ -245,7 +245,7 @@ class Config {
     }
     // eslint-disable-next-line no-restricted-syntax
     for (const config of this.activeExtensionNames.map(
-      (ae) => this.extensions[ae].configEntries
+      (ae) => this.extensions[ae].configEntries,
     )) {
       if (config[url] !== undefined) {
         if (config[url].contents !== undefined) {
@@ -287,7 +287,7 @@ class Config {
     const check = isValuePermitted(
       value,
       this.specs[url],
-      this.activeExtensions()
+      this.activeExtensions(),
     );
     if (check.status === 'OK') {
       this.setValue(url, value);

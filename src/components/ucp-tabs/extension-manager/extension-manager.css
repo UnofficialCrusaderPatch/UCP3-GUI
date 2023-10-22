@@ -26,15 +26,15 @@
 }
 
 .down {
-  background-image: url("/src/assets/ucp3/move_down.png");
+  background-image: url('/src/assets/ucp3/move_down.png');
 }
 
 .up {
-  background-image: url("/src/assets/ucp3/move_up.png");
+  background-image: url('/src/assets/ucp3/move_up.png');
 }
 
 .enable-arrow {
-  background-image: url("/src/assets/ucp3/add.png");
+  background-image: url('/src/assets/ucp3/add.png');
   background-color: transparent !important;
   width: 18px !important;
   height: 17px !important;
@@ -44,12 +44,11 @@
 }
 
 .enable-arrow:hover {
-  background-image: url("/src/assets/ucp3/add_hover.png");
+  background-image: url('/src/assets/ucp3/add_hover.png');
 }
 
-
 .disable-arrow {
-  background-image: url("/src/assets/ucp3/remove.png");
+  background-image: url('/src/assets/ucp3/remove.png');
   background-color: transparent !important;
   width: 18px !important;
   height: 17px !important;
@@ -59,5 +58,5 @@
 }
 
 .disable-arrow:hover {
-  background-image: url("/src/assets/ucp3/remove_hover.png");
+  background-image: url('/src/assets/ucp3/remove_hover.png');
 }

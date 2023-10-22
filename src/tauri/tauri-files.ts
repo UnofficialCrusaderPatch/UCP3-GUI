@@ -49,7 +49,7 @@ const BASE_FOLDER = 'UnofficialCrusaderPatch3';
 // only proxy
 export async function onFsExists(
   path: string,
-  options?: FsOptions | undefined
+  options?: FsOptions | undefined,
 ): Promise<boolean> {
   return tauriFileExists(path, options);
 }
@@ -63,7 +63,7 @@ export async function resolvePath(...paths: string[]): Promise<string> {
 // since interacting with this folder (like in this function), is forbidden,
 // which might be better, actually
 export async function recursiveCreateDirForFile(
-  filepath: string
+  filepath: string,
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
     const folderpath = await dirname(filepath); // may cause issues if not file path
@@ -72,20 +72,20 @@ export async function recursiveCreateDirForFile(
 }
 
 export async function readTextFile(
-  path: string
+  path: string,
 ): Promise<Result<string, Error>> {
   return Result.tryAsync(tauriReadTextFile, path);
 }
 
 export async function readBinaryFile(
-  path: string
+  path: string,
 ): Promise<Result<Uint8Array, Error>> {
   return Result.tryAsync(tauriReadBinaryFile, path);
 }
 
 export async function writeTextFile(
   path: string,
-  contents: string
+  contents: string,
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
     (await recursiveCreateDirForFile(path)).throwIfErr();
@@ -95,7 +95,7 @@ export async function writeTextFile(
 
 export async function writeBinaryFile(
   path: string,
-  contents: BinaryFileContents
+  contents: BinaryFileContents,
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
     (await recursiveCreateDirForFile(path)).throwIfErr();
@@ -105,14 +105,14 @@ export async function writeBinaryFile(
 
 export async function copyFile(
   source: string,
-  destination: string
+  destination: string,
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(tauriCopyFile, source, destination);
 }
 
 export async function renameFile(
   oldPath: string,
-  newPath: string
+  newPath: string,
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(tauriRenameFile, oldPath, newPath);
 }
@@ -125,7 +125,7 @@ export async function loadYaml(
   path: string,
   yamlOptions?:
     | (ParseOptions & DocumentOptions & SchemaOptions & ToJSOptions)
-    | undefined
+    | undefined,
 ): Promise<Result<Yaml, Error>> {
   return Result.tryAsync(async () => {
     const readContent = (await readTextFile(path)).getOrThrow();
@@ -137,7 +137,7 @@ export async function loadJson(
   path: string,
   reviver?:
     | ((this: unknown, key: string, value: unknown) => unknown)
-    | undefined
+    | undefined,
 ): Promise<Result<Json, Error>> {
   return Result.tryAsync(async () => {
     const readContent = (await readTextFile(path)).getOrThrow();
@@ -151,7 +151,7 @@ export async function writeJson(
   replacer?:
     | ((this: unknown, key: string, value: unknown) => unknown)
     | undefined,
-  space?: string | number | undefined
+  space?: string | number | undefined,
 ): Promise<Result<void, Error>> {
   return Result.tryAsync(async () => {
     const jsonStr = JSON.stringify(contents, replacer, space);

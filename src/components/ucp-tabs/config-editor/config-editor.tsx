@@ -3,93 +3,55 @@
 
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
-import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { useTranslation } from 'react-i18next';
 import {
-  ConfigEntry,
-  ConfigFile,
-  ConfigFileExtensionEntry,
-  Extension,
-} from 'config/ucp/common';
-import { DependencyStatement } from 'config/ucp/dependency-statement';
-import { loadConfigFromFile, saveUCPConfig } from 'config/ucp/config-files';
-import {
-  useConfigurationDefaultsReducer,
-  useConfigurationQualifierReducer,
+  useConfigurationDefaults,
+  useConfigurationQualifier,
   useConfigurationReducer,
   useConfigurationTouchedReducer,
-  useConfigurationWarningsReducer,
-  useExtensionStateReducer,
-  useSetConfigurationLocks,
+  useConfigurationWarnings,
+  useExtensionState,
   useUcpConfigFileValue,
 } from 'hooks/jotai/globals-wrapper';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import { info } from 'util/scripts/logging';
-import { ConfigurationQualifier, ExtensionsState } from 'function/global/types';
-import { collectConfigEntries } from 'function/extensions/discovery';
-import {
-  ConfigMetaContentDB,
-  ConfigMetaObjectDB,
-} from 'config/ucp/config-merge/objects';
-import {
-  buildConfigMetaContent,
-  buildConfigMetaContentDB,
-  buildExtensionConfigurationDB,
-} from '../extension-manager/extension-configuration';
+import { useCurrentGameFolder, useGameFolder } from 'hooks/jotai/helper';
 
+import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
+import { DependencyStatement } from 'config/ucp/dependency-statement';
+import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
+import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { reloadCurrentWindow } from 'function/window-actions';
+
+import { ConsoleLogger } from 'util/scripts/logging';
 import { UIFactory } from './ui-elements';
 
+import ExportButton from './ExportButton';
+import ApplyButton from './ApplyButton';
+import ImportButton from './ImportButton';
+import ResetButton from './ResetButton';
+import importButtonCallback from '../common/ImportButtonCallback';
+import exportButtonCallback from '../common/ExportButtonCallback';
+import saveConfig from '../common/SaveConfig';
+import ExportAsPluginButton from './ExportAsPluginButton';
+import serializeConfig from '../common/SerializeConfig';
+
 import './config-editor.css';
-import { propagateActiveExtensionsChange } from '../helpers';
-import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
-import { createHelperObjects } from '../extension-manager/extension-helper-objects';
-import { warnClearingOfConfiguration } from '../extension-manager/extension-manager';
-
-function saveConfig(
-  configuration: { [key: string]: unknown },
-  folder: string,
-  touched: { [key: string]: boolean },
-  sparseExtensions: Extension[],
-  allExtensions: Extension[],
-  configurationQualifier: { [key: string]: ConfigurationQualifier }
-) {
-  const sparseConfig = Object.fromEntries(
-    Object.entries(configuration).filter(([key]) => touched[key])
-  );
-
-  const fullConfig = configuration;
-
-  info(fullConfig);
-
-  return saveUCPConfig(
-    sparseConfig,
-    fullConfig,
-    sparseExtensions,
-    allExtensions,
-    folder,
-    configurationQualifier
-  );
-}
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
 
   const gameFolder = useCurrentGameFolder();
-  const [configurationDefaults, setConfigurationDefaults] =
-    useConfigurationDefaultsReducer();
+  const configurationDefaults = useConfigurationDefaults();
   const file = useUcpConfigFileValue();
-  const [configurationWarnings, setConfigurationWarnings] =
-    useConfigurationWarningsReducer();
+  const configurationWarnings = useConfigurationWarnings();
   const [configuration, setConfiguration] = useConfigurationReducer();
   const [configurationTouched, setConfigurationTouched] =
     useConfigurationTouchedReducer();
-  const [extensionsState, setExtensionsState] = useExtensionStateReducer();
+  const extensionsState = useExtensionState();
   const { activeExtensions } = extensionsState;
-  const { extensions } = extensionsState;
-  const setConfigurationLocks = useSetConfigurationLocks();
 
-  const [configurationQualifier, setConfigurationQualifier] =
-    useConfigurationQualifierReducer();
+  const configurationQualifier = useConfigurationQualifier();
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -109,7 +71,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
         ? t('gui-editor:config.status.nothing.active', {
             number: activeExtensions.length,
           })
-        : ''
+        : '',
     );
   }, [activeExtensions, t]);
 
@@ -128,9 +90,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
         {!readonly ? (
           <div className="row pb-2 mx-0">
             <div className="d-inline-flex">
-              <button
-                className="col-auto icons-button reset mx-1"
-                type="button"
+              <ResetButton
                 onClick={() => {
                   setConfiguration({
                     type: 'reset',
@@ -142,240 +102,99 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   });
                 }}
               />
-              <button
-                className="col-auto icons-button import mx-1"
-                type="button"
-                onClick={async () => {
-                  const path = await openFileDialog(gameFolder, [
-                    {
-                      name: t('gui-general:file.config'),
-                      extensions: ['yml', 'yaml'],
-                    },
-                    { name: t('gui-general:file.all'), extensions: ['*'] },
-                  ]);
-                  if (path.isEmpty()) {
-                    setConfigStatus(t('gui-editor:config.status.no.file'));
-                    return;
-                  }
-
-                  warnClearingOfConfiguration(configurationTouched);
-
-                  let newExtensionsState = {
-                    ...extensionsState,
-                    activeExtensions: [],
-                    explicitlyActivatedExtensions: [],
-                  } as ExtensionsState;
-
-                  const parsingResult: {
-                    status: string;
-                    message: string;
-                    result: ConfigFile;
-                  } = await loadConfigFromFile(path.get(), t);
-
-                  if (parsingResult.status !== 'OK') {
-                    setConfigStatus(
-                      `${parsingResult.status}: ${parsingResult.message}`
-                    );
-                    return;
-                  }
-
-                  if (parsingResult.result === undefined) {
-                    setConfigStatus(
-                      t('gui-editor:config.status.failed.unknown')
-                    );
-                    return;
-                  }
-
-                  const config = parsingResult.result;
-
-                  const lo = config['config-sparse']['load-order'];
-                  if (lo !== undefined && lo.length > 0) {
-                    const explicitActiveExtensions: Extension[] = [];
-
-                    // eslint-disable-next-line no-restricted-syntax
-                    for (const e of lo) {
-                      const ds = DependencyStatement.fromString(e);
-                      const options = extensions.filter(
-                        (ext: Extension) =>
-                          ext.name === ds.extension &&
-                          ext.version === ds.version.toString()
-                      );
-                      if (options.length === 0) {
-                        setConfigStatus(
-                          t('gui-editor:config.status.missing.extension', {
-                            extension: e,
-                          })
-                        );
-                        return;
-                      }
-                      explicitActiveExtensions.push(options[0]);
-                    }
-
-                    const {
-                      eds,
-                      extensionsByName,
-                      extensionsByNameVersionString,
-                      revDeps,
-                      depsFor,
-                    } = createHelperObjects(newExtensionsState.extensions);
-
-                    explicitActiveExtensions
-                      .slice()
-                      .reverse()
-                      .forEach((ext) => {
-                        newExtensionsState =
-                          addExtensionToExplicityActivatedExtensions(
-                            newExtensionsState,
-                            eds,
-                            extensionsByName,
-                            extensionsByNameVersionString,
-                            ext
-                          );
-                      });
-
-                    newExtensionsState =
-                      buildExtensionConfigurationDB(newExtensionsState);
-                  }
-
-                  propagateActiveExtensionsChange(newExtensionsState, {
-                    setConfiguration,
-                    setConfigurationDefaults,
-                    setConfigurationTouched,
-                    setConfigurationWarnings,
-                    setConfigurationLocks,
-                  });
-
-                  setExtensionsState(newExtensionsState);
-
-                  console.log('opened config');
-                  console.log(parsingResult.result);
-
-                  let userConfigEntries: { [key: string]: ConfigEntry } = {};
-
-                  const parseEntry = ([extensionName, data]: [
-                    string,
-                    {
-                      config: ConfigFileExtensionEntry;
-                    }
-                  ]) => {
-                    const result = collectConfigEntries(
-                      data.config as {
-                        [key: string]: unknown;
-                        contents: unknown;
-                      },
-                      extensionName
-                    );
-
-                    userConfigEntries = { ...userConfigEntries, ...result };
-                  };
-
-                  Object.entries(config['config-sparse'].modules).forEach(
-                    parseEntry
-                  );
-                  Object.entries(config['config-sparse'].plugins).forEach(
-                    parseEntry
-                  );
-
-                  const db: ConfigMetaObjectDB = {};
-
-                  const newConfigurationQualifier: {
-                    [key: string]: ConfigurationQualifier;
-                  } = {};
-                  setConfigurationQualifier({
-                    type: 'set-multiple',
-                    value: {},
-                  });
-
-                  Object.entries(userConfigEntries).forEach(([url, data]) => {
-                    const m = buildConfigMetaContentDB('user', data);
-                    db[url] = {
-                      url,
-                      modifications: m,
-                    };
-                    // TODO: do checking here if the user part is not conflicting?
-
-                    let q = m.value.qualifier;
-                    if (q === 'unspecified') q = 'required';
-                    newConfigurationQualifier[url] =
-                      q as ConfigurationQualifier;
-                  });
-
-                  const newConfiguration: { [key: string]: unknown } = {};
-                  const newConfigurationTouched: { [key: string]: boolean } =
-                    {};
-
-                  Object.entries(db).forEach(([url, cmo]) => {
-                    newConfiguration[url] = cmo.modifications.value.content;
-                    newConfigurationTouched[url] = true;
-                  });
-
-                  setConfiguration({
-                    type: 'set-multiple',
-                    value: newConfiguration,
-                  });
-                  setConfigurationTouched({
-                    type: 'set-multiple',
-                    value: newConfigurationTouched,
-                  });
-                  setConfigurationQualifier({
-                    type: 'set-multiple',
-                    value: newConfigurationQualifier,
-                  });
-                }}
+              <ImportButton
+                onClick={async () =>
+                  importButtonCallback(gameFolder, setConfigStatus, t, '')
+                }
               />
-              <button
-                className="col-auto icons-button export mx-1"
-                type="button"
-                onClick={async () => {
-                  const filePathOptional = await saveFileDialog(gameFolder, [
-                    {
-                      name: t('gui-general:file.config'),
-                      extensions: ['yml', 'yaml'],
-                    },
-                    { name: t('gui-general:file.all'), extensions: ['*'] },
-                  ]);
-                  if (filePathOptional.isEmpty()) {
-                    setConfigStatus(t('gui-editor:config.status.cancelled'));
-                    return;
-                  }
-                  let filePath = filePathOptional.get();
-
-                  if (!filePath.endsWith('.yml')) filePath = `${filePath}.yml`;
-
-                  saveConfig(
-                    configuration,
-                    filePath,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier
-                  )
-                    .then(() =>
-                      setConfigStatus(t('gui-editor:config.status.exported'))
-                    )
-                    .catch((e) => {
-                      throw new Error(e);
-                    });
-                }}
-              />
-              <button
-                className="ucp-button-variant"
-                type="button"
+              <ExportButton
                 onClick={() =>
-                  saveConfig(
+                  exportButtonCallback(gameFolder, setConfigStatus, t)
+                }
+              />
+              <ApplyButton
+                onClick={async () => {
+                  const result: string = await saveConfig(
                     configuration,
                     file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
                     configurationTouched,
                     extensionsState.explicitlyActivatedExtensions,
                     activeExtensions,
-                    configurationQualifier
-                  )
-                }
-              >
-                <div className="ucp-button-variant-button-text">
-                  {t('gui-general:apply')}
-                </div>
-              </button>
+                    configurationQualifier,
+                  );
+
+                  setConfigStatus(result);
+                }}
+              />
+              <ExportAsPluginButton
+                onClick={async () => {
+                  const result = await serializeConfig(
+                    configuration,
+                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                    configurationTouched,
+                    extensionsState.explicitlyActivatedExtensions,
+                    activeExtensions,
+                    configurationQualifier,
+                  );
+
+                  const trimmedResult = {
+                    'config-sparse': {
+                      modules: result['config-sparse'].modules,
+                      plugins: result['config-sparse'].plugins,
+                    },
+                    'specification-version': result['specification-version'],
+                  } as UCP3SerializedPluginConfig;
+
+                  ConsoleLogger.debug(trimmedResult);
+
+                  const r = await showCreatePluginModalWindow({
+                    title: 'Create plugin',
+                    message: '',
+                  });
+
+                  ConsoleLogger.debug(r);
+
+                  if (r === undefined) return;
+
+                  // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+
+                  const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
+
+                  if (await exists(pluginDir)) {
+                    await showGeneralModalOk({
+                      message: `directory already exists: ${pluginDir}`,
+                      title: 'cannot create plugin',
+                    });
+                    return;
+                  }
+
+                  await createDir(pluginDir);
+
+                  await writeTextFile(
+                    `${pluginDir}/definition.yml`,
+                    toYaml({
+                      name: r.pluginName,
+                      author: r.pluginAuthor,
+                      version: r.pluginVersion,
+                      dependencies: result['config-sparse']['load-order'],
+                    }),
+                  );
+
+                  await writeTextFile(
+                    `${pluginDir}/config.yml`,
+                    toYaml(trimmedResult),
+                  );
+
+                  const confirmed = await showGeneralModalOkCancel({
+                    title: t('gui-general:require.reload.title'),
+                    message: t('gui-editor:overview.require.reload.text'),
+                  });
+
+                  if (confirmed) {
+                    reloadCurrentWindow();
+                  }
+                }}
+              />
               <Form.Switch
                 id="config-allow-user-override-switch"
                 label={t('gui-editor:config.allow.override')}

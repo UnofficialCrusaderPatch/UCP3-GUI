@@ -7,7 +7,7 @@ import {
 
 function addToOptions(
   currentOptions: Partial<FetchOptions> | undefined,
-  addOptions: Partial<FetchOptions>
+  addOptions: Partial<FetchOptions>,
 ): Partial<FetchOptions> {
   // merge with addOptions, ONLY with special handling for the headers
   if (!currentOptions) {
@@ -21,7 +21,7 @@ function addToOptions(
 
 export function fetch<T>(
   url: string,
-  options?: FetchOptions
+  options?: FetchOptions,
 ): Promise<Response<T>> {
   return tauriFetch<T>(url, options);
 }
@@ -35,7 +35,7 @@ export function getSimple<T>(
   url: string,
   responseType: ResponseType,
   accept: string,
-  auth?: string
+  auth?: string,
 ) {
   const options: Omit<FetchOptions, 'method'> = {
     responseType,
@@ -50,7 +50,7 @@ export function getSimple<T>(
 // still allows Accept headers, but good enough
 export function getBinary<T>(
   url: string,
-  options?: Omit<FetchOptions, 'method' | 'responseType'>
+  options?: Omit<FetchOptions, 'method' | 'responseType'>,
 ) {
   const nextOptions = addToOptions(options, {
     responseType: ResponseType.Binary,
@@ -62,7 +62,7 @@ export function getBinary<T>(
 // still allows Accept headers, but good enough
 export function getJSON<T>(
   url: string,
-  options?: Omit<FetchOptions, 'method' | 'responseType'>
+  options?: Omit<FetchOptions, 'method' | 'responseType'>,
 ) {
   const nextOptions = addToOptions(options, {
     responseType: ResponseType.JSON,

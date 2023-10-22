@@ -1,8 +1,8 @@
-language.selection: "Language Selection"
-launch: "Launch"
-old.folders: "Use one of the recently used folders:"
-select.folder: "Browse to a Stronghold Crusader installation folder to get started:"
-select.language: "Select the language for the GUI:"
-title: "Welcome to Unofficial Crusader Patch 3"
-credits.title: "Credits & License"
-credits.open: "Credits&License"
+language.selection: 'Language Selection'
+launch: 'Launch'
+old.folders: 'Use one of the recently used folders:'
+select.folder: 'Browse to a Stronghold Crusader installation folder to get started:'
+select.language: 'Select the language for the GUI:'
+title: 'Welcome to Unofficial Crusader Patch 3'
+credits.title: 'Credits & License'
+credits.open: 'Credits&License'

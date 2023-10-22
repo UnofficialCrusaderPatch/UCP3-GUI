@@ -8,10 +8,13 @@
   },
   "package": {
     "productName": "UCP3-GUI",
-    "version": "0.0.10"
+    "version": "0.0.13"
   },
   "tauri": {
     "allowlist": {
+      "os": {
+        "all": true
+      },
       "fs": {
         "all": true,
         "scope": [
@@ -82,11 +85,11 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 630,
+        "height": 768,
         "minHeight": 630,
         "resizable": true,
         "title": "Unofficial Crusader Patch 3 - GUI",
-        "width": 800,
+        "width": 1024,
         "minWidth": 800,
         "decorations": false
       }

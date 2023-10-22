@@ -1,6 +1,8 @@
 import {
   useConfigurationDefaults,
+  useConfigurationLocks,
   useConfigurationReducer,
+  useConfigurationSuggestions,
   useConfigurationWarnings,
   useSetConfigurationTouched,
 } from 'hooks/jotai/globals-wrapper';
@@ -8,8 +10,14 @@ import {
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { useSetAtom } from 'jotai';
+import Logger from 'util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
+import { createStatusBarMessage } from './StatusBarMessage';
+
+const LOGGER = new Logger('CreateUCP2RadioGroup.tsx');
 
 function CreateUCP2RadioGroup(args: {
   spec: DisplayConfigElement;
@@ -20,6 +28,8 @@ function CreateUCP2RadioGroup(args: {
   const configurationWarnings = useConfigurationWarnings();
   const setConfigurationTouched = useSetConfigurationTouched();
   const configurationDefaults = useConfigurationDefaults();
+  const configurationLocks = useConfigurationLocks();
+  const configurationSuggestions = useConfigurationSuggestions();
 
   const { spec, disabled, className } = args;
   const { url, text, tooltip, enabled, header } = spec;
@@ -34,7 +44,7 @@ function CreateUCP2RadioGroup(args: {
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
-    configurationDefaults
+    configurationDefaults,
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
@@ -44,16 +54,29 @@ function CreateUCP2RadioGroup(args: {
   };
 
   if (value === undefined) {
-    console.error(`value not defined (no default specified?) for: ${url}`);
+    LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
 
     if (defaultValue === undefined) {
-      console.error(`default value not defined for: ${url}`);
+      LOGGER.msg(`default value not defined for: ${url}`).error();
     }
 
-    console.log(`default value for ${url}:`);
-    console.log(defaultValue);
+    LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
     value = defaultValue;
   }
+
+  const statusBarMessage = createStatusBarMessage(
+    disabled,
+    !isEnabled,
+    configurationLocks[url] !== undefined,
+    enabled,
+    configurationLocks[url],
+    configurationSuggestions[url] !== undefined,
+    configurationSuggestions[url],
+  );
+  const isDisabled =
+    disabled || !isEnabled || configurationLocks[url] !== undefined;
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
@@ -80,7 +103,7 @@ function CreateUCP2RadioGroup(args: {
               value: Object.fromEntries([[url, true]]),
             });
           }}
-          disabled={!isEnabled || disabled}
+          disabled={isDisabled}
         />
         <label className="fs-6" htmlFor={`${url}-header`}>
           {header}
@@ -89,7 +112,16 @@ function CreateUCP2RadioGroup(args: {
     );
   }
   return (
-    <div className="" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div
+      className="col-5"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(statusBarMessage);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-choice`}>
@@ -114,7 +146,7 @@ function CreateUCP2RadioGroup(args: {
             });
             configuration[url] = newValue;
           }}
-          disabled={!value.enabled}
+          disabled={!value.enabled || isDisabled}
         >
           {choices.map((choice) => (
             // eslint-disable-next-line jsx-a11y/label-has-associated-control
@@ -123,7 +155,7 @@ function CreateUCP2RadioGroup(args: {
                 className="form-check-input"
                 value={choice.name}
                 id={`${url}-radio-${choice.name}`}
-                disabled={!value.enabled}
+                disabled={!value.enabled || isDisabled}
               />
               {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label

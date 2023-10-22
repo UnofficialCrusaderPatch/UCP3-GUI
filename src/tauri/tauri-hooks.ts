@@ -24,7 +24,7 @@ class TauriEventHandler {
           // eslint-disable-next-line no-await-in-loop
           await func();
         }
-      }
+      },
     );
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     registerTauriEventListener(TauriEvent.WINDOW_CLOSE_REQUESTED, async () => {
@@ -40,7 +40,7 @@ class TauriEventHandler {
   registerListener(func: () => void | Promise<void>): boolean {
     if (this.intern_getFuncIndex(func) > -1) {
       showError(
-        `The following function was already registered for ${this.intern_handledEvent}:\n\n${func}`
+        `The following function was already registered for ${this.intern_handledEvent}:\n\n${func}`,
       );
       return false;
     }
@@ -77,7 +77,7 @@ const tauriEventHandlers = new Map<TauriEvent, TauriEventHandler>();
 
 export function registerTauriEventListener(
   tauriEvent: TauriEvent,
-  func: () => void | Promise<void>
+  func: () => void | Promise<void>,
 ) {
   const handler = tauriEventHandlers.get(tauriEvent);
   if (handler) {
@@ -86,7 +86,7 @@ export function registerTauriEventListener(
 
   if (tauriEvent === TauriEvent.WINDOW_DESTROYED) {
     showError(
-      `The event ${tauriEvent} will not be noticed by the same window.`
+      `The event ${tauriEvent} will not be noticed by the same window.`,
     );
     return false;
   }
@@ -101,7 +101,7 @@ export function registerTauriEventListener(
 
 export function removeTauriEventListener(
   tauriEvent: TauriEvent,
-  func: () => void | Promise<void>
+  func: () => void | Promise<void>,
 ) {
   const handler = tauriEventHandlers.get(tauriEvent);
   return handler ? handler.removeListener(func) : false;

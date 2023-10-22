@@ -8,7 +8,7 @@ import {
 function isNumberValuePermittedByConfig(
   value: number,
   config: ConfigEntry,
-  configName: string
+  configName: string,
 ): PermissionStatus {
   const configValueDef = config.contents;
   const requiredValue = configValueDef['required-value'];
@@ -81,7 +81,7 @@ function isNumberValuePermittedByConfig(
 function isNumberValuePermittedByConfigs(
   value: number,
   spec: OptionEntry,
-  extensions: Extension[]
+  extensions: Extension[],
 ): PermissionStatus {
   if (spec === undefined || spec.url === undefined) {
     return {

@@ -1,72 +1,71 @@
 .overview-background-image {
-    background-image: url("/src/assets/ucp3/bg.png");
-    background-size: cover;
-    background-position: right;
-    height: 100%;
-    width: 100%;
-    z-index: -1;
-    bottom: 0px;
-    right: 0px;
+  background-image: url('/src/assets/ucp3/bg.png');
+  background-size: cover;
+  background-position: right;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  bottom: 0px;
+  right: 0px;
 }
 
 .download-install-button {
-    height: 10px;
-    width: 90%;
+  height: 10px;
+  width: 90%;
 }
 
-
 .icon-button {
-    border: none;
-    background-color: transparent;
-    color: white;
-    vertical-align: center;
-    height: 40px;
-    min-width: 100px;
-    padding-top: -20px;
-    width: 40%;
-    margin-left: 30%;
-    margin-right: 30%;
-    position: relative;
-    display: flex;
-    justify-content: center;
+  border: none;
+  background-color: transparent;
+  color: white;
+  vertical-align: center;
+  height: 40px;
+  min-width: 100px;
+  padding-top: -20px;
+  width: 40%;
+  margin-left: 30%;
+  margin-right: 30%;
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .icon-button > .icon-placeholder {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
 }
 
 /* Define all icons for buttons */
 .zip-icon > .icon-placeholder {
-    background-image: url("/src/assets/ucp3/zip.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100%;
-  }
-  
-.zip-icon:hover > .icon-placeholder {
-    background-image: url("/src/assets/ucp3/add.png");
-  }
-  
-.zip-icon:active > .icon-placeholder {
-    background-image: url("/src/assets/ucp3/add_hover.png");
-  }
-  
-  .download-icon > .icon-placeholder {
-    background-image: url("/src/assets/ucp3/download.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100%;
-  }
-  
-  .download-icon:hover > .icon-placeholder {
-    background-image: url("/src/assets/ucp3/download_hover.png");
-  }
+  background-image: url('/src/assets/ucp3/zip.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
 
-  #decor {
-    background-image: url("/src/assets/ucp3/decor.png");
-    height: 40px;
-    width: 20px;
-    margin: auto;
-  }
+.zip-icon:hover > .icon-placeholder {
+  background-image: url('/src/assets/ucp3/add.png');
+}
+
+.zip-icon:active > .icon-placeholder {
+  background-image: url('/src/assets/ucp3/add_hover.png');
+}
+
+.download-icon > .icon-placeholder {
+  background-image: url('/src/assets/ucp3/download.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100%;
+}
+
+.download-icon:hover > .icon-placeholder {
+  background-image: url('/src/assets/ucp3/download_hover.png');
+}
+
+#decor {
+  background-image: url('/src/assets/ucp3/decor.png');
+  height: 40px;
+  width: 20px;
+  margin: auto;
+}

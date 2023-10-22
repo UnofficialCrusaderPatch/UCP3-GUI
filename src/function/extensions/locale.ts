@@ -11,7 +11,7 @@ const localeRegExp = /^\s*{{(.*)}}\s*$/;
 
 function changeLocaleOfObj(
   locale: { [key: string]: string },
-  obj: { [key: string]: string }
+  obj: { [key: string]: string },
 ) {
   Object.entries(obj).forEach(([k, v]) => {
     if (typeof v === 'string') {
@@ -33,7 +33,7 @@ function changeLocaleOfObj(
 
 function changeLocale(
   locale: { [key: string]: string },
-  obj: { [key: string]: unknown }
+  obj: { [key: string]: unknown },
 ): void {
   localeSensitiveFields.forEach((field) => {
     if (typeof obj[field] === 'string') {

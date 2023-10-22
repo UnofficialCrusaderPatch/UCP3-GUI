@@ -1,4 +1,3 @@
-
 .file-selector {
   background-color: rgba(12, 12, 12, 0.8);
   color: rgb(155, 155, 155) !important;
@@ -37,7 +36,7 @@
   margin: auto;
 }
 
-.textInputField input[type="text"] {
+.textInputField input[type='text'] {
   background-color: transparent;
   flex-grow: 1;
   color: white;
@@ -46,7 +45,7 @@
 
 .launch-button {
   /* Other button styles here */
-  border-image: url("/src/assets/ucp3/button_slice.png");
+  border-image: url('/src/assets/ucp3/button_slice.png');
   border-image-slice: 49% fill;
   border-width: 20px;
   border-style: solid;
@@ -64,7 +63,7 @@
 
 .launch-button:hover {
   /* Other button styles here */
-  border-image: url("/src/assets/ucp3/button_slice_hover.png");
+  border-image: url('/src/assets/ucp3/button_slice_hover.png');
   border-image-slice: 49% fill;
   border-width: 20px;
   border-style: solid;
@@ -78,23 +77,20 @@
   margin-right: 30%;
 }
 
-.launchtext{
+.launchtext {
   margin-top: -10px;
 }
-
 
 .dropdown-wrapper {
   position: relative;
 }
 
-
-.recent-folders{
+.recent-folders {
   border-image: var(--ucp-main-outline-image) fill;
   border-width: 4px;
   border-style: solid;
   background-color: transparent;
 }
-
 
 .recent-folders-dropdown {
   left: 0px;
@@ -109,20 +105,17 @@
   position: absolute;
 }
 
-
 .recent-folders-dropdown .file-selector {
   cursor: pointer;
   white-space: nowrap;
 }
 
-
 .recent-folders-dropdown .file-selector:hover {
   background-color: #e9ecef;
 }
 
-
 .dropdown-button {
-  background-image:  url("/src/assets/ucp3/dropdown_sel.png");
+  background-image: url('/src/assets/ucp3/dropdown_sel.png');
   height: 22px;
   width: 25px;
   margin-right: 9px;

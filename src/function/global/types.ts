@@ -1,5 +1,6 @@
 import { Extension } from 'config/ucp/common';
 import { ConfigMetaObjectDB } from 'config/ucp/config-merge/objects';
+import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 
 export type KeyValueReducerState<Type> = {
   [key: string]: Type;
@@ -60,6 +61,28 @@ export type ExtensionsState = {
    * Configuration that is associated with the current extensions ordering
    */
   configuration: ConfigurationState;
+
+  tree: ExtensionTree;
 };
 
 export type ConfigurationQualifier = 'required' | 'suggested';
+
+export type GeneralOkCancelModalWindow = {
+  type: 'ok_cancel';
+  title: string;
+  message: string;
+  handleClose: () => void;
+  handleAction: () => void;
+  show: boolean;
+  ok: string;
+  cancel: string;
+};
+
+export type GeneralOkModalWindow = {
+  type: 'ok';
+  title: string;
+  message: string;
+  handleAction: () => void;
+  show: boolean;
+  ok: string;
+};

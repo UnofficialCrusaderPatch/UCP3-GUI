@@ -176,5 +176,3 @@ export async function runProgram(
 ): Promise<void> {
   return invoke(TAURI_COMMAND.OS_OPEN_PROGRAM, { path, args, envs });
 }
-
-window.runProgram = runProgram;

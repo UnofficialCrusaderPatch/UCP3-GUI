@@ -129,7 +129,20 @@ function CreateUCP2Slider(args: {
       : (value.sliderValue as number) * factor,
   );
   return (
+<<<<<<< HEAD
     <div className="sword-checkbox" style={{ marginLeft: 0, marginBottom: 0 }}>
+=======
+    <div
+      className="col-5"
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      onMouseEnter={() => {
+        setStatusBarMessage(statusBarMessage);
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
+>>>>>>> fa7bc41b31cdd8df1277edeee16520f3a44bc5ed
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>

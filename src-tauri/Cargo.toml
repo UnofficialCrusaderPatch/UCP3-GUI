@@ -23,6 +23,7 @@ sha2 = { version = "=0.10.7" }
 log = "=0.4.19"
 anyhow = "=1.0.71" # sadly needed to implement the appender for the web console
 log4rs = { version = "=1.2.0", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller"] }
+dunce = "=1.0.4"
 
 [features]
 # by default Tauri runs in production mode

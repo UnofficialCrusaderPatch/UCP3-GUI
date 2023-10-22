@@ -33,6 +33,7 @@ const TAURI_COMMAND = {
   ZIP_WRITER_WRITE_ENTRY_FROM_FILE: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_file',),
 
   HASH_GET_SHA256_OF_FILE: 'get_sha256_of_file',
+  OS_OPEN_PROGRAM: "os_open_program",
 
   LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
@@ -167,3 +168,13 @@ export async function getSha256OfFile(path: string): Promise<string> {
 export async function log(level: number, message: string): Promise<void> {
   return invoke(TAURI_COMMAND.LOGGING_LOG, { level, message });
 }
+
+export async function runProgram(
+  path: string,
+  args: string[] = [],
+  envs: Record<string, string> = {},
+): Promise<void> {
+  return invoke(TAURI_COMMAND.OS_OPEN_PROGRAM, { path, args, envs });
+}
+
+window.runProgram = runProgram;

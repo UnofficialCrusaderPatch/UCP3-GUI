@@ -7,6 +7,7 @@ mod constants;
 mod gui_config;
 mod hash_utils;
 mod logging;
+mod run_program;
 mod utils;
 mod zip_support;
 
@@ -15,7 +16,10 @@ fn main() {
         .plugin(logging::init()) // logging is loaded first, currently using INFO until set by config
         .plugin(gui_config::init())
         .plugin(zip_support::init())
-        .invoke_handler(tauri::generate_handler![hash_utils::get_sha256_of_file,])
+        .invoke_handler(tauri::generate_handler![
+            hash_utils::get_sha256_of_file,
+            run_program::os_open_program
+        ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 

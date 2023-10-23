@@ -35,7 +35,7 @@ export function useUCPState(): [
   Option<Result<UCPStateHandler, unknown>>,
   () => Promise<void>,
 ] {
-  const currentFolder = useCurrentGameFolder();
+  const currentFolder = useAtomValue(GAME_FOLDER_ATOM);
   const { t } = useTranslation('gui-download');
   const [ucpStateResult, receiveState] = useUCPStateHook(currentFolder);
 
@@ -61,7 +61,7 @@ export function useUCPVersion(): [
   Option<Result<UCPVersion, unknown>>,
   () => Promise<void>,
 ] {
-  const currentFolder = useCurrentGameFolder();
+  const currentFolder = useAtomValue(GAME_FOLDER_ATOM);
   const [ucpVersionResult, receiveVersion] = useUCPVersionHook(currentFolder);
   return [ucpVersionResult, () => receiveVersion(currentFolder)];
 }
@@ -109,7 +109,7 @@ export function useInitGlobalConfiguration(): [
         // TODO: currently only set on initial render and folder selection
         // TODO: resolve this type badness
         try {
-          extensions = await getExtensions(newFolder, language);
+          extensions = await getExtensions(newFolder);
         } catch (e) {
           await showGeneralModalOk({
             message: `${e}`,

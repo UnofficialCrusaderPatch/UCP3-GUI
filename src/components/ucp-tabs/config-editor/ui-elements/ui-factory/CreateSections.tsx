@@ -4,26 +4,54 @@ import * as bootstrap from 'bootstrap';
 import {
   extensionsToOptionEntries,
   optionEntriesToHierarchical,
+  uiCollectionToOptionEntries,
 } from 'config/ucp/extension-util';
 import { DisplayConfigElement, OptionEntry } from 'config/ucp/common';
-import { useAtomValue } from 'jotai';
+import { atom, useAtomValue } from 'jotai';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
+import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { applyLocale } from 'function/extensions/discovery';
+import { selectAtom } from 'jotai/utils';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitizeID';
 import CreateSectionsNav from './CreateSectionsNav';
 
+const ACTIVE_EXTENSIONS_ATOM = selectAtom(
+  EXTENSION_STATE_REDUCER_ATOM,
+  (state) => state.activeExtensions,
+);
+
+const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
+  const extensions = get(ACTIVE_EXTENSIONS_ATOM);
+  const language = get(LANGUAGE_ATOM);
+
+  const euis = extensions.map((e) => {
+    const locale = e.locales[language] ?? e.locales.en;
+    if (locale === undefined) return e.ui;
+    return applyLocale(e, locale);
+  });
+
+  const uiCollection: any[] = [];
+  euis.forEach((eui) => {
+    uiCollection.push(...eui);
+  });
+
+  return uiCollectionToOptionEntries(uiCollection).filter(
+    (o: OptionEntry) => o.hidden === undefined || o.hidden === false,
+  );
+});
+
+const LOCALIZED_UI_HIERARCHICAL_ATOM = atom((get) =>
+  optionEntriesToHierarchical(get(LOCALIZED_UI_OPTION_ENTRIES_ATOM)),
+);
+
 function CreateSections(args: { readonly: boolean }): {
   nav: ReactElement | null;
   content: ReactElement | null;
 } {
-  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
-  const { activeExtensions } = extensionsState;
-
-  const optionEntries = extensionsToOptionEntries(activeExtensions).filter(
-    (o: OptionEntry) => o.hidden === undefined || o.hidden === false,
-  );
-  const definition = optionEntriesToHierarchical(optionEntries);
+  const optionEntries = useAtomValue(LOCALIZED_UI_OPTION_ENTRIES_ATOM);
+  const definition = useAtomValue(LOCALIZED_UI_HIERARCHICAL_ATOM);
   const { readonly } = args;
 
   const [t] = useTranslation(['gui-editor']);

@@ -6,8 +6,8 @@ import {
   SectionDescription,
 } from './common';
 
-export async function getExtensions(gameFolder: string, locale?: string) {
-  return Discovery.discoverExtensions(gameFolder, locale);
+export async function getExtensions(gameFolder: string) {
+  return Discovery.discoverExtensions(gameFolder);
 }
 
 export function optionEntriesToHierarchical(
@@ -43,11 +43,7 @@ export function optionEntriesToHierarchical(
   return result;
 }
 
-export function extensionsToOptionEntries(exts: Extension[]) {
-  const uiCollection: any[] = [];
-  exts.forEach((ext) => {
-    uiCollection.push(...ext.ui);
-  });
+export function uiCollectionToOptionEntries(uiCollection: any[]) {
   uiCollection.sort((a, b) => {
     if (a.category === undefined || b.category === undefined) return 0;
     for (
@@ -65,6 +61,15 @@ export function extensionsToOptionEntries(exts: Extension[]) {
     return 0;
   });
   return uiCollection;
+}
+
+export function extensionsToOptionEntries(exts: Extension[]) {
+  const uiCollection: any[] = [];
+  exts.forEach((ext) => {
+    uiCollection.push(...ext.ui);
+  });
+
+  return uiCollectionToOptionEntries(uiCollection);
 }
 
 export function getConfigDefaults(yml: OptionEntry[]) {

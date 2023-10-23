@@ -174,6 +174,7 @@ type Extension = {
   version: string;
   definition: Definition;
   ui: { [key: string]: unknown }[];
+  locales: { [language: string]: { [key: string]: string } };
   descriptionMD: string;
   config: ConfigFile;
   path: string;

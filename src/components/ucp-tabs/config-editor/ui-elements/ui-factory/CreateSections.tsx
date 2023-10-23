@@ -27,7 +27,7 @@ const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
   const language = get(LANGUAGE_ATOM);
 
   const euis = extensions.map((e) => {
-    const locale = e.locales[language] || e.locales.en;
+    const locale = e.locales[language] ?? e.locales.en;
     if (locale === undefined) return e.ui;
     return applyLocale(e, locale);
   });

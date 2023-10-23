@@ -1,5 +1,5 @@
 import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
-import { selectAtom } from 'jotai/utils';
+import { atom } from 'jotai';
 import { resolvePath } from 'tauri/tauri-files';
 
 async function getVanillaPath(gameFolder: string): Promise<string> {
@@ -10,6 +10,10 @@ async function getExtremePath(gameFolder: string): Promise<string> {
   return resolvePath(gameFolder, 'Stronghold_Crusader_Extreme.exe');
 }
 
-export const VANILLA_PATH_ATOM = selectAtom(GAME_FOLDER_ATOM, getVanillaPath);
+export const VANILLA_PATH_ATOM = atom((get) =>
+  getVanillaPath(get(GAME_FOLDER_ATOM)),
+);
 
-export const EXTREME_PATH_ATOM = selectAtom(GAME_FOLDER_ATOM, getExtremePath);
+export const EXTREME_PATH_ATOM = atom((get) =>
+  getExtremePath(get(GAME_FOLDER_ATOM)),
+);

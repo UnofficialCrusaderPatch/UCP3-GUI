@@ -3,7 +3,7 @@
 import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
 import i18next from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
-import { selectAtom } from 'jotai/utils';
+import { atom } from 'jotai';
 import { initReactI18next } from 'react-i18next';
 import Result from 'util/structs/result';
 import { parse as yamlParse } from 'yaml';
@@ -33,8 +33,8 @@ i18next
     },
   });
 
-export const LANGUAGE_STATE_ATOM = selectAtom(LANGUAGE_ATOM, async (lang) => {
-  await i18next.changeLanguage(lang);
+export const LANGUAGE_STATE_ATOM = atom(async (get) => {
+  await i18next.changeLanguage(get(LANGUAGE_ATOM));
 });
 
 export default i18next;

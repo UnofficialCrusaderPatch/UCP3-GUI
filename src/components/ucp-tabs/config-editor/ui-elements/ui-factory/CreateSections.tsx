@@ -11,13 +11,19 @@ import { atom, useAtomValue } from 'jotai';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
 import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
 import { applyLocale } from 'function/extensions/discovery';
+import { selectAtom } from 'jotai/utils';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitizeID';
 import CreateSectionsNav from './CreateSectionsNav';
 
+const ACTIVE_EXTENSIONS_ATOM = selectAtom(
+  EXTENSION_STATE_REDUCER_ATOM,
+  (state) => state.activeExtensions,
+);
+
 const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
-  const extensions = get(EXTENSION_STATE_REDUCER_ATOM).activeExtensions;
+  const extensions = get(ACTIVE_EXTENSIONS_ATOM);
   const language = get(LANGUAGE_ATOM);
 
   const euis = extensions.map((e) => {

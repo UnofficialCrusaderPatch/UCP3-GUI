@@ -12,6 +12,7 @@ import {
   OptionEntry,
 } from 'config/ucp/common';
 import Logger from 'util/scripts/logging';
+import languages from 'localization/languages.json';
 import ExtensionHandle from './extension-handle';
 import ZipExtensionHandle from './rust-zip-extension-handle';
 import DirectoryExtensionHandle from './directory-extension-handle';
@@ -56,28 +57,42 @@ async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
   };
 }
 
-async function setLocale(
+async function readLocales(
   eh: ExtensionHandle,
   ext: Extension,
-  language: string,
-): Promise<void> {
-  // TODO: folder checking is broken. Why?
+  locales: string[],
+) {
+  const translations: { [language: string]: { [key: string]: string } } = {};
+
   const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}/`);
   if (locFolder) {
-    if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
-      const locale = yaml.parse(
-        await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`),
-      );
+    // eslint-disable-next-line no-restricted-syntax
+    for (const language of locales) {
+      // eslint-disable-next-line no-await-in-loop
+      if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
+        const translation = yaml.parse(
+          // eslint-disable-next-line no-await-in-loop
+          await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`),
+        );
 
-      ext.ui.forEach((uiElement) => {
-        changeLocale(locale, uiElement as { [key: string]: unknown });
-      });
-    } else {
-      LOGGER.msg(
-        `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
-      ).info();
+        translations[language] = translation;
+      } else {
+        LOGGER.msg(
+          `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
+        ).info();
+      }
     }
   }
+
+  return translations;
+}
+
+function applyLocale(ext: Extension, locale: { [key: string]: string }) {
+  const ui = JSON.parse(JSON.stringify(ext.ui));
+  return ui.map((uiElement: { [key: string]: unknown }) => {
+    changeLocale(locale, uiElement as { [key: string]: unknown });
+    return uiElement as { [key: string]: unknown };
+  });
 }
 
 function collectOptionEntries(
@@ -214,10 +229,7 @@ async function getExtensionHandles(ucpFolder: string) {
 }
 
 const Discovery = {
-  discoverExtensions: async (
-    gameFolder: string,
-    locale?: string,
-  ): Promise<Extension[]> => {
+  discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
     LOGGER.msg('Discovering extensions').info();
 
     const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
@@ -261,7 +273,7 @@ const Discovery = {
 
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
-        await setLocale(eh, ext, locale || 'en');
+        ext.locales = await readLocales(eh, ext, Object.keys(languages));
         ext.config = await readConfig(eh);
 
         ext.optionEntries = collectOptionEntries(
@@ -334,4 +346,4 @@ function tryResolveDependencies(extensions: Extension[]) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export { Discovery, collectConfigEntries, tryResolveDependencies };
+export { Discovery, collectConfigEntries, tryResolveDependencies, applyLocale };

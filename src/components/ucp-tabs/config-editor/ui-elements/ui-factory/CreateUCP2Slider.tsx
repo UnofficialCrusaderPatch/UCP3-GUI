@@ -98,8 +98,9 @@ function CreateUCP2Slider(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <Form.Switch>
-        <Form.Switch.Input
+      <div className="sword-checkbox">
+        <input
+          type="checkbox"
           className="me-2"
           id={`${url}-header`}
           key={`${url}-header`}
@@ -120,10 +121,10 @@ function CreateUCP2Slider(args: {
           }}
           disabled={isDisabled}
         />
-        <Form.Switch.Label className="fs-6" htmlFor={`${url}-header`}>
+        <label className="fs-6" htmlFor={`${url}-header`}>
           {header}
-        </Form.Switch.Label>
-      </Form.Switch>
+        </label>
+      </div>
     );
   }
   // eslint-disable-next-line no-nested-ternary
@@ -135,16 +136,7 @@ function CreateUCP2Slider(args: {
       : (value.sliderValue as number) * factor,
   );
   return (
-    <div
-      className="col-5"
-      style={{ marginLeft: 0, marginBottom: 0 }}
-      onMouseEnter={() => {
-        setStatusBarMessage(statusBarMessage);
-      }}
-      onMouseLeave={() => {
-        setStatusBarMessage(undefined);
-      }}
-    >
+    <div className="sword-checkbox" style={{ marginLeft: 0, marginBottom: 0 }}>
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>
@@ -156,19 +148,19 @@ function CreateUCP2Slider(args: {
         <div className="col-auto">
           <Form.Label>{min}</Form.Label>
         </div>
-        <div className="col">
-          <RangeSlider
+        <div className="col col-6">
+          <input
+            type="range"
+            className="ucp-slider"
             min={min * factor}
             max={max * factor}
             step={step * factor}
             id={`${url}-slider`}
-            size="sm"
+            // size="sm"
             value={localValue}
-            tooltipLabel={(currentValue) => (currentValue / factor).toString()}
+            // tooltipLabel={(currentValue) => (currentValue / factor).toString()}
             onChange={(event) => {
               setLocalValue(parseInt(event.target.value, 10));
-            }}
-            onAfterChange={(event) => {
               setConfiguration({
                 type: 'set-multiple',
                 value: Object.fromEntries([

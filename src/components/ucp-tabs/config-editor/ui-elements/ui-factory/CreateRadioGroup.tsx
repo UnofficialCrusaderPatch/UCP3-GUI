@@ -16,6 +16,8 @@ import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 
+// TODO is this deprecated?
+
 function CreateRadioGroup(args: {
   spec: DisplayConfigElement;
   disabled: boolean;

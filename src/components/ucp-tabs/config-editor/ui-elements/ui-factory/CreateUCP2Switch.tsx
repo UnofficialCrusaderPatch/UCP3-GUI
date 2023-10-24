@@ -64,7 +64,6 @@ function CreateUCP2Switch(args: {
     <div className="sword-checkbox ucp2-switch">
       <input
         type="checkbox"
-        comment="ucp-switch"
         className="me-2"
         id={`${url}`}
         key={`${url}-switch`}

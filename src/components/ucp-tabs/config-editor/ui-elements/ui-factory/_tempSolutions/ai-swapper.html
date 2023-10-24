@@ -1,0 +1,90 @@
+<style>
+    .ai-swapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+
+
+    .ai-swapper__overview {
+        display: grid;
+        grid-template-rows: repeat(2, 1fr);
+        grid-template-columns: repeat(8, 1fr);
+        height: 100%;
+        width: 100%;
+    }
+
+    .ai-swapper__overview__ai {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .ai-swapper__change-menu{
+        box-sizing: border-box;
+        height: 100%;
+        width: 100%;
+    }
+
+    .ai-swapper__change-menu__ai {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+</style>
+
+
+
+<div class="ai-swapper">
+    <dialog class="ai-swapper__change-menu">
+        <div class="ai-swapper__change-menu__ai">
+            <p class="slot-name"></p>
+            <img class="ai-image" />
+        </div>
+    </dialog>
+
+    <div class="ai-swapper__overview">
+
+    </div>
+</div>
+
+<template class="template--ai-overview-slot">
+    <div class="ai-swapper__overview__ai">
+        <p class="slot-name"></p>
+        <img class="ai-image" />
+        <p class="ai-name">Test</p>
+    </div>
+</template>
+
+<script>
+    const AI_SLOTS = ["rat", "snake", "pig", "wolf", "saladin", "caliph", "sultan", "lionheart", "frederick", "phillip", "wazir", "emir", "nizar", "sheriff", "marshal", "abbot"];
+
+    const OVERVIEW = document.querySelector(".ai-swapper__overview");
+    const CHANGE_MENU = document.querySelector(".ai-swapper__change-menu");
+
+    function activateEditDialog(event) {
+        const slotName = Array.from(event.currentTarget.classList).find((cssClass) => cssClass.startsWith("slot--")).replace("slot--", "").toUpperCase();
+
+        CHANGE_MENU.querySelector(".slot-name").textContent = slotName;
+        CHANGE_MENU.showModal();
+    }
+
+    const overviewTemp = document.querySelector(".template--ai-overview-slot");
+    for (ai of AI_SLOTS) {
+        const clone = overviewTemp.content.cloneNode(true);
+        const cloneDiv = clone.querySelector(".ai-swapper__overview__ai");
+        cloneDiv.classList.add(`slot--${ai}`);
+        clone.querySelector(".slot-name").textContent = ai.toUpperCase();
+        // TODO: picture + current
+        cloneDiv.addEventListener("click", activateEditDialog);
+
+        OVERVIEW.appendChild(clone);
+    }
+
+</script>

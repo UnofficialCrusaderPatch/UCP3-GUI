@@ -1,4 +1,3 @@
-import { Console } from 'console';
 import {
   EMPTY_GAME_VERSION,
   GameVersionInstance,
@@ -12,7 +11,7 @@ import { ConsoleLogger } from 'util/scripts/logging';
 
 interface GameStarterProps {
   pathAtom: Atom<Promise<string>>;
-  versionAtom: Atom<Promise<Promise<GameVersionInstance>>>;
+  versionAtom: Atom<Promise<GameVersionInstance>>;
 }
 
 function GameStarterButton(props: GameStarterProps) {

@@ -19,7 +19,7 @@ function changeLocaleOfObj(
 
       if (search !== undefined && search !== null) {
         const keyword = search[1];
-        const loc = locale[keyword];
+        const loc = locale[keyword.toLowerCase()];
         if (loc !== undefined) {
           // eslint-disable-next-line no-param-reassign
           obj[k] = loc;
@@ -41,7 +41,7 @@ function changeLocale(
 
       if (search !== undefined && search !== null) {
         const keyword = search[1];
-        const loc = locale[keyword];
+        const loc = locale[keyword.toLowerCase()];
         if (loc !== undefined) {
           // eslint-disable-next-line no-param-reassign
           obj[field] = loc;

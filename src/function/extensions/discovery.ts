@@ -13,9 +13,9 @@ import {
 } from 'config/ucp/common';
 import Logger from 'util/scripts/logging';
 import languages from 'localization/languages.json';
-import ExtensionHandle from './extension-handle';
-import ZipExtensionHandle from './rust-zip-extension-handle';
-import DirectoryExtensionHandle from './directory-extension-handle';
+import ExtensionHandle from './extension-handles/extension-handle';
+import ZipExtensionHandle from './extension-handles/rust-zip-extension-handle';
+import DirectoryExtensionHandle from './extension-handles/directory-extension-handle';
 import { changeLocale } from './locale';
 import { ExtensionTree } from './dependency-management/dependency-resolution';
 
@@ -57,12 +57,15 @@ async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
   };
 }
 
+type Translation = { [key: string]: string };
+type TranslationDB = { [language: string]: Translation };
+
 async function readLocales(
   eh: ExtensionHandle,
   ext: Extension,
   locales: string[],
 ) {
-  const translations: { [language: string]: { [key: string]: string } } = {};
+  const translations: TranslationDB = {};
 
   const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}/`);
   if (locFolder) {
@@ -73,9 +76,14 @@ async function readLocales(
         const translation = yaml.parse(
           // eslint-disable-next-line no-await-in-loop
           await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`),
-        );
+        ) as Translation;
 
-        translations[language] = translation;
+        translations[language] = Object.fromEntries(
+          Object.entries(translation).map(([key, value]) => [
+            key.toLowerCase(),
+            value,
+          ]),
+        );
       } else {
         LOGGER.msg(
           `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,

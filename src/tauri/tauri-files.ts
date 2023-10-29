@@ -30,6 +30,7 @@ import {
   ToJSOptions,
 } from 'yaml';
 import Result from 'util/structs/result';
+import { convertFileSrc } from '@tauri-apps/api/tauri';
 
 // WARNING: Tauri funcs lie about their return.
 // Void Promises return "null" as result instead of undefined.
@@ -59,7 +60,17 @@ export async function resolvePath(...paths: string[]): Promise<string> {
   return resolve(...paths);
 }
 
-// WARNING: directly writting in DOWNLOAD for example does not work,
+export function receiveAssetUrl<
+  T extends string | string[],
+  R = T extends string ? string : Promise<string>,
+>(paths: T, protocol?: string): R {
+  const convertToAssetUrl = (path: string) => convertFileSrc(path, protocol);
+  return Array.isArray(paths)
+    ? (resolvePath(...paths).then(convertToAssetUrl) as R)
+    : (convertToAssetUrl(paths) as R);
+}
+
+// WARNING: directly writing in DOWNLOAD for example does not work,
 // since interacting with this folder (like in this function), is forbidden,
 // which might be better, actually
 export async function recursiveCreateDirForFile(

@@ -23,7 +23,7 @@
         align-items: center;
     }
 
-    .ai-swapper__change-menu{
+    .ai-swapper__change-menu {
         box-sizing: border-box;
         height: 100%;
         width: 100%;
@@ -32,25 +32,157 @@
     .ai-swapper__change-menu__ai {
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
         height: 100%;
         width: 100%;
     }
-</style>
 
+    .ai-swapper__change-menu__close {
+        position: absolute;
+        text-align: center;
+        line-height: 16px;
+        color: red;
+        right: 0;
+        top: 0;
+        height: 20px;
+        width: 20px;
+        margin: 5px;
+        padding: 0;
+        border: black solid 2px;
+    }
+
+    .ai-swapper__change-menu__header {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+    }
+
+    .ai-swapper__change-menu__table {
+        table-layout: fixed;
+        margin-top: 15px;
+        width: 100%;
+        flex-grow: 1;
+        border: black solid 1px;
+        border-collapse: collapse;
+    }
+
+    .ai-swapper__change-menu__table th {
+        border: black solid 1px;
+        vertical-align: center;
+        height: 1;
+        padding: 2px 4px;
+
+        white-space: nowrap;
+        text-wrap: nowrap;
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .ai-swapper__change-menu__table td {
+        border-top: black dotted 1px;
+        border-bottom: black dotted 1px;
+        border-left: black solid 1px;
+        border-right: black solid 1px;
+
+        height: 1;
+        vertical-align: top;
+
+        word-break: break-all;
+    }
+
+    .ai-swapper__change-menu__table tr:last-child td {
+        height: auto;
+    }
+
+    .ai-swapper__change-menu__table__header .small-column {
+        width: min-content;
+    }
+
+    .ai-swapper__change-menu__table__row--current {
+        border: black solid 1px;
+        background-color: yellow;
+        vertical-align: middle;
+        text-align: center;
+    }
+</style>
 
 
 <div class="ai-swapper">
     <dialog class="ai-swapper__change-menu">
+        <button tabindex="0" class="ai-swapper__change-menu__close">
+            &#10006;
+        </button>
         <div class="ai-swapper__change-menu__ai">
-            <p class="slot-name"></p>
-            <img class="ai-image" />
+            <h2 class="slot-name"></h2>
+            <div class="ai-swapper__change-menu__header">
+                <div>
+                    <p class="current-name"></p>
+                    <img class="ai-image" />
+                </div>
+                <div>
+                    <button class="ai-swapper__change-menu__select">
+                        SELECT
+                    </button>
+                </div>
+            </div>
+            <table class="ai-swapper__change-menu__table">
+                <thead class="ai-swapper__change-menu__table__header">
+                    <tr>
+                        <th class="small-column index">INDEX</th>
+                        <th class="name">NAME</th>
+                        <th class="path">PATH</th>
+                        <th class="language">LANGUAGE</th>
+                        <th class="small-column binks">BINKS</th>
+                        <th class="small-column speech">SPEECH</th>
+                        <th class="small-column lines">LINES</th>
+                        <th class="small-column portrait">PORTRAIT</th>
+                        <th class="small-column aic">AIC</th>
+                        <th class="small-column aiv">AIV</th>
+                        <th class="small-column lord">LORD</th>
+                        <th class="small-column start-troops">START_TROOPS</th>
+                        <th class="priority">PRIORITY</th>
+                        <th class="small-column remove">REMOVE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="ai-swapper__change-menu__table__row--current">
+                        <td>-</td>
+                        <td>CURRENT</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>"index"</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>INDEX</td>
+                        <td>NAME</td>
+                        <td>PATH</td>
+                        <td>LANGUAGE</td>
+                        <td>BINKS</td>
+                        <td>SPEECH</td>
+                        <td>LINES</td>
+                        <td>PORTRAIT</td>
+                        <td>AIC</td>
+                        <td>AIV</td>
+                        <td>LORD</td>
+                        <td>START_TROOPS</td>
+                        <td>PRIORITY</td>
+                        <td>REMOVE</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </dialog>
 
     <div class="ai-swapper__overview">
-
     </div>
 </div>
 
@@ -62,11 +194,15 @@
     </div>
 </template>
 
+
 <script>
     const AI_SLOTS = ["rat", "snake", "pig", "wolf", "saladin", "caliph", "sultan", "lionheart", "frederick", "phillip", "wazir", "emir", "nizar", "sheriff", "marshal", "abbot"];
 
     const OVERVIEW = document.querySelector(".ai-swapper__overview");
     const CHANGE_MENU = document.querySelector(".ai-swapper__change-menu");
+
+    // general init change menu
+    CHANGE_MENU.querySelector(".ai-swapper__change-menu__close").addEventListener("click", () => CHANGE_MENU.close());
 
     function activateEditDialog(event) {
         const slotName = Array.from(event.currentTarget.classList).find((cssClass) => cssClass.startsWith("slot--")).replace("slot--", "").toUpperCase();

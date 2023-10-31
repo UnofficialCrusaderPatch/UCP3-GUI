@@ -79,7 +79,6 @@ export async function isZipReaderEmpty(id: number): Promise<boolean> {
 }
 
 // WARNING: Do not use directly, only through ZipReader
-// does seem to return number of files and ignores folders
 export async function getZipReaderNumberOfEntries(id: number): Promise<number> {
   return invoke(TAURI_COMMAND.ZIP_READER_GET_NUMBER_OF_ENTRIES, { id });
 }

@@ -12,6 +12,9 @@ import {
   writeZipWriterEntryFromBinary,
   writeZipWriterEntryFromText,
   writeZipWriterEntryFromFile,
+  isZipReaderEmpty,
+  getZipReaderNumberOfEntries,
+  getZipReaderEntryNames,
 } from 'tauri/tauri-invoke';
 
 export class ZipReader {
@@ -58,8 +61,20 @@ export class ZipReader {
     ZipReader.#READER_GC_REGISTRY.unregister(this);
   }
 
+  async isEmpty() {
+    return isZipReaderEmpty(this.#id);
+  }
+
+  async getNumberOfEntries() {
+    return getZipReaderNumberOfEntries(this.#id);
+  }
+
   async doesEntryExist(path: string) {
     return existZipReaderEntry(this.#id, path);
+  }
+
+  async getEntryNames(globPattern?: string) {
+    return getZipReaderEntryNames(this.#id, globPattern);
   }
 
   async getEntryAsBinary(path: string) {

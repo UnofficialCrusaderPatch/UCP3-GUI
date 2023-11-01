@@ -2,12 +2,14 @@ use std::{
     collections::HashMap,
     fs::{self, File},
     io::{self, BufReader, BufWriter, Read, Write},
+    path::Path,
     pin::Pin,
     sync::Mutex,
-    sync::MutexGuard, path::Path,
+    sync::MutexGuard,
 };
 use tauri::{
     plugin::{Builder, TauriPlugin},
+    scope::GlobPattern,
     AppHandle, Manager, Runtime,
 };
 use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
@@ -48,6 +50,24 @@ fn get_zip_collections_state<R: Runtime>(
 
 fn get_pin_box_mem_address<S>(obj: &Pin<Box<S>>) -> usize {
     &**obj as *const S as usize
+}
+
+fn do_with_reader<R: Runtime, T, F: FnOnce(&mut Pin<Box<ZipReaderHelper>>) -> Result<T, String>>(
+    app_handle: &AppHandle<R>,
+    id: usize,
+    func: F,
+) -> Result<T, String> {
+    let mut state = get_zip_collections_state(&app_handle);
+    ZipReaderHelper::get_reader(&mut state, id).and_then(func)
+}
+
+fn do_with_writer<R: Runtime, T, F: FnOnce(&mut Pin<Box<ZipWriterHelper>>) -> Result<T, String>>(
+    app_handle: &AppHandle<R>,
+    id: usize,
+    func: F,
+) -> Result<T, String> {
+    let mut state: MutexGuard<'_, ZipCollectionsState> = get_zip_collections_state(&app_handle);
+    ZipWriterHelper::get_writer(&mut state, id).and_then(func)
 }
 
 /// READER ///
@@ -99,11 +119,32 @@ impl ZipReaderHelper {
             .ok_or(String::from("zip.id.missing"))
     }
 
+    fn is_empty(&self) -> bool {
+        self.reader.is_empty()
+    }
+
+    fn get_number_of_entries(&self) -> usize {
+        self.reader.len()
+    }
+
     fn exist(&mut self, path: &str) -> bool {
         match self.reader.by_name(path) {
             Ok(_) => true,
             Err(_) => false,
         }
+    }
+
+    fn get_entry_names(&mut self, pattern: &str) -> Result<Vec<String>, String> {
+        if pattern.is_empty() {
+            return Ok(self.reader.file_names().map(String::from).collect());
+        }
+        let glob_pattern = GlobPattern::new(pattern).map_err(|err| err.to_string())?;
+        Ok(self
+            .reader
+            .file_names()
+            .filter(|file_name| glob_pattern.matches(file_name))
+            .map(String::from)
+            .collect())
     }
 
     fn get_entry_as_binary(&mut self, path: &str) -> Result<Vec<u8>, String> {
@@ -232,13 +273,35 @@ fn close_zip_reader<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<(
 }
 
 #[tauri::command]
+fn is_zip_reader_empty<R: Runtime>(app_handle: AppHandle<R>, id: usize) -> Result<bool, String> {
+    do_with_reader(&app_handle, id, |reader| Ok(reader.is_empty()))
+}
+
+#[tauri::command]
+fn get_zip_reader_number_of_entries<R: Runtime>(
+    app_handle: AppHandle<R>,
+    id: usize,
+) -> Result<usize, String> {
+    do_with_reader(&app_handle, id, |reader| Ok(reader.get_number_of_entries()))
+}
+
+#[tauri::command]
 fn exist_zip_reader_entry<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
 ) -> Result<bool, String> {
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipReaderHelper::get_reader(&mut state, id).map(|reader| reader.exist(path))
+    do_with_reader(&app_handle, id, |reader| Ok(reader.exist(path)))
+}
+
+#[tauri::command]
+fn get_zip_reader_entry_names<R: Runtime>(
+    app_handle: AppHandle<R>,
+    id: usize,
+    pattern: &str,
+) -> Result<Vec<String>, String> {
+    // no idea how lifetime params could be set to avoid creating the string copies...
+    do_with_reader(&app_handle, id, |reader| reader.get_entry_names(pattern))
 }
 
 #[tauri::command]
@@ -247,8 +310,7 @@ fn get_zip_reader_entry_as_binary<R: Runtime>(
     id: usize,
     path: &str,
 ) -> Result<Vec<u8>, String> {
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipReaderHelper::get_reader(&mut state, id)?.get_entry_as_binary(path)
+    do_with_reader(&app_handle, id, |reader| reader.get_entry_as_binary(path))
 }
 
 #[tauri::command]
@@ -257,8 +319,7 @@ fn get_zip_reader_entry_as_text<R: Runtime>(
     id: usize,
     path: &str,
 ) -> Result<String, String> {
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipReaderHelper::get_reader(&mut state, id)?.get_entry_as_text(path)
+    do_with_reader(&app_handle, id, |reader| reader.get_entry_as_text(path))
 }
 
 #[tauri::command]
@@ -284,8 +345,7 @@ fn add_zip_writer_directory<R: Runtime>(
     id: usize,
     path: &str,
 ) -> Result<(), String> {
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipWriterHelper::get_writer(&mut state, id)?.add_directory(path)
+    do_with_writer(&app_handle, id, |writer| writer.add_directory(path))
 }
 
 #[tauri::command]
@@ -295,8 +355,9 @@ fn write_zip_writer_entry_from_binary<R: Runtime>(
     path: &str,
     binary: &[u8],
 ) -> Result<(), String> {
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipWriterHelper::get_writer(&mut state, id)?.write_entry_from_binary(path, binary)
+    do_with_writer(&app_handle, id, |writer| {
+        writer.write_entry_from_binary(path, binary)
+    })
 }
 
 #[tauri::command]
@@ -306,8 +367,9 @@ fn write_zip_writer_entry_from_text<R: Runtime>(
     path: &str,
     text: &str,
 ) -> Result<(), String> {
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipWriterHelper::get_writer(&mut state, id)?.write_entry_from_text(path, text)
+    do_with_writer(&app_handle, id, |writer| {
+        writer.write_entry_from_text(path, text)
+    })
 }
 
 #[tauri::command]
@@ -318,8 +380,9 @@ fn write_zip_writer_entry_from_file<R: Runtime>(
     source: &str,
 ) -> Result<(), String> {
     let source_path = get_allowed_path_with_string_error(&app_handle, source)?;
-    let mut state = get_zip_collections_state(&app_handle);
-    ZipWriterHelper::get_writer(&mut state, id)?.write_entry_from_file(path, source_path)
+    do_with_writer(&app_handle, id, |writer| {
+        writer.write_entry_from_file(path, source_path)
+    })
 }
 
 // careless, overwrites, may leave remains on error
@@ -349,7 +412,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             extract_zip_to_path,
             load_zip_reader,
             close_zip_reader,
+            is_zip_reader_empty,
+            get_zip_reader_number_of_entries,
             exist_zip_reader_entry,
+            get_zip_reader_entry_names,
             get_zip_reader_entry_as_binary,
             get_zip_reader_entry_as_text,
             load_zip_writer,

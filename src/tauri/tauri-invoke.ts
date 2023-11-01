@@ -20,7 +20,10 @@ const TAURI_COMMAND = {
   ZIP_EXTRACT_TO_PATH: buildPluginCmd(PLUGIN_ZIP, 'extract_zip_to_path'),
   ZIP_READER_LOAD: buildPluginCmd(PLUGIN_ZIP, 'load_zip_reader'),
   ZIP_READER_CLOSE: buildPluginCmd(PLUGIN_ZIP, 'close_zip_reader'),
+  ZIP_READER_IS_EMPTY: buildPluginCmd(PLUGIN_ZIP, 'is_zip_reader_empty'),
+  ZIP_READER_GET_NUMBER_OF_ENTRIES: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_number_of_entries'),
   ZIP_READER_EXIST_ENTRY: buildPluginCmd(PLUGIN_ZIP, 'exist_zip_reader_entry'),
+  ZIP_READER_GET_ENTRY_NAMES: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_names'),
   ZIP_READER_GET_ENTRY_AS_BINARY: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_as_binary',),
   ZIP_READER_GET_ENTRY_AS_TEXT: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_as_text',),
   ZIP_WRITER_LOAD: buildPluginCmd(PLUGIN_ZIP, 'load_zip_writer'),
@@ -71,11 +74,29 @@ export async function closeZipReader(id: number): Promise<void> {
 }
 
 // WARNING: Do not use directly, only through ZipReader
+export async function isZipReaderEmpty(id: number): Promise<boolean> {
+  return invoke(TAURI_COMMAND.ZIP_READER_IS_EMPTY, { id });
+}
+
+// WARNING: Do not use directly, only through ZipReader
+export async function getZipReaderNumberOfEntries(id: number): Promise<number> {
+  return invoke(TAURI_COMMAND.ZIP_READER_GET_NUMBER_OF_ENTRIES, { id });
+}
+
+// WARNING: Do not use directly, only through ZipReader
 export async function existZipReaderEntry(
   id: number,
   path: string,
 ): Promise<boolean> {
   return invoke(TAURI_COMMAND.ZIP_READER_EXIST_ENTRY, { id, path });
+}
+
+// WARNING: Do not use directly, only through ZipReader
+export async function getZipReaderEntryNames(
+  id: number,
+  pattern: string = '',
+): Promise<string[]> {
+  return invoke(TAURI_COMMAND.ZIP_READER_GET_ENTRY_NAMES, { id, pattern });
 }
 
 // WARNING: Do not use directly, only through ZipReader

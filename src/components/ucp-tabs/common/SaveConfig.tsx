@@ -22,8 +22,8 @@ function saveConfig(
   return saveUCPConfig(
     sparseConfig,
     fullConfig,
-    sparseExtensions,
-    allExtensions,
+    [...sparseExtensions].reverse(),
+    [...allExtensions].reverse(),
     folder,
     configurationQualifier,
   );

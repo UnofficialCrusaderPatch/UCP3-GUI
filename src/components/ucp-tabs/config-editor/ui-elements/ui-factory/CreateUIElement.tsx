@@ -16,6 +16,7 @@ import CreateUCP2RadioGroup from './CreateUCP2RadioGroup';
 import CreateUCP2Slider from './CreateUCP2Slider';
 import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
 import CreateUCP2Switch from './CreateUCP2Switch';
+import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput, {
   FileInputDisplayConfigElement,
 } from './CreateFileInput';
@@ -31,11 +32,13 @@ function CreateUIElement(args: {
 
   const [t] = useTranslation(['gui-editor']);
 
+  // TODO: looks like this could be replaced at least by a switch
   if (spec.display === undefined) {
     if (spec.contents.type !== undefined) {
       spec.display = DisplayDefaults[spec.contents.type];
     }
   }
+  // why the second if?
   if (spec.display === undefined) {
     LOGGER.msg(
       t('gui-editor:config.element.unsupported.type', {
@@ -119,6 +122,11 @@ function CreateUIElement(args: {
   if (spec.display === 'RadioGroup') {
     return (
       <CreateRadioGroup spec={spec} disabled={disabled} className={className} />
+    );
+  }
+  if (spec.display === 'CustomMenu') {
+    return (
+      <CreateCustomMenu spec={spec} disabled={disabled} className={className} />
     );
   }
   if (spec.display === 'FileInput') {

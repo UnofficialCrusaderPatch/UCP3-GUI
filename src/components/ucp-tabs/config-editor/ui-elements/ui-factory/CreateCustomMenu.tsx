@@ -73,7 +73,7 @@ function CreateCustomMenu(args: {
         />
       ) : null}
       <div>
-        <label className="form-check-label" htmlFor={`${url}-slider`}>
+        <label className="form-check-label" htmlFor={`${url}-sandbox`}>
           {!hasHeader && header}
           {text}
         </label>
@@ -81,16 +81,30 @@ function CreateCustomMenu(args: {
       <div className="row">
         <button
           type="button"
+          id={`${url}-sandbox`}
           className="sandbox-menu-button"
           onClick={() =>
             // TODO: improve setup
             setOverlayContent(SandboxMenu, {
-              url,
               sourcePaths: {
                 // TODO: create method to receive paths
                 htmlPath: `${currentFolder}/ucp/modules/inputHandler-0.1.0/menu/test.html`,
                 cssPath: `${currentFolder}/ucp/modules/inputHandler-0.1.0/menu/test.css`,
                 jsPath: `${currentFolder}/ucp/modules/inputHandler-0.1.0/menu/test.js`,
+              },
+              receiveConfig(config: Record<string, unknown>) {
+                // this approach might not be working well, since this sets something else than the master url
+                // also, this likely will close on "save" actions
+                setConfiguration({
+                  type: 'set-multiple',
+                  value: config,
+                });
+                setConfigurationTouched({
+                  type: 'set-multiple',
+                  value: Object.fromEntries(
+                    Object.keys(config).map((key) => [key, true]),
+                  ),
+                });
               },
             })
           }

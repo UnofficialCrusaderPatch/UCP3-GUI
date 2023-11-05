@@ -1,15 +1,18 @@
-import {
-  OverlayContentProps,
-  useSetOverlayContent,
-} from 'components/overlay/overlay';
+import { OverlayContentProps } from 'components/overlay/overlay';
 import { useEffect, useRef, useState } from 'react';
 import Sandbox, { PluginInstance } from 'websandbox';
-
-import { readTextFile, resolvePath } from 'tauri/tauri-files';
+import { readTextFile } from 'tauri/tauri-files';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import i18next from 'i18next';
-
-import Result from 'util/structs/result';
+import Logger, { ConsoleLogger } from 'util/scripts/logging';
+import {
+  getLanguage,
+  createGetLocalizedStringFunction,
+  createGetTextFileFunction,
+  createGetAssetUrlFunction,
+  createGetConfigStateFunction,
+  createGetCurrentConfigFunction,
+  createReceivePluginPathsFunction,
+} from './sandbox-menu-functions';
 
 // eslint-disable-next-line import/no-unresolved
 import frameBaseStyle from './sandbox-frame-base.css?inline';
@@ -17,6 +20,8 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 import frameBaseScript from './sandbox-frame-base.js?raw';
 
 import './sandbox-menu.css';
+
+const LOGGER = new Logger('sandbox-menu.tsx');
 
 interface SandboxSource {
   html: string;
@@ -31,99 +36,95 @@ export interface SandboxSourcePaths {
 }
 
 export interface SandboxArgs {
-  url: string;
   sourcePaths: SandboxSourcePaths;
+  receiveConfig: (config: Record<string, unknown>) => void;
 }
 
-async function getLanguage(): Promise<string> {
-  return i18next.language; // is kinda enough, using the hook might be overkill
+async function receiveSources(
+  sourcePaths: SandboxSourcePaths,
+): Promise<SandboxSource> {
+  return Promise.all([
+    readTextFile(sourcePaths.htmlPath),
+    readTextFile(sourcePaths.cssPath),
+    readTextFile(sourcePaths.jsPath),
+  ]).then((sourceStrings) =>
+    // should these be sanitized?
+    // css and js could also be made accessible through assets
+    // also, they may/should be restricted to their home folder -> needs test
+    ({
+      html: sourceStrings[0].ok().getOrElse(''),
+      css: sourceStrings[1].ok().getOrElse(''),
+      js: sourceStrings[2].ok().getOrElse(''),
+    }),
+  );
 }
 
-// dummy
-async function getLocalizedString(id: string): Promise<string> {
-  // TODO -> use module localization
-  const test: Record<string, string> = {
-    header: 'I am a header.',
-    text: 'I am text.',
+function createSandboxHostApi(
+  setInitDone: (value: boolean) => void,
+  currentFolder: string,
+  localization: Record<string, string>,
+  currentConfig: Record<string, unknown>,
+  overallConfig: unknown,
+) {
+  return {
+    confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
+    getLanguage,
+    getLocalizedString: createGetLocalizedStringFunction(localization),
+    getTextFile: createGetTextFileFunction(currentFolder),
+    getAssetUrl: createGetAssetUrlFunction(currentFolder),
+    receivePluginPaths: createReceivePluginPathsFunction(currentFolder),
+    getCurrentConfig: createGetCurrentConfigFunction(currentConfig),
+    getConfigState: createGetConfigStateFunction(overallConfig),
   };
-
-  return test[id];
 }
 
-async function getConfigState(url: string): Promise<unknown> {
-  // TODO: should be able to get a config value of other modules to perform logic
-  // (it should copy on transmit anyway, so it should not be needed to copy it here)
-  return null;
+function createSandboxOptions(
+  sandboxContainer: Element,
+  sources: SandboxSource,
+) {
+  return {
+    frameContainer: sandboxContainer,
+    frameClassName: 'sandbox-frame',
+    frameContent: sources.html,
+
+    // combining the sources seems to guarantee that the side can be recovered on reload
+    // if this is not wanted or desired, inject or run can be used
+    initialStyles: `${frameBaseStyle}\n${sources.css}`,
+    codeToRunBeforeInit: `${frameBaseScript}\n${sources.js}`,
+  };
 }
 
 export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
   const { closeFunc, args } = props;
-  const { url, sourcePaths } = args;
+  const { sourcePaths, receiveConfig } = args;
 
   const currentFolder = useCurrentGameFolder();
 
   const [sources, setSources] = useState<null | SandboxSource>(null);
 
-  const sandboxDiv = useRef(null);
+  const sandboxDiv = useRef<null | HTMLDivElement>(null);
   const [sandbox, setSandbox] = useState<null | PluginInstance>(null);
 
   const [initDone, setInitDone] = useState(false);
 
   useEffect(() => {
     if (!sources) {
-      // TODO: needs better handling
-
       // eslint-disable-next-line promise/catch-or-return
-      Promise.all([
-        readTextFile(sourcePaths.htmlPath),
-        readTextFile(sourcePaths.cssPath),
-        readTextFile(sourcePaths.jsPath),
-      ]).then((sourceStrings) =>
-        // should these be sanitized?
-        // css and js could also be made accessible through assets
-        // also, they may/should be restricted to their home folder -> needs test
-        setSources({
-          html: sourceStrings[0].ok().getOrElse(''),
-          css: sourceStrings[1].ok().getOrElse(''),
-          js: sourceStrings[2].ok().getOrElse(''),
-        })
-      );
+      receiveSources(sourcePaths).then(setSources);
+      return () => {};
+    }
+
+    if (!sandboxDiv.current) {
+      LOGGER.msg(
+        'Unable to create sandbox, since sandbox div is not present.',
+      ).error();
       return () => {};
     }
 
     const sand: PluginInstance = Sandbox.create(
-      {
-        confirmInit: async () => {
-          // could be done to do stuff after init
-          setInitDone(true);
-        },
-        getLanguage,
-        getLocalizedString,
-        getConfigState,
-        getTextFile: async (path): Promise<null | string> =>
-          (
-            (await readTextFile(
-              await resolvePath(currentFolder, path)
-            )) as Result<string | null, unknown>
-          )
-            .ok()
-            .getOrElse(null),
-        getCurrentConfig: async () => null, // TODO: this method should return the current config value, do allow the menu to initialize
-        // TODO: resources, like pictures?
-      },
-      {
-        frameContainer: sandboxDiv.current as unknown as Element,
-        frameClassName: 'sandbox-frame',
-        frameContent: sources.html,
-
-        // combining the sources seems to guarantee that the side can be recovered on reload
-        // if this is not wanted or desired, inject or run can be used
-        initialStyles: `${frameBaseStyle}\n${sources.css}`,
-        codeToRunBeforeInit: `${frameBaseScript}\n${sources.js}`,
-      }
+      createSandboxHostApi(setInitDone, currentFolder, {}, {}, {}),
+      createSandboxOptions(sandboxDiv.current, sources),
     );
-    // eslint-disable-next-line promise/catch-or-return
-
     // this could be used to one time run code or inject css
     // sand.promise
     //   .then(() => sand.injectStyle(sources.css))
@@ -131,7 +132,7 @@ export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
 
     setSandbox(sand);
     return () => sand.destroy();
-  }, [currentFolder, sources]);
+  }, [currentFolder, sourcePaths, sources]);
 
   return (
     <div className="sandbox-menu-container">
@@ -143,36 +144,39 @@ export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
       We should stop this.
       
       <a href="https://www.w3schools.com/tags/img_girl.jpg">TEst</a> */}
-      <div className="sandbox-control-menu">
-        <button
-          type="button"
-          className="sandbox-control-button"
-          disabled={!initDone}
-          onClick={async () =>
-            console.log(await sandbox?.connection.remote.getConfig())
-          }
-        >
-          SAVE
-        </button>
-        <button
-          type="button"
-          className="sandbox-control-button"
-          disabled={!initDone}
-          onClick={async () => {
-            console.log(await sandbox?.connection.remote.getConfig());
-            closeFunc();
-          }}
-        >
-          SAVE_AND_CLOSE
-        </button>
-        <button
-          type="button"
-          className="sandbox-control-button"
-          onClick={closeFunc}
-        >
-          CLOSE
-        </button>
-      </div>
+      {!sandbox ? null : (
+        <div className="sandbox-control-menu">
+          <button
+            type="button"
+            className="sandbox-control-button"
+            disabled={!initDone}
+            onClick={async () =>
+              // we will see, if this works, or just closes the sandbox
+              receiveConfig(await sandbox.connection.remote.getConfig())
+            }
+          >
+            SAVE
+          </button>
+          <button
+            type="button"
+            className="sandbox-control-button"
+            disabled={!initDone}
+            onClick={async () => {
+              receiveConfig(await sandbox.connection.remote.getConfig());
+              closeFunc();
+            }}
+          >
+            SAVE_AND_CLOSE
+          </button>
+          <button
+            type="button"
+            className="sandbox-control-button"
+            onClick={closeFunc}
+          >
+            CLOSE
+          </button>
+        </div>
+      )}
     </div>
   );
 }

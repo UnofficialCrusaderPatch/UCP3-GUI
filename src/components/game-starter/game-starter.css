@@ -1,3 +1,28 @@
 .game-starter__box {
     justify-content: start;
 }
+
+.game-starter__image {
+    cursor: pointer;
+}
+
+.game-starter__image:hover {
+    filter: drop-shadow(0 0 5px var(--ucp-main-grey));
+}
+
+.game-starter__image:active {
+    filter: brightness(75%);
+}
+
+.game-starter__image--disabled {
+    pointer-events: none;
+    cursor: none;
+    opacity: 40%;
+    filter: grayscale(50%)
+}
+
+.game-starter__image--starting {
+    pointer-events: none;
+    cursor: wait;
+    filter: brightness(75%);
+}

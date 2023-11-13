@@ -19,10 +19,12 @@ export default function Launch() {
     <div className="launch__container flex-default">
       <div className="launch__boxes">
         <GameStarter
+          imagePath="src/assets/game-assets/logo-crusader-vanilla.png"
           pathAtom={VANILLA_PATH_ATOM}
           versionAtom={VANILLA_VERSION_ATOM}
         />
         <GameStarter
+          imagePath="src/assets/game-assets/logo-crusader-extreme.png"
           pathAtom={EXTREME_PATH_ATOM}
           versionAtom={EXTREME_VERSION_ATOM}
         />

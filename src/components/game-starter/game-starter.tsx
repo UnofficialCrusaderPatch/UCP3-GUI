@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import './game-starter.css';
 
 import {
@@ -5,17 +6,20 @@ import {
   GameVersionInstance,
 } from 'function/game-files/game-version';
 import { Atom, useAtomValue } from 'jotai';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { osOpenProgram } from 'tauri/tauri-invoke';
-import { ConsoleLogger } from 'util/scripts/logging';
+import Logger from 'util/scripts/logging';
 
-interface GameStarterButtonProps {
+const LOGGER = new Logger('game-starter.tsx');
+
+interface GameStarterProps {
   pathAtom: Atom<Promise<string>>;
   versionAtom: Atom<Promise<GameVersionInstance>>;
+  imagePath: string;
+  args?: string[];
+  envs?: Record<string, string>;
 }
-
-interface GameStarterProps extends GameStarterButtonProps {}
 
 function GameStarterInfo(props: {
   versionAtom: Atom<Promise<GameVersionInstance>>;
@@ -28,36 +32,61 @@ function GameStarterInfo(props: {
 }
 
 function GameStarterButton(props: GameStarterProps) {
-  const { pathAtom, versionAtom } = props;
+  const { imagePath, pathAtom, versionAtom, args, envs } = props;
 
   const { t } = useTranslation(['gui-launch']);
 
   const path = useAtomValue(pathAtom);
   const version = useAtomValue(versionAtom);
 
+  const [starting, setStarting] = useState(false);
+
   const startDisabled = version === EMPTY_GAME_VERSION;
 
+  const classes = ['game-starter__image'];
+  if (startDisabled) {
+    classes.push('game-starter__image--disabled');
+  }
+  if (starting) {
+    classes.push('game-starter__image--starting');
+  }
+
+  const startFunc = async () => {
+    try {
+      setStarting(true);
+      await osOpenProgram(path, args, envs);
+    } catch (e) {
+      // change handling?
+      LOGGER.msg('Error while trying to launch "{}": {}', path, e).error();
+    } finally {
+      setStarting(false);
+    }
+  };
+
   return (
-    <button
-      type="button"
-      className="ucp-button"
-      onClick={() => osOpenProgram(path).catch(ConsoleLogger.error)} // needs better handling
-      disabled={startDisabled}
-    >
-      {t('gui-launch:launch')}
-    </button>
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
+    <img
+      src={imagePath}
+      className={classes.join(' ')}
+      alt={t('gui-launch:launch')}
+      onClick={startFunc}
+    />
   );
 }
 
 export default function GameStarter(props: GameStarterProps) {
-  const { pathAtom, versionAtom } = props;
+  const { imagePath, pathAtom, versionAtom, args, envs } = props;
 
-  // TODO: better suspense
   return (
     <div className="flex-default game-starter__box">
-      <img />
-      <Suspense fallback="DUMMY">
-        <GameStarterButton pathAtom={pathAtom} versionAtom={versionAtom} />
+      <Suspense>
+        <GameStarterButton
+          imagePath={imagePath}
+          pathAtom={pathAtom}
+          versionAtom={versionAtom}
+          args={args}
+          envs={envs}
+        />
         <GameStarterInfo versionAtom={versionAtom} />
       </Suspense>
     </div>

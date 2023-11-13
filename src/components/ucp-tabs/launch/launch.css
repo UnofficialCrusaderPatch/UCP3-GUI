@@ -12,9 +12,19 @@
 .launch__options {
     align-items: start;
     padding: 15px;
+    overflow: hidden;
 }
 
 .launch__options, .launch__options__box {
     width: 100%;
     flex-grow: 1;
+}
+
+.launch__options__box {
+    padding: 8px;
+}
+
+.launch__options__box--inside {
+    height: 100%;
+    overflow-y: auto;
 }

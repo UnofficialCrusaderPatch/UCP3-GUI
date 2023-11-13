@@ -1,5 +1,6 @@
 .game-starter__box {
     justify-content: start;
+    padding: 15px;
 }
 
 .game-starter__image {
@@ -25,4 +26,30 @@
     pointer-events: none;
     cursor: wait;
     filter: brightness(75%);
+}
+
+.game-starter__info {
+    padding-top: 15px;
+    justify-content: start;
+}
+
+.game-starter__info__row {
+    display: flex;
+    width: 100%;
+}
+
+.game-starter__info__row>div:first-child {
+    text-align: right;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.game-starter__info__row>div:nth-child(2) {
+    flex-basis: 15px;
+    text-align: center;
+}
+
+.game-starter__info__row>div:last-child {
+    flex-grow: 2;
+    flex-basis: 0;
 }

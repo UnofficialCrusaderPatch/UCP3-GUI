@@ -26,9 +26,34 @@ function GameStarterInfo(props: {
 }) {
   const { versionAtom } = props;
 
+  const { t } = useTranslation(['gui-launch']);
+
   const version = useAtomValue(versionAtom);
 
-  return <>{version.toString()}</>;
+  return (
+    <div className="flex-default game-starter__info">
+      <div className="game-starter__info__row">
+        <div>{t('gui-launch:info.name')}</div>
+        <div>:</div>
+        <div>{version.name.getOrElse('')}</div>
+      </div>
+      <div className="game-starter__info__row">
+        <div>{t('gui-launch:info.region')}</div>
+        <div>:</div>
+        <div>{version.region.getOrElse('')}</div>
+      </div>
+      <div className="game-starter__info__row">
+        <div>{t('gui-launch:info.version')}</div>
+        <div>:</div>
+        <div>{`${version.getMajorAsString()}.${version.getMinorAsString()}.${version.getPatchAsString()}`}</div>
+      </div>
+      <div className="game-starter__info__row">
+        <div>{t('gui-launch:info.sha')}</div>
+        <div>:</div>
+        <div>{version.getShaRepresentation()}</div>
+      </div>
+    </div>
+  );
 }
 
 function GameStarterButton(props: GameStarterProps) {

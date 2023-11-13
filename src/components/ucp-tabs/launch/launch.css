@@ -6,12 +6,12 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    padding: 20px;
+    padding-top: 15px;
 }
 
 .launch__options {
     align-items: start;
-    padding: 20px;
+    padding: 15px;
 }
 
 .launch__options, .launch__options__box {

@@ -1,7 +1,8 @@
+import './extension-manager.css';
+
 import { Extension } from 'config/ucp/common';
 import { ExtensionsState } from 'function/global/types';
 
-import './extension-manager.css';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import Logger from 'util/scripts/logging';
 

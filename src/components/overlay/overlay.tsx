@@ -1,5 +1,6 @@
-import { atom, useAtom, useSetAtom } from 'jotai';
 import './overlay.css';
+
+import { atom, useAtom, useSetAtom } from 'jotai';
 
 type OverlayConfig<T> = [OverlayContent<T>, T] | null;
 export type OverlayContentProps<T = undefined> = {

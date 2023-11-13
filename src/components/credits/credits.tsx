@@ -1,10 +1,10 @@
+import './credits.css';
+
 import {
   OverlayContentProps,
   useSetOverlayContent,
 } from 'components/overlay/overlay';
 import { useTranslation } from 'react-i18next';
-
-import './credits.css';
 
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.txt?raw';

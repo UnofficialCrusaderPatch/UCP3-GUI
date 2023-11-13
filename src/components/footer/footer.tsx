@@ -1,9 +1,10 @@
+import './footer.css';
+
 import { UCPState } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import Result from 'util/structs/result';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import './footer.css';
 import {
   useCurrentGameFolder,
   useUCPState,

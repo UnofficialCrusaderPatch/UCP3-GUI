@@ -4,6 +4,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import './titlebar.css';
+
 import closeIcon from 'assets/misc/x-lg.svg';
 import minimizeIcon from 'assets/misc/chevron-compact-down.svg';
 import maximizeIcon from 'assets/misc/fullscreen.svg';

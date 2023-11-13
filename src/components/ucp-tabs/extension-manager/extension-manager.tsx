@@ -1,7 +1,7 @@
+import './extension-manager.css';
+
 import { Container, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-
-import './extension-manager.css';
 
 import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';

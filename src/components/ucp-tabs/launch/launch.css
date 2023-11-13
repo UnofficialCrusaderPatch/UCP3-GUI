@@ -1,0 +1,20 @@
+.launch__container {
+    justify-content: start;
+}
+
+.launch__boxes {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 20px;
+}
+
+.launch__options {
+    align-items: start;
+    padding: 20px;
+}
+
+.launch__options, .launch__options__box {
+    width: 100%;
+    flex-grow: 1;
+}

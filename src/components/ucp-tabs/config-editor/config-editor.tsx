@@ -1,6 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 /* global CreateUIElement */
 
+import './config-editor.css';
+
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,8 +37,6 @@ import exportButtonCallback from '../common/ExportButtonCallback';
 import saveConfig from '../common/SaveConfig';
 import ExportAsPluginButton from './ExportAsPluginButton';
 import serializeConfig from '../common/SerializeConfig';
-
-import './config-editor.css';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -90,7 +90,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
       <div className="col-auto">{nav}</div>
       <div className="mb-1 config-section h-100">
         <div className="m-2 container-parchment-box">
-          <div className="flex-grow-1 d-flex flex-column overflow-auto parchment-box-inside parchment-box ">
+          <div className="flex-grow-1 d-flex flex-column overflow-auto parchment-box-inside parchment-box h-100">
             <div className="content-box parchment-box-item-list">{content}</div>
           </div>
         </div>

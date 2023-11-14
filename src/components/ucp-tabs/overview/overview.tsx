@@ -1,3 +1,5 @@
+import './overview.css';
+
 import StateButton from 'components/general/state-button';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import { installUCPFromZip } from 'function/download/ucp-download-handling';
@@ -15,8 +17,6 @@ import {
 } from 'hooks/jotai/helper';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import RecentFolders from './recent-folders';
-
-import './overview.css';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();

@@ -1,0 +1,4 @@
+All assets in this folder are taken from "Stronghold Crusader" or "Stronghold Crusader Extreme" by Firefly Studios.
+The assets are either in an exported state and only converted to another format or barely modified, for example, cut or slightly edited.
+
+Copyright belongs to Firefly Studios.

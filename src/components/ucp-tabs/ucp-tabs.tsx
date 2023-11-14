@@ -1,3 +1,5 @@
+import './ucp-tabs.css';
+
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { tryResolveDependencies } from 'function/extensions/discovery';
 import { useState } from 'react';
@@ -17,7 +19,7 @@ import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
 
-import './ucp-tabs.css';
+import Launch from './launch/launch';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
@@ -25,7 +27,7 @@ export default function UcpTabs() {
   const isInit = useAtomValue(INIT_DONE);
   const isInitRunning = useAtomValue(INIT_RUNNING);
 
-  const { t } = useTranslation(['gui-general', 'gui-editor']);
+  const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
 
   const displayConfigTabs = isInit && !isInitRunning;
 
@@ -86,6 +88,11 @@ export default function UcpTabs() {
               {t('gui-editor:config.title')}
             </Nav.Link>
           </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="launch" className="tab-link">
+              {t('gui-launch:launch')}
+            </Nav.Link>
+          </Nav.Item>
         </Nav>
         <Tab.Content className="overflow-auto h-100">
           <Tab.Pane eventKey="overview" className="h-100">
@@ -96,6 +103,9 @@ export default function UcpTabs() {
           </Tab.Pane>
           <Tab.Pane eventKey="config" className="tabpanel-config h-100">
             <ConfigEditor readonly={false} />
+          </Tab.Pane>
+          <Tab.Pane eventKey="launch" className="h-100">
+            <Launch />
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

@@ -32,10 +32,6 @@
   height: calc(100% - 50px);
 }
 
-.parchment-box {
-  height: 100%;
-}
-
 .icons-button {
   display: inline-block;
   background-color: transparent;

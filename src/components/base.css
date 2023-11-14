@@ -39,11 +39,11 @@
   color: white;
   vertical-align: center;
   height: 40px;
+  line-height: 0;
   min-width: 100px;
   width: 40%;
   margin-left: 30%;
   margin-right: 30%;
-  position: relative;
 }
 
 .ucp-button:hover {
@@ -51,10 +51,6 @@
   border-image: url('/src/assets/ucp3/button_slice_hover.png');
   border-image-slice: 49% fill;
   border-style: solid;
-}
-
-.ucp-button > .button-text {
-  margin-top: -10px;
 }
 
 /*

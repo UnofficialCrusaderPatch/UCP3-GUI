@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
+import './recent-folders.css';
+
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import {
   createEditorWindow,
@@ -12,8 +14,6 @@ import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
-
-import './recent-folders.css';
 
 export default function RecentFolders() {
   const [currentFolder, setFolder] = useGameFolder();

@@ -1,12 +1,12 @@
+import './variables.css';
+import './base.css';
+import './window.css';
+
 import { useAtomValue } from 'jotai';
 import { LANGUAGE_STATE_ATOM } from 'localization/i18n';
 import { Suspense } from 'react';
 import Titlebar from './titlebar/titlebar';
 import Main from './main-page';
-
-import './variables.css';
-import './base.css';
-import './window.css';
 
 function WindowContent() {
   useAtomValue(LANGUAGE_STATE_ATOM);

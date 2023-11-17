@@ -74,11 +74,9 @@
   box-shadow: none;
   background-image: url('/src/assets/ucp3/scroll_bar_bottom.png'),
     url('/src/assets/ucp3/scroll_bar_middle.png'),
-    radial-gradient(
-      40% 100% at center bottom,
+    radial-gradient(40% 100% at center bottom,
       var(--ucp-main-grey) 0%,
-      rgba(0, 0, 0, 0) 100%
-    );
+      rgba(0, 0, 0, 0) 100%);
   background-repeat:
     no-repeat no-repeat,
     no-repeat repeat,
@@ -91,26 +89,4 @@
 
 .icon-button {
   background-color: transparent;
-}
-
-.parchment-box {
-  background-image: url('/src/assets/ucp3/crdits_bg.png');
-  border-image: url('/src/assets/ucp3/credit_background.png');
-  border-style: solid;
-  border-image-slice: 17 16 17 17;
-  border-image-width: 17px 16px 17px 17px;
-  border-image-outset: 0px 0px 0px 0px;
-  border-image-repeat: repeat repeat;
-  overflow: hidden;
-}
-
-.parchment-box-inside {
-  padding: 6px;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
-}
-
-.parchment-box-item-list {
-  overflow-y: scroll;
-  overflow-x: clip;
 }

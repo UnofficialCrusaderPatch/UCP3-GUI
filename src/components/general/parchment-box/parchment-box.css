@@ -1,0 +1,15 @@
+.parchment-box {
+    background-image: url('/src/assets/ucp3/crdits_bg.png');
+    border-image: url('/src/assets/ucp3/credit_background.png');
+    border-image-slice: 16;
+    border-image-repeat: round;
+    /* "border-image-width" seems to make the image width independent of the border width */
+    border-image-width: auto;
+
+    /* Used to create invisible border width for sizing */
+    border-style: solid;
+    border-width: 8px;
+    border-color: transparent;
+
+    overflow: hidden auto;
+}

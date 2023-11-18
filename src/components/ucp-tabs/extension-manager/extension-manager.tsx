@@ -29,6 +29,7 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
 import { ZipWriter } from 'util/structs/zip-handler';
+import ParchmentBox from 'components/general/parchment-box/parchment-box';
 import {
   ActiveExtensionElement,
   ExtensionNameList,
@@ -222,17 +223,17 @@ export default function ExtensionManager() {
               <PlusLg />
             </button>
           </div>
-          <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
-            <div className="parchment-box-item-list"> {eUI} </div>
-          </div>
+          <ParchmentBox className="flex-grow-1 d-flex flex-column">
+            <div>{eUI}</div>
+          </ParchmentBox>
         </div>
         <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden ">
           <div className="d-flex flex-wrap align-items-center container">
             <h4>{t('gui-editor:extensions.activated')}</h4>
           </div>
-          <div className="parchment-box-inside parchment-box flex-grow-1 d-flex flex-column overflow-auto">
-            <div className="parchment-box-item-list">{activated}</div>
-          </div>
+          <ParchmentBox className="flex-grow-1 d-flex flex-column">
+            <div>{activated}</div>
+          </ParchmentBox>
           <div className="row pb-2 mx-0">
             <div className="d-inline-flex">
               <button

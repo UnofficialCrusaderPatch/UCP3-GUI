@@ -1,9 +1,6 @@
-import {
-  OverlayContent,
-  OverlayContentProps,
-} from 'components/overlay/overlay';
+import ParchmentBox from 'components/general/parchment-box/parchment-box';
+import { OverlayContentProps } from 'components/overlay/overlay';
 import { Extension } from 'config/ucp/common';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Markdown from 'react-markdown';
 
@@ -29,13 +26,11 @@ export function ExtensionViewer(
   return (
     <div className="credits-container">
       <h1 className="credits-title">{t('gui-editor:extensions.viewer')}</h1>
-      <div className="credits-text-box parchment-box">
-        <div className="credits-text-wrapper">
-          <div className="credits-text">
-            <Markdown>{extension.descriptionMD}</Markdown>
-          </div>
+      <ParchmentBox className="credits-text-box">
+        <div className="credits-text">
+          <Markdown>{extension.descriptionMD}</Markdown>
         </div>
-      </div>
+      </ParchmentBox>
       <button type="button" className="credits-close" onClick={closeFunc}>
         {t('gui-general:close')}
       </button>

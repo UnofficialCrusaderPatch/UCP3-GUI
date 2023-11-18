@@ -30,27 +30,36 @@
 }
 
 .ucp-button {
-  /* Other button styles here */
-  border-image: url('/src/assets/ucp3/button_slice.png');
-  border-image-slice: 49% fill;
-  border-width: 20px;
+  border-image: url('/src/assets/ucp3/button_ucp.png');
+  border-image-slice: 6 fill;
+  border-image-repeat: stretch;
+  border-image-width: auto;
+
   border-style: solid;
+  border-width: 6px;
+  border-color: transparent;
+
   background-color: transparent;
   color: white;
   vertical-align: center;
-  height: 40px;
-  line-height: 0;
-  min-width: 100px;
-  width: 40%;
-  margin-left: 30%;
-  margin-right: 30%;
 }
 
 .ucp-button:hover {
-  /* Other button styles here */
-  border-image: url('/src/assets/ucp3/button_slice_hover.png');
-  border-image-slice: 49% fill;
-  border-style: solid;
+  border-image: url('/src/assets/ucp3/button_ucp_hover.png');
+  border-image-slice: 6 fill;
+  border-image-repeat: stretch;
+  border-image-width: auto;
+}
+
+.ucp-button:active {
+  border-image: url('/src/assets/ucp3/button_ucp_active.png');
+  border-image-slice: 6 fill;
+  border-image-repeat: stretch;
+  border-image-width: auto;
+}
+
+.icon-button {
+  background-color: transparent;
 }
 
 /*
@@ -87,6 +96,25 @@
     center center;
 }
 
-.icon-button {
-  background-color: transparent;
+/*
+  Border and box elements:
+*/
+
+:is(.ornament-border--shadow, .parchment-box) {
+  border-image: url('/src/assets/ucp3/ornament_border_shadow.png');
+  border-image-slice: 16;
+  border-image-repeat: round;
+
+  /* "border-image-width" seems to make the image width independent of the border width */
+  border-image-width: auto;
+
+  /* Used to create invisible border width for sizing */
+  border-style: solid;
+  border-width: 8px;
+  border-color: transparent;
+}
+
+.parchment-box {
+  background-image: url('/src/assets/ucp3/parchment_bg.png');
+  overflow: hidden auto;
 }

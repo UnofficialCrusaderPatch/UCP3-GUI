@@ -79,7 +79,7 @@ export default function Overview() {
           success: activateButtonString,
           failed: activateButtonString,
         }}
-        buttonVariant="ucp-button"
+        buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => {
@@ -186,7 +186,7 @@ export default function Overview() {
           success: t('gui-editor:overview.uninstall.success'),
           failed: t('gui-editor:overview.uninstall.failed'),
         }}
-        buttonVariant="ucp-button"
+        buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => Result.emptyOk()}
@@ -200,7 +200,7 @@ export default function Overview() {
           success: t('gui-editor:overview.update.gui.success'),
           failed: t('gui-editor:overview.update.gui.failed'),
         }}
-        buttonVariant="ucp-button"
+        buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) =>

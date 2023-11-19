@@ -123,14 +123,7 @@ export default function ExtensionManager() {
             )}
             <button
               type="button"
-              className="d-flex flex-wrap mx-1 text-light align-content-center"
-              style={{
-                height: '28px',
-                backgroundColor: 'transparent',
-                backgroundRepeat: 'no-repeat',
-                overflow: 'hidden',
-                outline: '1px',
-              }}
+              className="ucp-button text-light"
               onClick={() => {
                 setShowAllExtensions(!showAllExtensions);
               }}
@@ -145,14 +138,7 @@ export default function ExtensionManager() {
             </button>
             <button
               type="button"
-              className="d-flex flex-wrap mx-1 text-light align-content-center"
-              style={{
-                height: '28px',
-                backgroundColor: 'transparent',
-                backgroundRepeat: 'no-repeat',
-                overflow: 'hidden',
-                outline: '1px',
-              }}
+              className="ucp-button text-light"
               onClick={async () => {
                 const result = await openFileDialog(gameFolder, [
                   { name: 'Zip files', extensions: ['zip'] },
@@ -237,14 +223,7 @@ export default function ExtensionManager() {
             <div className="d-inline-flex">
               <button
                 type="button"
-                className="d-flex flex-wrap mx-1 text-light align-content-center"
-                style={{
-                  height: '100%',
-                  backgroundColor: 'transparent',
-                  backgroundRepeat: 'no-repeat',
-                  overflow: 'hidden',
-                  outline: '1px',
-                }}
+                className="ucp-button text-light"
                 onClick={async () => {
                   LOGGER.msg('Creating modpack').trace();
 
@@ -392,14 +371,7 @@ export default function ExtensionManager() {
               />
               <button
                 type="button"
-                className="d-flex flex-wrap mx-1 text-light align-content-center"
-                style={{
-                  height: '100%',
-                  backgroundColor: 'transparent',
-                  backgroundRepeat: 'no-repeat',
-                  overflow: 'hidden',
-                  outline: '1px',
-                }}
+                className="ucp-button text-light"
                 onClick={() => {
                   setAdvancedMode(!advancedMode);
                 }}

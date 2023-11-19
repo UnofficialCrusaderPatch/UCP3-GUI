@@ -42,7 +42,6 @@
 
   background-color: transparent;
   color: white;
-  vertical-align: center;
 }
 
 .ucp-button:hover {
@@ -153,7 +152,9 @@
   border-color: transparent;
 }
 
-.ornament-border-button-active, .ornament-border-button:hover {
+.ornament-border-button.active,
+.ornament-border-button:active,
+.ornament-border-button:hover {
   border-image: url('/src/assets/ucp3/ornament_border_button_hover.png');
   border-image-slice: 18 fill;
   border-image-repeat: round;

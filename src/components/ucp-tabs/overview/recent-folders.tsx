@@ -61,10 +61,10 @@ export default function RecentFolders() {
   }
 
   return (
-    <div className="textInput mt-2">
+    <div className="text-input mt-2">
       <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
       <div className="d-flex mt-2">
-        <div className="textInputField d-flex align-items-center">
+        <div className="ornament-border-inset text-input-field d-flex align-items-center">
           <input
             id="browseresult"
             type="text"

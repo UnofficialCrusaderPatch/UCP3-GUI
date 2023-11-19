@@ -1,10 +1,8 @@
-/* @import '~bootstrap'; */
-
 .form-control:disabled {
   opacity: 0.5;
 }
 
-.label-disabled > label {
+.label-disabled>label {
   opacity: 0.5;
 }
 
@@ -34,47 +32,35 @@
 
 .icons-button {
   display: inline-block;
-  background-color: transparent;
-  width: 32px !important;
-  height: 28px !important;
-  border: none;
-  padding: 0px;
+  width: calc(1em + 28px);
 }
 
 .ucp-button-variant {
-  border-image: url('/src/assets/ucp3/button_slice.png') !important;
-  border-image-slice: 49% fill !important;
-  border-width: 14px !important;
-  border-style: solid !important;
-  background-color: transparent !important;
-  color: white !important;
-  min-width: 150px !important;
-  height: 28px !important;
-  padding: 0px !important;
-  margin: 0px !important;
-}
-
-.ucp-button-variant:hover {
-  /* Other button styles here */
-  border-image: url('/src/assets/ucp3/button_slice_hover.png');
-  border-image-slice: 49% fill;
-  border-style: solid;
-}
-
-.ucp-button-variant-button-text {
-  margin-top: -9px;
+  background-color: transparent;
+  color: white;
+  min-width: 150px;
+  padding: 0px;
+  margin: 0px;
+  vertical-align: middle;
 }
 
 .reset {
   background-image: url('/src/assets/ucp3/reset.png');
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-image-slice: 8;
 }
 
 .reset:hover {
   background-image: url('/src/assets/ucp3/reset_hover.png');
+  border-image-slice: 8;
 }
 
-.reset:disabled {
+.reset:disabled,
+.reset:active {
   background-image: url('/src/assets/ucp3/reset_active.png');
+  border-image-slice: 8;
 }
 
 .import {
@@ -105,8 +91,8 @@
   background-image: url('/src/assets/ucp3/reset.png');
   display: inline-block;
   background-color: transparent;
-  width: 32px !important;
-  height: 28px !important;
+  width: 32px;
+  height: 28px;
   border: none;
   padding: 0px;
 }
@@ -138,8 +124,7 @@
 /* @import '~bootstrap'; */
 
 /* Hide the default switch appearance */
-input[type="checkbox"] {
-}
+input[type="checkbox"] {}
 
 /* Style the label element to show the switch image
 .switch-label {
@@ -169,8 +154,9 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type="radio"] {
   display: none;
 }
-.sword-checkbox input[type="checkbox"] + label ,
-.sword-checkbox input[type="radio"] + label {
+
+.sword-checkbox input[type="checkbox"]+label,
+.sword-checkbox input[type="radio"]+label {
   display: block;
   position: relative;
   padding-left: 32px;
@@ -180,20 +166,22 @@ input[type="checkbox"]:disabled + .label:before {
   -moz-user-select: none;
   -ms-user-select: none;
 }
-.sword-checkbox input[type="checkbox"]:hover + label:hover ,
-.sword-checkbox input[type="radio"]:hover + label:hover {
+
+.sword-checkbox input[type="checkbox"]:hover+label:hover,
+.sword-checkbox input[type="radio"]:hover+label:hover {
   cursor: default;
 }
-.sword-checkbox input[type="checkbox"]:hover + label:before,
-.sword-checkbox input[type="radio"]:hover + label:before {
-}
 
-.sword-checkbox input[type="checkbox"] + label:last-child,
-.sword-checkbox input[type="radio"] + label:last-child {
+.sword-checkbox input[type="checkbox"]:hover+label:before,
+.sword-checkbox input[type="radio"]:hover+label:before {}
+
+.sword-checkbox input[type="checkbox"]+label:last-child,
+.sword-checkbox input[type="radio"]+label:last-child {
   margin-bottom: 0;
 }
-.sword-checkbox input[type="checkbox"] + label:before,
-.sword-checkbox input[type="radio"] + label:before {
+
+.sword-checkbox input[type="checkbox"]+label:before,
+.sword-checkbox input[type="radio"]+label:before {
   content: "";
   display: block;
   background-image: url('/src/assets/ucp3/checkbox_empty.png');
@@ -207,20 +195,21 @@ input[type="checkbox"]:disabled + .label:before {
   -webkit-transition: all 0.1s, background 0.1s ease-in-out;
   transition: all 0.1s, background 0.1s ease-in-out;
 }
-.sword-checkbox input[type="checkbox"]:checked + label:before,
-.sword-checkbox input[type="radio"]:checked + label:before {
+
+.sword-checkbox input[type="checkbox"]:checked+label:before,
+.sword-checkbox input[type="radio"]:checked+label:before {
   background-image: url('/src/assets/ucp3/checkbox_full.png');
 }
 
 /* Styles for disabled input elements */
-.sword-checkbox input[type="checkbox"]:disabled + label,
-.sword-checkbox input[type="radio"]:disabled + label {
+.sword-checkbox input[type="checkbox"]:disabled+label,
+.sword-checkbox input[type="radio"]:disabled+label {
   opacity: 0.5;
   cursor: not-allowed;
 }
-.sword-checkbox input[type="checkbox"]:disabled + label:before,
-.sword-checkbox input[type="radio"]:disabled + label:before {
-}
+
+.sword-checkbox input[type="checkbox"]:disabled+label:before,
+.sword-checkbox input[type="radio"]:disabled+label:before {}
 
 .ucp-slider:disabled {
   opacity: 0.5;
@@ -238,10 +227,13 @@ input[type="checkbox"]:disabled + .label:before {
 
 /** slider **/
 .ucp-slider {
-  -webkit-appearance: none;  /* Override default CSS styles */
+  -webkit-appearance: none;
+  /* Override default CSS styles */
   appearance: none;
-  width: 100%; /* Full-width */
-  height: 25px; /* Specified height */
+  width: 100%;
+  /* Full-width */
+  height: 25px;
+  /* Specified height */
 
   /* TODO add the slider background with a border image */
   background-image:
@@ -268,12 +260,16 @@ input[type="checkbox"]:disabled + .label:before {
 
 /* chrome, safari (webkit based) */
 .ucp-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
+  -webkit-appearance: none;
+  /* Override default look */
   appearance: none;
-  width: 7px; /* Set a specific slider handle width */
-  height: 15px; /* Slider handle height */
+  width: 7px;
+  /* Set a specific slider handle width */
+  height: 15px;
+  /* Slider handle height */
   background-image: url('src/assets/ucp3/slider.png');
-  cursor: pointer; /* Cursor on hover */
+  cursor: pointer;
+  /* Cursor on hover */
 }
 
 .ucp-slider::-webkit-slider-thumb:active {
@@ -282,10 +278,13 @@ input[type="checkbox"]:disabled + .label:before {
 
 /* mozilla based */
 .ucp-slider::-moz-range-thumb {
-  width: 7px; /* Set a specific slider handle width */
-  height: 15px; /* Slider handle height */
+  width: 7px;
+  /* Set a specific slider handle width */
+  height: 15px;
+  /* Slider handle height */
   background-image: url('src/assets/ucp3/slider.png');
-  cursor: pointer; /* Cursor on hover */
+  cursor: pointer;
+  /* Cursor on hover */
 }
 
 .ucp-slider::-moz-range-thumb:active {
@@ -315,7 +314,8 @@ input[type="checkbox"]:disabled + .label:before {
   width: 7px;
   height: 15px;
   border: none;
-  transition: background-image 0.2s; /* Smooth transition */
+  transition: background-image 0.2s;
+  /* Smooth transition */
 }
 
 .ucp-slider .slider-thumb:hover,
@@ -327,4 +327,3 @@ input[type="checkbox"]:disabled + .label:before {
 
 
 /** slider end **/
-

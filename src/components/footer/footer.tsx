@@ -109,7 +109,9 @@ export default function Footer() {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       role="button"
-      className={`footer${isFooterOpen ? '' : ' footer-closed'}`}
+      className={`ornament-border footer${
+        isFooterOpen ? '' : ' footer-closed'
+      }`}
       onClick={() => setFooterOpen(!isFooterOpen)}
     >
       <div className="d-flex p-1 px-2 fs-8 flex-wrap justify-content-end">

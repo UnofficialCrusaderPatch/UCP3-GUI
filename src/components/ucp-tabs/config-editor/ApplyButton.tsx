@@ -5,7 +5,7 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <button className="ucp-button-variant" type="button" {...props}>
+    <button className="ucp-button ucp-button-variant" type="button" {...props}>
       <div className="ucp-button-variant-button-text">
         {t('gui-general:apply')}
       </div>

@@ -1,6 +1,9 @@
 .footer {
-  border-top: 8px solid;
-  border-image: var(--ucp-main-border-image);
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-image-width: auto 0 0 0;
+
   background-color: var(--ucp-main-brown);
   cursor: pointer;
 }

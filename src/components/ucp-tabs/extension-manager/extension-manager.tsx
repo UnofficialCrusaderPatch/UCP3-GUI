@@ -29,7 +29,6 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
 import { ZipWriter } from 'util/structs/zip-handler';
-import ParchmentBox from 'components/general/parchment-box/parchment-box';
 import {
   ActiveExtensionElement,
   ExtensionNameList,
@@ -124,14 +123,7 @@ export default function ExtensionManager() {
             )}
             <button
               type="button"
-              className="d-flex flex-wrap mx-1 text-light align-content-center"
-              style={{
-                height: '28px',
-                backgroundColor: 'transparent',
-                backgroundRepeat: 'no-repeat',
-                overflow: 'hidden',
-                outline: '1px',
-              }}
+              className="ucp-button text-light"
               onClick={() => {
                 setShowAllExtensions(!showAllExtensions);
               }}
@@ -146,14 +138,7 @@ export default function ExtensionManager() {
             </button>
             <button
               type="button"
-              className="d-flex flex-wrap mx-1 text-light align-content-center"
-              style={{
-                height: '28px',
-                backgroundColor: 'transparent',
-                backgroundRepeat: 'no-repeat',
-                overflow: 'hidden',
-                outline: '1px',
-              }}
+              className="ucp-button text-light"
               onClick={async () => {
                 const result = await openFileDialog(gameFolder, [
                   { name: 'Zip files', extensions: ['zip'] },
@@ -223,29 +208,22 @@ export default function ExtensionManager() {
               <PlusLg />
             </button>
           </div>
-          <ParchmentBox className="flex-grow-1 d-flex flex-column">
+          <div className="parchment-box flex-grow-1 d-flex flex-column">
             <div>{eUI}</div>
-          </ParchmentBox>
+          </div>
         </div>
         <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden ">
           <div className="d-flex flex-wrap align-items-center container">
             <h4>{t('gui-editor:extensions.activated')}</h4>
           </div>
-          <ParchmentBox className="flex-grow-1 d-flex flex-column">
+          <div className="parchment-box flex-grow-1 d-flex flex-column">
             <div>{activated}</div>
-          </ParchmentBox>
+          </div>
           <div className="row pb-2 mx-0">
             <div className="d-inline-flex">
               <button
                 type="button"
-                className="d-flex flex-wrap mx-1 text-light align-content-center"
-                style={{
-                  height: '100%',
-                  backgroundColor: 'transparent',
-                  backgroundRepeat: 'no-repeat',
-                  overflow: 'hidden',
-                  outline: '1px',
-                }}
+                className="ucp-button text-light"
                 onClick={async () => {
                   LOGGER.msg('Creating modpack').trace();
 
@@ -393,14 +371,7 @@ export default function ExtensionManager() {
               />
               <button
                 type="button"
-                className="d-flex flex-wrap mx-1 text-light align-content-center"
-                style={{
-                  height: '100%',
-                  backgroundColor: 'transparent',
-                  backgroundRepeat: 'no-repeat',
-                  overflow: 'hidden',
-                  outline: '1px',
-                }}
+                className="ucp-button text-light"
                 onClick={() => {
                   setAdvancedMode(!advancedMode);
                 }}

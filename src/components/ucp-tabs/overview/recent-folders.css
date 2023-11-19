@@ -17,26 +17,19 @@
   overflow: hidden;
 }
 
-.textInputField {
-  background:
-    url('/src/assets/ucp3/textfield_left.png') left center no-repeat,
-    url('/src/assets/ucp3/textfield_right.png') right center no-repeat,
-    url('/src/assets/ucp3/textfield_middle.png') center center repeat-x;
-
-  background-size: auto;
-  border: none;
-  border-radius: 0px;
-  height: 40px;
+.text-input-field {
+  padding: 5px;
   width: 100%;
-  padding-top: 2px;
 }
 
-.textInput {
+.text-input {
   width: 80%;
   margin: auto;
 }
 
-.textInputField input[type='text'] {
+.text-input-field input[type='text'] {
+  padding: 0 3px;
+  border-radius: 0%;
   background-color: transparent;
   flex-grow: 1;
   color: white;
@@ -116,8 +109,6 @@
 
 .dropdown-button {
   background-image: url('/src/assets/ucp3/dropdown_sel.png');
-  height: 22px;
-  width: 25px;
-  margin-right: 9px;
-  padding: 0px;
+  height: 100%;
+  aspect-ratio: 1 / 1;
 }

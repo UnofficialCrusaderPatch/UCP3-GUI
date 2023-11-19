@@ -26,7 +26,6 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
-import ParchmentBox from 'components/general/parchment-box/parchment-box';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';
@@ -91,9 +90,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
       <div className="col-auto">{nav}</div>
       <div className="mb-1 config-section h-100">
         <div className="m-2 container-config-box">
-          <ParchmentBox className="flex-grow-1 d-flex flex-column h-100">
+          <div className="parchment-box flex-grow-1 d-flex flex-column h-100">
             <div className="content-box">{content}</div>
-          </ParchmentBox>
+          </div>
         </div>
         {!readonly ? (
           <div className="row pb-2 mx-0">

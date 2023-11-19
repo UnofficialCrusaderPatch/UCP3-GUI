@@ -45,14 +45,17 @@ export default function UcpTabs() {
       <Tab.Container defaultActiveKey="overview">
         <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
           <Nav.Item>
-            <Nav.Link eventKey="overview" className="tab-link">
+            <Nav.Link
+              eventKey="overview"
+              className="ornament-border-button tab-link"
+            >
               {t('gui-editor:overview.title')}
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
             <Nav.Link
               eventKey="extensions"
-              className="tab-link"
+              className="ornament-border-button tab-link"
               disabled={!displayConfigTabs}
               hidden={!ucpFolderExists}
               onClick={async () => {
@@ -81,7 +84,7 @@ export default function UcpTabs() {
           <Nav.Item>
             <Nav.Link
               eventKey="config"
-              className="tab-link"
+              className="ornament-border-button tab-link"
               disabled={!displayConfigTabs}
               hidden={!advancedMode || !ucpFolderExists}
             >
@@ -89,12 +92,15 @@ export default function UcpTabs() {
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
-            <Nav.Link eventKey="launch" className="tab-link">
+            <Nav.Link
+              eventKey="launch"
+              className="ornament-border-button tab-link"
+            >
               {t('gui-launch:launch')}
             </Nav.Link>
           </Nav.Item>
         </Nav>
-        <Tab.Content className="overflow-auto h-100">
+        <Tab.Content className="ornament-border overflow-auto h-100">
           <Tab.Pane eventKey="overview" className="h-100">
             <Overview />
           </Tab.Pane>

@@ -5,7 +5,6 @@ import {
   useSetOverlayContent,
 } from 'components/overlay/overlay';
 import { useTranslation } from 'react-i18next';
-import ParchmentBox from 'components/general/parchment-box/parchment-box';
 
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.txt?raw';
@@ -18,9 +17,9 @@ function Credits(props: OverlayContentProps) {
   return (
     <div className="credits-container">
       <h1 className="credits-title">{t('gui-landing:credits.title')}</h1>
-      <ParchmentBox className="credits-text-box">
+      <div className="parchment-box credits-text-box">
         <div className="credits-text">{credits}</div>
-      </ParchmentBox>
+      </div>
       <button type="button" className="credits-close" onClick={closeFunc}>
         {t('gui-general:close')}
       </button>

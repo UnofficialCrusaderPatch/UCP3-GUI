@@ -100,17 +100,17 @@ export default function UcpTabs() {
             </Nav.Link>
           </Nav.Item>
         </Nav>
-        <Tab.Content className="ornament-border overflow-auto h-100">
-          <Tab.Pane eventKey="overview" className="h-100">
+        <Tab.Content className="ornament-border">
+          <Tab.Pane eventKey="overview" className="tab-panel">
             <Overview />
           </Tab.Pane>
-          <Tab.Pane eventKey="extensions" className="h-100">
+          <Tab.Pane eventKey="extensions" className="tab-panel">
             <ExtensionManager />
           </Tab.Pane>
-          <Tab.Pane eventKey="config" className="tabpanel-config h-100">
+          <Tab.Pane eventKey="config" className="tab-panel">
             <ConfigEditor readonly={false} />
           </Tab.Pane>
-          <Tab.Pane eventKey="launch" className="h-100">
+          <Tab.Pane eventKey="launch" className="tab-panel">
             <Launch />
           </Tab.Pane>
         </Tab.Content>

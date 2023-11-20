@@ -1,3 +1,77 @@
+.extension-manager {
+  padding: 10px;
+}
+
+.extension-manager-control {
+  display: flex;
+  width: 100%;
+  flex-grow: 1;
+  flex-direction: column;
+}
+
+.extension-manager-control__box-container {
+  display: flex;
+  width: 100%;
+  flex-grow: 1;
+  flex-basis: 0;
+  overflow: hidden;
+}
+
+.extension-manager-control__box {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  height: 100%;
+  padding: 10px;
+  padding-top: 0;
+}
+
+.extension-manager-control__header-container {
+  display: flex;
+  width: 100%;
+}
+
+.extension-manager-control__header {
+  display: flex;
+  flex-wrap: wrap;
+  width: 50%;
+  padding: 10px;
+  padding-bottom: 0;
+}
+
+.extension-manager-control__box__header__headline {
+  margin: 0;
+  flex-grow: 2;
+}
+
+.extension-manager-control__box__header__buttons {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.extension-manager-list {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+}
+
+.extension-manager-control__box__buttons {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.extension-manager-control__box__buttons--apply-button {
+  margin-left: auto;
+}
+
+.extension-manager-control__box__buttons--apply-button > button {
+  height: 100%;
+}
+
 .arrow-margin {
   margin-right: 14px;
 }
@@ -59,4 +133,8 @@
 
 .disable-arrow:hover {
   background-image: url('/src/assets/ucp3/remove_hover.png');
+}
+
+.extension-text-warning-container {
+  width: 100%;
 }

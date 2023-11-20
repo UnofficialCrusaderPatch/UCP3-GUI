@@ -58,6 +58,11 @@
   border-image-width: auto;
 }
 
+.ucp-button--square {
+  aspect-ratio: 1/1;
+}
+
+
 .icon-button {
   background-color: transparent;
 }

@@ -140,27 +140,42 @@ export default function ExtensionManager() {
               type="button"
               className="ucp-button text-light"
               onClick={async () => {
-                const result = await openFileDialog(gameFolder, [
-                  { name: 'Zip files', extensions: ['zip'] },
-                ]);
+                try {
+                  const result = await openFileDialog(gameFolder, [
+                    { name: 'Zip files', extensions: ['zip'] },
+                  ]);
 
-                if (result.isPresent()) {
-                  const path = result.get();
+                  if (result.isPresent()) {
+                    const path = result.get();
 
-                  LOGGER.msg(
-                    `Trying to install extensions from: ${path}`,
-                  ).info();
+                    LOGGER.msg(
+                      `Trying to install extensions from: ${path}`,
+                    ).info();
 
-                  if (await exists(path)) {
-                    try {
-                      const ep = await ExtensionPack.fromPath(path);
-
+                    if (await exists(path)) {
                       try {
-                        await ep.install(`${gameFolder}/ucp`);
-                        await showGeneralModalOk({
-                          title: 'Succesful install',
-                          message: `Extension pack was succesfully installed`,
-                        });
+                        const ep = await ExtensionPack.fromPath(path);
+
+                        try {
+                          await ep.install(`${gameFolder}/ucp`);
+                          await showGeneralModalOk({
+                            title: 'Succesful install',
+                            message: `Extension pack was succesfully installed`,
+                          });
+                        } catch (e) {
+                          let msg = e;
+                          if (typeof e === 'string') {
+                            msg = e.toString(); // works, `e` narrowed to string
+                          } else if (e instanceof Error) {
+                            msg = e.message; // works, `e` narrowed to Error
+                          }
+                          await showGeneralModalOk({
+                            title: 'ERROR',
+                            message: (msg as string).toString(),
+                          });
+                        } finally {
+                          await ep.close();
+                        }
                       } catch (e) {
                         let msg = e;
                         if (typeof e === 'string') {
@@ -172,28 +187,20 @@ export default function ExtensionManager() {
                           title: 'ERROR',
                           message: (msg as string).toString(),
                         });
-                      } finally {
-                        await ep.close();
                       }
-                    } catch (e) {
-                      let msg = e;
-                      if (typeof e === 'string') {
-                        msg = e.toString(); // works, `e` narrowed to string
-                      } else if (e instanceof Error) {
-                        msg = e.message; // works, `e` narrowed to Error
-                      }
+                    } else {
+                      LOGGER.msg(`Path does not exist: ${path}`).warn();
                       await showGeneralModalOk({
-                        title: 'ERROR',
-                        message: (msg as string).toString(),
+                        title: 'Path does not exist',
+                        message: `Path does not exist: ${path}`,
                       });
                     }
-                  } else {
-                    LOGGER.msg(`Path does not exist: ${path}`).warn();
-                    await showGeneralModalOk({
-                      title: 'Path does not exist',
-                      message: `Path does not exist: ${path}`,
-                    });
                   }
+                } catch (e: any) {
+                  await showGeneralModalOk({
+                    title: 'ERROR',
+                    message: e.toString(),
+                  });
                 }
               }}
               onMouseEnter={() => {
@@ -225,111 +232,119 @@ export default function ExtensionManager() {
                 type="button"
                 className="ucp-button text-light"
                 onClick={async () => {
-                  LOGGER.msg('Creating modpack').trace();
-
-                  const filePathResult = await saveFileDialog(
-                    `${gameFolder}`,
-                    [{ name: 'Zip file', extensions: ['*.zip'] }],
-                    'Save pack as...',
-                  );
-
-                  if (filePathResult.isEmpty()) return;
-
-                  const filePath = filePathResult.get();
-
-                  const zw: ZipWriter = await ZipWriter.open(filePath);
                   try {
-                    zw.addDirectory('modules');
-                    zw.addDirectory('plugins');
-                    // eslint-disable-next-line no-restricted-syntax
-                    for (const ext of extensionsState.activeExtensions) {
-                      const fpath = `${ext.name}-${ext.version}`;
-                      const pathPrefix = `${gameFolder}/ucp/`;
-                      let originalPath = '';
-                      if (ext.type === 'plugin') {
-                        originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
-                        const dstPath = `plugins/${fpath}`;
-                        // eslint-disable-next-line no-await-in-loop
-                        const touch = await exists(originalPath);
+                    LOGGER.msg('Creating modpack').trace();
 
-                        if (!touch) {
+                    const filePathResult = await saveFileDialog(
+                      `${gameFolder}`,
+                      [{ name: 'Zip file', extensions: ['*.zip'] }],
+                      'Save pack as...',
+                    );
+
+                    if (filePathResult.isEmpty()) return;
+
+                    const filePath = filePathResult.get();
+
+                    const zw: ZipWriter = await ZipWriter.open(filePath);
+                    try {
+                      zw.addDirectory('modules');
+                      zw.addDirectory('plugins');
+                      // eslint-disable-next-line no-restricted-syntax
+                      for (const ext of extensionsState.activeExtensions) {
+                        const fpath = `${ext.name}-${ext.version}`;
+                        const pathPrefix = `${gameFolder}/ucp/`;
+                        let originalPath = '';
+                        if (ext.type === 'plugin') {
+                          originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
+                          const dstPath = `plugins/${fpath}`;
                           // eslint-disable-next-line no-await-in-loop
-                          await showGeneralModalOk({
-                            title: 'Error',
-                            message: `Path does not exist: ${originalPath}`,
-                          });
-                          return;
-                        }
+                          const touch = await exists(originalPath);
 
-                        const makeRelative = (fe: FileEntry) => {
-                          if (!fe.path.startsWith(pathPrefix)) {
-                            throw Error(fe.path);
+                          if (!touch) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await showGeneralModalOk({
+                              title: 'Error',
+                              message: `Path does not exist: ${originalPath}`,
+                            });
+                            return;
                           }
 
-                          return fe.path.substring(pathPrefix.length);
-                        };
+                          const makeRelative = (fe: FileEntry) => {
+                            if (!fe.path.startsWith(pathPrefix)) {
+                              throw Error(fe.path);
+                            }
 
-                        // eslint-disable-next-line no-await-in-loop
-                        const entries = await readDir(originalPath, {
-                          recursive: true,
-                        });
+                            return fe.path.substring(pathPrefix.length);
+                          };
 
-                        const dirs = entries
-                          .filter(
-                            (fe) =>
-                              fe.children !== undefined && fe.children !== null,
-                          )
-                          .map(makeRelative);
-
-                        // eslint-disable-next-line no-restricted-syntax
-                        for (const dir of dirs) {
                           // eslint-disable-next-line no-await-in-loop
-                          await zw.addDirectory(dir);
-                        }
-
-                        const files = entries.filter(
-                          (fe) =>
-                            fe.children === undefined || fe.children === null,
-                        );
-
-                        // eslint-disable-next-line no-restricted-syntax
-                        for (const fe of files) {
-                          // eslint-disable-next-line no-await-in-loop
-                          await zw.writeEntryFromFile(
-                            makeRelative(fe),
-                            fe.path,
-                          );
-                        }
-                      } else if (ext.type === 'module') {
-                        originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
-                        const dstPath = `modules/${fpath}.zip`;
-
-                        // eslint-disable-next-line no-await-in-loop
-                        const touch = await exists(originalPath);
-
-                        if (!touch) {
-                          // eslint-disable-next-line no-await-in-loop
-                          await showGeneralModalOk({
-                            title: 'Error',
-                            message: `Path does not exist: ${originalPath}`,
+                          const entries = await readDir(originalPath, {
+                            recursive: true,
                           });
-                          return;
-                        }
 
-                        // eslint-disable-next-line no-await-in-loop
-                        await zw.writeEntryFromFile(dstPath, originalPath);
-                      } else {
-                        throw Error('What are we doing here?');
+                          const dirs = entries
+                            .filter(
+                              (fe) =>
+                                fe.children !== undefined &&
+                                fe.children !== null,
+                            )
+                            .map(makeRelative);
+
+                          // eslint-disable-next-line no-restricted-syntax
+                          for (const dir of dirs) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await zw.addDirectory(dir);
+                          }
+
+                          const files = entries.filter(
+                            (fe) =>
+                              fe.children === undefined || fe.children === null,
+                          );
+
+                          // eslint-disable-next-line no-restricted-syntax
+                          for (const fe of files) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await zw.writeEntryFromFile(
+                              makeRelative(fe),
+                              fe.path,
+                            );
+                          }
+                        } else if (ext.type === 'module') {
+                          originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
+                          const dstPath = `modules/${fpath}.zip`;
+
+                          // eslint-disable-next-line no-await-in-loop
+                          const touch = await exists(originalPath);
+
+                          if (!touch) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await showGeneralModalOk({
+                              title: 'Error',
+                              message: `Path does not exist: ${originalPath}`,
+                            });
+                            return;
+                          }
+
+                          // eslint-disable-next-line no-await-in-loop
+                          await zw.writeEntryFromFile(dstPath, originalPath);
+                        } else {
+                          throw Error('What are we doing here?');
+                        }
                       }
+                    } catch (e) {
+                      LOGGER.obj(e).error();
+                      await showGeneralModalOk({
+                        title: 'Error',
+                        message: (e as Error).toString(),
+                      });
+                    } finally {
+                      zw.close();
                     }
-                  } catch (e) {
-                    LOGGER.obj(e).error();
+                  } catch (e: any) {
                     await showGeneralModalOk({
-                      title: 'Error',
-                      message: (e as Error).toString(),
+                      title: 'ERROR',
+                      message: e.toString(),
                     });
-                  } finally {
-                    zw.close();
                   }
                 }}
                 onMouseEnter={() => {
@@ -344,9 +359,16 @@ export default function ExtensionManager() {
                 <Stack />
               </button>
               <ImportButton
-                onClick={async () =>
-                  importButtonCallback(gameFolder, setConfigStatus, t, '')
-                }
+                onClick={async () => {
+                  try {
+                    importButtonCallback(gameFolder, setConfigStatus, t, '');
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
+                }}
                 onMouseEnter={() => {
                   setStatusBarMessage(
                     'Import a config file, overwriting the current configuration',
@@ -357,9 +379,16 @@ export default function ExtensionManager() {
                 }}
               />
               <ExportButton
-                onClick={() =>
-                  exportButtonCallback(gameFolder, setConfigStatus, t)
-                }
+                onClick={async () => {
+                  try {
+                    exportButtonCallback(gameFolder, setConfigStatus, t);
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
+                }}
                 onMouseEnter={() => {
                   setStatusBarMessage(
                     'Export the current configuration to a file',
@@ -386,16 +415,23 @@ export default function ExtensionManager() {
               </button>
               <ApplyButton
                 onClick={async () => {
-                  const result: string = await saveConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier,
-                  );
+                  try {
+                    const result: string = await saveConfig(
+                      configuration,
+                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                      configurationTouched,
+                      extensionsState.explicitlyActivatedExtensions,
+                      activeExtensions,
+                      configurationQualifier,
+                    );
 
-                  setConfigStatus(result);
+                    setConfigStatus(result);
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
                 }}
                 onMouseEnter={() => {
                   setStatusBarMessage(

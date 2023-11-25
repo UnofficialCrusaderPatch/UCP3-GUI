@@ -110,95 +110,123 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                 }}
               />
               <ImportButton
-                onClick={async () =>
-                  importButtonCallback(gameFolder, setConfigStatus, t, '')
-                }
+                onClick={async () => {
+                  try {
+                    importButtonCallback(gameFolder, setConfigStatus, t, '');
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
+                }}
               />
               <ExportButton
-                onClick={() =>
-                  exportButtonCallback(gameFolder, setConfigStatus, t)
-                }
+                onClick={async () => {
+                  try {
+                    exportButtonCallback(gameFolder, setConfigStatus, t);
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
+                }}
               />
               <ApplyButton
                 onClick={async () => {
-                  const result: string = await saveConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier,
-                  );
+                  try {
+                    const result: string = await saveConfig(
+                      configuration,
+                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                      configurationTouched,
+                      extensionsState.explicitlyActivatedExtensions,
+                      activeExtensions,
+                      configurationQualifier,
+                    );
 
-                  setConfigStatus(result);
+                    setConfigStatus(result);
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
                 }}
               />
               <ExportAsPluginButton
                 onClick={async () => {
-                  const result = await serializeConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier,
-                  );
+                  try {
+                    const result = await serializeConfig(
+                      configuration,
+                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                      configurationTouched,
+                      extensionsState.explicitlyActivatedExtensions,
+                      activeExtensions,
+                      configurationQualifier,
+                    );
 
-                  const trimmedResult = {
-                    'config-sparse': {
-                      modules: result['config-sparse'].modules,
-                      plugins: result['config-sparse'].plugins,
-                    },
-                    'specification-version': result['specification-version'],
-                  } as UCP3SerializedPluginConfig;
+                    const trimmedResult = {
+                      'config-sparse': {
+                        modules: result['config-sparse'].modules,
+                        plugins: result['config-sparse'].plugins,
+                      },
+                      'specification-version': result['specification-version'],
+                    } as UCP3SerializedPluginConfig;
 
-                  ConsoleLogger.debug(trimmedResult);
+                    ConsoleLogger.debug(trimmedResult);
 
-                  const r = await showCreatePluginModalWindow({
-                    title: 'Create plugin',
-                    message: '',
-                  });
-
-                  ConsoleLogger.debug(r);
-
-                  if (r === undefined) return;
-
-                  // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
-
-                  const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
-
-                  if (await exists(pluginDir)) {
-                    await showGeneralModalOk({
-                      message: `directory already exists: ${pluginDir}`,
-                      title: 'cannot create plugin',
+                    const r = await showCreatePluginModalWindow({
+                      title: 'Create plugin',
+                      message: '',
                     });
-                    return;
-                  }
 
-                  await createDir(pluginDir);
+                    ConsoleLogger.debug(r);
 
-                  await writeTextFile(
-                    `${pluginDir}/definition.yml`,
-                    toYaml({
-                      name: r.pluginName,
-                      author: r.pluginAuthor,
-                      version: r.pluginVersion,
-                      dependencies: result['config-sparse']['load-order'],
-                    }),
-                  );
+                    if (r === undefined) return;
 
-                  await writeTextFile(
-                    `${pluginDir}/config.yml`,
-                    toYaml(trimmedResult),
-                  );
+                    // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
-                  const confirmed = await showGeneralModalOkCancel({
-                    title: t('gui-general:require.reload.title'),
-                    message: t('gui-editor:overview.require.reload.text'),
-                  });
+                    const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
 
-                  if (confirmed) {
-                    reloadCurrentWindow();
+                    if (await exists(pluginDir)) {
+                      await showGeneralModalOk({
+                        message: `directory already exists: ${pluginDir}`,
+                        title: 'cannot create plugin',
+                      });
+                      return;
+                    }
+
+                    await createDir(pluginDir);
+
+                    await writeTextFile(
+                      `${pluginDir}/definition.yml`,
+                      toYaml({
+                        name: r.pluginName,
+                        author: r.pluginAuthor,
+                        version: r.pluginVersion,
+                        dependencies: result['config-sparse']['load-order'],
+                      }),
+                    );
+
+                    await writeTextFile(
+                      `${pluginDir}/config.yml`,
+                      toYaml(trimmedResult),
+                    );
+
+                    const confirmed = await showGeneralModalOkCancel({
+                      title: t('gui-general:require.reload.title'),
+                      message: t('gui-editor:overview.require.reload.text'),
+                    });
+
+                    if (confirmed) {
+                      reloadCurrentWindow();
+                    }
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
                   }
                 }}
               />

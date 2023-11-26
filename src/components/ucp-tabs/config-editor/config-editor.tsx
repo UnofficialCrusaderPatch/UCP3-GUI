@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable react/no-unescaped-entities */
 /* global CreateUIElement */
 
@@ -85,14 +86,11 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   const { nav, content } = UIFactory.CreateSections({ readonly });
 
   return (
-    <div id="dynamicConfigPanel" className="d-flex h-100 overflow-hidden">
-      {/* Still has issues with x-Overflow */}
-      <div className="col-auto">{nav}</div>
-      <div className="mb-1 config-section h-100">
-        <div className="m-2 container-config-box">
-          <div className="parchment-box flex-grow-1 d-flex flex-column h-100">
-            <div className="content-box">{content}</div>
-          </div>
+    <div className="config-editor">
+      {nav}
+      <div className="flex-default config-container">
+        <div className="parchment-box config-container__content" tabIndex={0}>
+          {content}
         </div>
         {!readonly ? (
           <div className="row pb-2 mx-0">

@@ -1,11 +1,9 @@
 import './extension-element.css';
 
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import { Button, Col, Row, Tooltip } from 'react-bootstrap';
+import { Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
-
-import '../extension-manager.css';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import {

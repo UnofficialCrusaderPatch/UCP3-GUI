@@ -22,15 +22,12 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
   });
 
   return (
-    <nav
-      id="config-navbar"
-      className="navbar navbar-dark bg-dark flex-column align-items-stretch justify-content-start p-3 h-100 flex-nowrap"
-    >
-      <a className="navbar-brand" href="#config-General">
+    <nav className="config-navbar">
+      <a className="config-navbar__header" href="#config-general">
         {t('gui-editor:config.table.of.contents')}
       </a>
-      <nav className="nav nav-pills flex-column overflow-auto flex-nowrap">
-        <a className="nav-link" href="#config-General">
+      <nav className="config-navbar__nav">
+        <a className="config-navbar__link" href="#config-general">
           {t('gui-editor:config.general')}
         </a>
         {level1}

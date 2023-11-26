@@ -1,3 +1,55 @@
+.config-editor {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+
+.config-navbar, .config-navbar__nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  flex-wrap: nowrap;
+}
+
+.config-navbar {
+  height: 100%;
+  width: 25%;
+  padding: 10px;
+}
+
+.config-navbar__header {
+  text-decoration: none;
+}
+
+.config-navbar__nav {
+  padding-left: 10px;
+  width: 100%;
+}
+
+.config-navbar > .config-navbar__nav {
+  overflow: auto;
+}
+
+.config-navbar__link {
+  text-decoration: none;
+  padding: 2px;
+}
+
+.config-container {
+  width: 75%;
+  padding: 10px;
+  align-items: stretch;
+}
+
+.config-container__content {
+  position: relative;
+  padding: 10px;
+  color: black;
+  flex-grow: 1;
+}
+
 .form-control:disabled {
   opacity: 0.5;
 }
@@ -12,22 +64,6 @@
   flex-direction: column;
   justify-content: space-between;
   overflow: clip;
-}
-
-#config-navbar {
-  /* color: #f8f9fa; */
-  padding: 0;
-}
-
-.content-box {
-  padding: 10px;
-  height: 100%;
-  overflow-y: scroll;
-  color: black;
-}
-
-.container-config-box {
-  height: calc(100% - 50px);
 }
 
 .icons-button {
@@ -104,22 +140,6 @@
 .apply:disabled {
   background-image: url('/src/assets/ucp3/reset_active.png');
 }
-
-/*
-#config-navbar > nav > nav > a {
-  font-size: medium;
-}
-
-#config-navbar > nav > nav > nav > a {
-  font-size: medium;
-}
-
-#config-navbar > nav > nav > nav > a {
-  font-size: medium;
-}
-#config-navbar > nav > nav > nav > nav > a {
-  font-size: medium;
-} */
 
 /* @import '~bootstrap'; */
 

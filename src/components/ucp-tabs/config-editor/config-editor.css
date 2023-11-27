@@ -237,9 +237,9 @@ input[type="checkbox"]:disabled + .label:before {
 
   /* TODO add the slider background with a border image */
   background-image:
-    url('src/assets/ucp3/slider_bg_left.png'),
-    url('src/assets/ucp3/slider_bg_right.png'),
-    url('src/assets/ucp3/slider_bg_middle.png');
+    url('/src/assets/ucp3/slider_bg_left.png'),
+    url('/src/assets/ucp3/slider_bg_right.png'),
+    url('/src/assets/ucp3/slider_bg_middle.png');
   background-position:
     left top,
     right top,
@@ -267,13 +267,13 @@ input[type="checkbox"]:disabled + .label:before {
   /* Set a specific slider handle width */
   height: 15px;
   /* Slider handle height */
-  background-image: url('src/assets/ucp3/slider.png');
+  background-image: url('/src/assets/ucp3/slider.png');
   cursor: pointer;
   /* Cursor on hover */
 }
 
 .ucp-slider::-webkit-slider-thumb:active {
-  background-image: url('src/assets/ucp3/slider_active.png');
+  background-image: url('/src/assets/ucp3/slider_active.png');
 }
 
 /* mozilla based */
@@ -282,21 +282,21 @@ input[type="checkbox"]:disabled + .label:before {
   /* Set a specific slider handle width */
   height: 15px;
   /* Slider handle height */
-  background-image: url('src/assets/ucp3/slider.png');
+  background-image: url('/src/assets/ucp3/slider.png');
   cursor: pointer;
   /* Cursor on hover */
 }
 
 .ucp-slider::-moz-range-thumb:active {
-  background-image: url('src/assets/ucp3/slider_active.png');
+  background-image: url('/src/assets/ucp3/slider_active.png');
 }
 
 /* Slider track styles */
 .ucp-slider .slider-track {
   background-image:
-    url('src/assets/ucp3/slider_bg_left.png'),
-    url('src/assets/ucp3/slider_bg_right.png'),
-    url('src/assets/ucp3/slider_bg_middle.png');
+    url('/src/assets/ucp3/slider_bg_left.png'),
+    url('/src/assets/ucp3/slider_bg_right.png'),
+    url('/src/assets/ucp3/slider_bg_middle.png');
   background-position:
     left top,
     right top,
@@ -310,7 +310,7 @@ input[type="checkbox"]:disabled + .label:before {
 
 /* Thumb styles */
 .ucp-slider .slider-thumb {
-  background: url('src/assets/ucp3/slider.png') no-repeat center;
+  background: url('/src/assets/ucp3/slider.png') no-repeat center;
   width: 7px;
   height: 15px;
   border: none;
@@ -320,7 +320,7 @@ input[type="checkbox"]:disabled + .label:before {
 
 .ucp-slider .slider-thumb:hover,
 .ucp-slider .slider-thumb:focus {
-  background-image: url(src/assets/ucp3/slider.png);
+  background-image: url('/src/assets/ucp3/slider.png');
 }
 
 

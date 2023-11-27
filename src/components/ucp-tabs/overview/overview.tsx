@@ -15,6 +15,7 @@ import {
   useUCPVersion,
 } from 'hooks/jotai/helper';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {
@@ -83,17 +84,25 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => {
-          let result = Result.emptyOk<string>();
-          if (ucpStateHandler.isEmpty()) {
+          try {
+            let result = Result.emptyOk<string>();
+            if (ucpStateHandler.isEmpty()) {
+              return result;
+            }
+
+            if (ucpState === UCPState.ACTIVE) {
+              result = (await ucpStateHandler.get().deactivate()).mapErr(
+                String,
+              );
+            } else if (ucpState === UCPState.INACTIVE) {
+              result = (await ucpStateHandler.get().activate()).mapErr(String);
+            }
             return result;
+          } catch (e: any) {
+            await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
           }
 
-          if (ucpState === UCPState.ACTIVE) {
-            result = (await ucpStateHandler.get().deactivate()).mapErr(String);
-          } else if (ucpState === UCPState.INACTIVE) {
-            result = (await ucpStateHandler.get().activate()).mapErr(String);
-          }
-          return result;
+          return Result.emptyOk();
         }}
         tooltip={t('gui-editor:overview.activationTooltip')}
         setResultNodeState={setButtonResult}
@@ -140,42 +149,50 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => {
-          setOverviewButtonActive(false);
-          const zipFilePath = await openFileDialog(currentFolder, [
-            { name: t('gui-general:file.zip'), extensions: ['zip'] },
-            { name: t('gui-general:file.all'), extensions: ['*'] },
-          ]);
+          try {
+            setOverviewButtonActive(false);
+            const zipFilePath = await openFileDialog(currentFolder, [
+              { name: t('gui-general:file.zip'), extensions: ['zip'] },
+              { name: t('gui-general:file.all'), extensions: ['*'] },
+            ]);
 
-          if (zipFilePath.isEmpty()) return Result.err('');
+            if (zipFilePath.isEmpty()) return Result.err('');
 
-          // TODO: improve feedback
-          const zipInstallResult = await installUCPFromZip(
-            zipFilePath.get(),
-            currentFolder,
-            // can be used to transform -> although splitting into more components might be better
-            (status) => stateUpdate(status),
-            t,
-          );
-          if (zipInstallResult.ok().isPresent()) {
-            // load new state
-            await receiveState();
-            await receiveVersion();
+            // TODO: improve feedback
+            const zipInstallResult = await installUCPFromZip(
+              zipFilePath.get(),
+              currentFolder,
+              // can be used to transform -> although splitting into more components might be better
+              (status) => stateUpdate(status),
+              t,
+            );
+            if (zipInstallResult.ok().isPresent()) {
+              // load new state
+              await receiveState();
+              await receiveVersion();
 
-            const confirmed = await showGeneralModalOkCancel({
-              title: t('gui-general:require.reload.title'),
-              message: t('gui-editor:overview.require.reload.text'),
-            });
-            // const confirmed = await confirm(
-            //   t('gui-editor:overview.require.reload.text'),
-            //   { title: t('gui-general:require.reload.title'), type: 'warning' }
-            // );
+              const confirmed = await showGeneralModalOkCancel({
+                title: t('gui-general:require.reload.title'),
+                message: t('gui-editor:overview.require.reload.text'),
+              });
+              // const confirmed = await confirm(
+              //   t('gui-editor:overview.require.reload.text'),
+              //   { title: t('gui-general:require.reload.title'), type: 'warning' }
+              // );
 
-            if (confirmed) {
-              reloadCurrentWindow();
+              if (confirmed) {
+                reloadCurrentWindow();
+              }
             }
+            setOverviewButtonActive(true);
+            return zipInstallResult
+              .mapOk(() => '')
+              .mapErr((err) => String(err));
+          } catch (e: any) {
+            await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
           }
-          setOverviewButtonActive(true);
-          return zipInstallResult.mapOk(() => '').mapErr((err) => String(err));
+
+          return Result.emptyErr();
         }}
         setResultNodeState={setButtonResult}
       />
@@ -206,9 +223,17 @@ export default function Overview() {
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async (stateUpdate) =>
-          Result.tryAsync(() => checkForGUIUpdates(stateUpdate, t))
-        }
+        func={async (stateUpdate) => {
+          try {
+            return await Result.tryAsync(() =>
+              checkForGUIUpdates(stateUpdate, t),
+            );
+          } catch (e: any) {
+            await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
+          }
+
+          return Result.emptyErr();
+        }}
         setResultNodeState={setButtonResult}
       />
       {buttonResult}

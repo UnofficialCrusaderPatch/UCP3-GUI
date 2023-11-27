@@ -1,4 +1,5 @@
 /* eslint-disable react/require-default-props */
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import './game-starter.css';
 
 import {
@@ -83,6 +84,10 @@ function GameStarterButton(props: GameStarterProps) {
     } catch (e) {
       // change handling?
       LOGGER.msg('Error while trying to launch "{}": {}', path, e).error();
+      await showGeneralModalOk({
+        title: 'ERROR',
+        message: (e as any).toString(),
+      });
     } finally {
       setStarting(false);
     }

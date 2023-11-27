@@ -59,23 +59,30 @@ export default function UcpTabs() {
               disabled={!displayConfigTabs}
               hidden={!ucpFolderExists}
               onClick={async () => {
-                if (!showErrorsWarning) {
-                  return;
+                try {
+                  if (!showErrorsWarning) {
+                    return;
+                  }
+
+                  const messages = tryResolveDependencies(
+                    extensionsState.extensions,
+                  );
+
+                  if (messages.length === 0) return;
+
+                  await showGeneralModalOk({
+                    title: 'Error: missing dependencies',
+                    message: `Please be aware of the following missing dependencies:\n\n${messages}`,
+                    handleAction: () => setShowErrorsWarning(false),
+                  });
+
+                  LOGGER.msg(`Missing dependencies: ${messages}`).error();
+                } catch (e: any) {
+                  await showGeneralModalOk({
+                    title: 'ERROR',
+                    message: e.toString(),
+                  });
                 }
-
-                const messages = tryResolveDependencies(
-                  extensionsState.extensions,
-                );
-
-                if (messages.length === 0) return;
-
-                await showGeneralModalOk({
-                  title: 'Error: missing dependencies',
-                  message: `Please be aware of the following missing dependencies:\n\n${messages}`,
-                  handleAction: () => setShowErrorsWarning(false),
-                });
-
-                LOGGER.msg(`Missing dependencies: ${messages}`).error();
               }}
             >
               {t('gui-editor:extensions.title')}

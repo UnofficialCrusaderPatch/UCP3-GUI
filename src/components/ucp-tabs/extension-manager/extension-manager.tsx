@@ -107,7 +107,7 @@ export default function ExtensionManager() {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   return (
-    <div className="fs-6 flex-default extension-manager">
+    <div className="flex-default extension-manager">
       <div className="extension-manager-control">
         <div className="extension-manager-control__header-container">
           <div className="extension-manager-control__header">
@@ -388,6 +388,12 @@ export default function ExtensionManager() {
               >
                 {advancedMode ? <GearFill /> : <Gear />}
               </button>
+              <div className="d-none extension-manager-control__box__buttons--user-override-switch">
+                <Form.Switch
+                  label={t('gui-editor:config.allow.override')}
+                  className="user-override-switch"
+                />
+              </div>
               <div className="extension-manager-control__box__buttons--apply-button">
                 <ApplyButton
                   onClick={async () => {
@@ -412,11 +418,6 @@ export default function ExtensionManager() {
                   }}
                 />
               </div>
-              <Form.Switch
-                id="config-allow-user-override-switch"
-                label={t('gui-editor:config.allow.override')}
-                className="col-auto d-inline-block ms-1 d-none"
-              />
             </div>
           </div>
         </div>

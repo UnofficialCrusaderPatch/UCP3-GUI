@@ -62,6 +62,7 @@
   display: flex;
   width: 100%;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .extension-manager-control__box__buttons--apply-button {
@@ -75,4 +76,14 @@
 .extension-text-warning-container {
   width: 100%;
   padding: 0 10px 0 10px;
+}
+
+.extension-manager-control__box__buttons--user-override-switch {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.extension-manager-control__box__buttons--user-override-switch>.user-override-switch {
+  margin: 0 5px 0 0;
 }

@@ -5,7 +5,8 @@
   padding: 10px;
 }
 
-.config-navbar, .config-navbar__nav {
+.config-navbar,
+.config-navbar__nav {
   display: flex;
   flex-direction: column;
   justify-content: start;
@@ -21,6 +22,7 @@
 
 .config-navbar__header {
   text-decoration: none;
+  color: var(--bs-heading-color); /* bootstrap var, replace */
 }
 
 .config-navbar__nav {
@@ -28,13 +30,16 @@
   width: 100%;
 }
 
-.config-navbar > .config-navbar__nav {
+.config-navbar>.config-navbar__nav {
   overflow: auto;
+  background-color: var(--ucp-main-grey-alpha);
+  flex-grow: 1;
 }
 
 .config-navbar__link {
   text-decoration: none;
   padding: 2px;
+  color: black;
 }
 
 .config-container {
@@ -44,10 +49,56 @@
 }
 
 .config-container__content {
-  position: relative;
   padding: 10px;
   color: black;
   flex-grow: 1;
+}
+
+.config-editor__buttons {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.config-editor__buttons--user-override-switch {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.config-editor__buttons--user-override-switch>.user-override-switch {
+  margin: 0 5px 0 0;
+}
+
+.config-editor__buttons--apply-button {
+  margin-left: auto;
+}
+
+.config-editor__buttons--apply-button>button {
+  height: 100%;
+}
+
+.config-warning-container {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.config-warning-container {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  margin-top: 5px;
+}
+
+.config-warning-container__text {
+  flex-grow: 1;
+}
+
+.config-warning-container__symbols {
+  padding: 0 1px 0 5px;
+  text-wrap: nowrap;
 }
 
 .form-control:disabled {

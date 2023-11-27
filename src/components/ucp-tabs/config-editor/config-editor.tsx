@@ -93,8 +93,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
           {content}
         </div>
         {!readonly ? (
-          <div className="row pb-2 mx-0">
-            <div className="d-inline-flex">
+          <>
+            <div className="config-editor__buttons">
               <ResetButton
                 onClick={() => {
                   setConfiguration({
@@ -117,104 +117,106 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   exportButtonCallback(gameFolder, setConfigStatus, t)
                 }
               />
-              <ApplyButton
-                onClick={async () => {
-                  const result: string = await saveConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier,
-                  );
+              <div className="d-none config-editor__buttons--user-override-switch">
+                <Form.Switch
+                  label={t('gui-editor:config.allow.override')}
+                  className="user-override-switch"
+                />
+              </div>
+              <div className="config-editor__buttons--apply-button">
+                <ApplyButton
+                  onClick={async () => {
+                    const result: string = await saveConfig(
+                      configuration,
+                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                      configurationTouched,
+                      extensionsState.explicitlyActivatedExtensions,
+                      activeExtensions,
+                      configurationQualifier,
+                    );
 
-                  setConfigStatus(result);
-                }}
-              />
-              <ExportAsPluginButton
-                onClick={async () => {
-                  const result = await serializeConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier,
-                  );
+                    setConfigStatus(result);
+                  }}
+                />
+                <ExportAsPluginButton
+                  onClick={async () => {
+                    const result = await serializeConfig(
+                      configuration,
+                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                      configurationTouched,
+                      extensionsState.explicitlyActivatedExtensions,
+                      activeExtensions,
+                      configurationQualifier,
+                    );
 
-                  const trimmedResult = {
-                    'config-sparse': {
-                      modules: result['config-sparse'].modules,
-                      plugins: result['config-sparse'].plugins,
-                    },
-                    'specification-version': result['specification-version'],
-                  } as UCP3SerializedPluginConfig;
+                    const trimmedResult = {
+                      'config-sparse': {
+                        modules: result['config-sparse'].modules,
+                        plugins: result['config-sparse'].plugins,
+                      },
+                      'specification-version': result['specification-version'],
+                    } as UCP3SerializedPluginConfig;
 
-                  ConsoleLogger.debug(trimmedResult);
+                    ConsoleLogger.debug(trimmedResult);
 
-                  const r = await showCreatePluginModalWindow({
-                    title: 'Create plugin',
-                    message: '',
-                  });
-
-                  ConsoleLogger.debug(r);
-
-                  if (r === undefined) return;
-
-                  // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
-
-                  const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
-
-                  if (await exists(pluginDir)) {
-                    await showGeneralModalOk({
-                      message: `directory already exists: ${pluginDir}`,
-                      title: 'cannot create plugin',
+                    const r = await showCreatePluginModalWindow({
+                      title: 'Create plugin',
+                      message: '',
                     });
-                    return;
-                  }
 
-                  await createDir(pluginDir);
+                    ConsoleLogger.debug(r);
 
-                  await writeTextFile(
-                    `${pluginDir}/definition.yml`,
-                    toYaml({
-                      name: r.pluginName,
-                      author: r.pluginAuthor,
-                      version: r.pluginVersion,
-                      dependencies: result['config-sparse']['load-order'],
-                    }),
-                  );
+                    if (r === undefined) return;
 
-                  await writeTextFile(
-                    `${pluginDir}/config.yml`,
-                    toYaml(trimmedResult),
-                  );
+                    // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
-                  const confirmed = await showGeneralModalOkCancel({
-                    title: t('gui-general:require.reload.title'),
-                    message: t('gui-editor:overview.require.reload.text'),
-                  });
+                    const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
 
-                  if (confirmed) {
-                    reloadCurrentWindow();
-                  }
-                }}
-              />
-              <Form.Switch
-                id="config-allow-user-override-switch"
-                label={t('gui-editor:config.allow.override')}
-                className="col-auto d-inline-block ms-1 d-none"
-              />
-              <span className="text-warning fs-6">{configStatus}</span>
+                    if (await exists(pluginDir)) {
+                      await showGeneralModalOk({
+                        message: `directory already exists: ${pluginDir}`,
+                        title: 'cannot create plugin',
+                      });
+                      return;
+                    }
+
+                    await createDir(pluginDir);
+
+                    await writeTextFile(
+                      `${pluginDir}/definition.yml`,
+                      toYaml({
+                        name: r.pluginName,
+                        author: r.pluginAuthor,
+                        version: r.pluginVersion,
+                        dependencies: result['config-sparse']['load-order'],
+                      }),
+                    );
+
+                    await writeTextFile(
+                      `${pluginDir}/config.yml`,
+                      toYaml(trimmedResult),
+                    );
+
+                    const confirmed = await showGeneralModalOkCancel({
+                      title: t('gui-general:require.reload.title'),
+                      message: t('gui-editor:overview.require.reload.text'),
+                    });
+
+                    if (confirmed) {
+                      reloadCurrentWindow();
+                    }
+                  }}
+                />
+              </div>
             </div>
 
-            <div className="col-auto ml-auto d-flex justify-content-center align-items-center">
-              <div
-                className="d-flex justify-content-center align-items-center d-none"
-                style={{ height: '0' }}
-              >
+            <div className="config-warning-container">
+              <div className="config-warning-container__text text-warning">
+                {configStatus}
+              </div>
+              <div className="d-none config-warning-container__symbols">
                 <span
-                  className={`text-danger fs-4 mx-1${
+                  className={`text-danger mx-1${
                     errorCount > 0 ? '' : ' invisible'
                   }`}
                 >
@@ -224,7 +226,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   {t('gui-general:errors', { count: errorCount })}
                 </span>
                 <span
-                  className={`text-warning fs-4 mx-1${
+                  className={`text-warning mx-1${
                     errorCount > 0 ? '' : ' invisible'
                   }`}
                 >
@@ -235,7 +237,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                 </span>
               </div>
             </div>
-          </div>
+          </>
         ) : null}
       </div>
     </div>

@@ -165,3 +165,14 @@
   border-image-repeat: round;
   border-image-width: auto;
 }
+
+.outline-border {
+  border-image: url('/src/assets/ucp3/outline_border.png');
+  border-image-slice: 2;
+  border-image-repeat: stretch;
+  border-image-width: auto;
+
+  border-style: solid;
+  border-width: 2px;
+  border-color: transparent;
+}

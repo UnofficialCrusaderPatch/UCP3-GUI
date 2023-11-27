@@ -109,56 +109,44 @@ export default function Footer() {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       role="button"
-      className={`ornament-border footer${
+      className={`ornament-border fs-8 footer${
         isFooterOpen ? '' : ' footer-closed'
       }`}
       onClick={() => setFooterOpen(!isFooterOpen)}
     >
-      <div className="d-flex p-1 px-2 fs-8 flex-wrap justify-content-end">
-        <span
-          className="me-auto"
-          data-toggle="tooltip"
-          data-placement="top"
-          title={currentFolder}
-        >
-          {/* t('gui-editor:footer.folder') */}
-          <span className="px-2 fst-italic">{statusBarMessage}</span>
-        </span>
-        {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
+      <span
+        className="px-2 me-auto"
+        data-toggle="tooltip"
+        data-placement="top"
+        title={currentFolder}
+      >
+        <span className="fst-italic">{statusBarMessage}</span>
+      </span>
+      {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
         <span className="px-2">
           {t('gui-general:warnings', { count: warningCount })}
         </span>
         <span className="px-2">
           {t('gui-general:errors', { count: errorCount })}
         </span> */}
-        <span className="px-2">{`GUI ${'1.0.0'}`}</span>
-        <span className="px-2">{`UCP ${ucpFooterVersionString}`}</span>
+      <span className="footer__version-and-state">
+        <span>{`GUI ${'1.0.0'}`}</span>
+        <span className="px-3">{`UCP ${ucpFooterVersionString}`}</span>
 
-        <span className="px-2">
-          {/* Option 1 */}
-          {/* <OverlayTrigger
-            placement="left"
-            delay={{ show: 250, hide: 400 }}
-            overlay={renderTooltip}
-          >
-            <CircleFill color={UCP_STATE_COLOR_ARRAY[state]} />
-          </OverlayTrigger> */}
-          {/* Option 2 */}
-          <CircleFill
-            color={UCP_STATE_COLOR_ARRAY[state]}
-            onMouseEnter={() => {
-              setStatusBarMessage(
-                t('gui-editor:footer.state.prefix', {
-                  state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
-                }),
-              );
-            }}
-            onMouseLeave={() => {
-              setStatusBarMessage(undefined);
-            }}
-          />
-        </span>
-      </div>
+        <CircleFill
+          color={UCP_STATE_COLOR_ARRAY[state]}
+          onMouseEnter={() => {
+            setStatusBarMessage(
+              t('gui-editor:footer.state.prefix', {
+                state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
+              }),
+            );
+          }}
+          onMouseLeave={() => {
+            setStatusBarMessage(undefined);
+          }}
+        />
+      </span>
     </div>
   );
 }

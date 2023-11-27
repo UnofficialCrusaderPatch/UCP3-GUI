@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
-import { showGeneralModalOk } from 'components/modals/ModalOk';
 import './game-starter.css';
 
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 import {
   EMPTY_GAME_VERSION,
   GameVersionInstance,
@@ -51,7 +51,25 @@ function GameStarterInfo(props: {
       <div className="game-starter__info__row">
         <div>{t('gui-launch:info.sha')}</div>
         <div>:</div>
-        <div>{version.getShaRepresentation()}</div>
+        <div>
+          <button
+            type="button"
+            title={t('gui-launch:info.sha.copy')}
+            onClick={() =>
+              navigator.clipboard
+                .writeText(version.sha)
+                .catch(async (reason) => {
+                  LOGGER.obj(reason).warn();
+                  await showGeneralModalOk({
+                    title: 'WARNING',
+                    message: reason,
+                  });
+                })
+            }
+          >
+            {version.getShaRepresentation()}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -82,11 +100,11 @@ function GameStarterButton(props: GameStarterProps) {
       setStarting(true);
       await osOpenProgram(path, args, envs);
     } catch (e) {
-      // change handling?
-      LOGGER.msg('Error while trying to launch "{}": {}', path, e).error();
+      const msg = `Error while trying to launch "${path}": ${e}`;
+      LOGGER.msg(msg).error();
       await showGeneralModalOk({
         title: 'ERROR',
-        message: (e as any).toString(),
+        message: msg,
       });
     } finally {
       setStarting(false);

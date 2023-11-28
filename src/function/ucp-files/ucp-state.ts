@@ -7,6 +7,7 @@ import { atomWithRefresh, getStore } from 'hooks/jotai/base';
 import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
 import { atom } from 'jotai';
 import { getTranslation } from 'localization/i18n';
+import { loadable } from 'jotai/utils';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
@@ -23,26 +24,39 @@ export const enum UCPState {
   UNKNOWN,
 }
 
+async function getBinkPath(
+  gameFolder: string,
+  binkName: string,
+): Promise<string> {
+  if (!gameFolder) {
+    return '';
+  }
+
+  return resolvePath(gameFolder, binkName);
+}
+
 const BINK_PATH_ATOM = atom((get) =>
-  resolvePath(get(GAME_FOLDER_ATOM), 'binkw32.dll'),
+  getBinkPath(get(GAME_FOLDER_ATOM), 'binkw32.dll'),
 );
 const BINK_REAL_PATH_ATOM = atom((get) =>
-  resolvePath(get(GAME_FOLDER_ATOM), 'binkw32_real.dll'),
+  getBinkPath(get(GAME_FOLDER_ATOM), 'binkw32_real.dll'),
 );
 const BINK_UCP_PATH_ATOM = atom((get) =>
-  resolvePath(get(GAME_FOLDER_ATOM), 'binkw32_ucp.dll'),
+  getBinkPath(get(GAME_FOLDER_ATOM), 'binkw32_ucp.dll'),
 );
 
 export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
-  const binkShaPromise = getHexHashOfFile(await get(BINK_PATH_ATOM)).catch(
-    () => null,
-  );
-  const binkRealShaPromise = getHexHashOfFile(
-    await get(BINK_REAL_PATH_ATOM),
-  ).catch(() => null);
-  const binkUcpShaPromise = getHexHashOfFile(
-    await get(BINK_UCP_PATH_ATOM),
-  ).catch(() => null);
+  const binkPath = await get(BINK_PATH_ATOM);
+  const binkRealPath = await get(BINK_REAL_PATH_ATOM);
+  const binkUcpPath = await get(BINK_UCP_PATH_ATOM);
+
+  if (!binkPath || !binkRealPath || !binkUcpPath) {
+    return UCPState.UNKNOWN;
+  }
+
+  const binkShaPromise = getHexHashOfFile(binkPath).catch(() => null);
+  const binkRealShaPromise = getHexHashOfFile(binkRealPath).catch(() => null);
+  const binkUcpShaPromise = getHexHashOfFile(binkUcpPath).catch(() => null);
   const binkSha = await binkShaPromise;
   const binkRealSha = await binkRealShaPromise;
   const binkUcpSha = await binkUcpShaPromise;
@@ -73,6 +87,8 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
   }
   return UCPState.BINK_VERSION_DIFFERENCE; // if the three are different
 });
+
+export const LOADABLE_UCP_STATE_ATOM = loadable(UCP_STATE_ATOM);
 
 export async function createRealBink(): Promise<Result<void, unknown>> {
   const t = getTranslation('gui-download');

@@ -4,8 +4,8 @@ import StateButton from 'components/general/state-button';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import { installUCPFromZip } from 'function/download/ucp-download-handling';
 import {
+  LOADABLE_UCP_STATE_ATOM,
   UCPState,
-  UCP_STATE_ATOM,
   activateUCP,
   deactivateUCP,
 } from 'function/ucp-files/ucp-state';
@@ -22,40 +22,34 @@ import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
-  const ucpState = useAtomValue(UCP_STATE_ATOM);
-  const [ucpVersionResult, receiveVersion] = useUCPVersion();
+  const loadableUcpState = useAtomValue(LOADABLE_UCP_STATE_ATOM);
+  const [, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
   const [buttonResult, setButtonResult] = useState<ReactNode>(null);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
+  const ucpStatePresent = loadableUcpState.state === 'hasData';
+  const ucpState = ucpStatePresent ? loadableUcpState.data : UCPState.UNKNOWN;
   let activateButtonString = null;
-  let ucpVersionString = null;
-  if (ucpVersionResult.isEmpty()) {
-    ucpVersionString = t('gui-general:loading');
-    activateButtonString = ucpVersionString;
+  if (!ucpStatePresent) {
+    activateButtonString = t('gui-general:loading');
   } else {
-    const ucpVersion = ucpVersionResult.get().getOrThrow();
     switch (ucpState) {
       case UCPState.NOT_INSTALLED:
-        ucpVersionString = t('gui-editor:overview.not.installed');
         activateButtonString = t('gui-editor:overview.activate.not.installed');
         break;
       case UCPState.ACTIVE:
-        ucpVersionString = ucpVersion.toString();
         activateButtonString = t('gui-editor:overview.activate.do.deactivate');
         break;
       case UCPState.INACTIVE:
-        ucpVersionString = ucpVersion.toString();
         activateButtonString = t('gui-editor:overview.activate.do.activate');
         break;
       case UCPState.WRONG_FOLDER:
-        ucpVersionString = t('gui-editor:overview.not.installed');
         activateButtonString = t('gui-editor:overview.wrong.folder');
         break;
       default:
-        ucpVersionString = t('gui-editor:overview.unknown.state');
         activateButtonString = t('gui-editor:overview.activate.unknown');
         break;
     }
@@ -87,7 +81,7 @@ export default function Overview() {
               result = (await activateUCP()).mapErr(String);
             }
             return result;
-          } catch (e: unknown) {
+          } catch (e: any) {
             await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
           }
 

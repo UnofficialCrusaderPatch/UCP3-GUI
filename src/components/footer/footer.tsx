@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
 import { useCurrentGameFolder, useUCPVersion } from 'hooks/jotai/helper';
-import { RefAttributes, useState } from 'react';
+import { RefAttributes, Suspense, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   STATUS_BAR_MESSAGE_ATOM,
@@ -25,15 +25,10 @@ const UCP_STATE_ARRAY = [
 
 const UCP_STATE_COLOR_ARRAY = ['red', 'red', 'green', 'yellow', 'red', 'red'];
 
-export default function Footer() {
-  const currentFolder = useCurrentGameFolder();
+function VersionAndState() {
   const ucpState = useAtomValue(UCP_STATE_ATOM);
   const [ucpVersionResult] = useUCPVersion();
-  const [isFooterOpen, setFooterOpen] = useState(true);
-
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
@@ -53,10 +48,53 @@ export default function Footer() {
         ucpFooterVersionString = ucpVersion.toString();
         break;
       default:
-        ucpFooterVersionString = '?    ';
+        ucpFooterVersionString = '?';
         break;
     }
   }
+
+  const renderTooltip = (
+    props: JSX.IntrinsicAttributes &
+      TooltipProps &
+      RefAttributes<HTMLDivElement>,
+  ) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Tooltip id="button-tooltip" {...props}>
+      {t('gui-editor:footer.state.prefix', {
+        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+      })}
+    </Tooltip>
+  );
+
+  return (
+    <span className="footer__version-and-state">
+      <span>{`GUI ${'1.0.0'}`}</span>
+      <span className="px-3">{`UCP ${ucpFooterVersionString}`}</span>
+
+      <CircleFill
+        color={UCP_STATE_COLOR_ARRAY[ucpState]}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            t('gui-editor:footer.state.prefix', {
+              state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+            }),
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    </span>
+  );
+}
+
+export default function Footer() {
+  const currentFolder = useCurrentGameFolder();
+  const [isFooterOpen, setFooterOpen] = useState(true);
+
+  const configurationWarnings = useAtomValue(
+    CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  );
 
   const warningCount = Object.values(configurationWarnings)
     .map((v) => (v.level === 'warning' ? 1 : 0))
@@ -77,20 +115,7 @@ export default function Footer() {
     )}`;
   }
 
-  const renderTooltip = (
-    props: JSX.IntrinsicAttributes &
-      TooltipProps &
-      RefAttributes<HTMLDivElement>,
-  ) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Tooltip id="button-tooltip" {...props}>
-      {t('gui-editor:footer.state.prefix', {
-        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
-      })}
-    </Tooltip>
-  );
-
-  const [msg, setStatusBarMessage] = useAtom(STATUS_BAR_MESSAGE_ATOM);
+  const msg = useAtomValue(STATUS_BAR_MESSAGE_ATOM);
   const statusBarMessage =
     msg === undefined || msg.length === 0 ? displayCurrentFolder : msg;
 
@@ -118,26 +143,9 @@ export default function Footer() {
         <span className="px-2">
           {t('gui-general:errors', { count: errorCount })}
         </span> */}
-      <span className="footer__version-and-state">
-        <span>{`GUI ${'1.0.0'}`}</span>
-        <span className="px-3">{`UCP ${ucpFooterVersionString}`}</span>
-
-        <CircleFill
-          color={UCP_STATE_COLOR_ARRAY[ucpState]}
-          onMouseEnter={() => {
-            setStatusBarMessage(
-              t('gui-editor:footer.state.prefix', {
-                state: t(
-                  `gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`,
-                ),
-              }),
-            );
-          }}
-          onMouseLeave={() => {
-            setStatusBarMessage(undefined);
-          }}
-        />
-      </span>
+      <Suspense>
+        <VersionAndState />
+      </Suspense>
     </div>
   );
 }

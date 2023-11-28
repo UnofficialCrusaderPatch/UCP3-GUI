@@ -27,10 +27,14 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
         <h6>{t('gui-editor:config.table.of.contents')}</h6>
       </a>
       <nav className="outline-border config-navbar__nav">
-        <a className="config-navbar__link" href="#config-general">
-          {t('gui-editor:config.general')}
-        </a>
-        {level1}
+        {level1.length > 0 ? (
+          <>
+            <a className="config-navbar__link" href="#config-general">
+              {t('gui-editor:config.general')}
+            </a>
+            {level1}
+          </>
+        ) : null}
       </nav>
     </nav>
   );

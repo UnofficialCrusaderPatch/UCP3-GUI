@@ -3,37 +3,32 @@ import './overview.css';
 import StateButton from 'components/general/state-button';
 import { checkForGUIUpdates } from 'function/download/gui-update';
 import { installUCPFromZip } from 'function/download/ucp-download-handling';
-import { UCPState } from 'function/ucp-files/ucp-state';
+import {
+  UCPState,
+  UCP_STATE_ATOM,
+  activateUCP,
+  deactivateUCP,
+} from 'function/ucp-files/ucp-state';
 import { reloadCurrentWindow } from 'function/window-actions';
 import { useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
-import {
-  useCurrentGameFolder,
-  useUCPState,
-  useUCPVersion,
-} from 'hooks/jotai/helper';
+import { useCurrentGameFolder, useUCPVersion } from 'hooks/jotai/helper';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { useAtomValue } from 'jotai';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
-  const [ucpStateHandlerResult, receiveState] = useUCPState();
+  const ucpState = useAtomValue(UCP_STATE_ATOM);
   const [ucpVersionResult, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
-
-  const ucpStateHandler = ucpStateHandlerResult
-    .getOrReceive(Result.emptyErr)
-    .ok();
-  const ucpState = ucpStateHandler
-    .map((handler) => handler.state)
-    .getOrElse(UCPState.UNKNOWN);
 
   let activateButtonString = null;
   let ucpVersionString = null;
@@ -86,19 +81,13 @@ export default function Overview() {
         func={async () => {
           try {
             let result = Result.emptyOk<string>();
-            if (ucpStateHandler.isEmpty()) {
-              return result;
-            }
-
             if (ucpState === UCPState.ACTIVE) {
-              result = (await ucpStateHandler.get().deactivate()).mapErr(
-                String,
-              );
+              result = (await deactivateUCP()).mapErr(String);
             } else if (ucpState === UCPState.INACTIVE) {
-              result = (await ucpStateHandler.get().activate()).mapErr(String);
+              result = (await activateUCP()).mapErr(String);
             }
             return result;
-          } catch (e: any) {
+          } catch (e: unknown) {
             await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
           }
 
@@ -167,7 +156,6 @@ export default function Overview() {
             );
             if (zipInstallResult.ok().isPresent()) {
               // load new state
-              await receiveState();
               await receiveVersion();
 
               const confirmed = await showGeneralModalOkCancel({

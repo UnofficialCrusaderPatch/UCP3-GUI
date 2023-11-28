@@ -1,15 +1,10 @@
 import './footer.css';
 
-import { UCPState } from 'function/ucp-files/ucp-state';
+import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
-import Result from 'util/structs/result';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import {
-  useCurrentGameFolder,
-  useUCPState,
-  useUCPVersion,
-} from 'hooks/jotai/helper';
+import { useCurrentGameFolder, useUCPVersion } from 'hooks/jotai/helper';
 import { RefAttributes, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
@@ -32,7 +27,7 @@ const UCP_STATE_COLOR_ARRAY = ['red', 'red', 'green', 'yellow', 'red', 'red'];
 
 export default function Footer() {
   const currentFolder = useCurrentGameFolder();
-  const [ucpStateHandlerResult] = useUCPState();
+  const ucpState = useAtomValue(UCP_STATE_ATOM);
   const [ucpVersionResult] = useUCPVersion();
   const [isFooterOpen, setFooterOpen] = useState(true);
 
@@ -42,18 +37,12 @@ export default function Footer() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
-  const state = ucpStateHandlerResult
-    .getOrReceive(Result.emptyErr)
-    .ok()
-    .map((handler) => handler.state)
-    .getOrElse(UCPState.UNKNOWN);
-
   let ucpFooterVersionString = null;
   if (ucpVersionResult.isEmpty()) {
     ucpFooterVersionString = t('gui-general:loading');
   } else {
     const ucpVersion = ucpVersionResult.get().getOrThrow();
-    switch (state) {
+    switch (ucpState) {
       case UCPState.NOT_INSTALLED:
         ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
         break;
@@ -96,7 +85,7 @@ export default function Footer() {
     // eslint-disable-next-line react/jsx-props-no-spreading
     <Tooltip id="button-tooltip" {...props}>
       {t('gui-editor:footer.state.prefix', {
-        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
+        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
       })}
     </Tooltip>
   );
@@ -145,11 +134,13 @@ export default function Footer() {
           </OverlayTrigger> */}
           {/* Option 2 */}
           <CircleFill
-            color={UCP_STATE_COLOR_ARRAY[state]}
+            color={UCP_STATE_COLOR_ARRAY[ucpState]}
             onMouseEnter={() => {
               setStatusBarMessage(
                 t('gui-editor:footer.state.prefix', {
-                  state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
+                  state: t(
+                    `gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`,
+                  ),
                 }),
               );
             }}

@@ -24,7 +24,7 @@ export async function installUCPFromZip(
   t: TFunction,
 ): Promise<Result<void, FileUtilError>> {
   return Result.tryAsync(async () => {
-    (await createRealBink(gameFolder, t)).throwIfErr();
+    (await createRealBink()).throwIfErr();
 
     statusCallback(t('gui-download:zip.extract'));
     try {
@@ -34,7 +34,7 @@ export async function installUCPFromZip(
       throw t('gui-download:zip.extract.error', { error });
     }
 
-    (await activateUCP(gameFolder, t)).throwIfErr();
+    (await activateUCP()).throwIfErr();
   });
 }
 

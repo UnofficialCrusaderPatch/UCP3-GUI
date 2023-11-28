@@ -1,8 +1,6 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as bootstrap from 'bootstrap';
 import {
-  extensionsToOptionEntries,
   optionEntriesToHierarchical,
   uiCollectionToOptionEntries,
 } from 'config/ucp/extension-util';
@@ -55,18 +53,6 @@ function CreateSections(args: { readonly: boolean }): {
   const { readonly } = args;
 
   const [t] = useTranslation(['gui-editor']);
-
-  useEffect(() => {
-    // eslint-disable-next-line no-new
-    new bootstrap.ScrollSpy(
-      document.querySelector('#dynamicConfigPanel') as Element,
-      {
-        target: '#config-navbar',
-        offset: 10,
-        method: 'offset',
-      },
-    );
-  });
 
   if (optionEntries.length === 0) {
     return { nav: null, content: null };
@@ -126,8 +112,8 @@ function CreateSections(args: { readonly: boolean }): {
         // tabIndex={0}
         id="config-sections"
       >
-        <div id="config-General">
-          <h1 id="config-General">{t('gui-editor:config.general')}</h1>
+        <div id="config-general">
+          <h1>{t('gui-editor:config.general')}</h1>
           {elements}
         </div>
         <div>{children}</div>

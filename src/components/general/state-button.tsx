@@ -1,5 +1,5 @@
+/* eslint-disable react/require-default-props */
 import { ReactNode, useState } from 'react';
-// import { Button } from 'react-bootstrap';
 import { useTimeout } from 'hooks/general/util';
 import Result from 'util/structs/result';
 
@@ -17,12 +17,10 @@ interface StateButtonProps {
   func: (
     updateState: (stateUpdate: ReactNode) => void,
   ) => Promise<Result<void | ReactNode, void | ReactNode>>;
-  // eslint-disable-next-line react/require-default-props
   funcBefore?: () => void;
-  // eslint-disable-next-line react/require-default-props
   funcAfter?: () => void;
-  // eslint-disable-next-line react/require-default-props
   tooltip?: string;
+  setResultNodeState?: (node: ReactNode) => void;
 }
 
 enum ButtonState {
@@ -41,51 +39,48 @@ export default function StateButton(props: StateButtonProps) {
     funcBefore,
     funcAfter,
     tooltip,
+    setResultNodeState = () => {},
   } = props;
   const [active, setActive] = useState(true);
-  const [divState, setDivState] = useState<ReactNode>();
   const [buttonState, setButtonState] = useState(ButtonState.IDLE);
 
   const setResState = (res: void | ReactNode, newButtonState: ButtonState) => {
     setButtonState(newButtonState);
     if (res !== undefined && res !== null) {
-      setDivState(res);
+      setResultNodeState(res);
     }
   };
 
   useTimeout(
     () => {
-      setDivState(null);
+      setResultNodeState(null);
       setButtonState(ButtonState.IDLE);
     },
     active && buttonState !== ButtonState.IDLE ? 5000 : null,
   );
 
   return (
-    <div className="m-2 ">
-      <button
-        type="button"
-        className={`${buttonVariant}`}
-        disabled={!active || !buttonActive}
-        onClick={async () => {
-          if (funcBefore) funcBefore();
-          setActive(false);
-          setButtonState(ButtonState.RUNNING);
-          (await func(setDivState)).consider(
-            (ok) => setResState(ok, ButtonState.SUCCESS),
-            (err) => setResState(err, ButtonState.FAILED),
-          );
-          setActive(true);
-          if (funcAfter) funcAfter();
-        }}
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title={tooltip}
-      >
-        <div className="icon-placeholder" />
-        <div className="button-text">{buttonValues[buttonState]}</div>
-      </button>
-      <div className="col d-flex align-items-center">{divState}</div>
-    </div>
+    <button
+      type="button"
+      className={`${buttonVariant}`}
+      disabled={!active || !buttonActive}
+      onClick={async () => {
+        if (funcBefore) funcBefore();
+        setActive(false);
+        setButtonState(ButtonState.RUNNING);
+        (await func(setResultNodeState)).consider(
+          (ok) => setResState(ok, ButtonState.SUCCESS),
+          (err) => setResState(err, ButtonState.FAILED),
+        );
+        setActive(true);
+        if (funcAfter) funcAfter();
+      }}
+      data-bs-toggle="tooltip"
+      data-bs-placement="top"
+      title={tooltip}
+    >
+      <div className="icon-placeholder" />
+      <div className="button-text">{buttonValues[buttonState]}</div>
+    </button>
   );
 }

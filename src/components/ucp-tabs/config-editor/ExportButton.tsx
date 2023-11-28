@@ -3,7 +3,7 @@ import { FolderSymlink } from 'react-bootstrap-icons';
 function ExportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
-      className="ucp-button text-light"
+      className="ucp-button ucp-button--square text-light"
       type="button"
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}

@@ -1,6 +1,6 @@
 import './extension-manager.css';
 
-import { Container, Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
 import { useState } from 'react';
@@ -107,61 +107,75 @@ export default function ExtensionManager() {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   return (
-    <Container className="fs-6 d-flex flex-column h-100 py-1">
-      <div className="row flex-grow-1 d-flex ">
-        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
-          <div className="d-flex flex-wrap align-items-center container">
-            <h4 className="d-flex me-auto">
+    <div className="flex-default extension-manager">
+      <div className="extension-manager-control">
+        <div className="extension-manager-control__header-container">
+          <div className="extension-manager-control__header">
+            <h4 className="extension-manager-control__box__header__headline">
               {t('gui-editor:extensions.available')}
             </h4>
-            {!showAllExtensions ? (
-              <span className="fs-8">{`filtered: ${
-                extensionsState.extensions.length - extensionsToDisplay.length
-              } out of ${extensionsState.extensions.length}`}</span>
-            ) : (
-              <span />
-            )}
-            <button
-              type="button"
-              className="ucp-button text-light"
-              onClick={() => {
-                setShowAllExtensions(!showAllExtensions);
-              }}
-              onMouseEnter={() => {
-                setStatusBarMessage('Show all extensions / Hide modules');
-              }}
-              onMouseLeave={() => {
-                setStatusBarMessage(undefined);
-              }}
-            >
-              {showAllExtensions ? <Funnel /> : <FunnelFill />}
-            </button>
-            <button
-              type="button"
-              className="ucp-button text-light"
-              onClick={async () => {
-                try {
-                  const result = await openFileDialog(gameFolder, [
-                    { name: 'Zip files', extensions: ['zip'] },
-                  ]);
+            <div className="extension-manager-control__box__header__buttons">
+              {!showAllExtensions ? (
+                <span className="fs-8">{`filtered: ${
+                  extensionsState.extensions.length - extensionsToDisplay.length
+                } out of ${extensionsState.extensions.length}`}</span>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                className="ucp-button ucp-button--square text-light"
+                onClick={() => {
+                  setShowAllExtensions(!showAllExtensions);
+                }}
+                onMouseEnter={() => {
+                  setStatusBarMessage('Show all extensions / Hide modules');
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
+              >
+                {showAllExtensions ? <Funnel /> : <FunnelFill />}
+              </button>
+              <button
+                type="button"
+                className="ucp-button ucp-button--square text-light"
+                onClick={async () => {
+                  try {
+                    const result = await openFileDialog(gameFolder, [
+                      { name: 'Zip files', extensions: ['zip'] },
+                    ]);
+                    if (result.isPresent()) {
+                      const path = result.get();
 
-                  if (result.isPresent()) {
-                    const path = result.get();
+                      LOGGER.msg(
+                        `Trying to install extensions from: ${path}`,
+                      ).info();
 
-                    LOGGER.msg(
-                      `Trying to install extensions from: ${path}`,
-                    ).info();
-
-                    if (await exists(path)) {
-                      try {
-                        const ep = await ExtensionPack.fromPath(path);
-
+                      if (await exists(path)) {
                         try {
-                          await ep.install(`${gameFolder}/ucp`);
-                          await showGeneralModalOk({
-                            title: 'Succesful install',
-                            message: `Extension pack was succesfully installed`,
-                          });
+                          const ep = await ExtensionPack.fromPath(path);
+
+                          try {
+                            await ep.install(`${gameFolder}/ucp`);
+                            await showGeneralModalOk({
+                              title: 'Succesful install',
+                              message: `Extension pack was succesfully installed`,
+                            });
+                          } catch (e) {
+                            let msg = e;
+                            if (typeof e === 'string') {
+                              msg = e.toString(); // works, `e` narrowed to string
+                            } else if (e instanceof Error) {
+                              msg = e.message; // works, `e` narrowed to Error
+                            }
+                            await showGeneralModalOk({
+                              title: 'ERROR',
+                              message: (msg as string).toString(),
+                            });
+                          } finally {
+                            await ep.close();
+                          }
                         } catch (e) {
                           let msg = e;
                           if (typeof e === 'string') {
@@ -173,64 +187,53 @@ export default function ExtensionManager() {
                             title: 'ERROR',
                             message: (msg as string).toString(),
                           });
-                        } finally {
-                          await ep.close();
                         }
-                      } catch (e) {
-                        let msg = e;
-                        if (typeof e === 'string') {
-                          msg = e.toString(); // works, `e` narrowed to string
-                        } else if (e instanceof Error) {
-                          msg = e.message; // works, `e` narrowed to Error
-                        }
+                      } else {
+                        LOGGER.msg(`Path does not exist: ${path}`).warn();
                         await showGeneralModalOk({
-                          title: 'ERROR',
-                          message: (msg as string).toString(),
+                          title: 'Path does not exist',
+                          message: `Path does not exist: ${path}`,
                         });
                       }
-                    } else {
-                      LOGGER.msg(`Path does not exist: ${path}`).warn();
-                      await showGeneralModalOk({
-                        title: 'Path does not exist',
-                        message: `Path does not exist: ${path}`,
-                      });
                     }
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
                   }
-                } catch (e: any) {
-                  await showGeneralModalOk({
-                    title: 'ERROR',
-                    message: e.toString(),
-                  });
-                }
-              }}
-              onMouseEnter={() => {
-                setStatusBarMessage(
-                  'Install extensions from a pack (a zip file)',
-                );
-              }}
-              onMouseLeave={() => {
-                setStatusBarMessage(undefined);
-              }}
-            >
-              <PlusLg />
-            </button>
+                }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(
+                    'Install extensions from a pack (a zip file)',
+                  );
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
+              >
+                <PlusLg />
+              </button>
+            </div>
           </div>
-          <div className="parchment-box flex-grow-1 d-flex flex-column">
-            <div>{eUI}</div>
+          <div className="extension-manager-control__header">
+            <h4 className="extension-manager-control__box__header__headline">
+              {t('gui-editor:extensions.activated')}
+            </h4>
           </div>
         </div>
-        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden ">
-          <div className="d-flex flex-wrap align-items-center container">
-            <h4>{t('gui-editor:extensions.activated')}</h4>
+        <div className="extension-manager-control__box-container">
+          <div className="extension-manager-control__box">
+            <div className="parchment-box extension-manager-list">{eUI}</div>
           </div>
-          <div className="parchment-box flex-grow-1 d-flex flex-column">
-            <div>{activated}</div>
-          </div>
-          <div className="row pb-2 mx-0">
-            <div className="d-inline-flex">
+          <div className="extension-manager-control__box">
+            <div className="parchment-box extension-manager-list">
+              {activated}
+            </div>
+            <div className="extension-manager-control__box__buttons">
               <button
                 type="button"
-                className="ucp-button text-light"
+                className="ucp-button ucp-button--square text-light"
                 onClick={async () => {
                   try {
                     LOGGER.msg('Creating modpack').trace();
@@ -400,7 +403,7 @@ export default function ExtensionManager() {
               />
               <button
                 type="button"
-                className="ucp-button text-light"
+                className="ucp-button ucp-button--square text-light"
                 onClick={() => {
                   setAdvancedMode(!advancedMode);
                 }}
@@ -413,46 +416,49 @@ export default function ExtensionManager() {
               >
                 {advancedMode ? <GearFill /> : <Gear />}
               </button>
-              <ApplyButton
-                onClick={async () => {
-                  try {
-                    const result: string = await saveConfig(
-                      configuration,
-                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                      configurationTouched,
-                      extensionsState.explicitlyActivatedExtensions,
-                      activeExtensions,
-                      configurationQualifier,
+              <div className="d-none extension-manager-control__box__buttons--user-override-switch">
+                <Form.Switch
+                  label={t('gui-editor:config.allow.override')}
+                  className="user-override-switch"
+                />
+              </div>
+              <div className="extension-manager-control__box__buttons--apply-button">
+                <ApplyButton
+                  onClick={async () => {
+                    try {
+                      const result: string = await saveConfig(
+                        configuration,
+                        file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                        configurationTouched,
+                        extensionsState.explicitlyActivatedExtensions,
+                        activeExtensions,
+                        configurationQualifier,
+                      );
+                      setConfigStatus(result);
+                    } catch (e: any) {
+                      await showGeneralModalOk({
+                        title: 'ERROR',
+                        message: e.toString(),
+                      });
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(
+                      'Apply the current configuration (save to ucp-config.yml)',
                     );
-
-                    setConfigStatus(result);
-                  } catch (e: any) {
-                    await showGeneralModalOk({
-                      title: 'ERROR',
-                      message: e.toString(),
-                    });
-                  }
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage(
-                    'Apply the current configuration (save to ucp-config.yml)',
-                  );
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              />
-
-              <Form.Switch
-                id="config-allow-user-override-switch"
-                label={t('gui-editor:config.allow.override')}
-                className="col-auto d-inline-block ms-1 d-none"
-              />
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <Container className="row text-warning">{configStatus}</Container>
-    </Container>
+      <div className="extension-text-warning-container text-warning">
+        {configStatus}
+      </div>
+    </div>
   );
 }

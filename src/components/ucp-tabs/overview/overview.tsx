@@ -5,8 +5,7 @@ import { checkForGUIUpdates } from 'function/download/gui-update';
 import { installUCPFromZip } from 'function/download/ucp-download-handling';
 import { UCPState } from 'function/ucp-files/ucp-state';
 import { reloadCurrentWindow } from 'function/window-actions';
-import { useState } from 'react';
-import { Container } from 'react-bootstrap';
+import { ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
@@ -25,6 +24,7 @@ export default function Overview() {
   const [ucpVersionResult, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
+  const [buttonResult, setButtonResult] = useState<ReactNode>(null);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
@@ -67,7 +67,7 @@ export default function Overview() {
   }
 
   return (
-    <Container fluid className="overflow-auto overview-background-image ">
+    <div className="flex-default overview">
       <RecentFolders />
       <StateButton
         buttonActive={
@@ -105,6 +105,7 @@ export default function Overview() {
           return Result.emptyOk();
         }}
         tooltip={t('gui-editor:overview.activationTooltip')}
+        setResultNodeState={setButtonResult}
       />
 
       {/*      <StateButton
@@ -193,6 +194,7 @@ export default function Overview() {
 
           return Result.emptyErr();
         }}
+        setResultNodeState={setButtonResult}
       />
       <div id="decor" />
       <StateButton
@@ -208,6 +210,7 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => Result.emptyOk()}
         tooltip={t('gui-editor:overview.uninstallationToolTip')}
+        setResultNodeState={setButtonResult}
       />
       <StateButton
         buttonActive={overviewButtonActive}
@@ -231,7 +234,9 @@ export default function Overview() {
 
           return Result.emptyErr();
         }}
+        setResultNodeState={setButtonResult}
       />
-    </Container>
+      {buttonResult}
+    </div>
   );
 }

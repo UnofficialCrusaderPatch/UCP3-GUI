@@ -1,6 +1,5 @@
 import Result from 'util/structs/result';
 import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
-import { TFunction } from 'i18next';
 import { getHexHashOfFile } from 'util/scripts/hash';
 import Logger from 'util/scripts/logging';
 import { atomWithRefresh, getStore } from 'hooks/jotai/base';
@@ -8,6 +7,11 @@ import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
 import { atom } from 'jotai';
 import { getTranslation } from 'localization/i18n';
 import { loadable } from 'jotai/utils';
+import {
+  BINK_FILENAME,
+  REAL_BINK_FILENAME,
+  UCP_BINK_FILENAME,
+} from 'function/global/constants/file-constants';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
@@ -36,13 +40,13 @@ async function getBinkPath(
 }
 
 const BINK_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_ATOM), 'binkw32.dll'),
+  getBinkPath(get(GAME_FOLDER_ATOM), BINK_FILENAME),
 );
 const BINK_REAL_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_ATOM), 'binkw32_real.dll'),
+  getBinkPath(get(GAME_FOLDER_ATOM), REAL_BINK_FILENAME),
 );
 const BINK_UCP_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_ATOM), 'binkw32_ucp.dll'),
+  getBinkPath(get(GAME_FOLDER_ATOM), UCP_BINK_FILENAME),
 );
 
 export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {

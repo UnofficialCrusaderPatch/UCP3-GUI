@@ -10,11 +10,11 @@ import {
 } from 'tauri/tauri-files';
 import { extractZipToPath } from 'tauri/tauri-invoke';
 import Result from 'util/structs/result';
-import Option from 'util/structs/option';
 import { activateUCP, createRealBink } from 'function/ucp-files/ucp-state';
 import { getBinary } from 'tauri/tauri-http';
+import { getStore } from 'hooks/jotai/base';
 import { checkForLatestUCP3DevReleaseUpdate } from './github';
-import { loadUCPVersion } from '../ucp-files/ucp-version';
+import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
 import { GITHUB_AUTH_HEADER } from './download-enums';
 
 export async function installUCPFromZip(
@@ -34,6 +34,7 @@ export async function installUCPFromZip(
       throw t('gui-download:zip.extract.error', { error });
     }
 
+    getStore().set(UCP_VERSION_ATOM);
     (await activateUCP()).throwIfErr();
   });
 }
@@ -51,11 +52,7 @@ export async function checkForUCP3Updates(
   };
 
   statusCallback(t('gui-download:ucp.version.yaml.load'));
-  const sha = (await loadUCPVersion(gameFolder))
-    .ok()
-    .map((version) => version.sha)
-    .getOrReceive(Option.ofEmpty)
-    .getOrElse('!');
+  const sha = (await getStore().get(UCP_VERSION_ATOM)).sha.getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));
   const result = await checkForLatestUCP3DevReleaseUpdate(sha);

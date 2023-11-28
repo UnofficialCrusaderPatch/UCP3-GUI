@@ -14,7 +14,7 @@ import { ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
-import { useCurrentGameFolder, useUCPVersion } from 'hooks/jotai/helper';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import { useAtomValue } from 'jotai';
@@ -23,7 +23,6 @@ import RecentFolders from './recent-folders';
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
   const loadableUcpState = useAtomValue(LOADABLE_UCP_STATE_ATOM);
-  const [, receiveVersion] = useUCPVersion();
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
   const [buttonResult, setButtonResult] = useState<ReactNode>(null);
@@ -150,9 +149,6 @@ export default function Overview() {
               t,
             );
             if (zipInstallResult.ok().isPresent()) {
-              // load new state
-              await receiveVersion();
-
               const confirmed = await showGeneralModalOkCancel({
                 title: t('gui-general:require.reload.title'),
                 message: t('gui-editor:overview.require.reload.text'),

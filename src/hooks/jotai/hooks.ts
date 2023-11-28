@@ -1,12 +1,6 @@
+/* eslint-disable import/prefer-default-export */
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
-import {
-  getEmptyUCPVersion,
-  loadUCPVersion,
-} from 'function/ucp-files/ucp-version';
-import {
-  createFunctionForAsyncAtomWithMutate,
-  createHookInitializedFunctionForAsyncAtomWithMutate,
-} from 'hooks/jotai/base';
+import { createFunctionForAsyncAtomWithMutate } from 'hooks/jotai/base';
 
 export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
   RecentFolderHelper,
@@ -18,11 +12,3 @@ export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
   await recentFolderHelper.loadRecentFolders();
   return recentFolderHelper;
 });
-
-export const useUCPVersionHook =
-  createHookInitializedFunctionForAsyncAtomWithMutate(
-    async (_prev, currentFolder: string) =>
-      (await loadUCPVersion(currentFolder))
-        .ok()
-        .getOrReceive(getEmptyUCPVersion),
-  );

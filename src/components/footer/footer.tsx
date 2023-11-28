@@ -4,7 +4,7 @@ import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import { useCurrentGameFolder, useUCPVersion } from 'hooks/jotai/helper';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { RefAttributes, Suspense, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
@@ -13,6 +13,7 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   STATUS_BAR_MESSAGE_ATOM,
 } from 'function/global/global-atoms';
+import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
 
 const UCP_STATE_ARRAY = [
   'wrong.folder',
@@ -27,30 +28,25 @@ const UCP_STATE_COLOR_ARRAY = ['red', 'red', 'green', 'yellow', 'red', 'red'];
 
 function VersionAndState() {
   const ucpState = useAtomValue(UCP_STATE_ATOM);
-  const [ucpVersionResult] = useUCPVersion();
+  const ucpVersion = useAtomValue(UCP_VERSION_ATOM);
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
   let ucpFooterVersionString = null;
-  if (ucpVersionResult.isEmpty()) {
-    ucpFooterVersionString = t('gui-general:loading');
-  } else {
-    const ucpVersion = ucpVersionResult.get().getOrThrow();
-    switch (ucpState) {
-      case UCPState.NOT_INSTALLED:
-        ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
-        break;
-      case UCPState.ACTIVE:
-        ucpFooterVersionString = ucpVersion.toString();
-        break;
-      case UCPState.INACTIVE:
-        ucpFooterVersionString = ucpVersion.toString();
-        break;
-      default:
-        ucpFooterVersionString = '?';
-        break;
-    }
+  switch (ucpState) {
+    case UCPState.NOT_INSTALLED:
+      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+      break;
+    case UCPState.ACTIVE:
+      ucpFooterVersionString = ucpVersion.toString();
+      break;
+    case UCPState.INACTIVE:
+      ucpFooterVersionString = ucpVersion.toString();
+      break;
+    default:
+      ucpFooterVersionString = '?';
+      break;
   }
 
   const renderTooltip = (

@@ -1,12 +1,9 @@
-.overview-background-image {
+.overview {
   background-image: url('/src/assets/ucp3/bg.png');
   background-size: cover;
   background-position: right;
-  height: 100%;
-  width: 100%;
-  z-index: -1;
-  bottom: 0px;
-  right: 0px;
+  justify-content: start;
+  padding: 10px;
 }
 
 .download-install-button {
@@ -18,16 +15,13 @@
   border: none;
   background-color: transparent;
   color: white;
-  vertical-align: center;
   height: 40px;
   min-width: 100px;
-  padding-top: -20px;
   width: 40%;
-  margin-left: 30%;
-  margin-right: 30%;
-  position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
+  margin: 5px;
 }
 
 .icon-button > .icon-placeholder {
@@ -65,9 +59,9 @@
 
 #decor {
   background-image: url('/src/assets/ucp3/decor.png');
-  height: 40px;
+  min-height: 40px;
   width: 20px;
-  margin: auto;
+  margin: 5px;
 }
 
 .overview__text-button {
@@ -75,7 +69,6 @@
   line-height: 0;
   min-width: 100px;
   width: 40%;
-  margin-left: 30%;
-  margin-right: 30%;
   vertical-align: middle;
+  margin: 5px;
 }

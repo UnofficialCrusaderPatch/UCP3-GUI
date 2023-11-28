@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React from 'react';
 
 import type {
   DisplayConfigElement,

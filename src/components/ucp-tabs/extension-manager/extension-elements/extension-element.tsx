@@ -1,17 +1,9 @@
+import './extension-element.css';
+
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import {
-  Button,
-  Col,
-  Dropdown,
-  DropdownButton,
-  ListGroup,
-  Row,
-  Tooltip,
-} from 'react-bootstrap';
+import { Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
-
-import '../extension-manager.css';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import {
@@ -70,62 +62,52 @@ export function ExtensionElement(props: {
   };
 
   const arrows = active ? (
-    <Col className="col-auto arrow-margin">
-      <Row className="flex-column">
-        <Button
-          className="arrow-container"
-          disabled={!movability.up}
-          onClick={() => {
-            if (movability.up) moveCallback({ name: ext.name, type: 'up' });
-          }}
-        >
-          <div className="arrow up" />
-        </Button>
-        <Button
-          className="arrow-container"
-          disabled={!movability.down}
-          onClick={() => {
-            if (movability.down) moveCallback({ name: ext.name, type: 'down' });
-          }}
-        >
-          <div className="arrow down" />
-        </Button>
-      </Row>
-    </Col>
+    <div className="arrow-container">
+      <button
+        type="button"
+        className="arrow up"
+        disabled={!movability.up}
+        onClick={() => {
+          if (movability.up) moveCallback({ name: ext.name, type: 'up' });
+        }}
+      />
+      <button
+        type="button"
+        className="arrow down"
+        disabled={!movability.down}
+        onClick={() => {
+          if (movability.down) moveCallback({ name: ext.name, type: 'down' });
+        }}
+      />
+    </div>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
 
   const enableButton = !active ? (
-    <Col className="col-auto">
-      <OverlayTrigger placement="left" overlay={renderTooltip}>
-        <div>
-          <Button
-            className="fs-8 enable-arrow"
-            onClick={clickCallback}
-            disabled={revDeps.length > 0}
-          />
-        </div>
-      </OverlayTrigger>
-    </Col>
+    <OverlayTrigger placement="right" overlay={renderTooltip}>
+      <button
+        type="button"
+        className="fs-8 enable-arrow"
+        onClick={clickCallback}
+        disabled={revDeps.length > 0}
+      />
+    </OverlayTrigger>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
 
   const disableButton = active ? (
-    <Col className="col-auto">
-      <OverlayTrigger placement="left" overlay={renderTooltip}>
-        <div>
-          <Button
-            className="fs-8 disable-arrow"
-            onClick={clickCallback}
-            disabled={revDeps.length > 0}
-          />
-        </div>
-      </OverlayTrigger>
-    </Col>
+    <OverlayTrigger placement="left" overlay={renderTooltip}>
+      <button
+        type="button"
+        className="fs-8 disable-arrow"
+        onClick={clickCallback}
+        disabled={revDeps.length > 0}
+      />
+    </OverlayTrigger>
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
@@ -148,71 +130,47 @@ export function ExtensionElement(props: {
       ? availableVersions[0]
       : preferredVersions[name];
 
-  const dd = (
-    <select
-      name="cars"
-      id="cars"
-      className="mx-2"
-      style={{
-        fontSize: 'smaller',
-        backgroundColor: 'transparent',
-        border: 'none',
-      }}
-      disabled={fixedVersion}
-      value={preferredVersion}
-      onChange={(event) => {
-        const newValue = event.target.value;
-        preferredVersions[name] = newValue;
-        setPreferredVersions({ ...preferredVersions });
-      }}
-    >
-      {availableVersions.map((v) => (
-        <option key={`${name}-${v}`} value={v}>
-          {v}
-        </option>
-      ))}
-    </select>
+  const versionDropdown = (
+    <div>
+      <select
+        className="extension-version-dropdown"
+        disabled={fixedVersion}
+        value={preferredVersion}
+        onChange={(event) => {
+          const newValue = event.target.value;
+          preferredVersions[name] = newValue;
+          setPreferredVersions({ ...preferredVersions });
+        }}
+      >
+        {availableVersions.map((v) => (
+          <option key={`${name}-${v}`} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 
   const setOverlayContent = useSetOverlayContent<ExtensionViewerProps>();
 
   return (
-    <ListGroup.Item
-      key={`${name}-${version}-${author}`}
-      className="light-shade-item"
-    >
-      <Row className="align-items-center">
-        {disableButton}
-        <Col>
-          <Row>
-            <Col className="col-10">
-              <span
-                className="mx-2 text-secondary"
-                style={{ fontSize: 'smaller' }}
-              >
-                -
-              </span>
-              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-              <span
-                className="mx-2"
-                style={{ fontSize: 'smaller', cursor: 'pointer' }}
-                onClick={() => {
-                  setOverlayContent(ExtensionViewer, { extension: ext });
-                }}
-              >
-                {name}
-              </span>
-            </Col>
-            <Col className="col-2">{dd}</Col>
-            {/* <Col>
-                <span className="mx-2">{description || ''}</span>
-               </Col> */}
-          </Row>
-        </Col>
-        {arrows}
-        {enableButton}
-      </Row>
-    </ListGroup.Item>
+    <div key={`${name}-${version}-${author}`} className="extension-element">
+      {disableButton}
+      <div className="extension-name-box">
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <span
+          className="extension-name-box__name"
+          onClick={() => {
+            setOverlayContent(ExtensionViewer, { extension: ext });
+          }}
+        >
+          {name}
+        </span>
+      </div>
+      {versionDropdown}
+      {arrows}
+      {enableButton}
+    </div>
   );
 }
 

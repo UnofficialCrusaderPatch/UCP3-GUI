@@ -7,7 +7,7 @@
 }
 
 .ucp-tabs-header {
-  padding-top: 100px;
+  padding: 100px 7px 0 7px;
   background-image: url('/src/assets/ucp3/bg.png');
   background-position: center;
   background-repeat: no-repeat;
@@ -21,6 +21,14 @@
   border-right: 0;
   border-bottom: 0;
   border-image-width: auto 0 0 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tab-panel {
+  height: 100%;
+  width: 100%;
 }
 
 .tab-link {

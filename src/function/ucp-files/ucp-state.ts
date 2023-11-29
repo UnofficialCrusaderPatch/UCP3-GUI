@@ -12,12 +12,13 @@ import {
   REAL_BINK_FILENAME,
   UCP_BINK_FILENAME,
 } from 'function/global/constants/file-constants';
+import { showGeneralModalOk } from 'components/modals/ModalOk';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
-const REAL_BINK_HASHS = new Set(
+const REAL_BINK_HASHS = new Set([
   'ee68dcf51e8e3b482f9fb5ef617f44a2d9e970d03f3ed21fe26d40cd63c57a48',
-);
+]);
 
 export const enum UCPState {
   WRONG_FOLDER, // based only on the state of the bink.dlls
@@ -82,6 +83,14 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
   }
 
   // at this point all binks are present
+
+  if (!REAL_BINK_HASHS.has(binkRealSha)) {
+    const t = getTranslation('gui-download');
+    await showGeneralModalOk({
+      title: 'binkw32_real.dll',
+      message: t('gui-download:bink.real.unknown'),
+    });
+  }
 
   if (binkSha === binkRealSha) {
     return binkSha !== binkUcpSha ? UCPState.INACTIVE : UCPState.UNKNOWN;

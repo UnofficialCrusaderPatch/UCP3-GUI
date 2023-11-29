@@ -64,7 +64,7 @@ export function ModalOk() {
 
   const { handleAction, title, message, show } = generalModalWindow;
 
-  const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
+  const { t } = useTranslation(['gui-general']);
 
   /* General modal popup window */
   return (
@@ -73,8 +73,11 @@ export function ModalOk() {
       onHide={handleAction}
       className="text-dark"
       style={{ whiteSpace: 'pre-line' }}
+      // prevents escaping the modal:
+      backdrop="static"
+      keyboard={false}
     >
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>

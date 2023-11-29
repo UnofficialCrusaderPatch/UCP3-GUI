@@ -24,7 +24,6 @@
 }
 
 .game-starter__image--starting {
-    pointer-events: none;
     cursor: wait;
     filter: brightness(75%);
 }

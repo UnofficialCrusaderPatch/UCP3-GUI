@@ -11,6 +11,7 @@ import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { osOpenProgram } from 'tauri/tauri-invoke';
 import Logger from 'util/scripts/logging';
+import { sleep } from 'util/scripts/util';
 
 const LOGGER = new Logger('game-starter.tsx');
 
@@ -87,18 +88,19 @@ function GameStarterButton(props: GameStarterProps) {
 
   const startDisabled = version === EMPTY_GAME_VERSION;
 
-  const classes = ['game-starter__image'];
+  let cssClass = 'game-starter__image';
   if (startDisabled) {
-    classes.push('game-starter__image--disabled');
-  }
-  if (starting) {
-    classes.push('game-starter__image--starting');
+    cssClass = 'game-starter__image--disabled';
+  } else if (starting) {
+    cssClass = 'game-starter__image--starting';
   }
 
   const startFunc = async () => {
     try {
       setStarting(true);
       await osOpenProgram(path, args, envs);
+      // the game start takes a while, but we not observe it, so we simulate loading a bit instead
+      await sleep(2000);
     } catch (e) {
       const msg = `Error while trying to launch "${path}": ${e}`;
       LOGGER.msg(msg).error();
@@ -117,9 +119,9 @@ function GameStarterButton(props: GameStarterProps) {
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
       tabIndex={startDisabled ? undefined : 0}
       src={imagePath}
-      className={classes.join(' ')}
+      className={cssClass}
       alt={t('gui-launch:launch')}
-      onClick={startFunc}
+      onClick={startDisabled || starting ? undefined : startFunc}
       onKeyDown={(event) => {
         if (event.key !== 'Enter') {
           return;

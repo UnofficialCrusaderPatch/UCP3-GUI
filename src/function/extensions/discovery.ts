@@ -346,13 +346,6 @@ const Discovery = {
       extensionsByID[id] = e;
     });
 
-    console.log(
-      'result: ',
-      await (
-        await createReceivePluginPathsFunction(gameFolder)
-      )('', 'resources/ai/**/meta.json'),
-    );
-
     return extensions;
   },
 };

@@ -1,5 +1,11 @@
+import { FileEntry } from '@tauri-apps/api/fs';
+import { getExtensionHandles } from 'function/extensions/discovery';
+import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
 import i18next from 'i18next';
 import { readTextFile, receiveAssetUrl, resolvePath } from 'tauri/tauri-files';
+import Logger from 'util/scripts/logging';
+
+const LOGGER = new Logger('sandbox-menu-functions.ts');
 
 export async function getLanguage(): Promise<string> {
   return i18next.language; // is kinda enough, using the hook might be overkill
@@ -51,8 +57,35 @@ export function createGetAssetUrlFunction(currentFolder: string) {
     ...
  ]
 */
-export function createReceivePluginPathsFunction(currentFolder: string) {
-  return async (basePath: string, pathPattern: string) => null;
+export async function createReceivePluginPathsFunction(currentFolder: string) {
+  const ucpFolder = `${currentFolder}/ucp`;
+  const extensionHandles = await getExtensionHandles(ucpFolder);
+
+  return async (basePath: string, pathPattern: string) => {
+    const pattern =
+      basePath.length > 0 ? `${basePath}/${pathPattern}` : pathPattern;
+
+    const result = await Promise.all(
+      extensionHandles.map(async (extensionHandle: ExtensionHandle) => {
+        let entries: FileEntry[] = [];
+
+        try {
+          entries = await extensionHandle.listEntries(pattern);
+        } catch (e: any) {
+          LOGGER.msg(e.toString()).error();
+        } finally {
+          await extensionHandle.close();
+        }
+
+        return {
+          path: extensionHandle.path.split(`${currentFolder}/`)[1],
+          paths: entries,
+        };
+      }),
+    );
+
+    return result.filter(({ paths }) => paths.length > 0);
+  };
 }
 
 // TODO, based on config

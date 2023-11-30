@@ -13,11 +13,12 @@ import {
 } from 'config/ucp/common';
 import Logger from 'util/scripts/logging';
 import languages from 'localization/languages.json';
-import ExtensionHandle from './extension-handles/extension-handle';
+import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
 import ZipExtensionHandle from './extension-handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from './extension-handles/directory-extension-handle';
 import { changeLocale } from './locale';
 import { ExtensionTree } from './dependency-management/dependency-resolution';
+import { ExtensionHandle } from './extension-handles/extension-handle';
 
 const LOGGER = new Logger('discovery.ts');
 
@@ -240,7 +241,7 @@ const Discovery = {
   discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
     LOGGER.msg('Discovering extensions').info();
 
-    const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
+    const ehs = await getExtensionHandles(`${gameFolder}/ucp`);
 
     const extensions = await Promise.all(
       ehs.map(async (eh) => {
@@ -345,6 +346,13 @@ const Discovery = {
       extensionsByID[id] = e;
     });
 
+    console.log(
+      'result: ',
+      await (
+        await createReceivePluginPathsFunction(gameFolder)
+      )('', 'resources/ai/**/meta.json'),
+    );
+
     return extensions;
   },
 };
@@ -354,4 +362,10 @@ function tryResolveDependencies(extensions: Extension[]) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export { Discovery, collectConfigEntries, tryResolveDependencies, applyLocale };
+export {
+  Discovery,
+  collectConfigEntries,
+  tryResolveDependencies,
+  applyLocale,
+  getExtensionHandles,
+};

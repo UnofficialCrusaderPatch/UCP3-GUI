@@ -15,16 +15,31 @@ import {
 } from 'function/global/global-atoms';
 import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
 
-const UCP_STATE_ARRAY = [
-  'wrong.folder',
-  'not.installed',
-  'active',
-  'inactive',
-  'bink.version.differences',
-  'unknown',
-];
+const UCP_STATE_MAP = new Map([
+  [UCPState.WRONG_FOLDER, 'wrong.folder'],
+  [UCPState.NOT_INSTALLED, 'not.installed'],
+  [UCPState.NOT_INSTALLED_WITH_REAL_BINK, 'not.installed'],
+  [UCPState.ACTIVE, 'active'],
+  [UCPState.INACTIVE, 'inactive'],
+  [UCPState.BINK_VERSION_DIFFERENCE, 'bink.version.differences'],
+  [UCPState.BINK_UCP_MISSING, 'bink.ucp.missing'],
+  [UCPState.BINK_REAL_COPY_MISSING, 'bink.real.copy.missing'],
+  [UCPState.INVALID, 'invalid'],
+  [UCPState.UNKNOWN, 'unknown'],
+]);
 
-const UCP_STATE_COLOR_ARRAY = ['red', 'red', 'green', 'yellow', 'red', 'red'];
+const UCP_STATE_COLOR_MAP = new Map([
+  [UCPState.WRONG_FOLDER, 'red'],
+  [UCPState.NOT_INSTALLED, 'red'],
+  [UCPState.NOT_INSTALLED_WITH_REAL_BINK, 'red'],
+  [UCPState.ACTIVE, 'green'],
+  [UCPState.INACTIVE, 'yellow'],
+  [UCPState.BINK_VERSION_DIFFERENCE, 'yellow'], // assumes manuel UCP update
+  [UCPState.BINK_UCP_MISSING, 'yellow'],
+  [UCPState.BINK_REAL_COPY_MISSING, 'yellow'],
+  [UCPState.INVALID, 'red'],
+  [UCPState.UNKNOWN, 'red'],
+]);
 
 function VersionAndState() {
   const ucpState = useAtomValue(UCP_STATE_ATOM);
@@ -36,12 +51,14 @@ function VersionAndState() {
   let ucpFooterVersionString = null;
   switch (ucpState) {
     case UCPState.NOT_INSTALLED:
+    case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
+    case UCPState.BINK_UCP_MISSING:
       ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
       break;
     case UCPState.ACTIVE:
-      ucpFooterVersionString = ucpVersion.toString();
-      break;
     case UCPState.INACTIVE:
+    case UCPState.BINK_REAL_COPY_MISSING:
+    case UCPState.BINK_VERSION_DIFFERENCE:
       ucpFooterVersionString = ucpVersion.toString();
       break;
     default:
@@ -57,7 +74,11 @@ function VersionAndState() {
     // eslint-disable-next-line react/jsx-props-no-spreading
     <Tooltip id="button-tooltip" {...props}>
       {t('gui-editor:footer.state.prefix', {
-        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+        state: t(
+          `gui-editor:footer.state.${
+            UCP_STATE_MAP.get(ucpState) ?? UCP_STATE_MAP.get(UCPState.UNKNOWN)
+          }`,
+        ),
       })}
     </Tooltip>
   );
@@ -68,11 +89,19 @@ function VersionAndState() {
       <span className="px-3">{`UCP ${ucpFooterVersionString}`}</span>
 
       <CircleFill
-        color={UCP_STATE_COLOR_ARRAY[ucpState]}
+        color={
+          UCP_STATE_COLOR_MAP.get(ucpState) ??
+          UCP_STATE_COLOR_MAP.get(UCPState.UNKNOWN)
+        }
         onMouseEnter={() => {
           setStatusBarMessage(
             t('gui-editor:footer.state.prefix', {
-              state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[ucpState]}`),
+              state: t(
+                `gui-editor:footer.state.${
+                  UCP_STATE_MAP.get(ucpState) ??
+                  UCP_STATE_MAP.get(UCPState.UNKNOWN)
+                }`,
+              ),
             }),
           );
         }}

@@ -37,16 +37,23 @@ export default function Overview() {
   } else {
     switch (ucpState) {
       case UCPState.NOT_INSTALLED:
+      case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
         activateButtonString = t('gui-editor:overview.activate.not.installed');
         break;
       case UCPState.ACTIVE:
+      case UCPState.BINK_UCP_MISSING:
+      case UCPState.BINK_VERSION_DIFFERENCE:
         activateButtonString = t('gui-editor:overview.activate.do.deactivate');
         break;
       case UCPState.INACTIVE:
+      case UCPState.BINK_REAL_COPY_MISSING:
         activateButtonString = t('gui-editor:overview.activate.do.activate');
         break;
       case UCPState.WRONG_FOLDER:
         activateButtonString = t('gui-editor:overview.wrong.folder');
+        break;
+      case UCPState.INVALID:
+        activateButtonString = t('gui-editor:overview.activate.invalid');
         break;
       default:
         activateButtonString = t('gui-editor:overview.activate.unknown');
@@ -60,7 +67,11 @@ export default function Overview() {
       <StateButton
         buttonActive={
           overviewButtonActive &&
-          (ucpState === UCPState.ACTIVE || ucpState === UCPState.INACTIVE)
+          (ucpState === UCPState.ACTIVE ||
+            ucpState === UCPState.INACTIVE ||
+            ucpState === UCPState.BINK_UCP_MISSING ||
+            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
         }
         buttonValues={{
           idle: activateButtonString,
@@ -74,9 +85,16 @@ export default function Overview() {
         func={async () => {
           try {
             let result = Result.emptyOk<string>();
-            if (ucpState === UCPState.ACTIVE) {
+            if (
+              ucpState === UCPState.ACTIVE ||
+              ucpState === UCPState.BINK_UCP_MISSING ||
+              ucpState === UCPState.BINK_VERSION_DIFFERENCE
+            ) {
               result = (await deactivateUCP()).mapErr(String);
-            } else if (ucpState === UCPState.INACTIVE) {
+            } else if (
+              ucpState === UCPState.INACTIVE ||
+              ucpState === UCPState.BINK_REAL_COPY_MISSING
+            ) {
               result = (await activateUCP()).mapErr(String);
             }
             return result;

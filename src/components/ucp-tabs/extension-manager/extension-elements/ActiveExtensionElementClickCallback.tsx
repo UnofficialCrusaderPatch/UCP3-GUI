@@ -3,10 +3,12 @@ import { getStore } from 'hooks/jotai/base';
 import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
+  GAME_FOLDER_ATOM,
 } from 'function/global/global-atoms';
 import { propagateActiveExtensionsChange } from 'components/ucp-tabs/extension-manager/propagateActiveExtensionChange';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import Logger from 'util/scripts/logging';
+import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
@@ -55,6 +57,13 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   propagateActiveExtensionsChange(res);
 
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, res);
+
+  console.log(
+    'result: ',
+    await (
+      await createReceivePluginPathsFunction(getStore().get(GAME_FOLDER_ATOM))
+    )('resources/ai/', '**/meta.json'),
+  );
 };
 
 export default activeExtensionElementClickCallback;

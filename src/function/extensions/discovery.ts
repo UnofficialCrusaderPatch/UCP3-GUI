@@ -9,6 +9,7 @@ import {
   ConfigFile,
   ConfigFileExtensionEntry,
   Extension,
+  ExtensionIOCallback,
   OptionEntry,
 } from 'config/ucp/common';
 import Logger from 'util/scripts/logging';
@@ -278,6 +279,14 @@ const Discovery = {
           version,
           type: assumedType,
           definition,
+          io: async (cb: ExtensionIOCallback) => {
+            const neh = await eh.clone();
+            try {
+              await cb(neh);
+            } finally {
+              neh.close();
+            }
+          },
         } as unknown as Extension;
 
         const uiRaw = await readUISpec(eh);

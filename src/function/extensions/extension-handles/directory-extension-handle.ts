@@ -83,6 +83,10 @@ class DirectoryExtensionHandle implements ExtensionHandle {
     this.path = path;
   }
 
+  async clone() {
+    return new DirectoryExtensionHandle(this.path);
+  }
+
   async listEntries(
     globPattern: string | undefined,
   ): Promise<ExtensionFileHandle[]> {

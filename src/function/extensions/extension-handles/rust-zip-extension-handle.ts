@@ -37,6 +37,10 @@ class RustZipExtensionHandle implements ExtensionHandle {
     this.#zip = zip;
   }
 
+  async clone() {
+    return RustZipExtensionHandle.fromPath(this.path);
+  }
+
   static async fromPath(path: string) {
     return new RustZipExtensionHandle(path, await ZipReader.open(path));
   }

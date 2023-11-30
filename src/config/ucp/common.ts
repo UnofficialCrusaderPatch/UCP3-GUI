@@ -89,6 +89,8 @@ modules:
 ```
 */
 
+import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
+
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required
   value: undefined;
@@ -167,6 +169,8 @@ type PluginType = 'plugin';
 type ModuleType = 'module';
 type ExtensionType = PluginType | ModuleType;
 
+type ExtensionIOCallback = (extensionHandle: ExtensionHandle) => Promise<void>;
+
 type Extension = {
   'specification-version': string;
   name: string;
@@ -180,6 +184,7 @@ type Extension = {
   path: string;
   configEntries: { [key: string]: ConfigEntry };
   optionEntries: { [key: string]: OptionEntry };
+  io: (cb: ExtensionIOCallback) => Promise<void>;
 };
 
 type Configs = { [key: string]: ConfigEntry }[];
@@ -238,4 +243,5 @@ export type {
   PluginType,
   ModuleType,
   ExtensionType,
+  ExtensionIOCallback,
 };

@@ -1,7 +1,11 @@
 import { FileEntry } from '@tauri-apps/api/fs';
+import { Extension } from 'config/ucp/common';
 import { getExtensionHandles } from 'function/extensions/discovery';
 import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
+import { getStore } from 'hooks/jotai/base';
 import i18next from 'i18next';
+import { useAtomValue } from 'jotai';
 import { readTextFile, receiveAssetUrl, resolvePath } from 'tauri/tauri-files';
 import Logger from 'util/scripts/logging';
 
@@ -58,28 +62,25 @@ export function createGetAssetUrlFunction(currentFolder: string) {
  ]
 */
 export async function createReceivePluginPathsFunction(currentFolder: string) {
-  const ucpFolder = `${currentFolder}/ucp`;
-  const extensionHandles = await getExtensionHandles(ucpFolder);
+  const { activeExtensions } = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
   return async (basePath: string, pathPattern: string) => {
     const pattern =
       basePath.length > 0 ? `${basePath}/${pathPattern}` : pathPattern;
 
     const result = await Promise.all(
-      extensionHandles.map(async (extensionHandle: ExtensionHandle) => {
+      activeExtensions.map(async (extension: Extension) => {
         let entries: FileEntry[] = [];
+        let path: string = '';
 
-        try {
+        await extension.io(async (extensionHandle) => {
           entries = await extensionHandle.listEntries(pattern);
-        } catch (e: any) {
-          LOGGER.msg(e.toString()).error();
-        } finally {
-          await extensionHandle.close();
-        }
+          [, path] = extensionHandle.path.split(`${currentFolder}/`);
+        });
 
         return {
-          path: extensionHandle.path.split(`${currentFolder}/`)[1],
-          paths: entries,
+          path,
+          paths: entries.map((e) => e.path),
         };
       }),
     );

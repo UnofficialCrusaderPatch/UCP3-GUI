@@ -4,6 +4,7 @@ interface ExtensionHandle {
   getBinaryContents(path: string): Promise<Uint8Array>;
   doesEntryExist(path: string): Promise<boolean>;
   close(): Promise<void>;
+  clone(): Promise<ExtensionHandle>;
 
   listEntries(
     globPattern: string | undefined,

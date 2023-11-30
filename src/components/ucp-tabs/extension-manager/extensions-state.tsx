@@ -4,6 +4,9 @@ import { ExtensionsState } from 'function/global/types';
 import './extension-manager.css';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import Logger from 'util/scripts/logging';
+import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
+import { getStore } from 'hooks/jotai/base';
+import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
 
 const LOGGER = new Logger('extension-state.ts');
 

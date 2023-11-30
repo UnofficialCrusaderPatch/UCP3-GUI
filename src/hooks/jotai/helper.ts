@@ -23,6 +23,7 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
 import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
 import { UCPStateHandler, useUCPStateHook, useUCPVersionHook } from './hooks';
 
 const LOGGER = new Logger('helper.ts');

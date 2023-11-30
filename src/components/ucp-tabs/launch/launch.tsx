@@ -1,7 +1,6 @@
 import './launch.css';
 
 import { useTranslation } from 'react-i18next';
-
 import GameStarter from 'components/game-starter/game-starter';
 import {
   EXTREME_PATH_ATOM,
@@ -12,6 +11,9 @@ import {
   VANILLA_VERSION_ATOM,
 } from 'function/game-files/game-version-state';
 import { useState } from 'react';
+
+import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
+import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 
 export default function Launch() {
   // might a bit inefficient, but should be enough for a game starter
@@ -25,14 +27,14 @@ export default function Launch() {
     <div className="launch__container flex-default">
       <div className="launch__boxes">
         <GameStarter
-          imagePath="src/assets/game-assets/logo-crusader-vanilla.png"
+          imagePath={logoCrusaderVanilla}
           pathAtom={VANILLA_PATH_ATOM}
           versionAtom={VANILLA_VERSION_ATOM}
           args={currentArgs}
           envs={envs}
         />
         <GameStarter
-          imagePath="src/assets/game-assets/logo-crusader-extreme.png"
+          imagePath={logoCrusaderExtreme}
           pathAtom={EXTREME_PATH_ATOM}
           versionAtom={EXTREME_VERSION_ATOM}
           args={currentArgs}

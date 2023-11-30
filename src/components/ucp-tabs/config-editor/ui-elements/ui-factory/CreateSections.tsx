@@ -55,7 +55,7 @@ function CreateSections(args: { readonly: boolean }): {
   const [t] = useTranslation(['gui-editor']);
 
   if (optionEntries.length === 0) {
-    return { nav: null, content: null };
+    return { nav: <CreateSectionsNav spec={definition} />, content: null };
     // // Display message that no config options can be displayed
     // return (
     //   // <h3

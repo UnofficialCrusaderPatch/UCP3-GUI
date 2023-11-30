@@ -1,10 +1,6 @@
 import { Extension } from 'config/ucp/common';
 import { getExtensions } from 'config/ucp/extension-util';
-import { activateUCP, deactivateUCP } from 'function/ucp-files/ucp-state';
-import { UCPVersion } from 'function/ucp-files/ucp-version';
 import { useTranslation } from 'react-i18next';
-import Option from 'util/structs/option';
-import Result from 'util/structs/result';
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
@@ -23,47 +19,11 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
 import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
-import { UCPStateHandler, useUCPStateHook, useUCPVersionHook } from './hooks';
 
 const LOGGER = new Logger('helper.ts');
 
 export function useCurrentGameFolder() {
   return useAtomValue(GAME_FOLDER_ATOM); // only a proxy
-}
-
-export function useUCPState(): [
-  Option<Result<UCPStateHandler, unknown>>,
-  () => Promise<void>,
-] {
-  const currentFolder = useAtomValue(GAME_FOLDER_ATOM);
-  const { t } = useTranslation('gui-download');
-  const [ucpStateResult, receiveState] = useUCPStateHook(currentFolder);
-
-  const ucpStateHandlerResult = ucpStateResult.map((res) =>
-    res.mapOk((state) => ({
-      state,
-      activate: async () => {
-        const result = await activateUCP(currentFolder, t);
-        receiveState(currentFolder);
-        return result;
-      },
-      deactivate: async () => {
-        const result = await deactivateUCP(currentFolder, t);
-        receiveState(currentFolder);
-        return result;
-      },
-    })),
-  );
-  return [ucpStateHandlerResult, () => receiveState(currentFolder)];
-}
-
-export function useUCPVersion(): [
-  Option<Result<UCPVersion, unknown>>,
-  () => Promise<void>,
-] {
-  const currentFolder = useAtomValue(GAME_FOLDER_ATOM);
-  const [ucpVersionResult, receiveVersion] = useUCPVersionHook(currentFolder);
-  return [ucpVersionResult, () => receiveVersion(currentFolder)];
 }
 
 export function useInitGlobalConfiguration(): [
@@ -184,9 +144,6 @@ export function useGameFolder(): [
 ] {
   const [currentFolder, setCurrentFolder] = useAtom(GAME_FOLDER_ATOM);
 
-  const [stateResult, receiveState] = useUCPStateHook(currentFolder);
-  const [versionResult, receiveVersion] = useUCPVersionHook(currentFolder);
-
   // TODO: currently, the language for the extensions/plugins is only set on load,
   // this is a problem at the moment, since it means the language will not switch with the GUI
   const language = useAtomValue(LANGUAGE_ATOM);
@@ -197,12 +154,10 @@ export function useGameFolder(): [
     currentFolder,
     async (newFolder: string) => {
       // kinda bad, it might skip a folder switch
-      if (stateResult.isEmpty() || versionResult.isEmpty() || isInitRunning) {
+      if (isInitRunning) {
         return;
       }
       setCurrentFolder(newFolder);
-      await receiveState(newFolder);
-      await receiveVersion(newFolder);
       await initConfig(newFolder, language);
     },
   ];

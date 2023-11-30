@@ -50,3 +50,10 @@ export function createSplitRange(left: number, right: number, parts: number) {
     }
   }
 }
+
+// https://www.sitepoint.com/delay-sleep-pause-wait/
+export async function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

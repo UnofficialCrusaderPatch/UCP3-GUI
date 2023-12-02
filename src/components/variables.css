@@ -4,7 +4,6 @@
   --ucp-main-grey: rgb(155, 155, 155);
   --ucp-main-grey-alpha: rgba(155, 155, 155, 0.5);
   --ucp-main-brown: #212529;
-  --ucp-main-border-image: url('/src/assets/ucp3/outline.png') 8%;
   --ucp-main-border: 4px solid;
   --ucp-menu-shade: rgba(0, 0, 0, 0.521);
 }

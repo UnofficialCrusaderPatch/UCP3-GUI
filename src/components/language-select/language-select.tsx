@@ -1,3 +1,5 @@
+import './language-select.css';
+
 import { useTranslation } from 'react-i18next';
 import translateIcon from 'assets/misc/translate.svg';
 import languages from 'localization/languages.json';
@@ -5,8 +7,6 @@ import SvgHelper from 'components/general/svg-helper';
 import { useAtom } from 'jotai';
 import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
 import { startTransition } from 'react';
-
-import './language-select.css';
 
 export default function LanguageSelect() {
   const [lang, setLang] = useAtom(LANGUAGE_ATOM);

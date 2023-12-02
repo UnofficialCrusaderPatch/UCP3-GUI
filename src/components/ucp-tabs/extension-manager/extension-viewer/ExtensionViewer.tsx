@@ -1,9 +1,5 @@
-import {
-  OverlayContent,
-  OverlayContentProps,
-} from 'components/overlay/overlay';
+import { OverlayContentProps } from 'components/overlay/overlay';
 import { Extension } from 'config/ucp/common';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Markdown from 'react-markdown';
 
@@ -29,11 +25,9 @@ export function ExtensionViewer(
   return (
     <div className="credits-container">
       <h1 className="credits-title">{t('gui-editor:extensions.viewer')}</h1>
-      <div className="credits-text-box parchment-box">
-        <div className="credits-text-wrapper">
-          <div className="credits-text">
-            <Markdown>{extension.descriptionMD}</Markdown>
-          </div>
+      <div className="parchment-box credits-text-box">
+        <div className="credits-text">
+          <Markdown>{extension.descriptionMD}</Markdown>
         </div>
       </div>
       <button type="button" className="credits-close" onClick={closeFunc}>

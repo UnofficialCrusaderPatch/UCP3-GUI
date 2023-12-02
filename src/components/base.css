@@ -1,6 +1,7 @@
 /* used for very common stuff */
 
-@import 'bootstrap';
+/* Reduces power of this styling, allowing easier override */
+@import 'bootstrap' layer(bootstrap);
 
 @import './scrollbar.css';
 
@@ -32,55 +33,113 @@
 }
 
 .ucp-button {
-  /* Other button styles here */
-  border-image: url('/src/assets/ucp3/button_slice.png');
-  border-image-slice: 49% fill;
-  border-width: 20px;
+  border-image: url('/src/assets/ucp3/button_ucp.png');
+  border-image-slice: 8 fill;
+  border-image-repeat: stretch;
+  border-image-width: auto;
+
   border-style: solid;
+  border-width: 8px;
+  border-color: transparent;
+
   background-color: transparent;
   color: white;
-  vertical-align: center;
-  height: 40px;
-  min-width: 100px;
-  width: 40%;
-  margin-left: 30%;
-  margin-right: 30%;
-  position: relative;
 }
 
 .ucp-button:hover {
-  /* Other button styles here */
-  border-image: url('/src/assets/ucp3/button_slice_hover.png');
-  border-image-slice: 49% fill;
-  border-style: solid;
+  border-image: url('/src/assets/ucp3/button_ucp_hover.png');
+  border-image-slice: 8 fill;
+  border-image-repeat: stretch;
+  border-image-width: auto;
 }
 
-.ucp-button > .button-text {
-  margin-top: -10px;
+.ucp-button:active {
+  border-image: url('/src/assets/ucp3/button_ucp_active.png');
+  border-image-slice: 8 fill;
+  border-image-repeat: stretch;
+  border-image-width: auto;
 }
+
+.ucp-button--square {
+  aspect-ratio: 1/1;
+}
+
 
 .icon-button {
   background-color: transparent;
 }
+/*
+  Border and box elements:
+*/
+
+:is(.ornament-border-shadow, .parchment-box) {
+  border-image: url('/src/assets/ucp3/ornament_border_shadow.png');
+  border-image-slice: 16;
+  border-image-repeat: round;
+
+  /* "border-image-width" seems to make the image width independent of the border width */
+  border-image-width: auto;
+
+  /* Used to create invisible border width for sizing */
+  border-style: solid;
+  border-width: 8px;
+  border-color: transparent;
+}
 
 .parchment-box {
-  background-image: url('/src/assets/ucp3/crdits_bg.png');
-  border-image: url('/src/assets/ucp3/credit_background.png');
+  background-image: url('/src/assets/ucp3/parchment_bg.png');
+  overflow: hidden auto;
+}
+
+.ornament-border {
+  border-image: url('/src/assets/ucp3/ornament_border.png');
+  border-image-slice: 8;
+  border-image-repeat: round;
+  border-image-width: auto;
+
   border-style: solid;
-  border-image-slice: 17 16 17 17;
-  border-image-width: 17px 16px 17px 17px;
-  border-image-outset: 0px 0px 0px 0px;
-  border-image-repeat: repeat repeat;
-  overflow: hidden;
+  border-width: 8px;
+  border-color: transparent;
 }
 
-.parchment-box-inside {
-  padding: 6px;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
+.ornament-border-inset {
+  border-image: url('/src/assets/ucp3/ornament_border_inset.png');
+  border-image-slice: 13 fill;
+  border-image-repeat: round;
+  border-image-width: auto;
+
+  border-style: solid;
+  border-width: 8px;
+  border-color: transparent;
 }
 
-.parchment-box-item-list {
-  overflow-y: scroll;
-  overflow-x: clip;
+.ornament-border-button {
+  border-image: url('/src/assets/ucp3/ornament_border_button.png');
+  border-image-slice: 18 fill;
+  border-image-repeat: round;
+  border-image-width: auto;
+
+  border-style: solid;
+  border-width: 13px;
+  border-color: transparent;
+}
+
+.ornament-border-button.active,
+.ornament-border-button:active,
+.ornament-border-button:hover {
+  border-image: url('/src/assets/ucp3/ornament_border_button_hover.png');
+  border-image-slice: 18 fill;
+  border-image-repeat: round;
+  border-image-width: auto;
+}
+
+.outline-border {
+  border-image: url('/src/assets/ucp3/outline_border.png');
+  border-image-slice: 2;
+  border-image-repeat: stretch;
+  border-image-width: auto;
+
+  border-style: solid;
+  border-width: 2px;
+  border-color: transparent;
 }

@@ -1,7 +1,7 @@
-import { Container, Form } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
-
 import './extension-manager.css';
+
+import { Form } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -107,250 +107,247 @@ export default function ExtensionManager() {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   return (
-    <Container className="fs-6 d-flex flex-column h-100 py-1">
-      <div className="row flex-grow-1 d-flex ">
-        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden">
-          <div className="d-flex flex-wrap align-items-center container">
-            <h4 className="d-flex me-auto">
+    <div className="flex-default extension-manager">
+      <div className="extension-manager-control">
+        <div className="extension-manager-control__header-container">
+          <div className="extension-manager-control__header">
+            <h4 className="extension-manager-control__box__header__headline">
               {t('gui-editor:extensions.available')}
             </h4>
-            {!showAllExtensions ? (
-              <span className="fs-8">{`filtered: ${
-                extensionsState.extensions.length - extensionsToDisplay.length
-              } out of ${extensionsState.extensions.length}`}</span>
-            ) : (
-              <span />
-            )}
-            <button
-              type="button"
-              className="d-flex flex-wrap mx-1 text-light align-content-center"
-              style={{
-                height: '28px',
-                backgroundColor: 'transparent',
-                backgroundRepeat: 'no-repeat',
-                overflow: 'hidden',
-                outline: '1px',
-              }}
-              onClick={() => {
-                setShowAllExtensions(!showAllExtensions);
-              }}
-              onMouseEnter={() => {
-                setStatusBarMessage('Show all extensions / Hide modules');
-              }}
-              onMouseLeave={() => {
-                setStatusBarMessage(undefined);
-              }}
-            >
-              {showAllExtensions ? <Funnel /> : <FunnelFill />}
-            </button>
-            <button
-              type="button"
-              className="d-flex flex-wrap mx-1 text-light align-content-center"
-              style={{
-                height: '28px',
-                backgroundColor: 'transparent',
-                backgroundRepeat: 'no-repeat',
-                overflow: 'hidden',
-                outline: '1px',
-              }}
-              onClick={async () => {
-                const result = await openFileDialog(gameFolder, [
-                  { name: 'Zip files', extensions: ['zip'] },
-                ]);
-
-                if (result.isPresent()) {
-                  const path = result.get();
-
-                  LOGGER.msg(
-                    `Trying to install extensions from: ${path}`,
-                  ).info();
-
-                  if (await exists(path)) {
-                    try {
-                      const ep = await ExtensionPack.fromPath(path);
-
-                      try {
-                        await ep.install(`${gameFolder}/ucp`);
-                        await showGeneralModalOk({
-                          title: 'Succesful install',
-                          message: `Extension pack was succesfully installed`,
-                        });
-                      } catch (e) {
-                        let msg = e;
-                        if (typeof e === 'string') {
-                          msg = e.toString(); // works, `e` narrowed to string
-                        } else if (e instanceof Error) {
-                          msg = e.message; // works, `e` narrowed to Error
-                        }
-                        await showGeneralModalOk({
-                          title: 'ERROR',
-                          message: (msg as string).toString(),
-                        });
-                      } finally {
-                        await ep.close();
-                      }
-                    } catch (e) {
-                      let msg = e;
-                      if (typeof e === 'string') {
-                        msg = e.toString(); // works, `e` narrowed to string
-                      } else if (e instanceof Error) {
-                        msg = e.message; // works, `e` narrowed to Error
-                      }
-                      await showGeneralModalOk({
-                        title: 'ERROR',
-                        message: (msg as string).toString(),
-                      });
-                    }
-                  } else {
-                    LOGGER.msg(`Path does not exist: ${path}`).warn();
-                    await showGeneralModalOk({
-                      title: 'Path does not exist',
-                      message: `Path does not exist: ${path}`,
-                    });
-                  }
-                }
-              }}
-              onMouseEnter={() => {
-                setStatusBarMessage(
-                  'Install extensions from a pack (a zip file)',
-                );
-              }}
-              onMouseLeave={() => {
-                setStatusBarMessage(undefined);
-              }}
-            >
-              <PlusLg />
-            </button>
-          </div>
-          <div className="parchment-box-inside flex-grow-1 parchment-box d-flex flex-column overflow-auto">
-            <div className="parchment-box-item-list"> {eUI} </div>
-          </div>
-        </div>
-        <div className="col-md-4 float-leftpt-2 w-50 h-100 d-flex flex-column overflow-hidden ">
-          <div className="d-flex flex-wrap align-items-center container">
-            <h4>{t('gui-editor:extensions.activated')}</h4>
-          </div>
-          <div className="parchment-box-inside parchment-box flex-grow-1 d-flex flex-column overflow-auto">
-            <div className="parchment-box-item-list">{activated}</div>
-          </div>
-          <div className="row pb-2 mx-0">
-            <div className="d-inline-flex">
+            <div className="extension-manager-control__box__header__buttons">
+              {!showAllExtensions ? (
+                <span className="fs-8">{`filtered: ${
+                  extensionsState.extensions.length - extensionsToDisplay.length
+                } out of ${extensionsState.extensions.length}`}</span>
+              ) : (
+                <span />
+              )}
               <button
                 type="button"
-                className="d-flex flex-wrap mx-1 text-light align-content-center"
-                style={{
-                  height: '100%',
-                  backgroundColor: 'transparent',
-                  backgroundRepeat: 'no-repeat',
-                  overflow: 'hidden',
-                  outline: '1px',
+                className="ucp-button ucp-button--square text-light"
+                onClick={() => {
+                  setShowAllExtensions(!showAllExtensions);
                 }}
+                onMouseEnter={() => {
+                  setStatusBarMessage('Show all extensions / Hide modules');
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
+              >
+                {showAllExtensions ? <Funnel /> : <FunnelFill />}
+              </button>
+              <button
+                type="button"
+                className="ucp-button ucp-button--square text-light"
                 onClick={async () => {
-                  LOGGER.msg('Creating modpack').trace();
-
-                  const filePathResult = await saveFileDialog(
-                    `${gameFolder}`,
-                    [{ name: 'Zip file', extensions: ['*.zip'] }],
-                    'Save pack as...',
-                  );
-
-                  if (filePathResult.isEmpty()) return;
-
-                  const filePath = filePathResult.get();
-
-                  const zw: ZipWriter = await ZipWriter.open(filePath);
                   try {
-                    zw.addDirectory('modules');
-                    zw.addDirectory('plugins');
-                    // eslint-disable-next-line no-restricted-syntax
-                    for (const ext of extensionsState.activeExtensions) {
-                      const fpath = `${ext.name}-${ext.version}`;
-                      const pathPrefix = `${gameFolder}/ucp/`;
-                      let originalPath = '';
-                      if (ext.type === 'plugin') {
-                        originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
-                        const dstPath = `plugins/${fpath}`;
-                        // eslint-disable-next-line no-await-in-loop
-                        const touch = await exists(originalPath);
+                    const result = await openFileDialog(gameFolder, [
+                      { name: 'Zip files', extensions: ['zip'] },
+                    ]);
+                    if (result.isPresent()) {
+                      const path = result.get();
 
-                        if (!touch) {
-                          // eslint-disable-next-line no-await-in-loop
-                          await showGeneralModalOk({
-                            title: 'Error',
-                            message: `Path does not exist: ${originalPath}`,
-                          });
-                          return;
-                        }
+                      LOGGER.msg(
+                        `Trying to install extensions from: ${path}`,
+                      ).info();
 
-                        const makeRelative = (fe: FileEntry) => {
-                          if (!fe.path.startsWith(pathPrefix)) {
-                            throw Error(fe.path);
+                      if (await exists(path)) {
+                        try {
+                          const ep = await ExtensionPack.fromPath(path);
+
+                          try {
+                            await ep.install(`${gameFolder}/ucp`);
+                            await showGeneralModalOk({
+                              title: 'Succesful install',
+                              message: `Extension pack was succesfully installed`,
+                            });
+                          } catch (e) {
+                            let msg = e;
+                            if (typeof e === 'string') {
+                              msg = e.toString(); // works, `e` narrowed to string
+                            } else if (e instanceof Error) {
+                              msg = e.message; // works, `e` narrowed to Error
+                            }
+                            await showGeneralModalOk({
+                              title: 'ERROR',
+                              message: (msg as string).toString(),
+                            });
+                          } finally {
+                            await ep.close();
                           }
-
-                          return fe.path.substring(pathPrefix.length);
-                        };
-
-                        // eslint-disable-next-line no-await-in-loop
-                        const entries = await readDir(originalPath, {
-                          recursive: true,
-                        });
-
-                        const dirs = entries
-                          .filter(
-                            (fe) =>
-                              fe.children !== undefined && fe.children !== null,
-                          )
-                          .map(makeRelative);
-
-                        // eslint-disable-next-line no-restricted-syntax
-                        for (const dir of dirs) {
-                          // eslint-disable-next-line no-await-in-loop
-                          await zw.addDirectory(dir);
-                        }
-
-                        const files = entries.filter(
-                          (fe) =>
-                            fe.children === undefined || fe.children === null,
-                        );
-
-                        // eslint-disable-next-line no-restricted-syntax
-                        for (const fe of files) {
-                          // eslint-disable-next-line no-await-in-loop
-                          await zw.writeEntryFromFile(
-                            makeRelative(fe),
-                            fe.path,
-                          );
-                        }
-                      } else if (ext.type === 'module') {
-                        originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
-                        const dstPath = `modules/${fpath}.zip`;
-
-                        // eslint-disable-next-line no-await-in-loop
-                        const touch = await exists(originalPath);
-
-                        if (!touch) {
-                          // eslint-disable-next-line no-await-in-loop
+                        } catch (e) {
+                          let msg = e;
+                          if (typeof e === 'string') {
+                            msg = e.toString(); // works, `e` narrowed to string
+                          } else if (e instanceof Error) {
+                            msg = e.message; // works, `e` narrowed to Error
+                          }
                           await showGeneralModalOk({
-                            title: 'Error',
-                            message: `Path does not exist: ${originalPath}`,
+                            title: 'ERROR',
+                            message: (msg as string).toString(),
                           });
-                          return;
                         }
-
-                        // eslint-disable-next-line no-await-in-loop
-                        await zw.writeEntryFromFile(dstPath, originalPath);
                       } else {
-                        throw Error('What are we doing here?');
+                        LOGGER.msg(`Path does not exist: ${path}`).warn();
+                        await showGeneralModalOk({
+                          title: 'Path does not exist',
+                          message: `Path does not exist: ${path}`,
+                        });
                       }
                     }
-                  } catch (e) {
-                    LOGGER.obj(e).error();
+                  } catch (e: any) {
                     await showGeneralModalOk({
-                      title: 'Error',
-                      message: (e as Error).toString(),
+                      title: 'ERROR',
+                      message: e.toString(),
                     });
-                  } finally {
-                    zw.close();
+                  }
+                }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(
+                    'Install extensions from a pack (a zip file)',
+                  );
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
+              >
+                <PlusLg />
+              </button>
+            </div>
+          </div>
+          <div className="extension-manager-control__header">
+            <h4 className="extension-manager-control__box__header__headline">
+              {t('gui-editor:extensions.activated')}
+            </h4>
+          </div>
+        </div>
+        <div className="extension-manager-control__box-container">
+          <div className="extension-manager-control__box">
+            <div className="parchment-box extension-manager-list">{eUI}</div>
+          </div>
+          <div className="extension-manager-control__box">
+            <div className="parchment-box extension-manager-list">
+              {activated}
+            </div>
+            <div className="extension-manager-control__box__buttons">
+              <button
+                type="button"
+                className="ucp-button ucp-button--square text-light"
+                onClick={async () => {
+                  try {
+                    LOGGER.msg('Creating modpack').trace();
+
+                    const filePathResult = await saveFileDialog(
+                      `${gameFolder}`,
+                      [{ name: 'Zip file', extensions: ['*.zip'] }],
+                      'Save pack as...',
+                    );
+
+                    if (filePathResult.isEmpty()) return;
+
+                    const filePath = filePathResult.get();
+
+                    const zw: ZipWriter = await ZipWriter.open(filePath);
+                    try {
+                      zw.addDirectory('modules');
+                      zw.addDirectory('plugins');
+                      // eslint-disable-next-line no-restricted-syntax
+                      for (const ext of extensionsState.activeExtensions) {
+                        const fpath = `${ext.name}-${ext.version}`;
+                        const pathPrefix = `${gameFolder}/ucp/`;
+                        let originalPath = '';
+                        if (ext.type === 'plugin') {
+                          originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
+                          const dstPath = `plugins/${fpath}`;
+                          // eslint-disable-next-line no-await-in-loop
+                          const touch = await exists(originalPath);
+
+                          if (!touch) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await showGeneralModalOk({
+                              title: 'Error',
+                              message: `Path does not exist: ${originalPath}`,
+                            });
+                            return;
+                          }
+
+                          const makeRelative = (fe: FileEntry) => {
+                            if (!fe.path.startsWith(pathPrefix)) {
+                              throw Error(fe.path);
+                            }
+
+                            return fe.path.substring(pathPrefix.length);
+                          };
+
+                          // eslint-disable-next-line no-await-in-loop
+                          const entries = await readDir(originalPath, {
+                            recursive: true,
+                          });
+
+                          const dirs = entries
+                            .filter(
+                              (fe) =>
+                                fe.children !== undefined &&
+                                fe.children !== null,
+                            )
+                            .map(makeRelative);
+
+                          // eslint-disable-next-line no-restricted-syntax
+                          for (const dir of dirs) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await zw.addDirectory(dir);
+                          }
+
+                          const files = entries.filter(
+                            (fe) =>
+                              fe.children === undefined || fe.children === null,
+                          );
+
+                          // eslint-disable-next-line no-restricted-syntax
+                          for (const fe of files) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await zw.writeEntryFromFile(
+                              makeRelative(fe),
+                              fe.path,
+                            );
+                          }
+                        } else if (ext.type === 'module') {
+                          originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
+                          const dstPath = `modules/${fpath}.zip`;
+
+                          // eslint-disable-next-line no-await-in-loop
+                          const touch = await exists(originalPath);
+
+                          if (!touch) {
+                            // eslint-disable-next-line no-await-in-loop
+                            await showGeneralModalOk({
+                              title: 'Error',
+                              message: `Path does not exist: ${originalPath}`,
+                            });
+                            return;
+                          }
+
+                          // eslint-disable-next-line no-await-in-loop
+                          await zw.writeEntryFromFile(dstPath, originalPath);
+                        } else {
+                          throw Error('What are we doing here?');
+                        }
+                      }
+                    } catch (e) {
+                      LOGGER.obj(e).error();
+                      await showGeneralModalOk({
+                        title: 'Error',
+                        message: (e as Error).toString(),
+                      });
+                    } finally {
+                      zw.close();
+                    }
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
                   }
                 }}
                 onMouseEnter={() => {
@@ -365,9 +362,16 @@ export default function ExtensionManager() {
                 <Stack />
               </button>
               <ImportButton
-                onClick={async () =>
-                  importButtonCallback(gameFolder, setConfigStatus, t, '')
-                }
+                onClick={async () => {
+                  try {
+                    importButtonCallback(gameFolder, setConfigStatus, t, '');
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
+                }}
                 onMouseEnter={() => {
                   setStatusBarMessage(
                     'Import a config file, overwriting the current configuration',
@@ -378,9 +382,16 @@ export default function ExtensionManager() {
                 }}
               />
               <ExportButton
-                onClick={() =>
-                  exportButtonCallback(gameFolder, setConfigStatus, t)
-                }
+                onClick={async () => {
+                  try {
+                    exportButtonCallback(gameFolder, setConfigStatus, t);
+                  } catch (e: any) {
+                    await showGeneralModalOk({
+                      title: 'ERROR',
+                      message: e.toString(),
+                    });
+                  }
+                }}
                 onMouseEnter={() => {
                   setStatusBarMessage(
                     'Export the current configuration to a file',
@@ -392,14 +403,7 @@ export default function ExtensionManager() {
               />
               <button
                 type="button"
-                className="d-flex flex-wrap mx-1 text-light align-content-center"
-                style={{
-                  height: '100%',
-                  backgroundColor: 'transparent',
-                  backgroundRepeat: 'no-repeat',
-                  overflow: 'hidden',
-                  outline: '1px',
-                }}
+                className="ucp-button ucp-button--square text-light"
                 onClick={() => {
                   setAdvancedMode(!advancedMode);
                 }}
@@ -412,39 +416,49 @@ export default function ExtensionManager() {
               >
                 {advancedMode ? <GearFill /> : <Gear />}
               </button>
-              <ApplyButton
-                onClick={async () => {
-                  const result: string = await saveConfig(
-                    configuration,
-                    file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                    configurationTouched,
-                    extensionsState.explicitlyActivatedExtensions,
-                    activeExtensions,
-                    configurationQualifier,
-                  );
-
-                  setConfigStatus(result);
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage(
-                    'Apply the current configuration (save to ucp-config.yml)',
-                  );
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              />
-
-              <Form.Switch
-                id="config-allow-user-override-switch"
-                label={t('gui-editor:config.allow.override')}
-                className="col-auto d-inline-block ms-1 d-none"
-              />
+              <div className="d-none extension-manager-control__box__buttons--user-override-switch">
+                <Form.Switch
+                  label={t('gui-editor:config.allow.override')}
+                  className="user-override-switch"
+                />
+              </div>
+              <div className="extension-manager-control__box__buttons--apply-button">
+                <ApplyButton
+                  onClick={async () => {
+                    try {
+                      const result: string = await saveConfig(
+                        configuration,
+                        file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                        configurationTouched,
+                        extensionsState.explicitlyActivatedExtensions,
+                        activeExtensions,
+                        configurationQualifier,
+                      );
+                      setConfigStatus(result);
+                    } catch (e: any) {
+                      await showGeneralModalOk({
+                        title: 'ERROR',
+                        message: e.toString(),
+                      });
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(
+                      'Apply the current configuration (save to ucp-config.yml)',
+                    );
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <Container className="row text-warning">{configStatus}</Container>
-    </Container>
+      <div className="extension-text-warning-container text-warning">
+        {configStatus}
+      </div>
+    </div>
   );
 }

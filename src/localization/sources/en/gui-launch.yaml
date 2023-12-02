@@ -1,0 +1,7 @@
+launch: "Launch"
+launch.options: "Launch Options"
+info.name: "Name"
+info.region: "Type"
+info.version: "Version"
+info.sha: "SHA-Start"
+info.sha.copy: "Click to copy entire SHA-256"

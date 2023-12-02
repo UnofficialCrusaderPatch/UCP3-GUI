@@ -1,3 +1,5 @@
+import './main-page.css';
+
 import LanguageSelect from './language-select/language-select';
 import { Overlay } from './overlay/overlay';
 import CreditsButton from './credits/credits';
@@ -7,8 +9,6 @@ import UcpTabs from './ucp-tabs/ucp-tabs';
 import { ModalOkCancel } from './modals/ModalOkCancel';
 import { ModalOk } from './modals/ModalOk';
 import { CreatePluginModal } from './modals/CreatePluginModal';
-
-import './main-page.css';
 
 export default function Main() {
   return (

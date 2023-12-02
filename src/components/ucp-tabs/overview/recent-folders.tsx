@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
+import './recent-folders.css';
+
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
 import {
   createEditorWindow,
@@ -12,8 +14,6 @@ import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
-
-import './recent-folders.css';
 
 export default function RecentFolders() {
   const [currentFolder, setFolder] = useGameFolder();
@@ -61,29 +61,27 @@ export default function RecentFolders() {
   }
 
   return (
-    <div className="textInput mt-2">
+    <div className="text-input">
       <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
-      <div className="d-flex mt-2">
-        <div className="textInputField d-flex align-items-center">
-          <input
-            id="browseresult"
-            type="text"
-            className="form-control"
-            readOnly
-            role="button"
-            onClick={async () =>
-              (await openFolderDialog(currentFolder)).ifPresent(
-                updateCurrentFolderSelectState,
-              )
-            }
-            value={currentFolder}
-          />
-          <button
-            type="button"
-            className="dropdown-button"
-            onClick={() => setShowRecentFolders(!showRecentFolders)}
-          />
-        </div>
+      <div className="ornament-border-inset text-input-field">
+        <input
+          id="browseresult"
+          type="text"
+          className="form-control"
+          readOnly
+          role="button"
+          onClick={async () =>
+            (await openFolderDialog(currentFolder)).ifPresent(
+              updateCurrentFolderSelectState,
+            )
+          }
+          value={currentFolder}
+        />
+        <button
+          type="button"
+          className="dropdown-button"
+          onClick={() => setShowRecentFolders(!showRecentFolders)}
+        />
       </div>
       <div className="dropdown-wrapper">
         <div
@@ -96,7 +94,7 @@ export default function RecentFolders() {
             .map((recentFolder) => (
               <div
                 key={recentFolder}
-                className="px-2 file-selector d-flex justify-content-between align-items-center"
+                className="file-selector"
                 role="button"
                 title={recentFolder}
                 onClick={onClickUpdateRecentFolder}

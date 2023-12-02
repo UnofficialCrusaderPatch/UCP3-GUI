@@ -1,10 +1,111 @@
-/* @import '~bootstrap'; */
+.config-editor {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+
+.config-navbar,
+.config-navbar__nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  flex-wrap: nowrap;
+}
+
+.config-navbar {
+  height: 100%;
+  width: 25%;
+  padding: 10px;
+}
+
+.config-navbar__header {
+  text-decoration: none;
+  color: var(--bs-heading-color); /* bootstrap var, replace */
+}
+
+.config-navbar__nav {
+  padding-left: 10px;
+  width: 100%;
+}
+
+.config-navbar>.config-navbar__nav {
+  overflow: auto;
+  background-color: var(--ucp-main-grey-alpha);
+  flex-grow: 1;
+}
+
+.config-navbar__link {
+  text-decoration: none;
+  padding: 2px;
+  color: black;
+}
+
+.config-container {
+  width: 75%;
+  padding: 10px;
+  align-items: stretch;
+}
+
+.config-container__content {
+  padding: 10px;
+  color: black;
+  flex-grow: 1;
+}
+
+.config-editor__buttons {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.config-editor__buttons--user-override-switch {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.config-editor__buttons--user-override-switch>.user-override-switch {
+  margin: 0 5px 0 0;
+}
+
+.config-editor__buttons--apply-button {
+  margin-left: auto;
+}
+
+.config-editor__buttons--apply-button>button {
+  height: 100%;
+}
+
+.config-warning-container {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.config-warning-container {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  margin-top: 5px;
+}
+
+.config-warning-container__text {
+  flex-grow: 1;
+}
+
+.config-warning-container__symbols {
+  padding: 0 1px 0 5px;
+  text-wrap: nowrap;
+}
 
 .form-control:disabled {
   opacity: 0.5;
 }
 
-.label-disabled > label {
+.label-disabled>label {
   opacity: 0.5;
 }
 
@@ -16,69 +117,37 @@
   overflow: clip;
 }
 
-#config-navbar {
-  /* color: #f8f9fa; */
-  padding: 0;
-}
-
-.content-box {
-  padding: 10px;
-  height: 100%;
-  overflow-y: scroll;
-  color: black;
-}
-
-.container-parchment-box {
-  height: calc(100% - 50px);
-}
-
-.parchment-box {
-  height: 100%;
-}
-
 .icons-button {
   display: inline-block;
-  background-color: transparent;
-  width: 32px !important;
-  height: 28px !important;
-  border: none;
-  padding: 0px;
+  width: calc(1em + 28px);
 }
 
 .ucp-button-variant {
-  border-image: url('/src/assets/ucp3/button_slice.png') !important;
-  border-image-slice: 49% fill !important;
-  border-width: 14px !important;
-  border-style: solid !important;
-  background-color: transparent !important;
-  color: white !important;
-  min-width: 150px !important;
-  height: 28px !important;
-  padding: 0px !important;
-  margin: 0px !important;
-}
-
-.ucp-button-variant:hover {
-  /* Other button styles here */
-  border-image: url('/src/assets/ucp3/button_slice_hover.png');
-  border-image-slice: 49% fill;
-  border-style: solid;
-}
-
-.ucp-button-variant-button-text {
-  margin-top: -9px;
+  background-color: transparent;
+  color: white;
+  min-width: 150px;
+  padding: 0px;
+  margin: 0px;
+  vertical-align: middle;
 }
 
 .reset {
   background-image: url('/src/assets/ucp3/reset.png');
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-image-slice: 8;
 }
 
 .reset:hover {
   background-image: url('/src/assets/ucp3/reset_hover.png');
+  border-image-slice: 8;
 }
 
-.reset:disabled {
+.reset:disabled,
+.reset:active {
   background-image: url('/src/assets/ucp3/reset_active.png');
+  border-image-slice: 8;
 }
 
 .import {
@@ -109,8 +178,8 @@
   background-image: url('/src/assets/ucp3/reset.png');
   display: inline-block;
   background-color: transparent;
-  width: 32px !important;
-  height: 28px !important;
+  width: 32px;
+  height: 28px;
   border: none;
   padding: 0px;
 }
@@ -123,27 +192,10 @@
   background-image: url('/src/assets/ucp3/reset_active.png');
 }
 
-/*
-#config-navbar > nav > nav > a {
-  font-size: medium;
-}
-
-#config-navbar > nav > nav > nav > a {
-  font-size: medium;
-}
-
-#config-navbar > nav > nav > nav > a {
-  font-size: medium;
-}
-#config-navbar > nav > nav > nav > nav > a {
-  font-size: medium;
-} */
-
 /* @import '~bootstrap'; */
 
 /* Hide the default switch appearance */
-input[type="checkbox"] {
-}
+input[type="checkbox"] {}
 
 /* Style the label element to show the switch image
 .switch-label {
@@ -173,8 +225,9 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type="radio"] {
   display: none;
 }
-.sword-checkbox input[type="checkbox"] + label ,
-.sword-checkbox input[type="radio"] + label {
+
+.sword-checkbox input[type="checkbox"]+label,
+.sword-checkbox input[type="radio"]+label {
   display: block;
   position: relative;
   padding-left: 32px;
@@ -184,20 +237,22 @@ input[type="checkbox"]:disabled + .label:before {
   -moz-user-select: none;
   -ms-user-select: none;
 }
-.sword-checkbox input[type="checkbox"]:hover + label:hover ,
-.sword-checkbox input[type="radio"]:hover + label:hover {
+
+.sword-checkbox input[type="checkbox"]:hover+label:hover,
+.sword-checkbox input[type="radio"]:hover+label:hover {
   cursor: default;
 }
-.sword-checkbox input[type="checkbox"]:hover + label:before,
-.sword-checkbox input[type="radio"]:hover + label:before {
-}
 
-.sword-checkbox input[type="checkbox"] + label:last-child,
-.sword-checkbox input[type="radio"] + label:last-child {
+.sword-checkbox input[type="checkbox"]:hover+label:before,
+.sword-checkbox input[type="radio"]:hover+label:before {}
+
+.sword-checkbox input[type="checkbox"]+label:last-child,
+.sword-checkbox input[type="radio"]+label:last-child {
   margin-bottom: 0;
 }
-.sword-checkbox input[type="checkbox"] + label:before,
-.sword-checkbox input[type="radio"] + label:before {
+
+.sword-checkbox input[type="checkbox"]+label:before,
+.sword-checkbox input[type="radio"]+label:before {
   content: "";
   display: block;
   background-image: url('/src/assets/ucp3/checkbox_empty.png');
@@ -211,20 +266,21 @@ input[type="checkbox"]:disabled + .label:before {
   -webkit-transition: all 0.1s, background 0.1s ease-in-out;
   transition: all 0.1s, background 0.1s ease-in-out;
 }
-.sword-checkbox input[type="checkbox"]:checked + label:before,
-.sword-checkbox input[type="radio"]:checked + label:before {
+
+.sword-checkbox input[type="checkbox"]:checked+label:before,
+.sword-checkbox input[type="radio"]:checked+label:before {
   background-image: url('/src/assets/ucp3/checkbox_full.png');
 }
 
 /* Styles for disabled input elements */
-.sword-checkbox input[type="checkbox"]:disabled + label,
-.sword-checkbox input[type="radio"]:disabled + label {
+.sword-checkbox input[type="checkbox"]:disabled+label,
+.sword-checkbox input[type="radio"]:disabled+label {
   opacity: 0.5;
   cursor: not-allowed;
 }
-.sword-checkbox input[type="checkbox"]:disabled + label:before,
-.sword-checkbox input[type="radio"]:disabled + label:before {
-}
+
+.sword-checkbox input[type="checkbox"]:disabled+label:before,
+.sword-checkbox input[type="radio"]:disabled+label:before {}
 
 .ucp-slider:disabled {
   opacity: 0.5;
@@ -242,16 +298,19 @@ input[type="checkbox"]:disabled + .label:before {
 
 /** slider **/
 .ucp-slider {
-  -webkit-appearance: none;  /* Override default CSS styles */
+  -webkit-appearance: none;
+  /* Override default CSS styles */
   appearance: none;
-  width: 100%; /* Full-width */
-  height: 25px; /* Specified height */
+  width: 100%;
+  /* Full-width */
+  height: 25px;
+  /* Specified height */
 
   /* TODO add the slider background with a border image */
   background-image:
-    url('src/assets/ucp3/slider_bg_left.png'),
-    url('src/assets/ucp3/slider_bg_right.png'),
-    url('src/assets/ucp3/slider_bg_middle.png');
+    url('/src/assets/ucp3/slider_bg_left.png'),
+    url('/src/assets/ucp3/slider_bg_right.png'),
+    url('/src/assets/ucp3/slider_bg_middle.png');
   background-position:
     left top,
     right top,
@@ -272,36 +331,43 @@ input[type="checkbox"]:disabled + .label:before {
 
 /* chrome, safari (webkit based) */
 .ucp-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
+  -webkit-appearance: none;
+  /* Override default look */
   appearance: none;
-  width: 7px; /* Set a specific slider handle width */
-  height: 15px; /* Slider handle height */
-  background-image: url('src/assets/ucp3/slider.png');
-  cursor: pointer; /* Cursor on hover */
+  width: 7px;
+  /* Set a specific slider handle width */
+  height: 15px;
+  /* Slider handle height */
+  background-image: url('/src/assets/ucp3/slider.png');
+  cursor: pointer;
+  /* Cursor on hover */
 }
 
 .ucp-slider::-webkit-slider-thumb:active {
-  background-image: url('src/assets/ucp3/slider_active.png');
+  background-image: url('/src/assets/ucp3/slider_active.png');
 }
 
 /* mozilla based */
 .ucp-slider::-moz-range-thumb {
-  width: 7px; /* Set a specific slider handle width */
-  height: 15px; /* Slider handle height */
-  background-image: url('src/assets/ucp3/slider.png');
-  cursor: pointer; /* Cursor on hover */
+  width: 7px;
+  /* Set a specific slider handle width */
+  height: 15px;
+  /* Slider handle height */
+  background-image: url('/src/assets/ucp3/slider.png');
+  cursor: pointer;
+  /* Cursor on hover */
 }
 
 .ucp-slider::-moz-range-thumb:active {
-  background-image: url('src/assets/ucp3/slider_active.png');
+  background-image: url('/src/assets/ucp3/slider_active.png');
 }
 
 /* Slider track styles */
 .ucp-slider .slider-track {
   background-image:
-    url('src/assets/ucp3/slider_bg_left.png'),
-    url('src/assets/ucp3/slider_bg_right.png'),
-    url('src/assets/ucp3/slider_bg_middle.png');
+    url('/src/assets/ucp3/slider_bg_left.png'),
+    url('/src/assets/ucp3/slider_bg_right.png'),
+    url('/src/assets/ucp3/slider_bg_middle.png');
   background-position:
     left top,
     right top,
@@ -315,20 +381,20 @@ input[type="checkbox"]:disabled + .label:before {
 
 /* Thumb styles */
 .ucp-slider .slider-thumb {
-  background: url('src/assets/ucp3/slider.png') no-repeat center;
+  background: url('/src/assets/ucp3/slider.png') no-repeat center;
   width: 7px;
   height: 15px;
   border: none;
-  transition: background-image 0.2s; /* Smooth transition */
+  transition: background-image 0.2s;
+  /* Smooth transition */
 }
 
 .ucp-slider .slider-thumb:hover,
 .ucp-slider .slider-thumb:focus {
-  background-image: url(src/assets/ucp3/slider.png);
+  background-image: url('/src/assets/ucp3/slider.png');
 }
 
 
 
 
 /** slider end **/
-

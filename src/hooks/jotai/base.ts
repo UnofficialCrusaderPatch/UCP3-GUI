@@ -1,4 +1,4 @@
-import { atom, getDefaultStore, useAtom, useSetAtom } from 'jotai';
+import { Getter, atom, getDefaultStore, useAtom, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
 import Option from 'util/structs/option';
 import Result from 'util/structs/result';
@@ -20,6 +20,21 @@ type Loadable<T> =
       state: 'hasData';
       data: Awaited<T>;
     };
+
+// https://jotai.org/docs/recipes/atom-with-refresh
+// can trigger, but not await refresh
+// if result needed, follow set with a awaited get
+export function atomWithRefresh<T>(fn: (get: Getter) => T) {
+  const refreshCounter = atom(0);
+
+  return atom(
+    (get) => {
+      get(refreshCounter);
+      return fn(get);
+    },
+    (_, set) => set(refreshCounter, (i) => i + 1),
+  );
+}
 
 // https://jotai.org/docs/advanced-recipes/atom-creators#atom-with-refresh
 function asyncAtomWithMutate<T, U extends unknown[]>(

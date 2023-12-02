@@ -3,7 +3,12 @@ import Result from 'util/structs/result';
 import Option from 'util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
 import { UCP_VERSION_FILE } from 'function/global/constants/file-constants';
+import { atom } from 'jotai';
+import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
+import { atomWithRefresh } from 'hooks/jotai/base';
+import Logger from 'util/scripts/logging';
 
+const LOGGER = new Logger('ucp-version.ts');
 export interface UCPVersionInterface {
   major: Option<number>;
   minor: Option<number>;
@@ -71,13 +76,28 @@ export class UCPVersion implements UCPVersionInterface {
   }
 }
 
-export function getEmptyUCPVersion(): UCPVersion {
-  return new UCPVersion();
+async function getUCPVersionFilePath(gameFolder: string) {
+  if (!gameFolder) {
+    return '';
+  }
+
+  return resolvePath(gameFolder, UCP_VERSION_FILE);
 }
 
-export async function loadUCPVersion(
-  gameFolder: string,
-): Promise<Result<UCPVersion, Error>> {
-  const path = await resolvePath(gameFolder, UCP_VERSION_FILE);
-  return (await loadYaml(path)).mapOk((yaml) => new UCPVersion(yaml));
-}
+const UCP_VERSION_FILE_PATH_ATOM = atom((get) =>
+  getUCPVersionFilePath(get(GAME_FOLDER_ATOM)),
+);
+
+export const UCP_VERSION_ATOM = atomWithRefresh(async (get) => {
+  const path = await get(UCP_VERSION_FILE_PATH_ATOM);
+  if (!path) {
+    return new UCPVersion();
+  }
+  return (await loadYaml(path)).consider(
+    (yaml) => new UCPVersion(yaml),
+    (err) => {
+      LOGGER.obj(err).warn();
+      return new UCPVersion();
+    },
+  );
+});

@@ -76,102 +76,101 @@ export function CreatePluginModal() {
 
   const [versionElementHasFocus, setVersionElementHasFocus] = useState(false);
 
+  /* General modal popup window */
   return (
-    <>
-      {/* General modal popup window */}
-      <div className="m-5">
-        <Modal
-          show={show}
-          onHide={() => {
-            setWindow({ ...window, show: false });
-            handleClose();
-          }}
-          className="text-dark"
-          style={{ whiteSpace: 'pre-line' }}
+    <Modal
+      show={show}
+      onHide={() => {
+        setWindow({ ...window, show: false });
+        handleClose();
+      }}
+      className="text-dark"
+      style={{ whiteSpace: 'pre-line' }}
+      // prevents escaping the modal:
+      backdrop="static"
+      keyboard={false}
+    >
+      <Modal.Header>
+        <Modal.Title>{title}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          <Form.Label>Plugin name:</Form.Label>
+          <Form.Control
+            id="create-plugin-name"
+            type="text"
+            value={pluginName}
+            onChange={(e) => {
+              setPluginName(e.target.value);
+            }}
+          />
+          <Form.Label>Plugin author:</Form.Label>
+          <Form.Control
+            id="create-plugin-author"
+            type="text"
+            value={pluginAuthor}
+            onChange={(e) => {
+              setPluginAuthor(e.target.value);
+            }}
+          />
+          <Form.Label>Plugin version (format: 1.0.0):</Form.Label>
+          <Form.Control
+            id="create-plugin-version"
+            type="text"
+            value={pluginVersion}
+            onChange={(e) => {
+              setPluginVersion(e.target.value);
+            }}
+            onFocus={() => {
+              setVersionElementHasFocus(true);
+            }}
+            onBlur={() => {
+              setVersionElementHasFocus(false);
+            }}
+            style={
+              !versionElementHasFocus &&
+              pluginVersion.length > 0 &&
+              !pluginVersionValid
+                ? { backgroundColor: 'red' }
+                : {}
+            }
+          />
+          <Form.Switch
+            id="create-plugin-include-dependencies"
+            label="Also create a modpack"
+            checked={createModpack}
+            onChange={(e) => {
+              setCreateModpack(e.target.checked);
+            }}
+          />
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button
+          variant="primary"
+          disabled={
+            pluginName.length === 0 ||
+            pluginAuthor.length === 0 ||
+            !pluginVersionValid
+          }
+          onClick={() =>
+            new Promise<void>((resolve) => {
+              setWindow({ ...window, show: false });
+              handleAction({
+                pluginName,
+                pluginVersion,
+                pluginAuthor,
+                createModpack,
+              });
+              resolve();
+            })
+          }
         >
-          <Modal.Header closeButton>
-            <Modal.Title>{title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              <Form.Label>Plugin name:</Form.Label>
-              <Form.Control
-                id="create-plugin-name"
-                type="text"
-                value={pluginName}
-                onChange={(e) => {
-                  setPluginName(e.target.value);
-                }}
-              />
-              <Form.Label>Plugin author:</Form.Label>
-              <Form.Control
-                id="create-plugin-author"
-                type="text"
-                value={pluginAuthor}
-                onChange={(e) => {
-                  setPluginAuthor(e.target.value);
-                }}
-              />
-              <Form.Label>Plugin version (format: 1.0.0):</Form.Label>
-              <Form.Control
-                id="create-plugin-version"
-                type="text"
-                value={pluginVersion}
-                onChange={(e) => {
-                  setPluginVersion(e.target.value);
-                }}
-                onFocus={() => {
-                  setVersionElementHasFocus(true);
-                }}
-                onBlur={() => {
-                  setVersionElementHasFocus(false);
-                }}
-                style={
-                  !versionElementHasFocus &&
-                  pluginVersion.length > 0 &&
-                  !pluginVersionValid
-                    ? { backgroundColor: 'red' }
-                    : {}
-                }
-              />
-              <Form.Switch
-                id="create-plugin-include-dependencies"
-                label="Also create a modpack"
-                checked={createModpack}
-                onChange={(e) => {
-                  setCreateModpack(e.target.checked);
-                }}
-              />
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="primary"
-              disabled={
-                pluginName.length === 0 ||
-                pluginAuthor.length === 0 ||
-                !pluginVersionValid
-              }
-              onClick={() =>
-                new Promise<void>((resolve) => {
-                  setWindow({ ...window, show: false });
-                  handleAction({
-                    pluginName,
-                    pluginVersion,
-                    pluginAuthor,
-                    createModpack,
-                  });
-                  resolve();
-                })
-              }
-            >
-              {window.ok !== undefined && window.ok.length > 0
-                ? window.ok
-                : 'Create'}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    </>
+          {window.ok !== undefined && window.ok.length > 0
+            ? window.ok
+            : 'Create'}
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }

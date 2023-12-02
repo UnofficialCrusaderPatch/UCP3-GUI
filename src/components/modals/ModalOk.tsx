@@ -64,38 +64,37 @@ export function ModalOk() {
 
   const { handleAction, title, message, show } = generalModalWindow;
 
-  const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
+  const { t } = useTranslation(['gui-general']);
 
+  /* General modal popup window */
   return (
-    <>
-      {/* General modal popup window */}
-      <div className="m-5">
-        <Modal
-          show={show}
-          onHide={handleAction}
-          className="text-dark"
-          style={{ whiteSpace: 'pre-line' }}
+    <Modal
+      show={show}
+      onHide={handleAction}
+      className="text-dark"
+      style={{ whiteSpace: 'pre-line' }}
+      // prevents escaping the modal:
+      backdrop="static"
+      keyboard={false}
+    >
+      <Modal.Header>
+        <Modal.Title>{title}</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>{message}</Modal.Body>
+      <Modal.Footer>
+        <Button
+          variant="primary"
+          onClick={() => {
+            setGeneralModalWindow({ ...generalModalWindow, show: false });
+            handleAction();
+          }}
         >
-          <Modal.Header closeButton>
-            <Modal.Title>{title}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{message}</Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setGeneralModalWindow({ ...generalModalWindow, show: false });
-                handleAction();
-              }}
-            >
-              {generalModalWindow.ok !== undefined &&
-              generalModalWindow.ok.length > 0
-                ? generalModalWindow.ok
-                : t('gui-general:ok')}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </div>
-    </>
+          {generalModalWindow.ok !== undefined &&
+          generalModalWindow.ok.length > 0
+            ? generalModalWindow.ok
+            : t('gui-general:ok')}
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }

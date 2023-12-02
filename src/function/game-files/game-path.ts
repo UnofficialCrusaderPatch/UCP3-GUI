@@ -3,10 +3,18 @@ import { atom } from 'jotai';
 import { resolvePath } from 'tauri/tauri-files';
 
 async function getVanillaPath(gameFolder: string): Promise<string> {
+  if (!gameFolder) {
+    return '';
+  }
+
   return resolvePath(gameFolder, 'Stronghold Crusader.exe');
 }
 
 async function getExtremePath(gameFolder: string): Promise<string> {
+  if (!gameFolder) {
+    return '';
+  }
+
   return resolvePath(gameFolder, 'Stronghold_Crusader_Extreme.exe');
 }
 

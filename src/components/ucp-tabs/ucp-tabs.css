@@ -7,35 +7,53 @@
 }
 
 .ucp-tabs-header {
-  padding-top: 100px;
+  padding: 100px 7px 0 7px;
   background-image: url('/src/assets/ucp3/bg.png');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   align-items: end;
+  border: 0;
+}
+
+.tab-content {
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-image-width: auto 0 0 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tab-panel {
+  height: 100%;
+  width: 100%;
 }
 
 .tab-link {
+  border-bottom: 0;
+  border-image-width: auto auto 0 auto;
+
   display: flex;
   align-items: start;
   justify-content: center;
-  background-color: transparent !important;
-  border-image-source: url('/src/assets/ucp3/tab.png') !important;
-  border-image-slice: 18 19 0 18 fill !important;
-  border-image-width: 20px 20px 0px 20px !important;
-  border-image-outset: 0px 0px 0px 0px !important;
-  border-image-repeat: repeat repeat !important;
-  border-width: 20px 20px 0px 20px !important;
+  background-color: transparent;
   height: 50px;
   width: 160px;
   text-align: center;
-  color: white !important;
+  color: white;
+  margin-bottom: 0;
+}
+
+.tab-link:hover {
+  border-bottom: 0;
+  border-image-width: auto auto 0 auto;
 }
 
 .tab-link.active {
-  background-color: transparent !important;
-  border-image-source: url('/src/assets/ucp3/tab_hover.png') !important;
-  border-style: solid;
+  border-bottom: 0;
+  border-image-width: auto auto 0 auto;
+
   height: 60px;
-  color: white !important;
 }

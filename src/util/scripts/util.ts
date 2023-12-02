@@ -24,3 +24,36 @@ export function getPropertyIfExistsAndTypeOf<
     ? Option.of(object[property] as JSType[T])
     : Option.ofEmpty();
 }
+
+// source: https://stackoverflow.com/a/51250818
+export function createSplitRange(left: number, right: number, parts: number) {
+  const internParts = Math.round(parts);
+  if (internParts < 1) {
+    return [];
+  }
+  switch (internParts) {
+    case 1:
+      return [left];
+    case 2:
+      return [left, right];
+    default: {
+      const result = [];
+      const delta = (right - left) / (internParts - 1);
+      let runValue = left;
+      // eslint-disable-next-line no-plusplus
+      for (let index = 0; index < internParts - 1; ++index) {
+        result.push(runValue);
+        runValue += delta;
+      }
+      result.push(right);
+      return result;
+    }
+  }
+}
+
+// https://www.sitepoint.com/delay-sleep-pause-wait/
+export async function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

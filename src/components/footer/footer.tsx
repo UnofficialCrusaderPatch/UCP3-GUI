@@ -1,72 +1,125 @@
-import { UCPState } from 'function/ucp-files/ucp-state';
+import './footer.css';
+
+import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
-import Result from 'util/structs/result';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import './footer.css';
-import {
-  useCurrentGameFolder,
-  useUCPState,
-  useUCPVersion,
-} from 'hooks/jotai/helper';
-import { RefAttributes, useState } from 'react';
+import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import { RefAttributes, Suspense, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   STATUS_BAR_MESSAGE_ATOM,
 } from 'function/global/global-atoms';
+import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
 
-const UCP_STATE_ARRAY = [
-  'wrong.folder',
-  'not.installed',
-  'active',
-  'inactive',
-  'bink.version.differences',
-  'unknown',
-];
+const UCP_STATE_MAP = new Map([
+  [UCPState.WRONG_FOLDER, 'wrong.folder'],
+  [UCPState.NOT_INSTALLED, 'not.installed'],
+  [UCPState.NOT_INSTALLED_WITH_REAL_BINK, 'not.installed'],
+  [UCPState.ACTIVE, 'active'],
+  [UCPState.INACTIVE, 'inactive'],
+  [UCPState.BINK_VERSION_DIFFERENCE, 'bink.version.differences'],
+  [UCPState.BINK_UCP_MISSING, 'bink.ucp.missing'],
+  [UCPState.BINK_REAL_COPY_MISSING, 'bink.real.copy.missing'],
+  [UCPState.INVALID, 'invalid'],
+  [UCPState.UNKNOWN, 'unknown'],
+]);
 
-const UCP_STATE_COLOR_ARRAY = ['red', 'red', 'green', 'yellow', 'red', 'red'];
+const UCP_STATE_COLOR_MAP = new Map([
+  [UCPState.WRONG_FOLDER, 'red'],
+  [UCPState.NOT_INSTALLED, 'red'],
+  [UCPState.NOT_INSTALLED_WITH_REAL_BINK, 'red'],
+  [UCPState.ACTIVE, 'green'],
+  [UCPState.INACTIVE, 'yellow'],
+  [UCPState.BINK_VERSION_DIFFERENCE, 'yellow'], // assumes manuel UCP update
+  [UCPState.BINK_UCP_MISSING, 'yellow'],
+  [UCPState.BINK_REAL_COPY_MISSING, 'yellow'],
+  [UCPState.INVALID, 'red'],
+  [UCPState.UNKNOWN, 'red'],
+]);
+
+function VersionAndState() {
+  const ucpState = useAtomValue(UCP_STATE_ATOM);
+  const ucpVersion = useAtomValue(UCP_VERSION_ATOM);
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  const { t } = useTranslation(['gui-general', 'gui-editor']);
+
+  let ucpFooterVersionString = null;
+  switch (ucpState) {
+    case UCPState.NOT_INSTALLED:
+    case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
+    case UCPState.BINK_UCP_MISSING:
+      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+      break;
+    case UCPState.ACTIVE:
+    case UCPState.INACTIVE:
+    case UCPState.BINK_REAL_COPY_MISSING:
+    case UCPState.BINK_VERSION_DIFFERENCE:
+      ucpFooterVersionString = ucpVersion.toString();
+      break;
+    default:
+      ucpFooterVersionString = '?';
+      break;
+  }
+
+  const renderTooltip = (
+    props: JSX.IntrinsicAttributes &
+      TooltipProps &
+      RefAttributes<HTMLDivElement>,
+  ) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Tooltip id="button-tooltip" {...props}>
+      {t('gui-editor:footer.state.prefix', {
+        state: t(
+          `gui-editor:footer.state.${
+            UCP_STATE_MAP.get(ucpState) ?? UCP_STATE_MAP.get(UCPState.UNKNOWN)
+          }`,
+        ),
+      })}
+    </Tooltip>
+  );
+
+  return (
+    <span className="footer__version-and-state">
+      <span>{`GUI ${'1.0.0'}`}</span>
+      <span className="px-3">{`UCP ${ucpFooterVersionString}`}</span>
+
+      <CircleFill
+        color={
+          UCP_STATE_COLOR_MAP.get(ucpState) ??
+          UCP_STATE_COLOR_MAP.get(UCPState.UNKNOWN)
+        }
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            t('gui-editor:footer.state.prefix', {
+              state: t(
+                `gui-editor:footer.state.${
+                  UCP_STATE_MAP.get(ucpState) ??
+                  UCP_STATE_MAP.get(UCPState.UNKNOWN)
+                }`,
+              ),
+            }),
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    </span>
+  );
+}
 
 export default function Footer() {
   const currentFolder = useCurrentGameFolder();
-  const [ucpStateHandlerResult] = useUCPState();
-  const [ucpVersionResult] = useUCPVersion();
   const [isFooterOpen, setFooterOpen] = useState(true);
 
   const configurationWarnings = useAtomValue(
     CONFIGURATION_WARNINGS_REDUCER_ATOM,
   );
-
-  const { t } = useTranslation(['gui-general', 'gui-editor']);
-
-  const state = ucpStateHandlerResult
-    .getOrReceive(Result.emptyErr)
-    .ok()
-    .map((handler) => handler.state)
-    .getOrElse(UCPState.UNKNOWN);
-
-  let ucpFooterVersionString = null;
-  if (ucpVersionResult.isEmpty()) {
-    ucpFooterVersionString = t('gui-general:loading');
-  } else {
-    const ucpVersion = ucpVersionResult.get().getOrThrow();
-    switch (state) {
-      case UCPState.NOT_INSTALLED:
-        ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
-        break;
-      case UCPState.ACTIVE:
-        ucpFooterVersionString = ucpVersion.toString();
-        break;
-      case UCPState.INACTIVE:
-        ucpFooterVersionString = ucpVersion.toString();
-        break;
-      default:
-        ucpFooterVersionString = '?    ';
-        break;
-    }
-  }
 
   const warningCount = Object.values(configurationWarnings)
     .map((v) => (v.level === 'warning' ? 1 : 0))
@@ -87,20 +140,7 @@ export default function Footer() {
     )}`;
   }
 
-  const renderTooltip = (
-    props: JSX.IntrinsicAttributes &
-      TooltipProps &
-      RefAttributes<HTMLDivElement>,
-  ) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Tooltip id="button-tooltip" {...props}>
-      {t('gui-editor:footer.state.prefix', {
-        state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
-      })}
-    </Tooltip>
-  );
-
-  const [msg, setStatusBarMessage] = useAtom(STATUS_BAR_MESSAGE_ATOM);
+  const msg = useAtomValue(STATUS_BAR_MESSAGE_ATOM);
   const statusBarMessage =
     msg === undefined || msg.length === 0 ? displayCurrentFolder : msg;
 
@@ -108,54 +148,29 @@ export default function Footer() {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       role="button"
-      className={`footer${isFooterOpen ? '' : ' footer-closed'}`}
+      className={`ornament-border fs-8 footer${
+        isFooterOpen ? '' : ' footer-closed'
+      }`}
       onClick={() => setFooterOpen(!isFooterOpen)}
     >
-      <div className="d-flex p-1 px-2 fs-8 flex-wrap justify-content-end">
-        <span
-          className="me-auto"
-          data-toggle="tooltip"
-          data-placement="top"
-          title={currentFolder}
-        >
-          {/* t('gui-editor:footer.folder') */}
-          <span className="px-2 fst-italic">{statusBarMessage}</span>
-        </span>
-        {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
+      <span
+        className="px-2 me-auto"
+        data-toggle="tooltip"
+        data-placement="top"
+        title={currentFolder}
+      >
+        <span className="fst-italic">{statusBarMessage}</span>
+      </span>
+      {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
         <span className="px-2">
           {t('gui-general:warnings', { count: warningCount })}
         </span>
         <span className="px-2">
           {t('gui-general:errors', { count: errorCount })}
         </span> */}
-        <span className="px-2">{`GUI ${'1.0.0'}`}</span>
-        <span className="px-2">{`UCP ${ucpFooterVersionString}`}</span>
-
-        <span className="px-2">
-          {/* Option 1 */}
-          {/* <OverlayTrigger
-            placement="left"
-            delay={{ show: 250, hide: 400 }}
-            overlay={renderTooltip}
-          >
-            <CircleFill color={UCP_STATE_COLOR_ARRAY[state]} />
-          </OverlayTrigger> */}
-          {/* Option 2 */}
-          <CircleFill
-            color={UCP_STATE_COLOR_ARRAY[state]}
-            onMouseEnter={() => {
-              setStatusBarMessage(
-                t('gui-editor:footer.state.prefix', {
-                  state: t(`gui-editor:footer.state.${UCP_STATE_ARRAY[state]}`),
-                }),
-              );
-            }}
-            onMouseLeave={() => {
-              setStatusBarMessage(undefined);
-            }}
-          />
-        </span>
-      </div>
+      <Suspense>
+        <VersionAndState />
+      </Suspense>
     </div>
   );
 }

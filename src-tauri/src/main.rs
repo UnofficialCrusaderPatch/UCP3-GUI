@@ -4,6 +4,7 @@
 )]
 
 mod constants;
+mod file_support;
 mod gui_config;
 mod hash_utils;
 mod logging;
@@ -18,7 +19,10 @@ fn main() {
         .plugin(zip_support::init())
         .invoke_handler(tauri::generate_handler![
             hash_utils::get_sha256_of_file,
-            run_program::os_open_program
+            run_program::os_open_program,
+            file_support::slashify,
+            file_support::canonicalize,
+            file_support::read_and_filter_dir
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

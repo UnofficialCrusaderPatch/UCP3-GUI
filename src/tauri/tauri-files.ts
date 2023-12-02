@@ -31,6 +31,11 @@ import {
 } from 'yaml';
 import Result from 'util/structs/result';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
+import {
+  readAndFilterPaths as invokeReadAndFilterPaths,
+  slashify as invokeSlashify,
+  canonicalize as invokeCanonicalize,
+} from './tauri-invoke';
 
 // WARNING: Tauri funcs lie about their return.
 // Void Promises return "null" as result instead of undefined.
@@ -46,6 +51,17 @@ export type Error = unknown;
 // CODE
 
 const BASE_FOLDER = 'UnofficialCrusaderPatch3';
+
+export async function slashify(path: string): Promise<Result<string, Error>> {
+  return Result.tryAsync(invokeSlashify, path);
+}
+
+export async function canonicalize(
+  path: string,
+  slashifyPath?: boolean,
+): Promise<Result<string, Error>> {
+  return Result.tryAsync(invokeCanonicalize, path, slashifyPath);
+}
 
 // only proxy
 export async function onFsExists(
@@ -174,6 +190,10 @@ export async function writeJson(
 
 export async function readDir(dir: string, options?: FsDirOptions | undefined) {
   return Result.tryAsync(tauriReadDir, dir, options);
+}
+
+export async function readAndFilterPaths(dir: string, pattern: string) {
+  return Result.tryAsync(invokeReadAndFilterPaths, dir, pattern);
 }
 
 export async function getDownloadFolder() {

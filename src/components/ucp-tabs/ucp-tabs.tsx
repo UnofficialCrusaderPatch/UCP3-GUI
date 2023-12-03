@@ -6,15 +6,15 @@ import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import Logger from 'util/scripts/logging';
-import { useAtom, useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import {
-  DOES_UCP_FOLDER_EXIST_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
   INIT_DONE,
   INIT_RUNNING,
 } from 'function/global/global-atoms';
 
+import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/game-folder/state';
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
@@ -23,13 +23,15 @@ import Launch from './launch/launch';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
-export default function UcpTabs() {
-  const isInit = useAtomValue(INIT_DONE);
-  const isInitRunning = useAtomValue(INIT_RUNNING);
+const DISPLAY_CONFIG_TABS_ATOM = atom(
+  (get) => get(INIT_DONE) && !get(INIT_RUNNING),
+);
 
+export default function UcpTabs() {
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
 
-  const displayConfigTabs = isInit && !isInitRunning;
+  const displayConfigTabs = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
+  console.log('display', displayConfigTabs);
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 

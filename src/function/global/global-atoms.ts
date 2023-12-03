@@ -59,8 +59,6 @@ const extensionStateReducer = (
 export const INIT_DONE = atom(false);
 export const INIT_RUNNING = atom(false);
 export const UCP_CONFIG_FILE_ATOM = atom('');
-export const GAME_FOLDER_ATOM = atom('');
-
 // reducer atoms
 
 export const CONFIGURATION_REDUCER_ATOM = atomWithReducer(
@@ -157,21 +155,3 @@ export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
   });
 
 export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);
-
-const DOES_UCP_FOLDER_EXIST_ASYNC_ATOM = atom(async (get) => {
-  const folder = get(GAME_FOLDER_ATOM);
-  if (
-    folder === undefined ||
-    folder === null ||
-    folder.length === 0 ||
-    folder === ''
-  )
-    return false;
-
-  const result = await exists(`${folder}/ucp`);
-  return result;
-});
-
-export const DOES_UCP_FOLDER_EXIST_ATOM = loadable(
-  DOES_UCP_FOLDER_EXIST_ASYNC_ATOM,
-);

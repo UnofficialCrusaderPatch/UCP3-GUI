@@ -4,7 +4,7 @@ import Option from 'util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
 import { UCP_VERSION_FILE } from 'function/global/constants/file-constants';
 import { atom } from 'jotai';
-import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
+import { GAME_FOLDER_ATOM } from 'function/game-folder/state';
 import { atomWithRefresh } from 'hooks/jotai/base';
 import Logger from 'util/scripts/logging';
 

@@ -3,7 +3,7 @@ import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
 import { getHexHashOfFile } from 'util/scripts/hash';
 import Logger from 'util/scripts/logging';
 import { atomWithRefresh, getStore } from 'hooks/jotai/base';
-import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
+import { GAME_FOLDER_ATOM } from 'function/game-folder/state';
 import { atom } from 'jotai';
 import { getTranslation } from 'localization/i18n';
 import { loadable } from 'jotai/utils';

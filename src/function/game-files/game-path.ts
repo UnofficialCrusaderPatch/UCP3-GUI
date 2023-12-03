@@ -1,4 +1,4 @@
-import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
+import { GAME_FOLDER_ATOM } from 'function/game-folder/state';
 import { atom } from 'jotai';
 import { resolvePath } from 'tauri/tauri-files';
 

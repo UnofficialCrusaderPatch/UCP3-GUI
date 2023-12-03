@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/require-default-props */
 /* eslint-disable func-names */
 /* eslint-disable react/jsx-props-no-spreading */
@@ -13,7 +14,7 @@ import {
   EXTREME_VERSION_ATOM,
   VANILLA_VERSION_ATOM,
 } from 'function/game-files/game-version-state';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
@@ -23,6 +24,67 @@ interface LaunchOptions {
   setArgs: (...args: string[]) => void;
   getEnvs: () => Record<string, string>;
   setEnvs: (envs: Record<string, string>) => void;
+}
+
+function createLaunchOptionFuncs(
+  id: string,
+  internalArgs: Record<string, string[]>,
+  setInternalArgs: (internalArgs: Record<string, string[]>) => void,
+  internalEnvs: Record<string, Record<string, string>>,
+  setInternalEnvs: (
+    internalEnvs: Record<string, Record<string, string>>,
+  ) => void,
+): LaunchOptions {
+  return {
+    getArgs: () => internalArgs[id] ?? [],
+    setArgs: (...args: string[]) =>
+      setInternalArgs({ ...internalArgs, [id]: args }),
+    getEnvs: () => internalEnvs[id] ?? {},
+    setEnvs: (envs: Record<string, string>) =>
+      setInternalEnvs({ ...internalEnvs, [id]: envs }),
+  };
+}
+
+function FreeArgs(props: LaunchOptions) {
+  const { getArgs, setArgs } = props;
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  return (
+    <div className="launch__options__box--free-args">
+      <form
+        ref={formRef}
+        onSubmit={(e) => {
+          e.preventDefault();
+
+          const form = e.target as HTMLFormElement;
+          const formData = new FormData(form);
+          const allArgs = formData.getAll('arg') as string[];
+          setArgs(...allArgs.filter((arg) => !!arg));
+        }}
+        onBlur={(event) => {
+          if (event.currentTarget.contains(event.relatedTarget)) {
+            return;
+          }
+          // source: https://stackoverflow.com/a/65667238
+          formRef.current?.dispatchEvent(
+            new Event('submit', { cancelable: true, bubbles: true }),
+          );
+        }}
+      >
+        {getArgs().map((arg) => (
+          <input
+            key={crypto.randomUUID()} // needed, since there are duplicates, etc
+            type="text"
+            name="arg"
+            defaultValue={arg}
+          />
+        ))}
+        <input key={crypto.randomUUID()} type="text" name="arg" />
+        <button type="submit" className="d-none" />
+      </form>
+    </div>
+  );
 }
 
 function FreeEnvsForm(props: {
@@ -68,7 +130,6 @@ function FreeEnvsForm(props: {
         onChange={(event) => {
           setKey(event.target.value);
         }}
-        placeholder=""
       />
       <input
         type="text"
@@ -77,7 +138,6 @@ function FreeEnvsForm(props: {
         onChange={(event) => {
           setValue(event.target.value);
         }}
-        placeholder=""
       />
       <button type="submit" />
     </form>
@@ -112,7 +172,7 @@ function FreeEnvs(props: LaunchOptions) {
   };
 
   return (
-    <div>
+    <div className="launch__options__box--free-envs">
       {Object.entries(getEnvs()).map(([key, value]) => (
         <FreeEnvsForm
           key={key}
@@ -124,25 +184,6 @@ function FreeEnvs(props: LaunchOptions) {
       <FreeEnvsForm handleEnvsChange={handleEnvsChange} />
     </div>
   );
-}
-
-function createLaunchOptionFuncs(
-  id: string,
-  internalArgs: Record<string, string[]>,
-  setInternalArgs: (internalArgs: Record<string, string[]>) => void,
-  internalEnvs: Record<string, Record<string, string>>,
-  setInternalEnvs: (
-    internalEnvs: Record<string, Record<string, string>>,
-  ) => void,
-): LaunchOptions {
-  return {
-    getArgs: () => internalArgs[id] ?? {},
-    setArgs: (...args: string[]) =>
-      setInternalArgs({ ...internalArgs, [id]: args }),
-    getEnvs: () => internalEnvs[id] ?? {},
-    setEnvs: (envs: Record<string, string>) =>
-      setInternalEnvs({ ...internalEnvs, [id]: envs }),
-  };
 }
 
 export default function Launch() {
@@ -179,6 +220,15 @@ export default function Launch() {
       <div className="flex-default launch__options">
         <h4>{t('gui-launch:launch.options')}</h4>
         <div className="parchment-box launch__options__box">
+          <FreeArgs
+            {...createLaunchOptionFuncs(
+              'FREE_ARGS',
+              internalArgs,
+              setInternalArgs,
+              internalEnvs,
+              setInternalEnvs,
+            )}
+          />
           <FreeEnvs
             {...createLaunchOptionFuncs(
               'FREE_ENVS',
@@ -188,11 +238,6 @@ export default function Launch() {
               setInternalEnvs,
             )}
           />
-          {/* 
-            Insert options that change start params or environment vars.
-            Do not forget that setArgs and setEnvs need to be called with
-            a new object to trigger change.
-          */}
         </div>
       </div>
     </div>

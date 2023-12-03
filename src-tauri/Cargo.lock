@@ -3572,6 +3572,7 @@ version = "0.0.13"
 dependencies = [
  "anyhow",
  "dunce",
+ "glob",
  "log",
  "log4rs",
  "path-slash",

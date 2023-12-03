@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
 import ExtensionPack from 'function/extensions/extension-pack';
@@ -29,6 +28,7 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
 import { ZipWriter } from 'util/structs/zip-handler';
+import { useCurrentGameFolder } from 'function/game-folder/state';
 import {
   ActiveExtensionElement,
   ExtensionNameList,

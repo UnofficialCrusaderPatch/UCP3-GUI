@@ -1,4 +1,5 @@
 /* eslint-disable import/prefer-default-export */
+import { P } from '@tauri-apps/api/event-41a9edf5';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { Extension } from 'config/ucp/common';
@@ -13,9 +14,11 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
+  GAME_FOLDER_ATOM,
 } from 'function/global/global-atoms';
 import { getStore } from 'hooks/jotai/base';
 import i18next, { exists } from 'i18next';
+import { atom, useAtomValue } from 'jotai';
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
 
 const LOGGER = new Logger('game-folder/state.ts');
@@ -105,4 +108,23 @@ export async function initializeGameFolder(newFolder: string) {
 
   getStore().set(INIT_DONE, true);
   getStore().set(INIT_RUNNING, false);
+}
+
+export const GAME_FOLDER_INTERFACE_ATOM = atom(
+  async (get) => get(GAME_FOLDER_ATOM),
+  async (get, set, newValue: string) => {
+    const oldValue = get(GAME_FOLDER_ATOM);
+
+    if (newValue === oldValue || get(INIT_RUNNING)) {
+      return;
+    }
+
+    await initializeGameFolder(newValue);
+
+    set(GAME_FOLDER_ATOM, newValue);
+  },
+);
+
+export function useCurrentGameFolder() {
+  return useAtomValue(GAME_FOLDER_ATOM); // only a proxy
 }

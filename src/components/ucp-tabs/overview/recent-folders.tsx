@@ -4,19 +4,20 @@
 import './recent-folders.css';
 
 import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
+import { GAME_FOLDER_INTERFACE_ATOM } from 'function/game-folder/state';
 import {
   createEditorWindow,
   reloadCurrentWindow,
 } from 'function/window-actions';
-import { useGameFolder } from 'hooks/jotai/helper';
 import { useRecentFolders } from 'hooks/jotai/hooks';
+import { useAtom } from 'jotai';
 import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
 
 export default function RecentFolders() {
-  const [currentFolder, setFolder] = useGameFolder();
+  const [currentFolder, setFolder] = useAtom(GAME_FOLDER_INTERFACE_ATOM);
   const [recentFolderResult] = useRecentFolders();
   const [showRecentFolders, setShowRecentFolders] = useState(false);
 

@@ -7,7 +7,6 @@ import './config-editor.css';
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 
 import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
 import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
@@ -27,6 +26,7 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
+import { useCurrentGameFolder } from 'function/game-folder/state';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';

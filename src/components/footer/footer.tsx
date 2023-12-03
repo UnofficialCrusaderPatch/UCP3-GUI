@@ -4,7 +4,6 @@ import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { RefAttributes, Suspense, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
@@ -14,6 +13,7 @@ import {
   STATUS_BAR_MESSAGE_ATOM,
 } from 'function/global/global-atoms';
 import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
+import { useCurrentGameFolder } from 'function/game-folder/state';
 
 const UCP_STATE_MAP = new Map([
   [UCPState.WRONG_FOLDER, 'wrong.folder'],

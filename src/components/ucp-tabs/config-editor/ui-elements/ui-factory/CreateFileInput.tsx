@@ -12,9 +12,9 @@ import {
 } from 'function/global/global-atoms';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { openFileDialog } from 'tauri/tauri-dialog';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { MouseEvent } from 'react';
 import Logger from 'util/scripts/logging';
+import { useCurrentGameFolder } from 'function/game-folder/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';

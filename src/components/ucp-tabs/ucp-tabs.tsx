@@ -31,7 +31,6 @@ export default function UcpTabs() {
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
 
   const displayConfigTabs = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
-  console.log('display', displayConfigTabs);
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 

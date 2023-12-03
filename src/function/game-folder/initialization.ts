@@ -1,3 +1,4 @@
+import { exists } from '@tauri-apps/api/fs';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { Extension } from 'config/ucp/common';
@@ -14,7 +15,7 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
 import { getStore } from 'hooks/jotai/base';
-import i18next, { exists } from 'i18next';
+import i18next from 'i18next';
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
 
 export const LOGGER = new Logger('game-folder/initialization.ts');

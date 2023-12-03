@@ -184,7 +184,12 @@ type Extension = {
   path: string;
   configEntries: { [key: string]: ConfigEntry };
   optionEntries: { [key: string]: OptionEntry };
-  io: (cb: ExtensionIOCallback) => Promise<void>;
+  io: {
+    isZip: boolean;
+    isDirectory: boolean;
+    path: string;
+    handle: (cb: ExtensionIOCallback) => Promise<void>;
+  };
 };
 
 type Configs = { [key: string]: ConfigEntry }[];

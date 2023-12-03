@@ -6,6 +6,7 @@ import {
   readTextFile,
 } from 'tauri/tauri-files';
 import { FileEntry } from '@tauri-apps/api/fs';
+import { readAndFilterPaths } from 'tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
 import { globToRegExp } from './glob';
 
@@ -88,26 +89,27 @@ class DirectoryExtensionHandle implements ExtensionHandle {
   }
 
   async listEntries(
-    globPattern: string | undefined,
+    basePath: string,
+    globPattern?: string | undefined,
   ): Promise<ExtensionFileHandle[]> {
-    const regex = globPattern !== undefined ? globToRegExp(globPattern) : null;
-    const fileEntries = collectFileEntries(
-      this.path,
-      (await readDir(this.path, { recursive: true }))
-        .ok()
-        .getOrReceive(() => []) as FileEntry[],
-    ).filter((fe) => (regex !== null ? fe.path.match(regex) !== null : true));
+    // new code, half implemented
+    const path = `${this.path}/${basePath}`;
+    const r = await readAndFilterPaths(path, globPattern);
 
-    return fileEntries.map((fileEntry: FileEntry) => {
-      const isDirectory =
-        fileEntry.children !== null && fileEntry.children !== undefined;
+    const isDirectory = path.endsWith('/');
 
-      return new DirectoryExtensionFileHandle(
-        this,
-        fileEntry.path,
-        isDirectory,
-      );
-    });
+    // This hack is here to acommodate symlink situations
+    const makeRelative = (p: string) => `ucp/${p.split('/ucp/', 2)[1]}`;
+
+    return r.map(
+      (p: string) =>
+        new DirectoryExtensionFileHandle(
+          this,
+          // This hack is here to acommodate symlink situations
+          makeRelative(p),
+          isDirectory,
+        ),
+    );
   }
 
   async doesEntryExist(path: string): Promise<boolean> {

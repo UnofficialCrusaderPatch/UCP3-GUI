@@ -8,6 +8,7 @@ import {
 } from 'function/global/global-atoms';
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
+import { readAndFilterPaths, slashify } from 'tauri/tauri-invoke';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
@@ -62,13 +63,6 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
 
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, res);
   ConsoleLogger.debug('New extension state', res);
-
-  console.log(
-    'result: ',
-    await (
-      await createReceivePluginPathsFunction(getStore().get(GAME_FOLDER_ATOM))
-    )('resources/ai/', '**/meta.json'),
-  );
 };
 
 export default inactiveExtensionElementClickCallback;

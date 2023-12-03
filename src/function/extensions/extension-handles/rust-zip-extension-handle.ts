@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { ZipReader } from 'util/structs/zip-handler';
 import Logger from 'util/scripts/logging';
+import { slashify } from 'tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
 
 const LOGGER = new Logger('zip-extension-handle.ts');
@@ -26,6 +27,24 @@ class RustZipExtensionFileHandle implements ExtensionFileHandle {
     return this.extensionHandle.getBinaryContents(this.path);
   }
 }
+
+const detectDirectories = (entries: string[]) => {
+  const directories: Record<string, boolean> = {};
+  entries.forEach((entry: string) => {
+    const parts = entry.split('/');
+    if (parts.length > 1) {
+      const part = `${parts.slice(0, -1).join('/')}/`;
+      if (directories[part] === false) {
+        const msg = `Error while listing entries. Path ${entry} cannot both be a file and a directory`;
+        LOGGER.msg(msg).error();
+        throw Error(msg);
+      }
+      directories[part] = true;
+    }
+  });
+
+  return directories;
+};
 
 class RustZipExtensionHandle implements ExtensionHandle {
   #zip: ZipReader;
@@ -68,24 +87,14 @@ class RustZipExtensionHandle implements ExtensionHandle {
   }
 
   async listEntries(
+    basePath: string,
     globPattern: string | undefined,
   ): Promise<ExtensionFileHandle[]> {
-    const entries = await this.#zip.getEntryNames(globPattern);
+    const entries = await this.#zip.getEntryNames(
+      await slashify(`${basePath}/${globPattern || ''}`),
+    );
 
-    const directories: Record<string, boolean> = {};
-
-    entries.forEach((entry: string) => {
-      const parts = entry.split('/');
-      if (parts.length > 1) {
-        const part = `${parts.slice(0, -1).join('/')}/`;
-        if (directories[part] === false) {
-          const msg = `Error while listing entries of ${this.path}. Path ${entry} cannot both be a file and a directory`;
-          LOGGER.msg(msg).error();
-          throw Error(msg);
-        }
-        directories[part] = true;
-      }
-    });
+    const directories: Record<string, boolean> = detectDirectories(entries);
 
     return entries.map(
       (entry: string) =>

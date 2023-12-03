@@ -7,6 +7,7 @@ interface ExtensionHandle {
   clone(): Promise<ExtensionHandle>;
 
   listEntries(
+    basePath: string,
     globPattern: string | undefined,
   ): Promise<Array<ExtensionFileHandle>>;
 }

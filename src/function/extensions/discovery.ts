@@ -15,6 +15,7 @@ import {
 import Logger from 'util/scripts/logging';
 import languages from 'localization/languages.json';
 import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
+import { canonicalize, slashify } from 'tauri/tauri-invoke';
 import ZipExtensionHandle from './extension-handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from './extension-handles/directory-extension-handle';
 import { changeLocale } from './locale';
@@ -217,10 +218,11 @@ async function getExtensionHandles(ucpFolder: string) {
     dirEnts.map(async (fe: FileEntry) => {
       const type = modDirEnts.indexOf(fe) === -1 ? 'plugin' : 'module';
 
-      const folder =
+      const folder = await slashify(
         type === 'module'
           ? `${ucpFolder}/modules/${fe.name}`
-          : `${ucpFolder}/plugins/${fe.name}`;
+          : `${ucpFolder}/plugins/${fe.name}`,
+      );
 
       if (fe.name !== undefined && fe.name.endsWith('.zip')) {
         // TODO: Do hash check here!
@@ -274,12 +276,8 @@ const Discovery = {
         definition.dependencies =
           definition.dependencies || definition.depends || [];
 
-        const ext = {
-          name,
-          version,
-          type: assumedType,
-          definition,
-          io: async (cb: ExtensionIOCallback) => {
+        const io = {
+          handle: async (cb: ExtensionIOCallback) => {
             const neh = await eh.clone();
             try {
               await cb(neh);
@@ -287,6 +285,17 @@ const Discovery = {
               neh.close();
             }
           },
+          isZip: eh instanceof ZipExtensionHandle,
+          isDirectory: eh instanceof DirectoryExtensionHandle,
+          path: eh.path,
+        };
+
+        const ext = {
+          name,
+          version,
+          type: assumedType,
+          definition,
+          io,
         } as unknown as Extension;
 
         const uiRaw = await readUISpec(eh);

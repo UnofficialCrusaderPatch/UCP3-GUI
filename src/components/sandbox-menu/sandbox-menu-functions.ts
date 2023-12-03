@@ -7,6 +7,7 @@ import { getStore } from 'hooks/jotai/base';
 import i18next from 'i18next';
 import { useAtomValue } from 'jotai';
 import { readTextFile, receiveAssetUrl, resolvePath } from 'tauri/tauri-files';
+import { canonicalize, slashify } from 'tauri/tauri-invoke';
 import Logger from 'util/scripts/logging';
 
 const LOGGER = new Logger('sandbox-menu-functions.ts');
@@ -64,25 +65,30 @@ export function createGetAssetUrlFunction(currentFolder: string) {
 export async function createReceivePluginPathsFunction(currentFolder: string) {
   const { activeExtensions } = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
+  const gameFolder = await slashify(currentFolder);
+
   return async (basePath: string, pathPattern: string) => {
-    const pattern =
-      basePath.length > 0 ? `${basePath}/${pathPattern}` : pathPattern;
-
     const result = await Promise.all(
-      activeExtensions.map(async (extension: Extension) => {
-        let entries: FileEntry[] = [];
-        let path: string = '';
+      activeExtensions
+        // // Module paths cannot be returned usually because they live inside zip files?
+        // .filter((e) => e.type === 'plugin')
+        .map(async (extension: Extension) => {
+          let entries: FileEntry[] = [];
+          let path: string = '';
 
-        await extension.io(async (extensionHandle) => {
-          entries = await extensionHandle.listEntries(pattern);
-          [, path] = extensionHandle.path.split(`${currentFolder}/`);
-        });
+          await extension.io.handle(async (extensionHandle) => {
+            entries = await extensionHandle.listEntries(basePath, pathPattern);
+            [, path] = extensionHandle.path.split(`${gameFolder}/`, 2);
+          });
 
-        return {
-          path,
-          paths: entries.map((e) => e.path),
-        };
-      }),
+          const paths = entries.map((e) => e.path);
+
+          return {
+            extension: JSON.parse(JSON.stringify(extension)),
+            path,
+            paths,
+          };
+        }),
     );
 
     return result.filter(({ paths }) => paths.length > 0);

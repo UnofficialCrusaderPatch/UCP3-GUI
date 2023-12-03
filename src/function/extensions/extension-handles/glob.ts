@@ -2,6 +2,7 @@
 
 const ILLEGAL_CHARACTERS = ['[', ']', '(', ')', '!'];
 
+/** @deprecated */
 const globToRegExp = (glob: string) => {
   let regex = '';
 

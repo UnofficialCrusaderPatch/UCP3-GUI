@@ -6,7 +6,7 @@ use tauri::{
     AppHandle, FsScope, Manager,
 };
 
-use crate::{constants::PATH_MATCH_OPTIONS, utils::get_allowed_path_with_string_error};
+use crate::{constants::PATH_MATCH_OPTIONS, utils::{get_allowed_path_with_string_error, get_allowed_path}};
 
 fn fill_with_paths_with_slash(
     fs_scope: &FsScope,
@@ -32,15 +32,19 @@ pub async fn read_and_filter_dir(
     base: &str,
     pattern: &str,
 ) -> Result<Vec<String>, String> {
-    let fs_scope = app_handle.fs_scope();
-    if !fs_scope.is_allowed(base) {
-        return Ok(vec![]);
-    }
-    let path = dunce::canonicalize(base).map_err(|err| err.to_string())?;
+    let base_path = match get_allowed_path(&app_handle, base) {
+        Ok(path) => if path.exists() {
+            path
+        } else {
+            return Ok(vec![])
+        }
+        Err(_err) => return Ok(vec![]),
+    };
+    let path = dunce::canonicalize(base_path).map_err(|err| err.to_string())?;
 
     let found_entries = read_dir(path, true).map_err(|err| err.to_string())?;
     let mut found_paths = vec![];
-    fill_with_paths_with_slash(&fs_scope, &found_entries, &mut found_paths);
+    fill_with_paths_with_slash(&app_handle.fs_scope(), &found_entries, &mut found_paths);
 
     if !pattern.is_empty() {
         let glob_pattern = GlobPattern::new(pattern).map_err(|err| err.to_string())?;

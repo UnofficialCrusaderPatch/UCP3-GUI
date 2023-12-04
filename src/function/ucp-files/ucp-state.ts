@@ -3,7 +3,7 @@ import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
 import { getHexHashOfFile } from 'util/scripts/hash';
 import Logger from 'util/scripts/logging';
 import { atomWithRefresh, getStore } from 'hooks/jotai/base';
-import { GAME_FOLDER_ATOM } from 'function/game-folder/state';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from 'function/game-folder/state';
 import { atom } from 'jotai';
 import { getTranslation } from 'localization/i18n';
 import { loadable } from 'jotai/utils';
@@ -45,13 +45,13 @@ async function getBinkPath(
 }
 
 const BINK_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_ATOM), BINK_FILENAME),
+  getBinkPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM), BINK_FILENAME),
 );
 const BINK_REAL_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_ATOM), REAL_BINK_FILENAME),
+  getBinkPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM), REAL_BINK_FILENAME),
 );
 const BINK_UCP_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_ATOM), UCP_BINK_FILENAME),
+  getBinkPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM), UCP_BINK_FILENAME),
 );
 
 export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {

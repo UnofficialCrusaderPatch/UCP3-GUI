@@ -9,7 +9,7 @@ import { initializeGameFolder } from './initialization';
 
 export const LOGGER = new Logger('game-folder/state.ts');
 
-export const GAME_FOLDER_ATOM = atom('');
+const GAME_FOLDER_ATOM = atom('');
 
 export const GAME_FOLDER_INTERFACE_ASYNC_ATOM = atom(
   (get) => get(GAME_FOLDER_ATOM),
@@ -32,7 +32,7 @@ export const GAME_FOLDER_LOADED_ASYNC_ATOM = atom((get) =>
 export const GAME_FOLDER_LOADED_ATOM = loadable(GAME_FOLDER_LOADED_ASYNC_ATOM);
 
 export function useCurrentGameFolder() {
-  return useAtomValue(GAME_FOLDER_ATOM); // only a proxy
+  return useAtomValue(GAME_FOLDER_INTERFACE_ASYNC_ATOM); // only a proxy
 }
 
 const DOES_UCP_FOLDER_EXIST_ASYNC_ATOM = atom(async (get) => {

@@ -12,7 +12,7 @@ export const extensionStateReducer = (
   return state;
 };
 
-export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
+export const EXTENSION_STATE_INTERNAL_ATOM = atomWithReducer(
   {
     extensions: [],
     onlineAvailableExtensions: [],
@@ -31,9 +31,11 @@ export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
 );
 
 export const EXTENSION_STATE_INTERFACE_ATOM = atom(
-  (get) => get(EXTENSION_STATE_REDUCER_ATOM),
+  (get) => get(EXTENSION_STATE_INTERNAL_ATOM),
   (get, set, newValue: ExtensionsState) => {
     propagateActiveExtensionsChange(newValue);
-    set(EXTENSION_STATE_REDUCER_ATOM, newValue);
+    set(EXTENSION_STATE_INTERNAL_ATOM, newValue);
   },
 );
+
+export const EXTENSION_STATE_REDUCER_ATOM = EXTENSION_STATE_INTERFACE_ATOM;

@@ -7,8 +7,7 @@ import { CircleFill } from 'react-bootstrap-icons';
 import { RefAttributes, Suspense, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { CONFIGURATION_WARNINGS_REDUCER_ATOM } from 'function/configuration/state';
 import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
 import { useCurrentGameFolder } from 'function/game-folder/state';
@@ -38,6 +37,8 @@ const UCP_STATE_COLOR_MAP = new Map([
   [UCPState.INVALID, 'red'],
   [UCPState.UNKNOWN, 'red'],
 ]);
+
+export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);
 
 function VersionAndState() {
   const ucpState = useAtomValue(UCP_STATE_ATOM);

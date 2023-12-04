@@ -3,7 +3,7 @@ import RangeSlider from 'react-bootstrap-range-slider';
 
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import { useState } from 'react';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,

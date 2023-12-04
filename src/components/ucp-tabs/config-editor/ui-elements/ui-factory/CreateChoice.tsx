@@ -1,6 +1,5 @@
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -10,6 +9,7 @@ import {
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';

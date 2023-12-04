@@ -1,6 +1,5 @@
 import { Extension } from 'config/ucp/common';
 import { loadable } from 'jotai/utils';
-import { atom } from 'jotai';
 import { exists } from '@tauri-apps/api/fs';
 import {
   ArrayReducerArgs,
@@ -14,6 +13,7 @@ import {
   Warning,
 } from './types';
 
+// eslint-disable-next-line import/prefer-default-export
 export function KeyValueReducer<Type>() {
   return (
     state: KeyValueReducerState<Type>,
@@ -35,5 +35,3 @@ function ArrayReducer<Type>() {
     newState: ArrayReducerArgs<Type>,
   ) => [...newState];
 }
-
-export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);

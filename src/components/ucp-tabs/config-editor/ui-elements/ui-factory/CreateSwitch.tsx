@@ -3,7 +3,7 @@ import { DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,

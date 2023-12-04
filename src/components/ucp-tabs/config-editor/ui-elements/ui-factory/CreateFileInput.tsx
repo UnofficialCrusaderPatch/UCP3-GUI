@@ -1,7 +1,7 @@
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 
 import { Button, Form } from 'react-bootstrap';
-import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,

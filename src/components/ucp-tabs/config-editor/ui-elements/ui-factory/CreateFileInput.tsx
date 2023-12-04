@@ -1,15 +1,15 @@
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 
 import { Button, Form } from 'react-bootstrap';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  STATUS_BAR_MESSAGE_ATOM,
-} from 'function/global/global-atoms';
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+} from 'function/configuration/state';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import { MouseEvent } from 'react';

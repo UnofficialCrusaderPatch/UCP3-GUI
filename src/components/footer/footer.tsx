@@ -8,10 +8,8 @@ import { RefAttributes, Suspense, useState } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
 import { useAtomValue, useSetAtom } from 'jotai';
-import {
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  STATUS_BAR_MESSAGE_ATOM,
-} from 'function/global/global-atoms';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
+import { CONFIGURATION_WARNINGS_REDUCER_ATOM } from 'function/configuration/state';
 import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 

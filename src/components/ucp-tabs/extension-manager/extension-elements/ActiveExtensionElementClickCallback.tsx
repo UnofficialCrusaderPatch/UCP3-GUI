@@ -1,6 +1,6 @@
 import { Extension } from 'config/ucp/common';
 import { getStore } from 'hooks/jotai/base';
-import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/global/global-atoms';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,

@@ -39,3 +39,24 @@ export const EXTENSION_STATE_INTERFACE_ATOM = atom(
 );
 
 export const EXTENSION_STATE_REDUCER_ATOM = EXTENSION_STATE_INTERFACE_ATOM;
+export type PreferredExtensionVersionDictionary = {
+  [extensionName: string]: string;
+};
+export const PREFERRED_EXTENSION_VERSION_ATOM =
+  atom<PreferredExtensionVersionDictionary>({});
+export type AvailableExtensionVersionsDictionary = {
+  [extensionName: string]: string[];
+};
+export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
+  atom<AvailableExtensionVersionsDictionary>((get) => {
+    const { extensions } = get(EXTENSION_STATE_REDUCER_ATOM);
+
+    const { tree } = get(EXTENSION_STATE_REDUCER_ATOM);
+
+    return Object.fromEntries(
+      Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
+        name,
+        tree.allVersionsForName(name),
+      ]),
+    ) as AvailableExtensionVersionsDictionary;
+  });

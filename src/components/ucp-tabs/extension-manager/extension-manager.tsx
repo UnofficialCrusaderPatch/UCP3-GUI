@@ -19,13 +19,13 @@ import {
   PlusLg,
   Stack,
 } from 'react-bootstrap-icons';
+import { STATUS_BAR_MESSAGE_ATOM } from 'function/global/global-atoms';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  STATUS_BAR_MESSAGE_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
-} from 'function/global/global-atoms';
+} from 'function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { ZipWriter } from 'util/structs/zip-handler';
 import { useCurrentGameFolder } from 'function/game-folder/state';

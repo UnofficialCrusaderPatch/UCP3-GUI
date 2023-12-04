@@ -1,11 +1,10 @@
 /* eslint-disable import/prefer-default-export */
 import { P } from '@tauri-apps/api/event-41a9edf5';
-import { INIT_RUNNING } from 'function/global/global-atoms';
 import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
 import Logger from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
-import { initializeGameFolder } from './initialization';
+import { INIT_RUNNING, initializeGameFolder } from './initialization';
 
 export const LOGGER = new Logger('game-folder/state.ts');
 

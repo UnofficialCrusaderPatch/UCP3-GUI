@@ -1,7 +1,5 @@
-import {
-  ConfigurationLock,
-  ConfigurationSuggestion,
-} from 'function/global/global-atoms';
+import { ConfigurationSuggestion } from 'function/configuration/state';
+import { ConfigurationLock } from 'function/configuration/state';
 
 const createStatusBarMessage = (
   disabledByParent: boolean,

@@ -12,13 +12,11 @@ import { ExtensionsState, ConfigurationQualifier } from 'function/global/types';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
 import { getStore } from 'hooks/jotai/base';
-import {
-  AVAILABLE_EXTENSION_VERSIONS_ATOM,
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  PREFERRED_EXTENSION_VERSION_ATOM,
-} from 'function/global/global-atoms';
+import { AVAILABLE_EXTENSION_VERSIONS_ATOM } from 'function/extensions/state/state';
+import { PREFERRED_EXTENSION_VERSION_ATOM } from 'function/extensions/state/state';
+import { CONFIGURATION_QUALIFIER_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_REDUCER_ATOM } from 'function/configuration/state';
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,

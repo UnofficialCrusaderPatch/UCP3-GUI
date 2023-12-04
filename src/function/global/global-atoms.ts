@@ -1,8 +1,8 @@
 import { Extension } from 'config/ucp/common';
 import { atomWithReducer, loadable } from 'jotai/utils';
 import { atom } from 'jotai';
-import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 import { exists } from '@tauri-apps/api/fs';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import {
   ArrayReducerArgs,
   ArrayReducerState,
@@ -46,14 +46,6 @@ const configurationDefaultsReducer = KeyValueReducer<unknown>();
 
 const configurationQualifierReducer = KeyValueReducer<ConfigurationQualifier>();
 
-const extensionStateReducer = (
-  oldState: ExtensionsState,
-  newState: Partial<ExtensionsState>,
-): ExtensionsState => {
-  const state = { ...oldState, ...newState };
-  return state;
-};
-
 // normal atoms
 
 export const INIT_DONE = atom(false);
@@ -79,24 +71,6 @@ export const CONFIGURATION_WARNINGS_REDUCER_ATOM = atomWithReducer(
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationDefaultsReducer,
-);
-
-export const EXTENSION_STATE_REDUCER_ATOM = atomWithReducer(
-  {
-    extensions: [],
-    onlineAvailableExtensions: [],
-    installedExtensions: [],
-    activeExtensions: [],
-    explicitlyActivatedExtensions: [],
-    tree: new ExtensionTree([]),
-    configuration: {
-      statusCode: 0,
-      errors: [],
-      warnings: [],
-      state: {},
-    },
-  },
-  extensionStateReducer,
 );
 
 export type ConfigurationLock = {

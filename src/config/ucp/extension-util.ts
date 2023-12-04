@@ -1,4 +1,4 @@
-import { Discovery } from 'function/extensions/discovery';
+import { Discovery } from 'function/extensions/discovery/discovery';
 import {
   DisplayConfigElement,
   Extension,

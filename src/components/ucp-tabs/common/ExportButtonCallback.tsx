@@ -9,8 +9,8 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/global/global-atoms';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import saveConfig from './SaveConfig';
 
 const exportButtonCallback = async (

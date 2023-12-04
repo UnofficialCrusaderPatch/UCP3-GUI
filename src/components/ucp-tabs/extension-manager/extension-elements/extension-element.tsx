@@ -9,9 +9,9 @@ import { useAtom, useAtomValue } from 'jotai';
 import {
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
   AvailableExtensionVersionsDictionary,
-  EXTENSION_STATE_REDUCER_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useSetOverlayContent } from 'components/overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';

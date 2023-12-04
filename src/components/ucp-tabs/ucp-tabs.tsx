@@ -1,18 +1,15 @@
 import './ucp-tabs.css';
 
 import { showGeneralModalOk } from 'components/modals/ModalOk';
-import { tryResolveDependencies } from 'function/extensions/discovery';
+import { tryResolveDependencies } from 'function/extensions/discovery/discovery';
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import Logger from 'util/scripts/logging';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
-import {
-  EXTENSION_STATE_REDUCER_ATOM,
-  INIT_DONE,
-  INIT_RUNNING,
-} from 'function/global/global-atoms';
+import { INIT_DONE, INIT_RUNNING } from 'function/global/global-atoms';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 
 import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/game-folder/state';
 import ConfigEditor from './config-editor/config-editor';

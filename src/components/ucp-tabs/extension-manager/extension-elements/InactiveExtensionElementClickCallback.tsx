@@ -1,15 +1,16 @@
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { Extension } from 'config/ucp/common';
 import { getStore } from 'hooks/jotai/base';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/global/global-atoms';
 import {
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/global/global-atoms';
+} from 'function/extensions/state/state';
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
-import { propagateActiveExtensionsChange } from '../propagateActiveExtensionChange';
+import { propagateActiveExtensionsChange } from '../../../../function/extensions/state/change';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 
@@ -56,9 +57,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     LOGGER.msg(`New configuration build without errors or warnings`).info();
   }
 
-  propagateActiveExtensionsChange(res);
-
-  getStore().set(EXTENSION_STATE_REDUCER_ATOM, res);
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
   ConsoleLogger.debug('New extension state', res);
 };
 

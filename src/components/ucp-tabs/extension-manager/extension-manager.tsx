@@ -8,7 +8,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import * as GuiSettings from 'function/global/gui-settings/guiSettings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
-import ExtensionPack from 'function/extensions/extension-pack';
+import ExtensionPack from 'function/extensions/pack/extension-pack';
 import { showGeneralModalOk } from 'components/modals/ModalOk';
 import Logger from 'util/scripts/logging';
 import {
@@ -23,10 +23,10 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
   STATUS_BAR_MESSAGE_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { ZipWriter } from 'util/structs/zip-handler';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import {

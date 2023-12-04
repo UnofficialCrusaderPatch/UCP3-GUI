@@ -23,9 +23,9 @@ import {
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from 'function/global/global-atoms';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import { UIFactory } from './ui-elements';
 

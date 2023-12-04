@@ -1,4 +1,4 @@
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useAtomValue } from 'jotai';
 
 const CreatePackButtonCallback = () => {

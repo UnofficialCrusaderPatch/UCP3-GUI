@@ -2,7 +2,10 @@ import { FileEntry } from '@tauri-apps/api/fs';
 import { Extension } from 'config/ucp/common';
 import { getExtensionHandles } from 'function/extensions/discovery';
 import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
+import {
+  CONFIGURATION_REDUCER_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+} from 'function/global/global-atoms';
 import { getStore } from 'hooks/jotai/base';
 import i18next from 'i18next';
 import { useAtomValue } from 'jotai';
@@ -96,12 +99,30 @@ export async function createReceivePluginPathsFunction(currentFolder: string) {
 }
 
 // TODO, based on config
+/** Get value for a url from the configuration */
 export function createGetConfigStateFunction(overallConfig: unknown) {
-  return async (url: string) => null;
+  return async (url: string) => getStore().get(CONFIGURATION_REDUCER_ATOM)[url];
 }
 
 export function createGetCurrentConfigFunction(
+  extensionName: string,
   currentConfig: Record<string, unknown>, // combination of url and values
 ) {
-  return async () => currentConfig;
+  const urlPrefix = `${extensionName}.`;
+
+  return async () => {
+    const baseline = getStore().get(EXTENSION_STATE_REDUCER_ATOM).configuration
+      .state;
+    const filteredBaseline = Object.fromEntries(
+      Object.entries(baseline).filter(([url]) => url.startsWith(urlPrefix)),
+    );
+    const userConfig = getStore().get(CONFIGURATION_REDUCER_ATOM);
+    const filteredUserConfig = Object.fromEntries(
+      Object.entries(userConfig).filter(([url]) => url.startsWith(urlPrefix)),
+    );
+    return {
+      baseline: filteredBaseline,
+      user: filteredUserConfig,
+    };
+  };
 }

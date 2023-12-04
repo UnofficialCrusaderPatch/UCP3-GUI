@@ -7,7 +7,7 @@ import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import Logger from 'util/scripts/logging';
 import { atom, useAtom, useAtomValue } from 'jotai';
-import * as GuiSettings from 'function/global/gui-settings/guiSettings';
+import * as GuiSettings from 'function/gui-settings/settings';
 import { INIT_RUNNING, INIT_DONE } from 'function/game-folder/initialization';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 

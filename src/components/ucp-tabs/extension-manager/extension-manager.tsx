@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import * as GuiSettings from 'function/global/gui-settings/guiSettings';
+import * as GuiSettings from 'function/gui-settings/settings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
 import ExtensionPack from 'function/extensions/pack/extension-pack';

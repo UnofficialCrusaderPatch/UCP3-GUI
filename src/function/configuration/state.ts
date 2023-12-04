@@ -1,4 +1,4 @@
-import { KeyValueReducer } from 'function/global/global-atoms';
+import { KeyValueReducer } from 'function/global/KeyValueReducer';
 import { ConfigurationQualifier, Warning } from 'function/global/types';
 import { atom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';

@@ -1,6 +1,6 @@
 // Tut Source: https://phrase.com/blog/posts/localizing-react-apps-with-i18next/
 
-import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { LANGUAGE_ATOM } from 'function/gui-settings/settings';
 import i18next, { DefaultNamespace, Namespace } from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
 import { atom } from 'jotai';

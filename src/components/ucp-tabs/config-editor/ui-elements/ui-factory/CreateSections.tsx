@@ -7,7 +7,7 @@ import {
 import { DisplayConfigElement, OptionEntry } from 'config/ucp/common';
 import { atom, useAtomValue } from 'jotai';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { LANGUAGE_ATOM } from 'function/gui-settings/settings';
 import { applyLocale } from 'function/extensions/discovery/discovery';
 import { selectAtom } from 'jotai/utils';
 import CreateUIElement from './CreateUIElement';

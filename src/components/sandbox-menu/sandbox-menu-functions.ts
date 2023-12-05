@@ -4,6 +4,7 @@ import { getExtensionHandles } from 'function/extensions/discovery';
 import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
 import {
   CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/global/global-atoms';
 import { getStore } from 'hooks/jotai/base';
@@ -124,5 +125,27 @@ export function createGetCurrentConfigFunction(
       baseline: filteredBaseline,
       user: filteredUserConfig,
     };
+  };
+}
+
+export function createSetCurrentConfigFunction(extensionName: string) {
+  const urlPrefix = `${extensionName}.`;
+
+  return async (config: Record<string, unknown>) => {
+    const filteredConfig = Object.fromEntries(
+      Object.entries(config).filter(([url]) => url.startsWith(urlPrefix)),
+    );
+
+    getStore().set(CONFIGURATION_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: filteredConfig,
+    });
+
+    getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: Object.fromEntries(
+        Object.keys(filteredConfig).map((key) => [key, true]),
+      ),
+    });
   };
 }

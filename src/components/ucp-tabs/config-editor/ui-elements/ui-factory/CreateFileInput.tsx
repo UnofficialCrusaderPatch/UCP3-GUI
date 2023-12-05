@@ -1,4 +1,4 @@
-import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
+import { DisplayConfigElement, FileInputContents } from 'config/ucp/common';
 
 import { Button, Form } from 'react-bootstrap';
 import {
@@ -8,13 +8,16 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
   STATUS_BAR_MESSAGE_ATOM,
 } from 'function/global/global-atoms';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { openFileDialog } from 'tauri/tauri-dialog';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import { MouseEvent } from 'react';
+import { MouseEvent, useMemo } from 'react';
 import Logger from 'util/scripts/logging';
+import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { getStore } from 'hooks/jotai/base';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
@@ -28,6 +31,19 @@ export type FileInputDisplayConfigElement = DisplayConfigElement & {
 
 const r =
   /^ucp[/](modules|plugins)[/]([a-zA-Z0-9-.]+)-([0-9]+[.][0-9]+[.][0-9]+)[/](.*)/;
+
+const makeRelative = (baseFolder: string, path: string) => {
+  const nbase = baseFolder.replaceAll(/[\\]+/g, '/');
+  const npath = path.replaceAll(/[\\]+/g, '/');
+
+  const nestedPath = npath.split(nbase)[1];
+  if (nestedPath !== undefined) {
+    let cleanedPath = nestedPath;
+    while (cleanedPath.startsWith('/')) cleanedPath = cleanedPath.substring(1);
+    return cleanedPath;
+  }
+  return `ucp/${npath.split('/ucp/')[1]}`;
+};
 
 function CreateFileInput(args: {
   spec: FileInputDisplayConfigElement;
@@ -50,9 +66,8 @@ function CreateFileInput(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, contents, generalizeExtensionPaths } =
-    spec;
-  const { min, max } = contents as NumberContents;
+  const { url, text, tooltip, enabled, contents } = spec;
+  const { filter, generalizeExtensionPaths } = contents as FileInputContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -79,20 +94,38 @@ function CreateFileInput(args: {
 
   const gameFolder = useCurrentGameFolder();
 
+  const valueAtom = useMemo(() => atom<string>(`${value}`), [value]);
+  const [theValue, setTheValue] = useAtom(valueAtom);
+
   const onClick = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    const pathResult = await openFileDialog(`${gameFolder}`);
+    let pathResult;
+
+    if (filter === 'files' || filter === undefined) {
+      pathResult = await openFileDialog(`${gameFolder}`);
+    } else if (filter === 'folders') {
+      pathResult = await openFolderDialog(`${gameFolder}`);
+    } else {
+      const extensions = filter.split(',').map((v) => v.trim());
+      pathResult = await openFileDialog(`${gameFolder}`, [
+        {
+          name: 'supported extensions',
+          extensions,
+        },
+      ]);
+    }
 
     if (!pathResult.isPresent() || pathResult.isEmpty()) return;
 
     const path = pathResult.get().replaceAll(/[\\]+/g, '/');
 
-    const relativePath = path.substring(
-      gameFolder.replaceAll(/[\\]+/g, '/').length + 1,
-    );
+    LOGGER.msg(path).debug();
+
+    const relativePath = makeRelative(gameFolder, path);
 
     LOGGER.msg(relativePath).debug();
+
     let finalPath = relativePath;
 
     if (generalizeExtensionPaths) {
@@ -103,11 +136,33 @@ function CreateFileInput(args: {
         const matches = r.exec(relativePath);
 
         if (matches !== null) {
-          finalPath = `ucp/${matches[1]}/${matches[2]}-*/${matches[4]}`;
+          const extensionType = matches[1];
+          const extensionName = matches[2];
+          const remainder = matches[4];
+          finalPath = `ucp/${extensionType}/${extensionName}-*/${remainder}`;
+
+          const isNotListed =
+            getStore()
+              .get(EXTENSION_STATE_REDUCER_ATOM)
+              .activeExtensions.map((ex) => ex.name)
+              .indexOf(extensionName) === -1;
+          if (isNotListed) {
+            if (
+              !(await showGeneralModalOkCancel({
+                title: 'WARNING: Extension not active',
+                message: `The extension "${extensionName}" is not among the active extensions. Make sure to active it. Otherwise, running the game might fail.`,
+              }))
+            ) {
+              return;
+            }
+          }
         }
       }
     }
 
+    LOGGER.msg(finalPath).debug();
+
+    setTheValue(finalPath);
     setConfiguration({
       type: 'set-multiple',
       value: Object.fromEntries([[url, finalPath]]),
@@ -164,9 +219,7 @@ function CreateFileInput(args: {
           data-bs-placement="top"
           title={fullToolTip}
           // End of tooltip stuff
-          defaultValue={value as string}
-          onChange={(event) => {}}
-          disabled
+          value={theValue}
           readOnly
         />
       </div>

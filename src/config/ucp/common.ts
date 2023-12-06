@@ -211,6 +211,14 @@ type NumberContents = BasicContents & {
   step: number;
 };
 
+type CustomMenuContents = BasicContents & {
+  source: {
+    html: string;
+    css: string;
+    js: string;
+  };
+};
+
 type DisplayConfigElement = {
   name: string;
   description: string;
@@ -222,7 +230,11 @@ type DisplayConfigElement = {
   columns: number;
   tooltip: string;
   enabled: string;
-  contents: BasicContents | ChoiceContents | NumberContents;
+  contents:
+    | BasicContents
+    | ChoiceContents
+    | NumberContents
+    | CustomMenuContents;
 };
 
 type SectionDescription = {
@@ -241,6 +253,7 @@ export type {
   PermissionStatus,
   DisplayConfigElement,
   SectionDescription,
+  CustomMenuContents,
   NumberContents,
   ChoiceContents,
   BasicContents,

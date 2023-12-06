@@ -1,20 +1,13 @@
 import { FileEntry } from '@tauri-apps/api/fs';
 import { Extension } from 'config/ucp/common';
-import { getExtensionHandles } from 'function/extensions/discovery';
-import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
 import {
   CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/global/global-atoms';
 import { getStore } from 'hooks/jotai/base';
 import i18next from 'i18next';
-import { useAtomValue } from 'jotai';
 import { readTextFile, receiveAssetUrl, resolvePath } from 'tauri/tauri-files';
-import { canonicalize, slashify } from 'tauri/tauri-invoke';
-import Logger from 'util/scripts/logging';
-
-const LOGGER = new Logger('sandbox-menu-functions.ts');
+import { slashify } from 'tauri/tauri-invoke';
 
 export async function getLanguage(): Promise<string> {
   return i18next.language; // is kinda enough, using the hook might be overkill
@@ -66,12 +59,12 @@ export function createGetAssetUrlFunction(currentFolder: string) {
     ...
  ]
 */
-export async function createReceivePluginPathsFunction(currentFolder: string) {
+export function createReceivePluginPathsFunction(currentFolder: string) {
   const { activeExtensions } = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
-  const gameFolder = await slashify(currentFolder);
-
+  let gameFolder: string | null = null;
   return async (basePath: string, pathPattern: string) => {
+    gameFolder = gameFolder ?? (await slashify(currentFolder));
     const result = await Promise.all(
       activeExtensions
         // // Module paths cannot be returned usually because they live inside zip files?
@@ -99,18 +92,12 @@ export async function createReceivePluginPathsFunction(currentFolder: string) {
   };
 }
 
-// TODO, based on config
-/** Get value for a url from the configuration */
-export function createGetConfigStateFunction(overallConfig: unknown) {
+export function createGetConfigStateFunction() {
   return async (url: string) => getStore().get(CONFIGURATION_REDUCER_ATOM)[url];
 }
 
-export function createGetCurrentConfigFunction(
-  extensionName: string,
-  currentConfig: Record<string, unknown>, // combination of url and values
-) {
-  const urlPrefix = `${extensionName}.`;
-
+export function createGetCurrentConfigFunction(baseUrl: string) {
+  const urlPrefix = `${baseUrl}.`;
   return async () => {
     const baseline = getStore().get(EXTENSION_STATE_REDUCER_ATOM).configuration
       .state;
@@ -125,27 +112,5 @@ export function createGetCurrentConfigFunction(
       baseline: filteredBaseline,
       user: filteredUserConfig,
     };
-  };
-}
-
-export function createSetCurrentConfigFunction(extensionName: string) {
-  const urlPrefix = `${extensionName}.`;
-
-  return async (config: Record<string, unknown>) => {
-    const filteredConfig = Object.fromEntries(
-      Object.entries(config).filter(([url]) => url.startsWith(urlPrefix)),
-    );
-
-    getStore().set(CONFIGURATION_REDUCER_ATOM, {
-      type: 'set-multiple',
-      value: filteredConfig,
-    });
-
-    getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
-      type: 'set-multiple',
-      value: Object.fromEntries(
-        Object.keys(filteredConfig).map((key) => [key, true]),
-      ),
-    });
   };
 }

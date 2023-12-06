@@ -1,9 +1,16 @@
+import './sandbox-menu.css';
+
 import { OverlayContentProps } from 'components/overlay/overlay';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import Sandbox, { PluginInstance } from 'websandbox';
 import { readTextFile } from 'tauri/tauri-files';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
-import Logger, { ConsoleLogger } from 'util/scripts/logging';
+import { getStore } from 'hooks/jotai/base';
+import {
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+} from 'function/global/global-atoms';
+import { atom, useAtomValue } from 'jotai';
 import {
   getLanguage,
   createGetLocalizedStringFunction,
@@ -19,34 +26,29 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
 
-import './sandbox-menu.css';
-
-const LOGGER = new Logger('sandbox-menu.tsx');
-
 interface SandboxSource {
   html: string;
   css: string;
   js: string;
 }
 
-export interface SandboxSourcePaths {
-  htmlPath: string;
-  cssPath: string;
-  jsPath: string;
-}
+// same attributes, but holds paths inside menu folder
+type SandboxSourcePaths = SandboxSource;
 
 export interface SandboxArgs {
-  sourcePaths: SandboxSourcePaths;
-  receiveConfig: (config: Record<string, unknown>) => void;
+  baseUrl: string;
+  source: SandboxSourcePaths;
 }
 
 async function receiveSources(
+  currentFolder: string,
   sourcePaths: SandboxSourcePaths,
 ): Promise<SandboxSource> {
+  // TODO: needs changing to be handled by extension io
   return Promise.all([
-    readTextFile(sourcePaths.htmlPath),
-    readTextFile(sourcePaths.cssPath),
-    readTextFile(sourcePaths.jsPath),
+    readTextFile(sourcePaths.html),
+    readTextFile(sourcePaths.css),
+    readTextFile(sourcePaths.js),
   ]).then((sourceStrings) =>
     // should these be sanitized?
     // css and js could also be made accessible through assets
@@ -59,12 +61,32 @@ async function receiveSources(
   );
 }
 
+function saveConfig(baseUrl: string, config: Record<string, unknown>) {
+  const newConfigEntries = Object.fromEntries(
+    Object.entries(config).map(([subUrl, newConfigValue]) => [
+      `${baseUrl}.${subUrl}`,
+      newConfigValue,
+    ]),
+  );
+
+  getStore().set(CONFIGURATION_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: newConfigEntries,
+  });
+
+  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: Object.fromEntries(
+      Object.keys(newConfigEntries).map((key) => [key, true]),
+    ),
+  });
+}
+
 function createSandboxHostApi(
   setInitDone: (value: boolean) => void,
   currentFolder: string,
+  baseUrl: string,
   localization: Record<string, string>,
-  currentConfig: Record<string, unknown>,
-  overallConfig: unknown,
 ) {
   return {
     confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
@@ -73,8 +95,8 @@ function createSandboxHostApi(
     getTextFile: createGetTextFileFunction(currentFolder),
     getAssetUrl: createGetAssetUrlFunction(currentFolder),
     receivePluginPaths: createReceivePluginPathsFunction(currentFolder),
-    getCurrentConfig: createGetCurrentConfigFunction(currentConfig),
-    getConfigState: createGetConfigStateFunction(overallConfig),
+    getCurrentConfig: createGetCurrentConfigFunction(baseUrl),
+    getConfigState: createGetConfigStateFunction(),
   };
 }
 
@@ -94,88 +116,91 @@ function createSandboxOptions(
   };
 }
 
-export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
+function SandboxInternal(
+  props: OverlayContentProps<SandboxArgs & { sandboxDiv: HTMLDivElement }>,
+) {
   const { closeFunc, args } = props;
-  const { sourcePaths, receiveConfig } = args;
+  const { baseUrl, source, sandboxDiv } = args;
 
   const currentFolder = useCurrentGameFolder();
+  const sourceData = useAtomValue(
+    useMemo(
+      () =>
+        atom(() =>
+          receiveSources(currentFolder, {
+            html: source.html,
+            css: source.css,
+            js: source.js,
+          }),
+        ),
+      [currentFolder, source.html, source.css, source.js],
+    ),
+  );
 
-  const [sources, setSources] = useState<null | SandboxSource>(null);
-
-  const sandboxDiv = useRef<null | HTMLDivElement>(null);
   const [sandbox, setSandbox] = useState<null | PluginInstance>(null);
 
   const [initDone, setInitDone] = useState(false);
 
   useEffect(() => {
-    if (!sources) {
-      // eslint-disable-next-line promise/catch-or-return
-      receiveSources(sourcePaths).then(setSources);
-      return () => {};
-    }
-
-    if (!sandboxDiv.current) {
-      LOGGER.msg(
-        'Unable to create sandbox, since sandbox div is not present.',
-      ).error();
-      return () => {};
-    }
-
     const sand: PluginInstance = Sandbox.create(
-      createSandboxHostApi(setInitDone, currentFolder, {}, {}, {}),
-      createSandboxOptions(sandboxDiv.current, sources),
+      createSandboxHostApi(setInitDone, currentFolder, baseUrl, {}),
+      createSandboxOptions(sandboxDiv, sourceData),
     );
-    // this could be used to one time run code or inject css
-    // sand.promise
-    //   .then(() => sand.injectStyle(sources.css))
-    //   .then(() => sand.run(sources.js));
 
     setSandbox(sand);
     return () => sand.destroy();
-  }, [currentFolder, sourcePaths, sources]);
+  }, [baseUrl, currentFolder, sandboxDiv, sourceData]);
 
+  return !sandbox ? null : (
+    <div className="sandbox-control-menu">
+      <button
+        type="button"
+        className="sandbox-control-button"
+        disabled={!initDone}
+        onClick={async () =>
+          // we will see, if this works, or just closes the sandbox
+          saveConfig(baseUrl, await sandbox.connection.remote.getConfig())
+        }
+      >
+        SAVE
+      </button>
+      <button
+        type="button"
+        className="sandbox-control-button"
+        disabled={!initDone}
+        onClick={async () => {
+          saveConfig(baseUrl, await sandbox.connection.remote.getConfig());
+          closeFunc();
+        }}
+      >
+        SAVE_AND_CLOSE
+      </button>
+      <button
+        type="button"
+        className="sandbox-control-button"
+        onClick={closeFunc}
+      >
+        CLOSE
+      </button>
+    </div>
+  );
+}
+
+export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
+  const { closeFunc, args } = props;
+
+  const sandboxDiv = useRef<null | HTMLDivElement>(null);
   return (
     <div className="sandbox-menu-container">
       <h1 className="sandbox-menu-title">TITLE_TEST</h1>
       <div ref={sandboxDiv} className="sandbox-container" />
-
-      {/* 
-      TODO: both in sandbox, as in the iframe, external links to pictures and websites work.
-      We should stop this.
-      
-      <a href="https://www.w3schools.com/tags/img_girl.jpg">TEst</a> */}
-      {!sandbox ? null : (
-        <div className="sandbox-control-menu">
-          <button
-            type="button"
-            className="sandbox-control-button"
-            disabled={!initDone}
-            onClick={async () =>
-              // we will see, if this works, or just closes the sandbox
-              receiveConfig(await sandbox.connection.remote.getConfig())
-            }
-          >
-            SAVE
-          </button>
-          <button
-            type="button"
-            className="sandbox-control-button"
-            disabled={!initDone}
-            onClick={async () => {
-              receiveConfig(await sandbox.connection.remote.getConfig());
-              closeFunc();
-            }}
-          >
-            SAVE_AND_CLOSE
-          </button>
-          <button
-            type="button"
-            className="sandbox-control-button"
-            onClick={closeFunc}
-          >
-            CLOSE
-          </button>
-        </div>
+      {!sandboxDiv.current ? null : (
+        <Suspense>
+          <SandboxInternal
+            closeFunc={closeFunc}
+            args={{ ...args, sandboxDiv: sandboxDiv.current }}
+          />
+        </Suspense>
       )}
     </div>
   );

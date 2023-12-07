@@ -139,19 +139,13 @@ type ConfigFile = {
 };
 
 type OptionEntry = {
+  extension: Extension;
   name: string;
   text: string;
   tooltip: string;
   display: string;
   url: string;
-  contents: {
-    value: unknown;
-    type: string;
-    default: unknown;
-    choices: unknown[];
-    min: unknown;
-    max: unknown;
-  };
+  contents: BasicContents | ChoiceContents | NumberContents;
   hidden: boolean;
   category: string[];
 };
@@ -235,6 +229,7 @@ type DisplayConfigElement = {
     | ChoiceContents
     | NumberContents
     | CustomMenuContents;
+  extension: Extension;
 };
 
 type SectionDescription = {

@@ -10,6 +10,7 @@ import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
 import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
 import { applyLocale } from 'function/extensions/discovery';
 import { selectAtom } from 'jotai/utils';
+import { ConsoleLogger } from 'util/scripts/logging';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitizeID';
@@ -26,14 +27,19 @@ const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
 
   const euis = extensions.map((e) => {
     const locale = e.locales[language] ?? e.locales.en;
-    if (locale === undefined) return e.ui;
-    return applyLocale(e, locale);
+    if (locale === undefined) {
+      return e.ui;
+    }
+    const localized = applyLocale(e, locale);
+    return localized;
   });
 
   const uiCollection: any[] = [];
   euis.forEach((eui) => {
     uiCollection.push(...eui);
   });
+
+  ConsoleLogger.debug('test');
 
   return uiCollectionToOptionEntries(uiCollection).filter(
     (o: OptionEntry) => o.hidden === undefined || o.hidden === false,

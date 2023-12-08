@@ -79,10 +79,24 @@ function CreateChoice(args: {
           level={configurationWarnings[url].level}
         />
       ) : null}
-      <div className="col-3">
+      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
+        <Form.Label
+          htmlFor={`${url}-input`}
+          // Tooltip stuff
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          title={fullToolTip}
+          // End of tooltip stuff
+          // disabled={!isEnabled || disabled || configurationLocks[url] === true}
+        >
+          {text}
+        </Form.Label>
+      </div>
+      <div className="flex-grow-1" style={{ minWidth: '33%', maxWidth: '33%' }}>
         <Form.Select
           size="sm"
-          className="bg-dark text-light fs-7 lh-1"
+          className="text-light fs-7 lh-1"
+          style={{ backgroundColor: '#ab712d' }}
           key={`${url}-input`}
           id={`${url}-input`}
           // Tooltip stuff
@@ -109,19 +123,6 @@ function CreateChoice(args: {
             </option>
           ))}
         </Form.Select>
-      </div>
-      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
-        <Form.Label
-          htmlFor={`${url}-input`}
-          // Tooltip stuff
-          data-bs-toggle="tooltip"
-          data-bs-placement="top"
-          title={fullToolTip}
-          // End of tooltip stuff
-          // disabled={!isEnabled || disabled || configurationLocks[url] === true}
-        >
-          {text}
-        </Form.Label>
       </div>
     </Form.Group>
   );

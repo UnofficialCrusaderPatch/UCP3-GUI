@@ -5,7 +5,7 @@
 import './launch.css';
 
 import { useTranslation } from 'react-i18next';
-import GameStarter from 'components/game-starter/game-starter';
+import GameStarter from 'components/ucp-tabs/launch/game-starter/game-starter';
 import {
   EXTREME_PATH_ATOM,
   VANILLA_PATH_ATOM,

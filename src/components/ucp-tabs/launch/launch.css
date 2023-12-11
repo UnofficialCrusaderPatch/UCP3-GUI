@@ -24,34 +24,14 @@
 .launch__options__box {
     padding: 8px;
     display: flex;
-}
 
-.launch__options__box--free-args {
-    width: 50%;
-    padding: 10px;
-
-    >form {
-        display: flex;
-        flex-direction: column;
+    & input {
+        height: 2em;
     }
-}
 
-.launch__options__box--free-envs {
-    width: 50%;
-    padding: 10px;
-
-    >form {
-        display: flex;
-        align-items: stretch;
-
-        >input {
-            flex-grow: 1;
-        }
-        >button {
-            height: 100%;
-            padding: 0;
-            aspect-ratio: 1/1;
-            flex-grow: 1;
-        }
+    & button {
+        padding: 0;
+        height: 2em;
+        aspect-ratio: 1/1;
     }
 }

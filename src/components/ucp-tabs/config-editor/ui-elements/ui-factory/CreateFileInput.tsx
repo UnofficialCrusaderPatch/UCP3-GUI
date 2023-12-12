@@ -10,10 +10,6 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
-import {
-  EXTENSION_STATE_REDUCER_ATOM,
-  STATUS_BAR_MESSAGE_ATOM,
-} from 'function/global/global-atoms';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import { useCurrentGameFolder } from 'function/game-folder/state';
@@ -21,6 +17,7 @@ import { MouseEvent, useMemo } from 'react';
 import Logger from 'util/scripts/logging';
 import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
 import { getStore } from 'hooks/jotai/base';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';

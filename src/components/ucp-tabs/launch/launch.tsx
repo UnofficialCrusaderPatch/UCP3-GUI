@@ -1,7 +1,9 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import './launch.css';
+import './launch-options/launch-options.css'; // currently imported here, als long as single files not needed
 
 import { useTranslation } from 'react-i18next';
-import GameStarter from 'components/game-starter/game-starter';
+import GameStarter from 'components/ucp-tabs/launch/game-starter/game-starter';
 import {
   EXTREME_PATH_ATOM,
   VANILLA_PATH_ATOM,
@@ -10,19 +12,29 @@ import {
   EXTREME_VERSION_ATOM,
   VANILLA_VERSION_ATOM,
 } from 'function/game-files/game-version-state';
-import { useState } from 'react';
+import { useRef } from 'react';
 
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
+import { createLaunchOptionFuncs } from './launch-options/launch-options';
+import FreeArgs from './launch-options/free-args';
+import FreeEnvs from './launch-options/free-envs';
+import {
+  UcpConsoleLogLevel,
+  UcpLogLevel,
+} from './launch-options/verbosity-args';
 
 export default function Launch() {
-  // might a bit inefficient, but should be enough for a game starter
-  const [args, setArgs] = useState<Record<string, string[]>>({});
-  const [envs, setEnvs] = useState<Record<string, string>>({});
+  const internalArgs = useRef<Record<string, string[]>>({}).current;
+  const internalEnvs = useRef<Record<string, Record<string, string>>>(
+    {},
+  ).current;
 
   const { t } = useTranslation(['gui-launch']);
 
-  const currentArgs = Object.values(args).flat();
+  const receiveArgs = () => Object.values(internalArgs).flat();
+  const receiveEnvs = () => Object.assign({}, ...Object.values(internalEnvs));
+
   return (
     <div className="launch__container flex-default">
       <div className="launch__boxes">
@@ -30,25 +42,52 @@ export default function Launch() {
           imagePath={logoCrusaderVanilla}
           pathAtom={VANILLA_PATH_ATOM}
           versionAtom={VANILLA_VERSION_ATOM}
-          args={currentArgs}
-          envs={envs}
+          receiveArgs={receiveArgs}
+          receiveEnvs={receiveEnvs}
         />
         <GameStarter
           imagePath={logoCrusaderExtreme}
           pathAtom={EXTREME_PATH_ATOM}
           versionAtom={EXTREME_VERSION_ATOM}
-          args={currentArgs}
-          envs={envs}
+          receiveArgs={receiveArgs}
+          receiveEnvs={receiveEnvs}
         />
       </div>
       <div className="flex-default launch__options">
         <h4>{t('gui-launch:launch.options')}</h4>
         <div className="parchment-box launch__options__box">
-          {/* 
-            Insert options that change start params or environment vars.
-            Do not forget that setArgs and setEnvs need to be called with
-            a new object to trigger change.
-          */}
+          <div className="launch__options__box__row">
+            <UcpLogLevel
+              {...createLaunchOptionFuncs(
+                'UCP_LOG_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+            <UcpConsoleLogLevel
+              {...createLaunchOptionFuncs(
+                'UCP_CONSOLE_LOG_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+          </div>
+          <div className="launch__options__box__row">
+            <FreeArgs
+              {...createLaunchOptionFuncs(
+                'FREE_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+            <FreeEnvs
+              {...createLaunchOptionFuncs(
+                'FREE_ENVS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+          </div>
         </div>
       </div>
     </div>

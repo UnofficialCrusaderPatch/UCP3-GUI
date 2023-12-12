@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
 
 export interface OkCancelModalWindowProperties
-  extends AbstractModalWindowProperties<void> {
+  extends AbstractModalWindowProperties<boolean, boolean> {
   cancel: string;
 }
 
@@ -26,12 +26,12 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
 
   const internalHandleAction = () => {
     setShow(false);
-    handleAction();
+    handleAction(true);
   };
 
   const internalHandleClose = () => {
     setShow(false);
-    handleClose();
+    handleClose(false);
   };
 
   return (
@@ -68,7 +68,7 @@ export async function showModalOkCancel(
     ...spec,
   };
 
-  return registerModal<void, OkCancelModalWindowProperties>(
+  return registerModal<boolean, boolean, OkCancelModalWindowProperties>(
     ModalOkCancel,
     fullSpec,
   );

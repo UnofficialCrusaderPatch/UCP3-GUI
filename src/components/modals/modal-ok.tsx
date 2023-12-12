@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
 
 export interface OkModalWindowProperties
-  extends Omit<AbstractModalWindowProperties<void>, 'handleClose'> {}
+  extends Omit<AbstractModalWindowProperties<void, void>, 'handleClose'> {}
 
-const DEFAULT_OK_MODAL_PROPERTIES: AbstractModalWindowProperties<void> = {
+const DEFAULT_OK_MODAL_PROPERTIES: AbstractModalWindowProperties<void, void> = {
   message: '',
   title: '',
   handleAction: () => {},
@@ -50,12 +50,12 @@ function ModalOk(props: OkModalWindowProperties) {
 }
 
 export async function showModalOk(spec: Partial<OkModalWindowProperties>) {
-  const fullSpec: AbstractModalWindowProperties<void> = {
+  const fullSpec: AbstractModalWindowProperties<void, void> = {
     ...DEFAULT_OK_MODAL_PROPERTIES,
     ...spec,
   };
 
-  return registerModal<void, AbstractModalWindowProperties<void>>(
+  return registerModal<void, void, AbstractModalWindowProperties<void, void>>(
     ModalOk,
     fullSpec,
   );

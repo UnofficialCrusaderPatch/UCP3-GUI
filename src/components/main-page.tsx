@@ -5,8 +5,6 @@ import { Overlay } from './overlay/overlay';
 import CreditsButton from './credits/credits';
 import Footer from './footer/footer';
 import UcpTabs from './ucp-tabs/ucp-tabs';
-
-import { CreatePluginModal } from './modals/CreatePluginModal';
 import { ModalWindow } from './modals/abstract-modal';
 
 export default function Main() {
@@ -25,7 +23,6 @@ export default function Main() {
         </div>
       </div>
       <ModalWindow />
-      <CreatePluginModal />
     </>
   );
 }

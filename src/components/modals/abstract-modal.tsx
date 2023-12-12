@@ -6,11 +6,11 @@ import { sleep } from 'util/scripts/util';
 
 const LOGGER = new Logger('abstract-modal.tsx');
 
-export interface AbstractModalWindowProperties<R> {
+export interface AbstractModalWindowProperties<R, C> {
   message: string;
   title: string;
   handleAction: (result: R) => void;
-  handleClose: () => void;
+  handleClose: (cancelResult: C) => void;
   ok: string;
 }
 
@@ -40,28 +40,31 @@ function nextModalWindow() {
   }
 }
 
-export function registerModal<R, P extends AbstractModalWindowProperties<R>>(
-  modalFunc: (props: P) => ReactNode,
-  properties: P,
-): Promise<void> {
+export function registerModal<
+  R,
+  C,
+  P extends AbstractModalWindowProperties<R, C>,
+>(modalFunc: (props: P) => ReactNode, properties: P) {
   return (
-    new Promise<void>((resolve) => {
+    new Promise<R | C>((resolve) => {
       const finalProperties = {
         ...properties,
         handleAction: (result: R) => {
           properties.handleAction(result);
-          resolve();
+          resolve(result);
         },
-        handleClose: () => {
-          properties.handleClose();
-          resolve();
+        handleClose: (cancelResult: C) => {
+          properties.handleClose(cancelResult);
+          resolve(cancelResult);
         },
       };
 
       placeModalCreator(() => modalFunc(finalProperties));
     })
       .catch((e) => {
-        LOGGER.obj(e);
+        // logs and throws further: Should the error be handled here?
+        LOGGER.obj(e).error();
+        throw e;
       })
       // update to next modal stage after a short wait, no matter if the previous modal worked or not
       .finally(() => sleep(500).then(nextModalWindow))

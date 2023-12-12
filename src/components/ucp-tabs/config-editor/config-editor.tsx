@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 
 import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
-import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
+import { showModalCreatePlugin } from 'components/modals/modal-create-plugin';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import { showModalOk } from 'components/modals/modal-ok';
 import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
@@ -180,7 +180,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
 
                       ConsoleLogger.debug(trimmedResult);
 
-                      const r = await showCreatePluginModalWindow({
+                      const r = await showModalCreatePlugin({
                         title: 'Create plugin',
                         message: '',
                       });

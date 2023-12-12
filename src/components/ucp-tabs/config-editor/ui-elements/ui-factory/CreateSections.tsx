@@ -6,9 +6,9 @@ import {
 } from 'config/ucp/extension-util';
 import { DisplayConfigElement, OptionEntry } from 'config/ucp/common';
 import { atom, useAtomValue } from 'jotai';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/global/global-atoms';
-import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
-import { applyLocale } from 'function/extensions/discovery';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
+import { LANGUAGE_ATOM } from 'function/gui-settings/settings';
+import { applyLocale } from 'function/extensions/discovery/discovery';
 import { selectAtom } from 'jotai/utils';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';

@@ -24,9 +24,12 @@
 .launch__options__box {
   padding: 8px;
   display: flex;
+  flex-direction: column;
+  color: black;
 
   & input {
     height: 2em;
+    min-width: 0;
   }
 
   & button {
@@ -34,4 +37,13 @@
     height: 2em;
     aspect-ratio: 1/1;
   }
+
+  & select {
+    height: 2em;
+  }
+}
+
+.launch__options__box__row {
+  width: 100%;
+  display: flex;
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LaunchOptions } from './launch-options';
 
 const LOG_LEVELS: Record<string, string> = {
@@ -24,15 +25,20 @@ const LOG_LEVELS_INVERSE: Record<string, string> = {
 const UCP_VERBOSITY_ARG = '--ucp-verbosity';
 const UCP_CONSOLE_VERBOSITY_ARG = '--ucp-console-verbosity';
 
-function LogLevelSetting(props: LaunchOptions & { arg: string }) {
-  const { arg, getArgs, setArgs } = props;
+function LogLevelSetting(
+  props: LaunchOptions & { arg: string; label: string },
+) {
+  const { arg, label, getArgs, setArgs } = props;
+
+  const [t] = useTranslation(['gui-launch']);
 
   const [logLevel, setLogLevel] = useState(
     LOG_LEVELS_INVERSE[getArgs().at(1) ?? ''],
   );
 
   return (
-    <div>
+    <div className="launch__options__box--ucp-log-level">
+      <h5>{t(`gui-launch:launch.options.${label}`)}</h5>
       <select
         value={logLevel}
         onChange={(event) => {
@@ -55,9 +61,17 @@ function LogLevelSetting(props: LaunchOptions & { arg: string }) {
 }
 
 export function UcpLogLevel(props: LaunchOptions) {
-  return LogLevelSetting({ ...props, arg: UCP_VERBOSITY_ARG });
+  return LogLevelSetting({
+    ...props,
+    arg: UCP_VERBOSITY_ARG,
+    label: 'ucp.log.level',
+  });
 }
 
 export function UcpConsoleLogLevel(props: LaunchOptions) {
-  return LogLevelSetting({ ...props, arg: UCP_CONSOLE_VERBOSITY_ARG });
+  return LogLevelSetting({
+    ...props,
+    arg: UCP_CONSOLE_VERBOSITY_ARG,
+    label: 'ucp.log.level.console',
+  });
 }

@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { FormEvent, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LaunchOptions } from './launch-options';
 
 function FreeEnvsForm(props: {
@@ -62,6 +63,8 @@ function FreeEnvsForm(props: {
 export default function FreeEnvs(props: LaunchOptions) {
   const { getEnvs, setEnvs } = props;
 
+  const [t] = useTranslation(['gui-launch']);
+
   const [internalEnvs, setInternalEnvs] = useState(getEnvs());
 
   const handleEnvsChange = (e: FormEvent) => {
@@ -90,6 +93,7 @@ export default function FreeEnvs(props: LaunchOptions) {
 
   return (
     <div className="launch__options__box--free-envs">
+      <h5>{t('gui-launch:launch.options.free.envs')}</h5>
       {Object.entries(internalEnvs).map(([key, value]) => (
         <FreeEnvsForm
           key={key}

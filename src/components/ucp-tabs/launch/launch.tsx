@@ -56,34 +56,38 @@ export default function Launch() {
       <div className="flex-default launch__options">
         <h4>{t('gui-launch:launch.options')}</h4>
         <div className="parchment-box launch__options__box">
-          <UcpLogLevel
-            {...createLaunchOptionFuncs(
-              'UCP_LOG_ARGS',
-              internalArgs,
-              internalEnvs,
-            )}
-          />
-          <UcpConsoleLogLevel
-            {...createLaunchOptionFuncs(
-              'UCP_CONSOLE_LOG_ARGS',
-              internalArgs,
-              internalEnvs,
-            )}
-          />
-          <FreeArgs
-            {...createLaunchOptionFuncs(
-              'FREE_ARGS',
-              internalArgs,
-              internalEnvs,
-            )}
-          />
-          <FreeEnvs
-            {...createLaunchOptionFuncs(
-              'FREE_ENVS',
-              internalArgs,
-              internalEnvs,
-            )}
-          />
+          <div className="launch__options__box__row">
+            <UcpLogLevel
+              {...createLaunchOptionFuncs(
+                'UCP_LOG_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+            <UcpConsoleLogLevel
+              {...createLaunchOptionFuncs(
+                'UCP_CONSOLE_LOG_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+          </div>
+          <div className="launch__options__box__row">
+            <FreeArgs
+              {...createLaunchOptionFuncs(
+                'FREE_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+            <FreeEnvs
+              {...createLaunchOptionFuncs(
+                'FREE_ENVS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+          </div>
         </div>
       </div>
     </div>

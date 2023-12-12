@@ -20,3 +20,18 @@
     }
   }
 }
+
+.launch__options__box--ucp-log-level {
+  width: 50%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+
+  >h5 {
+    margin: 0;
+    vertical-align: center;
+  }
+  >select {
+    margin-left: auto;
+  }
+}

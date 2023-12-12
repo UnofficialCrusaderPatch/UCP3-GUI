@@ -6,7 +6,7 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/extensions/state/state';
 import { propagateActiveExtensionsChange } from 'function/extensions/state/change';
-import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import Logger from 'util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
@@ -34,7 +34,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     if (res.configuration.statusCode === 2) {
       const msg = `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`;
       LOGGER.msg(msg).error();
-      const confirmed1 = await showGeneralModalOkCancel({
+      const confirmed1 = await showModalOkCancel({
         title: 'Error',
         message: msg,
       });
@@ -43,7 +43,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     if (res.configuration.warnings.length > 0) {
       const msg = `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`;
       LOGGER.msg(msg).warn();
-      const confirmed2 = await showGeneralModalOkCancel({
+      const confirmed2 = await showModalOkCancel({
         title: 'Warning',
         message: msg,
       });

@@ -1,6 +1,6 @@
 import './ucp-tabs.css';
 
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import { tryResolveDependencies } from 'function/extensions/discovery/discovery';
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
@@ -68,7 +68,7 @@ export default function UcpTabs() {
 
                   if (messages.length === 0) return;
 
-                  await showGeneralModalOk({
+                  await showModalOk({
                     title: 'Error: missing dependencies',
                     message: `Please be aware of the following missing dependencies:\n\n${messages}`,
                     handleAction: () => setShowErrorsWarning(false),
@@ -76,7 +76,7 @@ export default function UcpTabs() {
 
                   LOGGER.msg(`Missing dependencies: ${messages}`).error();
                 } catch (e: any) {
-                  await showGeneralModalOk({
+                  await showModalOk({
                     title: 'ERROR',
                     message: e.toString(),
                   });

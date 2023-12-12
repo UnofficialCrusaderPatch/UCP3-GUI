@@ -14,8 +14,8 @@ import { ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
-import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
+import { showModalOk } from 'components/modals/modal-ok';
 import { useAtomValue } from 'jotai';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import RecentFolders from './recent-folders';
@@ -99,7 +99,7 @@ export default function Overview() {
             }
             return result;
           } catch (e: any) {
-            await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
+            await showModalOk({ message: e.toString(), title: 'ERROR' });
           }
 
           return Result.emptyOk();
@@ -167,7 +167,7 @@ export default function Overview() {
               t,
             );
             if (zipInstallResult.ok().isPresent()) {
-              const confirmed = await showGeneralModalOkCancel({
+              const confirmed = await showModalOkCancel({
                 title: t('gui-general:require.reload.title'),
                 message: t('gui-editor:overview.require.reload.text'),
               });
@@ -185,7 +185,7 @@ export default function Overview() {
               .mapOk(() => '')
               .mapErr((err) => String(err));
           } catch (e: any) {
-            await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
+            await showModalOk({ message: e.toString(), title: 'ERROR' });
           }
 
           return Result.emptyErr();
@@ -225,7 +225,7 @@ export default function Overview() {
               checkForGUIUpdates(stateUpdate, t),
             );
           } catch (e: any) {
-            await showGeneralModalOk({ message: e.toString(), title: 'ERROR' });
+            await showModalOk({ message: e.toString(), title: 'ERROR' });
           }
 
           return Result.emptyErr();

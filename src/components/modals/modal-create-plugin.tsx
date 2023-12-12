@@ -1,10 +1,7 @@
-import { getStore } from 'hooks/jotai/base';
-import { atom, useAtom } from 'jotai';
 import { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-
-const VERSION_REGEX = /^[0-9]+[.][0-9]+[.][0-9]+$/;
+import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
 
 export type CreatePluginModalResult = {
   pluginName: string;
@@ -13,57 +10,25 @@ export type CreatePluginModalResult = {
   createModpack: boolean;
 };
 
-export type CreatePluginModalWindow = {
-  show: boolean;
-  message: string;
-  title: string;
-  handleAction: (result: CreatePluginModalResult) => void;
-  handleClose: () => void;
-  ok: string;
-};
+export interface CreatePluginModalWindowProperties
+  extends AbstractModalWindowProperties<CreatePluginModalResult, void> {}
 
-export const DefaultCreatePluginModalWindow: CreatePluginModalWindow = {
-  show: false,
-  message: '',
-  title: '',
-  handleAction: () => ({}),
-  handleClose: () => {},
-  ok: '',
-};
+const VERSION_REGEX = /^[0-9]+[.][0-9]+[.][0-9]+$/;
 
-export const CREATE_PLUGIN_MODAL_WINDOW_STATE = atom<CreatePluginModalWindow>(
-  DefaultCreatePluginModalWindow,
-);
-
-export async function showCreatePluginModalWindow(
-  spec: Partial<CreatePluginModalWindow>,
-) {
-  const fullSpec: CreatePluginModalWindow = {
-    ...DefaultCreatePluginModalWindow,
-    ...spec,
+const DEFAULT_CREATE_PLUGIN_MODAL_PROPERTIES: CreatePluginModalWindowProperties =
+  {
+    message: '',
+    title: '',
+    handleAction: () => {},
+    handleClose: () => {},
+    ok: '',
   };
 
-  return new Promise<CreatePluginModalResult | undefined>((resolve) => {
-    getStore().set(CREATE_PLUGIN_MODAL_WINDOW_STATE, {
-      ...fullSpec,
-      show: true,
-      handleClose: () => {
-        fullSpec.handleClose();
-        resolve(undefined);
-      },
-      handleAction: (result: CreatePluginModalResult) => {
-        fullSpec.handleAction(result);
-        resolve(result);
-      },
-    });
-  });
-}
-
 // eslint-disable-next-line import/prefer-default-export
-export function CreatePluginModal() {
-  const [window, setWindow] = useAtom(CREATE_PLUGIN_MODAL_WINDOW_STATE);
+function CreatePluginModal(props: CreatePluginModalWindowProperties) {
+  const { handleAction, title, ok, handleClose } = props;
 
-  const { handleAction, title, message, show, handleClose } = window;
+  const [show, setShow] = useState(true);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
@@ -76,21 +41,32 @@ export function CreatePluginModal() {
 
   const [versionElementHasFocus, setVersionElementHasFocus] = useState(false);
 
-  /* General modal popup window */
+  const internalHandleAction = () => {
+    setShow(false);
+    handleAction({
+      pluginName,
+      pluginVersion,
+      pluginAuthor,
+      createModpack,
+    });
+  };
+
+  const internalHandleClose = () => {
+    setShow(false);
+    handleClose();
+  };
+
   return (
     <Modal
       show={show}
-      onHide={() => {
-        setWindow({ ...window, show: false });
-        handleClose();
-      }}
+      onHide={internalHandleClose}
       className="text-dark"
       style={{ whiteSpace: 'pre-line' }}
       // prevents escaping the modal:
       backdrop="static"
       keyboard={false}
     >
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -153,24 +129,26 @@ export function CreatePluginModal() {
             pluginAuthor.length === 0 ||
             !pluginVersionValid
           }
-          onClick={() =>
-            new Promise<void>((resolve) => {
-              setWindow({ ...window, show: false });
-              handleAction({
-                pluginName,
-                pluginVersion,
-                pluginAuthor,
-                createModpack,
-              });
-              resolve();
-            })
-          }
+          onClick={internalHandleAction}
         >
-          {window.ok !== undefined && window.ok.length > 0
-            ? window.ok
-            : 'Create'}
+          {ok.length > 0 ? ok : 'Create'}
         </Button>
       </Modal.Footer>
     </Modal>
   );
+}
+
+export async function showModalCreatePlugin(
+  spec: Partial<CreatePluginModalWindowProperties>,
+) {
+  const fullSpec: CreatePluginModalWindowProperties = {
+    ...DEFAULT_CREATE_PLUGIN_MODAL_PROPERTIES,
+    ...spec,
+  };
+
+  return registerModal<
+    CreatePluginModalResult,
+    void,
+    CreatePluginModalWindowProperties
+  >(CreatePluginModal, fullSpec);
 }

@@ -1,5 +1,5 @@
 import { exists } from '@tauri-apps/api/fs';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { Extension } from 'config/ucp/common';
 import { getExtensions } from 'config/ucp/extension-util';
@@ -41,7 +41,7 @@ export async function initializeGameFolder(newFolder: string) {
     try {
       extensions = await getExtensions(newFolder);
     } catch (e) {
-      await showGeneralModalOk({
+      await showModalOk({
         message: `${e}`,
         title: 'Error in extensions',
       });

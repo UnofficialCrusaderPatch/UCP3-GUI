@@ -9,7 +9,7 @@ import * as GuiSettings from 'function/gui-settings/settings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
 import ExtensionPack from 'function/extensions/pack/extension-pack';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import Logger from 'util/scripts/logging';
 import {
   Funnel,
@@ -158,7 +158,7 @@ export default function ExtensionManager() {
 
                           try {
                             await ep.install(`${gameFolder}/ucp`);
-                            await showGeneralModalOk({
+                            await showModalOk({
                               title: 'Succesful install',
                               message: `Extension pack was succesfully installed`,
                             });
@@ -169,7 +169,7 @@ export default function ExtensionManager() {
                             } else if (e instanceof Error) {
                               msg = e.message; // works, `e` narrowed to Error
                             }
-                            await showGeneralModalOk({
+                            await showModalOk({
                               title: 'ERROR',
                               message: (msg as string).toString(),
                             });
@@ -183,21 +183,21 @@ export default function ExtensionManager() {
                           } else if (e instanceof Error) {
                             msg = e.message; // works, `e` narrowed to Error
                           }
-                          await showGeneralModalOk({
+                          await showModalOk({
                             title: 'ERROR',
                             message: (msg as string).toString(),
                           });
                         }
                       } else {
                         LOGGER.msg(`Path does not exist: ${path}`).warn();
-                        await showGeneralModalOk({
+                        await showModalOk({
                           title: 'Path does not exist',
                           message: `Path does not exist: ${path}`,
                         });
                       }
                     }
                   } catch (e: any) {
-                    await showGeneralModalOk({
+                    await showModalOk({
                       title: 'ERROR',
                       message: e.toString(),
                     });
@@ -265,7 +265,7 @@ export default function ExtensionManager() {
 
                           if (!touch) {
                             // eslint-disable-next-line no-await-in-loop
-                            await showGeneralModalOk({
+                            await showModalOk({
                               title: 'Error',
                               message: `Path does not exist: ${originalPath}`,
                             });
@@ -321,7 +321,7 @@ export default function ExtensionManager() {
 
                           if (!touch) {
                             // eslint-disable-next-line no-await-in-loop
-                            await showGeneralModalOk({
+                            await showModalOk({
                               title: 'Error',
                               message: `Path does not exist: ${originalPath}`,
                             });
@@ -336,7 +336,7 @@ export default function ExtensionManager() {
                       }
                     } catch (e) {
                       LOGGER.obj(e).error();
-                      await showGeneralModalOk({
+                      await showModalOk({
                         title: 'Error',
                         message: (e as Error).toString(),
                       });
@@ -344,7 +344,7 @@ export default function ExtensionManager() {
                       zw.close();
                     }
                   } catch (e: any) {
-                    await showGeneralModalOk({
+                    await showModalOk({
                       title: 'ERROR',
                       message: e.toString(),
                     });
@@ -366,7 +366,7 @@ export default function ExtensionManager() {
                   try {
                     importButtonCallback(gameFolder, setConfigStatus, t, '');
                   } catch (e: any) {
-                    await showGeneralModalOk({
+                    await showModalOk({
                       title: 'ERROR',
                       message: e.toString(),
                     });
@@ -386,7 +386,7 @@ export default function ExtensionManager() {
                   try {
                     exportButtonCallback(gameFolder, setConfigStatus, t);
                   } catch (e: any) {
-                    await showGeneralModalOk({
+                    await showModalOk({
                       title: 'ERROR',
                       message: e.toString(),
                     });
@@ -436,7 +436,7 @@ export default function ExtensionManager() {
                       );
                       setConfigStatus(result);
                     } catch (e: any) {
-                      await showGeneralModalOk({
+                      await showModalOk({
                         title: 'ERROR',
                         message: e.toString(),
                       });

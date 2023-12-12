@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import './game-starter.css';
 
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import {
   EMPTY_GAME_VERSION,
   GameVersionInstance,
@@ -61,7 +61,7 @@ function GameStarterInfo(props: {
                 .writeText(version.sha)
                 .catch(async (reason) => {
                   LOGGER.obj(reason).warn();
-                  await showGeneralModalOk({
+                  await showModalOk({
                     title: 'WARNING',
                     message: reason,
                   });
@@ -104,7 +104,7 @@ function GameStarterButton(props: GameStarterProps) {
     } catch (e) {
       const msg = `Error while trying to launch "${path}": ${e}`;
       LOGGER.msg(msg).error();
-      await showGeneralModalOk({
+      await showModalOk({
         title: 'ERROR',
         message: msg,
       });

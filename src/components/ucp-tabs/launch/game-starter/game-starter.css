@@ -1,70 +1,71 @@
 .game-starter__box {
-    justify-content: start;
-    padding: 15px;
+  justify-content: start;
+  padding: 15px;
 }
 
 .game-starter__image {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .game-starter__image:hover,
 .game-starter__image:focus {
-    filter: drop-shadow(0 0 5px var(--ucp-main-grey));
+  filter: drop-shadow(0 0 5px var(--ucp-main-grey));
 }
 
 .game-starter__image:active {
-    filter: brightness(75%);
+  filter: brightness(75%);
 }
 
 .game-starter__image--disabled {
-    pointer-events: none;
-    cursor: none;
-    opacity: 40%;
-    filter: grayscale(50%)
+  pointer-events: none;
+  cursor: none;
+  opacity: 40%;
+  filter: grayscale(50%)
 }
 
 .game-starter__image--starting {
-    cursor: wait;
-    filter: brightness(75%);
+  cursor: wait;
+  filter: brightness(75%);
 }
 
 .game-starter__info {
-    padding-top: 15px;
-    justify-content: start;
+  padding-top: 15px;
+  justify-content: start;
 }
 
 .game-starter__info__row {
-    display: flex;
-    width: 100%;
+  display: flex;
+  width: 100%;
 }
 
 .game-starter__info__row>div:first-child {
-    text-align: right;
-    flex-grow: 1;
-    flex-basis: 0;
+  text-align: right;
+  flex-grow: 1;
+  flex-basis: 0;
 }
 
 .game-starter__info__row>div:nth-child(2) {
-    flex-basis: 15px;
-    text-align: center;
+  flex-basis: 15px;
+  text-align: center;
 }
 
 .game-starter__info__row>div:last-child {
-    flex-grow: 2;
-    flex-basis: 0;
+  flex-grow: 2;
+  flex-basis: 0;
 }
 
 .game-starter__info__row>div:last-child button {
-    border: 0;
-    background: none;
-    color: inherit;
-    padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
 
-    &:hover, &:focus {
-        text-decoration: underline;
-    }
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
 
-    &:active {
-        opacity: 50%;
-    }
+  &:active {
+    opacity: 50%;
+  }
 }

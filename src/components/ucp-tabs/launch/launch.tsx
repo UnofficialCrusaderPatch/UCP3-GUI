@@ -19,6 +19,10 @@ import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanil
 import { createLaunchOptionFuncs } from './launch-options/launch-options';
 import FreeArgs from './launch-options/free-args';
 import FreeEnvs from './launch-options/free-envs';
+import {
+  UcpConsoleLogLevel,
+  UcpLogLevel,
+} from './launch-options/verbosity-args';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -52,6 +56,20 @@ export default function Launch() {
       <div className="flex-default launch__options">
         <h4>{t('gui-launch:launch.options')}</h4>
         <div className="parchment-box launch__options__box">
+          <UcpLogLevel
+            {...createLaunchOptionFuncs(
+              'UCP_LOG_ARGS',
+              internalArgs,
+              internalEnvs,
+            )}
+          />
+          <UcpConsoleLogLevel
+            {...createLaunchOptionFuncs(
+              'UCP_CONSOLE_LOG_ARGS',
+              internalArgs,
+              internalEnvs,
+            )}
+          />
           <FreeArgs
             {...createLaunchOptionFuncs(
               'FREE_ARGS',

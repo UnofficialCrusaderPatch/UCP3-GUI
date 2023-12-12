@@ -1,37 +1,37 @@
 .launch__container {
-    justify-content: start;
+  justify-content: start;
 }
 
 .launch__boxes {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    padding-top: 15px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding-top: 15px;
 }
 
 .launch__options {
-    align-items: start;
-    padding: 15px;
-    overflow: hidden;
+  align-items: start;
+  padding: 15px;
+  overflow: hidden;
 }
 
 .launch__options,
 .launch__options__box {
-    width: 100%;
-    flex-grow: 1;
+  width: 100%;
+  flex-grow: 1;
 }
 
 .launch__options__box {
-    padding: 8px;
-    display: flex;
+  padding: 8px;
+  display: flex;
 
-    & input {
-        height: 2em;
-    }
+  & input {
+    height: 2em;
+  }
 
-    & button {
-        padding: 0;
-        height: 2em;
-        aspect-ratio: 1/1;
-    }
+  & button {
+    padding: 0;
+    height: 2em;
+    aspect-ratio: 1/1;
+  }
 }

@@ -5,7 +5,7 @@ import translateIcon from 'assets/misc/translate.svg';
 import languages from 'localization/languages.json';
 import SvgHelper from 'components/general/svg-helper';
 import { useAtom } from 'jotai';
-import { LANGUAGE_ATOM } from 'function/global/gui-settings/guiSettings';
+import { LANGUAGE_ATOM } from 'function/gui-settings/settings';
 import { startTransition } from 'react';
 
 export default function LanguageSelect() {

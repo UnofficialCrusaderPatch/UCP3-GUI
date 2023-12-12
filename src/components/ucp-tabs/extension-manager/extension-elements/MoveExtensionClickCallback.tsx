@@ -1,9 +1,7 @@
 import warnClearingOfConfiguration from 'components/ucp-tabs/common/WarnClearingOfConfiguration';
 import { getStore } from 'hooks/jotai/base';
-import {
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/global/global-atoms';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { moveExtension } from '../extensions-state';
 
 const moveExtensionClickCallback = async (event: {

@@ -14,10 +14,10 @@ import { ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import Result from 'util/structs/result';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { showModalOk } from 'components/modals/modal-ok';
 import { useAtomValue } from 'jotai';
+import { useCurrentGameFolder } from 'function/game-folder/state';
 import RecentFolders from './recent-folders';
 
 export default function Overview() {

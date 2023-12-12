@@ -7,7 +7,6 @@ import './config-editor.css';
 import { Form } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 
 import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
 import { showModalCreatePlugin } from 'components/modals/modal-create-plugin';
@@ -18,15 +17,14 @@ import { reloadCurrentWindow } from 'function/window-actions';
 
 import { ConsoleLogger } from 'util/scripts/logging';
 import { useAtom, useAtomValue } from 'jotai';
-import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
-  UCP_CONFIG_FILE_ATOM,
-} from 'function/global/global-atoms';
+import { CONFIGURATION_QUALIFIER_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_WARNINGS_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_REDUCER_ATOM } from 'function/configuration/state';
+import { UCP_CONFIG_FILE_ATOM } from 'function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
+import { useCurrentGameFolder } from 'function/game-folder/state';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';

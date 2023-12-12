@@ -5,11 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import * as GuiSettings from 'function/global/gui-settings/guiSettings';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
+import * as GuiSettings from 'function/gui-settings/settings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
-import ExtensionPack from 'function/extensions/extension-pack';
+import ExtensionPack from 'function/extensions/pack/extension-pack';
 import { showModalOk } from 'components/modals/modal-ok';
 import Logger from 'util/scripts/logging';
 import {
@@ -22,13 +21,14 @@ import {
 } from 'react-bootstrap-icons';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
-  STATUS_BAR_MESSAGE_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
-} from 'function/global/global-atoms';
+} from 'function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { ZipWriter } from 'util/structs/zip-handler';
+import { useCurrentGameFolder } from 'function/game-folder/state';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
   ActiveExtensionElement,
   ExtensionNameList,

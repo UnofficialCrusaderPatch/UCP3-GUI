@@ -201,6 +201,11 @@ type NumberContents = BasicContents & {
   step: number;
 };
 
+type FileInputContents = BasicContents & {
+  filter: 'folders' | 'files' | string;
+  generalizeExtensionPaths: boolean;
+};
+
 type DisplayConfigElement = {
   name: string;
   description: string;
@@ -238,4 +243,5 @@ export type {
   PluginType,
   ModuleType,
   ExtensionType,
+  FileInputContents,
 };

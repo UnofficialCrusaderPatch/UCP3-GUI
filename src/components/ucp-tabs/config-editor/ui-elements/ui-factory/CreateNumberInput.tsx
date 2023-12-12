@@ -79,10 +79,24 @@ function CreateNumberInput(args: {
           level={configurationWarnings[url].level}
         />
       ) : null}
-      <div className="col-1 mr-3">
+      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
+        <Form.Label
+          htmlFor={`${url}-input`}
+          // Tooltip stuff
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          title={fullToolTip}
+          // End of tooltip stuff
+          // disabled={!isEnabled || disabled}
+        >
+          {text}
+        </Form.Label>
+      </div>
+      <div className="flex-grow-1" style={{ minWidth: '33%', maxWidth: '33%' }}>
         <Form.Control
-          className="bg-dark text-light fs-7 lh-1"
+          className="text-light fs-7 lh-1 text-end"
           key={`${url}-input`}
+          style={{ backgroundColor: '#ab712d' }}
           type="number"
           min={min as number}
           max={max as number}
@@ -107,19 +121,6 @@ function CreateNumberInput(args: {
           }}
           disabled={isDisabled}
         />
-      </div>
-      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
-        <Form.Label
-          htmlFor={`${url}-input`}
-          // Tooltip stuff
-          data-bs-toggle="tooltip"
-          data-bs-placement="top"
-          title={fullToolTip}
-          // End of tooltip stuff
-          // disabled={!isEnabled || disabled}
-        >
-          {text}
-        </Form.Label>
       </div>
     </Form.Group>
   );

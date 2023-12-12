@@ -1,4 +1,4 @@
-import { showModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import Logger from 'util/scripts/logging';
 
 const LOGGER = new Logger('WarnClearingOfConfiguration.tsx');

@@ -16,7 +16,7 @@ import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { MouseEvent, useMemo } from 'react';
 import Logger from 'util/scripts/logging';
-import { showModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { getStore } from 'hooks/jotai/base';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';

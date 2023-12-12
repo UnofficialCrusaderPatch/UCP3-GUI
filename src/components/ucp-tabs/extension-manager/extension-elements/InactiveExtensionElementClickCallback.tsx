@@ -1,4 +1,4 @@
-import { showModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { Extension } from 'config/ucp/common';
 import { getStore } from 'hooks/jotai/base';
 import {

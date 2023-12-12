@@ -5,7 +5,7 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/global/global-atoms';
 import { propagateActiveExtensionsChange } from 'components/ucp-tabs/extension-manager/propagateActiveExtensionChange';
-import { showModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import Logger from 'util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';

@@ -1,7 +1,7 @@
 import { getHexHashOfString, getHexHashOfFile } from 'util/scripts/hash';
 import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
 import { showModalOk } from 'components/modals/modal-ok';
-import { showModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import Logger from 'util/scripts/logging';
 
 const LOGGER = new Logger('dev.ts');

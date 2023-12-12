@@ -6,7 +6,6 @@ import CreditsButton from './credits/credits';
 import Footer from './footer/footer';
 import UcpTabs from './ucp-tabs/ucp-tabs';
 
-import { ModalOkCancel } from './modals/ModalOkCancel';
 import { CreatePluginModal } from './modals/CreatePluginModal';
 import { ModalWindow } from './modals/abstract-modal';
 
@@ -26,7 +25,6 @@ export default function Main() {
         </div>
       </div>
       <ModalWindow />
-      <ModalOkCancel />
       <CreatePluginModal />
     </>
   );

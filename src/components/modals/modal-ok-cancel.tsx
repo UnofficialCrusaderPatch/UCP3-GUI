@@ -3,19 +3,22 @@ import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
 
-export interface OkModalWindowProperties
-  extends Omit<AbstractModalWindowProperties<void>, 'handleClose'> {}
+export interface OkCancelModalWindowProperties
+  extends AbstractModalWindowProperties<void> {
+  cancel: string;
+}
 
-const DEFAULT_OK_MODAL_PROPERTIES: AbstractModalWindowProperties<void> = {
+const DEFAULT_OK_CANCEL_MODAL_PROPERTIES: OkCancelModalWindowProperties = {
   message: '',
   title: '',
   handleAction: () => {},
   handleClose: () => {},
   ok: '',
+  cancel: '',
 };
 
-function ModalOk(props: OkModalWindowProperties) {
-  const { handleAction, title, message, ok } = props;
+function ModalOkCancel(props: OkCancelModalWindowProperties) {
+  const { handleClose, handleAction, title, message, ok, cancel } = props;
 
   const [show, setShow] = useState(true);
 
@@ -26,10 +29,15 @@ function ModalOk(props: OkModalWindowProperties) {
     handleAction();
   };
 
+  const internalHandleClose = () => {
+    setShow(false);
+    handleClose();
+  };
+
   return (
     <Modal
       show={show}
-      onHide={internalHandleAction}
+      onHide={internalHandleClose}
       className="text-dark"
       style={{ whiteSpace: 'pre-line' }}
       // prevents escaping the modal:
@@ -41,6 +49,9 @@ function ModalOk(props: OkModalWindowProperties) {
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
+        <Button variant="secondary" onClick={internalHandleClose}>
+          {cancel.length > 0 ? cancel : t('gui-general:cancel')}
+        </Button>
         <Button variant="primary" onClick={internalHandleAction}>
           {ok.length > 0 ? ok : t('gui-general:ok')}
         </Button>
@@ -49,14 +60,16 @@ function ModalOk(props: OkModalWindowProperties) {
   );
 }
 
-export async function showModalOk(spec: Partial<OkModalWindowProperties>) {
-  const fullSpec: AbstractModalWindowProperties<void> = {
-    ...DEFAULT_OK_MODAL_PROPERTIES,
+export async function showModalOkCancel(
+  spec: Partial<OkCancelModalWindowProperties>,
+) {
+  const fullSpec: OkCancelModalWindowProperties = {
+    ...DEFAULT_OK_CANCEL_MODAL_PROPERTIES,
     ...spec,
   };
 
-  return registerModal<void, AbstractModalWindowProperties<void>>(
-    ModalOk,
+  return registerModal<void, OkCancelModalWindowProperties>(
+    ModalOkCancel,
     fullSpec,
   );
 }

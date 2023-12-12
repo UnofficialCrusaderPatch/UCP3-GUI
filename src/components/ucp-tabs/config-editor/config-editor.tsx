@@ -13,7 +13,7 @@ import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
 import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import { showModalOk } from 'components/modals/modal-ok';
-import { showModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { reloadCurrentWindow } from 'function/window-actions';
 
 import { ConsoleLogger } from 'util/scripts/logging';

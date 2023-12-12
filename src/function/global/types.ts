@@ -77,12 +77,3 @@ export type GeneralOkCancelModalWindow = {
   ok: string;
   cancel: string;
 };
-
-export type GeneralOkModalWindow = {
-  type: 'ok';
-  title: string;
-  message: string;
-  handleAction: () => void;
-  show: boolean;
-  ok: string;
-};

@@ -42,7 +42,7 @@ function setGeneralOkCancelModalWindow(state: GeneralOkCancelModalWindow) {
   getStore().set(GENERAL_OKCANCEL_MODAL_WINDOW_REDUCER_ATOM, state);
 }
 
-export async function showGeneralModalOkCancel(
+export async function showModalOkCancel(
   spec: Partial<GeneralOkCancelModalWindow>,
 ) {
   const fullSpec: GeneralOkCancelModalWindow = {

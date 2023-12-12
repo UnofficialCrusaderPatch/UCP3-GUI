@@ -12,7 +12,7 @@ import {
   REAL_BINK_FILENAME,
   UCP_BINK_FILENAME,
 } from 'function/global/constants/file-constants';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
@@ -83,7 +83,7 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
   const t = getTranslation(['gui-general', 'gui-download']);
 
   if (!!binkRealSha && !REAL_BINK_HASHS.has(binkRealSha)) {
-    await showGeneralModalOk({
+    await showModalOk({
       title: t('gui-general:warning'),
       message: t('gui-download:bink.real.unknown'),
     });
@@ -100,7 +100,7 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
     if (REAL_BINK_HASHS.has(binkSha)) {
       return UCPState.BINK_REAL_COPY_MISSING;
     }
-    await showGeneralModalOk({
+    await showModalOk({
       title: t('gui-general:warning'),
       message: t('gui-download:bink.real.invalid.missing'),
     });
@@ -113,7 +113,7 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
     if (binkSha !== binkUcpSha) {
       return UCPState.INACTIVE;
     }
-    await showGeneralModalOk({
+    await showModalOk({
       title: t('gui-general:warning'),
       message: t('gui-download:bink.all.same'),
     });
@@ -126,7 +126,7 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
   if (REAL_BINK_HASHS.has(binkRealSha)) {
     return UCPState.BINK_VERSION_DIFFERENCE; // valid, since we still have a real one
   }
-  await showGeneralModalOk({
+  await showModalOk({
     title: t('gui-general:warning'),
     message: t('gui-download:bink.mixed.real.unknown'),
   });

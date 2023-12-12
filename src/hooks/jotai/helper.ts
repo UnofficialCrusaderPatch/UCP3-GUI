@@ -5,7 +5,7 @@ import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
 import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
 import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -71,7 +71,7 @@ export function useInitGlobalConfiguration(): [
         try {
           extensions = await getExtensions(newFolder);
         } catch (e) {
-          await showGeneralModalOk({
+          await showModalOk({
             message: `${e}`,
             title: 'Error in extensions',
           });

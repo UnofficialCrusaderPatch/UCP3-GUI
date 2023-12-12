@@ -12,8 +12,8 @@ import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
 import { showCreatePluginModalWindow } from 'components/modals/CreatePluginModal';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
-import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOk } from 'components/modals/modal-ok';
+import { showModalOkCancel } from 'components/modals/ModalOkCancel';
 import { reloadCurrentWindow } from 'function/window-actions';
 
 import { ConsoleLogger } from 'util/scripts/logging';
@@ -112,7 +112,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   try {
                     importButtonCallback(gameFolder, setConfigStatus, t, '');
                   } catch (e: any) {
-                    await showGeneralModalOk({
+                    await showModalOk({
                       title: 'ERROR',
                       message: e.toString(),
                     });
@@ -124,7 +124,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   try {
                     exportButtonCallback(gameFolder, setConfigStatus, t);
                   } catch (e: any) {
-                    await showGeneralModalOk({
+                    await showModalOk({
                       title: 'ERROR',
                       message: e.toString(),
                     });
@@ -151,7 +151,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       );
                       setConfigStatus(result);
                     } catch (e: any) {
-                      await showGeneralModalOk({
+                      await showModalOk({
                         title: 'ERROR',
                         message: e.toString(),
                       });
@@ -194,7 +194,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
 
                       if (await exists(pluginDir)) {
-                        await showGeneralModalOk({
+                        await showModalOk({
                           message: `directory already exists: ${pluginDir}`,
                           title: 'cannot create plugin',
                         });
@@ -218,7 +218,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                         toYaml(trimmedResult),
                       );
 
-                      const confirmed = await showGeneralModalOkCancel({
+                      const confirmed = await showModalOkCancel({
                         title: t('gui-general:require.reload.title'),
                         message: t('gui-editor:overview.require.reload.text'),
                       });
@@ -227,7 +227,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                         reloadCurrentWindow();
                       }
                     } catch (e: any) {
-                      await showGeneralModalOk({
+                      await showModalOk({
                         title: 'ERROR',
                         message: e.toString(),
                       });

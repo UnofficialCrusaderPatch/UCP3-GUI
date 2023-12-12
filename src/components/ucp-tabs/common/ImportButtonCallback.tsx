@@ -20,7 +20,7 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from 'function/global/global-atoms';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import { ConsoleLogger } from 'util/scripts/logging';
 import {
   buildExtensionConfigurationDB,
@@ -139,7 +139,7 @@ const importButtonCallback = async (
         const errorMsg = `Unimplemented operator in dependency statement: ${e}`;
 
         // eslint-disable-next-line no-await-in-loop
-        await showGeneralModalOk({
+        await showModalOk({
           message: errorMsg,
           title: `Illegal dependency statement`,
         });
@@ -160,7 +160,7 @@ const importButtonCallback = async (
         );
 
         // eslint-disable-next-line no-await-in-loop
-        await showGeneralModalOk({
+        await showModalOk({
           message: t('gui-editor:config.status.missing.extension', {
             extension: e,
           }),
@@ -172,7 +172,7 @@ const importButtonCallback = async (
 
       if (options.length > 1) {
         // eslint-disable-next-line no-await-in-loop
-        await showGeneralModalOk({
+        await showModalOk({
           message: `The same version of extension is installed multiple times: ${e}`,
           title: `Duplicate extensions`,
         });

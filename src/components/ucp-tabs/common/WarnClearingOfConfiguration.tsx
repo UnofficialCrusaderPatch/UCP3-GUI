@@ -1,4 +1,4 @@
-import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/ModalOkCancel';
 import Logger from 'util/scripts/logging';
 
 const LOGGER = new Logger('WarnClearingOfConfiguration.tsx');
@@ -13,7 +13,7 @@ async function warnClearingOfConfiguration(configurationTouched: {
     (pair) => pair[1] === true,
   );
   if (touchedOptions.length > 0) {
-    const confirmed = await showGeneralModalOkCancel({
+    const confirmed = await showModalOkCancel({
       title: 'Warning',
       message:
         'Changing the active extensions will reset your configuration. Proceed anyway?',

@@ -16,7 +16,7 @@ import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { MouseEvent, useMemo } from 'react';
 import Logger from 'util/scripts/logging';
-import { showGeneralModalOkCancel } from 'components/modals/ModalOkCancel';
+import { showModalOkCancel } from 'components/modals/ModalOkCancel';
 import { getStore } from 'hooks/jotai/base';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
@@ -148,7 +148,7 @@ function CreateFileInput(args: {
               .indexOf(extensionName) === -1;
           if (isNotListed) {
             if (
-              !(await showGeneralModalOkCancel({
+              !(await showModalOkCancel({
                 title: 'WARNING: Extension not active',
                 message: `The extension "${extensionName}" is not among the active extensions. Make sure to active it. Otherwise, running the game might fail.`,
               }))

@@ -5,7 +5,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
-} from 'function/global/global-atoms';
+} from 'function/configuration/state';
 import { useAtomValue } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';

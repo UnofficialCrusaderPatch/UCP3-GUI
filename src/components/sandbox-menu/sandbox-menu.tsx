@@ -2,15 +2,16 @@ import './sandbox-menu.css';
 
 import { OverlayContentProps } from 'components/overlay/overlay';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import Sandbox, { PluginInstance } from 'websandbox';
 import { readTextFile } from 'tauri/tauri-files';
-import { useCurrentGameFolder } from 'hooks/jotai/helper';
 import { getStore } from 'hooks/jotai/base';
+import { atom, useAtomValue } from 'jotai';
 import {
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-} from 'function/global/global-atoms';
-import { atom, useAtomValue } from 'jotai';
+} from 'function/configuration/state';
+import { useCurrentGameFolder } from 'function/game-folder/state';
+import Sandbox, { PluginInstance } from 'websandbox';
+
 import {
   getLanguage,
   createGetLocalizedStringFunction,

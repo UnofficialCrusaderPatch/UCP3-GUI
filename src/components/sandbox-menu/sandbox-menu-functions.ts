@@ -1,9 +1,7 @@
 import { FileEntry } from '@tauri-apps/api/fs';
 import { Extension } from 'config/ucp/common';
-import {
-  CONFIGURATION_REDUCER_ATOM,
-  EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/global/global-atoms';
+import { CONFIGURATION_REDUCER_ATOM } from 'function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { getStore } from 'hooks/jotai/base';
 import i18next from 'i18next';
 import { readTextFile, receiveAssetUrl, resolvePath } from 'tauri/tauri-files';

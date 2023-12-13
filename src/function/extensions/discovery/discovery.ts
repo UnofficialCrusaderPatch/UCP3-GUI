@@ -8,6 +8,7 @@ import {
   ConfigEntry,
   ConfigFile,
   ConfigFileExtensionEntry,
+  DisplayConfigElement,
   Extension,
   ExtensionIOCallback,
   OptionEntry,
@@ -99,11 +100,10 @@ async function readLocales(
 }
 
 function applyLocale(ext: Extension, locale: { [key: string]: string }) {
-  const ui = JSON.parse(JSON.stringify(ext.ui));
-  return ui.map((uiElement: { [key: string]: unknown }) => {
-    changeLocale(locale, uiElement as { [key: string]: unknown });
-    return uiElement as { [key: string]: unknown };
-  });
+  const { ui } = ext;
+  return ui.map((uiElement: { [key: string]: unknown }) =>
+    changeLocale(locale, uiElement as { [key: string]: unknown }),
+  );
 }
 
 function collectOptionEntries(
@@ -240,6 +240,35 @@ async function getExtensionHandles(ucpFolder: string) {
   return exts;
 }
 
+const attachExtensionInformation = (extension: Extension, obj: unknown) => {
+  const todo: unknown[] = [];
+  const done: unknown[] = [];
+
+  todo.push(obj);
+
+  while (todo.length > 0) {
+    const current = todo.pop();
+
+    if (done.indexOf(current) !== -1) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (current instanceof Array) {
+      current.forEach((v) => todo.push(v));
+    } else if (current instanceof Object) {
+      Object.entries(current).forEach(([k, v]) => {
+        todo.push(v);
+      });
+      (current as DisplayConfigElement).extension = extension;
+    } else {
+      // throw Error((obj as any).toString());
+    }
+
+    done.push(current);
+  }
+};
+
 const Discovery = {
   discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
     LOGGER.msg('Discovering extensions').info();
@@ -300,13 +329,16 @@ const Discovery = {
 
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
+        console.debug('attaching extension');
+        attachExtensionInformation(ext, ext.ui);
+
         ext.locales = await readLocales(eh, ext, Object.keys(languages));
         ext.config = await readConfig(eh);
 
-        ext.optionEntries = collectOptionEntries(
-          ext.ui as unknown as { [key: string]: unknown },
-          ext.name,
-        );
+        // ext.optionEntries = collectOptionEntries(
+        //   ext.ui as unknown as { [key: string]: unknown },
+        //   ext.name,
+        // );
 
         ext.configEntries = {};
 

@@ -233,6 +233,7 @@ type DisplayConfigElement = {
     | BasicContents
     | ChoiceContents
     | NumberContents
+    | FileInputContents
     | CustomMenuContents;
   extension: Extension;
 };

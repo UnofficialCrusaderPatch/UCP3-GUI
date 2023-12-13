@@ -41,8 +41,9 @@ export async function initializeGameFolder(newFolder: string) {
     try {
       extensions = await getExtensions(newFolder);
     } catch (e) {
+      console.error(e);
       await showModalOk({
-        message: `${e}`,
+        message: (e as any).toString(),
         title: 'Error in extensions',
       });
     }

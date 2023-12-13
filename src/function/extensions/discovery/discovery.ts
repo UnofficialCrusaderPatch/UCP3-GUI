@@ -16,11 +16,11 @@ import Logger from 'util/scripts/logging';
 import languages from 'localization/languages.json';
 import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
 import { canonicalize, slashify } from 'tauri/tauri-invoke';
-import ZipExtensionHandle from './extension-handles/rust-zip-extension-handle';
-import DirectoryExtensionHandle from './extension-handles/directory-extension-handle';
-import { changeLocale } from './locale';
-import { ExtensionTree } from './dependency-management/dependency-resolution';
-import { ExtensionHandle } from './extension-handles/extension-handle';
+import { ExtensionTree } from '../dependency-management/dependency-resolution';
+import DirectoryExtensionHandle from '../handles/directory-extension-handle';
+import { ExtensionHandle } from '../handles/extension-handle';
+import { changeLocale } from '../locale/locale';
+import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
 
 const LOGGER = new Logger('discovery.ts');
 
@@ -226,7 +226,7 @@ async function getExtensionHandles(ucpFolder: string) {
 
       if (fe.name !== undefined && fe.name.endsWith('.zip')) {
         // TODO: Do hash check here!
-        const result = await ZipExtensionHandle.fromPath(folder);
+        const result = await RustZipExtensionHandle.fromPath(folder);
         return result as ExtensionHandle;
       }
       if (fe.children !== null) {
@@ -285,7 +285,7 @@ const Discovery = {
               neh.close();
             }
           },
-          isZip: eh instanceof ZipExtensionHandle,
+          isZip: eh instanceof RustZipExtensionHandle,
           isDirectory: eh instanceof DirectoryExtensionHandle,
           path: eh.path,
         };

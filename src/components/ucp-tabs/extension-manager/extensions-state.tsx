@@ -3,11 +3,8 @@ import './extension-manager.css';
 import { Extension } from 'config/ucp/common';
 import { ExtensionsState } from 'function/global/types';
 
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import Logger from 'util/scripts/logging';
-import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
-import { getStore } from 'hooks/jotai/base';
-import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
 
 const LOGGER = new Logger('extension-state.ts');
 
@@ -23,7 +20,7 @@ const addExtensionToExplicityActivatedExtensions = async (
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     LOGGER.msg(solution.message).error();
-    await showGeneralModalOk({
+    await showModalOk({
       message: solution.message,
       title: 'Error in dependencies',
     });
@@ -59,7 +56,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     LOGGER.msg(solution.message).error();
-    await showGeneralModalOk({
+    await showModalOk({
       message: solution.message,
       title: 'Error in dependencies',
     });

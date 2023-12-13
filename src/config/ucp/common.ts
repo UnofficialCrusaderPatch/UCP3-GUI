@@ -89,7 +89,7 @@ modules:
 ```
 */
 
-import { ExtensionHandle } from 'function/extensions/extension-handles/extension-handle';
+import { ExtensionHandle } from 'function/extensions/handles/extension-handle';
 
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required
@@ -213,6 +213,11 @@ type CustomMenuContents = BasicContents & {
   };
 };
 
+type FileInputContents = BasicContents & {
+  filter: 'folders' | 'files' | string;
+  generalizeExtensionPaths: boolean;
+};
+
 type DisplayConfigElement = {
   name: string;
   description: string;
@@ -257,4 +262,5 @@ export type {
   ModuleType,
   ExtensionType,
   ExtensionIOCallback,
+  FileInputContents,
 };

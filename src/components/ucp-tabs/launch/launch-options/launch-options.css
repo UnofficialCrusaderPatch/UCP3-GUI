@@ -1,0 +1,37 @@
+.launch__options__box--free-args {
+  width: 50%;
+  padding: 10px;
+
+  > form {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.launch__options__box--free-envs {
+  width: 50%;
+  padding: 10px;
+
+  > form {
+    display: flex;
+
+    > input {
+      flex-grow: 1;
+    }
+  }
+}
+
+.launch__options__box--ucp-log-level {
+  width: 50%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+
+  > h5 {
+    margin: 0;
+    vertical-align: center;
+  }
+  > select {
+    margin-left: auto;
+  }
+}

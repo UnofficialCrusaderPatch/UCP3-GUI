@@ -1,15 +1,15 @@
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  STATUS_BAR_MESSAGE_ATOM,
-} from 'function/global/global-atoms';
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+} from 'function/configuration/state';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
@@ -79,10 +79,24 @@ function CreateChoice(args: {
           level={configurationWarnings[url].level}
         />
       ) : null}
-      <div className="col-3">
+      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
+        <Form.Label
+          htmlFor={`${url}-input`}
+          // Tooltip stuff
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          title={fullToolTip}
+          // End of tooltip stuff
+          // disabled={!isEnabled || disabled || configurationLocks[url] === true}
+        >
+          {text}
+        </Form.Label>
+      </div>
+      <div className="flex-grow-1" style={{ minWidth: '33%', maxWidth: '33%' }}>
         <Form.Select
           size="sm"
-          className="bg-dark text-light fs-7 lh-1"
+          className="text-light fs-7 lh-1"
+          style={{ backgroundColor: '#ab712d' }}
           key={`${url}-input`}
           id={`${url}-input`}
           // Tooltip stuff
@@ -109,19 +123,6 @@ function CreateChoice(args: {
             </option>
           ))}
         </Form.Select>
-      </div>
-      <div className={`flex-grow-1 px-2 ${isDisabled ? 'label-disabled' : ''}`}>
-        <Form.Label
-          htmlFor={`${url}-input`}
-          // Tooltip stuff
-          data-bs-toggle="tooltip"
-          data-bs-placement="top"
-          title={fullToolTip}
-          // End of tooltip stuff
-          // disabled={!isEnabled || disabled || configurationLocks[url] === true}
-        >
-          {text}
-        </Form.Label>
       </div>
     </Form.Group>
   );

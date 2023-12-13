@@ -1,4 +1,4 @@
-import { GAME_FOLDER_ATOM } from 'function/global/global-atoms';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from 'function/game-folder/state';
 import { atom } from 'jotai';
 import { resolvePath } from 'tauri/tauri-files';
 
@@ -19,9 +19,9 @@ async function getExtremePath(gameFolder: string): Promise<string> {
 }
 
 export const VANILLA_PATH_ATOM = atom((get) =>
-  getVanillaPath(get(GAME_FOLDER_ATOM)),
+  getVanillaPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM)),
 );
 
 export const EXTREME_PATH_ATOM = atom((get) =>
-  getExtremePath(get(GAME_FOLDER_ATOM)),
+  getExtremePath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM)),
 );

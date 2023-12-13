@@ -3,16 +3,16 @@ import {
   extensionsToOptionEntries,
   getConfigDefaults,
 } from 'config/ucp/extension-util';
+import { CONFIGURATION_SUGGESTIONS_REDUCER_ATOM } from 'function/configuration/state';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  ConfigurationLock,
   ConfigurationSuggestion,
-} from 'function/global/global-atoms';
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  ConfigurationLock,
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+} from 'function/configuration/state';
 import { ExtensionsState } from 'function/global/types';
 import { getStore } from 'hooks/jotai/base';
 import { ConsoleLogger } from 'util/scripts/logging';

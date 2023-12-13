@@ -7,27 +7,28 @@ import {
 import { loadConfigFromFile } from 'config/ucp/config-files';
 import { ConfigMetaObjectDB } from 'config/ucp/config-merge/objects';
 import { DependencyStatement, Version } from 'config/ucp/dependency-statement';
-import { collectConfigEntries } from 'function/extensions/discovery';
+import { collectConfigEntries } from 'function/extensions/discovery/discovery';
 import { ExtensionsState, ConfigurationQualifier } from 'function/global/types';
 import { openFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
 import { getStore } from 'hooks/jotai/base';
+import { AVAILABLE_EXTENSION_VERSIONS_ATOM } from 'function/extensions/state/state';
+import { PREFERRED_EXTENSION_VERSION_ATOM } from 'function/extensions/state/state';
+import { CONFIGURATION_QUALIFIER_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
+import { CONFIGURATION_REDUCER_ATOM } from 'function/configuration/state';
 import {
-  AVAILABLE_EXTENSION_VERSIONS_ATOM,
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
-  PREFERRED_EXTENSION_VERSION_ATOM,
-} from 'function/global/global-atoms';
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+} from 'function/extensions/state/state';
+import { showModalOk } from 'components/modals/modal-ok';
 import { ConsoleLogger } from 'util/scripts/logging';
 import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
-import { propagateActiveExtensionsChange } from '../extension-manager/propagateActiveExtensionChange';
+import { propagateActiveExtensionsChange } from '../../../function/extensions/state/change';
 import warnClearingOfConfiguration from './WarnClearingOfConfiguration';
 
 const setConfiguration = (arg0: {
@@ -45,7 +46,7 @@ const setConfigurationTouched = (arg0: {
 };
 
 const setExtensionsState = (arg0: ExtensionsState) => {
-  getStore().set(EXTENSION_STATE_REDUCER_ATOM, arg0);
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, arg0);
 };
 
 const setConfigurationQualifier = (arg0: {
@@ -139,7 +140,7 @@ const importButtonCallback = async (
         const errorMsg = `Unimplemented operator in dependency statement: ${e}`;
 
         // eslint-disable-next-line no-await-in-loop
-        await showGeneralModalOk({
+        await showModalOk({
           message: errorMsg,
           title: `Illegal dependency statement`,
         });
@@ -160,7 +161,7 @@ const importButtonCallback = async (
         );
 
         // eslint-disable-next-line no-await-in-loop
-        await showGeneralModalOk({
+        await showModalOk({
           message: t('gui-editor:config.status.missing.extension', {
             extension: e,
           }),
@@ -172,7 +173,7 @@ const importButtonCallback = async (
 
       if (options.length > 1) {
         // eslint-disable-next-line no-await-in-loop
-        await showGeneralModalOk({
+        await showModalOk({
           message: `The same version of extension is installed multiple times: ${e}`,
           title: `Duplicate extensions`,
         });
@@ -202,8 +203,6 @@ const importButtonCallback = async (
 
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
   }
-
-  propagateActiveExtensionsChange(newExtensionsState);
 
   setExtensionsState(newExtensionsState);
 

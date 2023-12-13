@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import './game-starter.css';
 
-import { showGeneralModalOk } from 'components/modals/ModalOk';
+import { showModalOk } from 'components/modals/modal-ok';
 import {
   EMPTY_GAME_VERSION,
   GameVersionInstance,
@@ -19,8 +19,8 @@ interface GameStarterProps {
   pathAtom: Atom<Promise<string>>;
   versionAtom: Atom<Promise<GameVersionInstance>>;
   imagePath: string;
-  args?: string[];
-  envs?: Record<string, string>;
+  receiveArgs?: () => string[];
+  receiveEnvs?: () => Record<string, string>;
 }
 
 function GameStarterInfo(props: {
@@ -61,7 +61,7 @@ function GameStarterInfo(props: {
                 .writeText(version.sha)
                 .catch(async (reason) => {
                   LOGGER.obj(reason).warn();
-                  await showGeneralModalOk({
+                  await showModalOk({
                     title: 'WARNING',
                     message: reason,
                   });
@@ -77,7 +77,7 @@ function GameStarterInfo(props: {
 }
 
 function GameStarterButton(props: GameStarterProps) {
-  const { imagePath, pathAtom, versionAtom, args, envs } = props;
+  const { imagePath, pathAtom, versionAtom, receiveArgs, receiveEnvs } = props;
 
   const { t } = useTranslation(['gui-launch']);
 
@@ -98,13 +98,13 @@ function GameStarterButton(props: GameStarterProps) {
   const startFunc = async () => {
     try {
       setStarting(true);
-      await osOpenProgram(path, args, envs);
+      await osOpenProgram(path, receiveArgs?.(), receiveEnvs?.());
       // the game start takes a while, but we not observe it, so we simulate loading a bit instead
       await sleep(2000);
     } catch (e) {
       const msg = `Error while trying to launch "${path}": ${e}`;
       LOGGER.msg(msg).error();
-      await showGeneralModalOk({
+      await showModalOk({
         title: 'ERROR',
         message: msg,
       });
@@ -133,7 +133,7 @@ function GameStarterButton(props: GameStarterProps) {
 }
 
 export default function GameStarter(props: GameStarterProps) {
-  const { imagePath, pathAtom, versionAtom, args, envs } = props;
+  const { imagePath, pathAtom, versionAtom, receiveArgs, receiveEnvs } = props;
 
   return (
     <div className="flex-default game-starter__box">
@@ -142,8 +142,8 @@ export default function GameStarter(props: GameStarterProps) {
           imagePath={imagePath}
           pathAtom={pathAtom}
           versionAtom={versionAtom}
-          args={args}
-          envs={envs}
+          receiveArgs={receiveArgs}
+          receiveEnvs={receiveEnvs}
         />
         <GameStarterInfo versionAtom={versionAtom} />
       </Suspense>

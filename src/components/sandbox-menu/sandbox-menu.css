@@ -1,24 +1,6 @@
-.sandbox-menu-button-dummy {
-    background-color: var(--ucp-menu-shade);
-    color: white;
-    position: absolute;
-    border: none;
-    font-size: 16px;
-    padding: 4px 16px;
-    top: 8px;
-    left: 0;
-    right: 0;
-    margin: auto;
-    width: max-content;
-}
-
 .sandbox-menu-button {
-    background-color: var(--ucp-menu-shade);
-    color: white;
-    border: none;
     font-size: 16px;
     padding: 4px 16px;
-    width: max-content;
 }
 
 .sandbox-control-menu {
@@ -28,23 +10,14 @@
 }
 
 .sandbox-control-button {
-    background-color: var(--ucp-menu-shade);
-    color: white;
-    border: none;
-    font-size: 16px;
-    padding: 4px 16px;
-    margin: 4px;
+    background-color: black;
+    background-clip: padding-box;
 }
 
 .sandbox-container {
     width: 100%;
     flex-grow: 1;
     background-color: var(--ucp-main-brown);
-    border-image: var(--ucp-main-border-image);
-    border-top: var(--ucp-main-border);
-    border-bottom: var(--ucp-main-border);
-    border-left: var(--ucp-main-border);
-    border-right: var(--ucp-main-border);
 }
 
 .sandbox-frame {

@@ -10,6 +10,7 @@ import {
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import Sandbox, { PluginInstance } from 'websandbox';
 
+import { useTranslation } from 'react-i18next';
 import {
   getLanguage,
   createGetLocalizedStringFunction,
@@ -38,6 +39,7 @@ export interface SandboxArgs {
   baseUrl: string;
   source: SandboxSource;
   localizedStrings: Record<string, string>;
+  title?: string;
 }
 
 function saveConfig(baseUrl: string, config: Record<string, unknown>) {
@@ -101,6 +103,7 @@ function SandboxInternal(
   const { closeFunc, args } = props;
   const { baseUrl, source, localizedStrings, sandboxDiv } = args;
 
+  const [t] = useTranslation(['gui-editor']);
   const currentFolder = useCurrentGameFolder();
 
   const [sandbox, setSandbox] = useState<null | PluginInstance>(null);
@@ -126,32 +129,32 @@ function SandboxInternal(
     <div className="sandbox-control-menu">
       <button
         type="button"
-        className="sandbox-control-button"
+        className="ucp-button sandbox-control-button"
         disabled={!initDone}
         onClick={async () =>
           // we will see, if this works, or just closes the sandbox
           saveConfig(baseUrl, await sandbox.connection.remote.getConfig())
         }
       >
-        SAVE
+        {t('gui-editor:sandbox.save')}
       </button>
       <button
         type="button"
-        className="sandbox-control-button"
+        className="ucp-button sandbox-control-button"
         disabled={!initDone}
         onClick={async () => {
           saveConfig(baseUrl, await sandbox.connection.remote.getConfig());
           closeFunc();
         }}
       >
-        SAVE_AND_CLOSE
+        {t('gui-editor:sandbox.save.close')}
       </button>
       <button
         type="button"
-        className="sandbox-control-button"
+        className="ucp-button sandbox-control-button"
         onClick={closeFunc}
       >
-        CLOSE
+        {t('gui-editor:sandbox.close')}
       </button>
     </div>
   );
@@ -159,12 +162,13 @@ function SandboxInternal(
 
 export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
   const { closeFunc, args } = props;
+  const { title } = args;
 
   const [sandboxDiv, setSandboxDiv] = useState<null | HTMLDivElement>(null);
   return (
     <div className="sandbox-menu-container">
-      <h1 className="sandbox-menu-title">TITLE_TEST</h1>
-      <div ref={setSandboxDiv} className="sandbox-container" />
+      {!title ? null : <h1 className="sandbox-menu-title">{title}</h1>}
+      <div ref={setSandboxDiv} className="outline-border sandbox-container" />
       {!sandboxDiv ? null : (
         <Suspense>
           <SandboxInternal

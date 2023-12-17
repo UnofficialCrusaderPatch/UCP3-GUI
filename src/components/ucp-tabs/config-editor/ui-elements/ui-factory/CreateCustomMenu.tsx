@@ -75,7 +75,7 @@ function CreateCustomMenu(args: {
     CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   );
 
-  const [, i18n] = useTranslation();
+  const [t, i18n] = useTranslation(['gui-editor']);
   const [activatingMenu, setActivatingMenu] = useState(false);
   const setOverlayContent = useSetOverlayContent<SandboxArgs>();
 
@@ -95,7 +95,7 @@ function CreateCustomMenu(args: {
   };
 
   return (
-    <div className="col-5" style={{ marginLeft: 0, marginBottom: 0 }}>
+    <div>
       {hasWarning ? (
         <ConfigWarning
           text={configurationWarnings[url].text}
@@ -108,23 +108,24 @@ function CreateCustomMenu(args: {
           {text}
         </label>
       </div>
-      <div className="row">
+      <div>
         <button
           type="button"
           id={`${url}-sandbox`}
-          className="sandbox-menu-button"
+          className="ucp-button sandbox-menu-button"
           onClick={async () => {
             setActivatingMenu(true);
             setOverlayContent(SandboxMenu, {
               baseUrl: url,
               source: await receiveSources(extension, sourcePaths),
               localizedStrings: extension.locales[i18n.language] ?? {},
+              title: hasHeader ? header : undefined,
             });
             setActivatingMenu(false);
           }}
           disabled={!isEnabled || disabled || activatingMenu}
         >
-          SANDBOX_TEST
+          {t('gui-editor:sandbox.open')}
         </button>
       </div>
     </div>

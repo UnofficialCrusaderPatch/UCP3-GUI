@@ -1,5 +1,14 @@
-import { CustomMenuContents, DisplayConfigElement } from 'config/ucp/common';
-import { SandboxArgs, SandboxMenu } from 'components/sandbox-menu/sandbox-menu';
+import {
+  CustomMenuContents,
+  DisplayConfigElement,
+  Extension,
+} from 'config/ucp/common';
+import {
+  SandboxArgs,
+  SandboxMenu,
+  SandboxSource,
+  SandboxSourcePaths,
+} from 'components/sandbox-menu/sandbox-menu';
 import { useSetOverlayContent } from 'components/overlay/overlay';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -7,8 +16,51 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from 'function/configuration/state';
 import { useAtomValue } from 'jotai';
+import { ExtensionHandle } from 'function/extensions/handles/extension-handle';
+import Logger from 'util/scripts/logging';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';
+
+const LOGGER = new Logger('CreateCustomMenu.tsx');
+
+async function receiveSource(handle: ExtensionHandle, source: string) {
+  if (!source) {
+    return '';
+  }
+  return handle.getTextContents(`menu/${source}`).catch((e) => {
+    LOGGER.msg(
+      'Unable to load source "{}" from menu path of extension with path "{}": {}',
+      source,
+      handle.path,
+      e,
+    ).warn();
+    return '';
+  });
+}
+
+async function receiveSources(
+  extension: Extension,
+  sourcePaths: SandboxSourcePaths,
+): Promise<SandboxSource> {
+  return extension.io
+    .handle((handle) =>
+      Promise.all([
+        receiveSource(handle, sourcePaths.html),
+        receiveSource(handle, sourcePaths.css),
+        receiveSource(handle, sourcePaths.js),
+      ]),
+    )
+    .then((sourceStrings) =>
+      // should these be sanitized?
+      ({
+        html: sourceStrings[0],
+        css: sourceStrings[1],
+        js: sourceStrings[2],
+      }),
+    );
+}
 
 function CreateCustomMenu(args: {
   spec: DisplayConfigElement;
@@ -23,11 +75,13 @@ function CreateCustomMenu(args: {
     CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   );
 
+  const [, i18n] = useTranslation();
+  const [activatingMenu, setActivatingMenu] = useState(false);
   const setOverlayContent = useSetOverlayContent<SandboxArgs>();
 
   const { spec, disabled } = args;
-  const { url, text, enabled, header } = spec;
-  const { source } = spec.contents as CustomMenuContents;
+  const { url, text, enabled, header, extension } = spec;
+  const { source: sourcePaths } = spec.contents as CustomMenuContents;
 
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -59,13 +113,16 @@ function CreateCustomMenu(args: {
           type="button"
           id={`${url}-sandbox`}
           className="sandbox-menu-button"
-          onClick={() =>
+          onClick={async () => {
+            setActivatingMenu(true);
             setOverlayContent(SandboxMenu, {
               baseUrl: url,
-              source,
-            })
-          }
-          disabled={!isEnabled || disabled}
+              source: await receiveSources(extension, sourcePaths),
+              localizedStrings: extension.locales[i18n.language] ?? {},
+            });
+            setActivatingMenu(false);
+          }}
+          disabled={!isEnabled || disabled || activatingMenu}
         >
           SANDBOX_TEST
         </button>

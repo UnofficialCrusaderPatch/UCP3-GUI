@@ -29,34 +29,6 @@ export function createGetAssetUrlFunction(currentFolder: string) {
   return async (path: string) => receiveAssetUrl(currentFolder, path);
 }
 
-// TODO
-// should be called with a base path (in the plugin folder) and a path pattern and
-// receive an array or a map of objects,
-// each containing and object with information to the plugin is was found in and
-// an array/object of path objects with the (relative to current folder) and
-// all other requested groups, idea:
-/*
- [
-    {
-        name: "plugin-name",
-        version: 0.0.0,
-        path: "..." // relative path to plugin
-        ... // other?,
-        paths: [ // paths that fitted the pattern
-            {
-                path: "...", // relative to game folder
-                pluginPath: "...", // relative to plugin
-                ... // either here all groups from the path, or as:
-                groups: {
-                    ...
-                }
-            },
-            ...
-        ]
-    },
-    ...
- ]
-*/
 export function createReceivePluginPathsFunction(currentFolder: string) {
   const { activeExtensions } = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 

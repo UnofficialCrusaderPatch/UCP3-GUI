@@ -306,10 +306,10 @@ const Discovery = {
           definition.dependencies || definition.depends || [];
 
         const io = {
-          handle: async (cb: ExtensionIOCallback) => {
+          handle: async <R>(cb: ExtensionIOCallback<R>) => {
             const neh = await eh.clone();
             try {
-              await cb(neh);
+              return await cb(neh);
             } finally {
               neh.close();
             }

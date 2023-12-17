@@ -2,9 +2,7 @@ import './sandbox-menu.css';
 
 import { OverlayContentProps } from 'components/overlay/overlay';
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { readTextFile } from 'tauri/tauri-files';
 import { getStore } from 'hooks/jotai/base';
-import { atom, useAtomValue } from 'jotai';
 import {
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -27,39 +25,19 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
 
-interface SandboxSource {
+export interface SandboxSource {
   html: string;
   css: string;
   js: string;
 }
 
 // same attributes, but holds paths inside menu folder
-type SandboxSourcePaths = SandboxSource;
+export type SandboxSourcePaths = SandboxSource;
 
 export interface SandboxArgs {
   baseUrl: string;
-  source: SandboxSourcePaths;
-}
-
-async function receiveSources(
-  currentFolder: string,
-  sourcePaths: SandboxSourcePaths,
-): Promise<SandboxSource> {
-  // TODO: needs changing to be handled by extension io
-  return Promise.all([
-    readTextFile(sourcePaths.html),
-    readTextFile(sourcePaths.css),
-    readTextFile(sourcePaths.js),
-  ]).then((sourceStrings) =>
-    // should these be sanitized?
-    // css and js could also be made accessible through assets
-    // also, they may/should be restricted to their home folder -> needs test
-    ({
-      html: sourceStrings[0].ok().getOrElse(''),
-      css: sourceStrings[1].ok().getOrElse(''),
-      js: sourceStrings[2].ok().getOrElse(''),
-    }),
-  );
+  source: SandboxSource;
+  localizedStrings: Record<string, string>;
 }
 
 function saveConfig(baseUrl: string, config: Record<string, unknown>) {
@@ -121,22 +99,9 @@ function SandboxInternal(
   props: OverlayContentProps<SandboxArgs & { sandboxDiv: HTMLDivElement }>,
 ) {
   const { closeFunc, args } = props;
-  const { baseUrl, source, sandboxDiv } = args;
+  const { baseUrl, source, localizedStrings, sandboxDiv } = args;
 
   const currentFolder = useCurrentGameFolder();
-  const sourceData = useAtomValue(
-    useMemo(
-      () =>
-        atom(() =>
-          receiveSources(currentFolder, {
-            html: source.html,
-            css: source.css,
-            js: source.js,
-          }),
-        ),
-      [currentFolder, source.html, source.css, source.js],
-    ),
-  );
 
   const [sandbox, setSandbox] = useState<null | PluginInstance>(null);
 
@@ -144,13 +109,18 @@ function SandboxInternal(
 
   useEffect(() => {
     const sand: PluginInstance = Sandbox.create(
-      createSandboxHostApi(setInitDone, currentFolder, baseUrl, {}),
-      createSandboxOptions(sandboxDiv, sourceData),
+      createSandboxHostApi(
+        setInitDone,
+        currentFolder,
+        baseUrl,
+        localizedStrings,
+      ),
+      createSandboxOptions(sandboxDiv, source),
     );
 
     setSandbox(sand);
     return () => sand.destroy();
-  }, [baseUrl, currentFolder, sandboxDiv, sourceData]);
+  }, [baseUrl, currentFolder, sandboxDiv, source, localizedStrings]);
 
   return !sandbox ? null : (
     <div className="sandbox-control-menu">
@@ -190,16 +160,16 @@ function SandboxInternal(
 export function SandboxMenu(props: OverlayContentProps<SandboxArgs>) {
   const { closeFunc, args } = props;
 
-  const sandboxDiv = useRef<null | HTMLDivElement>(null);
+  const [sandboxDiv, setSandboxDiv] = useState<null | HTMLDivElement>(null);
   return (
     <div className="sandbox-menu-container">
       <h1 className="sandbox-menu-title">TITLE_TEST</h1>
-      <div ref={sandboxDiv} className="sandbox-container" />
-      {!sandboxDiv.current ? null : (
+      <div ref={setSandboxDiv} className="sandbox-container" />
+      {!sandboxDiv ? null : (
         <Suspense>
           <SandboxInternal
             closeFunc={closeFunc}
-            args={{ ...args, sandboxDiv: sandboxDiv.current }}
+            args={{ ...args, sandboxDiv }}
           />
         </Suspense>
       )}

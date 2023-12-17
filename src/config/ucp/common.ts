@@ -163,7 +163,7 @@ type PluginType = 'plugin';
 type ModuleType = 'module';
 type ExtensionType = PluginType | ModuleType;
 
-type ExtensionIOCallback = (extensionHandle: ExtensionHandle) => Promise<void>;
+type ExtensionIOCallback<R> = (extensionHandle: ExtensionHandle) => Promise<R>;
 
 type Extension = {
   'specification-version': string;
@@ -182,7 +182,7 @@ type Extension = {
     isZip: boolean;
     isDirectory: boolean;
     path: string;
-    handle: (cb: ExtensionIOCallback) => Promise<void>;
+    handle: <R>(cb: ExtensionIOCallback<R>) => Promise<R>;
   };
 };
 

@@ -7,12 +7,9 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from 'function/extensions/state/state';
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
-import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
-import { readAndFilterPaths, slashify } from 'tauri/tauri-invoke';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
-import { propagateActiveExtensionsChange } from '../../../../function/extensions/state/change';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 

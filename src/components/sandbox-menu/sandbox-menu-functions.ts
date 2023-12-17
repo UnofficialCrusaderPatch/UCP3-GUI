@@ -37,8 +37,9 @@ export function createReceivePluginPathsFunction(currentFolder: string) {
     gameFolder = gameFolder ?? (await slashify(currentFolder));
     const result = await Promise.all(
       activeExtensions
-        // // Module paths cannot be returned usually because they live inside zip files?
-        // .filter((e) => e.type === 'plugin')
+        // Filter for plugins, since currently they are unpacked, modules can be found by the universal approach,
+        // but we can not load data from packaged data into the game
+        .filter((e) => e.type === 'plugin')
         .map(async (extension: Extension) => {
           let entries: FileEntry[] = [];
           let path: string = '';
@@ -51,7 +52,7 @@ export function createReceivePluginPathsFunction(currentFolder: string) {
           const paths = entries.map((e) => e.path);
 
           return {
-            extension: JSON.parse(JSON.stringify(extension)),
+            description: { ...extension.definition, dependencies: undefined },
             path,
             paths,
           };
@@ -66,21 +67,34 @@ export function createGetConfigStateFunction() {
   return async (url: string) => getStore().get(CONFIGURATION_REDUCER_ATOM)[url];
 }
 
+function transformConfigsForCustomMenu(
+  urlPrefix: string,
+  configs: Record<string, unknown>,
+) {
+  return Object.fromEntries(
+    Object.entries(configs)
+      .filter(([url]) => url.startsWith(urlPrefix))
+      .map(([url, config]) => [url.replace(urlPrefix, ''), config]),
+  );
+}
+
 export function createGetCurrentConfigFunction(baseUrl: string) {
   const urlPrefix = `${baseUrl}.`;
   return async () => {
     const baseline = getStore().get(EXTENSION_STATE_REDUCER_ATOM).configuration
       .state;
-    const filteredBaseline = Object.fromEntries(
-      Object.entries(baseline).filter(([url]) => url.startsWith(urlPrefix)),
+    const transformedBaseline = transformConfigsForCustomMenu(
+      urlPrefix,
+      baseline,
     );
     const userConfig = getStore().get(CONFIGURATION_REDUCER_ATOM);
-    const filteredUserConfig = Object.fromEntries(
-      Object.entries(userConfig).filter(([url]) => url.startsWith(urlPrefix)),
+    const transformedUserConfig = transformConfigsForCustomMenu(
+      urlPrefix,
+      userConfig,
     );
     return {
-      baseline: filteredBaseline,
-      user: filteredUserConfig,
+      baseline: transformedBaseline,
+      user: transformedUserConfig,
     };
   };
 }

@@ -1,7 +1,7 @@
 import './sandbox-menu.css';
 
 import { OverlayContentProps } from 'components/overlay/overlay';
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { getStore } from 'hooks/jotai/base';
 import {
   CONFIGURATION_REDUCER_ATOM,

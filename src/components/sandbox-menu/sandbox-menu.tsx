@@ -38,7 +38,8 @@ export type SandboxSourcePaths = SandboxSource;
 export interface SandboxArgs {
   baseUrl: string;
   source: SandboxSource;
-  localizedStrings: Record<string, string>;
+  localization: Record<string, string>;
+  fallbackLocalization: Record<string, string>;
   title?: string;
 }
 
@@ -68,11 +69,15 @@ function createSandboxHostApi(
   currentFolder: string,
   baseUrl: string,
   localization: Record<string, string>,
+  fallbackLocalization: Record<string, string>,
 ) {
   return {
     confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
     getLanguage,
-    getLocalizedString: createGetLocalizedStringFunction(localization),
+    getLocalizedString: createGetLocalizedStringFunction(
+      localization,
+      fallbackLocalization,
+    ),
     getTextFile: createGetTextFileFunction(currentFolder),
     getAssetUrl: createGetAssetUrlFunction(currentFolder),
     receivePluginPaths: createReceivePluginPathsFunction(currentFolder),
@@ -101,7 +106,8 @@ function SandboxInternal(
   props: OverlayContentProps<SandboxArgs & { sandboxDiv: HTMLDivElement }>,
 ) {
   const { closeFunc, args } = props;
-  const { baseUrl, source, localizedStrings, sandboxDiv } = args;
+  const { baseUrl, source, localization, fallbackLocalization, sandboxDiv } =
+    args;
 
   const [t] = useTranslation(['gui-editor']);
   const currentFolder = useCurrentGameFolder();
@@ -116,14 +122,22 @@ function SandboxInternal(
         setInitDone,
         currentFolder,
         baseUrl,
-        localizedStrings,
+        localization,
+        fallbackLocalization,
       ),
       createSandboxOptions(sandboxDiv, source),
     );
 
     setSandbox(sand);
     return () => sand.destroy();
-  }, [baseUrl, currentFolder, sandboxDiv, source, localizedStrings]);
+  }, [
+    baseUrl,
+    currentFolder,
+    sandboxDiv,
+    source,
+    localization,
+    fallbackLocalization,
+  ]);
 
   return !sandbox ? null : (
     <div className="sandbox-control-menu">

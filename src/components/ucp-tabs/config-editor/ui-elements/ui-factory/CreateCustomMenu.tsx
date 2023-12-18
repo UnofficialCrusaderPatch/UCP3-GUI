@@ -118,7 +118,8 @@ function CreateCustomMenu(args: {
             setOverlayContent(SandboxMenu, {
               baseUrl: url,
               source: await receiveSources(extension, sourcePaths),
-              localizedStrings: extension.locales[i18n.language] ?? {},
+              localization: extension.locales[i18n.language] ?? {},
+              fallbackLocalization: extension.locales.en ?? {},
               title: hasHeader ? header : undefined,
             });
             setActivatingMenu(false);

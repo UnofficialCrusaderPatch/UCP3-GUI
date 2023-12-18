@@ -13,8 +13,9 @@ export async function getLanguage(): Promise<string> {
 
 export function createGetLocalizedStringFunction(
   localization: Record<string, string>,
+  fallbackLocalization: Record<string, string>,
 ): (id: string) => Promise<string> {
-  return async (id: string) => localization[id];
+  return async (id: string) => localization[id] ?? fallbackLocalization[id];
 }
 
 export function createGetTextFileFunction(currentFolder: string) {

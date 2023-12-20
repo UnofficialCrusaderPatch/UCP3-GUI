@@ -32,20 +32,22 @@ async function replaceAllLocalizeTextMarkers(startNode) {
 
 async function replaceAllAssetUrlMarkers(startNode) {
   const idRegex = /^asset:{{(?<path>.+)}}$/;
-  const walk = document.createTreeWalker(startNode, NodeFilter.SHOW_ATTRIBUTE);
-  let attributeNode;
-  while ((attributeNode = walk.nextNode())) {
-    const found = attributeNode.value.match(idRegex);
-    const path = found?.groups?.path;
+  const walk = document.createTreeWalker(startNode, NodeFilter.SHOW_ELEMENT);
+  let elementNode;
+  while ((elementNode = walk.nextNode())) {
+    for (const attr of elementNode.attributes) {
+      const found = attr.value?.match(idRegex);
+      const path = found?.groups?.path;
 
-    if (!path) {
-      continue;
+      if (!path) {
+        continue;
+      }
+      const url = await HOST_FUNCTIONS.getAssetUrl(path);
+      if (!url) {
+        continue;
+      }
+      attr.value = url;
     }
-    const url = await HOST_FUNCTIONS.getAssetUrl(path);
-    if (!url) {
-      continue;
-    }
-    attributeNode.value = url;
   }
 }
 

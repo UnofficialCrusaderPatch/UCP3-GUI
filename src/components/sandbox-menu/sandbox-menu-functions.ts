@@ -27,7 +27,7 @@ export function createGetTextFileFunction(currentFolder: string) {
 }
 
 export function createGetAssetUrlFunction(currentFolder: string) {
-  return async (path: string) => receiveAssetUrl(currentFolder, path);
+  return async (path: string) => receiveAssetUrl([currentFolder, path]);
 }
 
 export function createReceivePluginPathsFunction(currentFolder: string) {

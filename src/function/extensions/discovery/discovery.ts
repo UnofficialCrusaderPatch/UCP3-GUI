@@ -13,6 +13,7 @@ import {
 } from 'config/ucp/common';
 import Logger from 'util/scripts/logging';
 import languages from 'localization/languages.json';
+import { showModalOk } from 'components/modals/modal-ok';
 import ExtensionHandle from '../handles/extension-handle';
 import ZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
@@ -240,6 +241,7 @@ type ExtensionLoadResult = {
   status: 'ok' | 'warning' | 'error';
   messages: string[];
   content: Extension | undefined;
+  handle: ExtensionHandle;
 };
 
 const Discovery = {
@@ -358,13 +360,15 @@ const Discovery = {
               status: 'warning',
               content: ext,
               messages: warnings,
+              handle: eh,
             } as ExtensionLoadResult;
           }
 
           return {
             status: 'ok',
             content: ext,
-            messages: [],
+            messages: [] as string[],
+            handle: eh,
           } as ExtensionLoadResult;
         } catch (e: any) {
           console.error(e);
@@ -373,7 +377,8 @@ const Discovery = {
             status: 'error',
             content: undefined,
             messages: [...warnings, e.toString()],
-          };
+            handle: eh,
+          } as ExtensionLoadResult;
         }
       }),
     );
@@ -384,6 +389,18 @@ const Discovery = {
     const extensions: Extension[] = extensionDiscoveryResults
       .filter((edr) => edr.status !== 'error' && edr.content !== undefined)
       .map((edr) => edr.content) as Extension[];
+
+    const extensionsWithErrors = extensionDiscoveryResults
+      .filter((edr) => edr.status === 'error')
+      .map((elr) => `${elr.handle.path}:\n${elr.messages.join('\n')}`);
+
+    if (extensionsWithErrors.length > 0) {
+      await showModalOk({
+        title: 'Errors while discovering extensions',
+        message: extensionsWithErrors.join('\n\n'),
+      });
+    }
+
     extensions.forEach((e) => {
       const id = `${e.name}@${e.version}`;
       if (extensionsByID[id] !== undefined) {

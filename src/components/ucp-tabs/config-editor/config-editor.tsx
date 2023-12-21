@@ -17,14 +17,17 @@ import { reloadCurrentWindow } from 'function/window-actions';
 
 import { ConsoleLogger } from 'util/scripts/logging';
 import { useAtom, useAtomValue } from 'jotai';
-import { CONFIGURATION_QUALIFIER_REDUCER_ATOM } from 'function/configuration/state';
-import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from 'function/configuration/state';
-import { CONFIGURATION_WARNINGS_REDUCER_ATOM } from 'function/configuration/state';
-import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
-import { CONFIGURATION_REDUCER_ATOM } from 'function/configuration/state';
-import { UCP_CONFIG_FILE_ATOM } from 'function/configuration/state';
+import {
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+  UCP_CONFIG_FILE_ATOM,
+} from 'function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useCurrentGameFolder } from 'function/game-folder/state';
+import { makeToast } from 'components/modals/toasts/ToastsDisplay';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';
@@ -69,16 +72,16 @@ export default function ConfigEditor(args: { readonly: boolean }) {
     .map((v) => (v.level === 'error' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
-  const [configStatus, setConfigStatus] = useState('');
+  const setConfigStatus = (msg: string) => makeToast({ title: '', body: msg });
 
   useEffect(() => {
-    setConfigStatus(
-      activeExtensions.length === 0
-        ? t('gui-editor:config.status.nothing.active', {
-            number: activeExtensions.length,
-          })
-        : '',
-    );
+    // setConfigStatus(
+    //   activeExtensions.length === 0
+    //     ? t('gui-editor:config.status.nothing.active', {
+    //         number: activeExtensions.length,
+    //       })
+    //     : '',
+    // );
   }, [activeExtensions, t]);
 
   const { nav, content } = UIFactory.CreateSections({ readonly });
@@ -236,9 +239,6 @@ export default function ConfigEditor(args: { readonly: boolean }) {
             </div>
 
             <div className="config-warning-container">
-              <div className="config-warning-container__text text-warning">
-                {configStatus}
-              </div>
               <div className="d-none config-warning-container__symbols">
                 <span
                   className={`text-danger mx-1${

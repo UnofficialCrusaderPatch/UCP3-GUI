@@ -209,7 +209,7 @@ function CreateUCP2SliderChoice(args: {
                 {choice.min}
               </Form.Label>
             </div>
-            <div className="col-6">
+            <div className="col-7">
               <input
                 type="range"
                 className="ucp-slider"
@@ -247,7 +247,7 @@ function CreateUCP2SliderChoice(args: {
                 }
               />
             </div>
-            <div className="col-auto">
+            <div className="col-1">
               <Form.Label
                 disabled={
                   !isEnabled ||
@@ -259,6 +259,45 @@ function CreateUCP2SliderChoice(args: {
               >
                 {choice.max}
               </Form.Label>
+            </div>
+            <div className="col-2">
+              <Form.Control
+                className="text-light fs-7 lh-1 text-end"
+                key={`${url}-input`}
+                style={{ backgroundColor: '#ab712d' }}
+                type="number"
+                min={choice.min as number}
+                max={choice.max as number}
+                id={`${url}-input`}
+                // Tooltip stuff
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title={fullToolTip}
+                // End of tooltip stuff
+                value={localValue === undefined ? 0 : (localValue as number)}
+                onChange={(event) => {
+                  setLocalValue(parseInt(event.target.value, 10));
+                  setLocalValue(parseInt(event.target.value, 10));
+                  const newValue = { ...value };
+                  newValue.choices[choice.name].slider =
+                    parseInt(event.target.value, 10) / factor;
+                  setConfiguration({
+                    type: 'set-multiple',
+                    value: Object.fromEntries([[url, newValue]]),
+                  });
+                  setConfigurationTouched({
+                    type: 'set-multiple',
+                    value: Object.fromEntries([[url, true]]),
+                  });
+                }}
+                disabled={
+                  !isEnabled ||
+                  disabled ||
+                  !value.enabled ||
+                  value.choice !== choice.name ||
+                  isDisabled
+                }
+              />
             </div>
           </div>
         </div>

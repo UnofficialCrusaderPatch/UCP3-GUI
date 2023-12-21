@@ -241,6 +241,10 @@ async function getExtensionHandles(ucpFolder: string) {
 }
 
 const attachExtensionInformation = (extension: Extension, obj: unknown) => {
+  // This code makes the extension read only to some extent, but more importantly, by excluding .ui, it avoids recursive errors
+  const { ui, ...rest } = { ...extension };
+  const ext: Extension = { ...rest, ui: [] };
+
   const todo: unknown[] = [];
   const done: unknown[] = [];
 
@@ -257,10 +261,18 @@ const attachExtensionInformation = (extension: Extension, obj: unknown) => {
     if (current instanceof Array) {
       current.forEach((v) => todo.push(v));
     } else if (current instanceof Object) {
-      Object.entries(current).forEach(([k, v]) => {
-        todo.push(v);
-      });
-      (current as DisplayConfigElement).extension = extension;
+      // Assume something is a display config element
+
+      if ((current as DisplayConfigElement).display !== undefined) {
+        const dce = current as DisplayConfigElement;
+
+        dce.extension = ext;
+
+        if (dce.children !== undefined && dce.children instanceof Array) {
+          // Assume it is a DisplayConfigElement
+          dce.children.forEach((v) => todo.push(v));
+        }
+      }
     } else {
       // throw Error((obj as any).toString());
     }
@@ -330,7 +342,7 @@ const Discovery = {
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
         console.debug('attaching extension');
-        attachExtensionInformation(ext, ext.ui);
+        ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 
         ext.locales = await readLocales(eh, ext, Object.keys(languages));
         ext.config = await readConfig(eh);

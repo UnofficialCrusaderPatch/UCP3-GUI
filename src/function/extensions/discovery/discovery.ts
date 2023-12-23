@@ -341,8 +341,6 @@ const Discovery = {
 
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
-        console.debug('attaching extension');
-        ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 
         ext.locales = await readLocales(eh, ext, Object.keys(languages));
         ext.config = await readConfig(eh);
@@ -389,6 +387,9 @@ const Discovery = {
         }
 
         ext.descriptionMD = await readDescription(eh);
+
+        console.debug('attaching extension');
+        ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 
         eh.close();
 

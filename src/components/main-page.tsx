@@ -6,6 +6,7 @@ import CreditsButton from './credits/credits';
 import Footer from './footer/footer';
 import UcpTabs from './ucp-tabs/ucp-tabs';
 import { ModalWindow } from './modals/abstract-modal';
+import { ToastDisplay } from './modals/toasts/ToastsDisplay';
 
 export default function Main() {
   return (
@@ -23,6 +24,7 @@ export default function Main() {
         </div>
       </div>
       <ModalWindow />
+      <ToastDisplay />
     </>
   );
 }

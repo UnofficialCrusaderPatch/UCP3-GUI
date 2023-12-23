@@ -29,6 +29,7 @@ import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { ZipWriter } from 'util/structs/zip-handler';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+import { makeToast } from 'components/modals/toasts/ToastsDisplay';
 import {
   ActiveExtensionElement,
   ExtensionNameList,
@@ -55,7 +56,7 @@ export default function ExtensionManager() {
   const file = useAtomValue(UCP_CONFIG_FILE_ATOM);
   const { activeExtensions } = extensionsState;
 
-  const [configStatus, setConfigStatus] = useState('');
+  const setConfigStatus = (msg: string) => makeToast({ title: '', body: msg });
 
   const configurationQualifier = useAtomValue(
     CONFIGURATION_QUALIFIER_REDUCER_ATOM,
@@ -455,9 +456,6 @@ export default function ExtensionManager() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="extension-text-warning-container text-warning">
-        {configStatus}
       </div>
     </div>
   );

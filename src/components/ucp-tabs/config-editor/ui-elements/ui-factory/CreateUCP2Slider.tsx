@@ -192,6 +192,50 @@ function CreateUCP2Slider(args: {
         <div className="col-auto">
           <Form.Label>{max}</Form.Label>
         </div>
+        <div className="col-2">
+          <Form.Control
+            className="text-light fs-7 lh-1 text-end"
+            key={`${url}-input`}
+            style={{ backgroundColor: '#ab712d' }}
+            type="number"
+            min={min}
+            max={max}
+            id={`${url}-input`}
+            // Tooltip stuff
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title={fullToolTip}
+            // End of tooltip stuff
+            value={localValue === undefined ? 0 : (localValue as number)}
+            onChange={(event) => {
+              setLocalValue(parseInt(event.target.value, 10));
+              setConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [
+                    url,
+                    {
+                      ...value,
+                      ...{
+                        sliderValue: parseInt(event.target.value, 10) / factor,
+                      },
+                    },
+                  ],
+                ]),
+              });
+              setConfigurationTouched({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, true]]),
+              });
+            }}
+            disabled={
+              !isEnabled ||
+              disabled ||
+              !value.enabled ||
+              configurationLocks[url] !== undefined
+            }
+          />
+        </div>
       </div>
     </div>
   );

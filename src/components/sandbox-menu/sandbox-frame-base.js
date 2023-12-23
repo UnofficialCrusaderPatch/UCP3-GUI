@@ -12,7 +12,7 @@ const SANDBOX_FUNCTIONS = { getConfig: () => {} };
 const HOST_FUNCTIONS = {};
 
 async function replaceAllLocalizeTextMarkers(startNode) {
-  const idRegex = /^{{(?<id>.+)}}$/;
+  const idRegex = /^\s*{{(?<id>.+)}}\s*$/;
   const walk = document.createTreeWalker(startNode, NodeFilter.SHOW_TEXT);
   let textNode;
   while ((textNode = walk.nextNode())) {
@@ -31,7 +31,7 @@ async function replaceAllLocalizeTextMarkers(startNode) {
 }
 
 async function replaceAllAssetUrlMarkers(startNode) {
-  const idRegex = /^asset:{{(?<path>.+)}}$/;
+  const idRegex = /^\s*asset:{{(?<path>.+)}}\s*$/;
   const walk = document.createTreeWalker(startNode, NodeFilter.SHOW_ELEMENT);
   let elementNode;
   while ((elementNode = walk.nextNode())) {

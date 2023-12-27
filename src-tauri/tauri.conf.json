@@ -80,7 +80,15 @@
       }
     },
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost"
+      "csp": {
+        "default-src": "'self'",
+        "img-src": "'self' data: asset: https://asset.localhost",
+        "script-src": "'self' 'unsafe-inline'",
+        "style-src": "'self' 'unsafe-inline'"
+      },
+      "dangerousDisableAssetCspModification": [
+        "script-src"
+      ]
     },
     "updater": {
       "active": false

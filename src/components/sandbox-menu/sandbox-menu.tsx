@@ -117,6 +117,10 @@ function SandboxInternal(
   const [initDone, setInitDone] = useState(false);
 
   useEffect(() => {
+    // TODO?: Sandbox currently executes css and js using inline script and style tags
+    // the CSP currently allows this only for the sandbox
+    // However, it seems to currently simply be needed due to the used lib.
+    // Postponed until idea or bigger rework
     const sand: PluginInstance = Sandbox.create(
       createSandboxHostApi(
         setInitDone,

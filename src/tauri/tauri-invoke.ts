@@ -34,7 +34,11 @@ const TAURI_COMMAND = {
   ZIP_WRITER_WRITE_ENTRY_FROM_FILE: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_file',),
 
   HASH_GET_SHA256_OF_FILE: 'get_sha256_of_file',
-  OS_OPEN_PROGRAM: "os_open_program",
+  OS_OPEN_PROGRAM: 'os_open_program',
+
+  FILES_SLASHIFY: 'slashify',
+  FILES_CANONICALIZE: 'canonicalize',
+  FILES_READ_AND_FILTER_DIR: 'read_and_filter_dir',
 
   LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
@@ -186,4 +190,29 @@ export async function osOpenProgram(
   envs: Record<string, string> = {},
 ): Promise<void> {
   return invoke(TAURI_COMMAND.OS_OPEN_PROGRAM, { path, args, envs });
+}
+
+// converts a path to once using only slashes
+export async function slashify(path: string): Promise<string> {
+  return invoke(TAURI_COMMAND.FILES_SLASHIFY, { path });
+}
+
+// important, is not equals to typical "toAbsolute" of some languages,
+// and will fail if the file or the directory does not exist
+export async function canonicalize(
+  path: string,
+  slash: boolean = true,
+): Promise<string> {
+  return invoke(TAURI_COMMAND.FILES_CANONICALIZE, { path, slash });
+}
+
+// paths returned by this function will always use the slash as separator
+export async function readAndFilterPaths(
+  baseDir: string,
+  pattern: string = '',
+): Promise<string[]> {
+  return invoke(TAURI_COMMAND.FILES_READ_AND_FILTER_DIR, {
+    base: baseDir,
+    pattern,
+  });
 }

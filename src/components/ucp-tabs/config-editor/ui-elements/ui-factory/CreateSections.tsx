@@ -26,8 +26,11 @@ const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
 
   const euis = extensions.map((e) => {
     const locale = e.locales[language] ?? e.locales.en;
-    if (locale === undefined) return e.ui;
-    return applyLocale(e, locale);
+    if (locale === undefined) {
+      return e.ui;
+    }
+    const localized = applyLocale(e, locale);
+    return localized;
   });
 
   const uiCollection: any[] = [];

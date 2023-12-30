@@ -2,7 +2,7 @@
   width: 50%;
   padding: 10px;
 
-  >form {
+  > form {
     display: flex;
     flex-direction: column;
   }
@@ -12,10 +12,10 @@
   width: 50%;
   padding: 10px;
 
-  >form {
+  > form {
     display: flex;
 
-    >input {
+    > input {
       flex-grow: 1;
     }
   }
@@ -27,11 +27,11 @@
   display: flex;
   align-items: center;
 
-  >h5 {
+  > h5 {
     margin: 0;
     vertical-align: center;
   }
-  >select {
+  > select {
     margin-left: auto;
   }
 }

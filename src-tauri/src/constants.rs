@@ -1,6 +1,14 @@
+use glob::MatchOptions;
+
 // General
 
 pub const BASE_FOLDER: &str = "UnofficialCrusaderPatch3";
+
+pub const PATH_MATCH_OPTIONS: MatchOptions = MatchOptions {
+    case_sensitive: true,
+    require_literal_separator: true,
+    require_literal_leading_dot: true, // makes linux and windows behave the same
+};
 
 // Gui-Config
 

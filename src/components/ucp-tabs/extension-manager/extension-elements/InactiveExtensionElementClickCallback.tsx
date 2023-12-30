@@ -10,7 +10,6 @@ import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
-import { propagateActiveExtensionsChange } from '../../../../function/extensions/state/change';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 

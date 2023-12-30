@@ -89,6 +89,8 @@ modules:
 ```
 */
 
+import { ExtensionHandle } from 'function/extensions/handles/extension-handle';
+
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required
   value: undefined;
@@ -137,19 +139,13 @@ type ConfigFile = {
 };
 
 type OptionEntry = {
+  extension: Extension;
   name: string;
   text: string;
   tooltip: string;
   display: string;
   url: string;
-  contents: {
-    value: unknown;
-    type: string;
-    default: unknown;
-    choices: unknown[];
-    min: unknown;
-    max: unknown;
-  };
+  contents: BasicContents | ChoiceContents | NumberContents;
   hidden: boolean;
   category: string[];
 };
@@ -167,6 +163,8 @@ type PluginType = 'plugin';
 type ModuleType = 'module';
 type ExtensionType = PluginType | ModuleType;
 
+type ExtensionIOCallback<R> = (extensionHandle: ExtensionHandle) => Promise<R>;
+
 type Extension = {
   'specification-version': string;
   name: string;
@@ -180,6 +178,12 @@ type Extension = {
   path: string;
   configEntries: { [key: string]: ConfigEntry };
   optionEntries: { [key: string]: OptionEntry };
+  io: {
+    isZip: boolean;
+    isDirectory: boolean;
+    path: string;
+    handle: <R>(cb: ExtensionIOCallback<R>) => Promise<R>;
+  };
 };
 
 type Configs = { [key: string]: ConfigEntry }[];
@@ -201,6 +205,14 @@ type NumberContents = BasicContents & {
   step: number;
 };
 
+type CustomMenuContents = BasicContents & {
+  source: {
+    html: string;
+    css: string;
+    js: string;
+  };
+};
+
 type FileInputContents = BasicContents & {
   filter: 'folders' | 'files' | string;
   generalizeExtensionPaths: boolean;
@@ -217,7 +229,13 @@ type DisplayConfigElement = {
   columns: number;
   tooltip: string;
   enabled: string;
-  contents: BasicContents | ChoiceContents | NumberContents;
+  contents:
+    | BasicContents
+    | ChoiceContents
+    | NumberContents
+    | FileInputContents
+    | CustomMenuContents;
+  extension: Extension;
 };
 
 type SectionDescription = {
@@ -236,6 +254,7 @@ export type {
   PermissionStatus,
   DisplayConfigElement,
   SectionDescription,
+  CustomMenuContents,
   NumberContents,
   ChoiceContents,
   BasicContents,
@@ -243,5 +262,6 @@ export type {
   PluginType,
   ModuleType,
   ExtensionType,
+  ExtensionIOCallback,
   FileInputContents,
 };

@@ -57,7 +57,7 @@ pub async fn os_open_program(
     // The whole discussion can be found here: https://github.com/rust-lang/rust/issues/42869
     // This is the only reason we use the dunce crate
     // This might also break, but at least it will throw a not found error
-    let path = dunce::canonicalize(Path::new(source_path)).map_err(|err| err.to_string())?;
+    let path = dunce::canonicalize(source_path).map_err(|err| err.to_string())?;
 
     path.try_exists()
         .map_err(|_err| String::from("program.open.not.exist"))?;

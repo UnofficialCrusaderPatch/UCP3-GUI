@@ -3,6 +3,8 @@ import {
   OptionEntry,
   PermissionStatus,
   Extension,
+  NumberContents,
+  ChoiceContents,
 } from './common';
 import { isChoiceValuePermittedByConfigs } from './permissions-choice';
 import { isNumberValuePermittedByConfigs } from './permissions-number';
@@ -82,7 +84,7 @@ function isValuePermitted(
   if (spec.contents.type === 'number') {
     const numberValue = value as number;
 
-    const { min, max } = spec.contents;
+    const { min, max } = spec.contents as NumberContents;
 
     if (min !== undefined) {
       if (numberValue < (min as number)) {
@@ -107,8 +109,19 @@ function isValuePermitted(
 
   if (spec.contents.type === 'choice') {
     const choiceValue = value as string;
-    const { choices } = spec.contents;
-    const valueIndex = choices.indexOf(choiceValue);
+    const { choices } = spec.contents as ChoiceContents;
+
+    // TEMP: this will not work as index of, except if it is the same object, can this be?
+    // But at the same time, a string is set at the end
+    // this seems to need a rework, temporary band-aid to allow build
+    const valueIndex = choices.indexOf(
+      choiceValue as unknown as {
+        name: string;
+        text: string;
+        enabled: string;
+        subtext: string;
+      },
+    );
     if (valueIndex === -1) {
       return {
         status: 'illegal',

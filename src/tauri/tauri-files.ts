@@ -30,6 +30,12 @@ import {
   ToJSOptions,
 } from 'yaml';
 import Result from 'util/structs/result';
+import { convertFileSrc } from '@tauri-apps/api/tauri';
+import {
+  readAndFilterPaths as invokeReadAndFilterPaths,
+  slashify as invokeSlashify,
+  canonicalize as invokeCanonicalize,
+} from './tauri-invoke';
 
 // WARNING: Tauri funcs lie about their return.
 // Void Promises return "null" as result instead of undefined.
@@ -46,6 +52,17 @@ export type Error = unknown;
 
 const BASE_FOLDER = 'UnofficialCrusaderPatch3';
 
+export async function slashify(path: string): Promise<Result<string, Error>> {
+  return Result.tryAsync(invokeSlashify, path);
+}
+
+export async function canonicalize(
+  path: string,
+  slashifyPath?: boolean,
+): Promise<Result<string, Error>> {
+  return Result.tryAsync(invokeCanonicalize, path, slashifyPath);
+}
+
 // only proxy
 export async function onFsExists(
   path: string,
@@ -59,7 +76,17 @@ export async function resolvePath(...paths: string[]): Promise<string> {
   return resolve(...paths);
 }
 
-// WARNING: directly writting in DOWNLOAD for example does not work,
+export function receiveAssetUrl<
+  T extends string | string[],
+  R = T extends string ? string : Promise<string>,
+>(paths: T, protocol?: string): R {
+  const convertToAssetUrl = (path: string) => convertFileSrc(path, protocol);
+  return Array.isArray(paths)
+    ? (resolvePath(...paths).then(convertToAssetUrl) as R)
+    : (convertToAssetUrl(paths) as R);
+}
+
+// WARNING: directly writing in DOWNLOAD for example does not work,
 // since interacting with this folder (like in this function), is forbidden,
 // which might be better, actually
 export async function recursiveCreateDirForFile(
@@ -163,6 +190,10 @@ export async function writeJson(
 
 export async function readDir(dir: string, options?: FsDirOptions | undefined) {
   return Result.tryAsync(tauriReadDir, dir, options);
+}
+
+export async function readAndFilterPaths(dir: string, pattern: string) {
+  return Result.tryAsync(invokeReadAndFilterPaths, dir, pattern);
 }
 
 export async function getDownloadFolder() {

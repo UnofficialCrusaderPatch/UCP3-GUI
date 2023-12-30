@@ -8,17 +8,22 @@ import {
   ConfigEntry,
   ConfigFile,
   ConfigFileExtensionEntry,
+  DisplayConfigElement,
   Extension,
+  ExtensionIOCallback,
   OptionEntry,
 } from 'config/ucp/common';
 import Logger from 'util/scripts/logging';
 import languages from 'localization/languages.json';
+import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
+import { canonicalize, slashify } from 'tauri/tauri-invoke';
 import { showModalOk } from 'components/modals/modal-ok';
-import ExtensionHandle from '../handles/extension-handle';
+import { ExtensionHandle } from '../handles/extension-handle';
 import ZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
 import { changeLocale } from '../locale/locale';
 import { ExtensionTree } from '../dependency-management/dependency-resolution';
+import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
 
 const LOGGER = new Logger('discovery.ts');
 
@@ -97,11 +102,10 @@ async function readLocales(
 }
 
 function applyLocale(ext: Extension, locale: { [key: string]: string }) {
-  const ui = JSON.parse(JSON.stringify(ext.ui));
-  return ui.map((uiElement: { [key: string]: unknown }) => {
-    changeLocale(locale, uiElement as { [key: string]: unknown });
-    return uiElement as { [key: string]: unknown };
-  });
+  const { ui } = ext;
+  return ui.map((uiElement: { [key: string]: unknown }) =>
+    changeLocale(locale, uiElement as { [key: string]: unknown }),
+  );
 }
 
 function collectOptionEntries(
@@ -216,14 +220,15 @@ async function getExtensionHandles(ucpFolder: string) {
     dirEnts.map(async (fe: FileEntry) => {
       const type = modDirEnts.indexOf(fe) === -1 ? 'plugin' : 'module';
 
-      const folder =
+      const folder = await slashify(
         type === 'module'
           ? `${ucpFolder}/modules/${fe.name}`
-          : `${ucpFolder}/plugins/${fe.name}`;
+          : `${ucpFolder}/plugins/${fe.name}`,
+      );
 
       if (fe.name !== undefined && fe.name.endsWith('.zip')) {
         // TODO: Do hash check here!
-        const result = await ZipExtensionHandle.fromPath(folder);
+        const result = await RustZipExtensionHandle.fromPath(folder);
         return result as ExtensionHandle;
       }
       if (fe.children !== null) {
@@ -237,6 +242,47 @@ async function getExtensionHandles(ucpFolder: string) {
   return exts;
 }
 
+const attachExtensionInformation = (extension: Extension, obj: unknown) => {
+  // This code makes the extension read only to some extent, but more importantly, by excluding .ui, it avoids recursive errors
+  const { ui, ...rest } = { ...extension };
+  const ext: Extension = { ...rest, ui: [] };
+
+  const todo: unknown[] = [];
+  const done: unknown[] = [];
+
+  todo.push(obj);
+
+  while (todo.length > 0) {
+    const current = todo.pop();
+
+    if (done.indexOf(current) !== -1) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (current instanceof Array) {
+      current.forEach((v) => todo.push(v));
+    } else if (current instanceof Object) {
+      // Assume something is a display config element
+
+      if ((current as DisplayConfigElement).display !== undefined) {
+        const dce = current as DisplayConfigElement;
+
+        dce.extension = ext;
+
+        if (dce.children !== undefined && dce.children instanceof Array) {
+          // Assume it is a DisplayConfigElement
+          dce.children.forEach((v) => todo.push(v));
+        }
+      }
+    } else {
+      // throw Error((obj as any).toString());
+    }
+
+    done.push(current);
+  }
+};
+
 type ExtensionLoadResult = {
   status: 'ok' | 'warning' | 'error';
   messages: string[];
@@ -248,7 +294,7 @@ const Discovery = {
   discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
     LOGGER.msg('Discovering extensions').info();
 
-    const ehs = await getExtensionHandles(`${gameFolder}/ucp/`);
+    const ehs = await getExtensionHandles(`${gameFolder}/ucp`);
 
     const extensionDiscoveryResults = await Promise.all(
       ehs.map(async (eh) => {
@@ -295,22 +341,38 @@ const Discovery = {
           definition.dependencies =
             definition.dependencies || definition.depends || [];
 
+          const io = {
+            handle: async <R>(cb: ExtensionIOCallback<R>) => {
+              const neh = await eh.clone();
+              try {
+                return await cb(neh);
+              } finally {
+                neh.close();
+              }
+            },
+            isZip: eh instanceof RustZipExtensionHandle,
+            isDirectory: eh instanceof DirectoryExtensionHandle,
+            path: eh.path,
+          };
+
           const ext = {
             name,
             version,
             type: assumedType,
             definition,
+            io,
           } as unknown as Extension;
 
           const uiRaw = await readUISpec(eh);
           ext.ui = (uiRaw || {}).options || [];
+
           ext.locales = await readLocales(eh, ext, Object.keys(languages));
           ext.config = await readConfig(eh);
 
-          ext.optionEntries = collectOptionEntries(
-            ext.ui as unknown as { [key: string]: unknown },
-            ext.name,
-          );
+          // ext.optionEntries = collectOptionEntries(
+          //   ext.ui as unknown as { [key: string]: unknown },
+          //   ext.name,
+          // );
 
           ext.configEntries = {};
 
@@ -352,6 +414,9 @@ const Discovery = {
           }
 
           ext.descriptionMD = await readDescription(eh);
+
+          console.debug('attaching extension');
+          ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 
           eh.close();
 
@@ -420,4 +485,10 @@ function tryResolveDependencies(extensions: Extension[]) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export { Discovery, collectConfigEntries, tryResolveDependencies, applyLocale };
+export {
+  Discovery,
+  collectConfigEntries,
+  tryResolveDependencies,
+  applyLocale,
+  getExtensionHandles,
+};

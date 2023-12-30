@@ -1,0 +1,39 @@
+.sandbox-menu-button {
+    font-size: 16px;
+    padding: 4px 16px;
+}
+
+.sandbox-control-menu {
+    display: inline-flex;
+    width: 100%;
+    justify-content: end;
+}
+
+.sandbox-control-button {
+    background-color: black;
+    background-clip: padding-box;
+}
+
+.sandbox-container {
+    width: 100%;
+    flex-grow: 1;
+    background-color: var(--ucp-main-brown);
+}
+
+.sandbox-frame {
+    width: 100%;
+    height: 100%;
+}
+
+.sandbox-menu-container {
+    padding: 50px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sandbox--menu-title {
+    color: white;
+}

@@ -25,6 +25,7 @@ import CreateSection from './ui-elements/ui-factory/CreateSection';
 import NavSection from './ui-elements/ui-factory/navigation/NavSection';
 import CreateSectionsNav from './ui-elements/ui-factory/CreateSectionsNav';
 import CreateSections from './ui-elements/ui-factory/CreateSections';
+import CreateCustomMenu from './ui-elements/ui-factory/CreateCustomMenu';
 
 const UIFactory = {
   ConfigWarning,
@@ -45,6 +46,7 @@ const UIFactory = {
   NavSection,
   CreateSectionsNav,
   CreateSections,
+  CreateCustomMenu,
 };
 
 // eslint-disable-next-line import/prefer-default-export

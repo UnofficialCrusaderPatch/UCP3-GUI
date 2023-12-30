@@ -20,7 +20,7 @@
   pointer-events: none;
   cursor: none;
   opacity: 40%;
-  filter: grayscale(50%)
+  filter: grayscale(50%);
 }
 
 .game-starter__image--starting {
@@ -38,23 +38,23 @@
   width: 100%;
 }
 
-.game-starter__info__row>div:first-child {
+.game-starter__info__row > div:first-child {
   text-align: right;
   flex-grow: 1;
   flex-basis: 0;
 }
 
-.game-starter__info__row>div:nth-child(2) {
+.game-starter__info__row > div:nth-child(2) {
   flex-basis: 15px;
   text-align: center;
 }
 
-.game-starter__info__row>div:last-child {
+.game-starter__info__row > div:last-child {
   flex-grow: 2;
   flex-basis: 0;
 }
 
-.game-starter__info__row>div:last-child button {
+.game-starter__info__row > div:last-child button {
   border: 0;
   background: none;
   color: inherit;

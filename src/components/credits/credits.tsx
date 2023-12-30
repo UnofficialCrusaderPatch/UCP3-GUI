@@ -20,7 +20,11 @@ function Credits(props: OverlayContentProps) {
       <div className="parchment-box credits-text-box">
         <div className="credits-text">{credits}</div>
       </div>
-      <button type="button" className="credits-close" onClick={closeFunc}>
+      <button
+        type="button"
+        className="ucp-button credits-close"
+        onClick={closeFunc}
+      >
         {t('gui-general:close')}
       </button>
     </div>

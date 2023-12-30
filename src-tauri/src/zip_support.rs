@@ -14,7 +14,10 @@ use tauri::{
 };
 use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 
-use crate::utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle};
+use crate::{
+    constants::PATH_MATCH_OPTIONS,
+    utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle},
+};
 
 /// STATE OBJECT ///
 
@@ -142,7 +145,7 @@ impl ZipReaderHelper {
         Ok(self
             .reader
             .file_names()
-            .filter(|file_name| glob_pattern.matches(file_name))
+            .filter(|file_name| glob_pattern.matches_with(file_name, PATH_MATCH_OPTIONS))
             .map(String::from)
             .collect())
     }

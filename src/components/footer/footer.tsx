@@ -42,7 +42,8 @@ export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);
 
 function VersionAndState() {
   const ucpState = useAtomValue(UCP_STATE_ATOM);
-  const ucpVersion = useAtomValue(UCP_VERSION_ATOM);
+  const vr = useAtomValue(UCP_VERSION_ATOM);
+  const ucpVersion = vr.version;
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);

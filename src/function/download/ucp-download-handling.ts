@@ -14,7 +14,7 @@ import { activateUCP, createRealBink } from 'function/ucp-files/ucp-state';
 import { getBinary } from 'tauri/tauri-http';
 import { getStore } from 'hooks/jotai/base';
 import { checkForLatestUCP3DevReleaseUpdate } from './github';
-import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
+import { UCPVersion, UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
 import { GITHUB_AUTH_HEADER } from './download-enums';
 
 export async function installUCPFromZip(
@@ -52,7 +52,9 @@ export async function checkForUCP3Updates(
   };
 
   statusCallback(t('gui-download:ucp.version.yaml.load'));
-  const sha = (await getStore().get(UCP_VERSION_ATOM)).sha.getOrElse('!');
+  const vr = await getStore().get(UCP_VERSION_ATOM);
+  const { version } = vr;
+  const sha = version!.sha.getOrElse('!');
 
   statusCallback(t('gui-download:ucp.version.check'));
   const result = await checkForLatestUCP3DevReleaseUpdate(sha);

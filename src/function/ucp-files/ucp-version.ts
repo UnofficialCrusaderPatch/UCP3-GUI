@@ -7,6 +7,7 @@ import { atom } from 'jotai';
 import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from 'function/game-folder/state';
 import { atomWithRefresh } from 'hooks/jotai/base';
 import Logger from 'util/scripts/logging';
+import { showModalOk } from 'components/modals/modal-ok';
 
 const LOGGER = new Logger('ucp-version.ts');
 export interface UCPVersionInterface {
@@ -88,16 +89,62 @@ const UCP_VERSION_FILE_PATH_ATOM = atom((get) =>
   getUCPVersionFilePath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM)),
 );
 
+export type UCPVersionFileProcessResult = {
+  version: UCPVersion;
+  status: 'ok' | 'warning' | 'error';
+  messages: string[];
+  errorCode?: 1 | 2 | 3;
+};
+
 export const UCP_VERSION_ATOM = atomWithRefresh(async (get) => {
   const path = await get(UCP_VERSION_FILE_PATH_ATOM);
   if (!path) {
-    return new UCPVersion();
+    return {
+      version: new UCPVersion(),
+      status: 'error',
+      errorCode: 2,
+      messages: ['path is not defined'],
+    } as UCPVersionFileProcessResult;
   }
   return (await loadYaml(path)).consider(
-    (yaml) => new UCPVersion(yaml),
-    (err) => {
+    async (yaml) =>
+      ({
+        version: new UCPVersion(yaml),
+        status: 'ok',
+      }) as UCPVersionFileProcessResult,
+    async (err) => {
       LOGGER.obj(err).warn();
-      return new UCPVersion();
+      let errorCode = 0;
+      const messages: string[] = [];
+      if (
+        (err as object)
+          .toString()
+          .startsWith('path not allowed on the configured scope: ')
+      ) {
+        const msg =
+          'Cannot access new ucp subfolder, please check security permissions';
+        messages.push(msg);
+        errorCode = 1;
+        await showModalOk({
+          title: 'Permissions error',
+          message: msg,
+        });
+      } else if ((err as object).toString().endsWith('(os error 3)')) {
+        const msg = `File ${path} does not exist`;
+        messages.push(msg);
+        errorCode = 3;
+        // No point in showing this, the user is probably aware since the most likely cause is that UCP isn't installed
+        // await showModalOk({
+        //   title: 'File read error',
+        //   message: msg,
+        // });
+      }
+      return {
+        version: new UCPVersion(),
+        status: 'error',
+        errorCode,
+        messages,
+      } as UCPVersionFileProcessResult;
     },
   );
 });

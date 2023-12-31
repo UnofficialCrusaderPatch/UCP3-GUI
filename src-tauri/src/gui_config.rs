@@ -86,7 +86,19 @@ impl GuiConfig {
                 message(
                     None::<&tauri::Window>,
                     MESSAGE_TITLE,
-                    format!("Failed to add path to scope: {}", error.to_string()),
+                    format!("Failed to add path to file scope: {}", error.to_string()),
+                );
+            }
+
+            if let Some(error) = app_handle
+                .asset_protocol_scope()
+                .allow_directory(&recent_folder.path, true)
+                .err()
+            {
+                message(
+                    None::<&tauri::Window>,
+                    MESSAGE_TITLE,
+                    format!("Failed to add path to asset scope: {}", error.to_string()),
                 );
             }
         }

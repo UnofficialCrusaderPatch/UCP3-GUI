@@ -146,11 +146,9 @@ export default function Footer() {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
-      role="button"
       className={`ornament-border fs-8 footer${
         isFooterOpen ? '' : ' footer-closed'
       }`}
-      onClick={() => setFooterOpen(!isFooterOpen)}
     >
       <span
         className="px-2 me-auto"

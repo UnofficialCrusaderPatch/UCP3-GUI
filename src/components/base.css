@@ -3,6 +3,8 @@
 /* Reduces power of this styling, allowing easier override */
 @import 'bootstrap' layer(bootstrap);
 
+@import './scrollbar.css';
+
 .fs-7 {
   font-size: 0.9rem;
 }
@@ -66,41 +68,6 @@
 .icon-button {
   background-color: transparent;
 }
-
-/*
-  Custom scrollbar.
-  Used webkit stylings, which should work at least on windows,
-  since it uses Edge, which is Chromium-based
-*/
-
-::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track-piece:start {
-  background-image: url('/src/assets/ucp3/scroll_bar_middle.png');
-  background-repeat: no-repeat repeat;
-  background-position: center bottom;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  box-shadow: none;
-  background-image: url('/src/assets/ucp3/scroll_bar_bottom.png'),
-    url('/src/assets/ucp3/scroll_bar_middle.png'),
-    radial-gradient(40% 100% at center bottom,
-      var(--ucp-main-grey) 0%,
-      rgba(0, 0, 0, 0) 100%);
-  background-repeat:
-    no-repeat no-repeat,
-    no-repeat repeat,
-    no-repeat no-repeat;
-  background-position:
-    center bottom,
-    center bottom,
-    center center;
-}
-
 /*
   Border and box elements:
 */

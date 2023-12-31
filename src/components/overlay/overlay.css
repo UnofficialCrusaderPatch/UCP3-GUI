@@ -1,6 +1,7 @@
 .overlay {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.521);
+  backdrop-filter: blur(1px);
   height: 100%;
   width: 100%;
   overflow: hidden;

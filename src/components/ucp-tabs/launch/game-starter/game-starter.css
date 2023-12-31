@@ -22,7 +22,7 @@
   pointer-events: none;
   cursor: none;
   opacity: 40%;
-  filter: grayscale(50%)
+  filter: grayscale(50%);
 }
 
 .game-starter__starter,

@@ -33,46 +33,48 @@ function GameStarterInfo(props: {
   const version = useAtomValue(versionAtom);
 
   return (
-    <div className="flex-default game-starter__info">
-      <div className="game-starter__info__row">
-        <div>{t('gui-launch:info.name')}</div>
-        <div>:</div>
-        <div>{version.name.getOrElse('')}</div>
-      </div>
-      <div className="game-starter__info__row">
-        <div>{t('gui-launch:info.region')}</div>
-        <div>:</div>
-        <div>{version.region.getOrElse('')}</div>
-      </div>
-      <div className="game-starter__info__row">
-        <div>{t('gui-launch:info.version')}</div>
-        <div>:</div>
-        <div>{`${version.getMajorAsString()}.${version.getMinorAsString()}.${version.getPatchAsString()}`}</div>
-      </div>
-      <div className="game-starter__info__row">
-        <div>{t('gui-launch:info.sha')}</div>
-        <div>:</div>
-        <div>
-          <button
-            type="button"
-            title={t('gui-launch:info.sha.copy')}
-            onClick={() =>
-              navigator.clipboard
-                .writeText(version.sha)
-                .catch(async (reason) => {
-                  LOGGER.obj(reason).warn();
-                  await showModalOk({
-                    title: 'WARNING',
-                    message: reason,
-                  });
-                })
-            }
-          >
-            {version.getShaRepresentation()}
-          </button>
-        </div>
-      </div>
-    </div>
+    <table className="game-starter__info">
+      <tbody>
+        <tr className="game-starter__info__row">
+          <td>{t('gui-launch:info.name')}</td>
+          <td>:</td>
+          <td>{version.name.getOrElse('')}</td>
+        </tr>
+        <tr className="game-starter__info__row">
+          <td>{t('gui-launch:info.region')}</td>
+          <td>:</td>
+          <td>{version.region.getOrElse('')}</td>
+        </tr>
+        <tr className="game-starter__info__row">
+          <td>{t('gui-launch:info.version')}</td>
+          <td>:</td>
+          <td>{`${version.getMajorAsString()}.${version.getMinorAsString()}.${version.getPatchAsString()}`}</td>
+        </tr>
+        <tr className="game-starter__info__row">
+          <td>{t('gui-launch:info.sha')}</td>
+          <td>:</td>
+          <td>
+            <button
+              type="button"
+              title={t('gui-launch:info.sha.copy')}
+              onClick={() =>
+                navigator.clipboard
+                  .writeText(version.sha)
+                  .catch(async (reason) => {
+                    LOGGER.obj(reason).warn();
+                    await showModalOk({
+                      title: 'WARNING',
+                      message: reason,
+                    });
+                  })
+              }
+            >
+              {version.getShaRepresentation()}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 }
 
@@ -88,11 +90,11 @@ function GameStarterButton(props: GameStarterProps) {
 
   const startDisabled = version === EMPTY_GAME_VERSION;
 
-  let cssClass = 'game-starter__image';
+  let cssClass = 'game-starter__starter';
   if (startDisabled) {
-    cssClass = 'game-starter__image--disabled';
+    cssClass = 'game-starter__starter--disabled';
   } else if (starting) {
-    cssClass = 'game-starter__image--starting';
+    cssClass = 'game-starter__starter--starting';
   }
 
   const startFunc = async () => {
@@ -114,21 +116,24 @@ function GameStarterButton(props: GameStarterProps) {
   };
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
-    <img
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-      tabIndex={startDisabled ? undefined : 0}
-      src={imagePath}
-      className={cssClass}
-      alt={t('gui-launch:launch')}
-      onClick={startDisabled || starting ? undefined : startFunc}
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter') {
-          return;
-        }
-        (event.target as HTMLImageElement).click();
-      }}
-    />
+    <>
+      <button
+        type="button"
+        className={`ucp-button ${cssClass}`}
+        disabled={startDisabled || starting}
+        onClick={startDisabled || starting ? undefined : startFunc}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter') {
+            return;
+          }
+          (event.target as HTMLImageElement).click();
+        }}
+      >
+        &#9654;
+      </button>
+      <hr />
+      <img src={imagePath} alt={t('gui-launch:launch')} />
+    </>
   );
 }
 
@@ -138,6 +143,7 @@ export default function GameStarter(props: GameStarterProps) {
   return (
     <div className="flex-default game-starter__box">
       <Suspense>
+        <GameStarterInfo versionAtom={versionAtom} />
         <GameStarterButton
           imagePath={imagePath}
           pathAtom={pathAtom}
@@ -145,7 +151,6 @@ export default function GameStarter(props: GameStarterProps) {
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
         />
-        <GameStarterInfo versionAtom={versionAtom} />
       </Suspense>
     </div>
   );

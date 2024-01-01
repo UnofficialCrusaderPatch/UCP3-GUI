@@ -12,6 +12,11 @@ import { INIT_RUNNING, INIT_DONE } from 'function/game-folder/initialization';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 
 import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/game-folder/state';
+import {
+  LOADABLE_UCP_STATE_ATOM,
+  UCPState,
+  UCP_STATE_ATOM,
+} from 'function/ucp-files/ucp-state';
 import ConfigEditor from './config-editor/config-editor';
 import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
@@ -35,8 +40,11 @@ export default function UcpTabs() {
 
   const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
-  const l = useAtomValue(DOES_UCP_FOLDER_EXIST_ATOM);
-  const ucpFolderExists = l.state === 'hasData' && l.data === true;
+  const state = useAtomValue(LOADABLE_UCP_STATE_ATOM);
+  const ucpFolderExists =
+    state.state === 'hasData'
+      ? state.data === UCPState.ACTIVE || state.data === UCPState.INACTIVE
+      : false;
 
   return (
     <div className="ucp-tabs fs-7">

@@ -222,7 +222,7 @@ export async function deactivateUCP(): Promise<Result<void, Error>> {
   const t = getTranslation('gui-download');
 
   const ucpState = await getStore().get(UCP_STATE_ATOM);
-  switch (await getStore().get(UCP_STATE_ATOM)) {
+  switch (ucpState) {
     case UCPState.WRONG_FOLDER:
       return Result.err(t('gui-download:bink.missing'));
     case UCPState.NOT_INSTALLED:

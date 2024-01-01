@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "UCP3-GUI",
-    "version": "0.0.13"
+    "version": "0.0.14"
   },
   "tauri": {
     "allowlist": {
@@ -21,8 +21,7 @@
           "$DATA/*",
           "$DOWNLOAD/*",
           "$LOCALDATA/*",
-          "$APP/*",
-          "$HOME/**/*"
+          "$APP/*"
         ]
       },
       "path": {

@@ -117,13 +117,9 @@ const SIMPLIFICATION_TOKEN = '...';
 
 const simplifyGameFolderString = (folder: string, displayWidth: number) => {
   if (folder.length > displayWidth) {
-    const a = folder.substring(
-      0,
-      (displayWidth - SIMPLIFICATION_TOKEN.length) / 2,
-    );
-    const b = folder.substring(
-      folder.length - (displayWidth - SIMPLIFICATION_TOKEN.length) / 2,
-    );
+    const partSize = (displayWidth - SIMPLIFICATION_TOKEN.length) / 2;
+    const a = folder.substring(0, partSize);
+    const b = folder.substring(folder.length - partSize);
     return `${a}${SIMPLIFICATION_TOKEN}${b}`;
   }
 
@@ -145,16 +141,11 @@ export default function Footer() {
     .map((v) => (v.level === 'error' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
-  const folderDisplayWidth = 33;
-  let displayCurrentFolder = currentFolder;
-  if (displayCurrentFolder.length > folderDisplayWidth) {
-    displayCurrentFolder = `${currentFolder.substring(
-      0,
-      (folderDisplayWidth - 3) / 2,
-    )}...${currentFolder.substring(
-      displayCurrentFolder.length - (folderDisplayWidth - 3) / 2,
-    )}`;
-  }
+  const folderDisplayWidth = 100;
+  const displayCurrentFolder = simplifyGameFolderString(
+    currentFolder,
+    folderDisplayWidth,
+  );
 
   const msg = useAtomValue(STATUS_BAR_MESSAGE_ATOM);
   const statusBarMessage =

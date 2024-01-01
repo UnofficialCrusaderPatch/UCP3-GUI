@@ -1,37 +1,33 @@
 import { getStore } from 'hooks/jotai/base';
 import { atom, useAtomValue } from 'jotai';
-import { useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { ToastContainer, Toast } from 'react-bootstrap';
 
 export type ToastProps = {
   title: string;
-  body: string;
+  body: ReactNode;
   autohide?: boolean | undefined;
 };
 
-export type ToastState = ToastProps & {
+type ToastState = ToastProps & {
   index: number;
 };
 
-export type ToastsDisplayState = {
+type ToastsDisplayState = {
   toasts: ToastState[];
 };
 
-export const TOAST_STATE_ATOM = atom<ToastsDisplayState>({ toasts: [] });
+const TOAST_STATE_ATOM = atom<ToastsDisplayState>({ toasts: [] });
 
 function deleteToast(index: number) {
-  console.log(index);
-  console.log(getStore().get(TOAST_STATE_ATOM));
   const state = getStore().get(TOAST_STATE_ATOM);
   getStore().set(TOAST_STATE_ATOM, {
     ...state,
     toasts: state.toasts.filter((stat) => stat.index !== index),
   });
-  console.log(getStore().get(TOAST_STATE_ATOM));
 }
 
 export function makeToast(props: ToastProps) {
-  console.log(getStore().get(TOAST_STATE_ATOM));
   const state = getStore().get(TOAST_STATE_ATOM);
   getStore().set(TOAST_STATE_ATOM, {
     ...state,
@@ -44,8 +40,6 @@ export function makeToast(props: ToastProps) {
       },
     ],
   });
-
-  console.log(getStore().get(TOAST_STATE_ATOM));
 }
 
 function TheToast(props: { state: ToastState }) {
@@ -74,7 +68,6 @@ export function ToastDisplay() {
   //   makeToast('test', 'test 123');
   // }, []);
 
-  console.log('render', useAtomValue(TOAST_STATE_ATOM));
   const toasts = useAtomValue(TOAST_STATE_ATOM).toasts.map((state) =>
     TheToast({ state }),
   );

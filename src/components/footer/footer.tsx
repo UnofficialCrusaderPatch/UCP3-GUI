@@ -113,6 +113,23 @@ function VersionAndState() {
   );
 }
 
+const SIMPLIFICATION_TOKEN = '...';
+
+const simplifyGameFolderString = (folder: string, displayWidth: number) => {
+  if (folder.length > displayWidth) {
+    const a = folder.substring(
+      0,
+      (displayWidth - SIMPLIFICATION_TOKEN.length) / 2,
+    );
+    const b = folder.substring(
+      folder.length - (displayWidth - SIMPLIFICATION_TOKEN.length) / 2,
+    );
+    return `${a}${SIMPLIFICATION_TOKEN}${b}`;
+  }
+
+  return folder;
+};
+
 export default function Footer() {
   const currentFolder = useCurrentGameFolder();
 

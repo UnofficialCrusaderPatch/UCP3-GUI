@@ -1,4 +1,6 @@
 launch: "Launch"
+launch.options.view: "View launch options"
+launch.options.hide: "Hide launch options"
 launch.options: "Launch Options"
 launch.options.free.args: "Custom Launch Arguments:"
 launch.options.free.envs: "Custom ENV Variables:"

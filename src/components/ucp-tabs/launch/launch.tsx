@@ -12,8 +12,9 @@ import {
   EXTREME_VERSION_ATOM,
   VANILLA_VERSION_ATOM,
 } from 'function/game-files/game-version-state';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
+import { Button, Collapse } from 'react-bootstrap';
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import { createLaunchOptionFuncs } from './launch-options/launch-options';
@@ -35,6 +36,9 @@ export default function Launch() {
   const receiveArgs = () => Object.values(internalArgs).flat();
   const receiveEnvs = () => Object.assign({}, ...Object.values(internalEnvs));
 
+  const [displayAdvancedLaunchOptions, setDisplayAdvancedLaunchOptions] =
+    useState(false);
+
   return (
     <div className="launch__container flex-default">
       <div className="launch__boxes">
@@ -53,7 +57,25 @@ export default function Launch() {
           receiveEnvs={receiveEnvs}
         />
       </div>
-      <div className="flex-default launch__options">
+      <div className="d-flex align-self-start">
+        <Button
+          variant="link"
+          onClick={() =>
+            setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions)
+          }
+        >
+          {displayAdvancedLaunchOptions
+            ? t('gui-launch:launch.options.view')
+            : t('gui-launch:launch.options.hide')}
+        </Button>
+      </div>
+      <div
+        className={
+          displayAdvancedLaunchOptions
+            ? 'flex-default launch__options'
+            : 'd-none'
+        }
+      >
         <h4>{t('gui-launch:launch.options')}</h4>
         <div className="parchment-box launch__options__box">
           <div className="launch__options__box__row">

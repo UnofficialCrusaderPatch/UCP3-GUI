@@ -120,7 +120,7 @@ function CreateUCP2RadioGroup(args: {
   }
   return (
     <div
-      className="col-5"
+      className="col"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
         setStatusBarMessage(statusBarMessage);

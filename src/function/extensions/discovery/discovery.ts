@@ -87,7 +87,7 @@ async function readLocales(
         translations[language] = Object.fromEntries(
           Object.entries(translation).map(([key, value]) => [
             key.toLowerCase(),
-            value,
+            value.replaceAll('&', ''),
           ]),
         );
       } else {

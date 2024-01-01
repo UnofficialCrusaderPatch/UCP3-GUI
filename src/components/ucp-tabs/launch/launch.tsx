@@ -64,7 +64,7 @@ export default function Launch() {
             setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions)
           }
         >
-          {displayAdvancedLaunchOptions
+          {!displayAdvancedLaunchOptions
             ? t('gui-launch:launch.options.view')
             : t('gui-launch:launch.options.hide')}
         </Button>

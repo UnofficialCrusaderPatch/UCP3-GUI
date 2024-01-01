@@ -11,6 +11,8 @@ import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { CONFIGURATION_WARNINGS_REDUCER_ATOM } from 'function/configuration/state';
 import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
 import { useCurrentGameFolder } from 'function/game-folder/state';
+import { getVersion } from '@tauri-apps/api/app';
+import { loadable } from 'jotai/utils';
 
 const UCP_STATE_MAP = new Map([
   [UCPState.WRONG_FOLDER, 'wrong.folder'],
@@ -40,11 +42,20 @@ const UCP_STATE_COLOR_MAP = new Map([
 
 export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);
 
+export const GUI_VERSION_ASYNC_ATOM = atom(async (get) => getVersion());
+
+export const GUI_VERSION_ATOM = loadable(GUI_VERSION_ASYNC_ATOM);
+
 function VersionAndState() {
   const ucpState = useAtomValue(UCP_STATE_ATOM);
   const vr = useAtomValue(UCP_VERSION_ATOM);
   const ucpVersion = vr.version;
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+  const guiVersionLoadable = useAtomValue(GUI_VERSION_ATOM);
+  const guiVersion =
+    guiVersionLoadable.state === 'hasData'
+      ? guiVersionLoadable.data
+      : 'unknown';
 
   const { t } = useTranslation(['gui-general', 'gui-editor']);
 
@@ -85,7 +96,7 @@ function VersionAndState() {
 
   return (
     <span className="footer__version-and-state">
-      <span>{`GUI ${'1.0.0'}`}</span>
+      <span>{`GUI ${guiVersion}`}</span>
       <span className="px-3">{`UCP ${ucpFooterVersionString}`}</span>
 
       <CircleFill

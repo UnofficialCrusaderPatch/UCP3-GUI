@@ -74,51 +74,6 @@ export default function Overview() {
   return (
     <div className="flex-default overview">
       <RecentFolders />
-      <StateButton
-        buttonActive={
-          overviewButtonActive &&
-          (ucpState === UCPState.ACTIVE ||
-            ucpState === UCPState.INACTIVE ||
-            ucpState === UCPState.BINK_UCP_MISSING ||
-            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
-            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
-        }
-        buttonValues={{
-          idle: activateButtonString,
-          running: activateButtonString,
-          success: activateButtonString,
-          failed: activateButtonString,
-        }}
-        buttonVariant="ucp-button overview__text-button"
-        funcBefore={() => setOverviewButtonActive(false)}
-        funcAfter={() => setOverviewButtonActive(true)}
-        func={async () => {
-          try {
-            let result = Result.emptyOk<string>();
-            if (
-              ucpState === UCPState.ACTIVE ||
-              ucpState === UCPState.BINK_UCP_MISSING ||
-              ucpState === UCPState.BINK_VERSION_DIFFERENCE
-            ) {
-              result = (await deactivateUCP()).mapErr(String);
-            } else if (
-              ucpState === UCPState.INACTIVE ||
-              ucpState === UCPState.BINK_REAL_COPY_MISSING
-            ) {
-              result = (await activateUCP()).mapErr(String);
-            }
-            return result;
-          } catch (e: any) {
-            await showModalOk({ message: e.toString(), title: 'ERROR' });
-          }
-
-          return Result.emptyOk();
-        }}
-        tooltip={t('gui-editor:overview.activationTooltip')}
-        setResultNodeState={createToastHandler(
-          t('gui-editor:overview.activate.toast.title'),
-        )}
-      />
 
       {/*      <StateButton
         buttonActive={overviewButtonActive}
@@ -210,8 +165,53 @@ export default function Overview() {
           t('gui-editor:overview.zip.toast.title'),
         )}
       />
-      <div id="decor" />
       <StateButton
+        buttonActive={
+          overviewButtonActive &&
+          (ucpState === UCPState.ACTIVE ||
+            ucpState === UCPState.INACTIVE ||
+            ucpState === UCPState.BINK_UCP_MISSING ||
+            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
+        }
+        buttonValues={{
+          idle: activateButtonString,
+          running: activateButtonString,
+          success: activateButtonString,
+          failed: activateButtonString,
+        }}
+        buttonVariant="ucp-button overview__text-button"
+        funcBefore={() => setOverviewButtonActive(false)}
+        funcAfter={() => setOverviewButtonActive(true)}
+        func={async () => {
+          try {
+            let result = Result.emptyOk<string>();
+            if (
+              ucpState === UCPState.ACTIVE ||
+              ucpState === UCPState.BINK_UCP_MISSING ||
+              ucpState === UCPState.BINK_VERSION_DIFFERENCE
+            ) {
+              result = (await deactivateUCP()).mapErr(String);
+            } else if (
+              ucpState === UCPState.INACTIVE ||
+              ucpState === UCPState.BINK_REAL_COPY_MISSING
+            ) {
+              result = (await activateUCP()).mapErr(String);
+            }
+            return result;
+          } catch (e: any) {
+            await showModalOk({ message: e.toString(), title: 'ERROR' });
+          }
+
+          return Result.emptyOk();
+        }}
+        tooltip={t('gui-editor:overview.activationTooltip')}
+        setResultNodeState={createToastHandler(
+          t('gui-editor:overview.activate.toast.title'),
+        )}
+      />
+      <div id="decor" />
+      {/* <StateButton
         buttonActive={false}
         buttonValues={{
           idle: t('gui-editor:overview.uninstall.idle'),
@@ -227,7 +227,7 @@ export default function Overview() {
         setResultNodeState={createToastHandler(
           t('gui-editor:overview.uninstall.toast.title'),
         )}
-      />
+      /> */}
       <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{

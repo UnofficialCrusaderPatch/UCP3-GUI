@@ -46,6 +46,12 @@
   color: white;
 }
 
+.ucp-button[disabled] {
+  pointer-events: none;
+  opacity: 0.75;
+  color: gray;
+}
+
 .ucp-button:hover {
   border-image: url('/src/assets/ucp3/button_ucp_hover.png');
   border-image-slice: 8 fill;
@@ -64,10 +70,10 @@
   aspect-ratio: 1/1;
 }
 
-
 .icon-button {
   background-color: transparent;
 }
+
 /*
   Border and box elements:
 */

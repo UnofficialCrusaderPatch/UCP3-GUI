@@ -4,7 +4,7 @@ import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import { RefAttributes, Suspense, useState } from 'react';
+import { RefAttributes, Suspense } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
@@ -114,7 +114,6 @@ function VersionAndState() {
 
 export default function Footer() {
   const currentFolder = useCurrentGameFolder();
-  const [isFooterOpen, setFooterOpen] = useState(true);
 
   const configurationWarnings = useAtomValue(
     CONFIGURATION_WARNINGS_REDUCER_ATOM,
@@ -144,12 +143,7 @@ export default function Footer() {
     msg === undefined || msg.length === 0 ? displayCurrentFolder : msg;
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
-    <div
-      className={`ornament-border fs-8 footer${
-        isFooterOpen ? '' : ' footer-closed'
-      }`}
-    >
+    <div className="ornament-border fs-8 footer">
       <span
         className="px-2 me-auto"
         data-toggle="tooltip"

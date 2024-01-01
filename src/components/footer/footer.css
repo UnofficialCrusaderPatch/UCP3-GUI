@@ -11,15 +11,6 @@
   flex-wrap: nowrap;
 }
 
-.footer-closed {
-  height: 0px;
-  padding: 0;
-}
-
-.footer-closed > * {
-  display: none;
-}
-
 .footer__version-and-state {
   text-wrap: nowrap;
   padding: 0 0.5rem 0 0.5rem;

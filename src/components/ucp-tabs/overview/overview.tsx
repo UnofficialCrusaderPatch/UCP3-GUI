@@ -166,6 +166,7 @@ export default function Overview() {
               (status) => stateUpdate(status),
               t,
             );
+
             if (zipInstallResult.ok().isPresent()) {
               const confirmed = await showModalOkCancel({
                 title: t('gui-general:require.reload.title'),

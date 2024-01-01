@@ -10,7 +10,11 @@ import {
 } from 'tauri/tauri-files';
 import { extractZipToPath } from 'tauri/tauri-invoke';
 import Result from 'util/structs/result';
-import { activateUCP, createRealBink } from 'function/ucp-files/ucp-state';
+import {
+  UCP_STATE_ATOM,
+  activateUCP,
+  createRealBink,
+} from 'function/ucp-files/ucp-state';
 import { getBinary } from 'tauri/tauri-http';
 import { getStore } from 'hooks/jotai/base';
 import { checkForLatestUCP3DevReleaseUpdate } from './github';
@@ -34,7 +38,13 @@ export async function installUCPFromZip(
       throw t('gui-download:zip.extract.error', { error });
     }
 
+    // Force a refresh on this atom to ensure activateUCP() is dealing with the right IO state
     getStore().set(UCP_VERSION_ATOM);
+
+    // Force a refresh on this atom to ensure activateUCP() is dealing with the right IO state
+    getStore().set(UCP_STATE_ATOM);
+
+    // Activate the UCP by default when installing
     (await activateUCP()).throwIfErr();
   });
 }

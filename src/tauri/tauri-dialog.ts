@@ -143,6 +143,7 @@ export async function openFileDialog(
     defaultPath: baseFolder,
     filters,
     title,
+    recursive: true,
   });
   return result && !Array.isArray(result)
     ? Option.of(result)
@@ -158,6 +159,7 @@ export async function openFolderDialog(
     multiple: false,
     defaultPath: baseFolder,
     title,
+    recursive: true,
   });
   return result && !Array.isArray(result)
     ? Option.of(result)

@@ -18,14 +18,24 @@ import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { showModalOk } from 'components/modals/modal-ok';
 import { useAtomValue } from 'jotai';
 import { useCurrentGameFolder } from 'function/game-folder/state';
+import { makeToast } from 'components/modals/toasts/ToastsDisplay';
 import RecentFolders from './recent-folders';
+
+function createToastHandler(title: string) {
+  return (body: ReactNode) => {
+    if (body == null) {
+      // ignore if body null or undefined
+      return;
+    }
+    makeToast({ title, body });
+  };
+}
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
   const loadableUcpState = useAtomValue(LOADABLE_UCP_STATE_ATOM);
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
-  const [buttonResult, setButtonResult] = useState<ReactNode>(null);
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
@@ -105,7 +115,9 @@ export default function Overview() {
           return Result.emptyOk();
         }}
         tooltip={t('gui-editor:overview.activationTooltip')}
-        setResultNodeState={setButtonResult}
+        setResultNodeState={createToastHandler(
+          t('gui-editor:overview.activate.toast.title'),
+        )}
       />
 
       {/*      <StateButton
@@ -136,6 +148,9 @@ export default function Overview() {
           }
           return Result.emptyErr();
         }}
+        setResultNodeState={createToastHandler(
+          t('gui-editor:overview.update.toast.title'),
+        )}
       /> */}
       <StateButton
         buttonActive={overviewButtonActive}
@@ -156,7 +171,7 @@ export default function Overview() {
               { name: t('gui-general:file.all'), extensions: ['*'] },
             ]);
 
-            if (zipFilePath.isEmpty()) return Result.err('');
+            if (zipFilePath.isEmpty()) return Result.emptyErr();
 
             // TODO: improve feedback
             const zipInstallResult = await installUCPFromZip(
@@ -190,7 +205,9 @@ export default function Overview() {
 
           return Result.emptyErr();
         }}
-        setResultNodeState={setButtonResult}
+        setResultNodeState={createToastHandler(
+          t('gui-editor:overview.zip.toast.title'),
+        )}
       />
       <div id="decor" />
       <StateButton
@@ -206,7 +223,9 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async () => Result.emptyOk()}
         tooltip={t('gui-editor:overview.uninstallationToolTip')}
-        setResultNodeState={setButtonResult}
+        setResultNodeState={createToastHandler(
+          t('gui-editor:overview.uninstall.toast.title'),
+        )}
       />
       <StateButton
         buttonActive={overviewButtonActive}
@@ -230,9 +249,10 @@ export default function Overview() {
 
           return Result.emptyErr();
         }}
-        setResultNodeState={setButtonResult}
+        setResultNodeState={createToastHandler(
+          t('gui-editor:overview.update.gui.toast.title'),
+        )}
       />
-      {buttonResult}
     </div>
   );
 }

@@ -182,12 +182,49 @@ function collectConfigEntries(
 
 async function getExtensionHandles(ucpFolder: string) {
   const moduleDir = `${ucpFolder}/modules/`;
-  const modDirEnts = (await readDir(moduleDir))
+  const readModuleDirResult = await readDir(moduleDir);
+
+  if (readModuleDirResult.isErr()) {
+    const err = readModuleDirResult.err().get();
+    if (
+      (err as object)
+        .toString()
+        .startsWith('path not allowed on the configured scope')
+    ) {
+      throw Error(
+        `Cannot process extensions. List of extensions will be empty. \n\n Reason: App is not allowed to access: ${moduleDir}`,
+      );
+    }
+
+    readModuleDirResult.throwIfErr();
+
+    return [];
+  }
+
+  const modDirEnts = readModuleDirResult
     .ok()
     .getOrReceive(() => []) as FileEntry[];
 
   const pluginDir = `${ucpFolder}/plugins/`;
-  const pluginDirEnts = (await readDir(pluginDir))
+  const readPluginDirResult = await readDir(pluginDir);
+
+  if (readPluginDirResult.isErr()) {
+    const err = readPluginDirResult.err().get();
+    if (
+      (err as object)
+        .toString()
+        .startsWith('path not allowed on the configured scope')
+    ) {
+      throw Error(
+        `Cannot process extensions. List of extensions will be empty. \n\n Reason: App is not allowed to access: ${pluginDir}`,
+      );
+    }
+
+    readPluginDirResult.throwIfErr();
+
+    return [];
+  }
+  const pluginDirEnts = readPluginDirResult
     .ok()
     .getOrReceive(() => []) as FileEntry[];
 

@@ -4,7 +4,7 @@ import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
-import { RefAttributes, Suspense } from 'react';
+import { CSSProperties, RefAttributes, Suspense } from 'react';
 import { Tooltip, TooltipProps } from 'react-bootstrap';
 import { JSX } from 'react/jsx-runtime';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
@@ -159,8 +159,16 @@ export default function Footer() {
   );
 
   const msg = useAtomValue(STATUS_BAR_MESSAGE_ATOM);
-  const statusBarMessage =
-    msg === undefined || msg.length === 0 ? displayCurrentFolder : msg;
+  const isDisplayingCurrentFolder = msg === undefined || msg.length === 0;
+  const statusBarMessage = isDisplayingCurrentFolder
+    ? displayCurrentFolder
+    : msg;
+
+  const overflowPreventionStyle: CSSProperties = {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  };
 
   return (
     <div className="ornament-border fs-8 footer">
@@ -169,6 +177,7 @@ export default function Footer() {
         data-toggle="tooltip"
         data-placement="top"
         title={currentFolder}
+        style={isDisplayingCurrentFolder ? overflowPreventionStyle : {}}
       >
         <span className="fst-italic">{statusBarMessage}</span>
       </span>

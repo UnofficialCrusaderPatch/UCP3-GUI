@@ -5,9 +5,10 @@ import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
 import { UCP_VERSION_FILE } from 'function/global/constants/file-constants';
 import { atom } from 'jotai';
 import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from 'function/game-folder/state';
-import { atomWithRefresh } from 'hooks/jotai/base';
+import { atomWithRefresh, getStore } from 'hooks/jotai/base';
 import Logger from 'util/scripts/logging';
 import { showModalOk } from 'components/modals/modal-ok';
+import { INIT_ERROR } from 'function/game-folder/initialization';
 
 const LOGGER = new Logger('ucp-version.ts');
 export interface UCPVersionInterface {
@@ -121,18 +122,19 @@ export const UCP_VERSION_ATOM = atomWithRefresh(async (get) => {
           .toString()
           .startsWith('path not allowed on the configured scope: ')
       ) {
-        const msg =
-          'Cannot access new ucp subfolder, please check security permissions';
+        const msg = `Cannot access file ${path}, please check security permissions`;
         messages.push(msg);
         errorCode = 1;
-        await showModalOk({
-          title: 'Permissions error',
-          message: msg,
-        });
+
+        LOGGER.obj(msg).error();
+
+        if (!getStore().get(INIT_ERROR)) getStore().set(INIT_ERROR, true);
       } else if ((err as object).toString().endsWith('(os error 3)')) {
         const msg = `File ${path} does not exist`;
         messages.push(msg);
         errorCode = 3;
+
+        if (!getStore().get(INIT_ERROR)) getStore().set(INIT_ERROR, true);
         // No point in showing this, the user is probably aware since the most likely cause is that UCP isn't installed
         // await showModalOk({
         //   title: 'File read error',

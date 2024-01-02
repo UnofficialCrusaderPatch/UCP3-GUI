@@ -21,12 +21,14 @@ export const LOGGER = new Logger('game-folder/initialization.ts');
 
 export const INIT_DONE = atom(false);
 export const INIT_RUNNING = atom(false);
+export const INIT_ERROR = atom(false);
 
 export async function initializeGameFolder(newFolder: string) {
   const loggerState = LOGGER.empty();
 
   getStore().set(INIT_RUNNING, true);
   getStore().set(INIT_DONE, false);
+  getStore().set(INIT_ERROR, false);
 
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -44,8 +46,10 @@ export async function initializeGameFolder(newFolder: string) {
       LOGGER.obj(e).error();
       await showModalOk({
         message: (e as object).toString(),
-        title: 'Error in extensions',
+        title: 'Error in extension initialization',
       });
+
+      getStore().set(INIT_ERROR, true);
     }
 
     ConsoleLogger.debug('Discovered extensions: ', extensions);
@@ -58,6 +62,12 @@ export async function initializeGameFolder(newFolder: string) {
     file = `${newFolder}/ucp-config.yml`; // better be moved to const file?
   } else {
     loggerState.setMsg('No folder active.').info();
+
+    getStore().set(INIT_DONE, true);
+    getStore().set(INIT_RUNNING, false);
+    getStore().set(INIT_ERROR, false);
+
+    return;
   }
 
   getStore().set(CONFIGURATION_REDUCER_ATOM, {
@@ -93,18 +103,24 @@ export async function initializeGameFolder(newFolder: string) {
   loggerState.setMsg('Finished extension discovery').info();
   ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
 
-  loggerState.setMsg('Trying to loading ucp-config.yml').info();
+  if (getStore().get(INIT_ERROR) === false) {
+    loggerState.setMsg('Trying to load ucp-config.yml').info();
 
-  // const [t] = useTranslation(['gui-general', 'gui-editor']);
-  const { t } = i18next;
+    // const [t] = useTranslation(['gui-general', 'gui-editor']);
+    const { t } = i18next;
 
-  if (await exists(file)) {
-    await importButtonCallback(newFolder, () => {}, t, file);
+    if (await exists(file)) {
+      await importButtonCallback(newFolder, () => {}, t, file);
+    } else {
+      loggerState.setMsg('no ucp-config.yml file found').info();
+    }
+
+    loggerState.setMsg('Finished loading ucp-config.yml').info();
   } else {
-    loggerState.setMsg('no ucp-config.yml file found').info();
+    loggerState
+      .setMsg('Not loading ucp-config.yml as there were errors during init')
+      .info();
   }
-
-  loggerState.setMsg('Finished loading ucp-config.yml').info();
 
   getStore().set(INIT_DONE, true);
   getStore().set(INIT_RUNNING, false);

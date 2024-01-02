@@ -157,6 +157,7 @@ type Definition = {
   dependencies: string[];
   'display-name': string;
   description: string;
+  type: ExtensionType;
 };
 
 type PluginType = 'plugin';

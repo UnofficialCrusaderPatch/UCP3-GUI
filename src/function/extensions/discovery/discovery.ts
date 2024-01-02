@@ -8,12 +8,13 @@ import {
   ConfigEntry,
   ConfigFile,
   ConfigFileExtensionEntry,
+  Definition,
   DisplayConfigElement,
   Extension,
   ExtensionIOCallback,
   OptionEntry,
 } from 'config/ucp/common';
-import Logger from 'util/scripts/logging';
+import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import languages from 'localization/languages.json';
 import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
 import { canonicalize, slashify } from 'tauri/tauri-invoke';
@@ -327,194 +328,243 @@ type ExtensionLoadResult = {
   handle: ExtensionHandle;
 };
 
-const Discovery = {
-  discoverExtensions: async (gameFolder: string): Promise<Extension[]> => {
-    LOGGER.msg('Discovering extensions').info();
+type ExtensionDefinitionValidationResult = {
+  status: 'ok' | 'warning' | 'error';
+  messages: string[];
+  content?: Definition;
+};
 
-    const ehs = await getExtensionHandles(`${gameFolder}/ucp`);
+const validateDefinition = async (eh: ExtensionHandle) => {
+  const warnings: string[] = [];
 
-    const extensionDiscoveryResults = await Promise.all(
-      ehs.map(async (eh) => {
-        const warnings: string[] = [];
-        try {
-          console.log(`loading ${eh}`);
+  const inferredType =
+    eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
+  const definition = yaml.parse(
+    await eh.getTextContents(`${DEFINITION_FILE}`),
+  ) as Definition;
+  const { name, version } = definition;
 
-          const inferredType =
-            eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
-          const definition = yaml.parse(
-            await eh.getTextContents(`${DEFINITION_FILE}`),
+  if (name === undefined || name === null) {
+    const msg = `'name' missing in definition.yml of ${eh.path}`;
+    LOGGER.msg(msg).error();
+
+    return {
+      status: 'error',
+      messages: [msg],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  }
+
+  if (version === undefined || version === null) {
+    const msg = `'version' missing in definition.yml of ${eh.path}`;
+    LOGGER.msg(msg).error();
+
+    return {
+      status: 'error',
+      messages: [msg],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  }
+
+  const { type } = definition;
+
+  let assumedType = inferredType;
+  if (type === undefined) {
+    const warning = `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`;
+    LOGGER.msg(warning).warn();
+  } else if (type !== inferredType) {
+    const msg = `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`;
+    LOGGER.msg(msg).error();
+
+    return {
+      status: 'error',
+      messages: [msg],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  } else {
+    assumedType = type;
+  }
+
+  definition.dependencies =
+    definition.dependencies ||
+    (definition as unknown as { depends: string[] }).depends ||
+    [];
+
+  return {
+    status: warnings.length === 0 ? 'ok' : 'warning',
+    messages: warnings,
+    content: { ...definition, type: assumedType } as Definition,
+  } as ExtensionDefinitionValidationResult;
+};
+
+const createIO = (eh: ExtensionHandle) => ({
+  handle: async <R>(cb: ExtensionIOCallback<R>) => {
+    const neh = await eh.clone();
+    try {
+      return await cb(neh);
+    } finally {
+      neh.close();
+    }
+  },
+  isZip: eh instanceof RustZipExtensionHandle,
+  isDirectory: eh instanceof DirectoryExtensionHandle,
+  path: eh.path,
+});
+
+const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
+  LOGGER.msg('Discovering extensions').info();
+
+  const ehs = await getExtensionHandles(`${gameFolder}/ucp`);
+
+  const extensionDiscoveryResults = await Promise.all(
+    ehs.map(async (eh) => {
+      const warnings: string[] = [];
+      try {
+        ConsoleLogger.info(`loading ${eh.path}`);
+
+        const definitionValidationResult = await validateDefinition(eh);
+
+        if (definitionValidationResult.status === 'warning') {
+          definitionValidationResult.messages.forEach((msg) =>
+            warnings.push(msg),
           );
-          const { name, version } = definition;
-
-          const { type } = definition;
-
-          let assumedType = inferredType;
-          if (type === undefined) {
-            const warning = `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`;
-            warnings.push(warning);
-            LOGGER.msg(
-              '"type: " was not found in definition.yml of {}-{}. Extension was inferred to be a {}',
-              name,
-              version,
-              inferredType,
-            ).warn();
-          } else if (type !== inferredType) {
-            LOGGER.msg(
-              `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`,
-            ).error();
-
-            return {
-              status: 'error',
-              messages: [
-                ...warnings,
-                `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`,
-              ],
-              content: undefined,
-            } as ExtensionLoadResult;
-          } else {
-            assumedType = type;
-          }
-
-          definition.dependencies =
-            definition.dependencies || definition.depends || [];
-
-          const io = {
-            handle: async <R>(cb: ExtensionIOCallback<R>) => {
-              const neh = await eh.clone();
-              try {
-                return await cb(neh);
-              } finally {
-                neh.close();
-              }
-            },
-            isZip: eh instanceof RustZipExtensionHandle,
-            isDirectory: eh instanceof DirectoryExtensionHandle,
-            path: eh.path,
-          };
-
-          const ext = {
-            name,
-            version,
-            type: assumedType,
-            definition,
-            io,
-          } as unknown as Extension;
-
-          const uiRaw = await readUISpec(eh);
-          ext.ui = (uiRaw || {}).options || [];
-
-          ext.locales = await readLocales(eh, ext, Object.keys(languages));
-          ext.config = await readConfig(eh);
-
-          // ext.optionEntries = collectOptionEntries(
-          //   ext.ui as unknown as { [key: string]: unknown },
-          //   ext.name,
-          // );
-
-          ext.configEntries = {};
-
-          const parseEntry = ([extensionName, data]: [
-            string,
-            {
-              config: ConfigFileExtensionEntry;
-            },
-          ]) => {
-            const result = collectConfigEntries(
-              data.config as {
-                [key: string]: unknown;
-                contents: unknown;
-              },
-              extensionName,
-            );
-
-            ext.configEntries = { ...ext.configEntries, ...result };
-          };
-
-          if (
-            ext.config['config-sparse'] === undefined ||
-            ext.config['config-sparse'].modules === undefined ||
-            ext.config['config-sparse'].plugins === undefined
-          ) {
-            warnings.push(
-              `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`,
-            );
-            LOGGER.msg(
-              `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`,
-            ).warn();
-          } else {
-            Object.entries(ext.config['config-sparse'].modules).forEach(
-              parseEntry,
-            );
-            Object.entries(ext.config['config-sparse'].plugins).forEach(
-              parseEntry,
-            );
-          }
-
-          ext.descriptionMD = await readDescription(eh);
-
-          console.debug('attaching extension');
-          ext.ui.forEach((v) => attachExtensionInformation(ext, v));
-
-          eh.close();
-
-          if (warnings.length > 0) {
-            return {
-              status: 'warning',
-              content: ext,
-              messages: warnings,
-              handle: eh,
-            } as ExtensionLoadResult;
-          }
-
-          return {
-            status: 'ok',
-            content: ext,
-            messages: [] as string[],
-            handle: eh,
-          } as ExtensionLoadResult;
-        } catch (e: any) {
-          console.error(e);
-          LOGGER.msg(e).error();
+        } else if (definitionValidationResult.status === 'error') {
           return {
             status: 'error',
+            messages: definitionValidationResult.messages,
             content: undefined,
-            messages: [...warnings, e.toString()],
             handle: eh,
           } as ExtensionLoadResult;
         }
-      }),
-    );
 
-    const extensionsByID: { [id: string]: Extension } = {};
+        const definition: Definition = definitionValidationResult.content!;
 
-    // TODO: inform the end-user of the swallowed errors
-    const extensions: Extension[] = extensionDiscoveryResults
-      .filter((edr) => edr.status !== 'error' && edr.content !== undefined)
-      .map((edr) => edr.content) as Extension[];
+        const io = createIO(eh);
 
-    const extensionsWithErrors = extensionDiscoveryResults
-      .filter((edr) => edr.status === 'error')
-      .map((elr) => `${elr.handle.path}:\n${elr.messages.join('\n')}`);
+        const { name, version, type } = definition;
 
-    if (extensionsWithErrors.length > 0) {
-      await showModalOk({
-        title: 'Errors while discovering extensions',
-        message: extensionsWithErrors.join('\n\n'),
-      });
-    }
+        const ext = {
+          name,
+          version,
+          type,
+          definition,
+          io,
+        } as unknown as Extension;
 
-    extensions.forEach((e) => {
-      const id = `${e.name}@${e.version}`;
-      if (extensionsByID[id] !== undefined) {
-        throw Error(
-          `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`,
-        );
+        const uiRaw = await readUISpec(eh);
+        ext.ui = (uiRaw || {}).options || [];
+
+        ext.locales = await readLocales(eh, ext, Object.keys(languages));
+        ext.config = await readConfig(eh);
+
+        // ext.optionEntries = collectOptionEntries(
+        //   ext.ui as unknown as { [key: string]: unknown },
+        //   ext.name,
+        // );
+
+        ext.configEntries = {};
+
+        const parseEntry = ([extensionName, data]: [
+          string,
+          {
+            config: ConfigFileExtensionEntry;
+          },
+        ]) => {
+          const result = collectConfigEntries(
+            data.config as {
+              [key: string]: unknown;
+              contents: unknown;
+            },
+            extensionName,
+          );
+
+          ext.configEntries = { ...ext.configEntries, ...result };
+        };
+
+        if (
+          ext.config['config-sparse'] === undefined ||
+          ext.config['config-sparse'].modules === undefined ||
+          ext.config['config-sparse'].plugins === undefined
+        ) {
+          const msg = `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`;
+          warnings.push(msg);
+          LOGGER.msg(msg).warn();
+        } else {
+          Object.entries(ext.config['config-sparse'].modules).forEach(
+            parseEntry,
+          );
+          Object.entries(ext.config['config-sparse'].plugins).forEach(
+            parseEntry,
+          );
+        }
+
+        ext.descriptionMD = await readDescription(eh);
+
+        ext.ui.forEach((v) => attachExtensionInformation(ext, v));
+
+        eh.close();
+
+        if (warnings.length > 0) {
+          return {
+            status: 'warning',
+            content: ext,
+            messages: warnings,
+            handle: eh,
+          } as ExtensionLoadResult;
+        }
+
+        return {
+          status: 'ok',
+          content: ext,
+          messages: [] as string[],
+          handle: eh,
+        } as ExtensionLoadResult;
+      } catch (e: any) {
+        console.error(e);
+        LOGGER.msg(e).error();
+        return {
+          status: 'error',
+          content: undefined,
+          messages: [...warnings, e.toString()],
+          handle: eh,
+        } as ExtensionLoadResult;
       }
-      extensionsByID[id] = e;
-    });
+    }),
+  );
 
-    return extensions;
-  },
+  const extensionsByID: { [id: string]: Extension } = {};
+
+  // TODO: inform the end-user of the swallowed errors
+  const extensions: Extension[] = extensionDiscoveryResults
+    .filter((edr) => edr.status !== 'error' && edr.content !== undefined)
+    .map((edr) => edr.content) as Extension[];
+
+  const extensionsWithErrors = extensionDiscoveryResults
+    .filter((edr) => edr.status === 'error')
+    .map((elr) => `${elr.handle.path}:\n${elr.messages.join('\n')}`);
+
+  if (extensionsWithErrors.length > 0) {
+    await showModalOk({
+      title: 'Errors while discovering extensions',
+      message: extensionsWithErrors.join('\n\n'),
+    });
+  }
+
+  extensions.forEach((e) => {
+    const id = `${e.name}@${e.version}`;
+    if (extensionsByID[id] !== undefined) {
+      throw Error(
+        `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`,
+      );
+    }
+    extensionsByID[id] = e;
+  });
+
+  return extensions;
+};
+
+const Discovery = {
+  discoverExtensions,
 };
 
 function tryResolveDependencies(extensions: Extension[]) {

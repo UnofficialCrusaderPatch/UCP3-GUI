@@ -19,6 +19,7 @@ import languages from 'localization/languages.json';
 import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
 import { canonicalize, slashify } from 'tauri/tauri-invoke';
 import { showModalOk } from 'components/modals/modal-ok';
+import { SemVer } from 'semver';
 import { ExtensionHandle } from '../handles/extension-handle';
 import ZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
@@ -411,6 +412,22 @@ const createIO = (eh: ExtensionHandle) => ({
   path: eh.path,
 });
 
+const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
+  if (eh.path.toLocaleLowerCase().endsWith(`-${version}`)) {
+    return true;
+  }
+  if (eh.path.toLocaleLowerCase().endsWith(`-${version}.zip`)) {
+    return true;
+  }
+  if (eh.path.toLocaleLowerCase().endsWith(`-${version}/`)) {
+    return true;
+  }
+  if (eh.path.toLocaleLowerCase().endsWith(`-${version}\\`)) {
+    return true;
+  }
+  return false;
+};
+
 const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
   LOGGER.msg('Discovering extensions').info();
 
@@ -442,6 +459,18 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
         const io = createIO(eh);
 
         const { name, version, type } = definition;
+
+        if (!checkVersionEquality(eh, version)) {
+          return {
+            status: 'error',
+            messages: [
+              ...warnings,
+              `Version as defined in definition.yml (${version}) does not match file name version ${eh.path}`,
+            ],
+            content: undefined,
+            handle: eh,
+          } as ExtensionLoadResult;
+        }
 
         const ext = {
           name,
@@ -546,15 +575,18 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
   if (extensionsWithErrors.length > 0) {
     await showModalOk({
       title: 'Errors while discovering extensions',
-      message: extensionsWithErrors.join('\n\n'),
+      message: `These extensions were skipped because they contain errors:\n\n ${extensionsWithErrors.join(
+        '\n\n',
+      )}`,
     });
   }
 
+  // Should not happen anymore
   extensions.forEach((e) => {
     const id = `${e.name}@${e.version}`;
     if (extensionsByID[id] !== undefined) {
       throw Error(
-        `Duplicate extension detected: ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`,
+        `Duplicate extension detected (as per definition.yml): ${id}. Please fix the issue in the ucp folder and then refresh this GUI.`,
       );
     }
     extensionsByID[id] = e;

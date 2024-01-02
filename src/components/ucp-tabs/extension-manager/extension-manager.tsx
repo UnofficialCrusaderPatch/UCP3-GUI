@@ -56,7 +56,7 @@ export default function ExtensionManager() {
   const file = useAtomValue(UCP_CONFIG_FILE_ATOM);
   const { activeExtensions } = extensionsState;
 
-  const setConfigStatus = (msg: string) => makeToast({ title: '', body: msg });
+  const setConfigStatus = (msg: string) => makeToast({ title: msg, body: '' });
 
   const configurationQualifier = useAtomValue(
     CONFIGURATION_QUALIFIER_REDUCER_ATOM,
@@ -130,7 +130,7 @@ export default function ExtensionManager() {
                   setShowAllExtensions(!showAllExtensions);
                 }}
                 onMouseEnter={() => {
-                  setStatusBarMessage('Show all extensions / Hide modules');
+                  setStatusBarMessage(t('gui-editor:config.tooltip.filter'));
                 }}
                 onMouseLeave={() => {
                   setStatusBarMessage(undefined);
@@ -205,9 +205,7 @@ export default function ExtensionManager() {
                   }
                 }}
                 onMouseEnter={() => {
-                  setStatusBarMessage(
-                    'Install extensions from a pack (a zip file)',
-                  );
+                  setStatusBarMessage(t('gui-editor:config.tooltip.install'));
                 }}
                 onMouseLeave={() => {
                   setStatusBarMessage(undefined);
@@ -352,9 +350,7 @@ export default function ExtensionManager() {
                   }
                 }}
                 onMouseEnter={() => {
-                  setStatusBarMessage(
-                    'Zip the current extensions to a zip file for sharing',
-                  );
+                  setStatusBarMessage(t('gui-editor:config.tooltip.pack'));
                 }}
                 onMouseLeave={() => {
                   setStatusBarMessage(undefined);
@@ -374,9 +370,7 @@ export default function ExtensionManager() {
                   }
                 }}
                 onMouseEnter={() => {
-                  setStatusBarMessage(
-                    'Import a config file, overwriting the current configuration',
-                  );
+                  setStatusBarMessage(t('gui-editor:config.tooltip.import'));
                 }}
                 onMouseLeave={() => {
                   setStatusBarMessage(undefined);
@@ -394,9 +388,7 @@ export default function ExtensionManager() {
                   }
                 }}
                 onMouseEnter={() => {
-                  setStatusBarMessage(
-                    'Export the current configuration to a file',
-                  );
+                  setStatusBarMessage(t('gui-editor:config.tooltip.export'));
                 }}
                 onMouseLeave={() => {
                   setStatusBarMessage(undefined);
@@ -444,9 +436,7 @@ export default function ExtensionManager() {
                     }
                   }}
                   onMouseEnter={() => {
-                    setStatusBarMessage(
-                      'Apply the current configuration (save to ucp-config.yml)',
-                    );
+                    setStatusBarMessage(t('gui-editor:config.tooltip.apply'));
                   }}
                   onMouseLeave={() => {
                     setStatusBarMessage(undefined);

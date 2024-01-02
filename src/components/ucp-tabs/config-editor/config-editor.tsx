@@ -16,7 +16,7 @@ import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { reloadCurrentWindow } from 'function/window-actions';
 
 import { ConsoleLogger } from 'util/scripts/logging';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -28,6 +28,7 @@ import {
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import { makeToast } from 'components/modals/toasts/ToastsDisplay';
+import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';
@@ -72,7 +73,9 @@ export default function ConfigEditor(args: { readonly: boolean }) {
     .map((v) => (v.level === 'error' ? 1 : 0))
     .reduce((a: number, b: number) => a + b, 0);
 
-  const setConfigStatus = (msg: string) => makeToast({ title: '', body: msg });
+  const setConfigStatus = (msg: string) => makeToast({ title: msg, body: '' });
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   useEffect(() => {
     // setConfigStatus(
@@ -107,6 +110,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     value: {},
                   });
                 }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(t('gui-editor:config.tooltip.reset'));
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
               />
               <ImportButton
                 onClick={async () => {
@@ -119,6 +128,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     });
                   }
                 }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(t('gui-editor:config.tooltip.import'));
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
               />
               <ExportButton
                 onClick={async () => {
@@ -130,6 +145,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                       message: e.toString(),
                     });
                   }
+                }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(t('gui-editor:config.tooltip.export'));
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
                 }}
               />
               <ExportAsPluginButton
@@ -206,6 +227,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                     });
                   }
                 }}
+                onMouseEnter={() => {
+                  setStatusBarMessage(t('gui-editor:config.tooltip.plugin'));
+                }}
+                onMouseLeave={() => {
+                  setStatusBarMessage(undefined);
+                }}
               />
               <div className="d-none config-editor__buttons--user-override-switch">
                 <Form.Switch
@@ -232,6 +259,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                         message: e.toString(),
                       });
                     }
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(t('gui-editor:config.tooltip.apply'));
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
                   }}
                 />
               </div>

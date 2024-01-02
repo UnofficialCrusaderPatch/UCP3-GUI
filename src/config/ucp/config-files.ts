@@ -238,5 +238,5 @@ export async function saveUCPConfig(
     ),
   );
 
-  return `Config file saved succesfully`;
+  return `Saved!`;
 }

@@ -97,10 +97,17 @@ function GameStarterButton(props: GameStarterProps) {
     cssClass = 'game-starter__starter--starting';
   }
 
+  const preprocessedArgs =
+    receiveArgs === undefined
+      ? undefined
+      : receiveArgs()
+          .map((arg) => arg.split(' ', 2))
+          .flat();
+
   const startFunc = async () => {
     try {
       setStarting(true);
-      await osOpenProgram(path, receiveArgs?.(), receiveEnvs?.());
+      await osOpenProgram(path, preprocessedArgs, receiveEnvs?.());
       // the game start takes a while, but we not observe it, so we simulate loading a bit instead
       await sleep(2000);
     } catch (e) {

@@ -3,12 +3,10 @@ import { Extension } from 'config/ucp/common';
 import { useTranslation } from 'react-i18next';
 import Markdown from 'react-markdown';
 
-const markdown = '# Hi, *Pluto*!';
-
-// eslint-disable-next-line import/prefer-default-export
-export function MDTEST() {
-  return <Markdown>{markdown}</Markdown>;
-}
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line import/no-extraneous-dependencies
+import rehypeExternalLinks from 'rehype-external-links';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -27,7 +25,11 @@ export function ExtensionViewer(
       <h1 className="credits-title">{t('gui-editor:extensions.viewer')}</h1>
       <div className="parchment-box credits-text-box">
         <div className="credits-text">
-          <Markdown>{extension.descriptionMD}</Markdown>
+          <Markdown
+            rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
+          >
+            {extension.descriptionMD}
+          </Markdown>
         </div>
       </div>
       <button type="button" className="credits-close" onClick={closeFunc}>

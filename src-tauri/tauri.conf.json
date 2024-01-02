@@ -41,6 +41,9 @@
           "https://api.github.com/repos/UnofficialCrusaderPatch/**"
         ]
       },
+      "shell": {
+        "open": true
+      },
       "protocol": {
         "asset": true
       }

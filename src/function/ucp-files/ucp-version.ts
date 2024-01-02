@@ -74,7 +74,13 @@ export class UCPVersion implements UCPVersionInterface {
   }
 
   toString(): string {
-    return `${this.getMajorAsString()}.${this.getMinorAsString()}.${this.getPatchAsString()} - ${this.getShaRepresentation()} - ${this.getBuildRepresentation()}`;
+    let br = this.getBuildRepresentation();
+    if (br.length === 0) {
+      br = '';
+    } else {
+      br = ` - ${br}`;
+    }
+    return `${this.getMajorAsString()}.${this.getMinorAsString()}.${this.getPatchAsString()} - ${this.getShaRepresentation()}${br}`;
   }
 }
 

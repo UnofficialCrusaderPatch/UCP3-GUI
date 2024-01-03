@@ -43,7 +43,9 @@ export default function UcpTabs() {
   const state = useAtomValue(LOADABLE_UCP_STATE_ATOM);
   const ucpFolderExists =
     state.state === 'hasData'
-      ? state.data === UCPState.ACTIVE || state.data === UCPState.INACTIVE
+      ? state.data === UCPState.ACTIVE ||
+        state.data === UCPState.INACTIVE ||
+        state.data === UCPState.BINK_VERSION_DIFFERENCE
       : false;
 
   return (

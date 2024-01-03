@@ -1,9 +1,18 @@
-## The team behind the UCP
+## The team behind the UCP [![UCP_Official](https://discordapp.com/api/guilds/426318193603117057/widget.png?style=shield)](https://discord.gg/N4UVjZBRXU)
 
-### Creators of UCP 3
+### Creators of the UCP 3 framework
 
 [gynt](https://github.com/gynt)  
-[TheRedDaemon](https://github.com/thereddaemon)
+[TheRedDaemon](https://github.com/thereddaemon)  
+[Corax](https://github.com/Corax34)  
+[Le spec](https://github.com/LeSpec)
+
+### Creators of the GUI
+
+[gynt](https://github.com/gynt)  
+[TheRedDaemon](https://github.com/thereddaemon)  
+[Krarilotus (YouTube)](https://www.youtube.com/channel/UCMXHqa2vmclSoSkuCu_q5rw)  
+[Monsterfisch](https://github.com/Monsterfisch)
 
 ### Developers
 
@@ -14,7 +23,9 @@
 [LordHansCapon](https://github.com/LordHansCapon)  
 [J-T-de](https://github.com/J-T-de)  
 [Chaf1812](https://github.com/Chaf1812)  
-[np123](https://github.com/patel-nikhil)
+[np123](https://github.com/patel-nikhil)  
+[Krarilotus (YouTube)](https://www.youtube.com/channel/UCMXHqa2vmclSoSkuCu_q5rw)  
+[Monsterfisch](https://github.com/Monsterfisch)
 
 ### Translators
 
@@ -30,7 +41,8 @@
 ### Community Management
 
 [Kimberly Azula](https://github.com/ByBurton/)  
-[Krarilotus (YouTube)](https://www.youtube.com/channel/UCMXHqa2vmclSoSkuCu_q5rw)
+[Krarilotus (YouTube)](https://www.youtube.com/channel/UCMXHqa2vmclSoSkuCu_q5rw)  
+HeroesFlorian
 
 ### Content Creators
 
@@ -43,5 +55,7 @@
 ### Special thanks of course go to
 
 [Firefly Studios](https://fireflyworlds.com/) for the creation of the Stronghold series
+
+And to all testers for their feedback
 
 And many more

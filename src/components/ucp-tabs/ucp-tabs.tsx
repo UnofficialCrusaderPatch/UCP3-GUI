@@ -8,7 +8,11 @@ import { useTranslation } from 'react-i18next';
 import Logger from 'util/scripts/logging';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import * as GuiSettings from 'function/gui-settings/settings';
-import { INIT_RUNNING, INIT_DONE } from 'function/game-folder/initialization';
+import {
+  INIT_RUNNING,
+  INIT_DONE,
+  INIT_ERROR,
+} from 'function/game-folder/initialization';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 
 import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/game-folder/state';
@@ -25,8 +29,8 @@ import Launch from './launch/launch';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
-const DISPLAY_CONFIG_TABS_ATOM = atom(
-  (get) => get(INIT_DONE) && !get(INIT_RUNNING),
+export const DISPLAY_CONFIG_TABS_ATOM = atom(
+  (get) => get(INIT_DONE) && !get(INIT_RUNNING) && !get(INIT_ERROR),
 );
 
 export default function UcpTabs() {

@@ -1,4 +1,4 @@
-name: Build Tauri app
+name: 'Build & Release Tauri app'
 
 on: workflow_dispatch
 
@@ -26,42 +26,60 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
-      - name: install app dependencies and build it
+      - name: install app dependencies
         run: |
           npm ci
-          npm run build
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: create latest.json
-        shell: pwsh
-        run: |
-          $json = Get-Content .\src-tauri\tauri.conf.json | ConvertFrom-Json
-          $version = $json.package.version
-
-          $latest = @{
-            'version' = $version
-            'notes' = "Latest Tauri build"
-            'pub_date' = Get-Date -Format "o"
-            'platforms' = @{
-              'windows-x86_64' = @{
-                'signature' = ''
-                'url' = '' # Don't know how to solve this with a private repo
-              }
-            }
-          }
-
-          ConvertTo-Json $latest | Set-Content -Path latest.json
-
-      - uses: 'marvinpinto/action-automatic-releases@latest'
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          automatic_release_tag: 'latest-tauri'
-          prerelease: true
-          draft: false
-          title: 'Tauri Development Build'
-          files: |
-            latest.json
-            src-tauri/target/release/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
+          includeRelease: true
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          tagName: latest
+          releaseName: 'Latest version'
+          releaseBody: 'This version is the latest version of the GUI for UCP3.'
+          releaseDraft: false
+          prerelease: false
+          # TODO: include owner and repo to push to the main UCP repo
+
+      # - name: create latest.json
+      #   shell: pwsh
+      #   run: |
+      #     $json = Get-Content .\src-tauri\tauri.conf.json | ConvertFrom-Json
+      #     $version = $json.package.version
+
+      #     $latest = @{
+      #       'version' = $version
+      #       'notes' = "Latest Tauri build"
+      #       'pub_date' = Get-Date -Format "o"
+      #       'platforms' = @{
+      #         'windows-x86_64' = @{
+      #           'signature' = ''
+      #           'url' = '' # Don't know how to solve this with a private repo
+      #         }
+      #       }
+      #     }
+
+      #     ConvertTo-Json $latest | Set-Content -Path latest.json
+
+      # - uses: 'marvinpinto/action-automatic-releases@latest'
+      #   with:
+      #     repo_token: '${{ secrets.GITHUB_TOKEN }}'
+      #     automatic_release_tag: 'latest'
+      #     prerelease: true
+      #     draft: false
+      #     title: 'Tauri Development Build'
+      #     files: |
+      #       latest.json
+      #       src-tauri/target/release/*.exe
+      #       src-tauri/target/release/*.zip
+      #       src-tauri/target/release/*.sig
+      #       src-tauri/target/release/bundle/msi/*.msi
+      #       src-tauri/target/release/bundle/msi/*.zip
+      #       src-tauri/target/release/bundle/msi/*.sig
+      #       src-tauri/target/release/bundle/nsis/*.nsis
+      #       src-tauri/target/release/bundle/nsis/*.zip
+      #       src-tauri/target/release/bundle/nsis/*.sig

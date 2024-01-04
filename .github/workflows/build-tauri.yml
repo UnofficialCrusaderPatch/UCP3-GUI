@@ -61,6 +61,8 @@ jobs:
 
             ## Write the url
             echo "RELEASE_BODY=$n" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } else {
+            echo "RELEASE_BODY=$m" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           }
         shell: pwsh
       - name: Build the app and publish it

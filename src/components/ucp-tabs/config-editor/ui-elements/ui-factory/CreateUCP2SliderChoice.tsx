@@ -178,7 +178,16 @@ function CreateUCP2SliderChoice(args: {
     );
     return (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
-      <div key={choice.name} className="form-check">
+      <div
+        key={choice.name}
+        className="form-check"
+        onMouseEnter={() => {
+          setStatusBarMessage(statusBarMessage);
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      >
         <div className="sword-checkbox">
           <Radio
             className="form-check-input"

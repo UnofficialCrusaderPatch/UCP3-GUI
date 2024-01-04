@@ -41,6 +41,7 @@ import saveConfig from '../common/SaveConfig';
 import ApplyButton from '../config-editor/ApplyButton';
 import ExportButton from '../config-editor/ExportButton';
 import ImportButton from '../config-editor/ImportButton';
+import { CURRENT_DISPLAYED_TAB } from '../tabs-state';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -106,6 +107,8 @@ export default function ExtensionManager() {
   const gameFolder = useCurrentGameFolder();
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
 
   return (
     <div className="flex-default extension-manager">
@@ -230,190 +233,196 @@ export default function ExtensionManager() {
               {activated}
             </div>
             <div className="extension-manager-control__box__buttons">
-              <button
-                type="button"
-                className="ucp-button ucp-button--square text-light"
-                onClick={async () => {
-                  try {
-                    LOGGER.msg('Creating modpack').trace();
-
-                    const filePathResult = await saveFileDialog(
-                      `${gameFolder}`,
-                      [{ name: 'Zip file', extensions: ['*.zip'] }],
-                      'Save pack as...',
-                    );
-
-                    if (filePathResult.isEmpty()) return;
-
-                    const filePath = filePathResult.get();
-
-                    const zw: ZipWriter = await ZipWriter.open(filePath);
+              <div className="">
+                <button
+                  type="button"
+                  className="ucp-button ucp-button--square text-light"
+                  onClick={async () => {
                     try {
-                      zw.addDirectory('modules');
-                      zw.addDirectory('plugins');
-                      // eslint-disable-next-line no-restricted-syntax
-                      for (const ext of extensionsState.activeExtensions) {
-                        const fpath = `${ext.name}-${ext.version}`;
-                        const pathPrefix = `${gameFolder}/ucp/`;
-                        let originalPath = '';
-                        if (ext.type === 'plugin') {
-                          originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
-                          const dstPath = `plugins/${fpath}`;
-                          // eslint-disable-next-line no-await-in-loop
-                          const touch = await exists(originalPath);
+                      LOGGER.msg('Creating modpack').trace();
 
-                          if (!touch) {
+                      const filePathResult = await saveFileDialog(
+                        `${gameFolder}`,
+                        [{ name: 'Zip file', extensions: ['*.zip'] }],
+                        'Save pack as...',
+                      );
+
+                      if (filePathResult.isEmpty()) return;
+
+                      const filePath = filePathResult.get();
+
+                      const zw: ZipWriter = await ZipWriter.open(filePath);
+                      try {
+                        zw.addDirectory('modules');
+                        zw.addDirectory('plugins');
+                        // eslint-disable-next-line no-restricted-syntax
+                        for (const ext of extensionsState.activeExtensions) {
+                          const fpath = `${ext.name}-${ext.version}`;
+                          const pathPrefix = `${gameFolder}/ucp/`;
+                          let originalPath = '';
+                          if (ext.type === 'plugin') {
+                            originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
+                            const dstPath = `plugins/${fpath}`;
                             // eslint-disable-next-line no-await-in-loop
-                            await showModalOk({
-                              title: 'Error',
-                              message: `Path does not exist: ${originalPath}`,
-                            });
-                            return;
-                          }
+                            const touch = await exists(originalPath);
 
-                          const makeRelative = (fe: FileEntry) => {
-                            if (!fe.path.startsWith(pathPrefix)) {
-                              throw Error(fe.path);
+                            if (!touch) {
+                              // eslint-disable-next-line no-await-in-loop
+                              await showModalOk({
+                                title: 'Error',
+                                message: `Path does not exist: ${originalPath}`,
+                              });
+                              return;
                             }
 
-                            return fe.path.substring(pathPrefix.length);
-                          };
+                            const makeRelative = (fe: FileEntry) => {
+                              if (!fe.path.startsWith(pathPrefix)) {
+                                throw Error(fe.path);
+                              }
 
-                          // eslint-disable-next-line no-await-in-loop
-                          const entries = await readDir(originalPath, {
-                            recursive: true,
-                          });
+                              return fe.path.substring(pathPrefix.length);
+                            };
 
-                          const dirs = entries
-                            .filter(
-                              (fe) =>
-                                fe.children !== undefined &&
-                                fe.children !== null,
-                            )
-                            .map(makeRelative);
-
-                          // eslint-disable-next-line no-restricted-syntax
-                          for (const dir of dirs) {
                             // eslint-disable-next-line no-await-in-loop
-                            await zw.addDirectory(dir);
-                          }
-
-                          const files = entries.filter(
-                            (fe) =>
-                              fe.children === undefined || fe.children === null,
-                          );
-
-                          // eslint-disable-next-line no-restricted-syntax
-                          for (const fe of files) {
-                            // eslint-disable-next-line no-await-in-loop
-                            await zw.writeEntryFromFile(
-                              makeRelative(fe),
-                              fe.path,
-                            );
-                          }
-                        } else if (ext.type === 'module') {
-                          originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
-                          const dstPath = `modules/${fpath}.zip`;
-
-                          // eslint-disable-next-line no-await-in-loop
-                          const touch = await exists(originalPath);
-
-                          if (!touch) {
-                            // eslint-disable-next-line no-await-in-loop
-                            await showModalOk({
-                              title: 'Error',
-                              message: `Path does not exist: ${originalPath}`,
+                            const entries = await readDir(originalPath, {
+                              recursive: true,
                             });
-                            return;
-                          }
 
-                          // eslint-disable-next-line no-await-in-loop
-                          await zw.writeEntryFromFile(dstPath, originalPath);
-                        } else {
-                          throw Error('What are we doing here?');
+                            const dirs = entries
+                              .filter(
+                                (fe) =>
+                                  fe.children !== undefined &&
+                                  fe.children !== null,
+                              )
+                              .map(makeRelative);
+
+                            // eslint-disable-next-line no-restricted-syntax
+                            for (const dir of dirs) {
+                              // eslint-disable-next-line no-await-in-loop
+                              await zw.addDirectory(dir);
+                            }
+
+                            const files = entries.filter(
+                              (fe) =>
+                                fe.children === undefined ||
+                                fe.children === null,
+                            );
+
+                            // eslint-disable-next-line no-restricted-syntax
+                            for (const fe of files) {
+                              // eslint-disable-next-line no-await-in-loop
+                              await zw.writeEntryFromFile(
+                                makeRelative(fe),
+                                fe.path,
+                              );
+                            }
+                          } else if (ext.type === 'module') {
+                            originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
+                            const dstPath = `modules/${fpath}.zip`;
+
+                            // eslint-disable-next-line no-await-in-loop
+                            const touch = await exists(originalPath);
+
+                            if (!touch) {
+                              // eslint-disable-next-line no-await-in-loop
+                              await showModalOk({
+                                title: 'Error',
+                                message: `Path does not exist: ${originalPath}`,
+                              });
+                              return;
+                            }
+
+                            // eslint-disable-next-line no-await-in-loop
+                            await zw.writeEntryFromFile(dstPath, originalPath);
+                          } else {
+                            throw Error('What are we doing here?');
+                          }
                         }
+                      } catch (e) {
+                        LOGGER.obj(e).error();
+                        await showModalOk({
+                          title: 'Error',
+                          message: (e as Error).toString(),
+                        });
+                      } finally {
+                        zw.close();
                       }
-                    } catch (e) {
-                      LOGGER.obj(e).error();
+                    } catch (e: any) {
                       await showModalOk({
-                        title: 'Error',
-                        message: (e as Error).toString(),
+                        title: 'ERROR',
+                        message: e.toString(),
                       });
-                    } finally {
-                      zw.close();
                     }
-                  } catch (e: any) {
-                    await showModalOk({
-                      title: 'ERROR',
-                      message: e.toString(),
-                    });
-                  }
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage(t('gui-editor:config.tooltip.pack'));
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              >
-                <Stack />
-              </button>
-              <ImportButton
-                onClick={async () => {
-                  try {
-                    importButtonCallback(gameFolder, setConfigStatus, t, '');
-                  } catch (e: any) {
-                    await showModalOk({
-                      title: 'ERROR',
-                      message: e.toString(),
-                    });
-                  }
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage(t('gui-editor:config.tooltip.import'));
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              />
-              <ExportButton
-                onClick={async () => {
-                  try {
-                    exportButtonCallback(gameFolder, setConfigStatus, t);
-                  } catch (e: any) {
-                    await showModalOk({
-                      title: 'ERROR',
-                      message: e.toString(),
-                    });
-                  }
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage(t('gui-editor:config.tooltip.export'));
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              />
-              <button
-                type="button"
-                className="ucp-button ucp-button--square text-light"
-                onClick={() => {
-                  setAdvancedMode(!advancedMode);
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage('Customize configuration options');
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              >
-                {advancedMode ? <GearFill /> : <Gear />}
-              </button>
-              <div className="d-none extension-manager-control__box__buttons--user-override-switch">
-                <Form.Switch
-                  label={t('gui-editor:config.allow.override')}
-                  className="user-override-switch"
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(t('gui-editor:config.tooltip.pack'));
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
+                >
+                  <Stack />
+                </button>
+                <ImportButton
+                  onClick={async () => {
+                    try {
+                      importButtonCallback(gameFolder, setConfigStatus, t, '');
+                    } catch (e: any) {
+                      await showModalOk({
+                        title: 'ERROR',
+                        message: e.toString(),
+                      });
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(t('gui-editor:config.tooltip.import'));
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
                 />
+                <ExportButton
+                  onClick={async () => {
+                    try {
+                      exportButtonCallback(gameFolder, setConfigStatus, t);
+                    } catch (e: any) {
+                      await showModalOk({
+                        title: 'ERROR',
+                        message: e.toString(),
+                      });
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(t('gui-editor:config.tooltip.export'));
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
+                />
+                <button
+                  type="button"
+                  className="ucp-button text-light"
+                  onClick={() => {
+                    const av = advancedMode;
+                    setAdvancedMode(!advancedMode);
+                    if (!av) {
+                      setCurrentTab('config');
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(
+                      t('gui-editor:config.tooltip.customize'),
+                    );
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
+                >
+                  <div className="ucp-button-variant-button-text">
+                    {advancedMode ? <GearFill /> : <Gear />}
+                    <span> {t('gui-editor:config.customize')}...</span>
+                  </div>
+                </button>
               </div>
               <div className="extension-manager-control__box__buttons--apply-button">
                 <ApplyButton

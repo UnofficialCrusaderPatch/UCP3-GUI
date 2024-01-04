@@ -26,10 +26,11 @@ import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
 
 import Launch from './launch/launch';
+import { CURRENT_DISPLAYED_TAB, UITabs } from './tabs-state';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
-export const DISPLAY_CONFIG_TABS_ATOM = atom(
+const DISPLAY_CONFIG_TABS_ATOM = atom(
   (get) => get(INIT_DONE) && !get(INIT_RUNNING) && !get(INIT_ERROR),
 );
 
@@ -52,9 +53,15 @@ export default function UcpTabs() {
         state.data === UCPState.BINK_VERSION_DIFFERENCE
       : false;
 
+  const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
+
   return (
     <div className="ucp-tabs fs-7">
-      <Tab.Container defaultActiveKey="overview">
+      <Tab.Container
+        defaultActiveKey="overview"
+        activeKey={currentTab}
+        onSelect={(newKey) => setCurrentTab(newKey as UITabs)}
+      >
         <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
           <Nav.Item>
             <Nav.Link

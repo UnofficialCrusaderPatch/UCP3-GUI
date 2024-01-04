@@ -46,7 +46,7 @@ jobs:
           npm ci
       - name: Create changelog URL
         run: |
-          $m = ${{ inputs.release_message }}
+          $m = "${{ inputs.release_message }}"
           $t = "[Changelog](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/wiki/Changelog#)"
           if ( $m.Contains($t) ) {
 

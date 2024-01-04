@@ -110,6 +110,7 @@ function saveUCPConfigPart(
   allExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
+  LOGGER.msg('Saving ucp config part').info();
   LOGGER.obj(finalConfig[subConfig]).debug();
 
   finalConfig[subConfig]['load-order'] = extensions.map(

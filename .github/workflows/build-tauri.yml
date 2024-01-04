@@ -57,7 +57,7 @@ jobs:
           # TODO: include owner and repo to push to the main UCP repo
 
       - name: Push release to auto updater
-        if: ${{ inputs.pre_release }} == false
+        if: ${{ inputs.pre_release == false }}
         uses: exuanbo/actions-deploy-gist@v1
         with:
           token: '${{ secrets.UCP3_MACHINE_GIST_TOKEN }}'

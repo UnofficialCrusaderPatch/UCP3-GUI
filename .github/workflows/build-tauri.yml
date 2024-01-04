@@ -1,6 +1,17 @@
 name: 'Build & Release Tauri app'
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      release_message:
+        description: 'Message to write in the release'
+        required: true
+        type: string
+      pre_release:
+        description: 'Pre release?'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   build:
@@ -38,12 +49,21 @@ jobs:
           includeRelease: true
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
-          tagName: latest
-          releaseName: 'Latest version'
-          releaseBody: 'This version is the latest version of the GUI for UCP3.'
+          tagName: v__VERSION__
+          releaseName: 'UCP3-GUI: v__VERSION__'
+          releaseBody: '${{ inputs.release_message }}'
           releaseDraft: false
-          prerelease: false
+          prerelease: ${{ inputs.pre_release }}
           # TODO: include owner and repo to push to the main UCP repo
+
+      - name: Push release to auto updater
+        if: ${{ inputs.pre_release }} == false
+        uses: exuanbo/actions-deploy-gist@v1
+        with:
+          token: '${{ secrets.UCP3_MACHINE_GIST_TOKEN }}'
+          gist_id: 2a179c892f49448c85dfcc9e5f9a3c6b
+          file_path: latest.json
+          file_type: text
 
       # - name: create latest.json
       #   shell: pwsh

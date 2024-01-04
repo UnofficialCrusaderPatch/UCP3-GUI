@@ -95,7 +95,7 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/UnofficialCrusaderPatch/UCP3-GUI/releases/download/latest/latest.json"
+        "https://gist.githubusercontent.com/ucp3-machine/2a179c892f49448c85dfcc9e5f9a3c6b/raw/"
       ],
       "dialog": true,
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc5OUQwNEU2QjcxMUVFMTMKUldRVDdoRzM1Z1NkZVN3V2h2cXcwOTh6c1pTZFROS3BwM2UzM2lMTGFQajU3RzdLZ1gzc2RWS0kK",

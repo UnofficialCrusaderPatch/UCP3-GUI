@@ -6,10 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { AVAILABLE_EXTENSION_VERSIONS_ATOM } from 'function/extensions/state/state';
+import {
+  AVAILABLE_EXTENSION_VERSIONS_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+} from 'function/extensions/state/state';
 import { AvailableExtensionVersionsDictionary } from 'function/configuration/state';
-import { PREFERRED_EXTENSION_VERSION_ATOM } from 'function/extensions/state/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useSetOverlayContent } from 'components/overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
@@ -39,6 +41,7 @@ export function ExtensionElement(props: {
     clickCallback,
   } = props;
   const { name, version, author } = ext.definition;
+  const displayName = ext.definition['display-name'];
 
   const [t] = useTranslation(['gui-editor']);
 
@@ -162,7 +165,7 @@ export function ExtensionElement(props: {
             setOverlayContent(ExtensionViewer, { extension: ext });
           }}
         >
-          {name}
+          {displayName}
         </span>
       </div>
       {versionDropdown}

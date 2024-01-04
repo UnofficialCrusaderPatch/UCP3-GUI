@@ -472,6 +472,10 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
           } as ExtensionLoadResult;
         }
 
+        if (definition['display-name'] === undefined) {
+          definition['display-name'] = definition.name;
+        }
+
         const ext = {
           name,
           version,

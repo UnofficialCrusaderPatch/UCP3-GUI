@@ -22,11 +22,11 @@ import {
   UCP_STATE_ATOM,
 } from 'function/ucp-files/ucp-state';
 import ConfigEditor from './config-editor/config-editor';
-import ExtensionManager from './extension-manager/extension-manager';
 import Overview from './overview/overview';
 
 import Launch from './launch/launch';
 import { CURRENT_DISPLAYED_TAB, UITabs } from './tabs-state';
+import ExtensionManager from './extension-manager/extension-manager';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 

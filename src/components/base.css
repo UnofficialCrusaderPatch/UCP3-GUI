@@ -16,7 +16,7 @@
 }
 
 body {
-  font-family: 'DAYROM';
+  font-family: 'River Avenue';
   overflow: hidden;
 }
 
@@ -111,6 +111,7 @@ body {
   background-image: url('/src/assets/ucp3/parchment_bg.png');
   overflow-y: scroll;
   overflow-x: clip;
+  font-family: 'River Avenue';
 }
 
 .ornament-border {

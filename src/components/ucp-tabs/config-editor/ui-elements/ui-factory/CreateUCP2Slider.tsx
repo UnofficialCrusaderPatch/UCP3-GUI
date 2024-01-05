@@ -5,7 +5,7 @@ import { Form } from 'react-bootstrap';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
@@ -22,7 +22,6 @@ import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
-import { ConfigPopover } from './popover/ConfigPopover';
 
 const LOGGER = new Logger('CreateUCP2Slider.tsx');
 
@@ -136,25 +135,17 @@ function CreateUCP2Slider(args: {
       ? 0
       : (value.sliderValue as number) * factor,
   );
-
-  const [showPopover, setShowPopover] = useState(false);
-  const ref = useRef(null);
-
   return (
     <div
       className="sword-checkbox"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
-        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
-        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
-      ref={ref}
     >
-      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {headerElement}
       <div>
         <label className="form-check-label" htmlFor={`${url}-slider`}>

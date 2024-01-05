@@ -13,7 +13,7 @@ import {
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import { useCurrentGameFolder } from 'function/game-folder/state';
-import { MouseEvent, useMemo, useRef, useState } from 'react';
+import { MouseEvent, useMemo } from 'react';
 import Logger from 'util/scripts/logging';
 import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
 import { getStore } from 'hooks/jotai/base';
@@ -22,7 +22,6 @@ import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
 import { createStatusBarMessage } from './StatusBarMessage';
-import { ConfigPopover } from './popover/ConfigPopover';
 
 const LOGGER = new Logger('CreateFileInput.tsx');
 
@@ -174,23 +173,16 @@ function CreateFileInput(args: {
     });
   };
 
-  const [showPopover, setShowPopover] = useState(false);
-  const ref = useRef(null);
-
   return (
     <Form.Group
       className={`${className}`}
       onMouseEnter={() => {
-        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
-        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
-      ref={ref}
     >
-      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (
         <ConfigWarning
           text={configurationWarnings[url].text}

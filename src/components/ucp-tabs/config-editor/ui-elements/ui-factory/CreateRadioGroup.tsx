@@ -12,11 +12,9 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
-import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
-import { ConfigPopover } from './popover/ConfigPopover';
 
 // TODO is this deprecated?
 
@@ -86,24 +84,16 @@ function CreateRadioGroup(args: {
       </label>
     </div>
   ));
-
-  const [showPopover, setShowPopover] = useState(false);
-  const ref = useRef(null);
-
   return (
     <Form.Group
       className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
       onMouseEnter={() => {
-        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
-        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
-      ref={ref}
     >
-      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <p>{text}</p>
       <RadioGroup
         name={url}

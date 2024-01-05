@@ -2,7 +2,7 @@ import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
 import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
@@ -16,7 +16,6 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
-import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateSlider(args: {
   spec: DisplayConfigElement;
@@ -77,22 +76,15 @@ function CreateSlider(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const [showPopover, setShowPopover] = useState(false);
-  const ref = useRef(null);
-
   return (
     <div
       onMouseEnter={() => {
-        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
-        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
-      ref={ref}
     >
-      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <RangeSlider
         className="ucp-slider"
         min={min * factor}

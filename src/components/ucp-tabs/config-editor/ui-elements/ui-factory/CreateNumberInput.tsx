@@ -11,10 +11,12 @@ import {
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
 import { createStatusBarMessage } from './StatusBarMessage';
+import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateNumberInput(args: {
   spec: DisplayConfigElement;
@@ -63,16 +65,23 @@ function CreateNumberInput(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
   return (
     <Form.Group
       className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
       onMouseEnter={() => {
+        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
+        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
+      ref={ref}
     >
+      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (
         <ConfigWarning
           text={configurationWarnings[url].text}

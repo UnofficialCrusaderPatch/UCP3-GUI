@@ -1,9 +1,15 @@
 import { DisplayConfigElement, ChoiceContents } from 'config/ucp/common';
 
-import { Form } from 'react-bootstrap';
+import {
+  Button,
+  Form,
+  Overlay,
+  OverlayTrigger,
+  Popover,
+} from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
@@ -17,12 +23,15 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from 'function/configuration/state';
 import Logger from 'util/scripts/logging';
+import { BootstrapReboot } from 'react-bootstrap-icons';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+import { ConfigPopover } from './popover/ConfigPopover';
 
 const LOGGER = new Logger('CreateUCP2SliderChoice.tsx');
 
@@ -319,16 +328,23 @@ function CreateUCP2SliderChoice(args: {
     enabledOption = value.choice;
   }
 
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
   return (
     <div
       className="pb-3"
       onMouseEnter={() => {
+        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
+        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
+      ref={ref}
     >
+      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {headerElement}
       <p>{text}</p>
       <RadioGroup

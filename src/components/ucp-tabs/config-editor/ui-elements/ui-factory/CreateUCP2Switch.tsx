@@ -11,9 +11,11 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
+import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateUCP2Switch(args: {
   spec: DisplayConfigElement;
@@ -86,17 +88,24 @@ function CreateUCP2Switch(args: {
     </div>
   );
 
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
   return (
     <div
       className="col"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
+        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
+        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
+      ref={ref}
     >
+      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {headerElement}
       {text}
     </div>

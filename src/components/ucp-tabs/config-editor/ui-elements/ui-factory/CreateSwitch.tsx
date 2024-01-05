@@ -12,10 +12,12 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
+import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
 import { createStatusBarMessage } from './StatusBarMessage';
+import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateSwitch(args: {
   spec: DisplayConfigElement;
@@ -63,16 +65,23 @@ function CreateSwitch(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
   return (
     <div
       className={`d-flex align-items-baseline lh-sm my-1 ${className}`}
       onMouseEnter={() => {
+        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
+        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
+      ref={ref}
     >
+      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (
         <ConfigWarning
           text={configurationWarnings[url].text}

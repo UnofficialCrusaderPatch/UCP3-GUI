@@ -14,7 +14,7 @@ import {
 } from 'function/game-files/game-version-state';
 import { useRef, useState } from 'react';
 
-import { Button, Collapse } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import { createLaunchOptionFuncs } from './launch-options/launch-options';

@@ -4,15 +4,16 @@ import { useTranslation } from 'react-i18next';
 import translateIcon from 'assets/misc/translate.svg';
 import languages from 'localization/languages.json';
 import SvgHelper from 'components/general/svg-helper';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { LANGUAGE_ATOM } from 'function/gui-settings/settings';
 import { startTransition } from 'react';
+import { OVERLAY_ACTIVE_ATOM } from 'components/overlay/overlay';
 
 export default function LanguageSelect() {
   const [lang, setLang] = useAtom(LANGUAGE_ATOM);
+  const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
 
   const { t } = useTranslation('gui-landing');
-
   return (
     <div className="language-select-container">
       <div className="d-flex align-items-stretch">
@@ -34,6 +35,7 @@ export default function LanguageSelect() {
               });
             }
           }}
+          disabled={overlayActive}
         >
           {Object.entries(languages).map(([value, label]) => (
             <option key={value} value={value}>

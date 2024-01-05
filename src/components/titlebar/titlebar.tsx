@@ -14,37 +14,25 @@ import { getCurrentWindow } from 'tauri/tauri-window';
 import mainIcon from 'assets/ucp3.png';
 import { useTranslation } from 'react-i18next';
 import SvgHelper from 'components/general/svg-helper';
-import { useEffect, useState } from 'react';
-import {
-  registerTauriEventListener,
-  removeTauriEventListener,
-} from 'tauri/tauri-hooks';
+import { registerTauriEventListener } from 'tauri/tauri-hooks';
 import { TauriEvent } from '@tauri-apps/api/event';
+import { atom, useAtomValue } from 'jotai';
+import { getStore } from 'hooks/jotai/base';
+
+const TITLE_ATOM = atom(getCurrentWindow().title());
+const IS_MAX_ATOM = atom(false);
+
+registerTauriEventListener(TauriEvent.WINDOW_RESIZED, async () => {
+  getStore().set(IS_MAX_ATOM, await getCurrentWindow().isMaximized());
+});
 
 export default function Titlebar() {
-  const [title, setTitle] = useState('');
-  const [isMax, setIsMax] = useState(false);
+  const title = useAtomValue(TITLE_ATOM);
+  const isMax = useAtomValue(IS_MAX_ATOM);
 
   const [t] = useTranslation('gui-general');
 
   const currentWindow = getCurrentWindow();
-  useEffect(() => {
-    currentWindow.title().then((loadedTitle) => setTitle(loadedTitle));
-  }, []);
-
-  useEffect(() => {
-    const resizeFunc = async () => {
-      setIsMax(await currentWindow.isMaximized());
-    };
-    registerTauriEventListener(TauriEvent.WINDOW_RESIZED, resizeFunc);
-
-    // initial
-    currentWindow.isMaximized().then((isMaximized) => setIsMax(isMaximized));
-    return () => {
-      removeTauriEventListener(TauriEvent.WINDOW_RESIZED, resizeFunc);
-    };
-  }, [currentWindow]);
-
   return (
     <div data-tauri-drag-region className="titlebar">
       <div className="titlebar-icon" id="titlebar-icon">

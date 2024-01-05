@@ -15,12 +15,11 @@ import {
 } from 'function/game-folder/initialization';
 import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 
-import { DOES_UCP_FOLDER_EXIST_ATOM } from 'function/game-folder/state';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
-  UCP_STATE_ATOM,
 } from 'function/ucp-files/ucp-state';
+import { OVERLAY_ACTIVE_ATOM } from 'components/overlay/overlay';
 import ConfigEditor from './config-editor/config-editor';
 import Overview from './overview/overview';
 
@@ -37,8 +36,8 @@ const DISPLAY_CONFIG_TABS_ATOM = atom(
 export default function UcpTabs() {
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
 
+  const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
   const displayConfigTabs = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
-
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
@@ -56,7 +55,10 @@ export default function UcpTabs() {
   const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
 
   return (
-    <div className="ucp-tabs fs-7">
+    <div
+      className="ucp-tabs fs-7"
+      {...{ inert: overlayActive ? '' : undefined }} // inert is not yet supported by React
+    >
       <Tab.Container
         defaultActiveKey="overview"
         activeKey={currentTab}

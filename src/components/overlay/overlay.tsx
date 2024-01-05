@@ -1,8 +1,12 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import './overlay.css';
 
+import { useEffect, useRef } from 'react';
 import { atom, useAtom, useSetAtom } from 'jotai';
+import { getStore } from 'hooks/jotai/base';
 
-type OverlayConfig<T> = [OverlayContent<T>, T] | null;
+type OverlayConfig<T> = [OverlayContent<T>, boolean, boolean, T] | null;
 export type OverlayContentProps<T = undefined> = {
   closeFunc: () => void;
   args: T;
@@ -11,33 +15,69 @@ export type OverlayContent<T = undefined> = (
   props: OverlayContentProps<T>,
 ) => JSX.Element;
 
-const OVERLAY_CONTENT_ATOM = atom<unknown>(null);
+const OVERLAY_CONTENT_ATOM = atom<OverlayConfig<any>>(null);
 
-export function useSetOverlayContent<T = undefined>(): (
+export const OVERLAY_ACTIVE_ATOM = atom(false);
+
+export function setOverlayContent<T>(
   overlayContent: OverlayContent<T>,
+  allowEsc: boolean = false, // if the user can close the overview with ESC, potentially ignoring intern listeners
+  allowOutsideClick: boolean = false, // if the user can close the overview by clicking on the background, potentially ignoring intern listeners
   args?: T,
-) => void {
-  const setOverlayContent = useSetAtom(OVERLAY_CONTENT_ATOM);
-
-  // the atoms setters expect supplier if functions, so this needs a new function
-  return (newOverlayContent, args?) =>
-    setOverlayContent(() => [newOverlayContent, args]);
+) {
+  getStore().set(OVERLAY_CONTENT_ATOM, [
+    overlayContent,
+    allowEsc,
+    allowOutsideClick,
+    args,
+  ]);
 }
 
-export function Overlay<T>() {
-  const [unknownOverlayConfig, setOverlayContent] =
-    useAtom(OVERLAY_CONTENT_ATOM);
-  const overlayConfig = unknownOverlayConfig as OverlayConfig<T>;
+export function Overlay() {
+  const [overlayConfig, setOverlayContentAtom] = useAtom(OVERLAY_CONTENT_ATOM);
+  const setOverlayActive = useSetAtom(OVERLAY_ACTIVE_ATOM);
 
-  const closeFunc = () => setOverlayContent(null);
+  const overlayDiv = useRef<HTMLDivElement>(null);
+  const closeFunc = () => setOverlayContentAtom(null);
+
+  const overlayActive = !!overlayConfig;
+  useEffect(() => {
+    setOverlayActive(overlayActive);
+    if (overlayActive) {
+      overlayDiv.current?.focus();
+    }
+  });
 
   // no overlay
-  if (!overlayConfig) {
+  if (!overlayActive) {
     return null;
   }
-  const [OverlayContent, args] = overlayConfig;
+
+  const [OverlayContent, allowEsc, allowOutsideClick, args] = overlayConfig;
   return (
-    <div className="overlay">
+    <div
+      ref={overlayDiv}
+      className="overlay"
+      tabIndex={allowEsc ? -1 : undefined}
+      onKeyDown={
+        allowEsc
+          ? (event) => {
+              if (event.key === 'Escape') {
+                closeFunc();
+              }
+            }
+          : undefined
+      }
+      onClick={
+        allowOutsideClick
+          ? (event) => {
+              if (event.currentTarget === event.target) {
+                closeFunc();
+              }
+            }
+          : undefined
+      }
+    >
       <OverlayContent closeFunc={closeFunc} args={args} />
     </div>
   );

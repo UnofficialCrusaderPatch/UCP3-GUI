@@ -9,7 +9,7 @@ import {
   SandboxSource,
   SandboxSourcePaths,
 } from 'components/sandbox-menu/sandbox-menu';
-import { useSetOverlayContent } from 'components/overlay/overlay';
+import { setOverlayContent } from 'components/overlay/overlay';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
@@ -77,7 +77,6 @@ function CreateCustomMenu(args: {
 
   const [t, i18n] = useTranslation(['gui-editor']);
   const [activatingMenu, setActivatingMenu] = useState(false);
-  const setOverlayContent = useSetOverlayContent<SandboxArgs>();
 
   const { spec, disabled } = args;
   const { url, text, enabled, header, extension } = spec;
@@ -115,7 +114,7 @@ function CreateCustomMenu(args: {
           className="ucp-button sandbox-menu-button"
           onClick={async () => {
             setActivatingMenu(true);
-            setOverlayContent(SandboxMenu, {
+            setOverlayContent<SandboxArgs>(SandboxMenu, false, false, {
               baseUrl: url,
               source: await receiveSources(extension, sourcePaths),
               localization: extension.locales[i18n.language] ?? {},

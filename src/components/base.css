@@ -5,6 +5,10 @@
 
 @import './scrollbar.css';
 
+body {
+  overflow: hidden;
+}
+
 .fs-7 {
   font-size: 0.9rem;
 }
@@ -94,7 +98,8 @@
 
 .parchment-box {
   background-image: url('/src/assets/ucp3/parchment_bg.png');
-  overflow: hidden auto;
+  overflow-y: scroll;
+  overflow-x: clip;
 }
 
 .ornament-border {

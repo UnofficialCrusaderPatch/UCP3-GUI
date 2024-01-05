@@ -231,10 +231,6 @@ input[type="checkbox"]:disabled + .label:before {
   display: block;
   position: relative;
   padding-left: 32px;
-  font:
-    14px/20px 'Open Sans',
-    Arial,
-    sans-serif;
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;

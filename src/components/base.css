@@ -10,6 +10,11 @@
   src: url('src/assets/ucp3/DAYROM__.ttf');
 }
 
+@font-face {
+  font-family: 'River Avenue';
+  src: url('src/assets/ucp3/riverave.ttf');
+}
+
 body {
   font-family: 'DAYROM';
   overflow: hidden;

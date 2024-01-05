@@ -1,9 +1,3 @@
-.language-select-container {
-  position: absolute;
-  top: 8px;
-  right: 12px;
-}
-
 .language-select-container select {
   font-size: 16px;
   padding: 4px 16px;

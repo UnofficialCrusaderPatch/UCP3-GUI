@@ -1,3 +1,7 @@
+.language-select-container {
+  margin-left: auto !important;
+}
+
 .language-select-container select {
   font-size: 16px;
   padding: 4px 16px;

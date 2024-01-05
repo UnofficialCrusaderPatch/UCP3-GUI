@@ -15,7 +15,7 @@ export default function LanguageSelect() {
 
   const { t } = useTranslation('gui-landing');
   return (
-    <div className="language-select-container ms-auto">
+    <div className="language-select-container">
       <div className="d-flex align-items-stretch">
         <div className="d-flex dark-dropdown ps-3 pe-2">
           <SvgHelper

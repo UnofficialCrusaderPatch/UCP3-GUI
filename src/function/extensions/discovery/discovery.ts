@@ -439,6 +439,18 @@ const validateDefinition = async (eh: ExtensionHandle) => {
     (definition as unknown as { depends: string[] }).depends ||
     [];
 
+  if (!(definition.dependencies instanceof Array)) {
+    return {
+      status: 'error',
+      messages: [
+        `Dependencies definition of extension "${name}-${version}" is not an array of strings: ${JSON.stringify(
+          definition.dependencies,
+        )}`,
+      ],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  }
+
   return {
     status: warnings.length === 0 ? 'ok' : 'warning',
     messages: warnings,

@@ -7,6 +7,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from 'function/configuration/state';
+import { CREATOR_MODE_ATOM } from 'function/gui-settings/settings';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { MutableRefObject } from 'react';
 import { Form, Overlay } from 'react-bootstrap';
@@ -36,6 +37,8 @@ export function ConfigPopover(props: {
   const { [url]: defaultValue } = configurationDefaults;
 
   const qualifier = qualifiers[url];
+
+  const creatorMode = useAtomValue(CREATOR_MODE_ATOM);
 
   return (
     <Overlay
@@ -80,22 +83,30 @@ export function ConfigPopover(props: {
             ...prps.style,
           }}
         >
-          <Form>
-            <Form.Switch
-              onChange={() => {
-                setQualifier({
-                  type: 'set-multiple',
-                  value: Object.fromEntries([
-                    [url, qualifier === 'required' ? 'suggested' : 'required'],
-                  ]),
-                });
-              }}
-              checked={qualifier === 'required'}
-              label={qualifier === 'required' ? 'Required' : 'Suggested'}
-              id="popover-qualifier-button-test"
-            />
-          </Form>
-          <span className="ms-1 me-1"> |</span>
+          {creatorMode ? (
+            <>
+              <Form>
+                <Form.Switch
+                  onChange={() => {
+                    setQualifier({
+                      type: 'set-multiple',
+                      value: Object.fromEntries([
+                        [
+                          url,
+                          qualifier === 'required' ? 'suggested' : 'required',
+                        ],
+                      ]),
+                    });
+                  }}
+                  checked={qualifier === 'required'}
+                  label={qualifier === 'required' ? 'Required' : 'Suggested'}
+                  id="popover-qualifier-button-test"
+                />
+              </Form>
+              <span className="ms-1 me-1"> |</span>
+            </>
+          ) : undefined}
+
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,
       jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
           <span

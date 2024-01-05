@@ -9,6 +9,7 @@ export const SHOW_ALL_EXTENSIONS_ATOM = atomWithStorage(
   true,
 );
 export const ADVANCED_MODE_ATOM = atomWithStorage('guiAdvancedMode', false);
+export const CREATOR_MODE_ATOM = atomWithStorage('guiCreatorMode', false);
 export const RECENT_FOLDERS_ATOM = atomWithStorage(
   'guiRecentFolders',
   [] as string[],

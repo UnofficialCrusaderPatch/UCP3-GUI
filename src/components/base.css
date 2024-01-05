@@ -5,7 +5,13 @@
 
 @import './scrollbar.css';
 
+@font-face {
+  font-family: 'DAYROM';
+  src: url('src/assets/ucp3/DAYROM__.ttf');
+}
+
 body {
+  font-family: 'DAYROM';
   overflow: hidden;
 }
 

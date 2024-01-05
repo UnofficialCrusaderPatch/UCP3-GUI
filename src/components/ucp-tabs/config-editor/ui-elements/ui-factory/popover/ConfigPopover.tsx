@@ -11,6 +11,8 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { MutableRefObject } from 'react';
 import { Form, Overlay } from 'react-bootstrap';
 
+/** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
+
 // eslint-disable-next-line import/prefer-default-export
 export function ConfigPopover(props: {
   url: string;
@@ -35,33 +37,31 @@ export function ConfigPopover(props: {
 
   const qualifier = qualifiers[url];
 
-  console.log('render', show, theRef, url);
-
   return (
     <Overlay
       show={show}
       target={theRef.current}
       placement="top-end"
       container={theRef}
-      // popperConfig={{
-      //   strategy: 'fixed',
-      //   // https://popper.js.org/docs/v2/modifiers/prevent-overflow/
-      //   modifiers: [
-      //     {
-      //       name: 'preventOverflow',
-      //       options: {
-      //         mainAxis: true, // true
-      //         altAxis: false, // false
-      //         padding: 0, // 0
-      //         boundary: 'clippingParents', // "clippingParents"
-      //         altBoundary: false, // false
-      //         rootBoundary: 'viewport', // "viewport"
-      //         tether: true, // true
-      //         tetherOffset: 0, // 0
-      //       },
-      //     },
-      //   ],
-      // }}
+      popperConfig={{
+        strategy: 'fixed',
+        // https://popper.js.org/docs/v2/modifiers/prevent-overflow/
+        modifiers: [
+          {
+            name: 'preventOverflow',
+            options: {
+              mainAxis: true, // true
+              altAxis: false, // false
+              padding: 0, // 0
+              boundary: 'clippingParents', // "clippingParents"
+              altBoundary: false, // false
+              rootBoundary: 'viewport', // "viewport"
+              tether: true, // true
+              tetherOffset: 0, // 0
+            },
+          },
+        ],
+      }}
     >
       {({
         placement: _placement,

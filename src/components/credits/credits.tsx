@@ -1,6 +1,7 @@
 import './credits.css';
 
 import {
+  OVERLAY_ACTIVE_ATOM,
   OverlayContentProps,
   useSetOverlayContent,
 } from 'components/overlay/overlay';
@@ -10,8 +11,9 @@ import Markdown from 'react-markdown';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-// eslint-disable-next-line import/no-extraneous-dependencies
 import rehypeExternalLinks from 'rehype-external-links';
+
+import { useAtomValue } from 'jotai';
 
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.md?raw';
@@ -49,6 +51,7 @@ function Credits(props: OverlayContentProps) {
 
 export default function CreditsButton() {
   const setOverlayContent = useSetOverlayContent();
+  const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
 
   const [t] = useTranslation(['gui-landing']);
   return (
@@ -56,6 +59,7 @@ export default function CreditsButton() {
       type="button"
       className="credits-button"
       onClick={() => setOverlayContent(Credits)}
+      disabled={overlayActive}
     >
       {t('gui-landing:credits.open')}
     </button>

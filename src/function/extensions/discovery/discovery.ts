@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import type { FileEntry } from '@tauri-apps/api/fs';
+import { exists, type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
 import { readDir } from 'tauri/tauri-files';
@@ -183,6 +183,8 @@ function collectConfigEntries(
 }
 
 async function getExtensionHandles(ucpFolder: string) {
+  ConsoleLogger.info('Getting extension handles');
+
   const moduleDir = `${ucpFolder}/modules/`;
   const readModuleDirResult = await readDir(moduleDir);
 
@@ -431,6 +433,10 @@ const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
 const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
   LOGGER.msg('Discovering extensions').info();
 
+  if (!(await exists(`${gameFolder}/ucp`))) {
+    return [];
+  }
+
   const ehs = await getExtensionHandles(`${gameFolder}/ucp`);
 
   const extensionDiscoveryResults = await Promise.all(
@@ -470,6 +476,10 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
             content: undefined,
             handle: eh,
           } as ExtensionLoadResult;
+        }
+
+        if (definition['display-name'] === undefined) {
+          definition['display-name'] = definition.name;
         }
 
         const ext = {

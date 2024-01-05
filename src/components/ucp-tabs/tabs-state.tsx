@@ -1,0 +1,5 @@
+import { atom } from 'jotai';
+
+export type UITabs = 'overview' | 'extensions' | 'config' | 'launch';
+
+export const CURRENT_DISPLAYED_TAB = atom<UITabs>('overview');

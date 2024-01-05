@@ -10,7 +10,9 @@ function ExportAsPluginButton(
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading
     <button className="ucp-button ucp-button-variant" type="button" {...props}>
-      <div className="ucp-button-variant-button-text">Create plugin</div>
+      <div className="ucp-button-variant-button-text">
+        {t('gui-editor:plugin.create')}
+      </div>
     </button>
   );
 }

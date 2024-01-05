@@ -41,6 +41,7 @@ export function ExtensionElement(props: {
     clickCallback,
   } = props;
   const { name, version, author } = ext.definition;
+  const displayName = ext.definition['display-name'];
 
   const [t] = useTranslation(['gui-editor']);
 
@@ -167,7 +168,7 @@ export function ExtensionElement(props: {
             );
           }}
         >
-          {name}
+          {displayName}
         </span>
       </div>
       {versionDropdown}

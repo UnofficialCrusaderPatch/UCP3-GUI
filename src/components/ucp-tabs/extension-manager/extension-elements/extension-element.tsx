@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { Extension } from 'config/ucp/common';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { AVAILABLE_EXTENSION_VERSIONS_ATOM } from 'function/extensions/state/state';
+import {
+  AVAILABLE_EXTENSION_VERSIONS_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+} from 'function/extensions/state/state';
 import { AvailableExtensionVersionsDictionary } from 'function/configuration/state';
-import { PREFERRED_EXTENSION_VERSION_ATOM } from 'function/extensions/state/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { useSetOverlayContent } from 'components/overlay/overlay';
+import { setOverlayContent } from 'components/overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
 import moveExtensionClickCallback from './MoveExtensionClickCallback';
@@ -149,8 +151,6 @@ export function ExtensionElement(props: {
     </div>
   );
 
-  const setOverlayContent = useSetOverlayContent<ExtensionViewerProps>();
-
   return (
     <div key={`${name}-${version}-${author}`} className="extension-element">
       {disableButton}
@@ -159,7 +159,12 @@ export function ExtensionElement(props: {
         <span
           className="extension-name-box__name"
           onClick={() => {
-            setOverlayContent(ExtensionViewer, { extension: ext });
+            setOverlayContent<ExtensionViewerProps>(
+              ExtensionViewer,
+              true,
+              true,
+              { extension: ext },
+            );
           }}
         >
           {name}

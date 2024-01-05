@@ -3,7 +3,7 @@ import './credits.css';
 import {
   OVERLAY_ACTIVE_ATOM,
   OverlayContentProps,
-  useSetOverlayContent,
+  setOverlayContent,
 } from 'components/overlay/overlay';
 import { useTranslation } from 'react-i18next';
 
@@ -50,7 +50,6 @@ function Credits(props: OverlayContentProps) {
 }
 
 export default function CreditsButton() {
-  const setOverlayContent = useSetOverlayContent();
   const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
 
   const [t] = useTranslation(['gui-landing']);
@@ -58,7 +57,7 @@ export default function CreditsButton() {
     <button
       type="button"
       className="credits-button"
-      onClick={() => setOverlayContent(Credits)}
+      onClick={() => setOverlayContent(Credits, true, true)}
       disabled={overlayActive}
     >
       {t('gui-landing:credits.open')}

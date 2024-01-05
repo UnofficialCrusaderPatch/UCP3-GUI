@@ -19,6 +19,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  pointer-events: none;
+}
+
+.credits-container>*{
+  pointer-events: auto;
 }
 
 .credits-title {

@@ -7,12 +7,12 @@
 
 @font-face {
   font-family: 'DAYROM';
-  src: url('src/assets/ucp3/DAYROM__.ttf');
+  src: url('src/assets/ucp3/fonts/DAYROM__.ttf');
 }
 
 @font-face {
   font-family: 'River Avenue';
-  src: url('src/assets/ucp3/riverave.ttf');
+  src: url('src/assets/ucp3/fonts/riverave.ttf');
 }
 
 body {

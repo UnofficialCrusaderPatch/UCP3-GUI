@@ -22,7 +22,8 @@
 
 .config-navbar__header {
   text-decoration: none;
-  color: var(--bs-heading-color); /* bootstrap var, replace */
+  color: var(--bs-heading-color);
+  /* bootstrap var, replace */
 }
 
 .config-navbar__nav {
@@ -30,7 +31,7 @@
   width: 100%;
 }
 
-.config-navbar>.config-navbar__nav {
+.config-navbar > .config-navbar__nav {
   overflow: auto;
   background-color: var(--ucp-main-grey-alpha);
   flex-grow: 1;
@@ -67,7 +68,7 @@
   margin-left: auto;
 }
 
-.config-editor__buttons--user-override-switch>.user-override-switch {
+.config-editor__buttons--user-override-switch > .user-override-switch {
   margin: 0 5px 0 0;
 }
 
@@ -75,7 +76,7 @@
   margin-left: auto;
 }
 
-.config-editor__buttons--apply-button>button {
+.config-editor__buttons--apply-button > button {
   height: 100%;
 }
 
@@ -105,7 +106,7 @@
   opacity: 0.5;
 }
 
-.label-disabled>label {
+.label-disabled > label {
   opacity: 0.5;
 }
 
@@ -195,7 +196,8 @@
 /* @import '~bootstrap'; */
 
 /* Hide the default switch appearance */
-input[type="checkbox"] {}
+input[type='checkbox'] {
+}
 
 /* Style the label element to show the switch image
 .switch-label {
@@ -221,39 +223,43 @@ input[type="checkbox"]:disabled + .label:before {
 */
 
 /** sword-checkbox **/
-.sword-checkbox input[type="checkbox"],
-.sword-checkbox input[type="radio"] {
+.sword-checkbox input[type='checkbox'],
+.sword-checkbox input[type='radio'] {
   display: none;
 }
 
-.sword-checkbox input[type="checkbox"]+label,
-.sword-checkbox input[type="radio"]+label {
+.sword-checkbox input[type='checkbox'] + label,
+.sword-checkbox input[type='radio'] + label {
   display: block;
   position: relative;
   padding-left: 32px;
-  font: 14px/20px "Open Sans", Arial, sans-serif;
+  font:
+    14px/20px 'Open Sans',
+    Arial,
+    sans-serif;
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
 }
 
-.sword-checkbox input[type="checkbox"]:hover+label:hover,
-.sword-checkbox input[type="radio"]:hover+label:hover {
-  cursor: default;
+.sword-checkbox input[type='checkbox']:hover + label:hover,
+.sword-checkbox input[type='radio']:hover + label:hover {
+  cursor: pointer;
 }
 
-.sword-checkbox input[type="checkbox"]:hover+label:before,
-.sword-checkbox input[type="radio"]:hover+label:before {}
+.sword-checkbox input[type='checkbox']:hover + label:before,
+.sword-checkbox input[type='radio']:hover + label:before {
+}
 
-.sword-checkbox input[type="checkbox"]+label:last-child,
-.sword-checkbox input[type="radio"]+label:last-child {
+.sword-checkbox input[type='checkbox'] + label:last-child,
+.sword-checkbox input[type='radio'] + label:last-child {
   margin-bottom: 0;
 }
 
-.sword-checkbox input[type="checkbox"]+label:before,
-.sword-checkbox input[type="radio"]+label:before {
-  content: "";
+.sword-checkbox input[type='checkbox'] + label:before,
+.sword-checkbox input[type='radio'] + label:before {
+  content: '';
   display: block;
   background-image: url('/src/assets/ucp3/checkbox_empty.png');
   background-size: cover;
@@ -261,29 +267,30 @@ input[type="checkbox"]:disabled + .label:before {
   height: 19px;
 
   position: absolute;
-  left: 0;
-  top: 0;
-  -webkit-transition: all 0.1s, background 0.1s ease-in-out;
-  transition: all 0.1s, background 0.1s ease-in-out;
+  left: 0px;
+  top: -3px;
+  -webkit-transition:
+    all 0.1s,
+    background 0.1s ease-in-out;
+  transition:
+    all 0.1s,
+    background 0.1s ease-in-out;
 }
 
-.sword-checkbox input[type="checkbox"]:checked+label:before,
-.sword-checkbox input[type="radio"]:checked+label:before {
+.sword-checkbox input[type='checkbox']:checked + label:before,
+.sword-checkbox input[type='radio']:checked + label:before {
   background-image: url('/src/assets/ucp3/checkbox_full.png');
 }
 
 /* Styles for disabled input elements */
-.sword-checkbox input[type="checkbox"]:disabled+label,
-.sword-checkbox input[type="radio"]:disabled+label {
+.sword-checkbox input[type='checkbox']:disabled + label,
+.sword-checkbox input[type='radio']:disabled + label {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.sword-checkbox input[type="checkbox"]:disabled+label:before,
-.sword-checkbox input[type="radio"]:disabled+label:before {}
-
-.ucp-slider:disabled {
-  opacity: 0.5;
+.sword-checkbox input[type='checkbox']:disabled + label:before,
+.sword-checkbox input[type='radio']:disabled + label:before {
 }
 
 /** sword-checkbox end **/
@@ -294,7 +301,6 @@ input[type="checkbox"]:disabled + .label:before {
   margin-bottom: 3px;
   margin-top: 2px;
 }
-
 
 /** slider **/
 .ucp-slider {
@@ -307,26 +313,26 @@ input[type="checkbox"]:disabled + .label:before {
   /* Specified height */
 
   /* TODO add the slider background with a border image */
-  background-image:
-    url('/src/assets/ucp3/slider_bg_left.png'),
+  background-image: url('/src/assets/ucp3/slider_bg_left.png'),
     url('/src/assets/ucp3/slider_bg_right.png'),
     url('/src/assets/ucp3/slider_bg_middle.png');
   background-position:
     left top,
     right top,
     center top;
-  background-repeat:
-    no-repeat,
-    no-repeat,
-    repeat-x;
+  background-repeat: no-repeat, no-repeat, repeat-x;
   height: 11px;
   border-image-slice: 18 19 0 18 fill !important;
   border-image-width: 20px 20px 0px 20px !important;
   border-image-outset: 0px 0px 0px 0px !important;
 
   outline: none;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+}
+
+.ucp-slider:disabled {
+  opacity: 0.5;
 }
 
 /* chrome, safari (webkit based) */
@@ -364,18 +370,14 @@ input[type="checkbox"]:disabled + .label:before {
 
 /* Slider track styles */
 .ucp-slider .slider-track {
-  background-image:
-    url('/src/assets/ucp3/slider_bg_left.png'),
+  background-image: url('/src/assets/ucp3/slider_bg_left.png'),
     url('/src/assets/ucp3/slider_bg_right.png'),
     url('/src/assets/ucp3/slider_bg_middle.png');
   background-position:
     left top,
     right top,
     center top;
-  background-repeat:
-    no-repeat,
-    no-repeat,
-    repeat-x;
+  background-repeat: no-repeat, no-repeat, repeat-x;
   height: 11px;
 }
 
@@ -393,8 +395,5 @@ input[type="checkbox"]:disabled + .label:before {
 .ucp-slider .slider-thumb:focus {
   background-image: url('/src/assets/ucp3/slider.png');
 }
-
-
-
 
 /** slider end **/

@@ -12,9 +12,11 @@ import {
 } from 'function/configuration/state';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Logger from 'util/scripts/logging';
+import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+import { ConfigPopover } from './popover/ConfigPopover';
 
 const LOGGER = new Logger('CreateUCP2RadioGroup.tsx');
 
@@ -118,18 +120,26 @@ function CreateUCP2RadioGroup(args: {
       </div>
     );
   }
+
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
   return (
     <Accordion
       bsPrefix="ucp-accordion"
       className="col"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
+        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
+        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
+      ref={ref}
     >
+      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <Accordion.Header as="div">{headerElement}</Accordion.Header>
       <Accordion.Body>
         <div>

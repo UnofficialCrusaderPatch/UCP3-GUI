@@ -29,6 +29,8 @@ import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
 import { useCurrentGameFolder } from 'function/game-folder/state';
 import { makeToast } from 'components/modals/toasts/ToastsDisplay';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+import { GearFill, Gear } from 'react-bootstrap-icons';
+import { CREATOR_MODE_ATOM } from 'function/gui-settings/settings';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';
@@ -88,6 +90,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
   }, [activeExtensions, t]);
 
   const { nav, content } = UIFactory.CreateSections({ readonly });
+
+  const [guiCreatorMode, setGuiCreatorMode] = useAtom(CREATOR_MODE_ATOM);
 
   return (
     <div className="config-editor">
@@ -153,93 +157,107 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   setStatusBarMessage(undefined);
                 }}
               />
-              <ExportAsPluginButton
-                onClick={async () => {
-                  try {
-                    const result = await serializeConfig(
-                      configuration,
-                      file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-                      configurationTouched,
-                      extensionsState.explicitlyActivatedExtensions,
-                      activeExtensions,
-                      configurationQualifier,
-                    );
-                    const trimmedResult = {
-                      'config-sparse': {
-                        modules: result['config-sparse'].modules,
-                        plugins: result['config-sparse'].plugins,
-                      },
-                      'specification-version': result['specification-version'],
-                    } as UCP3SerializedPluginConfig;
+              <button
+                className="ucp-button ucp-button-variant"
+                type="button"
+                onClick={() => {
+                  setGuiCreatorMode(!guiCreatorMode);
+                }}
+              >
+                <div className="ucp-button-variant-button-text">
+                  <span className="mx-1">
+                    {guiCreatorMode ? <GearFill /> : <Gear />}
+                  </span>
+                  <span className="mx-1">
+                    {t('gui-editor:config.mode.creator')}
+                  </span>
+                </div>
+              </button>
+              {guiCreatorMode ? (
+                <ExportAsPluginButton
+                  onClick={async () => {
+                    try {
+                      const result = await serializeConfig(
+                        configuration,
+                        file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
+                        configurationTouched,
+                        extensionsState.explicitlyActivatedExtensions,
+                        activeExtensions,
+                        configurationQualifier,
+                      );
+                      const trimmedResult = {
+                        'config-sparse': {
+                          modules: result['config-sparse'].modules,
+                          plugins: result['config-sparse'].plugins,
+                        },
+                        'specification-version':
+                          result['specification-version'],
+                      } as UCP3SerializedPluginConfig;
 
-                    ConsoleLogger.debug(trimmedResult);
+                      ConsoleLogger.debug(trimmedResult);
 
-                    const r = await showModalCreatePlugin({
-                      title: 'Create plugin',
-                      message: '',
-                    });
-
-                    ConsoleLogger.debug(r);
-
-                    if (r === undefined) return;
-
-                    // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
-
-                    const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
-
-                    if (await exists(pluginDir)) {
-                      await showModalOk({
-                        message: `directory already exists: ${pluginDir}`,
-                        title: 'cannot create plugin',
+                      const r = await showModalCreatePlugin({
+                        title: 'Create plugin',
+                        message: '',
                       });
-                      return;
+
+                      ConsoleLogger.debug(r);
+
+                      if (r === undefined) return;
+
+                      // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+
+                      const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
+
+                      if (await exists(pluginDir)) {
+                        await showModalOk({
+                          message: `directory already exists: ${pluginDir}`,
+                          title: 'cannot create plugin',
+                        });
+                        return;
+                      }
+
+                      await createDir(pluginDir);
+
+                      await writeTextFile(
+                        `${pluginDir}/definition.yml`,
+                        toYaml({
+                          name: r.pluginName,
+                          author: r.pluginAuthor,
+                          version: r.pluginVersion,
+                          dependencies: result['config-sparse']['load-order'],
+                        }),
+                      );
+
+                      await writeTextFile(
+                        `${pluginDir}/config.yml`,
+                        toYaml(trimmedResult),
+                      );
+
+                      const confirmed = await showModalOkCancel({
+                        title: t('gui-general:require.reload.title'),
+                        message: t('gui-editor:overview.require.reload.text'),
+                      });
+
+                      if (confirmed) {
+                        reloadCurrentWindow();
+                      }
+                    } catch (e: any) {
+                      await showModalOk({
+                        title: 'ERROR',
+                        message: e.toString(),
+                      });
                     }
-
-                    await createDir(pluginDir);
-
-                    await writeTextFile(
-                      `${pluginDir}/definition.yml`,
-                      toYaml({
-                        name: r.pluginName,
-                        author: r.pluginAuthor,
-                        version: r.pluginVersion,
-                        dependencies: result['config-sparse']['load-order'],
-                      }),
-                    );
-
-                    await writeTextFile(
-                      `${pluginDir}/config.yml`,
-                      toYaml(trimmedResult),
-                    );
-
-                    const confirmed = await showModalOkCancel({
-                      title: t('gui-general:require.reload.title'),
-                      message: t('gui-editor:overview.require.reload.text'),
-                    });
-
-                    if (confirmed) {
-                      reloadCurrentWindow();
-                    }
-                  } catch (e: any) {
-                    await showModalOk({
-                      title: 'ERROR',
-                      message: e.toString(),
-                    });
-                  }
-                }}
-                onMouseEnter={() => {
-                  setStatusBarMessage(t('gui-editor:config.tooltip.plugin'));
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              />
-              <div className="d-none config-editor__buttons--user-override-switch">
-                <Form.Switch
-                  label={t('gui-editor:config.allow.override')}
-                  className="user-override-switch"
+                  }}
+                  onMouseEnter={() => {
+                    setStatusBarMessage(t('gui-editor:config.tooltip.plugin'));
+                  }}
+                  onMouseLeave={() => {
+                    setStatusBarMessage(undefined);
+                  }}
                 />
-              </div>
+              ) : undefined}
+
               <div className="config-editor__buttons--apply-button">
                 <ApplyButton
                   onClick={async () => {

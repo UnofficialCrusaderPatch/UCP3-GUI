@@ -111,11 +111,9 @@
 }
 
 #config-sections {
-  overflow-y: scroll;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow: clip;
 }
 
 .icons-button {
@@ -292,6 +290,7 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type='checkbox']:disabled + label:before,
 .sword-checkbox input[type='radio']:disabled + label:before {
 }
+
 
 /** sword-checkbox end **/
 

@@ -1,9 +1,18 @@
 import { DisplayConfigElement, ChoiceContents } from 'config/ucp/common';
 
-import { Accordion, Form } from 'react-bootstrap';
+import {
+  Accordion, 
+  Form,
+  Button,
+  Form,
+  Overlay,
+  OverlayTrigger,
+  Popover,
+} from 'react-bootstrap';
+
 import { RadioGroup, Radio } from 'react-radio-group';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
@@ -17,12 +26,15 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from 'function/configuration/state';
 import Logger from 'util/scripts/logging';
+import { BootstrapReboot } from 'react-bootstrap-icons';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+import { ConfigPopover } from './popover/ConfigPopover';
 
 import './UCPAccordion.css';
 
@@ -321,16 +333,23 @@ function CreateUCP2SliderChoice(args: {
     enabledOption = value.choice;
   }
 
+  const [showPopover, setShowPopover] = useState(false);
+  const ref = useRef(null);
+
   return (
     <Accordion
       bsPrefix="ucp-accordion"
       onMouseEnter={() => {
+        setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
       }}
       onMouseLeave={() => {
+        setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
+      ref={ref}
     >
+      <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <Accordion.Header as="div">{headerElement}</Accordion.Header>
       <Accordion.Body>
         <p>{text}</p>

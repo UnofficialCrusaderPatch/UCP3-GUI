@@ -1,6 +1,6 @@
-import { Extension } from 'config/ucp/common';
-import { serializeUCPConfig } from 'config/ucp/config-files';
-import { ConfigurationQualifier } from 'function/global/types';
+import { Extension } from '../../../config/ucp/common';
+import { serializeUCPConfig } from '../../../config/ucp/config-files';
+import { ConfigurationQualifier } from '../../../function/global/types';
 
 function serializeConfig(
   configuration: { [key: string]: unknown },

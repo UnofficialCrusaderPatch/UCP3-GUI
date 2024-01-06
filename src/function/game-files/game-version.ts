@@ -1,4 +1,4 @@
-import Option from 'util/structs/option';
+import Option from '../../util/structs/option';
 
 import VERSIONS_JSON from './game-version.json';
 

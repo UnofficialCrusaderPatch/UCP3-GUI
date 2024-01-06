@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { ReactNode, useState } from 'react';
-import { useTimeout } from 'hooks/general/util';
-import Result from 'util/structs/result';
+import { useTimeout } from '../../hooks/general/util';
+import Result from '../../util/structs/result';
 
 interface ButtonStateValues {
   idle: string;

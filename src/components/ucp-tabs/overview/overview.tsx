@@ -1,25 +1,27 @@
 import './overview.css';
 
-import StateButton from 'components/general/state-button';
-import { checkForGUIUpdates } from 'function/download/gui-update';
-import { installUCPFromZip } from 'function/download/ucp-download-handling';
+import { useAtomValue } from 'jotai';
+import { ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { checkForGUIUpdates } from '../../../function/download/gui-update';
+import { installUCPFromZip } from '../../../function/download/ucp-download-handling';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
   activateUCP,
   deactivateUCP,
-} from 'function/ucp-files/ucp-state';
-import { reloadCurrentWindow } from 'function/window-actions';
-import { ReactNode, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { openFileDialog } from 'tauri/tauri-dialog';
-import Result from 'util/structs/result';
-import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
-import { showModalOk } from 'components/modals/modal-ok';
-import { useAtomValue } from 'jotai';
-import { useCurrentGameFolder } from 'function/game-folder/state';
-import { makeToast } from 'components/modals/toasts/ToastsDisplay';
+} from '../../../function/ucp-files/ucp-state';
+import { reloadCurrentWindow } from '../../../function/window-actions';
+
+import { openFileDialog } from '../../../tauri/tauri-dialog';
+import Result from '../../../util/structs/result';
+import { showModalOkCancel } from '../../modals/modal-ok-cancel';
+import { showModalOk } from '../../modals/modal-ok';
+import { useCurrentGameFolder } from '../../../function/game-folder/state';
+import { makeToast } from '../../modals/toasts/ToastsDisplay';
 import RecentFolders from './recent-folders';
+import StateButton from '../../general/state-button';
 
 function createToastHandler(title: string) {
   return (body: ReactNode) => {

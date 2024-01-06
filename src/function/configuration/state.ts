@@ -1,7 +1,7 @@
-import { KeyValueReducer } from 'function/global/KeyValueReducer';
-import { ConfigurationQualifier, Warning } from 'function/global/types';
 import { atom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
+import { KeyValueReducer } from '../global/KeyValueReducer';
+import { ConfigurationQualifier, Warning } from '../global/types';
 
 export const configurationReducer = KeyValueReducer<unknown>();
 const configurationTouchedReducer = KeyValueReducer<boolean>();

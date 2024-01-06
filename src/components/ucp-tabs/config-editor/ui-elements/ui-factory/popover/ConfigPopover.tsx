@@ -1,13 +1,14 @@
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { MutableRefObject } from 'react';
+import { Form, Overlay } from 'react-bootstrap';
+
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { CREATOR_MODE_ATOM } from 'function/gui-settings/settings';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { MutableRefObject } from 'react';
-import { Form, Overlay } from 'react-bootstrap';
+} from '../../../../../../function/configuration/state';
+import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 
 /** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
 

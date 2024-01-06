@@ -1,7 +1,8 @@
-import { getStore } from 'hooks/jotai/base';
 import { atom, useAtomValue } from 'jotai';
 import { ReactNode } from 'react';
 import { ToastContainer, Toast } from 'react-bootstrap';
+
+import { getStore } from '../../../hooks/jotai/base';
 
 export type ToastProps = {
   title: string;

@@ -4,7 +4,7 @@ import './overlay.css';
 
 import { useEffect, useRef } from 'react';
 import { atom, useAtom, useSetAtom } from 'jotai';
-import { getStore } from 'hooks/jotai/base';
+import { getStore } from '../../hooks/jotai/base';
 
 type OverlayConfig<T> = [OverlayContent<T>, boolean, boolean, T] | null;
 export type OverlayContentProps<T = undefined> = {

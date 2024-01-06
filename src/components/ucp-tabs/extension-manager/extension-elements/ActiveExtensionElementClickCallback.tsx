@@ -1,12 +1,12 @@
-import { Extension } from 'config/ucp/common';
-import { getStore } from 'hooks/jotai/base';
-import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from 'function/configuration/state';
-import Logger from 'util/scripts/logging';
+import { Extension } from '../../../../config/ucp/common';
+import { getStore } from '../../../../hooks/jotai/base';
+import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
+import Logger from '../../../../util/scripts/logging';
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/extensions/state/state';
-import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
+} from '../../../../function/extensions/state/state';
+import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
 import { buildExtensionConfigurationDB } from '../extension-configuration';

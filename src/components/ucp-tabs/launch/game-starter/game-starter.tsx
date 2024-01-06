@@ -1,17 +1,17 @@
 /* eslint-disable react/require-default-props */
 import './game-starter.css';
 
-import { showModalOk } from 'components/modals/modal-ok';
-import {
-  EMPTY_GAME_VERSION,
-  GameVersionInstance,
-} from 'function/game-files/game-version';
 import { Atom, useAtomValue } from 'jotai';
 import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { osOpenProgram } from 'tauri/tauri-invoke';
-import Logger from 'util/scripts/logging';
-import { sleep } from 'util/scripts/util';
+import {
+  EMPTY_GAME_VERSION,
+  GameVersionInstance,
+} from '../../../../function/game-files/game-version';
+import { showModalOk } from '../../../modals/modal-ok';
+import Logger from '../../../../util/scripts/logging';
+import { sleep } from '../../../../util/scripts/util';
 
 const LOGGER = new Logger('game-starter.tsx');
 

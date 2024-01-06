@@ -1,12 +1,12 @@
 import { saveFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
-import { getStore } from 'hooks/jotai/base';
+import { getStore } from '../../../hooks/jotai/base';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
+} from '../../../function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import saveConfig from './SaveConfig';
 
 const exportButtonCallback = async (

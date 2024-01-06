@@ -8,7 +8,7 @@ import {
   WebviewWindow,
   WindowOptions,
 } from '@tauri-apps/api/window';
-import { getHexHashOfString } from 'util/scripts/hash';
+import { getHexHashOfString } from '../util/scripts/hash';
 
 export function getCurrentWindow() {
   return appWindow;

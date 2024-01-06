@@ -3,12 +3,8 @@ import './extension-manager.css';
 import { useTranslation } from 'react-i18next';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import * as GuiSettings from 'function/gui-settings/settings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
-import ExtensionPack from 'function/extensions/pack/extension-pack';
-import { showModalOk } from 'components/modals/modal-ok';
-import Logger from 'util/scripts/logging';
 import {
   Funnel,
   FunnelFill,
@@ -17,17 +13,21 @@ import {
   PlusLg,
   Stack,
 } from 'react-bootstrap-icons';
+import * as GuiSettings from '../../../function/gui-settings/settings';
+import ExtensionPack from '../../../function/extensions/pack/extension-pack';
+import { showModalOk } from '../../modals/modal-ok';
+import Logger from '../../../util/scripts/logging';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
-} from 'function/configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { ZipWriter } from 'util/structs/zip-handler';
-import { useCurrentGameFolder } from 'function/game-folder/state';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
-import { makeToast } from 'components/modals/toasts/ToastsDisplay';
+} from '../../../function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
+import { ZipWriter } from '../../../util/structs/zip-handler';
+import { useCurrentGameFolder } from '../../../function/game-folder/state';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
+import { makeToast } from '../../modals/toasts/ToastsDisplay';
 import {
   ActiveExtensionElement,
   ExtensionNameList,

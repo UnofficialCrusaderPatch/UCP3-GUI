@@ -3,18 +3,18 @@ import './launch.css';
 import './launch-options/launch-options.css'; // currently imported here, als long as single files not needed
 
 import { useTranslation } from 'react-i18next';
-import GameStarter from 'components/ucp-tabs/launch/game-starter/game-starter';
+import { useRef, useState } from 'react';
+import { Button } from 'react-bootstrap';
+import GameStarter from './game-starter/game-starter';
 import {
   EXTREME_PATH_ATOM,
   VANILLA_PATH_ATOM,
-} from 'function/game-files/game-path';
+} from '../../../function/game-files/game-path';
 import {
   EXTREME_VERSION_ATOM,
   VANILLA_VERSION_ATOM,
-} from 'function/game-files/game-version-state';
-import { useRef, useState } from 'react';
+} from '../../../function/game-files/game-version-state';
 
-import { Button } from 'react-bootstrap';
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import { createLaunchOptionFuncs } from './launch-options/launch-options';

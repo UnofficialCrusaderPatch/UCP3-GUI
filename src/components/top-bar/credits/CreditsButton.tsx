@@ -1,12 +1,10 @@
-import { Credits } from 'components/credits/credits';
-import {
-  OVERLAY_ACTIVE_ATOM,
-  setOverlayContent,
-} from 'components/overlay/overlay';
+import './CreditsButton.css';
+
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
-import './CreditsButton.css';
+import { OVERLAY_ACTIVE_ATOM, setOverlayContent } from '../../overlay/overlay';
+import { Credits } from '../../credits/credits';
 
 export default function CreditsButton() {
   const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);

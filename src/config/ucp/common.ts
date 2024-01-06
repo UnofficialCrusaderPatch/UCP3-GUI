@@ -89,7 +89,7 @@ modules:
 ```
 */
 
-import { ExtensionHandle } from 'function/extensions/handles/extension-handle';
+import { ExtensionHandle } from '../../function/extensions/handles/extension-handle';
 
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required

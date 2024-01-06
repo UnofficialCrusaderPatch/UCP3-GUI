@@ -1,5 +1,3 @@
-import { NumberContents, DisplayConfigElement } from 'config/ucp/common';
-
 import { Accordion, Form } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
@@ -7,15 +5,20 @@ import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { useRef, useState } from 'react';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+
+import {
+  NumberContents,
+  DisplayConfigElement,
+} from '../../../../../config/ucp/common';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import Logger from 'util/scripts/logging';
+} from '../../../../../function/configuration/state';
+import Logger from '../../../../../util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';

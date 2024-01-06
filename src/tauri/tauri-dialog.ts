@@ -1,5 +1,5 @@
 import { dialog } from '@tauri-apps/api';
-import Option from 'util/structs/option';
+import Option from '../util/structs/option';
 
 async function messageWrapper(
   func: 'show' | 'ask' | 'confirm',

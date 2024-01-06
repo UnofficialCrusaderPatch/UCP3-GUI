@@ -1,17 +1,20 @@
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
 import { useRef, useState } from 'react';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import {
+  DisplayConfigElement,
+  NumberContents,
+} from '../../../../../config/ucp/common';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+} from '../../../../../function/configuration/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';

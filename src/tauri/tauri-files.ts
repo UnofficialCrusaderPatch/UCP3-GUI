@@ -29,8 +29,8 @@ import {
   SchemaOptions,
   ToJSOptions,
 } from 'yaml';
-import Result from 'util/structs/result';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
+import Result from '../util/structs/result';
 import {
   readAndFilterPaths as invokeReadAndFilterPaths,
   slashify as invokeSlashify,

@@ -1,10 +1,9 @@
-import { DisplayConfigElement } from 'config/ucp/common';
-
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
+import { DisplayConfigElement } from '../../../../../config/ucp/common';
 
 function CreateGroup(args: {
   spec: DisplayConfigElement;

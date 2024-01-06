@@ -1,16 +1,18 @@
 import './sandbox-menu.css';
 
-import { OverlayContentProps } from 'components/overlay/overlay';
 import { Suspense, useEffect, useState } from 'react';
-import { getStore } from 'hooks/jotai/base';
-import {
-  CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { useCurrentGameFolder } from 'function/game-folder/state';
 import Sandbox, { PluginInstance } from 'websandbox';
 
 import { useTranslation } from 'react-i18next';
+
+import { OverlayContentProps } from '../overlay/overlay';
+import { getStore } from '../../hooks/jotai/base';
+import {
+  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+} from '../../function/configuration/state';
+import { useCurrentGameFolder } from '../../function/game-folder/state';
+
 import {
   getLanguage,
   createGetLocalizedStringFunction,

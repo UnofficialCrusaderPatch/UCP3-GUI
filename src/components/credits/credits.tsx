@@ -1,6 +1,5 @@
 import './credits.css';
 
-import { OverlayContentProps } from 'components/overlay/overlay';
 import { useTranslation } from 'react-i18next';
 
 import Markdown from 'react-markdown';
@@ -8,6 +7,8 @@ import Markdown from 'react-markdown';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import rehypeExternalLinks from 'rehype-external-links';
+
+import { OverlayContentProps } from '../overlay/overlay';
 
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.md?raw';

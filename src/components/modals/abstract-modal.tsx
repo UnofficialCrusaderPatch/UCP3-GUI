@@ -1,8 +1,9 @@
-import { getStore } from 'hooks/jotai/base';
 import { atom, useAtomValue } from 'jotai';
 import { ReactNode } from 'react';
-import Logger from 'util/scripts/logging';
-import { sleep } from 'util/scripts/util';
+
+import { getStore } from '../../hooks/jotai/base';
+import Logger from '../../util/scripts/logging';
+import { sleep } from '../../util/scripts/util';
 
 const LOGGER = new Logger('abstract-modal.tsx');
 

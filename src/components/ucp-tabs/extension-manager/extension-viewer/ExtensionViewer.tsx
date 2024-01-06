@@ -1,5 +1,3 @@
-import { OverlayContentProps } from 'components/overlay/overlay';
-import { Extension } from 'config/ucp/common';
 import { useTranslation } from 'react-i18next';
 import Markdown from 'react-markdown';
 
@@ -7,6 +5,8 @@ import Markdown from 'react-markdown';
 // @ts-ignore
 // eslint-disable-next-line import/no-extraneous-dependencies
 import rehypeExternalLinks from 'rehype-external-links';
+import { Extension } from '../../../../config/ucp/common';
+import { OverlayContentProps } from '../../../overlay/overlay';
 
 export type ExtensionViewerProps = {
   extension: Extension;

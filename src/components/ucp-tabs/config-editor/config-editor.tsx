@@ -6,15 +6,19 @@ import './config-editor.css';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';
-import { showModalCreatePlugin } from 'components/modals/modal-create-plugin';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
-import { showModalOk } from 'components/modals/modal-ok';
-import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
-import { reloadCurrentWindow } from 'function/window-actions';
-
-import { ConsoleLogger } from 'util/scripts/logging';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { GearFill, Gear } from 'react-bootstrap-icons';
+import {
+  UCP3SerializedPluginConfig,
+  toYaml,
+} from '../../../config/ucp/config-files';
+import { showModalCreatePlugin } from '../../modals/modal-create-plugin';
+import { showModalOk } from '../../modals/modal-ok';
+import { showModalOkCancel } from '../../modals/modal-ok-cancel';
+import { reloadCurrentWindow } from '../../../function/window-actions';
+
+import { ConsoleLogger } from '../../../util/scripts/logging';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -22,13 +26,12 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
-} from 'function/configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { useCurrentGameFolder } from 'function/game-folder/state';
-import { makeToast } from 'components/modals/toasts/ToastsDisplay';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
-import { GearFill, Gear } from 'react-bootstrap-icons';
-import { CREATOR_MODE_ATOM } from 'function/gui-settings/settings';
+} from '../../../function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
+import { useCurrentGameFolder } from '../../../function/game-folder/state';
+import { makeToast } from '../../modals/toasts/ToastsDisplay';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
+import { CREATOR_MODE_ATOM } from '../../../function/gui-settings/settings';
 import { UIFactory } from './ui-elements';
 
 import ExportButton from './ExportButton';

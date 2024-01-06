@@ -1,4 +1,4 @@
-import { DisplayConfigElement } from 'config/ucp/common';
+import { DisplayConfigElement } from '../../../../../config/ucp/common';
 
 function CreateParagraph(args: {
   spec: DisplayConfigElement;

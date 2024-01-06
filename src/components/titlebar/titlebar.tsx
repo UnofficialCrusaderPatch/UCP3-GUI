@@ -5,19 +5,21 @@
 
 import './titlebar.css';
 
+import { TauriEvent } from '@tauri-apps/api/event';
+import { atom, useAtomValue } from 'jotai';
+import { useTranslation } from 'react-i18next';
+
 import closeIcon from 'assets/misc/x-lg.svg';
 import minimizeIcon from 'assets/misc/chevron-compact-down.svg';
 import maximizeIcon from 'assets/misc/fullscreen.svg';
 import maximizeExitIcon from 'assets/misc/fullscreen-exit.svg';
-
-import { getCurrentWindow } from 'tauri/tauri-window';
 import mainIcon from 'assets/ucp3.png';
-import { useTranslation } from 'react-i18next';
-import SvgHelper from 'components/general/svg-helper';
-import { registerTauriEventListener } from 'tauri/tauri-hooks';
-import { TauriEvent } from '@tauri-apps/api/event';
-import { atom, useAtomValue } from 'jotai';
-import { getStore } from 'hooks/jotai/base';
+
+import { getCurrentWindow } from '../../tauri/tauri-window';
+import SvgHelper from '../general/svg-helper';
+import { registerTauriEventListener } from '../../tauri/tauri-hooks';
+
+import { getStore } from '../../hooks/jotai/base';
 
 const TITLE_ATOM = atom(getCurrentWindow().title());
 const IS_MAX_ATOM = atom(false);

@@ -1,15 +1,16 @@
 import './footer.css';
 
-import { UCPState, UCP_STATE_ATOM } from 'function/ucp-files/ucp-state';
 import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
 import { CSSProperties, Suspense } from 'react';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
-import { UCP_VERSION_ATOM } from 'function/ucp-files/ucp-version';
-import { useCurrentGameFolder } from 'function/game-folder/state';
 import { getVersion } from '@tauri-apps/api/app';
 import { loadable } from 'jotai/utils';
+
+import { UCPState, UCP_STATE_ATOM } from '../../function/ucp-files/ucp-state';
+import { useCurrentGameFolder } from '../../function/game-folder/state';
+import { UCP_VERSION_ATOM } from '../../function/ucp-files/ucp-version';
 
 const UCP_STATE_MAP = new Map([
   [UCPState.WRONG_FOLDER, 'wrong.folder'],

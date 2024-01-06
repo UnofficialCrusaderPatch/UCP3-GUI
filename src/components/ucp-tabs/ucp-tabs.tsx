@@ -1,25 +1,25 @@
 import './ucp-tabs.css';
 
-import { showModalOk } from 'components/modals/modal-ok';
-import { tryResolveDependencies } from 'function/extensions/discovery/discovery';
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import Logger from 'util/scripts/logging';
 import { atom, useAtom, useAtomValue } from 'jotai';
-import * as GuiSettings from 'function/gui-settings/settings';
+import Logger from '../../util/scripts/logging';
+import { tryResolveDependencies } from '../../function/extensions/discovery/discovery';
+import { showModalOk } from '../modals/modal-ok';
+import * as GuiSettings from '../../function/gui-settings/settings';
 import {
   INIT_RUNNING,
   INIT_DONE,
   INIT_ERROR,
-} from 'function/game-folder/initialization';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
+} from '../../function/game-folder/initialization';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
-} from 'function/ucp-files/ucp-state';
-import { OVERLAY_ACTIVE_ATOM } from 'components/overlay/overlay';
+} from '../../function/ucp-files/ucp-state';
+import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
 import ConfigEditor from './config-editor/config-editor';
 import Overview from './overview/overview';
 

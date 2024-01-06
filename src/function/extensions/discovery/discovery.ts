@@ -2,8 +2,11 @@
 import { exists, type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
-import { readDir } from 'tauri/tauri-files';
+import { readDir } from '../../../tauri/tauri-files';
 
+import { extractZipToPath, slashify } from '../../../tauri/tauri-invoke';
+
+import languages from '../../../localization/languages.json';
 import {
   ConfigEntry,
   ConfigFile,
@@ -12,12 +15,10 @@ import {
   DisplayConfigElement,
   Extension,
   ExtensionIOCallback,
-} from 'config/ucp/common';
-import Logger, { ConsoleLogger } from 'util/scripts/logging';
-import languages from 'localization/languages.json';
-import { extractZipToPath, slashify } from 'tauri/tauri-invoke';
-import { showModalOk } from 'components/modals/modal-ok';
-import { ZipReader } from 'util/structs/zip-handler';
+} from '../../../config/ucp/common';
+import Logger, { ConsoleLogger } from '../../../util/scripts/logging';
+import { showModalOk } from '../../../components/modals/modal-ok';
+import { ZipReader } from '../../../util/structs/zip-handler';
 import { ExtensionHandle } from '../handles/extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
 import { changeLocale } from '../locale/locale';

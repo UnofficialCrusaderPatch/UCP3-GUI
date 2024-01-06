@@ -1,9 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // eslint-disable-next-line max-classes-per-file
-import { Extension } from 'config/ucp/common';
-import { DependencyStatement } from 'config/ucp/dependency-statement';
 import { Dependency, Package, Repository, Tree } from 'lean-resolution';
 import { rcompare } from 'semver';
+
+import { Extension } from '../../../config/ucp/common';
+import { DependencyStatement } from '../../../config/ucp/dependency-statement';
 
 function extensionToID(ext: Extension) {
   return `${ext.name}@${ext.version}`;

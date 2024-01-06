@@ -1,8 +1,8 @@
-import { ConfigMetaObject } from 'config/ucp/config-merge/objects';
+import { ConfigMetaObject } from '../../../config/ucp/config-merge/objects';
 import {
   extensionsToOptionEntries,
   getConfigDefaults,
-} from 'config/ucp/extension-util';
+} from '../../../config/ucp/extension-util';
 import {
   ConfigurationSuggestion,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -12,10 +12,10 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { ExtensionsState } from 'function/global/types';
-import { getStore } from 'hooks/jotai/base';
-import { ConsoleLogger } from 'util/scripts/logging';
+} from '../../configuration/state';
+import { ExtensionsState } from '../../global/types';
+import { getStore } from '../../../hooks/jotai/base';
+import { ConsoleLogger } from '../../../util/scripts/logging';
 
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // This section is meant to allow the config editor to display the options.

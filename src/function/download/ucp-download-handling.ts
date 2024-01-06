@@ -1,22 +1,22 @@
 import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { TFunction } from 'i18next';
-import { askInfo, showWarning } from 'tauri/tauri-dialog';
+import { askInfo, showWarning } from '../../tauri/tauri-dialog';
 import {
   getLocalDataFolder,
   recursiveCreateDirForFile,
   removeFile,
   writeBinaryFile,
   Error as FileUtilError,
-} from 'tauri/tauri-files';
-import { extractZipToPath } from 'tauri/tauri-invoke';
-import Result from 'util/structs/result';
+} from '../../tauri/tauri-files';
+import { extractZipToPath } from '../../tauri/tauri-invoke';
+import { getBinary } from '../../tauri/tauri-http';
+import Result from '../../util/structs/result';
 import {
   UCP_STATE_ATOM,
   activateUCP,
   createRealBink,
-} from 'function/ucp-files/ucp-state';
-import { getBinary } from 'tauri/tauri-http';
-import { getStore } from 'hooks/jotai/base';
+} from '../ucp-files/ucp-state';
+import { getStore } from '../../hooks/jotai/base';
 import { checkForLatestUCP3DevReleaseUpdate } from './github';
 import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
 import { GITHUB_AUTH_HEADER } from './download-enums';

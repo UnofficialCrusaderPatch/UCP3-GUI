@@ -1,6 +1,6 @@
-import { Extension } from 'config/ucp/common';
-import { ConfigMetaObjectDB } from 'config/ucp/config-merge/objects';
-import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
+import { Extension } from '../../config/ucp/common';
+import { ConfigMetaObjectDB } from '../../config/ucp/config-merge/objects';
+import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
 
 export type KeyValueReducerState<Type> = {
   [key: string]: Type;

@@ -1,25 +1,28 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAtomValue } from 'jotai';
+
 import {
   CustomMenuContents,
   DisplayConfigElement,
   Extension,
-} from 'config/ucp/common';
+} from '../../../../../config/ucp/common';
 import {
   SandboxArgs,
   SandboxMenu,
   SandboxSource,
   SandboxSourcePaths,
-} from 'components/sandbox-menu/sandbox-menu';
-import { setOverlayContent } from 'components/overlay/overlay';
+} from '../../../../sandbox-menu/sandbox-menu';
+import { setOverlayContent } from '../../../../overlay/overlay';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { useAtomValue } from 'jotai';
-import { ExtensionHandle } from 'function/extensions/handles/extension-handle';
-import Logger from 'util/scripts/logging';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+} from '../../../../../function/configuration/state';
+
+import { ExtensionHandle } from '../../../../../function/extensions/handles/extension-handle';
+import Logger from '../../../../../util/scripts/logging';
+
 import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';
 

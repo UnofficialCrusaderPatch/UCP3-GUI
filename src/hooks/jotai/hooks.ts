@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import { RecentFolderHelper } from 'config/gui/recent-folder-helper';
-import { createFunctionForAsyncAtomWithMutate } from 'hooks/jotai/base';
+import { RecentFolderHelper } from '../../config/gui/recent-folder-helper';
+import { createFunctionForAsyncAtomWithMutate } from './base';
 
 export const useRecentFolders = createFunctionForAsyncAtomWithMutate<
   RecentFolderHelper,

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import Logger from 'util/scripts/logging';
+import Logger from '../../util/scripts/logging';
 import { UCP3_REPOS_MACHINE_TOKEN, UCP3_REPO_URL_API } from './download-enums';
 
 const LOGGER = new Logger('github.ts');

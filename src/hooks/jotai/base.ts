@@ -1,7 +1,7 @@
 import { Getter, atom, getDefaultStore, useAtom, useSetAtom } from 'jotai';
 import { loadable } from 'jotai/utils';
-import Option from 'util/structs/option';
-import Result from 'util/structs/result';
+import Option from '../../util/structs/option';
+import Result from '../../util/structs/result';
 
 export function getStore() {
   return getDefaultStore();

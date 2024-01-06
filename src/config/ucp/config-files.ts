@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
-import { ConfigurationQualifier } from 'function/global/types';
 import { TFunction } from 'i18next';
-import { writeTextFile, loadYaml } from 'tauri/tauri-files';
-import Result from 'util/structs/result';
 import { stringify as yamlStringify } from 'yaml';
-import Logger from 'util/scripts/logging';
+import { writeTextFile, loadYaml } from '../../tauri/tauri-files';
+import Result from '../../util/structs/result';
+import { ConfigurationQualifier } from '../../function/global/types';
+import Logger from '../../util/scripts/logging';
 import { ConfigFile, Extension } from './common';
 
 const LOGGER = new Logger('config-files.ts');

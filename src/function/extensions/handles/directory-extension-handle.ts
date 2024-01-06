@@ -1,6 +1,10 @@
 /* eslint-disable max-classes-per-file */
-import { onFsExists, readBinaryFile, readTextFile } from 'tauri/tauri-files';
-import { readAndFilterPaths } from 'tauri/tauri-invoke';
+import {
+  onFsExists,
+  readBinaryFile,
+  readTextFile,
+} from '../../../tauri/tauri-files';
+import { readAndFilterPaths } from '../../../tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
 
 class DirectoryExtensionFileHandle implements ExtensionFileHandle {

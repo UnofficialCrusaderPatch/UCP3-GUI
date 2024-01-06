@@ -243,7 +243,7 @@ input[type="checkbox"]:disabled + .label:before {
 
 .sword-checkbox input[type='checkbox']:hover + label:hover,
 .sword-checkbox input[type='radio']:hover + label:hover {
-  cursor: default;
+  cursor: pointer;
 }
 
 .sword-checkbox input[type='checkbox']:hover + label:before,
@@ -265,8 +265,8 @@ input[type="checkbox"]:disabled + .label:before {
   height: 19px;
 
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 0px;
+  top: -3px;
   -webkit-transition:
     all 0.1s,
     background 0.1s ease-in-out;
@@ -291,9 +291,6 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type='radio']:disabled + label:before {
 }
 
-.ucp-slider:disabled {
-  opacity: 0.5;
-}
 
 /** sword-checkbox end **/
 
@@ -331,6 +328,10 @@ input[type="checkbox"]:disabled + .label:before {
   outline: none;
   -webkit-transition: 0.2s;
   transition: opacity 0.2s;
+}
+
+.ucp-slider:disabled {
+  opacity: 0.5;
 }
 
 /* chrome, safari (webkit based) */

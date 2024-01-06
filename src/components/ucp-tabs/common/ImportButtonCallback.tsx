@@ -250,7 +250,7 @@ const importButtonCallback = async (
     // TODO: do checking here if the user part is not conflicting?
 
     let q = m.value.qualifier;
-    if (q === 'unspecified') q = 'required';
+    if (q === 'unspecified') q = 'suggested';
     newConfigurationQualifier[url] = q as ConfigurationQualifier;
   });
 

@@ -1,4 +1,4 @@
-import { Form } from 'react-bootstrap';
+import { Accordion, Form } from 'react-bootstrap';
 import { DisplayConfigElement } from 'config/ucp/common';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -92,7 +92,8 @@ function CreateUCP2Switch(args: {
   const ref = useRef(null);
 
   return (
-    <div
+    <Accordion
+      bsPrefix="ucp-accordion"
       className="col"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
@@ -106,9 +107,9 @@ function CreateUCP2Switch(args: {
       ref={ref}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      {headerElement}
-      {text}
-    </div>
+      <Accordion.Header as="div">{headerElement}</Accordion.Header>
+      <Accordion.Body>{text}</Accordion.Body>
+    </Accordion>
   );
 }
 

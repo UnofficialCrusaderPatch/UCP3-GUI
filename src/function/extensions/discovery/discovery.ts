@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { exists, type FileEntry } from '@tauri-apps/api/fs';
+import { createDir, exists, type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
 import { readDir } from 'tauri/tauri-files';
@@ -17,9 +17,12 @@ import {
 import Logger, { ConsoleLogger } from 'util/scripts/logging';
 import languages from 'localization/languages.json';
 import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
-import { canonicalize, slashify } from 'tauri/tauri-invoke';
+import { canonicalize, extractZipToPath, slashify } from 'tauri/tauri-invoke';
 import { showModalOk } from 'components/modals/modal-ok';
 import { SemVer } from 'semver';
+import { ZipReader } from 'util/structs/zip-handler';
+import { tempdir } from '@tauri-apps/api/os';
+import { t } from 'i18next';
 import { ExtensionHandle } from '../handles/extension-handle';
 import ZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
@@ -182,6 +185,42 @@ function collectConfigEntries(
   return collection;
 }
 
+async function unzipPlugins(pluginDirEnts: FileEntry[]) {
+  const zipFiles = pluginDirEnts.filter(
+    (fe) => fe.name !== undefined && fe.name.endsWith('.zip'),
+  );
+
+  await Promise.all(
+    zipFiles.map(async (fe) => {
+      const { path } = fe;
+
+      let isPlugin = true;
+
+      try {
+        await ZipReader.withZipReaderDo(path, async (reader) => {
+          if (!(await reader.doesEntryExist('definition.yml'))) {
+            throw new Error(
+              `Zip file does not contain a definition.yml, can't be a plugin: ${path}`,
+            );
+          }
+        });
+      } catch (e) {
+        if (
+          (e as object)
+            .toString()
+            .startsWith(
+              `Zip file does not contain a definition.yml, can't be a plugin`,
+            )
+        ) {
+          isPlugin = false;
+        }
+      }
+
+      if (isPlugin) await extractZipToPath(path, path.slice(undefined, -4));
+    }),
+  );
+}
+
 async function getExtensionHandles(ucpFolder: string) {
   ConsoleLogger.info('Getting extension handles');
 
@@ -210,7 +249,7 @@ async function getExtensionHandles(ucpFolder: string) {
     .getOrReceive(() => []) as FileEntry[];
 
   const pluginDir = `${ucpFolder}/plugins/`;
-  const readPluginDirResult = await readDir(pluginDir);
+  let readPluginDirResult = await readDir(pluginDir);
 
   if (readPluginDirResult.isErr()) {
     const err = readPluginDirResult.err().get();
@@ -228,9 +267,16 @@ async function getExtensionHandles(ucpFolder: string) {
 
     return [];
   }
-  const pluginDirEnts = readPluginDirResult
+  let pluginDirEnts = readPluginDirResult
     .ok()
     .getOrReceive(() => []) as FileEntry[];
+
+  await unzipPlugins(pluginDirEnts);
+
+  readPluginDirResult = await readDir(pluginDir);
+  pluginDirEnts = (
+    readPluginDirResult.ok().getOrReceive(() => []) as FileEntry[]
+  ).filter((fe) => !fe.path.endsWith('.zip'));
 
   const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(
     (fe) =>
@@ -392,6 +438,18 @@ const validateDefinition = async (eh: ExtensionHandle) => {
     definition.dependencies ||
     (definition as unknown as { depends: string[] }).depends ||
     [];
+
+  if (!(definition.dependencies instanceof Array)) {
+    return {
+      status: 'error',
+      messages: [
+        `Dependencies definition of extension "${name}-${version}" is not an array of strings: ${JSON.stringify(
+          definition.dependencies,
+        )}`,
+      ],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  }
 
   return {
     status: warnings.length === 0 ? 'ok' : 'warning',

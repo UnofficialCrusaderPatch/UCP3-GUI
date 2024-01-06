@@ -16,7 +16,7 @@ type ConfigurationDBBuildingResult = {
 
 function buildConfigMetaContent(extName: string, k: string, v: unknown) {
   let truekey = k;
-  let qualifier = 'required';
+  let qualifier = 'unspecified';
   if (k.startsWith('required-')) {
     // eslint-disable-next-line prefer-destructuring
     truekey = k.split('required-', 2)[1];

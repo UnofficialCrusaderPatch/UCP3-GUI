@@ -1,7 +1,5 @@
 .language-select-container {
-  position: absolute;
-  top: 8px;
-  right: 12px;
+  margin-left: auto !important;
 }
 
 .language-select-container select {

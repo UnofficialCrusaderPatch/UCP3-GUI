@@ -18,7 +18,8 @@ import { useAtomValue } from 'jotai';
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.md?raw';
 
-function Credits(props: OverlayContentProps) {
+// eslint-disable-next-line import/prefer-default-export
+export function Credits(props: OverlayContentProps) {
   const { closeFunc } = props;
 
   const [t] = useTranslation(['gui-general', 'gui-landing']);
@@ -46,21 +47,5 @@ function Credits(props: OverlayContentProps) {
         {t('gui-general:close')}
       </button>
     </div>
-  );
-}
-
-export default function CreditsButton() {
-  const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
-
-  const [t] = useTranslation(['gui-landing']);
-  return (
-    <button
-      type="button"
-      className="credits-button"
-      onClick={() => setOverlayContent(Credits, true, true)}
-      disabled={overlayActive}
-    >
-      {t('gui-landing:credits.open')}
-    </button>
   );
 }

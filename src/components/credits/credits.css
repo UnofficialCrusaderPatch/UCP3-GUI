@@ -1,14 +1,3 @@
-.credits-button {
-  background-color: var(--ucp-menu-shade);
-  color: white;
-  position: absolute;
-  border: none;
-  font-size: 16px;
-  padding: 4px 16px;
-  top: 8px;
-  left: 12px;
-}
-
 .credits-container {
   padding-top: 100px;
   padding-left: 100px;
@@ -22,7 +11,7 @@
   pointer-events: none;
 }
 
-.credits-container>*{
+.credits-container > * {
   pointer-events: auto;
 }
 

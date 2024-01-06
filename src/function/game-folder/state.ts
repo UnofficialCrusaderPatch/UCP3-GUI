@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export */
+
 import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
 import { exists } from '@tauri-apps/api/fs';

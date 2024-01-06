@@ -1,22 +1,12 @@
 import { DisplayConfigElement, ChoiceContents } from 'config/ucp/common';
 
-import {
-  Accordion, 
-  Form,
-  Button,
-  Form,
-  Overlay,
-  OverlayTrigger,
-  Popover,
-} from 'react-bootstrap';
+import { Accordion, Form } from 'react-bootstrap';
 
 import { RadioGroup, Radio } from 'react-radio-group';
 
 import { useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import RangeSlider from 'react-bootstrap-range-slider';
-
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
@@ -26,10 +16,8 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from 'function/configuration/state';
 import Logger from 'util/scripts/logging';
-import { BootstrapReboot } from 'react-bootstrap-icons';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';

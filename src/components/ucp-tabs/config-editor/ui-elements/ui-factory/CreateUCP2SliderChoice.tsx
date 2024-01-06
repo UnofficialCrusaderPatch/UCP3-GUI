@@ -1,6 +1,6 @@
 import { DisplayConfigElement, ChoiceContents } from 'config/ucp/common';
 
-import { Form } from 'react-bootstrap';
+import { Accordion, Form } from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
 
 import { useState } from 'react';
@@ -23,6 +23,8 @@ import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
+
+import './UCPAccordion.css';
 
 const LOGGER = new Logger('CreateUCP2SliderChoice.tsx');
 
@@ -135,7 +137,7 @@ function CreateUCP2SliderChoice(args: {
   let headerElement = <></>;
   if (hasHeader) {
     headerElement = (
-      <div className="sword-checkbox">
+      <div className="sword-checkbox d-flex align-items-center">
         <input
           type="checkbox"
           className="me-2"
@@ -320,8 +322,8 @@ function CreateUCP2SliderChoice(args: {
   }
 
   return (
-    <div
-      className="pb-3"
+    <Accordion
+      bsPrefix="ucp-accordion"
       onMouseEnter={() => {
         setStatusBarMessage(statusBarMessage);
       }}
@@ -329,29 +331,31 @@ function CreateUCP2SliderChoice(args: {
         setStatusBarMessage(undefined);
       }}
     >
-      {headerElement}
-      <p>{text}</p>
-      <RadioGroup
-        name={url}
-        selectedValue={enabledOption}
-        onChange={(newValue: string) => {
-          setConfiguration({
-            type: 'set-multiple',
-            value: Object.fromEntries([
-              [url, { ...value, ...{ choice: newValue } }],
-            ]),
-          });
-          setConfigurationTouched({
-            type: 'set-multiple',
-            value: Object.fromEntries([[url, true]]),
-          });
-          configuration[url] = newValue;
-        }}
-        disabled={isDisabled}
-      >
-        {radios}
-      </RadioGroup>
-    </div>
+      <Accordion.Header as="div">{headerElement}</Accordion.Header>
+      <Accordion.Body>
+        <p>{text}</p>
+        <RadioGroup
+          name={url}
+          selectedValue={enabledOption}
+          onChange={(newValue: string) => {
+            setConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [url, { ...value, ...{ choice: newValue } }],
+              ]),
+            });
+            setConfigurationTouched({
+              type: 'set-multiple',
+              value: Object.fromEntries([[url, true]]),
+            });
+            configuration[url] = newValue;
+          }}
+          disabled={isDisabled}
+        >
+          {radios}
+        </RadioGroup>
+      </Accordion.Body>
+    </Accordion>
   );
 }
 

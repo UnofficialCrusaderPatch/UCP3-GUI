@@ -1,6 +1,6 @@
 import { NumberContents, DisplayConfigElement } from 'config/ucp/common';
 
-import { Form } from 'react-bootstrap';
+import { Accordion, Form } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
@@ -136,7 +136,8 @@ function CreateUCP2Slider(args: {
       : (value.sliderValue as number) * factor,
   );
   return (
-    <div
+    <Accordion
+      bsPrefix="ucp-accordion"
       className="sword-checkbox"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
@@ -146,107 +147,111 @@ function CreateUCP2Slider(args: {
         setStatusBarMessage(undefined);
       }}
     >
-      {headerElement}
-      <div>
-        <label className="form-check-label" htmlFor={`${url}-slider`}>
-          {!hasHeader && header}
-          {text}
-        </label>
-      </div>
-      <div className="row">
-        <div className="col-auto">
-          <Form.Label>{min}</Form.Label>
+      <Accordion.Header as="div">{headerElement}</Accordion.Header>
+      <Accordion.Body>
+        <div>
+          <label className="form-check-label" htmlFor={`${url}-slider`}>
+            {!hasHeader && header}
+            {text}
+          </label>
         </div>
-        <div className="col col-6">
-          <input
-            type="range"
-            className="ucp-slider"
-            min={min * factor}
-            max={max * factor}
-            step={step * factor}
-            id={`${url}-slider`}
-            // size="sm"
-            value={localValue}
-            // tooltipLabel={(currentValue) => (currentValue / factor).toString()}
-            onChange={(event) => {
-              setLocalValue(parseInt(event.target.value, 10));
-              setConfiguration({
-                type: 'set-multiple',
-                value: Object.fromEntries([
-                  [
-                    url,
-                    {
-                      ...value,
-                      ...{
-                        sliderValue: parseInt(event.target.value, 10) / factor,
+        <div className="row">
+          <div className="col-auto">
+            <Form.Label>{min}</Form.Label>
+          </div>
+          <div className="col col-6">
+            <input
+              type="range"
+              className="ucp-slider"
+              min={min * factor}
+              max={max * factor}
+              step={step * factor}
+              id={`${url}-slider`}
+              // size="sm"
+              value={localValue}
+              // tooltipLabel={(currentValue) => (currentValue / factor).toString()}
+              onChange={(event) => {
+                setLocalValue(parseInt(event.target.value, 10));
+                setConfiguration({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([
+                    [
+                      url,
+                      {
+                        ...value,
+                        ...{
+                          sliderValue:
+                            parseInt(event.target.value, 10) / factor,
+                        },
                       },
-                    },
-                  ],
-                ]),
-              });
-              setConfigurationTouched({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, true]]),
-              });
-            }}
-            disabled={
-              !isEnabled ||
-              disabled ||
-              !value.enabled ||
-              configurationLocks[url] !== undefined
-            }
-          />
-        </div>
+                    ],
+                  ]),
+                });
+                setConfigurationTouched({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([[url, true]]),
+                });
+              }}
+              disabled={
+                !isEnabled ||
+                disabled ||
+                !value.enabled ||
+                configurationLocks[url] !== undefined
+              }
+            />
+          </div>
 
-        <div className="col-auto">
-          <Form.Label>{max}</Form.Label>
-        </div>
-        <div className="col-2">
-          <Form.Control
-            className="text-light fs-7 lh-1 text-end"
-            key={`${url}-input`}
-            style={{ backgroundColor: '#ab712d' }}
-            type="number"
-            min={min}
-            max={max}
-            id={`${url}-input`}
-            // Tooltip stuff
-            data-bs-toggle="tooltip"
-            data-bs-placement="top"
-            title={fullToolTip}
-            // End of tooltip stuff
-            value={localValue === undefined ? 0 : (localValue as number)}
-            onChange={(event) => {
-              setLocalValue(parseInt(event.target.value, 10));
-              setConfiguration({
-                type: 'set-multiple',
-                value: Object.fromEntries([
-                  [
-                    url,
-                    {
-                      ...value,
-                      ...{
-                        sliderValue: parseInt(event.target.value, 10) / factor,
+          <div className="col-auto">
+            <Form.Label>{max}</Form.Label>
+          </div>
+          <div className="col-2">
+            <Form.Control
+              className="text-light fs-7 lh-1 text-end"
+              key={`${url}-input`}
+              style={{ backgroundColor: '#ab712d' }}
+              type="number"
+              min={min}
+              max={max}
+              id={`${url}-input`}
+              // Tooltip stuff
+              data-bs-toggle="tooltip"
+              data-bs-placement="top"
+              title={fullToolTip}
+              // End of tooltip stuff
+              value={localValue === undefined ? 0 : (localValue as number)}
+              onChange={(event) => {
+                setLocalValue(parseInt(event.target.value, 10));
+                setConfiguration({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([
+                    [
+                      url,
+                      {
+                        ...value,
+                        ...{
+                          sliderValue:
+                            parseInt(event.target.value, 10) / factor,
+                        },
                       },
-                    },
-                  ],
-                ]),
-              });
-              setConfigurationTouched({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, true]]),
-              });
-            }}
-            disabled={
-              !isEnabled ||
-              disabled ||
-              !value.enabled ||
-              configurationLocks[url] !== undefined
-            }
-          />
+                    ],
+                  ]),
+                });
+                setConfigurationTouched({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([[url, true]]),
+                });
+              }}
+              disabled={
+                !isEnabled ||
+                disabled ||
+                !value.enabled ||
+                configurationLocks[url] !== undefined
+              }
+            />
+          </div>
         </div>
-      </div>
-    </div>
+      </Accordion.Body>
+    </Accordion>
   );
 }
 

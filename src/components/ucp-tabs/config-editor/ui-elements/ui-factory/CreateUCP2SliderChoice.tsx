@@ -1,14 +1,6 @@
 import { DisplayConfigElement, ChoiceContents } from 'config/ucp/common';
 
-import {
-  Accordion, 
-  Form,
-  Button,
-  Form,
-  Overlay,
-  OverlayTrigger,
-  Popover,
-} from 'react-bootstrap';
+import { Accordion, Form } from 'react-bootstrap';
 
 import { RadioGroup, Radio } from 'react-radio-group';
 

@@ -8,13 +8,11 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { parseEnabledLogic } from '../enabled-logic';
-import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
@@ -24,9 +22,6 @@ function CreateSlider(args: {
   className: string;
 }) {
   const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -38,8 +33,9 @@ function CreateSlider(args: {
     CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   );
 
-  const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled } = spec;
+  const { spec, disabled } = args;
+  // TODO: text property is unused... is that correct?
+  const { url, enabled } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
   const { [url]: value } = configuration as {
@@ -50,9 +46,8 @@ function CreateSlider(args: {
     configuration,
     configurationDefaults,
   );
-  const fullToolTip = formatToolTip(tooltip, url);
 
-  const hasWarning = configurationWarnings[url] !== undefined;
+  // const hasWarning = configurationWarnings[url] !== undefined;
 
   // eslint-disable-next-line no-nested-ternary
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);

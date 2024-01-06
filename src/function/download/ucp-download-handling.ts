@@ -18,7 +18,7 @@ import {
 import { getBinary } from 'tauri/tauri-http';
 import { getStore } from 'hooks/jotai/base';
 import { checkForLatestUCP3DevReleaseUpdate } from './github';
-import { UCPVersion, UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
+import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
 import { GITHUB_AUTH_HEADER } from './download-enums';
 
 export async function installUCPFromZip(

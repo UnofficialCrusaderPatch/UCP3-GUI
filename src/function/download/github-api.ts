@@ -14,7 +14,7 @@ type GitRelease = {
   attachments: GitReleaseAttachment[];
 };
 
-async function getLatestUCP3Release() {
+export async function getLatestUCP3Release() {
   const url =
     'https://api.github.com/repos/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases';
 
@@ -45,7 +45,7 @@ async function getLatestUCP3Release() {
   } as GitRelease;
 }
 
-async function downloadAttachment(a: GitReleaseAttachment) {
+export async function downloadAttachment(a: GitReleaseAttachment) {
   const result: any = await axios.get(a.downloadUrl);
 
   const blob = result.blob();

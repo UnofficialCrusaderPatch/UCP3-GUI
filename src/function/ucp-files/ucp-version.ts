@@ -1,5 +1,4 @@
-import { loadYaml, Error, resolvePath } from 'tauri/tauri-files';
-import Result from 'util/structs/result';
+import { loadYaml, resolvePath } from 'tauri/tauri-files';
 import Option from 'util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from 'util/scripts/util';
 import { UCP_VERSION_FILE } from 'function/global/constants/file-constants';
@@ -7,7 +6,6 @@ import { atom } from 'jotai';
 import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from 'function/game-folder/state';
 import { atomWithRefresh, getStore } from 'hooks/jotai/base';
 import Logger from 'util/scripts/logging';
-import { showModalOk } from 'components/modals/modal-ok';
 import { INIT_ERROR } from 'function/game-folder/initialization';
 
 const LOGGER = new Logger('ucp-version.ts');

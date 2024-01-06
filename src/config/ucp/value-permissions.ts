@@ -80,7 +80,7 @@ function isValuePermitted(
               by: "spec",
           };
       } */
-  const valueDef = spec.contents.value;
+  // const valueDef = spec.contents.value;
   if (spec.contents.type === 'number') {
     const numberValue = value as number;
 

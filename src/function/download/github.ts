@@ -53,7 +53,7 @@ async function checkForLatestUCP3DevReleaseUpdate(
   return result;
 }
 
-async function getLatestUCP3Artifacts() {
+export async function getLatestUCP3Artifacts() {
   const result = await axios
     .get(`${UCP3_REPO_URL_API}/actions/artifacts`, {
       auth: { username: 'ucp3-machine', password: UCP3_REPOS_MACHINE_TOKEN },

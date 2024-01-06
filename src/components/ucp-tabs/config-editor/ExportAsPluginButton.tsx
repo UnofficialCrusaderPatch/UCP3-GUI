@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 function ExportAsPluginButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
-  const { onClick } = props;
-
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   return (

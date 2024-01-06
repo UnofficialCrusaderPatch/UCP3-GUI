@@ -118,7 +118,7 @@ function saveUCPConfigPart(
   );
 
   Object.entries(config)
-    .filter(([key, value]) => value !== undefined)
+    .filter(([, value]) => value !== undefined)
     .forEach(([key, value]) => {
       const parts = key.split('.');
       const extName = parts[0];

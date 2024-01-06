@@ -8,12 +8,9 @@ import {
   GAME_FOLDER_INTERFACE_ASYNC_ATOM,
   GAME_FOLDER_LOADED_ATOM,
 } from 'function/game-folder/state';
-import {
-  createEditorWindow,
-  reloadCurrentWindow,
-} from 'function/window-actions';
+import { reloadCurrentWindow } from 'function/window-actions';
 import { useRecentFolders } from 'hooks/jotai/hooks';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from 'tauri/tauri-dialog';

@@ -1,3 +1,9 @@
+/* eslint-disable no-useless-escape */
+/* eslint-disable no-eval */
+/* eslint-disable no-control-regex */
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 /*
     cycle.js
     2021-05-31

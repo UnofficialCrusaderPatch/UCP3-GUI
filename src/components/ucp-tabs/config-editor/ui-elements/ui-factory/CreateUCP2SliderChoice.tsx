@@ -7,7 +7,6 @@ import { RadioGroup, Radio } from 'react-radio-group';
 import { useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import RangeSlider from 'react-bootstrap-range-slider';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
@@ -15,13 +14,10 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from 'function/configuration/state';
 import Logger from 'util/scripts/logging';
-import { BootstrapReboot } from 'react-bootstrap-icons';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
@@ -51,9 +47,6 @@ function CreateUCP2SliderChoice(args: {
   className: string;
 }) {
   const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -65,7 +58,7 @@ function CreateUCP2SliderChoice(args: {
     CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   );
 
-  const { spec, disabled, className } = args;
+  const { spec, disabled } = args;
   const { url, text, tooltip, enabled, header } = spec;
   const { contents } = spec;
   const { choices } = contents as UCP2SliderChoiceContents;
@@ -107,7 +100,6 @@ function CreateUCP2SliderChoice(args: {
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
-  const hasWarning = configurationWarnings[url] !== undefined;
   const { hasHeader } = spec as DisplayConfigElement & {
     hasHeader: boolean;
   };

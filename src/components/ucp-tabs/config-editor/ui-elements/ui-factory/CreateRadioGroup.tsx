@@ -4,7 +4,6 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
@@ -14,7 +13,6 @@ import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
 import { Form } from 'react-bootstrap';
 import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
-import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
@@ -26,9 +24,6 @@ function CreateRadioGroup(args: {
   className: string;
 }) {
   const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -41,7 +36,7 @@ function CreateRadioGroup(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled } = spec;
+  const { url, text, enabled } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
   const { [url]: value } = configuration;
@@ -50,9 +45,8 @@ function CreateRadioGroup(args: {
     configuration,
     configurationDefaults,
   );
-  const fullToolTip = formatToolTip(tooltip, url);
 
-  const hasWarning = configurationWarnings[url] !== undefined;
+  // const hasWarning = configurationWarnings[url] !== undefined;
   const defaultChoice = choices[0];
 
   const statusBarMessage = createStatusBarMessage(

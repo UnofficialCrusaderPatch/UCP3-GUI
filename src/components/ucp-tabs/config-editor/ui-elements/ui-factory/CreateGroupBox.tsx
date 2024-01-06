@@ -31,9 +31,8 @@ function CreateGroupBox(args: {
       i += 1
     ) {
       rowChildren.push(
-        <Col key={children[i].url}>
+        <Col key={children[i].url || children[i].name}>
           <CreateUIElement
-            key={children[i].url}
             spec={children[i]}
             disabled={disabled}
             className=""

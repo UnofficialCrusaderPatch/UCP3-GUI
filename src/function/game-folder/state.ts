@@ -1,5 +1,4 @@
 /* eslint-disable import/prefer-default-export */
-import { P } from '@tauri-apps/api/event-41a9edf5';
 import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
 import Logger from 'util/scripts/logging';

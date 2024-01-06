@@ -1,12 +1,11 @@
 import { ChoiceContents, DisplayConfigElement } from 'config/ucp/common';
-import { Accordion, Form } from 'react-bootstrap';
+import { Accordion } from 'react-bootstrap';
 import { RadioGroup, Radio } from 'react-radio-group';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
@@ -14,7 +13,6 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Logger from 'util/scripts/logging';
 import { useState, useRef } from 'react';
 import { parseEnabledLogic } from '../enabled-logic';
-import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
@@ -26,9 +24,7 @@ function CreateUCP2RadioGroup(args: {
   className: string;
 }) {
   const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
+
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -40,8 +36,8 @@ function CreateUCP2RadioGroup(args: {
     CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   );
 
-  const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, header } = spec;
+  const { spec, disabled } = args;
+  const { url, text, enabled, header } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
   let { [url]: value } = configuration as {
@@ -55,9 +51,8 @@ function CreateUCP2RadioGroup(args: {
     configuration,
     configurationDefaults,
   );
-  const fullToolTip = formatToolTip(tooltip, url);
 
-  const hasWarning = configurationWarnings[url] !== undefined;
+  // const hasWarning = configurationWarnings[url] !== undefined;
   const { hasHeader } = spec as DisplayConfigElement & {
     hasHeader: boolean;
   };

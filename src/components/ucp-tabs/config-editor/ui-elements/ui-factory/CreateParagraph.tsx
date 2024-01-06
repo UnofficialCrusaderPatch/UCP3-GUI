@@ -5,8 +5,8 @@ function CreateParagraph(args: {
   disabled: boolean;
   className: string;
 }) {
-  const { spec, disabled, className } = args;
-  const { name, description, header, text } = spec;
+  const { spec } = args;
+  const { header, text } = spec;
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;

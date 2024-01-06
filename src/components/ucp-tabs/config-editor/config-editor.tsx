@@ -1,11 +1,9 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable react/no-unescaped-entities */
-/* global CreateUIElement */
 
 import './config-editor.css';
 
-import { Form } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { UCP3SerializedPluginConfig, toYaml } from 'config/ucp/config-files';

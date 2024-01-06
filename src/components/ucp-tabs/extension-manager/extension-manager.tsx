@@ -1,9 +1,7 @@
 import './extension-manager.css';
 
-import { Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
-import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import * as GuiSettings from 'function/gui-settings/settings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
@@ -108,7 +106,7 @@ export default function ExtensionManager() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
+  const setCurrentTab = useSetAtom(CURRENT_DISPLAYED_TAB);
 
   return (
     <div className="flex-default extension-manager">
@@ -262,7 +260,6 @@ export default function ExtensionManager() {
                           let originalPath = '';
                           if (ext.type === 'plugin') {
                             originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
-                            const dstPath = `plugins/${fpath}`;
                             // eslint-disable-next-line no-await-in-loop
                             const touch = await exists(originalPath);
 

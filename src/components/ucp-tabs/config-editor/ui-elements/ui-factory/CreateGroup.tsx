@@ -12,7 +12,8 @@ function CreateGroup(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
-  const { name, description, children, header, text } = spec;
+  // TODO: header property is not used, is this expected?
+  const { name, description, children, text } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;

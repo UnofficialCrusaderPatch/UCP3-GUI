@@ -3,7 +3,6 @@ import { NumberContents, DisplayConfigElement } from 'config/ucp/common';
 import { Accordion, Form } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import RangeSlider from 'react-bootstrap-range-slider';
 
 import { useRef, useState } from 'react';
 
@@ -13,7 +12,6 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
 } from 'function/configuration/state';
@@ -34,9 +32,6 @@ function CreateUCP2Slider(args: {
   className: string;
 }) {
   const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -48,7 +43,7 @@ function CreateUCP2Slider(args: {
     CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   );
 
-  const { spec, disabled, className } = args;
+  const { spec, disabled } = args;
   const { url, text, tooltip, enabled, header } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
@@ -65,7 +60,7 @@ function CreateUCP2Slider(args: {
   );
   const fullToolTip = formatToolTip(tooltip, url);
 
-  const hasWarning = configurationWarnings[url] !== undefined;
+  // const hasWarning = configurationWarnings[url] !== undefined;
   const { hasHeader } = spec as DisplayConfigElement & {
     hasHeader: boolean;
   };

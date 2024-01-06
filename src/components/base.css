@@ -5,7 +5,18 @@
 
 @import './scrollbar.css';
 
+@font-face {
+  font-family: 'DAYROM';
+  src: url('src/assets/ucp3/fonts/DAYROM__.ttf');
+}
+
+@font-face {
+  font-family: 'River Avenue';
+  src: url('src/assets/ucp3/fonts/riverave.ttf');
+}
+
 body {
+  font-family: 'River Avenue';
   overflow: hidden;
 }
 
@@ -100,6 +111,7 @@ body {
   background-image: url('/src/assets/ucp3/parchment_bg.png');
   overflow-y: scroll;
   overflow-x: clip;
+  font-family: 'River Avenue';
 }
 
 .ornament-border {

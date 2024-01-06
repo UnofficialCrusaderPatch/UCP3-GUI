@@ -70,8 +70,6 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
   ae.forEach((ext) => {
     Object.entries(ext.configEntries).forEach(([url, data]) => {
-      const { contents } = data;
-
       let currentCMO = db[url];
 
       if (currentCMO === undefined) {

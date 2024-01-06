@@ -1,4 +1,3 @@
-import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
 import './RestartButton.css';

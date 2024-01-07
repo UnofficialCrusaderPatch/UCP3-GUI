@@ -1,5 +1,5 @@
 {
-  "type": "module",
+  "type": "commonjs",
   "name": "UCP3-GUI",
   "description": "A GUI for UnofficialCrusaderPatch3 Configuration",
   "keywords": [

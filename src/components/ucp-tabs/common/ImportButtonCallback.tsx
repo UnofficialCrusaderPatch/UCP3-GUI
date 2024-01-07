@@ -1,6 +1,6 @@
-import { openFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
-import { getStore } from 'hooks/jotai/base';
+import { openFileDialog } from '../../../tauri/tauri-dialog';
+import { getStore } from '../../../hooks/jotai/base';
 
 import {
   ConfigFile,

@@ -7,7 +7,7 @@ import {
   readDir,
   renameFile,
 } from '@tauri-apps/api/fs';
-import { extractZipToPath } from 'tauri/tauri-invoke';
+import { extractZipToPath } from '../../../tauri/tauri-invoke';
 import { ZipReader } from '../../../util/structs/zip-handler';
 import Logger from '../../../util/scripts/logging';
 

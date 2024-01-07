@@ -1,7 +1,10 @@
 import { Button, Form } from 'react-bootstrap';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
 import { MouseEvent, useMemo, useRef, useState } from 'react';
+import {
+  openFileDialog,
+  openFolderDialog,
+} from '../../../../../tauri/tauri-dialog';
 
 import {
   DisplayConfigElement,

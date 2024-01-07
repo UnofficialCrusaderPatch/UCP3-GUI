@@ -2,9 +2,9 @@
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-console */
 import { TauriEvent } from '@tauri-apps/api/event';
-import { registerTauriEventListener } from 'tauri/tauri-hooks';
-import { log } from 'tauri/tauri-invoke';
-import { onBackendLog } from 'tauri/tauri-listen';
+import { registerTauriEventListener } from '../../tauri/tauri-hooks';
+import { log } from '../../tauri/tauri-invoke';
+import { onBackendLog } from '../../tauri/tauri-listen';
 import JSON from './jsonCycle';
 
 const LOG_LEVEL = {

@@ -1,5 +1,5 @@
-import { getAppName, getAppVersion } from 'tauri/tauri-misc';
-import { createNewWindow } from 'tauri/tauri-window';
+import { getAppName, getAppVersion } from '../tauri/tauri-misc';
+import { createNewWindow } from '../tauri/tauri-window';
 
 export function reloadCurrentWindow() {
   window.location.reload();

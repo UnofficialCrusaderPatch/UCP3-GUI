@@ -4,7 +4,7 @@ import './game-starter.css';
 import { Atom, useAtomValue } from 'jotai';
 import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { osOpenProgram } from 'tauri/tauri-invoke';
+import { osOpenProgram } from '../../../../tauri/tauri-invoke';
 import {
   EMPTY_GAME_VERSION,
   GameVersionInstance,

@@ -1,5 +1,5 @@
-import { saveFileDialog } from 'tauri/tauri-dialog';
 import { TFunction } from 'i18next';
+import { saveFileDialog } from '../../../tauri/tauri-dialog';
 import { getStore } from '../../../hooks/jotai/base';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,

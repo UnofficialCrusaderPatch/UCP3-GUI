@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { slashify } from 'tauri/tauri-invoke';
+import { slashify } from '../../../tauri/tauri-invoke';
 import { ZipReader } from '../../../util/structs/zip-handler';
 import Logger from '../../../util/scripts/logging';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';

@@ -6,7 +6,7 @@ import './recent-folders.css';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { openFolderDialog } from 'tauri/tauri-dialog';
+import { openFolderDialog } from '../../../tauri/tauri-dialog';
 import { RecentFolderHelper } from '../../../config/gui/recent-folder-helper';
 import {
   GAME_FOLDER_INTERFACE_ASYNC_ATOM,

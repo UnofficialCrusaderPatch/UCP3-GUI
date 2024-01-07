@@ -1,7 +1,7 @@
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/extensions/state/state';
+} from '../../../../function/extensions/state/state';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { Extension } from '../../../../config/ucp/common';
 import { getStore } from '../../../../hooks/jotai/base';

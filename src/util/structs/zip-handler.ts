@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { showError } from 'tauri/tauri-dialog';
+import { showError } from '../../tauri/tauri-dialog';
 import {
   loadZipReader,
   closeZipReader,
@@ -15,7 +15,7 @@ import {
   isZipReaderEmpty,
   getZipReaderNumberOfEntries,
   getZipReaderEntryNames,
-} from 'tauri/tauri-invoke';
+} from '../../tauri/tauri-invoke';
 
 export class ZipReader {
   // do not change, handle like const!

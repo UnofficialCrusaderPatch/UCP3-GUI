@@ -1,7 +1,7 @@
 // needs to be used to get the window by identifier
 // source: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
 
-import { getSha256OfFile } from 'tauri/tauri-invoke';
+import { getSha256OfFile } from '../../tauri/tauri-invoke';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function getHexHashOfString(message: string): Promise<string> {

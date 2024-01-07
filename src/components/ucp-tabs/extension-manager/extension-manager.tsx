@@ -3,7 +3,6 @@ import './extension-manager.css';
 import { useTranslation } from 'react-i18next';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
 import {
   Funnel,
@@ -13,6 +12,7 @@ import {
   PlusLg,
   Stack,
 } from 'react-bootstrap-icons';
+import { openFileDialog, saveFileDialog } from '../../../tauri/tauri-dialog';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import ExtensionPack from '../../../function/extensions/pack/extension-pack';
 import { showModalOk } from '../../modals/modal-ok';

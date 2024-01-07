@@ -1,18 +1,14 @@
 import './language-select.css';
 
 import { startTransition } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import { LANGUAGE_ATOM } from '../../../function/gui-settings/settings';
 
 import languages from '../../../localization/languages.json';
 
-import { LANGUAGE_ATOM } from '../../../function/gui-settings/settings';
-
-import { OVERLAY_ACTIVE_ATOM } from '../../overlay/overlay';
-
 export default function LanguageSelect() {
   const [lang, setLang] = useAtom(LANGUAGE_ATOM);
-  const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
 
   const { t } = useTranslation('gui-landing');
   return (
@@ -45,7 +41,6 @@ export default function LanguageSelect() {
               });
             }
           }}
-          disabled={overlayActive}
         >
           {Object.entries(languages).map(([value, label]) => (
             <option key={value} value={value}>

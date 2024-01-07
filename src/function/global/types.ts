@@ -2,18 +2,6 @@ import { Extension } from '../../config/ucp/common';
 import { ConfigMetaObjectDB } from '../../config/ucp/config-merge/objects';
 import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
 
-export type KeyValueReducerState<Type> = {
-  [key: string]: Type;
-};
-
-export type KeyValueReducerArgs<Type> = {
-  type: string;
-  value: KeyValueReducerState<Type>;
-};
-
-export type ArrayReducerArgs<Type> = Type[];
-export type ArrayReducerState<Type> = Type[];
-
 export type Warning = {
   text: string;
   level: 'error' | 'warning' | 'info';

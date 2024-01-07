@@ -1,16 +1,10 @@
 import './extension-manager.css';
 
-import { Form } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
-import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import * as GuiSettings from 'function/gui-settings/settings';
 import { openFileDialog, saveFileDialog } from 'tauri/tauri-dialog';
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
-import ExtensionPack from 'function/extensions/pack/extension-pack';
-import { showModalOk } from 'components/modals/modal-ok';
-import Logger from 'util/scripts/logging';
 import {
   Funnel,
   FunnelFill,
@@ -19,17 +13,21 @@ import {
   PlusLg,
   Stack,
 } from 'react-bootstrap-icons';
+import * as GuiSettings from '../../../function/gui-settings/settings';
+import ExtensionPack from '../../../function/extensions/pack/extension-pack';
+import { showModalOk } from '../../modals/modal-ok';
+import Logger from '../../../util/scripts/logging';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
-} from 'function/configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { ZipWriter } from 'util/structs/zip-handler';
-import { useCurrentGameFolder } from 'function/game-folder/state';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
-import { makeToast } from 'components/modals/toasts/ToastsDisplay';
+} from '../../../function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
+import { ZipWriter } from '../../../util/structs/zip-handler';
+import { useCurrentGameFolder } from '../../../function/game-folder/state';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
+import { makeToast } from '../../modals/toasts/ToastsDisplay';
 import {
   ActiveExtensionElement,
   ExtensionNameList,
@@ -108,7 +106,7 @@ export default function ExtensionManager() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
+  const setCurrentTab = useSetAtom(CURRENT_DISPLAYED_TAB);
 
   return (
     <div className="flex-default extension-manager">
@@ -262,7 +260,6 @@ export default function ExtensionManager() {
                           let originalPath = '';
                           if (ext.type === 'plugin') {
                             originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
-                            const dstPath = `plugins/${fpath}`;
                             // eslint-disable-next-line no-await-in-loop
                             const touch = await exists(originalPath);
 

@@ -1,7 +1,7 @@
 import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
-import Logger from 'util/scripts/logging';
 import { exists } from '@tauri-apps/api/fs';
+import Logger from '../../util/scripts/logging';
 import { INIT_RUNNING, initializeGameFolder } from './initialization';
 
 export const LOGGER = new Logger('game-folder/state.ts');

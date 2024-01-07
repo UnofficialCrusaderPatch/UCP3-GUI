@@ -1,6 +1,3 @@
-import { KeyValueReducerArgs, KeyValueReducerState } from './types';
-
-// eslint-disable-next-line import/prefer-default-export
 export function KeyValueReducer<Type>() {
   return (
     state: KeyValueReducerState<Type>,
@@ -15,3 +12,10 @@ export function KeyValueReducer<Type>() {
     throw new Error(`Unknown configuration action type: ${action.type}`);
   };
 }
+export type KeyValueReducerState<Type> = {
+  [key: string]: Type;
+};
+export type KeyValueReducerArgs<Type> = {
+  type: string;
+  value: KeyValueReducerState<Type>;
+};

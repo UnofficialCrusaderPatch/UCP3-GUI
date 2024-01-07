@@ -1,8 +1,8 @@
-import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
 import { atomWithReducer } from 'jotai/utils';
-import { propagateActiveExtensionsChange } from 'function/extensions/state/change';
 import { atom } from 'jotai';
-import { ExtensionsState } from 'function/global/types';
+import { ExtensionTree } from '../dependency-management/dependency-resolution';
+import { propagateActiveExtensionsChange } from './change';
+import { ExtensionsState } from '../../global/types';
 
 export const extensionStateReducer = (
   oldState: ExtensionsState,

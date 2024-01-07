@@ -1,4 +1,4 @@
-import Option from 'util/structs/option';
+import Option from '../structs/option';
 
 export type JSType = {
   undefined: undefined;

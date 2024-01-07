@@ -1,7 +1,7 @@
-import { Extension } from 'config/ucp/common';
-import { saveUCPConfig } from 'config/ucp/config-files';
-import { ConfigurationQualifier } from 'function/global/types';
-import { ConsoleLogger } from 'util/scripts/logging';
+import { Extension } from '../../../config/ucp/common';
+import { saveUCPConfig } from '../../../config/ucp/config-files';
+import { ConfigurationQualifier } from '../../../function/global/types';
+import { ConsoleLogger } from '../../../util/scripts/logging';
 
 function saveConfig(
   configuration: { [key: string]: unknown },

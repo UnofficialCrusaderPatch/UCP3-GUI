@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Window from 'components/window';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Window from './components/window';
 
 // import for basic functionality:
 import 'util/scripts/logging';

@@ -1,21 +1,21 @@
 import { exists } from '@tauri-apps/api/fs';
-import { showModalOk } from 'components/modals/modal-ok';
-import importButtonCallback from 'components/ucp-tabs/common/ImportButtonCallback';
-import { Extension } from 'config/ucp/common';
-import { getExtensions } from 'config/ucp/extension-util';
-import { ExtensionTree } from 'function/extensions/dependency-management/dependency-resolution';
+import i18next from 'i18next';
+import { atom } from 'jotai';
+import { showModalOk } from '../../components/modals/modal-ok';
+import importButtonCallback from '../../components/ucp-tabs/common/ImportButtonCallback';
+import { Extension } from '../../config/ucp/common';
+import { getExtensions } from '../../config/ucp/extension-util';
+import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
-} from 'function/configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { getStore } from 'hooks/jotai/base';
-import i18next from 'i18next';
-import Logger, { ConsoleLogger } from 'util/scripts/logging';
-import { atom } from 'jotai';
+} from '../configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
+import { getStore } from '../../hooks/jotai/base';
+import Logger, { ConsoleLogger } from '../../util/scripts/logging';
 
 export const LOGGER = new Logger('game-folder/initialization.ts');
 

@@ -1,4 +1,4 @@
-import { SectionDescription } from 'config/ucp/common';
+import { SectionDescription } from '../../../../../../config/ucp/common';
 import sanitizeID from '../../sanitizeID';
 
 function NavSection(navArgs: {

@@ -16,7 +16,7 @@ function changeLocaleOfObj(
 ) {
   const newObj = { ...obj };
   Object.entries(obj)
-    .filter(([k, v]) => ignoreFields.indexOf(k) !== -1)
+    .filter(([k]) => ignoreFields.indexOf(k) !== -1)
     .forEach(([k, v]) => {
       if (typeof v === 'string') {
         const search = localeRegExp.exec(v);
@@ -68,7 +68,7 @@ function changeLocaleForObj(
   });
 
   Object.entries(obj)
-    .filter(([key, value]) => ignoreFields.indexOf(key) === -1)
+    .filter(([key]) => ignoreFields.indexOf(key) === -1)
     .forEach(([key, value]) => {
       if (value !== null && value instanceof Array) {
         // eslint-disable-next-line @typescript-eslint/no-use-before-define

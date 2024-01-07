@@ -1,18 +1,18 @@
-import Result from 'util/structs/result';
-import { copyFile, Error, resolvePath } from 'tauri/tauri-files';
-import { getHexHashOfFile } from 'util/scripts/hash';
-import Logger from 'util/scripts/logging';
-import { atomWithRefresh, getStore } from 'hooks/jotai/base';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from 'function/game-folder/state';
 import { atom } from 'jotai';
-import { getTranslation } from 'localization/i18n';
 import { loadable } from 'jotai/utils';
+import { copyFile, Error, resolvePath } from '../../tauri/tauri-files';
+import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
+import Result from '../../util/structs/result';
+import { getHexHashOfFile } from '../../util/scripts/hash';
+import Logger from '../../util/scripts/logging';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/state';
+import { getTranslation } from '../../localization/i18n';
 import {
   BINK_FILENAME,
   REAL_BINK_FILENAME,
   UCP_BINK_FILENAME,
-} from 'function/global/constants/file-constants';
-import { showModalOk } from 'components/modals/modal-ok';
+} from '../global/constants/file-constants';
+import { showModalOk } from '../../components/modals/modal-ok';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 

@@ -1,7 +1,12 @@
-import { DisplayConfigElement, NumberContents } from 'config/ucp/common';
-
 import { Form } from 'react-bootstrap';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useState, useRef } from 'react';
+import {
+  DisplayConfigElement,
+  NumberContents,
+} from '../../../../../config/ucp/common';
+
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -9,9 +14,7 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useState, useRef } from 'react';
+} from '../../../../../function/configuration/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';

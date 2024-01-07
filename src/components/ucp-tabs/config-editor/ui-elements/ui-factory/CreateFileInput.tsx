@@ -1,7 +1,14 @@
-import { DisplayConfigElement, FileInputContents } from 'config/ucp/common';
-
 import { Button, Form } from 'react-bootstrap';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
+import { MouseEvent, useMemo, useRef, useState } from 'react';
+
+import {
+  DisplayConfigElement,
+  FileInputContents,
+} from '../../../../../config/ucp/common';
+
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -9,15 +16,14 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { openFileDialog, openFolderDialog } from 'tauri/tauri-dialog';
-import { useCurrentGameFolder } from 'function/game-folder/state';
-import { MouseEvent, useMemo, useRef, useState } from 'react';
-import Logger from 'util/scripts/logging';
-import { showModalOkCancel } from 'components/modals/modal-ok-cancel';
-import { getStore } from 'hooks/jotai/base';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
+} from '../../../../../function/configuration/state';
+
+import { useCurrentGameFolder } from '../../../../../function/game-folder/state';
+
+import Logger from '../../../../../util/scripts/logging';
+import { showModalOkCancel } from '../../../../modals/modal-ok-cancel';
+import { getStore } from '../../../../../hooks/jotai/base';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../../function/extensions/state/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';

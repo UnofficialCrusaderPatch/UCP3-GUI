@@ -1,5 +1,5 @@
-import { SectionDescription } from 'config/ucp/common';
 import { useTranslation } from 'react-i18next';
+import { SectionDescription } from '../../../../../config/ucp/common';
 import NavSection from './navigation/NavSection';
 
 import sanitizeID from '../sanitizeID';

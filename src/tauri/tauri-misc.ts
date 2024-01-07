@@ -3,8 +3,8 @@ import {
   getVersion,
   getTauriVersion as tauriGetTauriVersion,
 } from '@tauri-apps/api/app';
-import Option from 'util/structs/option';
-import Result from 'util/structs/result';
+import Option from '../util/structs/option';
+import Result from '../util/structs/result';
 
 export async function getAppName(): Promise<Option<string>> {
   return (await Result.tryAsync(getName)).ok();

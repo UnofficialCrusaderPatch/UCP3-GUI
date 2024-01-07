@@ -1,30 +1,38 @@
+import { openFileDialog } from 'tauri/tauri-dialog';
+import { TFunction } from 'i18next';
+import { getStore } from 'hooks/jotai/base';
+
 import {
   ConfigFile,
   Extension,
   ConfigEntry,
   ConfigFileExtensionEntry,
-} from 'config/ucp/common';
-import { loadConfigFromFile } from 'config/ucp/config-files';
-import { ConfigMetaObjectDB } from 'config/ucp/config-merge/objects';
-import { DependencyStatement, Version } from 'config/ucp/dependency-statement';
-import { collectConfigEntries } from 'function/extensions/discovery/discovery';
-import { ExtensionsState, ConfigurationQualifier } from 'function/global/types';
-import { openFileDialog } from 'tauri/tauri-dialog';
-import { TFunction } from 'i18next';
-import { getStore } from 'hooks/jotai/base';
+} from '../../../config/ucp/common';
+import { loadConfigFromFile } from '../../../config/ucp/config-files';
+import { ConfigMetaObjectDB } from '../../../config/ucp/config-merge/objects';
+import {
+  DependencyStatement,
+  Version,
+} from '../../../config/ucp/dependency-statement';
+import { collectConfigEntries } from '../../../function/extensions/discovery/discovery';
+import {
+  ExtensionsState,
+  ConfigurationQualifier,
+} from '../../../function/global/types';
+
 import {
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/extensions/state/state';
+} from '../../../function/extensions/state/state';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { showModalOk } from 'components/modals/modal-ok';
-import { ConsoleLogger } from 'util/scripts/logging';
+} from '../../../function/configuration/state';
+import { showModalOk } from '../../modals/modal-ok';
+import { ConsoleLogger } from '../../../util/scripts/logging';
 import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,

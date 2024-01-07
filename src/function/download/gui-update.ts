@@ -3,14 +3,14 @@ import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { ResponseType } from '@tauri-apps/api/http';
 import { TFunction } from 'i18next';
 import semver from 'semver';
-import { askInfo } from 'tauri/tauri-dialog';
+import { askInfo } from '../../tauri/tauri-dialog';
 import {
   getDownloadFolder,
   joinPaths,
   writeBinaryFile,
-} from 'tauri/tauri-files';
-import { getBinary, getJSON, getSimple } from 'tauri/tauri-http';
-import { getAppVersion } from 'tauri/tauri-misc';
+} from '../../tauri/tauri-files';
+import { getBinary, getJSON, getSimple } from '../../tauri/tauri-http';
+import { getAppVersion } from '../../tauri/tauri-misc';
 import {
   GITHUB_AUTH_HEADER,
   GITHUB_BASIC_AUTH,

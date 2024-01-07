@@ -7,9 +7,9 @@ import {
   readDir,
   renameFile,
 } from '@tauri-apps/api/fs';
-import { ZipReader } from 'util/structs/zip-handler';
-import Logger from 'util/scripts/logging';
 import { extractZipToPath } from 'tauri/tauri-invoke';
+import { ZipReader } from '../../../util/structs/zip-handler';
+import Logger from '../../../util/scripts/logging';
 
 const LOGGER = new Logger('extension-pack.ts');
 

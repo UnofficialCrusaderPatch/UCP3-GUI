@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
 
 export type CreatePluginModalResult = {
@@ -30,7 +29,7 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
 
   const [show, setShow] = useState(true);
 
-  const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
+  // const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
   const [pluginName, setPluginName] = useState('');
   const [pluginAuthor, setPluginAuthor] = useState('');

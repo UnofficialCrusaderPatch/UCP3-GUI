@@ -1,10 +1,10 @@
 import './extension-manager.css';
 
-import { Extension } from 'config/ucp/common';
-import { ExtensionsState } from 'function/global/types';
+import { Extension } from '../../../config/ucp/common';
+import { ExtensionsState } from '../../../function/global/types';
 
-import { showModalOk } from 'components/modals/modal-ok';
-import Logger from 'util/scripts/logging';
+import { showModalOk } from '../../modals/modal-ok';
+import Logger from '../../../util/scripts/logging';
 
 const LOGGER = new Logger('extension-state.ts');
 

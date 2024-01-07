@@ -2,13 +2,10 @@
 import {
   onFsExists,
   readBinaryFile,
-  readDir,
   readTextFile,
-} from 'tauri/tauri-files';
-import { FileEntry } from '@tauri-apps/api/fs';
-import { readAndFilterPaths } from 'tauri/tauri-invoke';
+} from '../../../tauri/tauri-files';
+import { readAndFilterPaths } from '../../../tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
-import { globToRegExp } from './glob';
 
 class DirectoryExtensionFileHandle implements ExtensionFileHandle {
   path: string;
@@ -35,47 +32,6 @@ class DirectoryExtensionFileHandle implements ExtensionFileHandle {
     return this.extensionHandle.getBinaryContents(this.path);
   }
 }
-
-const standardizePath = (path: string) => path.replaceAll(/\\+/g, '/');
-
-const relativizePath = (basePath: string, fullPath: string) => {
-  const relPathA = standardizePath(fullPath).split(
-    standardizePath(basePath),
-    2,
-  )[1];
-  let i = 0;
-  while (
-    relPathA.slice(i).startsWith('/') ||
-    relPathA.slice(i).startsWith('\\')
-  ) {
-    i += 1;
-  }
-  return relPathA.slice(i);
-};
-
-const collectFileEntries = (basePath: string, fileEntries: FileEntry[]) => {
-  const allFileEntries: FileEntry[] = [];
-
-  const recursive = (fileEntry: FileEntry) => {
-    if (fileEntry.children !== undefined && fileEntry.children !== null) {
-      allFileEntries.push({
-        ...fileEntry,
-        path: `${relativizePath(basePath, fileEntry.path)}/`,
-      } as FileEntry);
-
-      fileEntry.children.forEach((childEntry) => recursive(childEntry));
-    } else {
-      allFileEntries.push({
-        ...fileEntry,
-        path: relativizePath(basePath, fileEntry.path),
-      } as FileEntry);
-    }
-  };
-
-  fileEntries.forEach((fileEntry: FileEntry) => recursive(fileEntry));
-
-  return allFileEntries;
-};
 
 class DirectoryExtensionHandle implements ExtensionHandle {
   path: string;

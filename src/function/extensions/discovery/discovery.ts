@@ -1,9 +1,12 @@
 // eslint-disable-next-line max-classes-per-file
-import { createDir, exists, type FileEntry } from '@tauri-apps/api/fs';
+import { exists, type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
-import { readDir } from 'tauri/tauri-files';
+import { readDir } from '../../../tauri/tauri-files';
 
+import { extractZipToPath, slashify } from '../../../tauri/tauri-invoke';
+
+import languages from '../../../localization/languages.json';
 import {
   ConfigEntry,
   ConfigFile,
@@ -12,19 +15,11 @@ import {
   DisplayConfigElement,
   Extension,
   ExtensionIOCallback,
-  OptionEntry,
-} from 'config/ucp/common';
-import Logger, { ConsoleLogger } from 'util/scripts/logging';
-import languages from 'localization/languages.json';
-import { createReceivePluginPathsFunction } from 'components/sandbox-menu/sandbox-menu-functions';
-import { canonicalize, extractZipToPath, slashify } from 'tauri/tauri-invoke';
-import { showModalOk } from 'components/modals/modal-ok';
-import { SemVer } from 'semver';
-import { ZipReader } from 'util/structs/zip-handler';
-import { tempdir } from '@tauri-apps/api/os';
-import { t } from 'i18next';
+} from '../../../config/ucp/common';
+import Logger, { ConsoleLogger } from '../../../util/scripts/logging';
+import { showModalOk } from '../../../components/modals/modal-ok';
+import { ZipReader } from '../../../util/structs/zip-handler';
 import { ExtensionHandle } from '../handles/extension-handle';
-import ZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
 import { changeLocale } from '../locale/locale';
 import { ExtensionTree } from '../dependency-management/dependency-resolution';
@@ -111,40 +106,6 @@ function applyLocale(ext: Extension, locale: { [key: string]: string }) {
   return ui.map((uiElement: { [key: string]: unknown }) =>
     changeLocale(locale, uiElement as { [key: string]: unknown }),
   );
-}
-
-function collectOptionEntries(
-  obj: { [key: string]: unknown },
-  extensionName: string,
-  collection?: { [key: string]: OptionEntry },
-) {
-  // eslint-disable-next-line no-param-reassign
-  if (collection === undefined) collection = {};
-
-  // WHY IS typeof(null) == 'object'
-  if (typeof obj === 'object' && obj !== null) {
-    if (obj.url !== undefined && obj.url !== null) {
-      const oeObj = obj as OptionEntry;
-      if (collection[oeObj.url] !== undefined) {
-        throw new Error(`url already has a value: ${oeObj.url}`);
-      }
-      let colURL = oeObj.url;
-      if (colURL.indexOf(`${extensionName}.`) !== 0) {
-        colURL = `${extensionName}.${colURL}`;
-      }
-      // eslint-disable-next-line no-param-reassign
-      collection[colURL] = oeObj;
-    } else {
-      Object.keys(obj).forEach((key: string) => {
-        collectOptionEntries(
-          obj[key] as { [key: string]: unknown },
-          extensionName,
-          collection,
-        );
-      });
-    }
-  }
-  return collection;
 }
 
 function collectConfigEntries(
@@ -617,7 +578,6 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
           handle: eh,
         } as ExtensionLoadResult;
       } catch (e: any) {
-        console.error(e);
         LOGGER.msg(e).error();
         return {
           status: 'error',

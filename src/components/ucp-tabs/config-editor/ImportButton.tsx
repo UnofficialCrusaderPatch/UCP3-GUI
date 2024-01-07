@@ -1,4 +1,4 @@
-import { Folder, Folder2Open } from 'react-bootstrap-icons';
+import { Folder } from 'react-bootstrap-icons';
 
 function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (

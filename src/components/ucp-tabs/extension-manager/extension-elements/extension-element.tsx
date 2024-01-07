@@ -3,16 +3,16 @@ import './extension-element.css';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import { Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { Extension } from 'config/ucp/common';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
+import { Extension } from '../../../../config/ucp/common';
 import {
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
-} from 'function/extensions/state/state';
-import { AvailableExtensionVersionsDictionary } from 'function/configuration/state';
-import { setOverlayContent } from 'components/overlay/overlay';
+} from '../../../../function/extensions/state/state';
+import { AvailableExtensionVersionsDictionary } from '../../../../function/configuration/state';
+import { setOverlayContent } from '../../../overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
 import moveExtensionClickCallback from './MoveExtensionClickCallback';

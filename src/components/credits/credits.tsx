@@ -1,10 +1,5 @@
 import './credits.css';
 
-import {
-  OVERLAY_ACTIVE_ATOM,
-  OverlayContentProps,
-  setOverlayContent,
-} from 'components/overlay/overlay';
 import { useTranslation } from 'react-i18next';
 
 import Markdown from 'react-markdown';
@@ -13,7 +8,7 @@ import Markdown from 'react-markdown';
 // @ts-ignore
 import rehypeExternalLinks from 'rehype-external-links';
 
-import { useAtomValue } from 'jotai';
+import { OverlayContentProps } from '../overlay/overlay';
 
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.md?raw';

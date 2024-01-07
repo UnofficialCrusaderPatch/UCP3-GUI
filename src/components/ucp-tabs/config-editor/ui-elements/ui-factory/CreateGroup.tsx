@@ -1,10 +1,9 @@
-import { DisplayConfigElement } from 'config/ucp/common';
-
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
+import { DisplayConfigElement } from '../../../../../config/ucp/common';
 
 function CreateGroup(args: {
   spec: DisplayConfigElement;
@@ -12,7 +11,8 @@ function CreateGroup(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
-  const { name, description, children, header, text } = spec;
+  // TODO: header property is not used, is this expected?
+  const { name, description, children, text } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;

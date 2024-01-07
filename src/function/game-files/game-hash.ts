@@ -1,6 +1,6 @@
-import { getHexHashOfFile } from 'util/scripts/hash';
-import Logger from 'util/scripts/logging';
-import Option from 'util/structs/option';
+import { getHexHashOfFile } from '../../util/scripts/hash';
+import Logger from '../../util/scripts/logging';
+import Option from '../../util/structs/option';
 
 const LOGGER = new Logger('game-hash.ts');
 

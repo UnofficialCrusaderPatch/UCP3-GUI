@@ -3,7 +3,7 @@ import React from 'react';
 import type {
   DisplayConfigElement,
   SectionDescription,
-} from 'config/ucp/common';
+} from '../../../../../config/ucp/common';
 
 import CreateUIElement from './CreateUIElement';
 

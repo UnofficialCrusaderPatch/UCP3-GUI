@@ -1,6 +1,6 @@
-import { DisplayConfigElement } from 'config/ucp/common';
 import { useTranslation } from 'react-i18next';
-import Logger from 'util/scripts/logging';
+import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import Logger from '../../../../../util/scripts/logging';
 import { DisplayDefaults } from '../display-defaults';
 import CreateChoice from './CreateChoice';
 // eslint-disable-next-line import/no-cycle

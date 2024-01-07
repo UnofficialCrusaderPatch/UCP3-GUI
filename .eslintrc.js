@@ -49,8 +49,8 @@ module.exports = {
    "react/react-in-jsx-scope": "off",
    "@typescript-eslint/no-empty-function": "warn",
    "prettier/prettier": "error",
-   "@typescript-eslint/no-unused-vars": "warn",
-   "no-console": "warn",
+   "@typescript-eslint/no-unused-vars": "error",
+   "no-console": "error",
    "@typescript-eslint/no-explicit-any": "warn"
   },
   plugins: ["prettier"]

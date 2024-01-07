@@ -1,7 +1,7 @@
 import {
   ConfigurationSuggestion,
   ConfigurationLock,
-} from 'function/configuration/state';
+} from '../../../../../function/configuration/state';
 
 const createStatusBarMessage = (
   disabledByParent: boolean,

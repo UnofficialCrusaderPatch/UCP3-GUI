@@ -1,8 +1,8 @@
+import './TopBar.css';
+
 import CreditsButton from './credits/CreditsButton';
 import { RestartButton } from './restart/RestartButton';
 import LanguageSelect from './language-select/language-select';
-
-import './TopBar.css';
 
 // eslint-disable-next-line import/prefer-default-export
 export function TopBar() {

@@ -1,11 +1,16 @@
-import { FileEntry } from '@tauri-apps/api/fs';
-import { Extension } from 'config/ucp/common';
-import { CONFIGURATION_REDUCER_ATOM } from 'function/configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from 'function/extensions/state/state';
-import { getStore } from 'hooks/jotai/base';
 import i18next from 'i18next';
-import { readTextFile, receiveAssetUrl, resolvePath } from 'tauri/tauri-files';
-import { slashify } from 'tauri/tauri-invoke';
+import { FileEntry } from '@tauri-apps/api/fs';
+import {
+  readTextFile,
+  receiveAssetUrl,
+  resolvePath,
+} from '../../tauri/tauri-files';
+import { slashify } from '../../tauri/tauri-invoke';
+import { getStore } from '../../hooks/jotai/base';
+
+import { Extension } from '../../config/ucp/common';
+import { CONFIGURATION_REDUCER_ATOM } from '../../function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 
 export async function getLanguage(): Promise<string> {
   return i18next.language; // is kinda enough, using the hook might be overkill

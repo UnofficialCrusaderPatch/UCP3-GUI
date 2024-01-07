@@ -1,19 +1,17 @@
-import { Accordion, Form } from 'react-bootstrap';
-import { DisplayConfigElement } from 'config/ucp/common';
-
+import { Accordion } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
+import { useState, useRef } from 'react';
+import { DisplayConfigElement } from '../../../../../config/ucp/common';
+
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_REDUCER_ATOM,
-} from 'function/configuration/state';
-import { useState, useRef } from 'react';
+} from '../../../../../function/configuration/state';
 import { parseEnabledLogic } from '../enabled-logic';
-import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
@@ -23,9 +21,6 @@ function CreateUCP2Switch(args: {
   className: string;
 }) {
   const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
-  const configurationWarnings = useAtomValue(
-    CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  );
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -37,15 +32,14 @@ function CreateUCP2Switch(args: {
     CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   );
 
-  const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, header } = spec;
+  const { spec, disabled } = args;
+  const { url, text, enabled, header } = spec;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,
     configurationDefaults,
   );
-  const fullToolTip = formatToolTip(tooltip, url);
 
   const statusBarMessage = createStatusBarMessage(
     disabled,
@@ -61,7 +55,8 @@ function CreateUCP2Switch(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const hasWarning = configurationWarnings[url] !== undefined;
+  // const hasWarning = configurationWarnings[url] !== undefined;
+
   const headerElement = (
     <div className="sword-checkbox ucp2-switch">
       <input

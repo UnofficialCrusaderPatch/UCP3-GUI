@@ -2,12 +2,7 @@ import './credits.css';
 
 import { useTranslation } from 'react-i18next';
 
-import Markdown from 'react-markdown';
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import rehypeExternalLinks from 'rehype-external-links';
-
+import { SaferMarkdown } from '../markdown/SaferMarkdown';
 import { OverlayContentProps } from '../overlay/overlay';
 
 // eslint-disable-next-line import/no-unresolved
@@ -27,11 +22,7 @@ export function Credits(props: OverlayContentProps) {
         style={{ backgroundImage: '' }}
       >
         <div className="credits-text">
-          <Markdown
-            rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
-          >
-            {credits}
-          </Markdown>
+          <SaferMarkdown>{credits}</SaferMarkdown>
         </div>
       </div>
       <button

@@ -1,10 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import Markdown from 'react-markdown';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// eslint-disable-next-line import/no-extraneous-dependencies
-import rehypeExternalLinks from 'rehype-external-links';
+import { SaferMarkdown } from '../../../markdown/SaferMarkdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 
@@ -25,11 +21,7 @@ export function ExtensionViewer(
       <h1 className="credits-title">{t('gui-editor:extensions.viewer')}</h1>
       <div className="parchment-box credits-text-box">
         <div className="credits-text">
-          <Markdown
-            rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
-          >
-            {extension.descriptionMD}
-          </Markdown>
+          <SaferMarkdown>{extension.descriptionMD}</SaferMarkdown>
         </div>
       </div>
       <button type="button" className="credits-close" onClick={closeFunc}>

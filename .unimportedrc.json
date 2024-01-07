@@ -1,0 +1,60 @@
+{
+  "ignoreUnresolved": [
+    [
+      "./credits.md?raw",
+      [
+        "src\\components\\credits\\credits.tsx"
+      ]
+    ],
+    [
+      "./sandbox-frame-base.css?inline",
+      [
+        "src\\components\\sandbox-menu\\sandbox-menu.tsx"
+      ]
+    ],
+    [
+      "./sandbox-frame-base.js?raw",
+      [
+        "src\\components\\sandbox-menu\\sandbox-menu.tsx"
+      ]
+    ],
+    [
+      "assets/misc/chevron-compact-down.svg",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/misc/fullscreen-exit.svg",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/misc/fullscreen.svg",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/misc/x-lg.svg",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/ucp3.png",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ]
+  ],
+  "ignoreUnused": [
+    "bootstrap"
+  ],
+  "ignoreUnimported": [
+    "src/components/sandbox-menu/sandbox-frame-base.js",
+    "src/components/ucp-tabs/common/CreatePackButtonCallback.tsx",
+    "src/function/global/ArrayReducer.ts"
+  ]
+}

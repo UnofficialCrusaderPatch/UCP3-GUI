@@ -17,7 +17,7 @@ export type OverlayContent<T = undefined> = (
 
 const OVERLAY_CONTENT_ATOM = atom<OverlayConfig<any>>(null);
 
-export const OVERLAY_ACTIVE_ATOM = atom(false);
+export const OVERLAY_ACTIVE_ATOM = atom((get) => !!get(OVERLAY_CONTENT_ATOM));
 
 export function setOverlayContent<T>(
   overlayContent: OverlayContent<T>,
@@ -35,14 +35,12 @@ export function setOverlayContent<T>(
 
 export function Overlay() {
   const [overlayConfig, setOverlayContentAtom] = useAtom(OVERLAY_CONTENT_ATOM);
-  const setOverlayActive = useSetAtom(OVERLAY_ACTIVE_ATOM);
 
   const overlayDiv = useRef<HTMLDivElement>(null);
   const closeFunc = () => setOverlayContentAtom(null);
 
   const overlayActive = !!overlayConfig;
   useEffect(() => {
-    setOverlayActive(overlayActive);
     if (overlayActive) {
       overlayDiv.current?.focus();
     }

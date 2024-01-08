@@ -1,7 +1,7 @@
 import './sandbox-menu.css';
 
 import { Suspense, useEffect, useState } from 'react';
-import Sandbox, { PluginInstance } from 'websandbox';
+import Sandbox from '@jetbrains/websandbox';
 
 import { useTranslation } from 'react-i18next';
 
@@ -114,7 +114,7 @@ function SandboxInternal(
   const [t] = useTranslation(['gui-editor']);
   const currentFolder = useCurrentGameFolder();
 
-  const [sandbox, setSandbox] = useState<null | PluginInstance>(null);
+  const [sandbox, setSandbox] = useState<null | Sandbox>(null);
 
   const [initDone, setInitDone] = useState(false);
 
@@ -123,7 +123,7 @@ function SandboxInternal(
     // the CSP currently allows this only for the sandbox
     // However, it seems to currently simply be needed due to the used lib.
     // Postponed until idea or bigger rework
-    const sand: PluginInstance = Sandbox.create(
+    const sand: Sandbox = Sandbox.create(
       createSandboxHostApi(
         setInitDone,
         currentFolder,
@@ -153,7 +153,7 @@ function SandboxInternal(
         disabled={!initDone}
         onClick={async () =>
           // we will see, if this works, or just closes the sandbox
-          saveConfig(baseUrl, await sandbox.connection.remote.getConfig())
+          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
         }
       >
         {t('gui-editor:sandbox.save')}
@@ -163,7 +163,7 @@ function SandboxInternal(
         className="ucp-button sandbox-control-button"
         disabled={!initDone}
         onClick={async () => {
-          saveConfig(baseUrl, await sandbox.connection.remote.getConfig());
+          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig());
           closeFunc();
         }}
       >

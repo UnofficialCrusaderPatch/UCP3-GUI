@@ -38,7 +38,9 @@
       "http": {
         "all": true,
         "scope": [
-          "https://api.github.com/repos/UnofficialCrusaderPatch/**"
+          "https://api.github.com/repos/UnofficialCrusaderPatch/**/*",
+          "https://github.com/UnofficialCrusaderPatch/**/*",
+          "https://gist.githubusercontent.com/ucp3-machine/**/*"
         ]
       },
       "shell": {

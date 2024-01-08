@@ -4,6 +4,10 @@ import { useAtomValue } from 'jotai';
 import { ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
+import { UCP3Updater } from '../../../function/download/github';
+import { getStore } from '../../../hooks/jotai/base';
+import { removeFile, writeBinaryFile } from '../../../tauri/tauri-files';
 import { checkForGUIUpdates } from '../../../function/download/gui-update';
 import { installUCPFromZip } from '../../../function/download/ucp-download-handling';
 import {
@@ -18,7 +22,10 @@ import { openFileDialog } from '../../../tauri/tauri-dialog';
 import Result from '../../../util/structs/result';
 import { showModalOkCancel } from '../../modals/modal-ok-cancel';
 import { showModalOk } from '../../modals/modal-ok';
-import { useCurrentGameFolder } from '../../../function/game-folder/state';
+import {
+  GAME_FOLDER_LOADED_ATOM,
+  useCurrentGameFolder,
+} from '../../../function/game-folder/state';
 import { makeToast } from '../../modals/toasts/ToastsDisplay';
 import RecentFolders from './recent-folders';
 import StateButton from '../../general/state-button';
@@ -77,7 +84,7 @@ export default function Overview() {
     <div className="flex-default overview">
       <RecentFolders />
 
-      {/*      <StateButton
+      <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{
           idle: t('gui-editor:overview.update.idle'),
@@ -85,30 +92,103 @@ export default function Overview() {
           success: t('gui-editor:overview.update.success'),
           failed: t('gui-editor:overview.update.failed'),
         }}
-        buttonVariant="primary"
+        buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => {
-          const updateResult = await checkForUCP3Updates(
-            currentFolder,
-            (status) => stateUpdate(status),
-            t
-          );
-          if (updateResult.update === true && updateResult.installed === true) {
-            setShow(true);
+          try {
+            stateUpdate(t('gui-download:ucp.version.check'));
 
-            // load new state
-            await receiveState();
-            await receiveVersion();
+            const vr = await getStore().get(UCP_VERSION_ATOM);
+            let version = '0.0.0';
+            let sha = '';
+            if (vr.status === 'ok') {
+              version = `${vr.version.getMajorAsString()}.${vr.version.getMinorAsString()}.${vr.version.getPatchAsString()}`;
+              sha = vr.version!.sha.getOrElse('!');
+            }
 
-            return Result.ok('');
+            const updater = new UCP3Updater(version, sha, new Date(0));
+
+            const updateExists = await updater.doesUpdateExist();
+            if (updateExists) {
+              stateUpdate('Update is available!');
+            } else {
+              return Result.ok(t('gui-download:ucp.version.not.available'));
+            }
+
+            const dialogResult = await showModalOkCancel({
+              title: t('gui-general:confirm'),
+              message: t('gui-download:ucp.download.request', {
+                version: updater.meta!.version,
+              }),
+            });
+
+            if (dialogResult !== true) {
+              return Result.err(t('gui-download:ucp.download.cancelled'));
+            }
+
+            stateUpdate(t('gui-download:ucp.download.download'));
+            const update = await updater.fetchUpdate();
+
+            stateUpdate(`Downloaded update: ${update.name}`);
+
+            const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
+
+            if (gameFolderState.state !== 'hasData') {
+              stateUpdate(
+                'Game folder in bad state. Cannot save update to disk.',
+              );
+              return Result.emptyErr();
+            }
+            const gameFolder = gameFolderState.data;
+            const path = `${gameFolder}/${update.name}`;
+            stateUpdate(`Saving update to game folder: ${update.name}`);
+            await writeBinaryFile(path, update.data);
+
+            stateUpdate(`Installing update to game folder`);
+            const installResult = await installUCPFromZip(
+              path,
+              gameFolder,
+              stateUpdate,
+              t,
+            );
+
+            if (installResult.isErr()) {
+              installResult
+                .err()
+                .ifPresent((error) =>
+                  stateUpdate(t('gui-download:ucp.install.failed', { error })),
+                );
+              return Result.err(installResult.err().get());
+            }
+
+            // TODO: in the future, use a cache?
+            const removeResult = await removeFile(path);
+            if (removeResult.isErr()) {
+              await showModalOk({
+                message: t('gui-download:ucp.install.zip.remove.failed', {
+                  error: removeResult.err().get(),
+                }),
+                title: 'Could not remove file',
+              });
+            }
+
+            await showModalOk({
+              title: 'Reload required',
+              message: 'The GUI will now reload.',
+            });
+
+            reloadCurrentWindow();
+
+            return Result.ok('Update finished');
+          } catch (e: any) {
+            return Result.err(e);
           }
-          return Result.emptyErr();
         }}
         setResultNodeState={createToastHandler(
           t('gui-editor:overview.update.toast.title'),
         )}
-      /> */}
+      />
       <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{

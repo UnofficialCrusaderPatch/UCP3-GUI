@@ -11,7 +11,7 @@ import mainIcon from 'assets/ucp3.png';
 import { TauriEvent } from '@tauri-apps/api/event';
 import { atom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import SvgHelper from 'components/general/svg-helper';
+import SvgHelper from '../general/svg-helper';
 import { getCurrentWindow } from '../../tauri/tauri-window';
 import { registerTauriEventListener } from '../../tauri/tauri-hooks';
 import { getStore } from '../../hooks/jotai/base';

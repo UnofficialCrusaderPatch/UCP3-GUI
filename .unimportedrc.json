@@ -25,7 +25,19 @@
       ]
     ],
     [
+      "assets/misc/chevron-compact-down.svg?raw",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
       "assets/misc/fullscreen-exit.svg",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/misc/fullscreen-exit.svg?raw",
       [
         "src\\components\\titlebar\\titlebar.tsx"
       ]
@@ -37,7 +49,25 @@
       ]
     ],
     [
+      "assets/misc/fullscreen.svg?raw",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/misc/translate.svg?raw",
+      [
+        "src\\components\\top-bar\\language-select\\language-select.tsx"
+      ]
+    ],
+    [
       "assets/misc/x-lg.svg",
+      [
+        "src\\components\\titlebar\\titlebar.tsx"
+      ]
+    ],
+    [
+      "assets/misc/x-lg.svg?raw",
       [
         "src\\components\\titlebar\\titlebar.tsx"
       ]

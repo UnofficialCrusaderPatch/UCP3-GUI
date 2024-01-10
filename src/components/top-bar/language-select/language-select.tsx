@@ -3,12 +3,12 @@ import './language-select.css';
 import { startTransition } from 'react';
 import { useAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import SvgHelper from 'components/general/svg-helper';
+// eslint-disable-next-line import/no-unresolved
+import translateIcon from 'assets/misc/translate.svg?raw';
+import SvgHelper from '../../general/svg-helper';
 import { LANGUAGE_ATOM } from '../../../function/gui-settings/settings';
 
 import languages from '../../../localization/languages.json';
-// eslint-disable-next-line import/no-unresolved
-import translateIcon from '../../../assets/misc/translate.svg?raw';
 
 export default function LanguageSelect() {
   const [lang, setLang] = useAtom(LANGUAGE_ATOM);

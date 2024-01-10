@@ -111,6 +111,8 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
             }
           />
           <Form.Switch
+            // Not implemented yet
+            style={{ display: 'none' }}
             id="create-plugin-include-dependencies"
             label="Also create a modpack"
             checked={createModpack}

@@ -1,7 +1,7 @@
 import './TopBar.css';
 
-import { OVERLAY_ACTIVE_ATOM } from 'components/overlay/overlay';
 import { useAtomValue } from 'jotai';
+import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
 import CreditsButton from './credits/CreditsButton';
 import { RestartButton } from './restart/RestartButton';
 import LanguageSelect from './language-select/language-select';

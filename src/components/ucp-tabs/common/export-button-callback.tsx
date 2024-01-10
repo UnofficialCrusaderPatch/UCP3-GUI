@@ -4,7 +4,7 @@ import { getStore } from '../../../hooks/jotai/base';
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
 } from '../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import saveConfig from './save-config';
@@ -14,7 +14,7 @@ const exportButtonCallback = async (
   setConfigStatus: (value: string) => void,
   t: TFunction<[string, string], undefined>,
 ) => {
-  const configuration = getStore().get(CONFIGURATION_REDUCER_ATOM);
+  const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
   const configurationTouched = getStore().get(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );

@@ -16,7 +16,7 @@ import {
 import { setOverlayContent } from '../../../../overlay/overlay';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
@@ -70,7 +70,7 @@ function CreateCustomMenu(args: {
   disabled: boolean;
   className: string;
 }) {
-  const configuration = useAtomValue(CONFIGURATION_REDUCER_ATOM);
+  const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
   const configurationWarnings = useAtomValue(
     CONFIGURATION_WARNINGS_REDUCER_ATOM,
   );

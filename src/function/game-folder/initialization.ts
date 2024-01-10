@@ -10,7 +10,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from '../configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
@@ -70,7 +70,7 @@ export async function initializeGameFolder(newFolder: string) {
     return;
   }
 
-  getStore().set(CONFIGURATION_REDUCER_ATOM, {
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'reset',
     value: defaults,
   });

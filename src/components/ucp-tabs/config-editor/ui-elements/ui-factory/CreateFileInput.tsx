@@ -18,7 +18,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
 import { useCurrentGameFolder } from '../../../../../function/game-folder/state';
@@ -60,7 +60,9 @@ function CreateFileInput(args: {
   disabled: boolean;
   className: string;
 }) {
-  const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
+  const [configuration, setConfiguration] = useAtom(
+    CONFIGURATION_FULL_REDUCER_ATOM,
+  );
   const configurationWarnings = useAtomValue(
     CONFIGURATION_WARNINGS_REDUCER_ATOM,
   );

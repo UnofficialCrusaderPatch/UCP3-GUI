@@ -3,7 +3,7 @@
 import './overlay.css';
 
 import { useEffect, useRef } from 'react';
-import { atom, useAtom, useSetAtom } from 'jotai';
+import { atom, useAtom } from 'jotai';
 import { getStore } from '../../hooks/jotai/base';
 
 type OverlayConfig<T> = [OverlayContent<T>, boolean, boolean, T] | null;

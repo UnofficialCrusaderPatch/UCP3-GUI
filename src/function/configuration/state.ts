@@ -4,7 +4,7 @@ import { KeyValueReducer } from '../global/key-value-reducer';
 import { Warning } from '../global/types';
 import { ConfigMetaObjectDB } from '../../config/ucp/config-merge/objects';
 
-const configurationReducer = KeyValueReducer<unknown>();
+const configurationFullReducer = KeyValueReducer<unknown>();
 const configurationDefaultsReducer = KeyValueReducer<unknown>();
 const configurationUserReducer = KeyValueReducer<unknown>();
 const configurationTouchedReducer = KeyValueReducer<boolean>();
@@ -12,9 +12,9 @@ const configurationWarningsReducer = KeyValueReducer<Warning>();
 const configurationQualifierReducer = KeyValueReducer<ConfigurationQualifier>();
 
 export const UCP_CONFIG_FILE_ATOM = atom(''); // reducer atoms
-export const CONFIGURATION_REDUCER_ATOM = atomWithReducer(
+export const CONFIGURATION_FULL_REDUCER_ATOM = atomWithReducer(
   {},
-  configurationReducer,
+  configurationFullReducer,
 );
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},

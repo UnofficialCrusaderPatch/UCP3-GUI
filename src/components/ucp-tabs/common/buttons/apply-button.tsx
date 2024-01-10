@@ -4,7 +4,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import {
   UCP_CONFIG_FILE_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
@@ -16,7 +16,7 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const file = useAtomValue(UCP_CONFIG_FILE_ATOM);
-  const configuration = useAtomValue(CONFIGURATION_REDUCER_ATOM);
+  const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;

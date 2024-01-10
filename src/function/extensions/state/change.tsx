@@ -10,7 +10,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../configuration/state';
 import { getStore } from '../../../hooks/jotai/base';
@@ -57,7 +57,7 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   );
 
   // Here the values are set
-  getStore().set(CONFIGURATION_REDUCER_ATOM, {
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'reset',
     value: defaults,
   });

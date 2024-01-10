@@ -9,7 +9,7 @@ import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
@@ -20,7 +20,9 @@ function CreateUCP2Switch(args: {
   disabled: boolean;
   className: string;
 }) {
-  const [configuration, setConfiguration] = useAtom(CONFIGURATION_REDUCER_ATOM);
+  const [configuration, setConfiguration] = useAtom(
+    CONFIGURATION_FULL_REDUCER_ATOM,
+  );
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );

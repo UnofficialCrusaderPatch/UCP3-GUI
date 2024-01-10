@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { OverlayContentProps } from '../overlay/overlay';
 import { getStore } from '../../hooks/jotai/base';
 import {
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
 } from '../../function/configuration/state';
 import { useCurrentGameFolder } from '../../function/game-folder/state';
@@ -53,7 +53,7 @@ function saveConfig(baseUrl: string, config: Record<string, unknown>) {
     ]),
   );
 
-  getStore().set(CONFIGURATION_REDUCER_ATOM, {
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfigEntries,
   });

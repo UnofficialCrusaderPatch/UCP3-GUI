@@ -8,7 +8,7 @@ import {
 } from '../../../../function/extensions/state/state';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
-import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
+import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state-manipulation';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');

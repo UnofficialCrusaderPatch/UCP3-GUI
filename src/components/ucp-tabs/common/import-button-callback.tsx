@@ -3,7 +3,7 @@ import {
   ConfigurationQualifier,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
 } from '../../../function/configuration/state';
 import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { openFileDialog } from '../../../tauri/tauri-dialog';
@@ -35,14 +35,14 @@ import {
   buildExtensionConfigurationDB,
   buildConfigMetaContentDB,
 } from '../extension-manager/extension-configuration';
-import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
+import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
 
 const setConfiguration = (arg0: {
   type: string;
   value: { [key: string]: unknown };
 }) => {
-  getStore().set(CONFIGURATION_REDUCER_ATOM, arg0);
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, arg0);
 };
 
 const setConfigurationTouched = (arg0: {

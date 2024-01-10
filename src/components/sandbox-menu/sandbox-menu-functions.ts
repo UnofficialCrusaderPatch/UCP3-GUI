@@ -9,7 +9,7 @@ import { slashify } from '../../tauri/tauri-invoke';
 import { getStore } from '../../hooks/jotai/base';
 
 import { Extension } from '../../config/ucp/common';
-import { CONFIGURATION_REDUCER_ATOM } from '../../function/configuration/state';
+import { CONFIGURATION_FULL_REDUCER_ATOM } from '../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 
 export async function getLanguage(): Promise<string> {
@@ -70,7 +70,8 @@ export function createReceivePluginPathsFunction(currentFolder: string) {
 }
 
 export function createGetConfigStateFunction() {
-  return async (url: string) => getStore().get(CONFIGURATION_REDUCER_ATOM)[url];
+  return async (url: string) =>
+    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM)[url];
 }
 
 function transformConfigsForCustomMenu(
@@ -93,7 +94,7 @@ export function createGetCurrentConfigFunction(baseUrl: string) {
       urlPrefix,
       baseline,
     );
-    const userConfig = getStore().get(CONFIGURATION_REDUCER_ATOM);
+    const userConfig = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
     const transformedUserConfig = transformConfigsForCustomMenu(
       urlPrefix,
       userConfig,

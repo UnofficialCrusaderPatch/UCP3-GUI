@@ -2,7 +2,7 @@ import warnClearingOfConfiguration from '../../common/warn-clearing-of-configura
 import { getStore } from '../../../../hooks/jotai/base';
 import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
-import { moveExtension } from '../extensions-state';
+import { moveExtension } from '../extensions-state-manipulation';
 
 const moveExtensionClickCallback = async (event: {
   name: string;

@@ -9,7 +9,7 @@ import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configu
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
-import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
+import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 

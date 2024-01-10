@@ -2,6 +2,7 @@ import { atom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
 import { KeyValueReducer } from '../global/KeyValueReducer';
 import { Warning } from '../global/types';
+import { ConfigMetaObjectDB } from '../../config/ucp/config-merge/objects';
 
 const configurationReducer = KeyValueReducer<unknown>();
 const configurationDefaultsReducer = KeyValueReducer<unknown>();
@@ -56,3 +57,9 @@ export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
   configurationQualifierReducer,
 );
 export type ConfigurationQualifier = 'required' | 'suggested';
+export type ConfigurationState = {
+  state: ConfigMetaObjectDB;
+  warnings: string[];
+  errors: string[];
+  statusCode: number;
+};

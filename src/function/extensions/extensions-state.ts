@@ -1,5 +1,5 @@
 import { Extension } from '../../config/ucp/common';
-import { ConfigurationState } from '../global/types';
+import { ConfigurationState } from '../configuration/state';
 import { ExtensionTree } from './dependency-management/dependency-resolution';
 
 export type ExtensionsState = {

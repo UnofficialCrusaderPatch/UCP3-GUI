@@ -97,6 +97,16 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (stateUpdate) => {
           try {
+            const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
+
+            if (gameFolderState.state !== 'hasData') {
+              stateUpdate(
+                'Game folder in bad state. Cannot save update to disk.',
+              );
+              return Result.emptyErr();
+            }
+            const gameFolder = gameFolderState.data;
+
             stateUpdate(t('gui-download:ucp.version.check'));
 
             const vr = await getStore().get(UCP_VERSION_ATOM);
@@ -111,7 +121,7 @@ export default function Overview() {
 
             const updateExists = await updater.doesUpdateExist();
             if (updateExists) {
-              stateUpdate('Update is available!');
+              stateUpdate(t('gui-download:ucp.version.available'));
             } else {
               return Result.ok(t('gui-download:ucp.version.not.available'));
             }
@@ -130,22 +140,16 @@ export default function Overview() {
             stateUpdate(t('gui-download:ucp.download.download'));
             const update = await updater.fetchUpdate();
 
-            stateUpdate(`Downloaded update: ${update.name}`);
+            stateUpdate(
+              t(`gui-download:ucp.download.downloaded`, {
+                version: `${update.name}`,
+              }),
+            );
 
-            const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
-
-            if (gameFolderState.state !== 'hasData') {
-              stateUpdate(
-                'Game folder in bad state. Cannot save update to disk.',
-              );
-              return Result.emptyErr();
-            }
-            const gameFolder = gameFolderState.data;
             const path = `${gameFolder}/${update.name}`;
-            stateUpdate(`Saving update to game folder: ${update.name}`);
             await writeBinaryFile(path, update.data);
 
-            stateUpdate(`Installing update to game folder`);
+            stateUpdate(t('gui-download:ucp.installing'));
             const installResult = await installUCPFromZip(
               path,
               gameFolder,

@@ -80,7 +80,7 @@ export default function StateButton(props: StateButtonProps) {
       title={tooltip}
     >
       <div className="icon-placeholder" />
-      <div className="button-text">{buttonValues[buttonState]}</div>
+      <div className="button-text">{buttonValues.idle}</div>
     </button>
   );
 }

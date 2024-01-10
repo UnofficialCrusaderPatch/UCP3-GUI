@@ -69,9 +69,12 @@ export function ToastDisplay() {
   //   makeToast('test', 'test 123');
   // }, []);
 
-  const toasts = useAtomValue(TOAST_STATE_ATOM).toasts.map((state) =>
-    TheToast({ state }),
-  );
+  const toasts = useAtomValue(TOAST_STATE_ATOM).toasts.map((state) => (
+    <TheToast
+      key={JSON.stringify({ title: state.title, body: state.body })}
+      state={state}
+    />
+  ));
   return (
     <ToastContainer
       id="toast-container"

@@ -1,10 +1,10 @@
+import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { ConfigEntry, Extension } from '../../../config/ucp/common';
 import {
   ConfigMetaContent,
   ConfigMetaContentDB,
   ConfigMetaObjectDB,
 } from '../../../config/ucp/config-merge/objects';
-import { ExtensionsState } from '../../../function/global/types';
 import Logger from '../../../util/scripts/logging';
 
 const LOGGER = new Logger('extension-configuration.ts');

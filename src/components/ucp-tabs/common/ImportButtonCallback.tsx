@@ -1,4 +1,11 @@
 import { TFunction } from 'i18next';
+import {
+  ConfigurationQualifier,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_REDUCER_ATOM,
+} from '../../../function/configuration/state';
+import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { openFileDialog } from '../../../tauri/tauri-dialog';
 import { getStore } from '../../../hooks/jotai/base';
 
@@ -15,10 +22,6 @@ import {
   Version,
 } from '../../../config/ucp/dependency-statement';
 import { collectConfigEntries } from '../../../function/extensions/discovery/discovery';
-import {
-  ExtensionsState,
-  ConfigurationQualifier,
-} from '../../../function/global/types';
 
 import {
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
@@ -26,11 +29,6 @@ import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../function/extensions/state/state';
-import {
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_REDUCER_ATOM,
-} from '../../../function/configuration/state';
 import { showModalOk } from '../../modals/modal-ok';
 import { ConsoleLogger } from '../../../util/scripts/logging';
 import {

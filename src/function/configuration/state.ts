@@ -1,19 +1,27 @@
 import { atom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
 import { KeyValueReducer } from '../global/KeyValueReducer';
-import { ConfigurationQualifier, Warning } from '../global/types';
+import { Warning } from '../global/types';
 
-export const configurationReducer = KeyValueReducer<unknown>();
+const configurationReducer = KeyValueReducer<unknown>();
+const configurationDefaultsReducer = KeyValueReducer<unknown>();
+const configurationUserReducer = KeyValueReducer<unknown>();
 const configurationTouchedReducer = KeyValueReducer<boolean>();
 const configurationWarningsReducer = KeyValueReducer<Warning>();
-const configurationDefaultsReducer = KeyValueReducer<unknown>();
-
 const configurationQualifierReducer = KeyValueReducer<ConfigurationQualifier>();
 
 export const UCP_CONFIG_FILE_ATOM = atom(''); // reducer atoms
 export const CONFIGURATION_REDUCER_ATOM = atomWithReducer(
   {},
   configurationReducer,
+);
+export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
+  {},
+  configurationDefaultsReducer,
+);
+export const CONFIGURATION_USER_REDUCER_ATOM = atomWithReducer(
+  {},
+  configurationUserReducer,
 );
 export const CONFIGURATION_TOUCHED_REDUCER_ATOM = atomWithReducer(
   {},
@@ -23,10 +31,7 @@ export const CONFIGURATION_WARNINGS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationWarningsReducer,
 );
-export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
-  {},
-  configurationDefaultsReducer,
-);
+
 export type ConfigurationLock = {
   lockedBy: string;
   lockedValue: unknown;
@@ -50,6 +55,4 @@ export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
   {},
   configurationQualifierReducer,
 );
-export type AvailableExtensionVersionsDictionary = {
-  [extensionName: string]: string[];
-};
+export type ConfigurationQualifier = 'required' | 'suggested';

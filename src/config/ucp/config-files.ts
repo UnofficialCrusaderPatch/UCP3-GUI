@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 import { stringify as yamlStringify } from 'yaml';
 import { writeTextFile, loadYaml } from '../../tauri/tauri-files';
 import Result from '../../util/structs/result';
-import { ConfigurationQualifier } from '../../function/global/types';
+import { ConfigurationQualifier } from '../../function/configuration/state';
 import Logger from '../../util/scripts/logging';
 import { ConfigFile, Extension } from './common';
 

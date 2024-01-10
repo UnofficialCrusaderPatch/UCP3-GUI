@@ -5,13 +5,13 @@ import { Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { Extension } from '../../../../config/ucp/common';
 import {
+  AvailableExtensionVersionsDictionary,
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
-import { AvailableExtensionVersionsDictionary } from '../../../../function/configuration/state';
+import { Extension } from '../../../../config/ucp/common';
 import { setOverlayContent } from '../../../overlay/overlay';
 import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
 import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';

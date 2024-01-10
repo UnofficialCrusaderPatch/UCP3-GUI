@@ -13,9 +13,9 @@ import {
   CONFIGURATION_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../configuration/state';
-import { ExtensionsState } from '../../global/types';
 import { getStore } from '../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../util/scripts/logging';
+import { ExtensionsState } from '../extensions-state';
 
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // This section is meant to allow the config editor to display the options.

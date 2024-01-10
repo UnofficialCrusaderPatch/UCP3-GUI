@@ -2,7 +2,7 @@ import './credits.css';
 
 import { useTranslation } from 'react-i18next';
 
-import { SaferMarkdown } from '../markdown/SaferMarkdown';
+import { SaferMarkdown } from '../markdown/safer-markdown';
 import { OverlayContentProps } from '../overlay/overlay';
 
 // eslint-disable-next-line import/no-unresolved

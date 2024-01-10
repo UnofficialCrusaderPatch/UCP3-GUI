@@ -10,13 +10,13 @@ import {
   ExtensionNameList,
   InactiveExtensionsElement,
 } from './extension-elements/extension-element';
-import ApplyButton from '../common/buttons/ApplyButton';
-import ExportButton from '../config-editor/buttons/ExportButton';
-import ImportButton from '../config-editor/buttons/ImportButton';
-import { CustomizeButton } from '../common/buttons/CustomizeButton';
-import { FilterButton } from './buttons/FilterButton';
-import { InstallExtensionButton } from './buttons/InstallExtensionButton';
-import { CreateExtensionsPackButton } from './buttons/CreateExtensionsPackButton';
+import ApplyButton from '../common/buttons/apply-button';
+import ExportButton from '../config-editor/buttons/export-button';
+import ImportButton from '../config-editor/buttons/import-button';
+import { CustomizeButton } from '../common/buttons/customize-button';
+import { FilterButton } from './buttons/filter-button';
+import { InstallExtensionButton } from './buttons/install-extensions-button';
+import { CreateExtensionsPackButton } from './buttons/create-extensions-pack-button';
 
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);

@@ -7,7 +7,7 @@ import {
   CONFIGURATION_REDUCER_ATOM,
 } from '../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
-import saveConfig from './SaveConfig';
+import saveConfig from './save-config';
 
 const exportButtonCallback = async (
   gameFolder: string,

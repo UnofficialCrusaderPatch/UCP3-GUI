@@ -1,4 +1,4 @@
-import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
+import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { getStore } from '../../../../hooks/jotai/base';
 import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';

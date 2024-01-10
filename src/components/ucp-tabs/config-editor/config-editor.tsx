@@ -13,12 +13,12 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state
 import { CREATOR_MODE_ATOM } from '../../../function/gui-settings/settings';
 import { UIFactory } from './ui-elements';
 
-import ExportButton from './buttons/ExportButton';
-import ApplyButton from '../common/buttons/ApplyButton';
-import ImportButton from './buttons/ImportButton';
-import ResetButton from './buttons/ResetButton';
-import ExportAsPluginButton from './buttons/ExportAsPluginButton';
-import { CreatorModeButton } from './buttons/CreatorModeButton';
+import ExportButton from './buttons/export-button';
+import ApplyButton from '../common/buttons/apply-button';
+import ImportButton from './buttons/import-button';
+import ResetButton from './buttons/reset-button';
+import ExportAsPluginButton from './buttons/export-as-plugin-button';
+import { CreatorModeButton } from './buttons/creator-mode-button';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;

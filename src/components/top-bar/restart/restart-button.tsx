@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { relaunch } from '@tauri-apps/api/process';
 
-import './RestartButton.css';
+import './restart-button.css';
 
 // eslint-disable-next-line import/prefer-default-export
 export function RestartButton() {

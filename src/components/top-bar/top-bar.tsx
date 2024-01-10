@@ -1,9 +1,9 @@
-import './TopBar.css';
+import './top-bar.css';
 
 import { useAtomValue } from 'jotai';
 import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
-import CreditsButton from './credits/CreditsButton';
-import { RestartButton } from './restart/RestartButton';
+import CreditsButton from './credits/credits-button';
+import { RestartButton } from './restart/restart-button';
 import LanguageSelect from './language-select/language-select';
 
 // eslint-disable-next-line import/prefer-default-export

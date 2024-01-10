@@ -13,13 +13,13 @@ import {
 } from '../../../../function/extensions/state/state';
 import { Extension } from '../../../../config/ucp/common';
 import { setOverlayContent } from '../../../overlay/overlay';
-import inactiveExtensionElementClickCallback from './InactiveExtensionElementClickCallback';
-import activeExtensionElementClickCallback from './ActiveExtensionElementClickCallback';
-import moveExtensionClickCallback from './MoveExtensionClickCallback';
+import inactiveExtensionElementClickCallback from './inactive-extension-element-click-callback';
+import activeExtensionElementClickCallback from './active-extension-element-click-callback';
+import moveExtensionClickCallback from './move-extension-click-callback';
 import {
   ExtensionViewer,
   ExtensionViewerProps,
-} from '../extension-viewer/ExtensionViewer';
+} from '../extension-viewer/extension-viewer';
 
 export function ExtensionElement(props: {
   ext: Extension;

@@ -5,7 +5,7 @@ import { TauriEvent } from '@tauri-apps/api/event';
 import { registerTauriEventListener } from '../../tauri/tauri-hooks';
 import { log } from '../../tauri/tauri-invoke';
 import { onBackendLog } from '../../tauri/tauri-listen';
-import JSON from './jsonCycle';
+import JSON from './json-cycle';
 
 const LOG_LEVEL = {
   ERROR: 1,

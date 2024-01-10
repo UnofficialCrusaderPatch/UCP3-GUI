@@ -1,5 +1,5 @@
 import { SectionDescription } from '../../../../../../config/ucp/common';
-import sanitizeID from '../../sanitizeID';
+import sanitizeID from '../../sanitize-id';
 
 function NavSection(navArgs: {
   subspec: SectionDescription;

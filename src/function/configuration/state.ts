@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
-import { KeyValueReducer } from '../global/KeyValueReducer';
+import { KeyValueReducer } from '../global/key-value-reducer';
 import { Warning } from '../global/types';
 import { ConfigMetaObjectDB } from '../../config/ucp/config-merge/objects';
 

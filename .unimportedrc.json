@@ -85,7 +85,7 @@
   "ignoreUnimported": [
     "src/components/general/svg-helper.tsx",
     "src/components/sandbox-menu/sandbox-frame-base.js",
-    "src/components/ucp-tabs/common/CreatePackButtonCallback.tsx",
-    "src/function/global/ArrayReducer.ts"
+    "src/components/ucp-tabs/common/create-pack-button-callback.tsx",
+    "src/function/global/array-reducer.ts"
   ]
 }

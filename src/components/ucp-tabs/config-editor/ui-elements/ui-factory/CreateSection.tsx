@@ -7,7 +7,7 @@ import type {
 
 import CreateUIElement from './CreateUIElement';
 
-import sanitizeID from '../sanitizeID';
+import sanitizeID from '../sanitize-id';
 
 function CreateSection(args: {
   level: number;

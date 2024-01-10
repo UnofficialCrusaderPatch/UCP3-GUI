@@ -36,7 +36,7 @@ import {
   buildConfigMetaContentDB,
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state';
-import warnClearingOfConfiguration from './WarnClearingOfConfiguration';
+import warnClearingOfConfiguration from './warn-clearing-of-configuration';
 
 const setConfiguration = (arg0: {
   type: string;

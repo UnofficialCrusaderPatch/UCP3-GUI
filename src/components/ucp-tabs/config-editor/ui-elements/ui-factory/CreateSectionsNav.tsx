@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { SectionDescription } from '../../../../../config/ucp/common';
 import NavSection from './navigation/NavSection';
 
-import sanitizeID from '../sanitizeID';
+import sanitizeID from '../sanitize-id';
 
 function CreateSectionsNav(args: { spec: SectionDescription }) {
   const { spec } = args;

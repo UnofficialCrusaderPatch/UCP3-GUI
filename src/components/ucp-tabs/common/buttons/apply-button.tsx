@@ -9,8 +9,8 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
-import { makeToast } from '../../../modals/toasts/ToastsDisplay';
-import saveConfig from '../SaveConfig';
+import { makeToast } from '../../../modals/toasts/toasts-display';
+import saveConfig from '../save-config';
 
 function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);

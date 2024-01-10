@@ -3,9 +3,9 @@ import { useSetAtom } from 'jotai';
 import { Folder } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
-import { makeToast } from '../../../modals/toasts/ToastsDisplay';
+import { makeToast } from '../../../modals/toasts/toasts-display';
 import { useCurrentGameFolder } from '../../../../function/game-folder/state';
-import importButtonCallback from '../../common/ImportButtonCallback';
+import importButtonCallback from '../../common/import-button-callback';
 
 function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);

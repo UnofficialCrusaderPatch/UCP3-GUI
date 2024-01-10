@@ -7,7 +7,7 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
-import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
+import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { SaferMarkdown } from '../../../markdown/SaferMarkdown';
+import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 

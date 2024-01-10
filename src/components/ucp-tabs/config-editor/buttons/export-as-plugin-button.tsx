@@ -6,7 +6,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalCreatePlugin } from '../../../modals/modal-create-plugin';
 import { showModalOk } from '../../../modals/modal-ok';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
-import serializeConfig from '../../common/SerializeConfig';
+import serializeConfig from '../../common/serialize-config';
 import {
   UCP3SerializedPluginConfig,
   toYaml,

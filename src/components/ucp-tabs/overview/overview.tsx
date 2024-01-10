@@ -26,7 +26,7 @@ import {
   GAME_FOLDER_LOADED_ATOM,
   useCurrentGameFolder,
 } from '../../../function/game-folder/state';
-import { makeToast } from '../../modals/toasts/ToastsDisplay';
+import { makeToast } from '../../modals/toasts/toasts-display';
 import RecentFolders from './recent-folders';
 import StateButton from '../../general/state-button';
 

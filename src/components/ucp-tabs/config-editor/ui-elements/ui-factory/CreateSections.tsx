@@ -15,7 +15,7 @@ import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
 import { applyLocale } from '../../../../../function/extensions/discovery/discovery';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
-import sanitizeID from '../sanitizeID';
+import sanitizeID from '../sanitize-id';
 import CreateSectionsNav from './CreateSectionsNav';
 
 const ACTIVE_EXTENSIONS_ATOM = selectAtom(

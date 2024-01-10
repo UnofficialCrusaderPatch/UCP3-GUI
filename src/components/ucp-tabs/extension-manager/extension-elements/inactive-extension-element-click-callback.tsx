@@ -7,7 +7,7 @@ import { Extension } from '../../../../config/ucp/common';
 import { getStore } from '../../../../hooks/jotai/base';
 import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
-import warnClearingOfConfiguration from '../../common/WarnClearingOfConfiguration';
+import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state';
 

@@ -1,4 +1,4 @@
-import './CreditsButton.css';
+import './credits-button.css';
 
 import { useTranslation } from 'react-i18next';
 import { setOverlayContent } from '../../overlay/overlay';

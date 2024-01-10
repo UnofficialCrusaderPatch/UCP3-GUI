@@ -2,7 +2,7 @@ import { exists } from '@tauri-apps/api/fs';
 import i18next from 'i18next';
 import { atom } from 'jotai';
 import { showModalOk } from '../../components/modals/modal-ok';
-import importButtonCallback from '../../components/ucp-tabs/common/ImportButtonCallback';
+import importButtonCallback from '../../components/ucp-tabs/common/import-button-callback';
 import { Extension } from '../../config/ucp/common';
 import { getExtensions } from '../../config/ucp/extension-util';
 import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';

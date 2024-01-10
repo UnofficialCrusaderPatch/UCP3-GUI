@@ -4,12 +4,12 @@ import { useAtomValue } from 'jotai';
 import { ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { installUCPFromZip } from '../../../function/installation/install-ucp-from-zip';
 import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
 import { UCP3Updater } from '../../../function/download/github';
 import { getStore } from '../../../hooks/jotai/base';
 import { removeFile, writeBinaryFile } from '../../../tauri/tauri-files';
 import { checkForGUIUpdates } from '../../../function/download/gui-update';
-import { installUCPFromZip } from '../../../function/download/ucp-download-handling';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,

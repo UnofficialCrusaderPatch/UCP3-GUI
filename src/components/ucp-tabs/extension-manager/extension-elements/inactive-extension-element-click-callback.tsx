@@ -74,6 +74,10 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     ([url]) => newRequiredValues[url] !== undefined,
   );
 
+  const retainedConfig = Object.fromEntries(
+    touchedConfig.filter(([url]) => newRequiredValues[url] === undefined),
+  );
+
   if (lostConfig.length > 0) {
     const answer = await showModalOkCancel({
       title: 'Losing customisations',
@@ -98,6 +102,11 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     'Current user config state',
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
+
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+    type: 'reset',
+    value: retainedConfig,
+  });
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
 

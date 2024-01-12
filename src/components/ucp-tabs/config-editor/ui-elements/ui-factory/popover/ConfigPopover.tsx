@@ -7,6 +7,7 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../../function/configuration/state';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 
@@ -20,6 +21,7 @@ export function ConfigPopover(props: {
 }) {
   const { url, show, theRef } = props;
 
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfiguration = useSetAtom(CONFIGURATION_FULL_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -111,6 +113,10 @@ export function ConfigPopover(props: {
             role="button"
             className="ms-1 me-1"
             onClick={() => {
+              setUserConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([[url, undefined]]),
+              });
               setConfiguration({
                 type: 'set-multiple',
                 value: Object.fromEntries([[url, defaultValue]]),

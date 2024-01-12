@@ -8,6 +8,7 @@ import { getStore } from '../../../../hooks/jotai/base';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
@@ -88,11 +89,27 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     }
   }
 
+  ConsoleLogger.info(
+    'Current full config state',
+    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+  );
+
+  ConsoleLogger.info(
+    'Current user config state',
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+  );
+
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+
   ConsoleLogger.info('New extension state', res);
   ConsoleLogger.info(
-    'New config state',
+    'New full config state',
     getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+  );
+
+  ConsoleLogger.info(
+    'New user config state',
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
 };
 

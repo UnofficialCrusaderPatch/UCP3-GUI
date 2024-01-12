@@ -4,6 +4,7 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../function/configuration/state';
 import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { openFileDialog } from '../../../tauri/tauri-dialog';
@@ -37,6 +38,13 @@ import {
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
+
+const setUserConfiguration = (arg0: {
+  type: string;
+  value: { [key: string]: unknown };
+}) => {
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, arg0);
+};
 
 const setConfiguration = (arg0: {
   type: string;
@@ -268,6 +276,7 @@ const importButtonCallback = async (
     newConfigurationTouched[url] = true;
   });
 
+  setUserConfiguration({ type: 'set-multiple', value: newConfiguration });
   setConfiguration({
     type: 'set-multiple',
     value: newConfiguration,

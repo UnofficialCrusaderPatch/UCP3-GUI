@@ -2,11 +2,11 @@ import { Accordion, Form } from 'react-bootstrap';
 
 import { RadioGroup, Radio } from 'react-radio-group';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import {
   DisplayConfigElement,
@@ -181,12 +181,17 @@ function CreateUCP2SliderChoice(args: {
       1 /
       // eslint-disable-next-line no-nested-ternary
       (choice.step === undefined ? 1 : choice.step === 0 ? 1 : choice.step);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [localValue, setLocalValue] = useState(
+    const v =
       value.choices[choice.name].slider === undefined
         ? 0
-        : (value.choices[choice.name].slider as number) * factor,
-    );
+        : (value.choices[choice.name].slider as number) * factor;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const localValueAtom = useMemo(() => atom(v), [v]);
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [localValue, setLocalValue] = useAtom(localValueAtom);
+
     return (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div
@@ -230,8 +235,8 @@ function CreateUCP2SliderChoice(args: {
               </Form.Label>
             </div>
             <div className="col-7">
-              <input
-                type="range"
+              <Form.Range
+                bsPrefix="ucp-slider"
                 className="ucp-slider"
                 min={choice.min * factor}
                 max={choice.max * factor}
@@ -243,11 +248,9 @@ function CreateUCP2SliderChoice(args: {
                 // tooltipLabel={(currentValue) =>
                 //  (currentValue / factor).toString()
                 // }
-                onChange={(event) => {
-                  setLocalValue(parseInt(event.target.value, 10));
+                onMouseUp={() => {
                   const newValue = { ...value };
-                  newValue.choices[choice.name].slider =
-                    parseInt(event.target.value, 10) / factor;
+                  newValue.choices[choice.name].slider = localValue / factor;
                   setUserConfiguration({
                     type: 'set-multiple',
                     value: Object.fromEntries([[url, newValue]]),
@@ -260,6 +263,11 @@ function CreateUCP2SliderChoice(args: {
                     type: 'set-multiple',
                     value: Object.fromEntries([[url, true]]),
                   });
+                }}
+                onChange={(event) => {
+                  const rawValue = parseFloat(event.target.value);
+                  setLocalValue(rawValue);
+                  ConsoleLogger.debug(localValue);
                 }}
                 disabled={
                   !isEnabled ||
@@ -298,11 +306,7 @@ function CreateUCP2SliderChoice(args: {
                 data-bs-placement="top"
                 title={fullToolTip}
                 // End of tooltip stuff
-                value={
-                  value.choices[choice.name].slider === undefined
-                    ? 0
-                    : (value.choices[choice.name].slider as number)
-                }
+                value={localValue}
                 onChange={(event) => {
                   ConsoleLogger.info(event);
                   const rawValue = parseFloat(event.target.value);

@@ -2,9 +2,9 @@ import { Accordion, Form } from 'react-bootstrap';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import {
   NumberContents,
@@ -138,12 +138,14 @@ function CreateUCP2Slider(args: {
   }
   // eslint-disable-next-line no-nested-ternary
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [localValue, setLocalValue] = useState(
+
+  const v =
     value.sliderValue === undefined
       ? 0
-      : (value.sliderValue as number) * factor,
-  );
+      : (value.sliderValue as number) * factor;
+  const localValueAtom = useMemo(() => atom(v), [v]);
+
+  const [localValue, setLocalValue] = useAtom(localValueAtom);
 
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
@@ -187,42 +189,27 @@ function CreateUCP2Slider(args: {
               // size="sm"
               value={localValue}
               // tooltipLabel={(currentValue) => (currentValue / factor).toString()}
-              onChange={(event) => {
-                setLocalValue(parseInt(event.target.value, 10));
+              onMouseUp={() => {
+                const newValue = {
+                  ...value,
+                };
+                newValue.sliderValue = localValue / factor;
                 setUserConfiguration({
                   type: 'set-multiple',
-                  value: Object.fromEntries([
-                    [
-                      url,
-                      {
-                        ...value,
-                        ...{
-                          sliderValue:
-                            parseInt(event.target.value, 10) / factor,
-                        },
-                      },
-                    ],
-                  ]),
+                  value: Object.fromEntries([[url, newValue]]),
                 });
                 setConfiguration({
                   type: 'set-multiple',
-                  value: Object.fromEntries([
-                    [
-                      url,
-                      {
-                        ...value,
-                        ...{
-                          sliderValue:
-                            parseInt(event.target.value, 10) / factor,
-                        },
-                      },
-                    ],
-                  ]),
+                  value: Object.fromEntries([[url, newValue]]),
                 });
                 setConfigurationTouched({
                   type: 'set-multiple',
                   value: Object.fromEntries([[url, true]]),
                 });
+              }}
+              onChange={(event) => {
+                const newLocalValue = parseFloat(event.target.value);
+                setLocalValue(newLocalValue);
               }}
               disabled={
                 !isEnabled ||
@@ -251,11 +238,7 @@ function CreateUCP2Slider(args: {
               data-bs-placement="top"
               title={fullToolTip}
               // End of tooltip stuff
-              value={
-                value.sliderValue === undefined
-                  ? 0
-                  : (value.sliderValue as number)
-              }
+              value={localValue}
               onChange={(event) => {
                 const rawValue = parseFloat(event.target.value);
                 const newLocalValue = rawValue * factor;

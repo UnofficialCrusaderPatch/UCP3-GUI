@@ -179,8 +179,8 @@ function CreateUCP2Slider(args: {
             <Form.Label>{min}</Form.Label>
           </div>
           <div className="col col-6">
-            <input
-              type="range"
+            <Form.Range
+              bsPrefix="ucp-slider"
               className="ucp-slider"
               min={min * factor}
               max={max * factor}

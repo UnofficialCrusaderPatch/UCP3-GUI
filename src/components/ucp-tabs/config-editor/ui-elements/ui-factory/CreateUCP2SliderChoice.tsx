@@ -21,7 +21,7 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
-import Logger from '../../../../../util/scripts/logging';
+import Logger, { ConsoleLogger } from '../../../../../util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
@@ -245,7 +245,6 @@ function CreateUCP2SliderChoice(args: {
                 // }
                 onChange={(event) => {
                   setLocalValue(parseInt(event.target.value, 10));
-                  setLocalValue(parseInt(event.target.value, 10));
                   const newValue = { ...value };
                   newValue.choices[choice.name].slider =
                     parseInt(event.target.value, 10) / factor;
@@ -292,19 +291,25 @@ function CreateUCP2SliderChoice(args: {
                 type="number"
                 min={choice.min as number}
                 max={choice.max as number}
+                step={choice.step}
                 id={`${url}-input`}
                 // Tooltip stuff
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
                 title={fullToolTip}
                 // End of tooltip stuff
-                value={localValue === undefined ? 0 : (localValue as number)}
+                value={
+                  value.choices[choice.name].slider === undefined
+                    ? 0
+                    : (value.choices[choice.name].slider as number)
+                }
                 onChange={(event) => {
-                  setLocalValue(parseInt(event.target.value, 10));
-                  setLocalValue(parseInt(event.target.value, 10));
+                  ConsoleLogger.info(event);
+                  const rawValue = parseFloat(event.target.value);
+                  const newLocalValue = rawValue * factor;
+                  setLocalValue(newLocalValue);
                   const newValue = { ...value };
-                  newValue.choices[choice.name].slider =
-                    parseInt(event.target.value, 10) / factor;
+                  newValue.choices[choice.name].slider = rawValue;
                   setUserConfiguration({
                     type: 'set-multiple',
                     value: Object.fromEntries([[url, newValue]]),

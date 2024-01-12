@@ -244,15 +244,22 @@ function CreateUCP2Slider(args: {
               type="number"
               min={min}
               max={max}
+              step={step}
               id={`${url}-input`}
               // Tooltip stuff
               data-bs-toggle="tooltip"
               data-bs-placement="top"
               title={fullToolTip}
               // End of tooltip stuff
-              value={localValue === undefined ? 0 : (localValue as number)}
+              value={
+                value.sliderValue === undefined
+                  ? 0
+                  : (value.sliderValue as number)
+              }
               onChange={(event) => {
-                setLocalValue(parseInt(event.target.value, 10));
+                const rawValue = parseFloat(event.target.value);
+                const newLocalValue = rawValue * factor;
+                setLocalValue(newLocalValue);
                 setConfiguration({
                   type: 'set-multiple',
                   value: Object.fromEntries([
@@ -261,8 +268,7 @@ function CreateUCP2Slider(args: {
                       {
                         ...value,
                         ...{
-                          sliderValue:
-                            parseInt(event.target.value, 10) / factor,
+                          sliderValue: rawValue,
                         },
                       },
                     ],

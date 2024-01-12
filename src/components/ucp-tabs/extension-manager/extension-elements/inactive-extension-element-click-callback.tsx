@@ -89,7 +89,11 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   }
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
-  ConsoleLogger.debug('New extension state', res);
+  ConsoleLogger.info('New extension state', res);
+  ConsoleLogger.info(
+    'New config state',
+    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+  );
 };
 
 export default inactiveExtensionElementClickCallback;

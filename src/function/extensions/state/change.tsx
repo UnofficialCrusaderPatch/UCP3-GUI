@@ -39,15 +39,15 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   Object.entries(extensionsState.configuration.state).forEach(
     ([url, cmo]: [string, ConfigMetaObject]) => {
       defaults[url] = cmo.modifications.value.content;
-      if (
-        cmo.modifications.value.qualifier === 'required' ||
-        cmo.modifications.value.qualifier === 'unspecified'
-      ) {
+      if (cmo.modifications.value.qualifier === 'required') {
         locks[url] = {
           lockedBy: cmo.modifications.value.entity,
           lockedValue: cmo.modifications.value.content,
         };
-      } else if (cmo.modifications.value.qualifier === 'suggested') {
+      } else if (
+        cmo.modifications.value.qualifier === 'suggested' ||
+        cmo.modifications.value.qualifier === 'unspecified'
+      ) {
         suggestions[url] = {
           suggestedBy: cmo.modifications.value.entity,
           suggestedValue: cmo.modifications.value.content,

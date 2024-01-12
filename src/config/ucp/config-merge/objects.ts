@@ -1,22 +1,14 @@
-type ValueDefinition = {
-  content: unknown;
-  qualifier: 'required' | 'suggested' | 'unspecified';
-  entity: string; // "user" or an extension that sets the value.
-};
-
-type UserValueDB = {
-  [url: string]: ValueDefinition;
-};
+type Qualifier = 'required' | 'suggested' | 'unspecified';
 
 // Can be reduced to ValueDefinition but that ruins documentation? :)
 // Premature optimization is the root of all evil.
 type ConfigMetaContent = {
   // The extension that specified this meta content
   // Only the last extension is retained if multiple extensions have non-conflictual settings.
-  extension: string;
+  entity: string | 'user';
 
   // The original value specified by the option definition is 'suggested' for 'value', but 'min' & 'max' are required.
-  qualifier: 'required' | 'suggested' | 'unspecified';
+  qualifier: Qualifier;
   content: unknown;
 };
 
@@ -48,6 +40,10 @@ type ConfigDB = {
   [url: string]: Config;
 };
 
+type UserValueDB = {
+  [url: string]: ConfigMetaContent;
+};
+
 // Usage
 // cmos: ConfigMetaObjectDB = {};
 // cmo = cmos[url];
@@ -58,12 +54,12 @@ type ConfigDB = {
 // For user level suggestions, requirements
 
 export type {
+  Qualifier,
   ConfigMetaObject,
   ConfigMetaContent,
   ConfigMetaObjectDB,
   ConfigMetaContentDB,
   UserValueDB,
-  ValueDefinition,
   ConfigDB,
   Config,
 };

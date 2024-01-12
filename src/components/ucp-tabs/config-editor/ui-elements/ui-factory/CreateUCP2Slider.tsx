@@ -17,6 +17,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import Logger from '../../../../../util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
@@ -37,6 +38,7 @@ function CreateUCP2Slider(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -109,6 +111,12 @@ function CreateUCP2Slider(args: {
             value.enabled === undefined ? false : (value.enabled as boolean)
           }
           onChange={(event) => {
+            setUserConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [url, { ...value, ...{ enabled: event.target.checked } }],
+              ]),
+            });
             setConfiguration({
               type: 'set-multiple',
               value: Object.fromEntries([
@@ -181,6 +189,21 @@ function CreateUCP2Slider(args: {
               // tooltipLabel={(currentValue) => (currentValue / factor).toString()}
               onChange={(event) => {
                 setLocalValue(parseInt(event.target.value, 10));
+                setUserConfiguration({
+                  type: 'set-multiple',
+                  value: Object.fromEntries([
+                    [
+                      url,
+                      {
+                        ...value,
+                        ...{
+                          sliderValue:
+                            parseInt(event.target.value, 10) / factor,
+                        },
+                      },
+                    ],
+                  ]),
+                });
                 setConfiguration({
                   type: 'set-multiple',
                   value: Object.fromEntries([

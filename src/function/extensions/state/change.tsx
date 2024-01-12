@@ -44,12 +44,12 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
         cmo.modifications.value.qualifier === 'unspecified'
       ) {
         locks[url] = {
-          lockedBy: cmo.modifications.value.extension,
+          lockedBy: cmo.modifications.value.entity,
           lockedValue: cmo.modifications.value.content,
         };
       } else if (cmo.modifications.value.qualifier === 'suggested') {
         suggestions[url] = {
-          suggestedBy: cmo.modifications.value.extension,
+          suggestedBy: cmo.modifications.value.entity,
           suggestedValue: cmo.modifications.value.content,
         };
       }

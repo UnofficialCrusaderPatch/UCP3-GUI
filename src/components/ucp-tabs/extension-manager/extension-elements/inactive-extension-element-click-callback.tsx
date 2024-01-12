@@ -10,7 +10,6 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
-import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
@@ -20,24 +19,20 @@ const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
+  LOGGER.msg('inactiveExtensionElementClickCallback').info();
+
   const configurationTouched = getStore().get(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
 
-  const confirmed = await warnClearingOfConfiguration(configurationTouched);
+  const currentExtensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
-  const eState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
-
-  if (!confirmed) {
-    return;
-  }
-
-  const newExtensionState = await addExtensionToExplicityActivatedExtensions(
-    eState,
+  const newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+    currentExtensionsState,
     ext,
   );
 
-  const res = buildExtensionConfigurationDB(newExtensionState);
+  const res = buildExtensionConfigurationDB(newExtensionsState);
 
   if (res.configuration.statusCode !== 0) {
     if (res.configuration.statusCode === 2) {

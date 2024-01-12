@@ -14,6 +14,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
@@ -27,6 +28,7 @@ function CreateSlider(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -106,6 +108,20 @@ function CreateSlider(args: {
           setLocalValue(parseInt(event.target.value, 10));
         }}
         onAfterChange={(event) => {
+          setUserConfiguration({
+            type: 'set-multiple',
+            value: Object.fromEntries([
+              [
+                url,
+                {
+                  ...value,
+                  ...{
+                    sliderValue: parseInt(event.target.value, 10) / factor,
+                  },
+                },
+              ],
+            ]),
+          });
           setConfiguration({
             type: 'set-multiple',
             value: Object.fromEntries([

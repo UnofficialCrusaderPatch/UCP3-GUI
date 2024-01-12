@@ -13,6 +13,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import Logger from '../../../../../util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
@@ -29,7 +30,7 @@ function CreateUCP2RadioGroup(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
-
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -101,6 +102,12 @@ function CreateUCP2RadioGroup(args: {
             value.enabled === undefined ? false : (value.enabled as boolean)
           }
           onChange={(event) => {
+            setUserConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [url, { ...value, ...{ enabled: event.target.checked } }],
+              ]),
+            });
             setConfiguration({
               type: 'set-multiple',
               value: Object.fromEntries([
@@ -153,6 +160,12 @@ function CreateUCP2RadioGroup(args: {
             name={url}
             selectedValue={value.choice}
             onChange={(newValue: string) => {
+              setUserConfiguration({
+                type: 'set-multiple',
+                value: Object.fromEntries([
+                  [url, { ...value, ...{ choice: newValue } }],
+                ]),
+              });
               setConfiguration({
                 type: 'set-multiple',
                 value: Object.fromEntries([

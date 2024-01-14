@@ -5,23 +5,17 @@ import { ConsoleLogger } from '../../../util/scripts/logging';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
+  userConfiguration: { [key: string]: unknown },
   folder: string,
-  touched: { [key: string]: boolean },
   sparseExtensions: Extension[],
   allExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
-  const sparseConfig = Object.fromEntries(
-    Object.entries(configuration).filter(([key]) => touched[key]),
-  );
-
-  const fullConfig = configuration;
-
   ConsoleLogger.debug(`Saving config: `, configuration);
 
   return saveUCPConfig(
-    sparseConfig,
-    fullConfig,
+    { ...userConfiguration },
+    { ...configuration },
     [...sparseExtensions].reverse(),
     [...allExtensions].reverse(),
     folder,

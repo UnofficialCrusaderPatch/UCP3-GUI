@@ -7,7 +7,6 @@ import { Extension } from '../../../../config/ucp/common';
 import { getStore } from '../../../../hooks/jotai/base';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
@@ -21,10 +20,6 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
   LOGGER.msg('inactiveExtensionElementClickCallback').info();
-
-  const configurationTouched = getStore().get(
-    CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  );
 
   const currentExtensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -59,9 +54,9 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   }
 
   // TODO: insert logic to integrate existing customisations with the new thing.
-  const touchedConfig = Object.entries(
-    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
-  ).filter(([url]) => configurationTouched[url] === true);
+  const userConfig = Object.entries(
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+  );
 
   const newRequiredValues = Object.fromEntries(
     Object.entries(res.configuration.state).filter(
@@ -70,12 +65,12 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     ),
   );
 
-  const lostConfig = touchedConfig.filter(
+  const lostConfig = userConfig.filter(
     ([url]) => newRequiredValues[url] !== undefined,
   );
 
   const retainedConfig = Object.fromEntries(
-    touchedConfig.filter(([url]) => newRequiredValues[url] === undefined),
+    userConfig.filter(([url]) => newRequiredValues[url] === undefined),
   );
 
   if (lostConfig.length > 0) {

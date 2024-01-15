@@ -90,12 +90,16 @@ export function ConfigPopover(props: {
                   onChange={() => {
                     setQualifier({
                       type: 'set-multiple',
-                      value: Object.fromEntries([
-                        [
-                          url,
+                      value: {
+                        [url]:
                           qualifier === 'required' ? 'suggested' : 'required',
-                        ],
-                      ]),
+                      },
+                    });
+                    setConfigurationTouched({
+                      type: 'set-multiple',
+                      value: {
+                        [url]: true,
+                      },
                     });
                   }}
                   checked={qualifier === 'required'}
@@ -114,20 +118,20 @@ export function ConfigPopover(props: {
             className="ms-1 me-1"
             onClick={() => {
               setUserConfiguration({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, undefined]]),
+                type: 'clear-key',
+                key: url,
               });
               setConfiguration({
                 type: 'set-multiple',
-                value: Object.fromEntries([[url, defaultValue]]),
+                value: { [url]: defaultValue },
               });
               setConfigurationTouched({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, false]]),
+                type: 'clear-key',
+                key: url,
               });
               setQualifier({
                 type: 'set-multiple',
-                value: Object.fromEntries([[url, 'suggested']]),
+                value: { [url]: 'suggested' },
               });
             }}
           >

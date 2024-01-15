@@ -1,7 +1,12 @@
 import { Extension } from '../../../config/ucp/common';
 import { saveUCPConfig } from '../../../config/ucp/config-files';
-import { ConfigurationQualifier } from '../../../function/configuration/state';
+import {
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  ConfigurationQualifier,
+} from '../../../function/configuration/state';
+import { getStore } from '../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../util/scripts/logging';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
@@ -20,7 +25,16 @@ function saveConfig(
     [...allExtensions].reverse(),
     folder,
     configurationQualifier,
-  );
+  ).then((value) => {
+    getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+      type: 'reset',
+      value: {},
+    });
+
+    getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, false);
+
+    return value;
+  });
 }
 
 export default saveConfig;

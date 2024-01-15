@@ -10,6 +10,7 @@ import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state-manipulation';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
 
@@ -53,6 +54,8 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   }
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 };
 
 export default activeExtensionElementClickCallback;

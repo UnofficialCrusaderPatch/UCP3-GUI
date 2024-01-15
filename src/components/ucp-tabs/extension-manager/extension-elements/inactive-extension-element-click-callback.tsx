@@ -13,6 +13,7 @@ import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 
@@ -115,6 +116,8 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     'New user config state',
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
+
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 };
 
 export default inactiveExtensionElementClickCallback;

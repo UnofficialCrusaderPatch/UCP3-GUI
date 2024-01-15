@@ -126,7 +126,10 @@ function saveUCPConfigPart(
       const ext = allExtensions.filter((ex) => ex.name === extName)[0];
 
       if (ext === undefined || ext === null) {
-        LOGGER.msg(`No extension found with name: ${extName}`).error();
+        LOGGER.msg(
+          `No extension found with name: ${extName}. Will not be saved`,
+        ).warn();
+        return;
       }
 
       const type = ext.type === 'module' ? 'modules' : 'plugins';

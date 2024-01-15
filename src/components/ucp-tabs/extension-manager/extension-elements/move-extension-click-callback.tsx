@@ -3,6 +3,7 @@ import { getStore } from '../../../../hooks/jotai/base';
 import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { moveExtension } from '../extensions-state-manipulation';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 
 const moveExtensionClickCallback = async (event: {
   name: string;
@@ -21,6 +22,8 @@ const moveExtensionClickCallback = async (event: {
   );
 
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
+
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 };
 
 export default moveExtensionClickCallback;

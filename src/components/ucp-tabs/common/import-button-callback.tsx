@@ -39,38 +39,6 @@ import {
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
 
-const setUserConfiguration = (arg0: {
-  type: string;
-  value: { [key: string]: unknown };
-}) => {
-  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, arg0);
-};
-
-const setConfiguration = (arg0: {
-  type: string;
-  value: { [key: string]: unknown };
-}) => {
-  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, arg0);
-};
-
-const setConfigurationTouched = (arg0: {
-  type: string;
-  value: { [key: string]: boolean };
-}) => {
-  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, arg0);
-};
-
-const setExtensionsState = (arg0: ExtensionsState) => {
-  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, arg0);
-};
-
-const setConfigurationQualifier = (arg0: {
-  type: string;
-  value: { [key: string]: ConfigurationQualifier };
-}) => {
-  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, arg0);
-};
-
 const importButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (arg0: string) => void,
@@ -219,7 +187,7 @@ const importButtonCallback = async (
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
   }
 
-  setExtensionsState(newExtensionsState);
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
 
   ConsoleLogger.debug('opened config', parsingResult.result);
 
@@ -250,7 +218,7 @@ const importButtonCallback = async (
   const newConfigurationQualifier: {
     [key: string]: ConfigurationQualifier;
   } = {};
-  setConfigurationQualifier({
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: {},
   });
@@ -276,16 +244,19 @@ const importButtonCallback = async (
     newConfigurationTouched[url] = true;
   });
 
-  setUserConfiguration({ type: 'set-multiple', value: newConfiguration });
-  setConfiguration({
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfiguration,
   });
-  setConfigurationTouched({
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: newConfiguration,
+  });
+  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfigurationTouched,
   });
-  setConfigurationQualifier({
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfigurationQualifier,
   });

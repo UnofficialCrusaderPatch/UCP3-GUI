@@ -9,7 +9,6 @@ import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
 import { UCP3Updater } from '../../../function/download/github';
 import { getStore } from '../../../hooks/jotai/base';
 import { removeFile, writeBinaryFile } from '../../../tauri/tauri-files';
-import { checkForGUIUpdates } from '../../../function/download/gui-update';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
@@ -314,7 +313,7 @@ export default function Overview() {
           t('gui-editor:overview.uninstall.toast.title'),
         )}
       /> */}
-      <StateButton
+      {/* <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{
           idle: t('gui-editor:overview.update.gui.idle'),
@@ -339,7 +338,7 @@ export default function Overview() {
         setResultNodeState={createToastHandler(
           t('gui-editor:overview.update.gui.toast.title'),
         )}
-      />
+      /> */}
     </div>
   );
 }

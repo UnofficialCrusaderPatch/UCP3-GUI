@@ -10,6 +10,7 @@ import { getStore } from '../../hooks/jotai/base';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../function/configuration/state';
 import { useCurrentGameFolder } from '../../function/game-folder/state';
 
@@ -52,6 +53,11 @@ function saveConfig(baseUrl: string, config: Record<string, unknown>) {
       newConfigValue,
     ]),
   );
+
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: newConfigEntries,
+  });
 
   getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'set-multiple',

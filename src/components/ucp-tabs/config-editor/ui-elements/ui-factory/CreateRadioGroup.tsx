@@ -9,6 +9,7 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
 import {
@@ -29,6 +30,7 @@ function CreateRadioGroup(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -108,6 +110,10 @@ function CreateRadioGroup(args: {
         name={url}
         selectedValue={value === undefined ? defaultChoice : (value as string)}
         onChange={(newValue: string) => {
+          setUserConfiguration({
+            type: 'set-multiple',
+            value: Object.fromEntries([[url, newValue]]),
+          });
           setConfiguration({
             type: 'set-multiple',
             value: Object.fromEntries([[url, newValue]]),

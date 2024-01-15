@@ -5,6 +5,8 @@ import './launch-options/launch-options.css'; // currently imported here, als lo
 import { useTranslation } from 'react-i18next';
 import { useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
+import { ExclamationCircleFill } from 'react-bootstrap-icons';
+import { useAtomValue } from 'jotai';
 import GameStarter from './game-starter/game-starter';
 import {
   EXTREME_PATH_ATOM,
@@ -24,6 +26,7 @@ import {
   UcpConsoleLogLevel,
   UcpLogLevel,
 } from './launch-options/verbosity-args';
+import { CONFIG_DIRTY_STATE_ATOM } from '../common/buttons/config-serialized-state';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -38,6 +41,8 @@ export default function Launch() {
 
   const [displayAdvancedLaunchOptions, setDisplayAdvancedLaunchOptions] =
     useState(false);
+
+  const configurationDirtyState = useAtomValue(CONFIG_DIRTY_STATE_ATOM);
 
   return (
     <div className="launch__container flex-default">
@@ -56,6 +61,16 @@ export default function Launch() {
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
         />
+      </div>
+      <div
+        className={`d-flex align-self-start ps-4 ${
+          configurationDirtyState ? '' : 'd-none'
+        }`}
+      >
+        <ExclamationCircleFill color="yellow" size={20} />
+        <span className="ps-3">
+          <em>Note: you have unsaved changes in your configuration</em>
+        </span>
       </div>
       <div className="d-flex align-self-start">
         <Button

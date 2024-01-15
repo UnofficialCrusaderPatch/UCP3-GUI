@@ -1,6 +1,7 @@
 activate: "Activate"
 advanced.mode: "Advanced mode"
 apply: "Apply"
+applied: "Applied"
 close: "Close"
 ok: "Ok"
 cancel: "Cancel"

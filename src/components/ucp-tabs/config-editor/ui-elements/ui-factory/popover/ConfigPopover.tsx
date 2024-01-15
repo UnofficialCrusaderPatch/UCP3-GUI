@@ -7,6 +7,7 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../../function/configuration/state';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 
@@ -20,6 +21,7 @@ export function ConfigPopover(props: {
 }) {
   const { url, show, theRef } = props;
 
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfiguration = useSetAtom(CONFIGURATION_FULL_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -88,12 +90,16 @@ export function ConfigPopover(props: {
                   onChange={() => {
                     setQualifier({
                       type: 'set-multiple',
-                      value: Object.fromEntries([
-                        [
-                          url,
+                      value: {
+                        [url]:
                           qualifier === 'required' ? 'suggested' : 'required',
-                        ],
-                      ]),
+                      },
+                    });
+                    setConfigurationTouched({
+                      type: 'set-multiple',
+                      value: {
+                        [url]: true,
+                      },
                     });
                   }}
                   checked={qualifier === 'required'}
@@ -111,17 +117,21 @@ export function ConfigPopover(props: {
             role="button"
             className="ms-1 me-1"
             onClick={() => {
+              setUserConfiguration({
+                type: 'clear-key',
+                key: url,
+              });
               setConfiguration({
                 type: 'set-multiple',
-                value: Object.fromEntries([[url, defaultValue]]),
+                value: { [url]: defaultValue },
               });
               setConfigurationTouched({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, false]]),
+                type: 'clear-key',
+                key: url,
               });
               setQualifier({
                 type: 'set-multiple',
-                value: Object.fromEntries([[url, 'suggested']]),
+                value: { [url]: 'suggested' },
               });
             }}
           >

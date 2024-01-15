@@ -1,32 +1,40 @@
 import { Extension } from '../../../config/ucp/common';
 import { saveUCPConfig } from '../../../config/ucp/config-files';
-import { ConfigurationQualifier } from '../../../function/configuration/state';
+import {
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  ConfigurationQualifier,
+} from '../../../function/configuration/state';
+import { getStore } from '../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../util/scripts/logging';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
+  userConfiguration: { [key: string]: unknown },
   folder: string,
-  touched: { [key: string]: boolean },
   sparseExtensions: Extension[],
   allExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
-  const sparseConfig = Object.fromEntries(
-    Object.entries(configuration).filter(([key]) => touched[key]),
-  );
-
-  const fullConfig = configuration;
-
   ConsoleLogger.debug(`Saving config: `, configuration);
 
   return saveUCPConfig(
-    sparseConfig,
-    fullConfig,
+    { ...userConfiguration },
+    { ...configuration },
     [...sparseExtensions].reverse(),
     [...allExtensions].reverse(),
     folder,
     configurationQualifier,
-  );
+  ).then((value) => {
+    getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+      type: 'reset',
+      value: {},
+    });
+
+    getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, false);
+
+    return value;
+  });
 }
 
 export default saveConfig;

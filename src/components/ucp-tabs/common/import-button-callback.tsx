@@ -4,6 +4,7 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../function/configuration/state';
 import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { openFileDialog } from '../../../tauri/tauri-dialog';
@@ -37,31 +38,6 @@ import {
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
-
-const setConfiguration = (arg0: {
-  type: string;
-  value: { [key: string]: unknown };
-}) => {
-  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, arg0);
-};
-
-const setConfigurationTouched = (arg0: {
-  type: string;
-  value: { [key: string]: boolean };
-}) => {
-  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, arg0);
-};
-
-const setExtensionsState = (arg0: ExtensionsState) => {
-  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, arg0);
-};
-
-const setConfigurationQualifier = (arg0: {
-  type: string;
-  value: { [key: string]: ConfigurationQualifier };
-}) => {
-  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, arg0);
-};
 
 const importButtonCallback = async (
   gameFolder: string,
@@ -211,7 +187,7 @@ const importButtonCallback = async (
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
   }
 
-  setExtensionsState(newExtensionsState);
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
 
   ConsoleLogger.debug('opened config', parsingResult.result);
 
@@ -242,7 +218,7 @@ const importButtonCallback = async (
   const newConfigurationQualifier: {
     [key: string]: ConfigurationQualifier;
   } = {};
-  setConfigurationQualifier({
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: {},
   });
@@ -268,15 +244,19 @@ const importButtonCallback = async (
     newConfigurationTouched[url] = true;
   });
 
-  setConfiguration({
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfiguration,
   });
-  setConfigurationTouched({
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: newConfiguration,
+  });
+  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfigurationTouched,
   });
-  setConfigurationQualifier({
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: newConfigurationQualifier,
   });

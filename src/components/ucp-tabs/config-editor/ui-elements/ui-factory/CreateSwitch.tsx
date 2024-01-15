@@ -11,6 +11,7 @@ import {
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
@@ -26,6 +27,7 @@ function CreateSwitch(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const configurationWarnings = useAtomValue(
     CONFIGURATION_WARNINGS_REDUCER_ATOM,
   );
@@ -101,6 +103,10 @@ function CreateSwitch(args: {
         id={`${url}-switch`}
         checked={value === undefined ? false : (value as boolean)}
         onChange={(event) => {
+          setUserConfiguration({
+            type: 'set-multiple',
+            value: Object.fromEntries([[url, event.target.checked]]),
+          });
           setConfiguration({
             type: 'set-multiple',
             value: Object.fromEntries([[url, event.target.checked]]),

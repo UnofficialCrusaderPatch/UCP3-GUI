@@ -2,11 +2,11 @@ import { Accordion, Form } from 'react-bootstrap';
 
 import { RadioGroup, Radio } from 'react-radio-group';
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import {
   DisplayConfigElement,
@@ -19,8 +19,9 @@ import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
-import Logger from '../../../../../util/scripts/logging';
+import Logger, { ConsoleLogger } from '../../../../../util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
@@ -52,6 +53,7 @@ function CreateUCP2SliderChoice(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
@@ -148,6 +150,12 @@ function CreateUCP2SliderChoice(args: {
             value.enabled === undefined ? false : (value.enabled as boolean)
           }
           onChange={(event) => {
+            setUserConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [url, { ...value, ...{ enabled: event.target.checked } }],
+              ]),
+            });
             setConfiguration({
               type: 'set-multiple',
               value: Object.fromEntries([
@@ -173,12 +181,17 @@ function CreateUCP2SliderChoice(args: {
       1 /
       // eslint-disable-next-line no-nested-ternary
       (choice.step === undefined ? 1 : choice.step === 0 ? 1 : choice.step);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [localValue, setLocalValue] = useState(
+    const v =
       value.choices[choice.name].slider === undefined
         ? 0
-        : (value.choices[choice.name].slider as number) * factor,
-    );
+        : (value.choices[choice.name].slider as number) * factor;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const localValueAtom = useMemo(() => atom(v), [v]);
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [localValue, setLocalValue] = useAtom(localValueAtom);
+
     return (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div
@@ -222,8 +235,8 @@ function CreateUCP2SliderChoice(args: {
               </Form.Label>
             </div>
             <div className="col-7">
-              <input
-                type="range"
+              <Form.Range
+                bsPrefix="ucp-slider"
                 className="ucp-slider"
                 min={choice.min * factor}
                 max={choice.max * factor}
@@ -235,12 +248,13 @@ function CreateUCP2SliderChoice(args: {
                 // tooltipLabel={(currentValue) =>
                 //  (currentValue / factor).toString()
                 // }
-                onChange={(event) => {
-                  setLocalValue(parseInt(event.target.value, 10));
-                  setLocalValue(parseInt(event.target.value, 10));
+                onMouseUp={() => {
                   const newValue = { ...value };
-                  newValue.choices[choice.name].slider =
-                    parseInt(event.target.value, 10) / factor;
+                  newValue.choices[choice.name].slider = localValue / factor;
+                  setUserConfiguration({
+                    type: 'set-multiple',
+                    value: Object.fromEntries([[url, newValue]]),
+                  });
                   setConfiguration({
                     type: 'set-multiple',
                     value: Object.fromEntries([[url, newValue]]),
@@ -249,6 +263,11 @@ function CreateUCP2SliderChoice(args: {
                     type: 'set-multiple',
                     value: Object.fromEntries([[url, true]]),
                   });
+                }}
+                onChange={(event) => {
+                  const rawValue = parseFloat(event.target.value);
+                  setLocalValue(rawValue);
+                  ConsoleLogger.debug(localValue);
                 }}
                 disabled={
                   !isEnabled ||
@@ -280,19 +299,25 @@ function CreateUCP2SliderChoice(args: {
                 type="number"
                 min={choice.min as number}
                 max={choice.max as number}
+                step={choice.step}
                 id={`${url}-input`}
                 // Tooltip stuff
                 data-bs-toggle="tooltip"
                 data-bs-placement="top"
                 title={fullToolTip}
                 // End of tooltip stuff
-                value={localValue === undefined ? 0 : (localValue as number)}
+                value={localValue}
                 onChange={(event) => {
-                  setLocalValue(parseInt(event.target.value, 10));
-                  setLocalValue(parseInt(event.target.value, 10));
+                  ConsoleLogger.info(event);
+                  const rawValue = parseFloat(event.target.value);
+                  const newLocalValue = rawValue * factor;
+                  setLocalValue(newLocalValue);
                   const newValue = { ...value };
-                  newValue.choices[choice.name].slider =
-                    parseInt(event.target.value, 10) / factor;
+                  newValue.choices[choice.name].slider = rawValue;
+                  setUserConfiguration({
+                    type: 'set-multiple',
+                    value: Object.fromEntries([[url, newValue]]),
+                  });
                   setConfiguration({
                     type: 'set-multiple',
                     value: Object.fromEntries([[url, newValue]]),
@@ -346,6 +371,12 @@ function CreateUCP2SliderChoice(args: {
           name={url}
           selectedValue={enabledOption}
           onChange={(newValue: string) => {
+            setUserConfiguration({
+              type: 'set-multiple',
+              value: Object.fromEntries([
+                [url, { ...value, ...{ choice: newValue } }],
+              ]),
+            });
             setConfiguration({
               type: 'set-multiple',
               value: Object.fromEntries([

@@ -12,6 +12,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../configuration/state';
 import { getStore } from '../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../util/scripts/logging';
@@ -39,17 +40,17 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   Object.entries(extensionsState.configuration.state).forEach(
     ([url, cmo]: [string, ConfigMetaObject]) => {
       defaults[url] = cmo.modifications.value.content;
-      if (
-        cmo.modifications.value.qualifier === 'required' ||
-        cmo.modifications.value.qualifier === 'unspecified'
-      ) {
+      if (cmo.modifications.value.qualifier === 'required') {
         locks[url] = {
-          lockedBy: cmo.modifications.value.extension,
+          lockedBy: cmo.modifications.value.entity,
           lockedValue: cmo.modifications.value.content,
         };
-      } else if (cmo.modifications.value.qualifier === 'suggested') {
+      } else if (
+        cmo.modifications.value.qualifier === 'suggested' ||
+        cmo.modifications.value.qualifier === 'unspecified'
+      ) {
         suggestions[url] = {
-          suggestedBy: cmo.modifications.value.extension,
+          suggestedBy: cmo.modifications.value.entity,
           suggestedValue: cmo.modifications.value.content,
         };
       }
@@ -59,7 +60,7 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // Here the values are set
   getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'reset',
-    value: defaults,
+    value: { ...defaults, ...getStore().get(CONFIGURATION_USER_REDUCER_ATOM) },
   });
   getStore().set(CONFIGURATION_DEFAULTS_REDUCER_ATOM, {
     type: 'reset',

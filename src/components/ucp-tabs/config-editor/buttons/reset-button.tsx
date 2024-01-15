@@ -5,11 +5,13 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 
 function ResetButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfiguration = useSetAtom(CONFIGURATION_FULL_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -23,6 +25,10 @@ function ResetButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
       className="ucp-button icons-button reset"
       type="button"
       onClick={() => {
+        setUserConfiguration({
+          type: 'reset',
+          value: {},
+        });
         setConfiguration({
           type: 'reset',
           value: configurationDefaults,

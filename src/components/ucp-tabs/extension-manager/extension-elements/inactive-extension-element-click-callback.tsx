@@ -5,33 +5,31 @@ import {
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { Extension } from '../../../../config/ucp/common';
 import { getStore } from '../../../../hooks/jotai/base';
-import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
+import {
+  CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
+} from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
-import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
+import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 
 const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
-  const confirmed = await warnClearingOfConfiguration(
-    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
-  );
+  LOGGER.msg('inactiveExtensionElementClickCallback').info();
 
-  const eState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const currentExtensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
-  if (!confirmed) {
-    return;
-  }
-
-  const newExtensionState = await addExtensionToExplicityActivatedExtensions(
-    eState,
+  const newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+    currentExtensionsState,
     ext,
   );
 
-  const res = buildExtensionConfigurationDB(newExtensionState);
+  const res = buildExtensionConfigurationDB(newExtensionsState);
 
   if (res.configuration.statusCode !== 0) {
     if (res.configuration.statusCode === 2) {
@@ -56,8 +54,70 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     LOGGER.msg(`New configuration build without errors or warnings`).info();
   }
 
+  // TODO: insert logic to integrate existing customisations with the new thing.
+  const userConfig = Object.entries(
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+  );
+
+  const newRequiredValues = Object.fromEntries(
+    Object.entries(res.configuration.state).filter(
+      ([, cmo]: [string, ConfigMetaObject]) =>
+        cmo.modifications.value.qualifier === 'required',
+    ),
+  );
+
+  const lostConfig = userConfig.filter(
+    ([url]) => newRequiredValues[url] !== undefined,
+  );
+
+  const retainedConfig = Object.fromEntries(
+    userConfig.filter(([url]) => newRequiredValues[url] === undefined),
+  );
+
+  if (lostConfig.length > 0) {
+    const answer = await showModalOkCancel({
+      title: 'Losing customisations',
+      message: `You will lose ${
+        lostConfig.length
+      } customisations. Do you want to proceed?\n\nLosing customisations:\n${lostConfig
+        .map(([url]) => url)
+        .sort()}`,
+    });
+
+    if (!answer) {
+      return;
+    }
+  }
+
+  ConsoleLogger.info(
+    'Current full config state',
+    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+  );
+
+  ConsoleLogger.info(
+    'Current user config state',
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+  );
+
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+    type: 'reset',
+    value: retainedConfig,
+  });
+
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
-  ConsoleLogger.debug('New extension state', res);
+
+  ConsoleLogger.info('New extension state', res);
+  ConsoleLogger.info(
+    'New full config state',
+    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+  );
+
+  ConsoleLogger.info(
+    'New user config state',
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+  );
+
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 };
 
 export default inactiveExtensionElementClickCallback;

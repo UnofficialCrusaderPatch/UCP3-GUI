@@ -2,7 +2,7 @@
 import { exists, type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
 
-import { readDir } from '../../../tauri/tauri-files';
+import { readDir, renameFile } from '../../../tauri/tauri-files';
 
 import { extractZipToPath, slashify } from '../../../tauri/tauri-invoke';
 
@@ -177,7 +177,10 @@ async function unzipPlugins(pluginDirEnts: FileEntry[]) {
         }
       }
 
-      if (isPlugin) await extractZipToPath(path, path.slice(undefined, -4));
+      if (isPlugin) {
+        await extractZipToPath(path, path.slice(undefined, -4));
+        await renameFile(path, `${path}.backup`);
+      }
     }),
   );
 }

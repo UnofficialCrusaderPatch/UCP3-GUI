@@ -30,7 +30,7 @@ function buildConfigMetaContent(extName: string, k: string, v: unknown) {
   return {
     truekey,
     configMetaContent: {
-      extension: extName,
+      entity: extName,
       content: v,
       qualifier,
     } as ConfigMetaContent,
@@ -85,7 +85,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             currentM.qualifier === 'required' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Suggested value by extension ('${ext.name}') dropped because of a required value from previously activated extension ('${currentM.extension}')`;
+            const w = `Suggested value by extension ('${ext.name}') dropped because of a required value from previously activated extension ('${currentM.entity}')`;
             LOGGER.msg(w).warn();
             warnings.push(w);
             return;
@@ -94,7 +94,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             currentM.qualifier === 'suggested' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Suggested value by extension ('${currentM.extension}') overriden by suggested value from later activated extension ('${ext.name}')`;
+            const w = `Suggested value by extension ('${currentM.entity}') overriden by suggested value from later activated extension ('${ext.name}')`;
             LOGGER.msg(w).warn();
             warnings.push(w);
             return;
@@ -103,7 +103,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             currentM.qualifier === 'suggested' &&
             cmc.qualifier === 'required'
           ) {
-            const w = `Suggested value by extension ('${currentM.extension}') overriden by required value from later activated extension ('${ext.name}')`;
+            const w = `Suggested value by extension ('${currentM.entity}') overriden by required value from later activated extension ('${ext.name}')`;
             LOGGER.msg(w).warn();
             warnings.push(w);
             return;
@@ -116,7 +116,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             if (
               JSON.stringify(currentM.content) !== JSON.stringify(cmc.content)
             ) {
-              const e = `Incompatible extension ('${ext.name}') and ('${currentM.extension}') because they both require different values for feature '${url}'`;
+              const e = `Incompatible extension ('${ext.name}') and ('${currentM.entity}') because they both require different values for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
             }
@@ -124,7 +124,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
         }
 
         m[key] = {
-          extension: ext.name,
+          entity: ext.name,
           content: cmc.content,
           qualifier: cmc.qualifier,
         } as ConfigMetaContent;

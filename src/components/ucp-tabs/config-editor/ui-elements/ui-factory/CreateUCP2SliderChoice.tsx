@@ -1,7 +1,5 @@
 import { Accordion, Form } from 'react-bootstrap';
 
-import { RadioGroup, Radio } from 'react-radio-group';
-
 import { useMemo, useRef, useState } from 'react';
 
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
@@ -192,6 +190,26 @@ function CreateUCP2SliderChoice(args: {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [localValue, setLocalValue] = useAtom(localValueAtom);
 
+    const onClickRadio = (newValue: string) => {
+      setUserConfiguration({
+        type: 'set-multiple',
+        value: Object.fromEntries([
+          [url, { ...value, ...{ choice: newValue } }],
+        ]),
+      });
+      setConfiguration({
+        type: 'set-multiple',
+        value: Object.fromEntries([
+          [url, { ...value, ...{ choice: newValue } }],
+        ]),
+      });
+      setConfigurationTouched({
+        type: 'set-multiple',
+        value: Object.fromEntries([[url, true]]),
+      });
+      configuration[url] = newValue;
+    };
+
     return (
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div
@@ -205,11 +223,16 @@ function CreateUCP2SliderChoice(args: {
         }}
       >
         <div className="sword-checkbox">
-          <Radio
+          <input
+            type="radio"
             className="form-check-input"
-            value={choice.name}
+            name={choice.name}
             id={`${url}-radio-${choice.name}`}
             disabled={!value.enabled}
+            checked={value.choice === choice.name}
+            onClick={() => {
+              onClickRadio(choice.name);
+            }}
           />
           <label
             className="form-check-label"
@@ -342,11 +365,6 @@ function CreateUCP2SliderChoice(args: {
     );
   });
 
-  let enabledOption = '';
-  if (value !== undefined) {
-    enabledOption = value.choice;
-  }
-
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
@@ -367,32 +385,11 @@ function CreateUCP2SliderChoice(args: {
       <Accordion.Header as="div">{headerElement}</Accordion.Header>
       <Accordion.Body>
         <p>{text}</p>
-        <RadioGroup
-          name={url}
-          selectedValue={enabledOption}
-          onChange={(newValue: string) => {
-            setUserConfiguration({
-              type: 'set-multiple',
-              value: Object.fromEntries([
-                [url, { ...value, ...{ choice: newValue } }],
-              ]),
-            });
-            setConfiguration({
-              type: 'set-multiple',
-              value: Object.fromEntries([
-                [url, { ...value, ...{ choice: newValue } }],
-              ]),
-            });
-            setConfigurationTouched({
-              type: 'set-multiple',
-              value: Object.fromEntries([[url, true]]),
-            });
-            configuration[url] = newValue;
-          }}
-          disabled={isDisabled}
+        <div // Radiogroup
+          className={isDisabled ? 'disabled' : ''}
         >
           {radios}
-        </RadioGroup>
+        </div>
       </Accordion.Body>
     </Accordion>
   );

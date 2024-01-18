@@ -1,5 +1,4 @@
 import { Accordion } from 'react-bootstrap';
-import { RadioGroup, Radio } from 'react-radio-group';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';
 import {
@@ -131,6 +130,22 @@ function CreateUCP2RadioGroup(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const onRadioClick = (newValue: string) => {
+    setUserConfiguration({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, { ...value, ...{ choice: newValue } }]]),
+    });
+    setConfiguration({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, { ...value, ...{ choice: newValue } }]]),
+    });
+    setConfigurationTouched({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, true]]),
+    });
+    configuration[url] = newValue;
+  };
+
   return (
     <Accordion
       bsPrefix="ucp-accordion"
@@ -156,36 +171,17 @@ function CreateUCP2RadioGroup(args: {
           </label>
         </div>
         <div className="row">
-          <RadioGroup
-            name={url}
-            selectedValue={value.choice}
-            onChange={(newValue: string) => {
-              setUserConfiguration({
-                type: 'set-multiple',
-                value: Object.fromEntries([
-                  [url, { ...value, ...{ choice: newValue } }],
-                ]),
-              });
-              setConfiguration({
-                type: 'set-multiple',
-                value: Object.fromEntries([
-                  [url, { ...value, ...{ choice: newValue } }],
-                ]),
-              });
-              setConfigurationTouched({
-                type: 'set-multiple',
-                value: Object.fromEntries([[url, true]]),
-              });
-              configuration[url] = newValue;
-            }}
-            disabled={!value.enabled || isDisabled}
-          >
+          <div className={!value.enabled || isDisabled ? 'disabled' : ''}>
             {choices.map((choice) => (
               // eslint-disable-next-line jsx-a11y/label-has-associated-control
               <div key={choice.name} className="form-check sword-checkbox">
-                <Radio
+                <input
+                  type="radio"
                   className="form-check-input"
-                  value={choice.name}
+                  checked={choice.name === value.choice}
+                  onClick={() => {
+                    onRadioClick(choice.name);
+                  }}
                   id={`${url}-radio-${choice.name}`}
                   disabled={!value.enabled || isDisabled}
                 />
@@ -204,7 +200,7 @@ function CreateUCP2RadioGroup(args: {
                 )}
               </div>
             ))}
-          </RadioGroup>
+          </div>
         </div>
       </Accordion.Body>
     </Accordion>

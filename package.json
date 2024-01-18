@@ -60,7 +60,6 @@
     "react-dom": "^18.2.0",
     "react-i18next": "^14.0.0",
     "react-markdown": "^9.0.1",
-    "react-radio-group": "^3.0.3",
     "react-router-dom": "^6.21.1",
     "semver": "^7.5.3",
     "yaml": "^2.3.4"

@@ -1,4 +1,3 @@
-import { RadioGroup, Radio } from 'react-radio-group';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Form } from 'react-bootstrap';
 import { useState, useRef } from 'react';
@@ -70,12 +69,34 @@ function CreateRadioGroup(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const selectedValue = value === undefined ? defaultChoice : (value as string);
+
+  const onRadioClick = (newValue: string) => {
+    setUserConfiguration({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, newValue]]),
+    });
+    setConfiguration({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, newValue]]),
+    });
+    setConfigurationTouched({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, true]]),
+    });
+    configuration[url] = newValue;
+  };
+
   const radios = choices.map((choice) => (
     // eslint-disable-next-line jsx-a11y/label-has-associated-control
     <div key={choice.name} className="form-check">
-      <Radio
+      <input
+        type="radio"
         className="form-check-input"
-        value={choice.name}
+        checked={choice.name === selectedValue}
+        onClick={() => {
+          onRadioClick(choice.name);
+        }}
         id={`${url}-radio-${choice.name}`}
       />
       {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
@@ -106,28 +127,7 @@ function CreateRadioGroup(args: {
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <p>{text}</p>
-      <RadioGroup
-        name={url}
-        selectedValue={value === undefined ? defaultChoice : (value as string)}
-        onChange={(newValue: string) => {
-          setUserConfiguration({
-            type: 'set-multiple',
-            value: Object.fromEntries([[url, newValue]]),
-          });
-          setConfiguration({
-            type: 'set-multiple',
-            value: Object.fromEntries([[url, newValue]]),
-          });
-          setConfigurationTouched({
-            type: 'set-multiple',
-            value: Object.fromEntries([[url, true]]),
-          });
-          configuration[url] = newValue;
-        }}
-        disabled={isDisabled}
-      >
-        {radios}
-      </RadioGroup>
+      <div className={isDisabled ? 'disabled' : ''}>{radios}</div>
     </Form.Group>
   );
 }

@@ -98,20 +98,19 @@ const moveExtension = (
   event: { name: string; type: 'up' | 'down' },
 ) => {
   const { name, type } = event;
-  const aei = extensionsState.activeExtensions.map((e) => e.name).indexOf(name);
-  const element = extensionsState.activeExtensions[aei];
+
+  const ae = [...extensionsState.activeExtensions];
+  const aei = ae.map((e) => e.name).indexOf(name);
+  const element = ae[aei];
   let newIndex = type === 'up' ? aei - 1 : aei + 1;
   newIndex = newIndex < 0 ? 0 : newIndex;
-  newIndex =
-    newIndex > extensionsState.activeExtensions.length - 1
-      ? extensionsState.activeExtensions.length - 1
-      : newIndex;
-  extensionsState.activeExtensions.splice(aei, 1);
-  extensionsState.activeExtensions.splice(newIndex, 0, element);
+  newIndex = newIndex > ae.length - 1 ? ae.length - 1 : newIndex;
+  ae.splice(aei, 1);
+  ae.splice(newIndex, 0, element);
 
   return {
     ...extensionsState,
-    activeExtensions: extensionsState.activeExtensions,
+    activeExtensions: ae,
   } as ExtensionsState;
 };
 

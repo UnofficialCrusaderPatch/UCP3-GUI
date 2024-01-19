@@ -8,8 +8,6 @@ import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   ConfigurationLock,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  CONFIGURATION_WARNINGS_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -23,13 +21,13 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   const optionEntries = extensionsToOptionEntries(
     extensionsState.activeExtensions,
   );
-  const defaults = getConfigDefaults(optionEntries);
+  const uiDefinedDefaults = getConfigDefaults(optionEntries);
 
   ConsoleLogger.debug(
     'Updating defaults based on imported extensions: ',
     extensionsState.activeExtensions,
     'Default settings: ',
-    defaults,
+    uiDefinedDefaults,
   );
 
   const locks: { [key: string]: ConfigurationLock } = {};
@@ -37,9 +35,11 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
 
   // This small section is meant to process the extensions and create an improved default configuration based on active extensions
   // TODO: make this rely on the extension state?
+
+  const configDefinedValues: Record<string, unknown> = {};
   Object.entries(extensionsState.configuration.state).forEach(
     ([url, cmo]: [string, ConfigMetaObject]) => {
-      defaults[url] = cmo.modifications.value.content;
+      configDefinedValues[url] = cmo.modifications.value.content;
       if (cmo.modifications.value.qualifier === 'required') {
         locks[url] = {
           lockedBy: cmo.modifications.value.entity,
@@ -58,24 +58,27 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   );
 
   // Here the values are set
+
+  const extensionsDefinedValues = {
+    ...uiDefinedDefaults,
+    ...configDefinedValues,
+  };
+  const userDefinedValues = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
+
+  const fullConfig = {
+    // First enter all default values as defined by the original UI files
+    ...uiDefinedDefaults,
+    ...configDefinedValues,
+    ...userDefinedValues,
+  };
+
   getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'reset',
-    value: { ...defaults, ...getStore().get(CONFIGURATION_USER_REDUCER_ATOM) },
+    value: fullConfig,
   });
   getStore().set(CONFIGURATION_DEFAULTS_REDUCER_ATOM, {
     type: 'reset',
-    value: defaults,
-  });
-  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
-    type: 'reset',
-    value: Object.fromEntries(
-      Object.entries(defaults).map((pair) => [pair[0], false]),
-    ),
-  });
-  // Not implemented currently. Could store them in configuration of extensionsState?
-  getStore().set(CONFIGURATION_WARNINGS_REDUCER_ATOM, {
-    type: 'reset',
-    value: {},
+    value: extensionsDefinedValues,
   });
   getStore().set(CONFIGURATION_LOCKS_REDUCER_ATOM, {
     type: 'reset',

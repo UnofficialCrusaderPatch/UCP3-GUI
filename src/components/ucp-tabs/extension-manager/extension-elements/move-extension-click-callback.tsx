@@ -1,27 +1,29 @@
-import warnClearingOfConfiguration from '../../common/warn-clearing-of-configuration';
 import { getStore } from '../../../../hooks/jotai/base';
-import { CONFIGURATION_TOUCHED_REDUCER_ATOM } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { moveExtension } from '../extensions-state-manipulation';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
+import { buildExtensionConfigurationDB } from '../extension-configuration';
+import reportAndConfirmBuildResult from './reporting';
+import Logger from '../../../../util/scripts/logging';
+
+const LOGGER = new Logger('move-extension-callback.ts');
 
 const moveExtensionClickCallback = async (event: {
   name: string;
   type: 'up' | 'down';
 }) => {
-  const confirmed = await warnClearingOfConfiguration(
-    getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
-  );
-  if (!confirmed) {
-    return;
-  }
+  LOGGER.msg(`moving ${event.name} ${event.type}`).info();
 
   const newExtensionsState = moveExtension(
     getStore().get(EXTENSION_STATE_REDUCER_ATOM),
     event,
   );
 
-  getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
+  const res = buildExtensionConfigurationDB(newExtensionsState);
+
+  if (!(await reportAndConfirmBuildResult(res))) return;
+
+  getStore().set(EXTENSION_STATE_REDUCER_ATOM, res);
 
   getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 };

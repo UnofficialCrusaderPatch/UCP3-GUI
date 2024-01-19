@@ -214,7 +214,7 @@ function CreateUCP2SliderChoice(args: {
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div
         key={choice.name}
-        className="form-check"
+        className="form-check sword-checkbox"
         onMouseEnter={() => {
           setStatusBarMessage(statusBarMessage);
         }}
@@ -222,7 +222,7 @@ function CreateUCP2SliderChoice(args: {
           setStatusBarMessage(undefined);
         }}
       >
-        <div className="sword-checkbox">
+        <div>
           <input
             type="radio"
             className="form-check-input"
@@ -371,6 +371,7 @@ function CreateUCP2SliderChoice(args: {
   return (
     <Accordion
       bsPrefix="ucp-accordion"
+      className="sword-checkbox"
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

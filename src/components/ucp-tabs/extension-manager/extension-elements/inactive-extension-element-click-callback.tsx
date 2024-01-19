@@ -14,6 +14,7 @@ import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
+import reportAndConfirmBuildResult from './reporting';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 
@@ -31,28 +32,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
 
   const res = buildExtensionConfigurationDB(newExtensionsState);
 
-  if (res.configuration.statusCode !== 0) {
-    if (res.configuration.statusCode === 2) {
-      const msg = `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`;
-      LOGGER.msg(msg).error();
-      const confirmed1 = await showModalOkCancel({
-        title: 'Error',
-        message: msg,
-      });
-      if (!confirmed1) return;
-    }
-    if (res.configuration.warnings.length > 0) {
-      const msg = `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`;
-      LOGGER.msg(msg).warn();
-      const confirmed2 = await showModalOkCancel({
-        title: 'Warning',
-        message: msg,
-      });
-      if (!confirmed2) return;
-    }
-  } else {
-    LOGGER.msg(`New configuration build without errors or warnings`).info();
-  }
+  if (!(await reportAndConfirmBuildResult(res))) return;
 
   // TODO: insert logic to integrate existing customisations with the new thing.
   const userConfig = Object.entries(

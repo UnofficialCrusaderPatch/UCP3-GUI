@@ -1,0 +1,15 @@
+.ucp-popover {
+  display: flex;
+  justify-content: center;
+}
+
+.ucp-popover > button {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+}
+
+.ucp-popover.disabled > button {
+  cursor: default;
+  opacity: 0.5;
+}

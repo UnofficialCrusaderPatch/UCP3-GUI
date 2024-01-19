@@ -163,6 +163,10 @@ function saveUCPConfigPart(
         } else {
           c['required-value'] = value;
         }
+      } else if (subConfig === 'config-sparse') {
+        // If a qualifier hasn't been touched yet (thus undefined)
+        // but the value has been configured, then assume "suggested"
+        c['suggested-value'] = value;
       } else {
         c.value = value;
       }
@@ -202,7 +206,7 @@ export function serializeUCPConfig(
     fullConfig,
     fullExtensions,
     fullExtensions,
-    configurationQualifier,
+    {},
   );
   saveUCPConfigPart(
     finalConfig,

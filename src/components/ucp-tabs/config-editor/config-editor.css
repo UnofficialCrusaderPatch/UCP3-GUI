@@ -103,11 +103,11 @@
 }
 
 .form-control:disabled {
-  opacity: 0.5;
+  opacity: 0.65;
 }
 
 .label-disabled > label {
-  opacity: 0.5;
+  opacity: 0.65;
 }
 
 #config-sections {
@@ -286,7 +286,6 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type='checkbox']:disabled + label:before,
 .sword-checkbox input[type='radio']:disabled + label:before {
 }
-
 
 /** sword-checkbox end **/
 

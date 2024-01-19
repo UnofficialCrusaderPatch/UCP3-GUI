@@ -149,7 +149,7 @@ function CreateUCP2RadioGroup(args: {
   return (
     <Accordion
       bsPrefix="ucp-accordion"
-      className="col"
+      className="col sword-checkbox"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {
         setShowPopover(true);

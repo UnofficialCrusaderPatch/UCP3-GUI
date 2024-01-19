@@ -17,6 +17,7 @@ import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { filterOutExtensions } from './filter-out-extensions';
+import reportAndConfirmBuildResult from './reporting';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
 
@@ -59,33 +60,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   );
 
   const res = buildExtensionConfigurationDB(newExtensionState);
-
-  if (res.configuration.statusCode !== 0) {
-    if (res.configuration.statusCode === 2) {
-      const msg = `Invalid extension configuration. New configuration has ${res.configuration.errors.length} errors. Try to proceed anyway?`;
-      LOGGER.msg(msg).error();
-      const confirmed1 = await showModalOkCancel({
-        title: 'Error',
-        message: msg,
-      });
-      if (!confirmed1) return;
-    }
-    if (res.configuration.warnings.length > 0) {
-      const msg = `Be warned, new configuration has ${res.configuration.warnings.length} warnings. Proceed anyway?`;
-      LOGGER.msg(msg).warn();
-      const confirmed2 = await showModalOkCancel({
-        title: 'Warning',
-        message: msg,
-      });
-      if (!confirmed2) return;
-    }
-  } else {
-    LOGGER.msg('New configuration build without errors or warnings').info();
-  }
-
-  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
-
-  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+  if (!(await reportAndConfirmBuildResult(res))) return;
 
   ConsoleLogger.info('New user configuration: ', newUserConfiguration);
 
@@ -117,6 +92,10 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
       newExtensionState.installedExtensions,
     ),
   });
+
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 };
 
 export default activeExtensionElementClickCallback;

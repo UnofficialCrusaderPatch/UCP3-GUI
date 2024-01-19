@@ -114,7 +114,7 @@ function CreateChoice(args: {
       <div className="flex-grow-1" style={{ minWidth: '33%', maxWidth: '33%' }}>
         <Form.Select
           size="sm"
-          className="text-light fs-7 lh-1"
+          className="text-light fs-7 lh-1 form-control"
           style={{ backgroundColor: '#ab712d' }}
           key={`${url}-input`}
           id={`${url}-input`}

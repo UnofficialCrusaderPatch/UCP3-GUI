@@ -1,6 +1,8 @@
+import './popover.css';
+
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { MutableRefObject } from 'react';
-import { Form, Overlay } from 'react-bootstrap';
+import { Button, Form, Overlay } from 'react-bootstrap';
 
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -8,6 +10,7 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
 } from '../../../../../../function/configuration/state';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 
@@ -21,6 +24,10 @@ export function ConfigPopover(props: {
 }) {
   const { url, show, theRef } = props;
 
+  const locks = useAtomValue(CONFIGURATION_LOCKS_REDUCER_ATOM);
+  const { [url]: lock } = locks;
+  const locked = lock !== undefined;
+  const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
   const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfiguration = useSetAtom(CONFIGURATION_FULL_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
@@ -75,7 +82,7 @@ export function ConfigPopover(props: {
         ...prps
       }) => (
         <div
-          className="d-flex justify-content-center"
+          className={`ucp-popover ${locked ? 'disabled' : ''}`}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...prps}
           style={{
@@ -101,10 +108,17 @@ export function ConfigPopover(props: {
                         [url]: true,
                       },
                     });
+                    setUserConfiguration({
+                      type: 'set-multiple',
+                      value: {
+                        [url]: configuration[url],
+                      },
+                    });
                   }}
                   checked={qualifier === 'required'}
                   label={qualifier === 'required' ? 'Required' : 'Suggested'}
-                  id="popover-qualifier-button-test"
+                  id={`${url}-popover-qualifier-switch`}
+                  disabled={locked}
                 />
               </Form>
               <span className="ms-1 me-1"> |</span>
@@ -113,9 +127,11 @@ export function ConfigPopover(props: {
 
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,
       jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
-          <span
+          <Button
+            disabled={locked}
             role="button"
             className="ms-1 me-1"
+            id={`${url}-popover-reset-button`}
             onClick={() => {
               setUserConfiguration({
                 type: 'clear-key',
@@ -136,7 +152,7 @@ export function ConfigPopover(props: {
             }}
           >
             Reset
-          </span>
+          </Button>
         </div>
       )}
     </Overlay>

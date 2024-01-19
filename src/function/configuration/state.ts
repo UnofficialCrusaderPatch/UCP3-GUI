@@ -16,6 +16,13 @@ export const CONFIGURATION_FULL_REDUCER_ATOM = atomWithReducer(
   {},
   configurationFullReducer,
 );
+/**
+ * Default config values as defined by the UI elements themselves AND
+ * the active extensions' config values.
+ *
+ * Primary use is to reset changed UI elements back to the specified value
+ * when user customisations are thrown away.
+ */
 export const CONFIGURATION_DEFAULTS_REDUCER_ATOM = atomWithReducer(
   {},
   configurationDefaultsReducer,
@@ -56,7 +63,7 @@ export const CONFIGURATION_QUALIFIER_REDUCER_ATOM = atomWithReducer(
   {},
   configurationQualifierReducer,
 );
-export type ConfigurationQualifier = 'required' | 'suggested';
+export type ConfigurationQualifier = 'required' | 'suggested' | 'unspecified';
 export type ConfigurationState = {
   state: ConfigMetaObjectDB;
   warnings: string[];

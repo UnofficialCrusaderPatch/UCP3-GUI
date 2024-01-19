@@ -6,6 +6,7 @@ import Result from '../../util/structs/result';
 import { ConfigurationQualifier } from '../../function/configuration/state';
 import Logger from '../../util/scripts/logging';
 import { ConfigFile, Extension } from './common';
+import { ConfigMeta } from './config/meta';
 
 const LOGGER = new Logger('config-files.ts');
 
@@ -91,13 +92,13 @@ type PluginConfigPart = {
 };
 
 export type UCP3SerializedPluginConfig = {
-  'specification-version': string;
+  meta: ConfigMeta;
   'config-sparse': PluginConfigPart;
 };
 
 export type UCP3SerializedUserConfig = {
   active: boolean;
-  'specification-version': string;
+  meta: ConfigMeta;
   'config-sparse': ConfigPart;
   'config-full': ConfigPart;
 };
@@ -194,7 +195,9 @@ export function serializeUCPConfig(
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
   const finalConfig: UCP3SerializedUserConfig = {
-    'specification-version': '1.0.0',
+    meta: {
+      version: '1.0.0',
+    },
     active: true,
     'config-sparse': { modules: {}, plugins: {}, 'load-order': [] },
     'config-full': { modules: {}, plugins: {}, 'load-order': [] },

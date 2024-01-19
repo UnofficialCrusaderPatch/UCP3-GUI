@@ -90,6 +90,7 @@ modules:
 */
 
 import { ExtensionHandle } from '../../function/extensions/handles/extension-handle';
+import { ConfigMeta, DefinitionMeta } from './config/meta';
 
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required
@@ -122,7 +123,7 @@ type ConfigFileExtensionEntry = {
 };
 
 type ConfigFile = {
-  'specification-version': string;
+  meta: ConfigMeta;
   'config-sparse': {
     modules: {
       [key: string]: {
@@ -167,7 +168,7 @@ type ExtensionType = PluginType | ModuleType;
 type ExtensionIOCallback<R> = (extensionHandle: ExtensionHandle) => Promise<R>;
 
 type Extension = {
-  'specification-version': string;
+  meta: DefinitionMeta;
   name: string;
   type: ExtensionType;
   version: string;

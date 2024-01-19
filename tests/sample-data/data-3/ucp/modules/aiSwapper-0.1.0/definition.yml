@@ -37,4 +37,5 @@ depends:
     aivloader>=0.0.1,
     files>=0.1.0,
   ]
-specification-version: 1.0.0
+meta:
+  version: 1.0.0

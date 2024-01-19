@@ -61,7 +61,7 @@ function ExportAsPluginButton(
               modules: result['config-sparse'].modules,
               plugins: result['config-sparse'].plugins,
             },
-            'specification-version': result['specification-version'],
+            meta: result.meta,
           } as UCP3SerializedPluginConfig;
 
           ConsoleLogger.debug(trimmedResult);

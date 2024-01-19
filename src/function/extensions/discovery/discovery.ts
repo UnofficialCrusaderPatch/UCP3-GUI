@@ -54,7 +54,7 @@ async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
     return yaml.parse(await eh.getTextContents(CONFIG_FILE));
   }
   return {
-    'specification-version': '0.0.0',
+    meta: { version: '1.0.0' },
     'config-sparse': {
       modules: {},
       plugins: {},

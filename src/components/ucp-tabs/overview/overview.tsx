@@ -35,7 +35,7 @@ function createToastHandler(title: string) {
       // ignore if body null or undefined
       return;
     }
-    makeToast({ title, body });
+    makeToast({ title, body, type });
   };
 }
 

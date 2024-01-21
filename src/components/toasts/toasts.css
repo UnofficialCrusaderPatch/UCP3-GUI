@@ -1,0 +1,17 @@
+.toast {
+}
+
+.toast-info {
+}
+
+.toast-warn {
+  background-color: color-mix(in srgb, lightsalmon, transparent 15%);
+}
+
+.toast-error {
+  background-color: color-mix(in srgb, lightcoral, transparent 15%);
+}
+
+.toast-success {
+  background-color: color-mix(in srgb, lightgreen, transparent 15%);
+}

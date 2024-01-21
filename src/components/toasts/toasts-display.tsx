@@ -1,3 +1,5 @@
+import './toasts.css';
+
 import { atom, useAtomValue } from 'jotai';
 import { ReactNode } from 'react';
 import { ToastContainer, Toast } from 'react-bootstrap';
@@ -30,6 +32,14 @@ type ToastsDisplayState = {
   toasts: Map<string, ToastState>;
 };
 
+export const TOAST_TYPE = {
+  CUSTOM: ToastType.CUSTOM,
+  INFO: ToastType.INFO,
+  WARN: ToastType.WARN,
+  ERROR: ToastType.ERROR,
+  SUCCESS: ToastType.SUCCESS,
+};
+
 const DEFAULT_TOAST_SETTINGS = new Map<ToastType, ToastConfig>([
   [ToastType.CUSTOM, {}],
   [
@@ -59,7 +69,7 @@ export function makeToast(props: ToastProps) {
   const { toasts } = getStore().get(TOAST_STATE_ATOM);
 
   const config = {
-    ...DEFAULT_TOAST_SETTINGS.get(props.type ?? ToastType.CUSTOM),
+    ...DEFAULT_TOAST_SETTINGS.get(props.type ?? ToastType.INFO),
     ...props,
   };
 

@@ -2,13 +2,14 @@ import { atom, useAtomValue } from 'jotai';
 import { ReactNode } from 'react';
 import { ToastContainer, Toast } from 'react-bootstrap';
 
-import { getStore } from '../../../hooks/jotai/base';
+import { getStore } from '../../hooks/jotai/base';
 
 export const enum ToastType {
   CUSTOM,
   INFO,
   WARN,
   ERROR,
+  SUCCESS,
 }
 
 type ToastConfig = {
@@ -40,6 +41,10 @@ const DEFAULT_TOAST_SETTINGS = new Map<ToastType, ToastConfig>([
     { customAutohide: true, customDelay: 5000, customCSSClass: 'toast-warn' },
   ],
   [ToastType.ERROR, { customAutohide: false, customCSSClass: 'toast-error' }],
+  [
+    ToastType.SUCCESS,
+    { customAutohide: false, customCSSClass: 'toast-success' },
+  ],
 ]);
 
 const TOAST_STATE_ATOM = atom<ToastsDisplayState>({ toasts: new Map() });

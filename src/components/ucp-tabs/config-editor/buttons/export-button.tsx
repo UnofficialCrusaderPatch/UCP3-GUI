@@ -4,7 +4,7 @@ import { useSetAtom } from 'jotai';
 import { useCurrentGameFolder } from '../../../../function/game-folder/state';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
-import { makeToast } from '../../../modals/toasts/toasts-display';
+import { makeToast } from '../../../toasts/toasts-display';
 import exportButtonCallback from '../../common/export-button-callback';
 
 function ExportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {

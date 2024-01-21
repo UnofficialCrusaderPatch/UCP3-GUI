@@ -1,4 +1,5 @@
-import { TFunction } from 'i18next';
+import { ToastType } from '../../components/toasts/toasts-display';
+import { getTranslation } from '../../localization/i18n';
 import { Error as FileUtilError } from '../../tauri/tauri-files';
 import { extractZipToPath } from '../../tauri/tauri-invoke';
 import Result from '../../util/structs/result';
@@ -14,13 +15,14 @@ import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
 export async function installUCPFromZip(
   zipFilePath: string,
   gameFolder: string,
-  statusCallback: (status: string) => void,
-  t: TFunction,
+  createStatusToast: (type: ToastType, status: string) => void,
 ): Promise<Result<void, FileUtilError>> {
   return Result.tryAsync(async () => {
+    const t = getTranslation(['gui-download']);
+
     (await createRealBink()).throwIfErr();
 
-    statusCallback(t('gui-download:zip.extract'));
+    createStatusToast(ToastType.INFO, t('gui-download:zip.extract'));
     try {
       await extractZipToPath(zipFilePath, gameFolder);
     } catch (error) {

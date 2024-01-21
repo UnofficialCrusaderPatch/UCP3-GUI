@@ -3,7 +3,7 @@ import { useSetAtom } from 'jotai';
 import { Folder } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
-import { makeToast } from '../../../modals/toasts/toasts-display';
+import { makeToast } from '../../../toasts/toasts-display';
 import { useCurrentGameFolder } from '../../../../function/game-folder/state';
 import importButtonCallback from '../../common/import-button-callback';
 

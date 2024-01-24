@@ -83,6 +83,7 @@
     "bootstrap"
   ],
   "ignoreUnimported": [
+    "src/hooks/general/util.ts",
     "src/components/general/svg-helper.tsx",
     "src/components/sandbox-menu/sandbox-frame-base.js",
     "src/components/ucp-tabs/common/create-pack-button-callback.tsx",

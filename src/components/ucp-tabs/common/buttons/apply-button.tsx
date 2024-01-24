@@ -11,7 +11,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
-import { makeToast } from '../../../modals/toasts/toasts-display';
+import { makeToast } from '../../../toasts/toasts-display';
 import saveConfig from '../save-config';
 import {
   CONFIG_DIRTY_STATE_ATOM,

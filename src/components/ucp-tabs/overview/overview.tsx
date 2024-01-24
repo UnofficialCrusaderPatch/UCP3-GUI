@@ -1,7 +1,7 @@
 import './overview.css';
 
 import { useAtomValue } from 'jotai';
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { installUCPFromZip } from '../../../function/installation/install-ucp-from-zip';
@@ -25,19 +25,9 @@ import {
   GAME_FOLDER_LOADED_ATOM,
   useCurrentGameFolder,
 } from '../../../function/game-folder/state';
-import { makeToast } from '../../modals/toasts/toasts-display';
 import RecentFolders from './recent-folders';
-import StateButton from '../../general/state-button';
-
-function createToastHandler(title: string) {
-  return (body: ReactNode) => {
-    if (body == null) {
-      // ignore if body null or undefined
-      return;
-    }
-    makeToast({ title, body });
-  };
-}
+import OverviewButton from './overview-button';
+import { ToastType } from '../../toasts/toasts-display';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -83,30 +73,29 @@ export default function Overview() {
     <div className="flex-default overview">
       <RecentFolders />
 
-      <StateButton
+      <OverviewButton
         buttonActive={overviewButtonActive}
-        buttonValues={{
-          idle: t('gui-editor:overview.update.idle'),
-          running: t('gui-editor:overview.update.running'),
-          success: t('gui-editor:overview.update.success'),
-          failed: t('gui-editor:overview.update.failed'),
-        }}
+        buttonText={t('gui-editor:overview.update.idle')}
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async (stateUpdate) => {
+        func={async (createStatusToast) => {
           try {
             const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
 
             if (gameFolderState.state !== 'hasData') {
-              stateUpdate(
-                'Game folder in bad state. Cannot save update to disk.',
+              createStatusToast(
+                ToastType.ERROR,
+                'Game folder in bad state. Cannot save update to disk.', // TODO: needs localization
               );
-              return Result.emptyErr();
+              return;
             }
             const gameFolder = gameFolderState.data;
 
-            stateUpdate(t('gui-download:ucp.version.check'));
+            createStatusToast(
+              ToastType.INFO,
+              t('gui-download:ucp.version.check'),
+            );
 
             const vr = await getStore().get(UCP_VERSION_ATOM);
             let version = '0.0.0';
@@ -118,11 +107,17 @@ export default function Overview() {
 
             const updater = new UCP3Updater(version, sha, new Date(0));
 
-            const updateExists = await updater.doesUpdateExist();
-            if (updateExists) {
-              stateUpdate(t('gui-download:ucp.version.available'));
+            if (await updater.doesUpdateExist()) {
+              createStatusToast(
+                ToastType.INFO,
+                t('gui-download:ucp.version.available'),
+              );
             } else {
-              return Result.ok(t('gui-download:ucp.version.not.available'));
+              createStatusToast(
+                ToastType.WARN,
+                t('gui-download:ucp.version.not.available'),
+              );
+              return;
             }
 
             const dialogResult = await showModalOkCancel({
@@ -133,13 +128,21 @@ export default function Overview() {
             });
 
             if (dialogResult !== true) {
-              return Result.err(t('gui-download:ucp.download.cancelled'));
+              createStatusToast(
+                ToastType.WARN,
+                t('gui-download:ucp.download.cancelled'),
+              );
+              return;
             }
 
-            stateUpdate(t('gui-download:ucp.download.download'));
+            createStatusToast(
+              ToastType.INFO,
+              t('gui-download:ucp.download.download'),
+            );
             const update = await updater.fetchUpdate();
 
-            stateUpdate(
+            createStatusToast(
+              ToastType.INFO,
               t(`gui-download:ucp.download.downloaded`, {
                 version: `${update.name}`,
               }),
@@ -148,21 +151,23 @@ export default function Overview() {
             const path = `${gameFolder}/${update.name}`;
             await writeBinaryFile(path, update.data);
 
-            stateUpdate(t('gui-download:ucp.installing'));
+            createStatusToast(ToastType.INFO, t('gui-download:ucp.installing'));
             const installResult = await installUCPFromZip(
               path,
               gameFolder,
-              stateUpdate,
-              t,
+              createStatusToast,
             );
 
             if (installResult.isErr()) {
               installResult
                 .err()
                 .ifPresent((error) =>
-                  stateUpdate(t('gui-download:ucp.install.failed', { error })),
+                  createStatusToast(
+                    ToastType.ERROR,
+                    t('gui-download:ucp.install.failed', { error }),
+                  ),
                 );
-              return Result.err(installResult.err().get());
+              return;
             }
 
             // TODO: in the future, use a cache?
@@ -183,43 +188,42 @@ export default function Overview() {
 
             reloadCurrentWindow();
 
-            return Result.ok('Update finished');
+            createStatusToast(
+              ToastType.SUCCESS,
+              t('gui-editor:overview.update.success'),
+            );
           } catch (e: any) {
-            return Result.err(e);
+            createStatusToast(ToastType.ERROR, e.toString());
           }
         }}
-        setResultNodeState={createToastHandler(
-          t('gui-editor:overview.update.toast.title'),
-        )}
+        toastTitle={t('gui-editor:overview.update.toast.title')}
       />
-      <StateButton
+      <OverviewButton
         buttonActive={overviewButtonActive}
-        buttonValues={{
-          idle: t('gui-editor:overview.zip.idle'),
-          running: t('gui-editor:overview.zip.running'),
-          success: t('gui-editor:overview.zip.success'),
-          failed: t('gui-editor:overview.zip.failed'),
-        }}
+        buttonText={t('gui-editor:overview.zip.idle')}
         buttonVariant="zip-icon icon-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async (stateUpdate) => {
+        func={async (createStatusToast) => {
           try {
-            setOverviewButtonActive(false);
             const zipFilePath = await openFileDialog(currentFolder, [
               { name: t('gui-general:file.zip'), extensions: ['zip'] },
               { name: t('gui-general:file.all'), extensions: ['*'] },
             ]);
 
-            if (zipFilePath.isEmpty()) return Result.emptyErr();
+            if (zipFilePath.isEmpty()) {
+              createStatusToast(
+                ToastType.INFO,
+                t('gui-editor:overview.zip.failed'),
+              );
+              return;
+            }
 
             // TODO: improve feedback
             const zipInstallResult = await installUCPFromZip(
               zipFilePath.get(),
               currentFolder,
-              // can be used to transform -> although splitting into more components might be better
-              (status) => stateUpdate(status),
-              t,
+              createStatusToast,
             );
 
             if (zipInstallResult.ok().isPresent()) {
@@ -236,21 +240,23 @@ export default function Overview() {
                 reloadCurrentWindow();
               }
             }
-            setOverviewButtonActive(true);
-            return zipInstallResult
-              .mapOk(() => '')
-              .mapErr((err) => String(err));
+            zipInstallResult
+              .mapErr((err) => String(err))
+              .consider(
+                () =>
+                  createStatusToast(
+                    ToastType.SUCCESS,
+                    t('gui-editor:overview.zip.success'),
+                  ),
+                (err) => createStatusToast(ToastType.ERROR, err),
+              );
           } catch (e: any) {
             await showModalOk({ message: e.toString(), title: 'ERROR' });
           }
-
-          return Result.emptyErr();
         }}
-        setResultNodeState={createToastHandler(
-          t('gui-editor:overview.zip.toast.title'),
-        )}
+        toastTitle={t('gui-editor:overview.zip.toast.title')}
       />
-      <StateButton
+      <OverviewButton
         buttonActive={
           overviewButtonActive &&
           (ucpState === UCPState.ACTIVE ||
@@ -259,41 +265,35 @@ export default function Overview() {
             ucpState === UCPState.BINK_REAL_COPY_MISSING ||
             ucpState === UCPState.BINK_VERSION_DIFFERENCE)
         }
-        buttonValues={{
-          idle: activateButtonString,
-          running: activateButtonString,
-          success: activateButtonString,
-          failed: activateButtonString,
-        }}
+        buttonText={activateButtonString}
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async () => {
+        func={async (createStatusToast) => {
           try {
-            let result = Result.emptyOk<string>();
+            let result = Result.emptyOk();
             if (
               ucpState === UCPState.ACTIVE ||
               ucpState === UCPState.BINK_UCP_MISSING ||
               ucpState === UCPState.BINK_VERSION_DIFFERENCE
             ) {
-              result = (await deactivateUCP()).mapErr(String);
+              result = await deactivateUCP();
             } else if (
               ucpState === UCPState.INACTIVE ||
               ucpState === UCPState.BINK_REAL_COPY_MISSING
             ) {
-              result = (await activateUCP()).mapErr(String);
+              result = await activateUCP();
             }
-            return result;
+            result
+              .err()
+              .map(String)
+              .ifPresent((err) => createStatusToast(ToastType.ERROR, err));
           } catch (e: any) {
             await showModalOk({ message: e.toString(), title: 'ERROR' });
           }
-
-          return Result.emptyOk();
         }}
         tooltip={t('gui-editor:overview.activationTooltip')}
-        setResultNodeState={createToastHandler(
-          t('gui-editor:overview.activate.toast.title'),
-        )}
+        toastTitle={t('gui-editor:overview.activate.toast.title')}
       />
       <div id="decor" />
       {/* <StateButton

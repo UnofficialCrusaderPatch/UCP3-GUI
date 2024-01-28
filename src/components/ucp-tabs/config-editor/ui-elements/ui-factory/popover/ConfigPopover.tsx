@@ -4,6 +4,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { MutableRefObject } from 'react';
 import { Button, Form, Overlay } from 'react-bootstrap';
 
+import { useTranslation } from 'react-i18next';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
@@ -46,6 +47,8 @@ export function ConfigPopover(props: {
   const qualifier = qualifiers[url];
 
   const creatorMode = useAtomValue(CREATOR_MODE_ATOM);
+
+  const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   return (
     <Overlay
@@ -116,7 +119,11 @@ export function ConfigPopover(props: {
                     });
                   }}
                   checked={qualifier === 'required'}
-                  label={qualifier === 'required' ? 'Required' : 'Suggested'}
+                  label={
+                    qualifier === 'required'
+                      ? t('gui-editor:config.popover.required')
+                      : t('gui-editor:config.popover.suggested')
+                  }
                   id={`${url}-popover-qualifier-switch`}
                   disabled={locked}
                 />
@@ -130,7 +137,7 @@ export function ConfigPopover(props: {
           <Button
             disabled={locked}
             role="button"
-            className="ms-1 me-1"
+            className="ms-1 me-3"
             id={`${url}-popover-reset-button`}
             onClick={() => {
               setUserConfiguration({
@@ -151,7 +158,7 @@ export function ConfigPopover(props: {
               });
             }}
           >
-            Reset
+            {t('gui-editor:config.popover.reset')}
           </Button>
         </div>
       )}

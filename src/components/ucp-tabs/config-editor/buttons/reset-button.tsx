@@ -1,5 +1,6 @@
 import { t } from 'i18next';
 import { useSetAtom, useAtomValue } from 'jotai';
+import { TrashFill } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
@@ -22,7 +23,7 @@ function ResetButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   );
   return (
     <button
-      className="ucp-button icons-button reset"
+      className="ucp-button icons-button"
       type="button"
       onClick={() => {
         setUserConfiguration({
@@ -46,7 +47,9 @@ function ResetButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
       }}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...props}
-    />
+    >
+      <TrashFill />
+    </button>
   );
 }
 

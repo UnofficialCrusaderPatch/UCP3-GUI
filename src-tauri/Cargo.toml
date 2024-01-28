@@ -1,10 +1,10 @@
 [package]
 name = "ucp_gui"
-version = "0.0.19"
+version = "0.0.20"
 description = "UCP3 GUI"
 authors = ["gynt", "TheRedDaemon"]
 license = ""
-repository = ""
+repository = "https://github.com/UnofficialCrusaderPatch/UCP3-GUI"
 default-run = "ucp_gui"
 edition = "2021"
 rust-version = "1.64"
@@ -34,3 +34,11 @@ default = [ "custom-protocol" ]
 # this feature is used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
 custom-protocol = [ "tauri/custom-protocol" ]
+
+# "recommanded" options for tauri release (https://tauri.app/v1/guides/building/app-size/#rust-build-time-optimizations)
+[profile.release]
+panic = "abort" # Strip expensive panic clean-up logic
+codegen-units = 1 # Compile crates one after another so the compiler can optimize better
+lto = true # Enables link to optimizations
+opt-level = "s" # Optimize for binary size
+strip = true # Remove debug symbols

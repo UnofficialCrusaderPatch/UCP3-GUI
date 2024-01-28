@@ -7,8 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "UCP3-GUI",
-    "version": "0.0.19"
+    "productName": "UCP3-GUI"
   },
   "tauri": {
     "allowlist": {
@@ -69,6 +68,7 @@
         "icons/icon.ico"
       ],
       "identifier": "ucp.gui.tauri",
+      "publisher": "ucp-team",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -79,11 +79,16 @@
       },
       "resources": [],
       "shortDescription": "",
-      "targets": "all",
+      "targets": ["nsis", "updater"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "timestampUrl": "",
+        "nsis": {
+          "installMode": "both",
+          "displayLanguageSelector": true,
+          "languages": ["English", "German"]
+        }
       }
     },
     "security": {

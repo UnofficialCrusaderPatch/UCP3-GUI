@@ -50,8 +50,11 @@ jobs:
           $t = "[Changelog](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/wiki/Changelog#)"
           if ( $m.Contains($t) ) {
 
+            Install-Module -Name PSToml -Scope CurrentUser -Force
+            Import-Module PSToml
+
             ## Get the version
-            $conf = Get-Content -Raw -Path "src-tauri/tauri.conf.json" | ConvertFrom-Json
+            $conf = Get-Content -Raw -Path "src-tauri/Cargo.toml" | ConvertFrom-Toml
             $v = $conf.package.version
             $vm = $v.Replace(".", "") # Needed this way for pound urls
 

@@ -89,9 +89,12 @@
     "husky": "^9.0.6",
     "lint-staged": "^15.2.0",
     "prettier": "^3.2.4",
+    "sharp": "^0.33.2",
+    "svgo": "^3.2.0",
     "typescript": "^5.3.3",
     "unimported": "^1.31.1",
     "vite": "^5.0.12",
+    "vite-plugin-image-optimizer": "^1.1.7",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.2.2"
   },

@@ -238,7 +238,7 @@ function CreateUCP2Slider(args: {
               data-bs-placement="top"
               title={fullToolTip}
               // End of tooltip stuff
-              value={localValue}
+              value={localValue / factor}
               onChange={(event) => {
                 const rawValue = parseFloat(event.target.value);
                 const newLocalValue = rawValue * factor;

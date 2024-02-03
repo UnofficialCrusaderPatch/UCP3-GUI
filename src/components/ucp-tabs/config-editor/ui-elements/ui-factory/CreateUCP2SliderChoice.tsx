@@ -329,7 +329,7 @@ function CreateUCP2SliderChoice(args: {
                 data-bs-placement="top"
                 title={fullToolTip}
                 // End of tooltip stuff
-                value={localValue}
+                value={localValue / factor}
                 onChange={(event) => {
                   ConsoleLogger.info(event);
                   const rawValue = parseFloat(event.target.value);

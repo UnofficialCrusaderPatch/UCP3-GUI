@@ -370,7 +370,7 @@ function CreateUCP2SliderChoice(args: {
 
   return (
     <Accordion
-      bsPrefix="ucp-accordion"
+      bsPrefix="ucp-accordion ui-element"
       className="sword-checkbox"
       onMouseEnter={() => {
         setShowPopover(true);

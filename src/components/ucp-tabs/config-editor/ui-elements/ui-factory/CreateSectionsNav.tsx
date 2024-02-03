@@ -22,7 +22,7 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
   });
 
   return (
-    <nav className="config-navbar">
+    <nav className="config-navbar ui-element">
       <a className="config-navbar__header" href="#config-general">
         <h6>{t('gui-editor:config.table.of.contents')}</h6>
       </a>

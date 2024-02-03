@@ -152,7 +152,7 @@ function CreateUCP2Slider(args: {
 
   return (
     <Accordion
-      bsPrefix="ucp-accordion"
+      bsPrefix="ucp-accordion ui-element"
       className="sword-checkbox"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {

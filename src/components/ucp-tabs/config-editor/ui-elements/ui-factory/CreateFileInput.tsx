@@ -196,7 +196,7 @@ function CreateFileInput(args: {
 
   return (
     <Form.Group
-      className={`${className}`}
+      className={`ui-element ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

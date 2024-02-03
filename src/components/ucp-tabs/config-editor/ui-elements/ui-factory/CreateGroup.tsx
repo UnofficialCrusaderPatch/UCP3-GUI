@@ -51,7 +51,10 @@ function CreateGroup(args: {
   }
 
   return (
-    <Container className={`my-2 px-0 pb-4 ${className}`} style={{ margin: 0 }}>
+    <Container
+      className={`my-2 px-0 pb-4 ui-element ${className}`}
+      style={{ margin: 0 }}
+    >
       {cs}
     </Container>
   );

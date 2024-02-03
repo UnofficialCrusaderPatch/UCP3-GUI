@@ -102,6 +102,7 @@ async function readLocales(
 }
 
 function applyLocale(ext: Extension, locale: { [key: string]: string }) {
+  ConsoleLogger.info('Applying locale ', locale, ' to extension ', ext);
   const { ui } = ext;
   return ui.map((uiElement: { [key: string]: unknown }) =>
     changeLocale(locale, uiElement as { [key: string]: unknown }),

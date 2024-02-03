@@ -51,7 +51,7 @@ function CreateGroupBox(args: {
   return (
     // <Form key={`${name}-groupbox`}>
     <Container
-      className={`border-light my-2 px-0 ${className}`}
+      className={`border-light my-2 px-0  ui-element ${className}`}
       style={{ margin: 0 }}
     >
       <Row className="my-3">

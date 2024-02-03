@@ -17,7 +17,7 @@ function CreateParagraph(args: {
   return (
     <>
       {headerElement}
-      <p>{text || ''}</p>
+      <p className="ui-element">{text || ''}</p>
     </>
   );
 }

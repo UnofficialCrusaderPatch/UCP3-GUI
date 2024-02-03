@@ -1,3 +1,5 @@
+import './common.css';
+
 import { useTranslation } from 'react-i18next';
 import { DisplayConfigElement } from '../../../../../config/ucp/common';
 import Logger from '../../../../../util/scripts/logging';

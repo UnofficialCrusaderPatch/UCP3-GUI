@@ -93,6 +93,7 @@ function CreateSlider(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
+      className="ui-element"
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <RangeSlider

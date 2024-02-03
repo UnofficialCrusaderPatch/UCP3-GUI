@@ -96,7 +96,7 @@ function CreateUCP2Switch(args: {
 
   return (
     <Accordion
-      bsPrefix="ucp-accordion"
+      bsPrefix="ucp-accordion ui-element"
       className="col sword-checkbox"
       style={{ marginLeft: 0, marginBottom: 0 }}
       onMouseEnter={() => {

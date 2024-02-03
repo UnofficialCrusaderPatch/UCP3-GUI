@@ -114,7 +114,7 @@ function CreateRadioGroup(args: {
 
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

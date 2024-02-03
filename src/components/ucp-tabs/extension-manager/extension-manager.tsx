@@ -27,7 +27,7 @@ export default function ExtensionManager() {
 
   const extensionsToDisplay = showAllExtensions
     ? extensionsState.installedExtensions
-    : extensionsState.installedExtensions.filter((e) => e.type === 'plugin');
+    : extensionsState.installedExtensions.filter((e) => e.ui.length > 0);
 
   const extensionsToDisplayByName = Array.from(
     new Set(extensionsToDisplay.map((e) => e.name)),
@@ -58,10 +58,13 @@ export default function ExtensionManager() {
     />
   ));
 
+  const a = extensionsState.extensions.length;
+  const b = extensionsToDisplay.length;
+
   const filterInfoElement = !showAllExtensions ? (
-    <span className="fs-8">{`filtered: ${
-      extensionsState.extensions.length - extensionsToDisplay.length
-    } out of ${extensionsState.extensions.length}`}</span>
+    <span className="fs-8">
+      {t('gui-editor:config.filter', { all: a, displayed: b })}
+    </span>
   ) : (
     <span />
   );

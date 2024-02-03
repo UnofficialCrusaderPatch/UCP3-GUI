@@ -10,6 +10,7 @@ import {
   copyFile as tauriCopyFile,
   renameFile as tauriRenameFile,
   removeFile as tauriRemoveFile,
+  removeDir as tauriRemoveDir,
   BinaryFileContents,
   FsDirOptions,
 } from '@tauri-apps/api/fs';
@@ -51,6 +52,24 @@ export type Error = unknown;
 // CODE
 
 const BASE_FOLDER = 'UnofficialCrusaderPatch3';
+const MISSING_FILE_OS_ERROR = '(os error 2)'; // might only apply to windows
+
+async function validateRemoval(
+  path: string,
+  result: Result<void, unknown>, // result produced by one of the removal functions
+): Promise<Result<void, unknown>> {
+  if (result.isOk()) {
+    return result;
+  }
+
+  const error = result.err().get();
+  if (String(error).endsWith(MISSING_FILE_OS_ERROR)) {
+    return Result.emptyOk();
+  }
+  // check to be sure
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return (await onFsExists(path)) ? result : Result.emptyOk();
+}
 
 export async function slashify(path: string): Promise<Result<string, Error>> {
   return Result.tryAsync(invokeSlashify, path);
@@ -144,8 +163,12 @@ export async function renameFile(
   return Result.tryAsync(tauriRenameFile, oldPath, newPath);
 }
 
-export async function removeFile(path: string): Promise<Result<void, Error>> {
-  return Result.tryAsync(tauriRemoveFile, path);
+export async function removeFile(
+  path: string,
+  ignoreNotFound?: boolean,
+): Promise<Result<void, Error>> {
+  const result = await Result.tryAsync(tauriRemoveFile, path);
+  return ignoreNotFound ? validateRemoval(path, result) : result;
 }
 
 export async function loadYaml(
@@ -190,6 +213,15 @@ export async function writeJson(
 
 export async function readDir(dir: string, options?: FsDirOptions | undefined) {
   return Result.tryAsync(tauriReadDir, dir, options);
+}
+
+export async function removeDir(
+  path: string,
+  recursive?: boolean,
+  ignoreNotFound?: boolean,
+): Promise<Result<void, Error>> {
+  const result = await Result.tryAsync(tauriRemoveDir, path, { recursive });
+  return ignoreNotFound ? validateRemoval(path, result) : result;
 }
 
 export async function readAndFilterPaths(dir: string, pattern: string) {

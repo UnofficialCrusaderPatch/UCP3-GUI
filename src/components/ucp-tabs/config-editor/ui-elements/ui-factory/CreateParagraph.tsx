@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionBody,
+  AccordionHeader,
+  AccordionItem,
+} from 'react-bootstrap';
 import { DisplayConfigElement } from '../../../../../config/ucp/common';
 
 function CreateParagraph(args: {
@@ -14,11 +20,37 @@ function CreateParagraph(args: {
     headerElement = <h5>{header}</h5>;
   }
 
+  // eslint-disable-next-line react/jsx-no-useless-fragment
+  let textElement = <></>;
+  if (text !== undefined) {
+    textElement = <p className="ui-element">{text || ''}</p>;
+  }
+
+  if (header === undefined && text === undefined) {
+    // eslint-disable-next-line react/jsx-no-useless-fragment
+    return <></>;
+  }
+
+  if (header !== undefined && text === undefined) {
+    return headerElement;
+  }
+
+  if (header === undefined && text !== undefined) {
+    return textElement;
+  }
+
   return (
-    <>
-      {headerElement}
-      <p className="ui-element">{text || ''}</p>
-    </>
+    <Accordion
+      bsPrefix="ucp-accordion ui-element"
+      className="sword-checkbox "
+      style={{ marginLeft: 0, marginBottom: 0 }}
+      defaultActiveKey={['0']}
+    >
+      <AccordionItem eventKey="0">
+        <AccordionHeader>{headerElement}</AccordionHeader>
+        <AccordionBody>{textElement}</AccordionBody>
+      </AccordionItem>
+    </Accordion>
   );
 }
 

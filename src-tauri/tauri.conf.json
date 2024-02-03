@@ -79,7 +79,10 @@
       },
       "resources": [],
       "shortDescription": "",
-      "targets": ["nsis", "updater"],
+      "targets": [
+        "nsis",
+        "updater"
+      ],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
@@ -87,7 +90,9 @@
         "nsis": {
           "installMode": "both",
           "displayLanguageSelector": true,
-          "languages": ["English", "German"]
+          "languages": [
+            "English"
+          ]
         }
       }
     },

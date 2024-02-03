@@ -43,7 +43,7 @@ export function optionEntriesToHierarchical(
   return result;
 }
 
-export function uiCollectionToOptionEntries(uiCollection: any[]) {
+export function applyCategoryBasedSort(uiCollection: any[]) {
   uiCollection.sort((a, b) => {
     if (a.category === undefined || b.category === undefined) return 0;
     for (
@@ -69,7 +69,7 @@ export function extensionsToOptionEntries(exts: Extension[]) {
     uiCollection.push(...ext.ui);
   });
 
-  return uiCollectionToOptionEntries(uiCollection);
+  return applyCategoryBasedSort(uiCollection);
 }
 
 export function getConfigDefaults(yml: OptionEntry[]) {

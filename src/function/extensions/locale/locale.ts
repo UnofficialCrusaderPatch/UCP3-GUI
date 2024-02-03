@@ -6,6 +6,7 @@ const localeSensitiveFields = [
   'tooltip',
   'header',
   'choices',
+  'category',
 ];
 const localeRegExp = /^\s*{{(.*)}}\s*$/;
 const ignoreFields = ['extension'];

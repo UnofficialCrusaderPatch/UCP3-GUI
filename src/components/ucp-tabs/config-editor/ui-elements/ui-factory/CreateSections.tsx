@@ -4,7 +4,7 @@ import { atom, useAtomValue } from 'jotai';
 import { selectAtom } from 'jotai/utils';
 import {
   optionEntriesToHierarchical,
-  uiCollectionToOptionEntries,
+  applyCategoryBasedSort,
 } from '../../../../../config/ucp/extension-util';
 import {
   DisplayConfigElement,
@@ -41,7 +41,7 @@ const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
     uiCollection.push(...eui);
   });
 
-  return uiCollectionToOptionEntries(uiCollection).filter(
+  return applyCategoryBasedSort(uiCollection).filter(
     (o: OptionEntry) => o.hidden === undefined || o.hidden === false,
   );
 });

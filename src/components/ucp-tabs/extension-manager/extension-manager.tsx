@@ -47,7 +47,7 @@ export default function ExtensionManager() {
 
   const displayedActiveExtensions = showAllExtensions
     ? extensionsState.activeExtensions
-    : extensionsState.activeExtensions.filter((e) => e.type === 'plugin');
+    : extensionsState.activeExtensions.filter((e) => e.ui.length > 0);
 
   const activated = displayedActiveExtensions.map((ext, index, arr) => (
     <ActiveExtensionElement
@@ -59,7 +59,7 @@ export default function ExtensionManager() {
   ));
 
   const a = extensionsState.extensions.length;
-  const b = extensionsToDisplay.length;
+  const b = extensionsToDisplay.length + displayedActiveExtensions.length;
 
   const filterInfoElement = !showAllExtensions ? (
     <span className="fs-8">

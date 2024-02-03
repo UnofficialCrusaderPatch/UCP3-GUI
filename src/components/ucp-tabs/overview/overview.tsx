@@ -8,7 +8,12 @@ import { installUCPFromZip } from '../../../function/installation/install-ucp-fr
 import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
 import { UCP3Updater } from '../../../function/download/github';
 import { getStore } from '../../../hooks/jotai/base';
-import { removeFile, writeBinaryFile } from '../../../tauri/tauri-files';
+import {
+  removeDir,
+  removeFile,
+  resolvePath,
+  writeBinaryFile,
+} from '../../../tauri/tauri-files';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
@@ -28,6 +33,17 @@ import {
 import RecentFolders from './recent-folders';
 import OverviewButton from './overview-button';
 import { ToastType } from '../../toasts/toasts-display';
+import {
+  LUA_DLL,
+  REAL_BINK_FILENAME,
+  RPS_DLL,
+  UCP_BINK_FILENAME,
+  UCP_CONFIG_YML,
+  UCP_DLL,
+  UCP_ERROR_LOG,
+  UCP_FOLDER,
+  UCP_LOG,
+} from '../../../function/global/constants/file-constants';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -292,27 +308,110 @@ export default function Overview() {
             await showModalOk({ message: e.toString(), title: 'ERROR' });
           }
         }}
-        tooltip={t('gui-editor:overview.activationTooltip')}
+        tooltip={t('gui-editor:overview.activate.tooltip')}
         toastTitle={t('gui-editor:overview.activate.toast.title')}
       />
-      <div id="decor" />
-      {/* <StateButton
-        buttonActive={false}
-        buttonValues={{
-          idle: t('gui-editor:overview.uninstall.idle'),
-          running: t('gui-editor:overview.uninstall.running'),
-          success: t('gui-editor:overview.uninstall.success'),
-          failed: t('gui-editor:overview.uninstall.failed'),
-        }}
+      <OverviewButton
+        buttonActive={
+          overviewButtonActive &&
+          (ucpState === UCPState.ACTIVE ||
+            ucpState === UCPState.INACTIVE ||
+            ucpState === UCPState.BINK_UCP_MISSING ||
+            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
+        }
+        buttonText={t('gui-editor:overview.uninstall.idle')}
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
-        func={async () => Result.emptyOk()}
-        tooltip={t('gui-editor:overview.uninstallationToolTip')}
-        setResultNodeState={createToastHandler(
-          t('gui-editor:overview.uninstall.toast.title'),
-        )}
-      /> */}
+        func={async (createStatusToast) => {
+          if (
+            !(await showModalOkCancel({
+              message: t('gui-editor:overview.uninstall.question'),
+              title: t('gui-editor:overview.uninstall.idle'),
+              ok: t('gui-general:yes'),
+              cancel: t('gui-general:no'),
+            }))
+          ) {
+            return;
+          }
+
+          if (
+            !(await showModalOkCancel({
+              message: t('gui-editor:overview.uninstall.question.really'),
+              title: t('gui-editor:overview.uninstall.idle'),
+              ok: t('gui-general:yes'),
+              cancel: t('gui-general:no'),
+            }))
+          ) {
+            return;
+          }
+
+          const deactivateResult = await deactivateUCP();
+          if (deactivateResult.isErr()) {
+            createStatusToast(
+              ToastType.ERROR,
+              String(deactivateResult.err().get()),
+            );
+            return;
+          }
+
+          try {
+            (
+              await removeDir(
+                await resolvePath(currentFolder, UCP_FOLDER),
+                true,
+                true,
+              )
+            ).throwIfErr();
+            (
+              await removeFile(await resolvePath(currentFolder, UCP_DLL), true)
+            ).throwIfErr();
+            (
+              await removeFile(await resolvePath(currentFolder, LUA_DLL), true)
+            ).throwIfErr();
+            (
+              await removeFile(await resolvePath(currentFolder, RPS_DLL), true)
+            ).throwIfErr();
+            (
+              await removeFile(
+                await resolvePath(currentFolder, UCP_CONFIG_YML),
+                true,
+              )
+            ).throwIfErr();
+            (
+              await removeFile(await resolvePath(currentFolder, UCP_LOG), true)
+            ).throwIfErr();
+            (
+              await removeFile(
+                await resolvePath(currentFolder, UCP_ERROR_LOG),
+                true,
+              )
+            ).throwIfErr();
+            (
+              await removeFile(
+                await resolvePath(currentFolder, REAL_BINK_FILENAME),
+                true,
+              )
+            ).throwIfErr();
+            (
+              await removeFile(
+                await resolvePath(currentFolder, UCP_BINK_FILENAME),
+                true,
+              )
+            ).throwIfErr();
+            createStatusToast(
+              ToastType.SUCCESS,
+              t('gui-editor:overview.uninstall.success'),
+            );
+          } catch (e: any) {
+            createStatusToast(ToastType.ERROR, e.toString());
+          }
+        }}
+        tooltip={t('gui-editor:overview.uninstall.tooltip')}
+        toastTitle={t('gui-editor:overview.uninstall.toast.title')}
+      />
+      <div id="decor" />
       {/* <StateButton
         buttonActive={overviewButtonActive}
         buttonValues={{

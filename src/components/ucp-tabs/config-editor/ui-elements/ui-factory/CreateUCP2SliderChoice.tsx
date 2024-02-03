@@ -8,7 +8,9 @@ import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import {
   DisplayConfigElement,
-  ChoiceContents,
+  UCP2SliderChoiceContents,
+  UCP2SliderChoiceContent,
+  UCP2SliderChoiceDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
@@ -26,25 +28,10 @@ import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
-import './UCPAccordion.css';
-
 const LOGGER = new Logger('CreateUCP2SliderChoice.tsx');
 
-type UCP2SliderChoiceContent = {
-  name: string;
-  text: string;
-  enabled: string;
-  min: number;
-  max: number;
-  step: number;
-};
-
-type UCP2SliderChoiceContents = ChoiceContents & {
-  choices: UCP2SliderChoiceContent[];
-};
-
 function CreateUCP2SliderChoice(args: {
-  spec: DisplayConfigElement;
+  spec: UCP2SliderChoiceDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

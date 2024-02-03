@@ -3,10 +3,13 @@ import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
-import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import {
+  GroupDisplayConfigElement,
+  UrlableDisplayConfigElement,
+} from '../../../../../config/ucp/common';
 
 function CreateGroup(args: {
-  spec: DisplayConfigElement;
+  spec: GroupDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {
@@ -32,9 +35,10 @@ function CreateGroup(args: {
       i += 1
     ) {
       rowChildren.push(
-        <Col key={`${name}-${row}-${children[i].url || children[i].name}`}>
+        <Col
+          key={`${name}-${row}-${(children[i] as UrlableDisplayConfigElement).url || children[i].name}`}
+        >
           <CreateUIElement
-            key={children[i].url}
             spec={children[i]}
             disabled={disabled}
             className=""

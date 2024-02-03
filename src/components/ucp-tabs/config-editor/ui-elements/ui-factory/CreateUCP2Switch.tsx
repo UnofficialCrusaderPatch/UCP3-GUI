@@ -1,7 +1,7 @@
 import { Accordion } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';
-import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import { UCP2SwitchDisplayConfigElement } from '../../../../../config/ucp/common';
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
@@ -17,7 +17,7 @@ import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateUCP2Switch(args: {
-  spec: DisplayConfigElement;
+  spec: UCP2SwitchDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

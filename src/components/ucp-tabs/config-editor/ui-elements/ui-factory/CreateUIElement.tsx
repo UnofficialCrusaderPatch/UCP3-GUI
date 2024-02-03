@@ -1,9 +1,9 @@
 import './common.css';
+import './UCPAccordion.css';
 
 import { useTranslation } from 'react-i18next';
 import { DisplayConfigElement } from '../../../../../config/ucp/common';
 import Logger from '../../../../../util/scripts/logging';
-import { DisplayDefaults } from '../display-defaults';
 import CreateChoice from './CreateChoice';
 // eslint-disable-next-line import/no-cycle
 import CreateGroup from './CreateGroup';
@@ -19,9 +19,7 @@ import CreateUCP2Slider from './CreateUCP2Slider';
 import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
 import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
-import CreateFileInput, {
-  FileInputDisplayConfigElement,
-} from './CreateFileInput';
+import CreateFileInput from './CreateFileInput';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -34,119 +32,107 @@ function CreateUIElement(args: {
 
   const [t] = useTranslation(['gui-editor']);
 
-  // TODO: looks like this could be replaced at least by a switch
-  if (spec.display === undefined) {
-    if (spec.contents.type !== undefined) {
-      spec.display = DisplayDefaults[spec.contents.type];
+  switch (spec.display) {
+    case 'UCP2Slider':
+      return (
+        <CreateUCP2Slider
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'UCP2SliderChoice':
+      return (
+        <CreateUCP2SliderChoice
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'UCP2Switch':
+      return (
+        <CreateUCP2Switch
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'UCP2RadioGroup':
+      return (
+        <CreateUCP2RadioGroup
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'Slider':
+      return (
+        <CreateSlider spec={spec} disabled={disabled} className={className} />
+      );
+    case 'Paragraph':
+      return (
+        <CreateParagraph
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'Group':
+      return (
+        <CreateGroup spec={spec} disabled={disabled} className={className} />
+      );
+    case 'GroupBox':
+      return (
+        <CreateGroupBox spec={spec} disabled={disabled} className={className} />
+      );
+    case 'Switch':
+      return (
+        <CreateSwitch spec={spec} disabled={disabled} className={className} />
+      );
+    case 'Number':
+      return (
+        <CreateNumberInput
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'Choice':
+      return (
+        <CreateChoice spec={spec} disabled={disabled} className={className} />
+      );
+    case 'RadioGroup':
+      return (
+        <CreateRadioGroup
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+
+    case 'CustomMenu':
+      return (
+        <CreateCustomMenu
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    case 'FileInput':
+      return (
+        <CreateFileInput
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      );
+    default: {
+      LOGGER.msg(
+        t('gui-editor:config.element.unsupported.type', JSON.stringify(spec)),
+      ).warn();
+      return <div />;
     }
   }
-  // why the second if?
-  if (spec.display === undefined) {
-    LOGGER.msg(
-      t('gui-editor:config.element.unsupported.type', {
-        url: spec.url,
-        type: spec.contents.type,
-      }),
-    ).warn();
-    return <div />;
-  }
-  if (spec.display === 'UCP2Slider') {
-    return (
-      <CreateUCP2Slider spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'UCP2SliderChoice') {
-    return (
-      <CreateUCP2SliderChoice
-        spec={spec}
-        disabled={disabled}
-        className={className}
-      />
-    );
-  }
-  if (spec.display === 'UCP2Switch') {
-    return (
-      <CreateUCP2Switch
-        spec={spec as DisplayConfigElement}
-        disabled={disabled}
-        className={className}
-      />
-    );
-  }
-  if (spec.display === 'UCP2RadioGroup') {
-    return (
-      <CreateUCP2RadioGroup
-        spec={spec as DisplayConfigElement}
-        disabled={disabled}
-        className={className}
-      />
-    );
-  }
-  if (spec.display === 'Slider') {
-    return (
-      <CreateSlider spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'Paragraph') {
-    return (
-      <CreateParagraph spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'Group') {
-    return (
-      <CreateGroup spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'GroupBox') {
-    return (
-      <CreateGroupBox spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'Switch') {
-    return (
-      <CreateSwitch spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'Number') {
-    return (
-      <CreateNumberInput
-        spec={spec}
-        disabled={disabled}
-        className={className}
-      />
-    );
-  }
-  if (spec.display === 'Choice') {
-    return (
-      <CreateChoice spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'RadioGroup') {
-    return (
-      <CreateRadioGroup spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'CustomMenu') {
-    return (
-      <CreateCustomMenu spec={spec} disabled={disabled} className={className} />
-    );
-  }
-  if (spec.display === 'FileInput') {
-    return (
-      <CreateFileInput
-        spec={spec as FileInputDisplayConfigElement}
-        disabled={disabled}
-        className={className}
-      />
-    );
-  }
-  LOGGER.msg(
-    t('gui-editor:config.element.unsupported.type', {
-      url: spec.url,
-      type: spec.contents.type,
-    }),
-  ).warn();
-  return <div />;
 }
 
 export default CreateUIElement;

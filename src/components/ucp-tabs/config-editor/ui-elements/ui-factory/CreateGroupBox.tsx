@@ -1,12 +1,15 @@
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
-import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import {
+  GroupBoxDisplayConfigElement,
+  UrlableDisplayConfigElement,
+} from '../../../../../config/ucp/common';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
 
 function CreateGroupBox(args: {
-  spec: DisplayConfigElement;
+  spec: GroupBoxDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {
@@ -31,7 +34,11 @@ function CreateGroupBox(args: {
       i += 1
     ) {
       rowChildren.push(
-        <Col key={children[i].url || children[i].name}>
+        <Col
+          key={
+            (children[i] as UrlableDisplayConfigElement).url || children[i].name
+          }
+        >
           <CreateUIElement
             spec={children[i]}
             disabled={disabled}

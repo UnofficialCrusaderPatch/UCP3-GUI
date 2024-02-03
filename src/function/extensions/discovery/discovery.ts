@@ -322,9 +322,11 @@ const attachExtensionInformation = (extension: Extension, obj: unknown) => {
 
         dce.extension = ext;
 
-        if (dce.children !== undefined && dce.children instanceof Array) {
-          // Assume it is a DisplayConfigElement
-          dce.children.forEach((v) => todo.push(v));
+        if (dce.display === 'Group' || dce.display === 'GroupBox') {
+          if (dce.children !== undefined && dce.children instanceof Array) {
+            // Assume it is a DisplayConfigElement
+            dce.children.forEach((v) => todo.push(v));
+          }
         }
       }
     } else {
@@ -560,7 +562,11 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
           );
         }
 
-        ext.descriptionMD = await readDescription(eh);
+        const descriptionMarkdownFile = await readDescription(eh);
+        ext.descriptionMD =
+          descriptionMarkdownFile ||
+          ext.description ||
+          '# No description provided';
 
         ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 

@@ -3,6 +3,7 @@ import React from 'react';
 import type {
   DisplayConfigElement,
   SectionDescription,
+  UrlableDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 
 import CreateUIElement from './CreateUIElement';
@@ -19,7 +20,8 @@ function CreateSection(args: {
   const { level, identifier, header, contents, readonly } = args;
   const elements = (contents.elements as DisplayConfigElement[]).map(
     (el: DisplayConfigElement) => {
-      const key = el.url || `${identifier}-${el.name}`;
+      const key =
+        (el as UrlableDisplayConfigElement).url || `${identifier}-${el.name}`;
       return (
         <CreateUIElement
           key={key}

@@ -9,6 +9,7 @@ import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   NumberContents,
   DisplayConfigElement,
+  UCP2SliderDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
@@ -31,7 +32,7 @@ const LOGGER = new Logger('CreateUCP2Slider.tsx');
 export type UCP2SliderValue = { enabled: boolean; sliderValue: number };
 
 function CreateUCP2Slider(args: {
-  spec: DisplayConfigElement;
+  spec: UCP2SliderDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

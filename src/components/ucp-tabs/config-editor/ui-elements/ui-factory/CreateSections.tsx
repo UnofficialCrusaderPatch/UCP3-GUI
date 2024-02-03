@@ -9,6 +9,7 @@ import {
 import {
   DisplayConfigElement,
   OptionEntry,
+  UrlableDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../../function/extensions/state/state';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
@@ -84,7 +85,7 @@ function CreateSections(args: { readonly: boolean }): {
   const elements = (definition.elements as DisplayConfigElement[]).map(
     (el: DisplayConfigElement) => (
       <CreateUIElement
-        key={el.url}
+        key={(el as UrlableDisplayConfigElement).url || el.name}
         spec={el as DisplayConfigElement}
         disabled={readonly}
         className=""

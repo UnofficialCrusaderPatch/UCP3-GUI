@@ -2,8 +2,8 @@ import { Form } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';
 import {
-  DisplayConfigElement,
   NumberContents,
+  NumberInputDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
@@ -23,7 +23,7 @@ import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateNumberInput(args: {
-  spec: DisplayConfigElement;
+  spec: NumberInputDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

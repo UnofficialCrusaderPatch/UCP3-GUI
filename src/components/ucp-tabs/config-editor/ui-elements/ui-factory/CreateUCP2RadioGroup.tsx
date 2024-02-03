@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import {
   ChoiceContents,
   DisplayConfigElement,
+  UCP2RadioGroupDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
@@ -22,7 +23,7 @@ import { ConfigPopover } from './popover/ConfigPopover';
 const LOGGER = new Logger('CreateUCP2RadioGroup.tsx');
 
 function CreateUCP2RadioGroup(args: {
-  spec: DisplayConfigElement;
+  spec: UCP2RadioGroupDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

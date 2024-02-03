@@ -7,8 +7,8 @@ import {
 } from '../../../../../tauri/tauri-dialog';
 
 import {
-  DisplayConfigElement,
   FileInputContents,
+  FileInputDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
@@ -35,10 +35,6 @@ import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
 const LOGGER = new Logger('CreateFileInput.tsx');
-
-export type FileInputDisplayConfigElement = DisplayConfigElement & {
-  generalizeExtensionPaths: boolean;
-};
 
 const r =
   /^ucp[/](modules|plugins)[/]([a-zA-Z0-9-.]+)-([0-9]+[.][0-9]+[.][0-9]+)[/](.*)/;

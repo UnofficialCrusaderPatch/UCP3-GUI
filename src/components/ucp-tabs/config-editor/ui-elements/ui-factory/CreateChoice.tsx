@@ -13,7 +13,7 @@ import {
 } from '../../../../../function/configuration/state';
 import {
   ChoiceContents,
-  DisplayConfigElement,
+  ChoiceDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
@@ -25,7 +25,7 @@ import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateChoice(args: {
-  spec: DisplayConfigElement;
+  spec: ChoiceDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

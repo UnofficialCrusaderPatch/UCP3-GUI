@@ -13,7 +13,7 @@ import {
 
 import {
   ChoiceContents,
-  DisplayConfigElement,
+  RadioGroupDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
@@ -22,7 +22,7 @@ import { ConfigPopover } from './popover/ConfigPopover';
 // TODO is this deprecated?
 
 function CreateRadioGroup(args: {
-  spec: DisplayConfigElement;
+  spec: RadioGroupDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

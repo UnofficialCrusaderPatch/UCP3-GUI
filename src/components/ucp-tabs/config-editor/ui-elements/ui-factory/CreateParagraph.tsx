@@ -4,10 +4,10 @@ import {
   AccordionHeader,
   AccordionItem,
 } from 'react-bootstrap';
-import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import { ParagraphDisplayConfigElement } from '../../../../../config/ucp/common';
 
 function CreateParagraph(args: {
-  spec: DisplayConfigElement;
+  spec: ParagraphDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

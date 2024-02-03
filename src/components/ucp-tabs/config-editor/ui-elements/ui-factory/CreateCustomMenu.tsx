@@ -4,6 +4,7 @@ import { useAtomValue } from 'jotai';
 
 import {
   CustomMenuContents,
+  CustomMenuDisplayConfigElement,
   DisplayConfigElement,
   Extension,
 } from '../../../../../config/ucp/common';
@@ -66,7 +67,7 @@ async function receiveSources(
 }
 
 function CreateCustomMenu(args: {
-  spec: DisplayConfigElement;
+  spec: CustomMenuDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

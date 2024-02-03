@@ -1,7 +1,7 @@
 import { Form } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';
-import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import { SwitchDisplayConfigElement } from '../../../../../config/ucp/common';
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
@@ -20,7 +20,7 @@ import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateSwitch(args: {
-  spec: DisplayConfigElement;
+  spec: SwitchDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

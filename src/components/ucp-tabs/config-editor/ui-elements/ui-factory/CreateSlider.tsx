@@ -4,8 +4,8 @@ import RangeSlider from 'react-bootstrap-range-slider';
 import { useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
-  DisplayConfigElement,
   NumberContents,
+  SliderDisplayConfigElement,
 } from '../../../../../config/ucp/common';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
@@ -21,7 +21,7 @@ import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
 
 function CreateSlider(args: {
-  spec: DisplayConfigElement;
+  spec: SliderDisplayConfigElement;
   disabled: boolean;
   className: string;
 }) {

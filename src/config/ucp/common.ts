@@ -176,6 +176,7 @@ type Extension = {
   ui: { [key: string]: unknown }[];
   locales: { [language: string]: { [key: string]: string } };
   descriptionMD: string;
+  description: string;
   config: ConfigFile;
   path: string;
   configEntries: { [key: string]: ConfigEntry };
@@ -220,25 +221,186 @@ type FileInputContents = BasicContents & {
   generalizeExtensionPaths: boolean;
 };
 
-type DisplayConfigElement = {
+export type UCP2SliderChoiceContent = {
   name: string;
-  description: string;
-  header: string;
   text: string;
-  display: string;
-  children: DisplayConfigElement[];
-  url: string;
-  columns: number;
-  tooltip: string;
   enabled: string;
-  contents:
-    | BasicContents
-    | ChoiceContents
-    | NumberContents
-    | FileInputContents
-    | CustomMenuContents;
+  min: number;
+  max: number;
+  step: number;
+};
+export type UCP2SliderChoiceContents = ChoiceContents & {
+  choices: UCP2SliderChoiceContent[];
+};
+
+export type BaseDisplayConfigElement = {
+  name: string;
   extension: Extension;
 };
+
+type ColumnableDisplayConfigElement = {
+  columns: number;
+};
+
+type EnableableDisplayConfigElement = {
+  enabled: string;
+};
+
+export type UrlableDisplayConfigElement = {
+  url: string;
+};
+
+type TooltipableDisplayConfigElement = {
+  tooltip: string;
+};
+
+type TextableDisplayConfigElement = {
+  text: string;
+};
+
+type HeaderableDisplayConfigElement = {
+  header: string;
+};
+
+type ChildrenableDisplayConfigElement = {
+  children: Array<DisplayConfigElement>;
+};
+
+export type ChoiceDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  TooltipableDisplayConfigElement &
+  TextableDisplayConfigElement & {
+    contents: ChoiceContents;
+    display: 'Choice';
+  };
+
+export type CustomMenuDisplayConfigElement = BaseDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  HeaderableDisplayConfigElement & {
+    contents: CustomMenuContents;
+    display: 'CustomMenu';
+  };
+
+export type FileInputDisplayConfigElement = BaseDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  TooltipableDisplayConfigElement & {
+    generalizeExtensionPaths: boolean;
+    contents: FileInputContents;
+    display: 'FileInput';
+  };
+
+export type GroupDisplayConfigElement = BaseDisplayConfigElement &
+  ColumnableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  ChildrenableDisplayConfigElement & {
+    description: string;
+    display: 'Group';
+  };
+
+export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
+  ColumnableDisplayConfigElement &
+  HeaderableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  ChildrenableDisplayConfigElement & {
+    description: string;
+    display: 'GroupBox';
+  };
+
+export type NumberInputDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  TooltipableDisplayConfigElement &
+  EnableableDisplayConfigElement & {
+    contents: NumberContents;
+    display: 'Number';
+  };
+
+export type ParagraphDisplayConfigElement = BaseDisplayConfigElement & {
+  header: string;
+  text: string;
+  display: 'Paragraph';
+};
+
+export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  EnableableDisplayConfigElement & {
+    contents: ChoiceContents;
+    display: 'RadioGroup';
+  };
+
+export type SliderDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  EnableableDisplayConfigElement & {
+    contents: NumberContents;
+    display: 'Slider';
+  };
+
+export type SwitchDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  TooltipableDisplayConfigElement & {
+    display: 'Switch';
+  };
+
+export type UCP2RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  HeaderableDisplayConfigElement & {
+    contents: ChoiceContents;
+    display: 'UCP2RadioGroup';
+  };
+
+export type UCP2SliderDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  TooltipableDisplayConfigElement &
+  HeaderableDisplayConfigElement & {
+    contents: NumberContents;
+    display: 'UCP2Slider';
+  };
+
+export type UCP2SliderChoiceDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  TooltipableDisplayConfigElement &
+  EnableableDisplayConfigElement &
+  HeaderableDisplayConfigElement & {
+    contents: UCP2SliderChoiceContents;
+    display: 'UCP2SliderChoice';
+  };
+
+export type UCP2SwitchDisplayConfigElement = BaseDisplayConfigElement &
+  UrlableDisplayConfigElement &
+  TextableDisplayConfigElement &
+  HeaderableDisplayConfigElement &
+  EnableableDisplayConfigElement & {
+    display: 'UCP2Switch';
+  };
+
+type DisplayConfigElement =
+  | ChoiceDisplayConfigElement
+  | CustomMenuDisplayConfigElement
+  | FileInputDisplayConfigElement
+  | GroupDisplayConfigElement
+  | GroupBoxDisplayConfigElement
+  | NumberInputDisplayConfigElement
+  | ParagraphDisplayConfigElement
+  | RadioGroupDisplayConfigElement
+  | SliderDisplayConfigElement
+  | SwitchDisplayConfigElement
+  | UCP2RadioGroupDisplayConfigElement
+  | UCP2SliderDisplayConfigElement
+  | UCP2SliderChoiceDisplayConfigElement
+  | UCP2SwitchDisplayConfigElement;
 
 type SectionDescription = {
   elements: DisplayConfigElement[];

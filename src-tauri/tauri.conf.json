@@ -88,7 +88,7 @@
         "digestAlgorithm": "sha256",
         "timestampUrl": "",
         "nsis": {
-          "installMode": "both",
+          "installMode": "currentUser",
           "displayLanguageSelector": true,
           "languages": [
             "English"

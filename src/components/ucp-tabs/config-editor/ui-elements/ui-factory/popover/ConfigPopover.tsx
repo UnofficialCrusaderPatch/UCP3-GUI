@@ -137,7 +137,7 @@ export function ConfigPopover(props: {
           <Button
             disabled={locked}
             role="button"
-            className="ms-1 me-3"
+            className="ms-1 me-5"
             id={`${url}-popover-reset-button`}
             onClick={() => {
               setUserConfiguration({

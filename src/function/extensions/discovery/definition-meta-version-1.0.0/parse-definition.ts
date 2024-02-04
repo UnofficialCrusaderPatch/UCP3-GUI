@@ -1,3 +1,5 @@
+import * as semver from 'semver';
+
 import {
   Definition,
   DependencyStatements,
@@ -35,7 +37,10 @@ export function parseDependencies(
     );
 
     const dictionary = Object.fromEntries(
-      parsed.map((ds) => [ds.extension, `${ds.operator} ${ds.version}`]),
+      parsed.map((ds) => [
+        ds.extension,
+        new semver.Range(`${ds.operator} ${ds.version}`, { loose: true }),
+      ]),
     );
 
     return {
@@ -46,7 +51,12 @@ export function parseDependencies(
   if ((dependencies as unknown) instanceof Object) {
     return {
       status: 'ok',
-      content: dependencies,
+      content: Object.fromEntries(
+        Object.entries(dependencies).map(([name, range]) => [
+          name,
+          new semver.Range(`${range}`, { loose: true }),
+        ]),
+      ),
     } as DependenciesValidationResult;
   }
 

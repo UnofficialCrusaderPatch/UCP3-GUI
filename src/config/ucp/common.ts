@@ -89,6 +89,7 @@ modules:
 ```
 */
 
+import * as semver from 'semver';
 import { ExtensionHandle } from '../../function/extensions/handles/extension-handle';
 import { ConfigMeta, DefinitionMeta } from './config/meta';
 
@@ -152,7 +153,7 @@ type OptionEntry = {
 };
 
 export type DependencyStatements = {
-  [extensionName: string]: string;
+  [extensionName: string]: semver.Range;
 };
 
 type PluginType = 'plugin';

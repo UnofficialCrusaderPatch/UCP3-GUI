@@ -50,7 +50,8 @@ export class ExtensionTree {
           e.name,
           e.version,
           Object.entries(e.definition.dependencies).map(
-            ([ext, v]) => new Dependency(ext, v.replaceAll('==', '=')),
+            ([ext, v]) =>
+              new Dependency(ext, v.toString().replaceAll('==', '=')),
           ),
         ),
     );

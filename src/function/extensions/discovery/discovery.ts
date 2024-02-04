@@ -35,14 +35,7 @@ const OPTIONS_FILE = 'options.yml';
 const CONFIG_FILE = 'config.yml';
 const DEFINITION_FILE = 'definition.yml';
 const LOCALE_FOLDER = 'locale';
-const DESCRIPTION_FILE = 'description.md';
-
-async function readDescription(eh: ExtensionHandle): Promise<string> {
-  if (await eh.doesEntryExist(DESCRIPTION_FILE)) {
-    return eh.getTextContents(DESCRIPTION_FILE);
-  }
-  return '# No description provided';
-}
+export const DESCRIPTION_FILE = 'description.md';
 
 async function readUISpec(
   eh: ExtensionHandle,
@@ -564,12 +557,6 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
             parseEntry,
           );
         }
-
-        const descriptionMarkdownFile = await readDescription(eh);
-        ext.descriptionMD =
-          descriptionMarkdownFile ||
-          ext.description ||
-          '# No description provided';
 
         ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 

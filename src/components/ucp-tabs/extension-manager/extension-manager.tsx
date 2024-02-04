@@ -27,7 +27,9 @@ export default function ExtensionManager() {
 
   const extensionsToDisplay = showAllExtensions
     ? extensionsState.installedExtensions
-    : extensionsState.installedExtensions.filter((e) => e.ui.length > 0);
+    : extensionsState.installedExtensions.filter(
+        (e) => !(e.type === 'module' && e.ui.length === 0),
+      );
 
   const extensionsToDisplayByName = Array.from(
     new Set(extensionsToDisplay.map((e) => e.name)),
@@ -47,7 +49,9 @@ export default function ExtensionManager() {
 
   const displayedActiveExtensions = showAllExtensions
     ? extensionsState.activeExtensions
-    : extensionsState.activeExtensions.filter((e) => e.ui.length > 0);
+    : extensionsState.activeExtensions.filter(
+        (e) => !(e.type === 'module' && e.ui.length === 0),
+      );
 
   const activated = displayedActiveExtensions.map((ext, index, arr) => (
     <ActiveExtensionElement

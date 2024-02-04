@@ -31,6 +31,8 @@ import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput from './CreateFileInput';
 import { useMessage } from '../../../../general/message';
+// eslint-disable-next-line import/no-cycle
+import { CreateModal } from './CreateModal';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -44,6 +46,8 @@ function CreateUIElementContent(args: {
   const localize = useMessage();
 
   switch (spec.display) {
+    case 'Modal':
+      return <CreateModal spec={spec} disabled={disabled} className={className} />;
     case 'UCP2Slider':
       return (
         <CreateUCP2Slider

@@ -24,6 +24,10 @@ import DirectoryExtensionHandle from '../handles/directory-extension-handle';
 import { changeLocale } from '../locale/locale';
 import { ExtensionTree } from '../dependency-management/dependency-resolution';
 import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
+import {
+  DefinitionMeta_1_0_0,
+  parseDependencies,
+} from './definition-meta-version-1.0.0/parse-definition';
 
 const LOGGER = new Logger('discovery.ts');
 
@@ -401,22 +405,21 @@ const validateDefinition = async (eh: ExtensionHandle) => {
     assumedType = type;
   }
 
-  definition.dependencies =
-    definition.dependencies ||
-    (definition as unknown as { depends: string[] }).depends ||
-    [];
-
-  if (!(definition.dependencies instanceof Array)) {
+  const parsedDependencies = parseDependencies(
+    definition as unknown as DefinitionMeta_1_0_0,
+  );
+  if (parsedDependencies.status !== 'ok') {
     return {
       status: 'error',
       messages: [
-        `Dependencies definition of extension "${name}-${version}" is not an array of strings: ${JSON.stringify(
+        `Dependencies definition of extension "${name}-${version}" is not an array of strings or a dictionary: ${JSON.stringify(
           definition.dependencies,
         )}`,
       ],
       content: undefined,
     } as ExtensionDefinitionValidationResult;
   }
+  definition.dependencies = parsedDependencies.content;
 
   return {
     status: warnings.length === 0 ? 'ok' : 'warning',

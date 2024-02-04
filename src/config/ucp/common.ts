@@ -151,11 +151,16 @@ type OptionEntry = {
   category: string[];
 };
 
+export type DependencyStatements = {
+  [extensionName: string]: string;
+};
+
 type Definition = {
+  meta: DefinitionMeta;
   name: string;
   version: string;
   author: [] | string;
-  dependencies: string[];
+  dependencies: DependencyStatements;
   'display-name': string;
   description: string;
   type: ExtensionType;

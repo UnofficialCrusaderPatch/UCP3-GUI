@@ -4,7 +4,6 @@ import { Dependency, Package, Repository, Tree } from 'lean-resolution';
 import { rcompare } from 'semver';
 
 import { Extension } from '../../../config/ucp/common';
-import { DependencyStatement } from '../../../config/ucp/dependency-statement';
 
 function extensionToID(ext: Extension) {
   return `${ext.name}@${ext.version}`;
@@ -50,13 +49,9 @@ export class ExtensionTree {
         new Package(
           e.name,
           e.version,
-          e.definition.dependencies.map((d) => {
-            const s = DependencyStatement.fromString(d);
-
-            if (s.operator === '==') s.operator = '=';
-
-            return new Dependency(s.extension, `${s.operator}${s.version}`);
-          }),
+          Object.entries(e.definition.dependencies).map(
+            ([ext, v]) => new Dependency(ext, v.replaceAll('==', '=')),
+          ),
         ),
     );
 

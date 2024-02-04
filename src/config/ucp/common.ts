@@ -155,20 +155,20 @@ export type DependencyStatements = {
   [extensionName: string]: string;
 };
 
+type PluginType = 'plugin';
+type ModuleType = 'module';
+type ExtensionType = PluginType | ModuleType;
+
 type Definition = {
   meta: DefinitionMeta;
   name: string;
   version: string;
-  author: [] | string;
+  author: string;
   dependencies: DependencyStatements;
   'display-name': string;
   description: string;
   type: ExtensionType;
 };
-
-type PluginType = 'plugin';
-type ModuleType = 'module';
-type ExtensionType = PluginType | ModuleType;
 
 type ExtensionIOCallback<R> = (extensionHandle: ExtensionHandle) => Promise<R>;
 

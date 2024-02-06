@@ -1,6 +1,5 @@
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
 import { GroupBoxDisplayConfigElement } from '../../../../../config/ucp/common';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
@@ -11,7 +10,7 @@ function CreateGroupBox(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
-  const { name, description, children, header, text, style } = spec;
+  const { name, description, children, header, text } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;
@@ -51,9 +50,9 @@ function CreateGroupBox(args: {
 
   return (
     // <Form key={`${name}-groupbox`}>
-    <Container
-      className={`border-light my-2 px-0  ui-element ${className}`}
-      style={style}
+    <div
+      className={`ui-element ${(spec.style || {}).className} ${className}`}
+      style={(spec.style || {}).css}
     >
       <Row className="my-3">
         <h5>{header}</h5>
@@ -65,7 +64,7 @@ function CreateGroupBox(args: {
       {/* <Row>
         <span className="text-muted text-end">module-name-v1.0.0</span>
       </Row> */}
-    </Container>
+    </div>
     // </Form>
   );
 }

@@ -43,7 +43,7 @@ function CreateUCP2RadioGroup(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, enabled, header, style } = spec;
+  const { url, text, enabled, header } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
   let { [url]: value } = configuration as {
@@ -150,8 +150,8 @@ function CreateUCP2RadioGroup(args: {
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className="col sword-checkbox"
-      style={{ marginLeft: 0, marginBottom: 0, ...style }}
+      className={`col sword-checkbox ${(spec.style || {}).className}`}
+      style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

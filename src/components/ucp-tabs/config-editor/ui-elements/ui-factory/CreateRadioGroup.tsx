@@ -42,7 +42,7 @@ function CreateRadioGroup(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, enabled, style } = spec;
+  const { url, text, enabled } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
   const { [url]: value } = configuration;
@@ -114,7 +114,7 @@ function CreateRadioGroup(args: {
 
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
@@ -124,7 +124,7 @@ function CreateRadioGroup(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
-      style={style}
+      style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <p>{text}</p>

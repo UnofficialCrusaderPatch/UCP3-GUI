@@ -46,7 +46,7 @@ function CreateNumberInput(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, contents, style } = spec;
+  const { url, text, tooltip, enabled, contents } = spec;
   const { min, max } = contents as NumberContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
@@ -77,7 +77,7 @@ function CreateNumberInput(args: {
 
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
@@ -87,7 +87,7 @@ function CreateNumberInput(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
-      style={style}
+      style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (

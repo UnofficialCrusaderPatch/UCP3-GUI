@@ -76,7 +76,7 @@ function CreateFileInput(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, contents, style } = spec;
+  const { url, text, tooltip, enabled, contents } = spec;
   const { filter, generalizeExtensionPaths } = contents as FileInputContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
@@ -192,7 +192,7 @@ function CreateFileInput(args: {
 
   return (
     <Form.Group
-      className={`ui-element ${className}`}
+      className={`ui-element ${(spec.style || {}).className} ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
@@ -202,7 +202,7 @@ function CreateFileInput(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
-      style={style}
+      style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (

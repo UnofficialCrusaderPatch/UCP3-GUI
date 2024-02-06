@@ -43,7 +43,7 @@ function CreateSwitch(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, style } = spec;
+  const { url, text, tooltip, enabled } = spec;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -73,7 +73,7 @@ function CreateSwitch(args: {
 
   return (
     <div
-      className={`d-flex align-items-baseline lh-sm my-1 sword-checkbox ui-element ${className}`}
+      className={`d-flex align-items-baseline lh-sm my-1 sword-checkbox ui-element ${(spec.style || {}).className} ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
@@ -83,7 +83,7 @@ function CreateSwitch(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
-      style={style}
+      style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (

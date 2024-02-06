@@ -240,7 +240,14 @@ export type UCP2SliderChoiceContents = ChoiceContents & {
   choices: UCP2SliderChoiceContent[];
 };
 
-export type BaseDisplayConfigElement = {
+export type StylableDisplayConfigElement = {
+  style: {
+    css: CSSProperties;
+    className: string;
+  };
+};
+
+export type BaseDisplayConfigElement = StylableDisplayConfigElement & {
   name: string;
   extension: Extension;
   style: CSSProperties;

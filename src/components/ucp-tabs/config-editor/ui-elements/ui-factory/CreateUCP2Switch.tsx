@@ -37,7 +37,7 @@ function CreateUCP2Switch(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, enabled, header, style } = spec;
+  const { url, text, enabled, header } = spec;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -62,7 +62,7 @@ function CreateUCP2Switch(args: {
   // const hasWarning = configurationWarnings[url] !== undefined;
 
   const headerElement = (
-    <div className="sword-checkbox ucp2-switch" style={style}>
+    <div className="sword-checkbox ucp2-switch">
       <input
         type="checkbox"
         className="me-2"
@@ -97,8 +97,8 @@ function CreateUCP2Switch(args: {
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className="col sword-checkbox"
-      style={{ marginLeft: 0, marginBottom: 0 }}
+      className={`col sword-checkbox ${(spec.style || {}).className}`}
+      style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

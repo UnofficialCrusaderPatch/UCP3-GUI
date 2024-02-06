@@ -83,7 +83,7 @@ function CreateCustomMenu(args: {
   const [activatingMenu, setActivatingMenu] = useState(false);
 
   const { spec, disabled } = args;
-  const { url, text, enabled, header, extension, style } = spec;
+  const { url, text, enabled, header, extension } = spec;
   const { source: sourcePaths } = spec.contents as CustomMenuContents;
 
   const isEnabled = parseEnabledLogic(
@@ -98,7 +98,10 @@ function CreateCustomMenu(args: {
   };
 
   return (
-    <div style={style}>
+    <div
+      style={(spec.style || {}).css}
+      className={`${(spec.style || {}).className}`}
+    >
       {hasWarning ? (
         <ConfigWarning
           text={configurationWarnings[url].text}

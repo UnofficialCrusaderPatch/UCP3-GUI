@@ -1,6 +1,5 @@
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
 import {
@@ -15,7 +14,7 @@ function CreateGroup(args: {
 }) {
   const { spec, disabled, className } = args;
   // TODO: header property is not used, is this expected?
-  const { name, description, children, text, style } = spec;
+  const { name, description, children, text } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;
@@ -55,12 +54,12 @@ function CreateGroup(args: {
   }
 
   return (
-    <Container
-      className={`my-2 px-0 pb-4 ui-element ${className}`}
-      style={style || {}}
+    <div
+      className={`ui-element ${(spec.style || {}).className} ${className}`}
+      style={(spec.style || {}).css}
     >
       {cs}
-    </Container>
+    </div>
   );
 }
 

@@ -42,7 +42,7 @@ function CreateSlider(args: {
 
   const { spec, disabled } = args;
   // TODO: text property is unused... is that correct?
-  const { url, enabled, style } = spec;
+  const { url, enabled } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
   const { [url]: value } = configuration as {
@@ -93,8 +93,8 @@ function CreateSlider(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
-      className="ui-element"
-      style={style}
+      className={`ui-element ${(spec.style || {}).className}`}
+      style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <RangeSlider

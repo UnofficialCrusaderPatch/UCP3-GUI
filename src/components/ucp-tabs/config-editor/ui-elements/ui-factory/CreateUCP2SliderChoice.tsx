@@ -51,7 +51,7 @@ function CreateUCP2SliderChoice(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, tooltip, enabled, header, style } = spec;
+  const { url, text, tooltip, enabled, header } = spec;
   const { contents } = spec;
   const { choices } = contents as UCP2SliderChoiceContents;
   // (
@@ -201,14 +201,13 @@ function CreateUCP2SliderChoice(args: {
       // eslint-disable-next-line jsx-a11y/label-has-associated-control
       <div
         key={choice.name}
-        className="form-check sword-checkbox"
+        className={`form-check sword-checkbox `}
         onMouseEnter={() => {
           setStatusBarMessage(statusBarMessage);
         }}
         onMouseLeave={() => {
           setStatusBarMessage(undefined);
         }}
-        style={style}
       >
         <div>
           <input
@@ -359,7 +358,7 @@ function CreateUCP2SliderChoice(args: {
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className="sword-checkbox"
+      className={`sword-checkbox  ${(spec.style || {}).className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);
@@ -369,6 +368,7 @@ function CreateUCP2SliderChoice(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
+      style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <Accordion.Header as="div">{headerElement}</Accordion.Header>

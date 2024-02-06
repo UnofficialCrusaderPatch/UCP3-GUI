@@ -6,16 +6,15 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalCreatePlugin } from '../../../modals/modal-create-plugin';
 import { showModalOk } from '../../../modals/modal-ok';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
-import serializeConfig from '../../common/serialize-config';
 import {
   UCP3SerializedPluginConfig,
+  serializeUCPConfig,
   toYaml,
 } from '../../../../config/ucp/config-files';
 import {
-  UCP_CONFIG_FILE_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { useCurrentGameFolder } from '../../../../function/game-folder/state';
@@ -26,9 +25,8 @@ function ExportAsPluginButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
   const gameFolder = useCurrentGameFolder();
-  const file = useAtomValue(UCP_CONFIG_FILE_ATOM);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
   const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
-  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;
 
@@ -48,10 +46,9 @@ function ExportAsPluginButton(
       {...props}
       onClick={async () => {
         try {
-          const result = await serializeConfig(
+          const result = await serializeUCPConfig(
+            userConfiguration,
             configuration,
-            file, // `${getCurrentFolder()}\\ucp3-gui-config-poc.yml`,
-            configurationTouched,
             extensionsState.explicitlyActivatedExtensions,
             activeExtensions,
             configurationQualifier,

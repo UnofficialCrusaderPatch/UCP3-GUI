@@ -12,7 +12,7 @@ function CreateParagraph(args: {
   className: string;
 }) {
   const { spec } = args;
-  const { header, text } = spec;
+  const { header, text, style } = spec;
 
   // eslint-disable-next-line react/jsx-no-useless-fragment
   let headerElement = <></>;
@@ -43,7 +43,7 @@ function CreateParagraph(args: {
     <Accordion
       bsPrefix="ucp-accordion ui-element"
       className="sword-checkbox "
-      style={{ marginLeft: 0, marginBottom: 0 }}
+      style={{ marginLeft: 0, marginBottom: 0, ...style }}
       defaultActiveKey={['0']}
     >
       <AccordionItem eventKey="0">

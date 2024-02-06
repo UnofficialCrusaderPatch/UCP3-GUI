@@ -42,7 +42,7 @@ function CreateRadioGroup(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, enabled } = spec;
+  const { url, text, enabled, style } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
   const { [url]: value } = configuration;
@@ -124,6 +124,7 @@ function CreateRadioGroup(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
+      style={style}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       <p>{text}</p>

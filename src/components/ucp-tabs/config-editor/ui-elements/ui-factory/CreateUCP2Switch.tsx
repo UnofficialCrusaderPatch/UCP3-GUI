@@ -37,7 +37,7 @@ function CreateUCP2Switch(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, enabled, header } = spec;
+  const { url, text, enabled, header, style } = spec;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -62,7 +62,7 @@ function CreateUCP2Switch(args: {
   // const hasWarning = configurationWarnings[url] !== undefined;
 
   const headerElement = (
-    <div className="sword-checkbox ucp2-switch">
+    <div className="sword-checkbox ucp2-switch" style={style}>
       <input
         type="checkbox"
         className="me-2"

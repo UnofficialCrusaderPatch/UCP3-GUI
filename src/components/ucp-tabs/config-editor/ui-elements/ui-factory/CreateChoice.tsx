@@ -48,7 +48,7 @@ function CreateChoice(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, contents } = spec;
+  const { url, text, tooltip, enabled, contents, style } = spec;
   const { choices } = contents as ChoiceContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
@@ -90,6 +90,7 @@ function CreateChoice(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
+      style={style}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (

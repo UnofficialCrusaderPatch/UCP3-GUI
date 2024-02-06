@@ -11,7 +11,7 @@ function CreateGroupBox(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
-  const { name, description, children, header, text } = spec;
+  const { name, description, children, header, text, style } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;
@@ -53,7 +53,7 @@ function CreateGroupBox(args: {
     // <Form key={`${name}-groupbox`}>
     <Container
       className={`border-light my-2 px-0  ui-element ${className}`}
-      style={{ margin: 0 }}
+      style={style}
     >
       <Row className="my-3">
         <h5>{header}</h5>

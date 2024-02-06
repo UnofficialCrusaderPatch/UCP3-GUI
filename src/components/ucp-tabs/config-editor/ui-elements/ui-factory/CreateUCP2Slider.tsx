@@ -52,7 +52,7 @@ function CreateUCP2Slider(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, tooltip, enabled, header } = spec;
+  const { url, text, tooltip, enabled, header, style } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
   let { [url]: value } = configuration as {
@@ -155,7 +155,7 @@ function CreateUCP2Slider(args: {
     <Accordion
       bsPrefix="ucp-accordion ui-element"
       className="sword-checkbox"
-      style={{ marginLeft: 0, marginBottom: 0 }}
+      style={{ marginLeft: 0, marginBottom: 0, ...style }}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

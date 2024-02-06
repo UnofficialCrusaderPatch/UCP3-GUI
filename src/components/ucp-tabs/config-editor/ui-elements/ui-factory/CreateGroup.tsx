@@ -15,7 +15,7 @@ function CreateGroup(args: {
 }) {
   const { spec, disabled, className } = args;
   // TODO: header property is not used, is this expected?
-  const { name, description, children, text } = spec;
+  const { name, description, children, text, style } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;
@@ -57,7 +57,7 @@ function CreateGroup(args: {
   return (
     <Container
       className={`my-2 px-0 pb-4 ui-element ${className}`}
-      style={{ margin: 0 }}
+      style={style || {}}
     >
       {cs}
     </Container>

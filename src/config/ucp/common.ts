@@ -90,6 +90,7 @@ modules:
 */
 
 import * as semver from 'semver';
+import { CSSProperties } from 'react';
 import { ExtensionHandle } from '../../function/extensions/handles/extension-handle';
 import { ConfigMeta, DefinitionMeta } from './config/meta';
 
@@ -242,6 +243,7 @@ export type UCP2SliderChoiceContents = ChoiceContents & {
 export type BaseDisplayConfigElement = {
   name: string;
   extension: Extension;
+  style: CSSProperties;
 };
 
 type ColumnableDisplayConfigElement = {

@@ -46,7 +46,7 @@ function CreateNumberInput(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled, contents } = spec;
+  const { url, text, tooltip, enabled, contents, style } = spec;
   const { min, max } = contents as NumberContents;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
@@ -87,6 +87,7 @@ function CreateNumberInput(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
+      style={style}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (

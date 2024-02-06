@@ -43,7 +43,7 @@ function CreateSwitch(args: {
   );
 
   const { spec, disabled, className } = args;
-  const { url, text, tooltip, enabled } = spec;
+  const { url, text, tooltip, enabled, style } = spec;
   const { [url]: value } = configuration;
   const isEnabled = parseEnabledLogic(
     enabled,
@@ -83,6 +83,7 @@ function CreateSwitch(args: {
         setStatusBarMessage(undefined);
       }}
       ref={ref}
+      style={style}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasWarning ? (
@@ -92,7 +93,7 @@ function CreateSwitch(args: {
         />
       ) : null}
       <Form.Switch
-        className=""
+        className="ps-0"
         // Tooltip stuff
         data-bs-toggle="tooltip"
         data-bs-placement="top"

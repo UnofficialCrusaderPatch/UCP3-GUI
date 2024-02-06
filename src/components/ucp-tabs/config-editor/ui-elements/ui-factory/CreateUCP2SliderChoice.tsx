@@ -51,7 +51,7 @@ function CreateUCP2SliderChoice(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, tooltip, enabled, header } = spec;
+  const { url, text, tooltip, enabled, header, style } = spec;
   const { contents } = spec;
   const { choices } = contents as UCP2SliderChoiceContents;
   // (
@@ -208,6 +208,7 @@ function CreateUCP2SliderChoice(args: {
         onMouseLeave={() => {
           setStatusBarMessage(undefined);
         }}
+        style={style}
       >
         <div>
           <input

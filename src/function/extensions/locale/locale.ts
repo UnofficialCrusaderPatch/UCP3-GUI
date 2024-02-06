@@ -60,7 +60,10 @@ function changeLocaleForObj(
         }
       }
     }
-    if (typeof obj[field] === 'object' && obj[field] !== null) {
+    if (obj[field] instanceof Array) {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      newObj[field] = changeLocaleForArray(locale, obj[field] as unknown[]);
+    } else if (obj[field] instanceof Object) {
       newObj[field] = changeLocaleOfObj(
         locale,
         obj[field] as { [key: string]: unknown },
@@ -92,7 +95,18 @@ function changeLocaleForArray(
   const newObj = [...obj];
 
   obj.forEach((value, index) => {
-    if (value !== null && value instanceof Array) {
+    if (typeof value === 'string') {
+      const search = localeRegExp.exec(value as string);
+
+      if (search !== undefined && search !== null) {
+        const keyword = search[1];
+        const loc = locale[keyword.toLowerCase()];
+        if (loc !== undefined) {
+          // eslint-disable-next-line no-param-reassign
+          newObj[index] = loc;
+        }
+      }
+    } else if (value !== null && value instanceof Array) {
       newObj[index] = changeLocaleForArray(locale, value as unknown[]);
     } else if (value !== null && value instanceof Object) {
       newObj[index] = changeLocaleForObj(

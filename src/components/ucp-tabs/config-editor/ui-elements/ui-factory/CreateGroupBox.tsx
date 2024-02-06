@@ -1,5 +1,6 @@
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { Accordion, AccordionBody, AccordionHeader } from 'react-bootstrap';
 import { GroupBoxDisplayConfigElement } from '../../../../../config/ucp/common';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
@@ -10,7 +11,7 @@ function CreateGroupBox(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
-  const { name, description, children, header, text } = spec;
+  const { name, description, children, header, text, accordion } = spec;
 
   let { columns } = spec;
   if (columns === undefined) columns = 1;
@@ -42,9 +43,37 @@ function CreateGroupBox(args: {
     }
     // Or use key: children[i].url but that fails if no children?
     cs.push(
-      <Row key={`${name}-${row}`} className="my-1">
+      <Row key={`${name}-${row}`} className="">
         {rowChildren}
       </Row>,
+    );
+  }
+
+  if ((accordion || {}).enabled) {
+    return (
+      // <Form key={`${name}-groupbox`}>
+      <Accordion
+        bsPrefix="ucp-accordion ui-element"
+        className={`${(spec.style || {}).className} ${className}`}
+        style={{
+          backgroundColor: 'rgba(245, 245, 227, 0.42)',
+          ...(spec.style || {}).css,
+        }}
+      >
+        <AccordionHeader className="">
+          <h5>{header}</h5>
+        </AccordionHeader>
+        <AccordionBody className="">
+          <div>
+            <span>{finalDescription}</span>
+          </div>
+          <div>{cs}</div>
+        </AccordionBody>
+        {/* <Row>
+          <span className="text-muted text-end">module-name-v1.0.0</span>
+        </Row> */}
+      </Accordion>
+      // </Form>
     );
   }
 
@@ -62,8 +91,8 @@ function CreateGroupBox(args: {
       </Row>
       <Row className="mt-1">{cs}</Row>
       {/* <Row>
-        <span className="text-muted text-end">module-name-v1.0.0</span>
-      </Row> */}
+          <span className="text-muted text-end">module-name-v1.0.0</span>
+        </Row> */}
     </div>
     // </Form>
   );

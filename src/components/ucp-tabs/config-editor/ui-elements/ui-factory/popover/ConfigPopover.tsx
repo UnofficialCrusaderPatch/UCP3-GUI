@@ -54,7 +54,7 @@ export function ConfigPopover(props: {
     <Overlay
       show={show}
       target={theRef.current}
-      placement="top-end"
+      placement="left-start"
       container={theRef}
       popperConfig={{
         strategy: 'fixed',
@@ -90,6 +90,7 @@ export function ConfigPopover(props: {
           {...prps}
           style={{
             position: 'absolute',
+            backgroundColor: '#ab712d',
             ...prps.style,
           }}
         >
@@ -137,7 +138,7 @@ export function ConfigPopover(props: {
           <Button
             disabled={locked}
             role="button"
-            className="ms-1 me-5"
+            className="me-2"
             id={`${url}-popover-reset-button`}
             onClick={() => {
               setUserConfiguration({

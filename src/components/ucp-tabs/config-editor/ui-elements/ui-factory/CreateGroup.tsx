@@ -47,7 +47,7 @@ function CreateGroup(args: {
     }
     // Or use key: children[i].url but that fails if no children?
     cs.push(
-      <Row key={`${name}-${row}`} className="my-1">
+      <Row key={`${name}-${row}`} className="">
         {rowChildren}
       </Row>,
     );

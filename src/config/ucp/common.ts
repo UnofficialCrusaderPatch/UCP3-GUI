@@ -281,6 +281,12 @@ type ChildrenableDisplayConfigElement = {
   children: Array<DisplayConfigElement>;
 };
 
+type AccordionableDisplayConfigElement = {
+  accordion: {
+    enabled: true;
+  };
+};
+
 export type ChoiceDisplayConfigElement = BaseDisplayConfigElement &
   UrlableDisplayConfigElement &
   EnableableDisplayConfigElement &
@@ -312,6 +318,7 @@ export type FileInputDisplayConfigElement = BaseDisplayConfigElement &
 export type GroupDisplayConfigElement = BaseDisplayConfigElement &
   ColumnableDisplayConfigElement &
   TextableDisplayConfigElement &
+  AccordionableDisplayConfigElement &
   ChildrenableDisplayConfigElement & {
     description: string;
     display: 'Group';
@@ -321,6 +328,7 @@ export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
   ColumnableDisplayConfigElement &
   HeaderableDisplayConfigElement &
   TextableDisplayConfigElement &
+  AccordionableDisplayConfigElement &
   ChildrenableDisplayConfigElement & {
     description: string;
     display: 'GroupBox';

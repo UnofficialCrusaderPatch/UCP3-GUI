@@ -40,12 +40,14 @@ export default function ExtensionManager() {
         extensions: extensionsState.extensions.filter((e) => e.name === n),
       }) as ExtensionNameList,
   );
-  const eUI = extensionsToDisplayByName.map((enl) => (
-    <InactiveExtensionsElement
-      key={`inactive-extension-element-${enl.name}`}
-      exts={enl.extensions}
-    />
-  ));
+  const eUI = extensionsToDisplayByName
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((enl) => (
+      <InactiveExtensionsElement
+        key={`inactive-extension-element-${enl.name}`}
+        exts={enl.extensions}
+      />
+    ));
 
   const displayedActiveExtensions = showAllExtensions
     ? extensionsState.activeExtensions

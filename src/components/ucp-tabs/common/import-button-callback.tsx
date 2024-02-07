@@ -1,3 +1,4 @@
+import * as semver from 'semver';
 import { TFunction } from 'i18next';
 import {
   ConfigurationQualifier,
@@ -119,7 +120,11 @@ const importButtonCallback = async (
         ds.version = Version.fromString(av[0]);
       }
 
-      if (ds.operator !== '==') {
+      const rstring = `${ds.operator} ${ds.version}`;
+      let range: semver.Range;
+      try {
+        range = new semver.Range(rstring, { loose: true });
+      } catch (err: any) {
         const errorMsg = `Unimplemented operator in dependency statement: ${e}`;
 
         // eslint-disable-next-line no-await-in-loop
@@ -133,7 +138,7 @@ const importButtonCallback = async (
 
       const options = extensions.filter(
         (ext: Extension) =>
-          ext.name === ds.extension && ext.version === ds.version.toString(),
+          ext.name === ds.extension && semver.satisfies(ext.version, range),
       );
       ConsoleLogger.debug(options);
       if (options.length === 0) {
@@ -154,17 +159,9 @@ const importButtonCallback = async (
         return;
       }
 
-      if (options.length > 1) {
-        // eslint-disable-next-line no-await-in-loop
-        await showModalOk({
-          message: `The same version of extension is installed multiple times: ${e}`,
-          title: `Duplicate extensions`,
-        });
-
-        return;
-      }
-
-      explicitActiveExtensions.push(options[0]);
+      explicitActiveExtensions.push(
+        options.sort((a, b) => semver.compare(b.version, a.version))[0],
+      );
     }
 
     const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };

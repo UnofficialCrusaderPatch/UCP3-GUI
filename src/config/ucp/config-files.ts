@@ -115,7 +115,8 @@ function saveUCPConfigPart(
   LOGGER.obj(finalConfig[subConfig]).debug();
 
   finalConfig[subConfig]['load-order'] = extensions.map(
-    (e: Extension) => `${e.name} == ${e.version}`,
+    (e: Extension) =>
+      `${e.name} ${subConfig === 'config-sparse' ? '==' : '=='} ${e.version}`,
   );
 
   Object.entries(config)

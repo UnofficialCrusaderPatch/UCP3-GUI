@@ -92,7 +92,9 @@ function ExportAsPluginButton(
               name: r.pluginName,
               author: r.pluginAuthor,
               version: r.pluginVersion,
-              dependencies: result['config-sparse']['load-order'],
+              dependencies: result['config-sparse']['load-order'].map((s) =>
+                s.replaceAll('==', '>='),
+              ),
             }),
           );
 

@@ -15,7 +15,7 @@ const exportButtonCallback = async (
   t: TFunction<[string, string], undefined>,
 ) => {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
-  const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
+  const fullConfiguration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;
   const configurationQualifier = getStore().get(
@@ -38,7 +38,7 @@ const exportButtonCallback = async (
   if (!filePath.endsWith('.yml')) filePath = `${filePath}.yml`;
 
   saveConfig(
-    configuration,
+    fullConfiguration,
     userConfiguration,
     filePath,
     extensionsState.explicitlyActivatedExtensions,

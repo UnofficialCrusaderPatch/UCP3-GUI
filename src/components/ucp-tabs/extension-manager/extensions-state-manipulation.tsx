@@ -8,6 +8,8 @@ import Logger from '../../../util/scripts/logging';
 
 const LOGGER = new Logger('extension-state.ts');
 
+export class DependencyError extends Error {}
+
 const addExtensionToExplicityActivatedExtensions = async (
   extensionsState: ExtensionsState,
   ext: Extension,
@@ -20,12 +22,7 @@ const addExtensionToExplicityActivatedExtensions = async (
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     LOGGER.msg(solution.message).error();
-    await showModalOk({
-      message: solution.message,
-      title: 'Error in dependencies',
-    });
-
-    return extensionsState;
+    throw new DependencyError(solution.message);
   }
 
   const allDependenciesInLoadOrder = solution.extensions.reverse();

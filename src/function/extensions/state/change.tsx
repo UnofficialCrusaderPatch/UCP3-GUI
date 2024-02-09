@@ -17,18 +17,18 @@ import { ConsoleLogger } from '../../../util/scripts/logging';
 import { ExtensionsState } from '../extensions-state';
 
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
+  ConsoleLogger.debug(
+    'Updating full config based on active extensions: ',
+    extensionsState.activeExtensions,
+  );
+
   // This section is meant to allow the config editor to display the options.
   const optionEntries = extensionsToOptionEntries(
     extensionsState.activeExtensions,
   );
   const uiDefinedDefaults = getConfigDefaults(optionEntries);
 
-  ConsoleLogger.debug(
-    'Updating defaults based on imported extensions: ',
-    extensionsState.activeExtensions,
-    'Default settings: ',
-    uiDefinedDefaults,
-  );
+  ConsoleLogger.debug('settings defined by the UI: ', uiDefinedDefaults);
 
   const locks: { [key: string]: ConfigurationLock } = {};
   const suggestions: { [url: string]: ConfigurationSuggestion } = {};

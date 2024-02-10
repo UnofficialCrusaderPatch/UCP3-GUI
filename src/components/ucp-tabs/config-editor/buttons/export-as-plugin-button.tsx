@@ -1,13 +1,15 @@
 import yaml from 'yaml';
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalCreatePlugin } from '../../../modals/modal-create-plugin';
 import { showModalOk } from '../../../modals/modal-ok';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import {
+  UCP3SerializedDefinition,
   UCP3SerializedPluginConfig,
+  UCP3SerializedUserConfig,
   serializeUCPConfig,
   toYaml,
 } from '../../../../config/ucp/config-files';
@@ -19,21 +21,65 @@ import {
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { useCurrentGameFolder } from '../../../../function/game-folder/state';
 import { reloadCurrentWindow } from '../../../../function/window-actions';
-import { ConsoleLogger } from '../../../../util/scripts/logging';
 import { readTextFile } from '../../../../tauri/tauri-files';
+import { getStore } from '../../../../hooks/jotai/base';
+
+const createPluginConfigFromCurrentState = async () => {
+  const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
+  const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
+  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const { activeExtensions } = extensionsState;
+
+  const configurationQualifier = getStore().get(
+    CONFIGURATION_QUALIFIER_REDUCER_ATOM,
+  );
+
+  const result = await serializeUCPConfig(
+    userConfiguration,
+    configuration,
+    extensionsState.explicitlyActivatedExtensions,
+    activeExtensions,
+    configurationQualifier,
+  );
+
+  return {
+    plugin: {
+      'config-sparse': {
+        modules: result['config-sparse'].modules,
+        plugins: result['config-sparse'].plugins,
+      },
+      meta: result.meta,
+    } as UCP3SerializedPluginConfig,
+    user: result as UCP3SerializedUserConfig,
+  };
+};
+
+const mergeDefinitions = (
+  pluginDefinition: UCP3SerializedDefinition,
+  newDefinition: UCP3SerializedDefinition,
+) => {
+  const definition = {
+    ...pluginDefinition,
+    name: pluginDefinition.name,
+    author: pluginDefinition.author || newDefinition.author,
+    version: pluginDefinition.version,
+    dependencies: [...(pluginDefinition.dependencies || new Array<string>())],
+  };
+
+  definition.dependencies = [
+    ...definition.dependencies,
+    ...newDefinition.dependencies
+      .filter((ds) => !ds.startsWith(pluginDefinition.name))
+      .map((s) => s.replaceAll('==', '>=')),
+  ];
+
+  return definition;
+};
 
 function ExportAsPluginButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
   const gameFolder = useCurrentGameFolder();
-  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
-  const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
-  const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
-  const { activeExtensions } = extensionsState;
-
-  const configurationQualifier = useAtomValue(
-    CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  );
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
@@ -47,65 +93,40 @@ function ExportAsPluginButton(
       {...props}
       onClick={async () => {
         try {
-          const result = await serializeUCPConfig(
-            userConfiguration,
-            configuration,
-            extensionsState.explicitlyActivatedExtensions,
-            activeExtensions,
-            configurationQualifier,
-          );
-          const trimmedResult = {
-            'config-sparse': {
-              modules: result['config-sparse'].modules,
-              plugins: result['config-sparse'].plugins,
-            },
-            meta: result.meta,
-          } as UCP3SerializedPluginConfig;
-
-          ConsoleLogger.debug(trimmedResult);
+          const { plugin, user } = await createPluginConfigFromCurrentState();
 
           const r = await showModalCreatePlugin({
             title: 'Create plugin',
             message: '',
           });
 
-          ConsoleLogger.debug(r);
-
           if (r === undefined) return;
-
-          // const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
           const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
 
           if (await exists(pluginDir)) {
-            const overwrite = showModalOkCancel({
-              title: 'Plugin already exists',
-              message:
-                'The plugin already exists, proceed? Overwrites config.yml and update dependencies in definition.yml',
-            });
-            if (!overwrite) return;
+            if (r.type !== 'overwrite') {
+              const overwrite = showModalOkCancel({
+                title: 'Plugin already exists',
+                message:
+                  'The plugin already exists, proceed? \n\n Overwrites config.yml and update dependencies in definition.yml',
+              });
+              if (!overwrite) return;
+            } else {
+              const overwrite = showModalOkCancel({
+                title: 'Are you sure?',
+                message:
+                  'Overwrites config.yml and update dependencies in definition.yml of the selected folder',
+              });
+              if (!overwrite) return;
+            }
 
             let definition = {
               name: r.pluginName,
               author: r.pluginAuthor,
               version: r.pluginVersion,
-              dependencies: new Array<string>(),
-            };
-
-            if (await exists(`${pluginDir}/definition.yml`)) {
-              definition = await yaml.parse(
-                (
-                  await readTextFile(`${pluginDir}/definition.yml`)
-                ).getOrThrow(),
-              );
-              definition.dependencies = definition.dependencies || [];
-            }
-
-            definition = {
-              ...definition,
               dependencies: [
-                ...definition.dependencies,
-                ...result['config-sparse']['load-order']
+                ...user['config-sparse']['load-order']
                   .filter(
                     (ds) =>
                       !(
@@ -115,7 +136,22 @@ function ExportAsPluginButton(
                   )
                   .map((s) => s.replaceAll('==', '>=')),
               ],
-            };
+              type: 'plugin',
+              'display-name': r.pluginName,
+              description: '',
+              meta: {
+                version: '1.0.0',
+              },
+            } as UCP3SerializedDefinition;
+
+            if (await exists(`${pluginDir}/definition.yml`)) {
+              const existingDefinition = await yaml.parse(
+                (
+                  await readTextFile(`${pluginDir}/definition.yml`)
+                ).getOrThrow(),
+              );
+              definition = mergeDefinitions(existingDefinition, definition);
+            }
 
             await writeTextFile(
               `${pluginDir}/definition.yml`,
@@ -133,10 +169,9 @@ function ExportAsPluginButton(
 
             pluginConfig['config-sparse'] = {
               ...pluginConfig['config-sparse'],
-              ...trimmedResult['config-sparse'],
+              ...plugin['config-sparse'],
             };
 
-            // TODO: test this logic
             await writeTextFile(
               `${pluginDir}/config.yml`,
               toYaml(pluginConfig),
@@ -150,16 +185,13 @@ function ExportAsPluginButton(
                 name: r.pluginName,
                 author: r.pluginAuthor,
                 version: r.pluginVersion,
-                dependencies: result['config-sparse']['load-order'].map((s) =>
+                dependencies: user['config-sparse']['load-order'].map((s) =>
                   s.replaceAll('==', '>='),
                 ),
               }),
             );
 
-            await writeTextFile(
-              `${pluginDir}/config.yml`,
-              toYaml(trimmedResult),
-            );
+            await writeTextFile(`${pluginDir}/config.yml`, toYaml(plugin));
           }
 
           const confirmed = await showModalOkCancel({

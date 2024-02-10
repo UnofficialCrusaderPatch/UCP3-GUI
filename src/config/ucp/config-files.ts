@@ -5,8 +5,8 @@ import { writeTextFile, loadYaml } from '../../tauri/tauri-files';
 import Result from '../../util/structs/result';
 import { ConfigurationQualifier } from '../../function/configuration/state';
 import Logger from '../../util/scripts/logging';
-import { ConfigFile, Extension } from './common';
-import { ConfigMeta } from './config/meta';
+import { ConfigFile, Extension, ExtensionType } from './common';
+import { ConfigMeta, DefinitionMeta } from './config/meta';
 
 const LOGGER = new Logger('config-files.ts');
 
@@ -51,6 +51,17 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
     result: config,
   };
 }
+
+export type UCP3SerializedDefinition = {
+  meta: DefinitionMeta;
+  name: string;
+  version: string;
+  author: string;
+  dependencies: string[];
+  'display-name': string;
+  description: string;
+  type: ExtensionType;
+};
 
 type Contents = {
   value: unknown;

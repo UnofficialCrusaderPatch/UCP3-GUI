@@ -1,13 +1,29 @@
 import { useState } from 'react';
+import yaml from 'yaml';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
+import { openFolderDialog } from '../../tauri/tauri-dialog';
+import { useCurrentGameFolder } from '../../function/game-folder/state';
+import { onFsExists, readTextFile } from '../../tauri/tauri-files';
+import { UCP3SerializedDefinition } from '../../config/ucp/config-files';
 
-export type CreatePluginModalResult = {
+type Create = {
+  type: 'create';
   pluginName: string;
   pluginAuthor: string;
   pluginVersion: string;
   createModpack: boolean;
 };
+
+type Overwrite = {
+  type: 'overwrite';
+  pluginName: string;
+  pluginAuthor: string;
+  pluginVersion: string;
+  createModpack: boolean;
+};
+
+export type CreatePluginModalResult = Create | Overwrite;
 
 export interface CreatePluginModalWindowProperties
   extends AbstractModalWindowProperties<CreatePluginModalResult, void> {}
@@ -42,15 +58,7 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
 
   const [versionElementHasFocus, setVersionElementHasFocus] = useState(false);
 
-  const internalHandleAction = () => {
-    setShow(false);
-    handleAction({
-      pluginName,
-      pluginVersion,
-      pluginAuthor,
-      createModpack,
-    });
-  };
+  const gameFolder = useCurrentGameFolder();
 
   const internalHandleClose = () => {
     setShow(false);
@@ -126,13 +134,58 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
       </Modal.Body>
       <Modal.Footer>
         <Button
+          variant="secondary"
+          onClick={async () => {
+            const optionString = await openFolderDialog(
+              `${gameFolder}/ucp/plugins/`,
+              'Select plugin to overwrite',
+            );
+
+            if (!optionString.isPresent() || optionString.isEmpty()) {
+              return;
+            }
+
+            const pluginFolder = optionString.get();
+
+            if (!(await onFsExists(`${pluginFolder}/definition.yml`))) {
+              return;
+            }
+
+            const definition = (await yaml.parse(
+              (
+                await readTextFile(`${pluginFolder}/definition.yml`)
+              ).getOrThrow(),
+            )) as UCP3SerializedDefinition;
+
+            setShow(false);
+            handleAction({
+              type: 'overwrite',
+              pluginName: definition.name,
+              pluginVersion: definition.version,
+              pluginAuthor: definition.author,
+              createModpack,
+            });
+          }}
+        >
+          {ok.length > 0 ? ok : 'Merge into existing plugin'}
+        </Button>
+        <Button
           variant="primary"
           disabled={
             pluginName.length === 0 ||
             pluginAuthor.length === 0 ||
             !pluginVersionValid
           }
-          onClick={internalHandleAction}
+          onClick={() => {
+            setShow(false);
+            handleAction({
+              type: 'create',
+              pluginName,
+              pluginVersion,
+              pluginAuthor,
+              createModpack,
+            });
+          }}
         >
           {ok.length > 0 ? ok : 'Create'}
         </Button>

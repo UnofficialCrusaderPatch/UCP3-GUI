@@ -1,6 +1,7 @@
 .ucp-popover {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .ucp-popover > button {

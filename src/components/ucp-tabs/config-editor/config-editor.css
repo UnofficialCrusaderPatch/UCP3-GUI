@@ -230,7 +230,7 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type='radio'] + label {
   display: block;
   position: relative;
-  padding-left: 32px;
+  /* padding-left: 32px; */
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -254,15 +254,15 @@ input[type="checkbox"]:disabled + .label:before {
 .sword-checkbox input[type='checkbox'] + label:before,
 .sword-checkbox input[type='radio'] + label:before {
   content: '';
-  display: block;
+  display: inline-flex;
   background-image: url('/src/assets/ucp3/checkbox_empty.png');
   background-size: cover;
   width: 19px;
   height: 19px;
 
-  position: absolute;
-  left: 0px;
-  top: -3px;
+  /* position: absolute; */
+  /* left: 0px;
+  top: -3px; */
   -webkit-transition:
     all 0.1s,
     background 0.1s ease-in-out;

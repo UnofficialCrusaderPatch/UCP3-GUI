@@ -23,6 +23,8 @@ const DEFAULT_CREATE_PLUGIN_MODAL_PROPERTIES: CreatePluginModalWindowProperties 
     ok: '',
   };
 
+const sanitizePluginName = (s: string) => s.replaceAll(/[^a-zA-Z0-9-]/g, '');
+
 // eslint-disable-next-line import/prefer-default-export
 function CreatePluginModal(props: CreatePluginModalWindowProperties) {
   const { handleAction, title, ok, handleClose } = props;
@@ -76,7 +78,7 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
             type="text"
             value={pluginName}
             onChange={(e) => {
-              setPluginName(e.target.value);
+              setPluginName(sanitizePluginName(e.target.value));
             }}
           />
           <Form.Label>Plugin author:</Form.Label>

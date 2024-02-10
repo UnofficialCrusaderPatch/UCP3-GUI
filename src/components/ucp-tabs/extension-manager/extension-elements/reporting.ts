@@ -28,11 +28,6 @@ export default async function reportAndConfirmBuildResult(
         '\n\n',
       )}`;
       LOGGER.msg(msg).warn();
-      const confirmed2 = await showModalOkCancel({
-        title: 'Warning',
-        message: msg,
-      });
-      if (!confirmed2) return false;
     }
   } else {
     LOGGER.msg('New configuration build without errors or warnings').info();

@@ -21,7 +21,7 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
-import Logger, { ConsoleLogger } from '../../../../../util/scripts/logging';
+import Logger from '../../../../../util/scripts/logging';
 import { parseEnabledLogic } from '../enabled-logic';
 
 import { formatToolTip } from '../tooltips';
@@ -317,7 +317,6 @@ function CreateUCP2SliderChoice(args: {
                 // End of tooltip stuff
                 value={localValue / factor}
                 onChange={(event) => {
-                  ConsoleLogger.info(event);
                   const rawValue = parseFloat(event.target.value);
                   const newLocalValue = rawValue * factor;
                   setLocalValue(newLocalValue);

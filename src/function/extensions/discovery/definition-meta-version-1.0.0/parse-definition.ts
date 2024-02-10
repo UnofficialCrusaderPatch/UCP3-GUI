@@ -5,7 +5,6 @@ import {
   DependencyStatements,
 } from '../../../../config/ucp/common';
 import { DependencyStatement } from '../../../../config/ucp/dependency-statement';
-import { ConsoleLogger } from '../../../../util/scripts/logging';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type DefinitionMeta_1_0_0 = Definition & {
@@ -28,7 +27,6 @@ export type DependenciesValidationResult =
 export function parseDependencies(
   definition: DefinitionMeta_1_0_0,
 ): DependenciesValidationResult {
-  ConsoleLogger.info('parsing dependencies');
   const dependencies = definition.dependencies || definition.depends || {};
 
   if (dependencies instanceof Array) {

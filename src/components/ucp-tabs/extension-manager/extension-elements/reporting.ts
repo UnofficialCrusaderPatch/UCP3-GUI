@@ -1,5 +1,5 @@
 import { ExtensionsState } from '../../../../function/extensions/extensions-state';
-import Logger from '../../../../util/scripts/logging';
+import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 
 const LOGGER = new Logger('reporting.ts');
@@ -36,6 +36,7 @@ export default async function reportAndConfirmBuildResult(
     }
   } else {
     LOGGER.msg('New configuration build without errors or warnings').info();
+    ConsoleLogger.debug(res);
   }
 
   return true;

@@ -1,5 +1,5 @@
-import { createDir, writeTextFile } from '@tauri-apps/api/fs';
-import { exists } from 'i18next';
+import yaml from 'yaml';
+import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -20,6 +20,7 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/st
 import { useCurrentGameFolder } from '../../../../function/game-folder/state';
 import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
+import { readTextFile } from '../../../../tauri/tauri-files';
 
 function ExportAsPluginButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -77,28 +78,89 @@ function ExportAsPluginButton(
           const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
 
           if (await exists(pluginDir)) {
-            await showModalOk({
-              message: `directory already exists: ${pluginDir}`,
-              title: 'cannot create plugin',
+            const overwrite = showModalOkCancel({
+              title: 'Plugin already exists',
+              message:
+                'The plugin already exists, proceed? Overwrites config.yml and update dependencies in definition.yml',
             });
-            return;
-          }
+            if (!overwrite) return;
 
-          await createDir(pluginDir);
-
-          await writeTextFile(
-            `${pluginDir}/definition.yml`,
-            toYaml({
+            let definition = {
               name: r.pluginName,
               author: r.pluginAuthor,
               version: r.pluginVersion,
-              dependencies: result['config-sparse']['load-order'].map((s) =>
-                s.replaceAll('==', '>='),
-              ),
-            }),
-          );
+              dependencies: new Array<string>(),
+            };
 
-          await writeTextFile(`${pluginDir}/config.yml`, toYaml(trimmedResult));
+            if (await exists(`${pluginDir}/definition.yml`)) {
+              definition = await yaml.parse(
+                (
+                  await readTextFile(`${pluginDir}/definition.yml`)
+                ).getOrThrow(),
+              );
+              definition.dependencies = definition.dependencies || [];
+            }
+
+            definition = {
+              ...definition,
+              dependencies: [
+                ...definition.dependencies,
+                ...result['config-sparse']['load-order']
+                  .filter(
+                    (ds) =>
+                      !(
+                        ds.startsWith(r.pluginName) &&
+                        ds.endsWith(r.pluginVersion)
+                      ),
+                  )
+                  .map((s) => s.replaceAll('==', '>=')),
+              ],
+            };
+
+            await writeTextFile(
+              `${pluginDir}/definition.yml`,
+              toYaml(definition),
+              { append: false },
+            );
+
+            let pluginConfig = { 'config-sparse': {} };
+
+            if (await exists(`${pluginDir}/config.yml`)) {
+              pluginConfig = await yaml.parse(
+                (await readTextFile(`${pluginDir}/config.yml`)).getOrThrow(),
+              );
+            }
+
+            pluginConfig['config-sparse'] = {
+              ...pluginConfig['config-sparse'],
+              ...trimmedResult['config-sparse'],
+            };
+
+            // TODO: test this logic
+            await writeTextFile(
+              `${pluginDir}/config.yml`,
+              toYaml(pluginConfig),
+            );
+          } else {
+            await createDir(pluginDir);
+
+            await writeTextFile(
+              `${pluginDir}/definition.yml`,
+              toYaml({
+                name: r.pluginName,
+                author: r.pluginAuthor,
+                version: r.pluginVersion,
+                dependencies: result['config-sparse']['load-order'].map((s) =>
+                  s.replaceAll('==', '>='),
+                ),
+              }),
+            );
+
+            await writeTextFile(
+              `${pluginDir}/config.yml`,
+              toYaml(trimmedResult),
+            );
+          }
 
           const confirmed = await showModalOkCancel({
             title: t('gui-general:require.reload.title'),

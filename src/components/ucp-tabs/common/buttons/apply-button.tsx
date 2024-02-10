@@ -8,17 +8,11 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { makeToast } from '../../../toasts/toasts-display';
 import saveConfig from '../save-config';
-import {
-  CONFIG_DIRTY_STATE_ATOM,
-  CONFIG_EXTENSIONS_DIRTY_STATE_ATOM,
-} from './config-serialized-state';
-import { ConsoleLogger } from '../../../../util/scripts/logging';
-import { getStore } from '../../../../hooks/jotai/base';
+import { CONFIG_DIRTY_STATE_ATOM } from './config-serialized-state';
 
 function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -51,7 +45,6 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
       }}
       onClick={async () => {
         try {
-          ConsoleLogger.info(configurationDirtyState);
           const result: string = await saveConfig(
             configuration,
             userConfiguration,
@@ -59,12 +52,6 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
             extensionsState.explicitlyActivatedExtensions,
             activeExtensions,
             configurationQualifier,
-          );
-          ConsoleLogger.info(
-            getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
-          );
-          ConsoleLogger.info(
-            getStore().get(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM),
           );
           setConfigStatus(result);
         } catch (e: any) {

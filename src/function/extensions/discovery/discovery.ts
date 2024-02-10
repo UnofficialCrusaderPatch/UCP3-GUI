@@ -16,7 +16,7 @@ import {
   Extension,
   ExtensionIOCallback,
 } from '../../../config/ucp/common';
-import Logger, { ConsoleLogger } from '../../../util/scripts/logging';
+import Logger from '../../../util/scripts/logging';
 import { showModalOk } from '../../../components/modals/modal-ok';
 import { ZipReader } from '../../../util/structs/zip-handler';
 import { ExtensionHandle } from '../handles/extension-handle';
@@ -99,7 +99,6 @@ async function readLocales(
 }
 
 function applyLocale(ext: Extension, locale: { [key: string]: string }) {
-  ConsoleLogger.info('Applying locale ', locale, ' to extension ', ext);
   const { ui } = ext;
   return ui.map((uiElement: { [key: string]: unknown }) =>
     changeLocale(locale, uiElement as { [key: string]: unknown }),
@@ -184,8 +183,6 @@ async function unzipPlugins(pluginDirEnts: FileEntry[]) {
 }
 
 async function getExtensionHandles(ucpFolder: string) {
-  ConsoleLogger.info('Getting extension handles');
-
   const moduleDir = `${ucpFolder}/modules/`;
   const readModuleDirResult = await readDir(moduleDir);
 
@@ -464,8 +461,6 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
     ehs.map(async (eh) => {
       const warnings: string[] = [];
       try {
-        ConsoleLogger.info(`loading ${eh.path}`);
-
         const definitionValidationResult = await validateDefinition(eh);
 
         if (definitionValidationResult.status === 'warning') {
@@ -549,7 +544,7 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
           ext.config['config-sparse'].modules === null ||
           ext.config['config-sparse'].plugins === null
         ) {
-          const msg = `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`;
+          const msg = `config.yml of extension ${ext.name} does not adhere to the configuration spec.`;
           warnings.push(msg);
           LOGGER.msg(msg).warn();
 
@@ -558,12 +553,14 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
             plugins: {},
           };
 
-          const modules = cs.modules || {};
-          const plugins = cs.modules || {};
+          cs.modules = cs.modules || {};
+          cs.plugins = cs.plugins || {};
 
-          Object.entries(modules).forEach(parseEntry);
-          Object.entries(plugins).forEach(parseEntry);
+          ext.config['config-sparse'] = cs;
         }
+
+        Object.entries(ext.config['config-sparse'].modules).forEach(parseEntry);
+        Object.entries(ext.config['config-sparse'].plugins).forEach(parseEntry);
 
         ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 

@@ -17,6 +17,8 @@ import { ConsoleLogger } from '../../../util/scripts/logging';
 import { ExtensionsState } from '../extensions-state';
 
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
+  ConsoleLogger.debug('change.tsx: extension state', extensionsState);
+
   ConsoleLogger.debug(
     'change.tsx: Updating full config based on active extensions: ',
     extensionsState.activeExtensions,

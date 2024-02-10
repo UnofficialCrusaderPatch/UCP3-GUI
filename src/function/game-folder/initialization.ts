@@ -96,12 +96,12 @@ export async function initializeGameFolder(newFolder: string) {
     installedExtensions: [...extensions],
     extensions,
   };
+  loggerState.setMsg('Finished extension discovery').info();
+  ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
+
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
 
   getStore().set(UCP_CONFIG_FILE_ATOM, file);
-
-  loggerState.setMsg('Finished extension discovery').info();
-  ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
 
   if (getStore().get(INIT_ERROR) === false) {
     loggerState.setMsg('Trying to load ucp-config.yml').info();

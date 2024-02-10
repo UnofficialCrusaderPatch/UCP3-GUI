@@ -5,7 +5,6 @@ import {
   ConfigurationQualifier,
 } from '../../../function/configuration/state';
 import { getStore } from '../../../hooks/jotai/base';
-import { ConsoleLogger } from '../../../util/scripts/logging';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
 
 function saveConfig(
@@ -16,7 +15,7 @@ function saveConfig(
   allExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
-  ConsoleLogger.debug(`Saving config: `, configuration);
+  // ConsoleLogger.debug(`Saving config: `, configuration);
 
   return saveUCPConfig(
     { ...userConfiguration },

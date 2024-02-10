@@ -565,12 +565,6 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
           Object.entries(plugins).forEach(parseEntry);
         }
 
-        ConsoleLogger.debug(
-          'discovery.ts: config entries: ',
-          ext,
-          ext.configEntries,
-        );
-
         ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 
         eh.close();

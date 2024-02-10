@@ -75,7 +75,7 @@ const importButtonCallback = async (
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
-  ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
+  // ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
 
   const { extensions } = extensionsState;
 
@@ -133,7 +133,7 @@ const importButtonCallback = async (
     result: ConfigFile;
   } = await loadConfigFromFile(path, t);
 
-  ConsoleLogger.debug(`Parsing result: `, parsingResult);
+  // ConsoleLogger.debug(`Parsing result: `, parsingResult);
 
   if (parsingResult.status !== 'OK') {
     setConfigStatus(`${parsingResult.status}: ${parsingResult.message}`);
@@ -192,7 +192,7 @@ const importButtonCallback = async (
             semver.satisfies(ext.version, range),
         );
 
-        ConsoleLogger.debug('options', options);
+        // ConsoleLogger.debug('options', options);
 
         // If there are no options, we are probably missing an extension
         if (options.length === 0) {
@@ -260,7 +260,7 @@ const importButtonCallback = async (
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
   }
 
-  ConsoleLogger.debug('opened config', parsingResult.result);
+  // ConsoleLogger.debug('opened config', parsingResult.result);
 
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
 
@@ -284,7 +284,7 @@ const importButtonCallback = async (
   Object.entries(config['config-sparse'].modules).forEach(parseEntry);
   Object.entries(config['config-sparse'].plugins).forEach(parseEntry);
 
-  ConsoleLogger.debug('parsed user config entries: ', userConfigEntries);
+  // ConsoleLogger.debug('parsed user config entries: ', userConfigEntries);
 
   const userConfigDB: ConfigMetaObjectDB = {};
 

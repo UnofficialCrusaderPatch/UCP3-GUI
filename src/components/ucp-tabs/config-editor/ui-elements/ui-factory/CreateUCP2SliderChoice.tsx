@@ -277,7 +277,6 @@ function CreateUCP2SliderChoice(args: {
                 onChange={(event) => {
                   const rawValue = parseFloat(event.target.value);
                   setLocalValue(rawValue);
-                  ConsoleLogger.debug(localValue);
                 }}
                 disabled={
                   !isEnabled ||

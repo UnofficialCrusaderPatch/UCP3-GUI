@@ -18,7 +18,7 @@ import { ExtensionsState } from '../extensions-state';
 
 function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   ConsoleLogger.debug(
-    'Updating full config based on active extensions: ',
+    'change.tsx: Updating full config based on active extensions: ',
     extensionsState.activeExtensions,
   );
 
@@ -28,7 +28,10 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   );
   const uiDefinedDefaults = getConfigDefaults(optionEntries);
 
-  ConsoleLogger.debug('settings defined by the UI: ', uiDefinedDefaults);
+  ConsoleLogger.debug(
+    'change.tsx: settings defined by the UI: ',
+    uiDefinedDefaults,
+  );
 
   const locks: { [key: string]: ConfigurationLock } = {};
   const suggestions: { [url: string]: ConfigurationSuggestion } = {};
@@ -37,6 +40,10 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
   // TODO: make this rely on the extension state?
 
   const configDefinedValues: Record<string, unknown> = {};
+  ConsoleLogger.debug(
+    'change.tsx: config defined values as passed from extension State',
+    extensionsState.configuration.state,
+  );
   Object.entries(extensionsState.configuration.state).forEach(
     ([url, cmo]: [string, ConfigMetaObject]) => {
       configDefinedValues[url] = cmo.modifications.value.content;
@@ -72,18 +79,36 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
     ...userDefinedValues,
   };
 
-  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
-    type: 'reset',
-    value: fullConfig,
-  });
+  ConsoleLogger.debug('change.tsx: extensions defined config');
+  ConsoleLogger.debug(extensionsDefinedValues);
+
   getStore().set(CONFIGURATION_DEFAULTS_REDUCER_ATOM, {
     type: 'reset',
     value: extensionsDefinedValues,
   });
+
+  ConsoleLogger.debug('change.tsx: user config');
+  ConsoleLogger.debug(userDefinedValues);
+
+  ConsoleLogger.debug('change.tsx: full config');
+  ConsoleLogger.debug(fullConfig);
+
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
+    type: 'reset',
+    value: fullConfig,
+  });
+
+  ConsoleLogger.debug('change.tsx: locks on the config');
+  ConsoleLogger.debug(locks);
+
   getStore().set(CONFIGURATION_LOCKS_REDUCER_ATOM, {
     type: 'reset',
     value: locks,
   });
+
+  ConsoleLogger.debug('change.tsx: suggestions in the config');
+  ConsoleLogger.debug(suggestions);
+
   getStore().set(CONFIGURATION_SUGGESTIONS_REDUCER_ATOM, {
     type: 'reset',
     value: suggestions,

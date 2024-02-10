@@ -39,6 +39,26 @@ import {
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
 
+export const sanitizeVersionRange = (rangeString: string) => {
+  if (rangeString.indexOf('==') !== -1) {
+    return rangeString.replaceAll('==', '');
+  }
+  return rangeString;
+};
+
+const updatePreferredExtensionVersions = (
+  explicitActiveExtensions: Extension[],
+) => {
+  // Set the new preferences for which version to use for each extension
+  const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };
+
+  explicitActiveExtensions.forEach((e: Extension) => {
+    newPrefs[e.name] = e.version;
+  });
+
+  getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
+};
+
 const importButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (arg0: string) => void,
@@ -156,11 +176,43 @@ const importButtonCallback = async (
         dependencyStatement.version = Version.fromString(availableVersions[0]);
       }
 
-      // Construct a range string that semver can parse
-      const rstring = `${dependencyStatement.operator} ${dependencyStatement.version}`;
-      let range: semver.Range;
+      let options: Extension[] = [];
+
       try {
-        range = new semver.Range(rstring, { loose: true });
+        // Construct a range string that semver can parse
+        const rstring = sanitizeVersionRange(
+          `${dependencyStatement.operator} ${dependencyStatement.version}`,
+        );
+        const range: semver.Range = new semver.Range(rstring, { loose: true });
+
+        // Set of extensions that satisfy the requirement.
+        options = extensions.filter(
+          (ext: Extension) =>
+            ext.name === dependencyStatement.extension &&
+            semver.satisfies(ext.version, range),
+        );
+
+        ConsoleLogger.debug('options', options);
+
+        // If there are no options, we are probably missing an extension
+        if (options.length === 0) {
+          setConfigStatus(
+            t('gui-editor:config.status.missing.extension', {
+              extension: dependencyStatementString,
+            }),
+          );
+
+          // eslint-disable-next-line no-await-in-loop
+          await showModalOk({
+            message: t('gui-editor:config.status.missing.extension', {
+              extension: dependencyStatementString,
+            }),
+            title: `Missing extension`,
+          });
+
+          // Abort the import
+          return;
+        }
       } catch (err: any) {
         // Couldn't be parsed by semver
         const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementString}`;
@@ -171,35 +223,6 @@ const importButtonCallback = async (
           title: `Illegal dependency statement`,
         });
 
-        throw Error(errorMsg);
-      }
-
-      // Set of extensions that satisfy the requirement.
-      const options = extensions.filter(
-        (ext: Extension) =>
-          ext.name === dependencyStatement.extension &&
-          semver.satisfies(ext.version, range),
-      );
-
-      ConsoleLogger.debug(options);
-
-      // If there are no options, we are probably missing an extension
-      if (options.length === 0) {
-        setConfigStatus(
-          t('gui-editor:config.status.missing.extension', {
-            extension: dependencyStatementString,
-          }),
-        );
-
-        // eslint-disable-next-line no-await-in-loop
-        await showModalOk({
-          message: t('gui-editor:config.status.missing.extension', {
-            extension: dependencyStatementString,
-          }),
-          title: `Missing extension`,
-        });
-
-        // Abort the import
         return;
       }
 
@@ -210,14 +233,7 @@ const importButtonCallback = async (
       );
     }
 
-    // Set the new preferences for which version to use for each extension
-    const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };
-
-    explicitActiveExtensions.forEach((e: Extension) => {
-      newPrefs[e.name] = e.version;
-    });
-
-    getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
+    updatePreferredExtensionVersions(explicitActiveExtensions);
 
     // Reverse the array of explicitly Active Extensions such that we deal it from the ground up (lowest dependency first)
     // eslint-disable-next-line no-restricted-syntax
@@ -314,6 +330,10 @@ const importButtonCallback = async (
     value: newConfigurationQualifier,
   });
 
+  ConsoleLogger.debug(
+    'import-button-callback.tsx: new extension state',
+    newExtensionsState,
+  );
   // Set the new extension state, which fires an update of the full config
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
 };

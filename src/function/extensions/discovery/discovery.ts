@@ -544,19 +544,32 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
         if (
           ext.config['config-sparse'] === undefined ||
           ext.config['config-sparse'].modules === undefined ||
-          ext.config['config-sparse'].plugins === undefined
+          ext.config['config-sparse'].plugins === undefined ||
+          ext.config['config-sparse'] === null ||
+          ext.config['config-sparse'].modules === null ||
+          ext.config['config-sparse'].plugins === null
         ) {
           const msg = `Extension ${ext.name} does not adhere to the configuration definition spec, skipped parsing of config object.`;
           warnings.push(msg);
           LOGGER.msg(msg).warn();
-        } else {
-          Object.entries(ext.config['config-sparse'].modules).forEach(
-            parseEntry,
-          );
-          Object.entries(ext.config['config-sparse'].plugins).forEach(
-            parseEntry,
-          );
+
+          const cs = ext.config['config-sparse'] || {
+            modules: {},
+            plugins: {},
+          };
+
+          const modules = cs.modules || {};
+          const plugins = cs.modules || {};
+
+          Object.entries(modules).forEach(parseEntry);
+          Object.entries(plugins).forEach(parseEntry);
         }
+
+        ConsoleLogger.debug(
+          'discovery.ts: config entries: ',
+          ext,
+          ext.configEntries,
+        );
 
         ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 

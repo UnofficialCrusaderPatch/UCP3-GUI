@@ -15,6 +15,7 @@ import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-
 import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import reportAndConfirmBuildResult from './reporting';
+import { showModalOk } from '../../../modals/modal-ok';
 
 const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
 
@@ -25,10 +26,21 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
 
   const currentExtensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
-  const newExtensionsState = await addExtensionToExplicityActivatedExtensions(
-    currentExtensionsState,
-    ext,
-  );
+  let newExtensionsState = { ...currentExtensionsState };
+
+  try {
+    newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+      currentExtensionsState,
+      ext,
+    );
+  } catch (err: any) {
+    await showModalOk({
+      title: 'error in adding extension',
+      message: err.toString(),
+    });
+
+    return;
+  }
 
   const res = buildExtensionConfigurationDB(newExtensionsState);
 
@@ -84,20 +96,16 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     value: retainedConfig,
   });
 
-  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
-
-  ConsoleLogger.info('New extension state', res);
-  ConsoleLogger.info(
-    'New full config state',
-    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
-  );
-
   ConsoleLogger.info(
     'New user config state',
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
 
   getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+
+  ConsoleLogger.info('New extension state', res);
+
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
 };
 
 export default inactiveExtensionElementClickCallback;

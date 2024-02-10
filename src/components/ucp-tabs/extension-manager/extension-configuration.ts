@@ -57,12 +57,6 @@ function buildExtensionConfigurationDBFromActiveExtensions(
   // So we reverse it
   ae.reverse();
 
-  LOGGER.msg(
-    `Activated extensions ${ae
-      .map((ex) => `${ex.name}-${ex.version}`)
-      .join(', ')}`,
-  ).info();
-
   const db: ConfigMetaObjectDB = {};
 
   const errors: string[] = [];

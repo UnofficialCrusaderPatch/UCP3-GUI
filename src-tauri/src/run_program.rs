@@ -1,8 +1,14 @@
 use std::{collections::HashMap, path::Path, process::Command};
-
 use tauri::AppHandle;
 
 use crate::utils::get_allowed_path_with_string_error;
+
+// source for no window handling: https://stackoverflow.com/a/75292572
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 #[cfg(target_os = "windows")]
 fn create_os_open_command<P: AsRef<Path>>(directory: P, filename: P) -> Result<Command, String> {
@@ -10,11 +16,11 @@ fn create_os_open_command<P: AsRef<Path>>(directory: P, filename: P) -> Result<C
     command
         .args(["/c", "start", "", "/b"])
         .arg(filename.as_ref())
-        .current_dir(directory);
+        .current_dir(directory)
+        .creation_flags(CREATE_NO_WINDOW);
     Ok(command)
 }
 
-// Windows Version does not open window, even in case of batch scripts
 // There needs to be tests to determine if the commands work like the windows one
 
 // TODO: needs tests (args, env)
@@ -42,7 +48,7 @@ fn create_os_open_command<P: AsRef<Path>>(directory: P, filename: P) -> Result<C
 }
 
 // async (other thread), since it does not care about other stuff
-// TODO: discuss if too general, and therefore unsafe? It uses at least the 
+// TODO: discuss if too general, and therefore unsafe? It uses at least the
 // folder protection to avoid starting any file on the system (but all in the allowed directories)
 #[tauri::command]
 pub async fn os_open_program(

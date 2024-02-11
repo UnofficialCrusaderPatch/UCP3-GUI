@@ -28,6 +28,7 @@ import {
 import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 
 export interface SandboxSource {
   html: string;
@@ -47,7 +48,7 @@ export interface SandboxArgs {
 }
 
 function saveConfig(baseUrl: string, config: Record<string, unknown>) {
-  const newConfigEntries = Object.fromEntries(
+  const userConfigEntries = Object.fromEntries(
     Object.entries(config).map(([subUrl, newConfigValue]) => [
       `${baseUrl}.${subUrl}`,
       newConfigValue,
@@ -56,18 +57,38 @@ function saveConfig(baseUrl: string, config: Record<string, unknown>) {
 
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'set-multiple',
-    value: newConfigEntries,
+    value: userConfigEntries,
+  });
+
+  // compute result based on baseline and user values
+  // TODO?: could be better, although bigger changes might require changes in config handling
+  // also, currently no support for setting required/suggested
+  const baseline = getStore().get(EXTENSION_STATE_REDUCER_ATOM).configuration
+    .state;
+  const baselineEntries: [string, unknown][] = Object.entries(baseline)
+    .filter(([url]) => url.startsWith(baseUrl))
+    .map(([key, value]) => [key, value.modifications.value.content]);
+
+  const finalConfigEntries: Record<string, unknown> = {};
+  baselineEntries.forEach(([key, value]) => {
+    finalConfigEntries[key] = value;
+  });
+  Object.entries(userConfigEntries).forEach(([key, value]) => {
+    // also set value if user config and baseline undefined, to overwrite old values
+    if (value !== undefined || finalConfigEntries[key] === undefined) {
+      finalConfigEntries[key] = value;
+    }
   });
 
   getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'set-multiple',
-    value: newConfigEntries,
+    value: finalConfigEntries,
   });
 
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'set-multiple',
     value: Object.fromEntries(
-      Object.keys(newConfigEntries).map((key) => [key, true]),
+      Object.keys(finalConfigEntries).map((key) => [key, true]),
     ),
   });
 }

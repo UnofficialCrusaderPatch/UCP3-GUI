@@ -76,7 +76,7 @@ export class UCPVersion implements UCPVersionInterface {
       .filter((el) => el !== undefined && el.length > 0)
       .join(' - ');
     if (tail.length > 0) {
-      tail += ` - ${tail}`;
+      tail = ` - ${tail}`;
     }
     return `${this.getMajorAsString()}.${this.getMinorAsString()}.${this.getPatchAsString()}${tail}`;
   }

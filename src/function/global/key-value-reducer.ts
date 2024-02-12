@@ -12,6 +12,13 @@ export function KeyValueReducer<Type>() {
 
       return remainder;
     }
+    if (action.type === 'clear-keys') {
+      const { keys } = action;
+
+      return Object.fromEntries(
+        Object.entries(state).filter(([key]) => keys.indexOf(key) === -1),
+      );
+    }
     if (action.type === 'reset') {
       return { ...action.value };
     }
@@ -28,6 +35,10 @@ export type KeyValueReducerArgs<Type> =
   | {
       type: 'clear-key';
       key: string;
+    }
+  | {
+      type: 'clear-keys';
+      keys: string[];
     }
   | {
       type: 'set-multiple';

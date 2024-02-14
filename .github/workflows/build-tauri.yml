@@ -7,7 +7,7 @@ on:
         description: 'Message to write in the release'
         required: true
         type: string
-        default: '[Changelog](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/wiki/Changelog#)'
+        default: 'v__VERSION__ contains bug fixes and new UI features. [Changelog](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/wiki/Changelog#)'
       pre_release:
         description: 'Pre release?'
         required: true

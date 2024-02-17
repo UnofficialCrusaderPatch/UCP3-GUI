@@ -22,6 +22,7 @@ import {
   localDataDir,
   normalize as normalizePath,
   resolve,
+  resolveResource,
 } from '@tauri-apps/api/path';
 import {
   DocumentOptions,
@@ -95,14 +96,27 @@ export async function resolvePath(...paths: string[]): Promise<string> {
   return resolve(...paths);
 }
 
+// only proxy
+export async function joinPaths(...paths: string[]) {
+  return join(...paths);
+}
+
 export function receiveAssetUrl<
   T extends string | string[],
   R = T extends string ? string : Promise<string>,
 >(paths: T, protocol?: string): R {
   const convertToAssetUrl = (path: string) => convertFileSrc(path, protocol);
   return Array.isArray(paths)
-    ? (resolvePath(...paths).then(convertToAssetUrl) as R)
+    ? (joinPaths(...paths).then(convertToAssetUrl) as R)
     : (convertToAssetUrl(paths) as R);
+}
+
+export async function resolveResourcePath<T extends string | string[]>(
+  paths: T,
+): Promise<string> {
+  return Array.isArray(paths)
+    ? joinPaths(...paths).then(resolveResource)
+    : resolveResource(paths);
 }
 
 // WARNING: directly writing in DOWNLOAD for example does not work,
@@ -230,10 +244,6 @@ export async function readAndFilterPaths(dir: string, pattern: string) {
 
 export async function getDownloadFolder() {
   return downloadDir();
-}
-
-export async function joinPaths(...paths: string[]) {
-  return join(...paths);
 }
 
 export const getRoamingDataFolder: () => Promise<string> = (() => {

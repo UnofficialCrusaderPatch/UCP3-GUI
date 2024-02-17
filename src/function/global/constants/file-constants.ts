@@ -11,3 +11,6 @@ export const RPS_DLL = 'rps.dll';
 export const UCP_CONFIG_YML = 'ucp-config.yml';
 export const UCP_LOG = 'ucp3.log';
 export const UCP_ERROR_LOG = 'ucp3-error-log.log';
+export const LOCALIZATION_DIRECTORY = 'lang';
+export const AVAILABLE_LANGUAGES_FILENAME = 'languages.yaml';
+export const LOCALIZATION_SOURCES_DIRECTORY = 'sources';

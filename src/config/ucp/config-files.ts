@@ -57,7 +57,7 @@ export type UCP3SerializedDefinition = {
   name: string;
   version: string;
   author: string;
-  dependencies: string[];
+  dependencies: string[] | { [name: string]: string };
   'display-name': string;
   description: string;
   type: ExtensionType;

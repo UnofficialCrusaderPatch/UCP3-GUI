@@ -52,7 +52,7 @@ export const customizeExtensionButtonCallback = async (ext: Extension) => {
 
     const stateWithoutTargetExtension = {
       ...extensionCompleteState,
-      explicityActivatedExtensions: eae,
+      explicitlyActivatedExtensions: eae,
       activeExtensions: ae,
     };
 

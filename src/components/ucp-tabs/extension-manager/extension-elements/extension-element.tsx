@@ -25,6 +25,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../../function/configuration/state';
 import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
 import { customizeExtensionButtonCallback } from './customize-extension-button-callback';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -248,6 +249,8 @@ export function CustomisationsExtensionElement() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const setDirty = useSetAtom(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM);
+
   const [extensionsState, setExtensionsState] = useAtom(
     EXTENSION_STATE_INTERFACE_ATOM,
   );
@@ -258,6 +261,7 @@ export function CustomisationsExtensionElement() {
       className="fs-8 disable-arrow-trash-button"
       onClick={() => {
         setUserConfig({ type: 'clear-all' });
+        setDirty(true);
         setExtensionsState({ ...extensionsState });
       }}
       onPointerEnter={() => {
@@ -278,6 +282,21 @@ export function CustomisationsExtensionElement() {
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span className="extension-name-box__name">{t('Customisations')}</span>
       </div>
+    </div>
+  );
+}
+
+export function GhostElement(props: { ext: Extension }) {
+  const { ext } = props;
+  const { name, version } = ext;
+  return (
+    <div key="user-customisations" className="extension-element">
+      <div className="extension-name-box ms-2">Modifying: </div>
+      <div className="extension-name-box" style={{ fontSize: 'smaller' }}>
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <span className="">{name}</span>
+      </div>
+      <div className="extension-version-dropdown me-4">{version}</div>
     </div>
   );
 }
@@ -392,9 +411,7 @@ export function ActiveExtensionElement(props: {
       buttonText={t('gui-general:deactivate')}
       clickCallback={clickCallback}
       moveCallback={moveCallback}
-      displayCustomizeButton={
-        guiCreatorMode && ext.type === 'plugin' && theRevDeps.length === 0
-      }
+      displayCustomizeButton={guiCreatorMode && ext.type === 'plugin'}
       revDeps={theRevDeps}
     />
   );

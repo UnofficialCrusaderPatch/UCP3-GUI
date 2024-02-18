@@ -9,17 +9,15 @@ import {
   ActiveExtensionElement,
   CustomisationsExtensionElement,
   ExtensionNameList,
+  GhostElement,
   InactiveExtensionsElement,
 } from './extension-elements/extension-element';
-import ApplyButton from '../common/buttons/apply-button';
-import ExportButton from '../config-editor/buttons/export-button';
-import ImportButton from '../config-editor/buttons/import-button';
-import { CustomizeButton } from '../common/buttons/customize-button';
 import { FilterButton } from './buttons/filter-button';
 import { InstallExtensionButton } from './buttons/install-extensions-button';
-import { CreateExtensionsPackButton } from './buttons/create-extensions-pack-button';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extension-editor-state';
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
+import { ExtensionManagerToolbar } from './toolbar-extension-manager';
+import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-editor-mode';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
@@ -86,6 +84,12 @@ export default function ExtensionManager() {
   );
 
   const hasCustomisations = useAtomValue(HAS_CUSTOMISATIONS);
+  const editorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
+  const displayCustomisationsElement =
+    hasCustomisations && editorState.state === 'inactive';
+
+  const displayGhostElement =
+    hasCustomisations && editorState.state === 'active';
 
   return (
     <div className="flex-default extension-manager">
@@ -114,23 +118,23 @@ export default function ExtensionManager() {
           <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">
               {[
-                hasCustomisations ? (
+                displayCustomisationsElement ? (
                   <CustomisationsExtensionElement key="user-customiastions" />
+                ) : undefined,
+                displayGhostElement ? (
+                  <GhostElement
+                    key={`${editorState.extension.name}-${editorState.extension.version}`}
+                    ext={editorState.extension}
+                  />
                 ) : undefined,
                 ...activated,
               ]}
             </div>
-            <div className="extension-manager-control__box__buttons">
-              <div className="">
-                <CreateExtensionsPackButton />
-                <ImportButton />
-                <ExportButton />
-                <CustomizeButton />
-              </div>
-              <div className="extension-manager-control__box__buttons--apply-button">
-                <ApplyButton />
-              </div>
-            </div>
+            {editorState.state === 'inactive' ? (
+              <ExtensionManagerToolbar />
+            ) : (
+              <EditorExtensionManagerToolbar />
+            )}
           </div>
         </div>
       </div>

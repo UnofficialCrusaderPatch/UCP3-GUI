@@ -33,6 +33,7 @@
   font-size: smaller;
   background-color: transparent;
   border: none;
+  min-width: 60px;
 }
 
 .disable-arrow-trash-button {

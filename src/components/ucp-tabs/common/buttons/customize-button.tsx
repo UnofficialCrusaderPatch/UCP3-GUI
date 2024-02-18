@@ -18,7 +18,7 @@ export function CustomizeButton() {
   return (
     <button
       type="button"
-      className="ucp-button text-light"
+      className="ucp-button h-100"
       onClick={() => {
         const av = advancedMode;
         setAdvancedMode(!advancedMode);
@@ -33,8 +33,8 @@ export function CustomizeButton() {
         setStatusBarMessage(undefined);
       }}
     >
-      <div className="ucp-button-variant-button-text">
-        {advancedMode ? <GearFill /> : <Gear />}
+      <div className="ucp-button-variant-button-text d-flex align-items-center">
+        <span className="me-1">{advancedMode ? <GearFill /> : <Gear />}</span>
         <span> {t('gui-editor:config.customize')}...</span>
       </div>
     </button>

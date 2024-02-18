@@ -17,11 +17,15 @@ import { CustomizeButton } from '../common/buttons/customize-button';
 import { FilterButton } from './buttons/filter-button';
 import { InstallExtensionButton } from './buttons/install-extensions-button';
 import { CreateExtensionsPackButton } from './buttons/create-extensions-pack-button';
+import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extension-editor-state';
 
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const extensionEditorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
 
   const showAllExtensions = useAtomValue(GuiSettings.SHOW_ALL_EXTENSIONS_ATOM);
 

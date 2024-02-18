@@ -1,107 +1,116 @@
 .extension-element {
-    display: flex;
-    width: 100%;
+  display: flex;
+  width: 100%;
 
-    background-color: rgba(245, 245, 227, 0.42);
-    border: 2px solid rgba(0, 0, 0, 0);
-    color: black;
-    margin: 2px 0 2px 0;
-    padding: 0 2px 0 2px;
+  background-color: rgba(245, 245, 227, 0.42);
+  border: 2px solid rgba(0, 0, 0, 0);
+  color: black;
+  margin: 2px 0 2px 0;
+  padding: 0 2px 0 2px;
 }
 
 .extension-name-box {
-    flex-grow: 1;
-    text-wrap: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  flex-grow: 1;
+  text-wrap: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .extension-name-box__name::before {
-    margin: 0 0.5rem 0 0.5rem;
-    content: "-";
-    font-size: smaller;
-    vertical-align: text-bottom;
+  margin: 0 0.5rem 0 0.5rem;
+  content: '-';
+  font-size: smaller;
+  vertical-align: text-bottom;
 }
 
 .extension-name-box__name {
-    font-size: smaller;
-    cursor: pointer;
+  font-size: smaller;
+  cursor: pointer;
 }
 
 .extension-version-dropdown {
-    margin: 0 0.5rem 0 0.5rem;
-    font-size: smaller;
-    background-color: transparent;
-    border: none;
+  margin: 0 0.5rem 0 0.5rem;
+  font-size: smaller;
+  background-color: transparent;
+  border: none;
+}
+
+.disable-arrow-trash-button {
+  background-color: transparent;
+  height: 100%;
+  aspect-ratio: 18/17;
+  border: none;
+  border-radius: 0px;
+  padding: 0px;
 }
 
 .enable-arrow,
 .disable-arrow {
-    background-repeat: no-repeat;
-    background-position: center;
-    background-color: transparent;
-    height: 100%;
-    aspect-ratio: 18/17;
-    border: none;
-    border-radius: 0px;
-    padding: 0px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: transparent;
+  height: 100%;
+  aspect-ratio: 18/17;
+  border: none;
+  border-radius: 0px;
+  padding: 0px;
 
-    &:disabled {
-        opacity: 40%;
-    }
+  &:disabled {
+    opacity: 40%;
+  }
 }
 
 .enable-arrow {
-    background-image: url('/src/assets/ucp3/add.png');
+  background-image: url('/src/assets/ucp3/add.png');
 }
 
 .enable-arrow:hover:not(:disabled) {
-    background-image: url('/src/assets/ucp3/add_hover.png');
+  background-image: url('/src/assets/ucp3/add_hover.png');
 }
 
 .disable-arrow {
-    background-image: url('/src/assets/ucp3/remove.png');
+  background-image: url('/src/assets/ucp3/remove.png');
 }
 
 .disable-arrow:hover:not(:disabled) {
-    background-image: url('/src/assets/ucp3/remove_hover.png');
+  background-image: url('/src/assets/ucp3/remove_hover.png');
 }
 
 .arrow-margin {
-    margin-right: 14px;
+  margin-right: 14px;
 }
 
 .arrow-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    aspect-ratio: 1/1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  aspect-ratio: 1/1;
 }
 
 .arrow-container:disabled {
-    background: transparent;
+  background: transparent;
 }
 
 .arrow {
-    background-repeat: no-repeat;
-    background-position: center;
-    width: 100%;
-    height: 50%;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100%;
+  height: 50%;
 
-    background-color: transparent;
-    border: none;
-    border-radius: 0px;
-    padding: 0px;
+  background-color: transparent;
+  border: none;
+  border-radius: 0px;
+  padding: 0px;
 }
 
 .arrow:disabled {
-    background: transparent;
+  background: transparent;
 }
 
 .down {
-    background-image: url('/src/assets/ucp3/move_down.png');
+  background-image: url('/src/assets/ucp3/move_down.png');
 }
 
 .up {
-    background-image: url('/src/assets/ucp3/move_up.png');
+  background-image: url('/src/assets/ucp3/move_up.png');
 }

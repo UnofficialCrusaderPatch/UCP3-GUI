@@ -1,15 +1,15 @@
 import './extension-element.css';
 
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import { Tooltip } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { TrashFill } from 'react-bootstrap-icons';
 import {
   AvailableExtensionVersionsDictionary,
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
   PREFERRED_EXTENSION_VERSION_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
+  EXTENSION_STATE_INTERFACE_ATOM,
 } from '../../../../function/extensions/state/state';
 import { Extension } from '../../../../config/ucp/common';
 import { setOverlayContent } from '../../../overlay/overlay';
@@ -20,6 +20,61 @@ import {
   ExtensionViewer,
   ExtensionViewerProps,
 } from '../extension-viewer/extension-viewer';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
+import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../../function/configuration/state';
+
+function MoveArrows(props: {
+  extensionName: string;
+  movability: { up: boolean; down: boolean };
+  moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
+}) {
+  const { extensionName, movability, moveCallback } = props;
+  return (
+    <div className="arrow-container">
+      <button
+        type="button"
+        className="arrow up"
+        disabled={!movability.up}
+        onClick={() => {
+          if (movability.up) moveCallback({ name: extensionName, type: 'up' });
+        }}
+      />
+      <button
+        type="button"
+        className="arrow down"
+        disabled={!movability.down}
+        onClick={() => {
+          if (movability.down)
+            moveCallback({ name: extensionName, type: 'down' });
+        }}
+      />
+    </div>
+  );
+}
+
+function ArrowButton(props: {
+  clickCallback: () => void;
+  disabled: boolean;
+  buttonText: string;
+  className: string;
+}) {
+  const { clickCallback, disabled, buttonText, className } = props;
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+  return (
+    <button
+      type="button"
+      className={`fs-8 ${className}`}
+      onClick={clickCallback}
+      disabled={disabled}
+      onPointerEnter={() => {
+        setStatusBarMessage(buttonText);
+      }}
+      onPointerLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    />
+  );
+}
 
 export function ExtensionElement(props: {
   ext: Extension;
@@ -39,76 +94,49 @@ export function ExtensionElement(props: {
     moveCallback,
     revDeps,
     clickCallback,
+    buttonText,
   } = props;
   const { name, version, author } = ext.definition;
   const displayName = ext.definition['display-name'];
 
   const [t] = useTranslation(['gui-editor']);
 
-  const renderTooltip = (p: unknown) => {
-    if (revDeps.length > 0) {
-      return (
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        <Tooltip {...(p as object)}>
-          {revDeps.length > 0
-            ? t('gui-editor:extensions.is.dependency', {
-                dependencies: revDeps.map((e) => `${e}`).join(', '),
-              })
-            : ''}
-        </Tooltip>
-      );
-    }
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    return <></>;
-  };
-
   const arrows = active ? (
-    <div className="arrow-container">
-      <button
-        type="button"
-        className="arrow up"
-        disabled={!movability.up}
-        onClick={() => {
-          if (movability.up) moveCallback({ name: ext.name, type: 'up' });
-        }}
-      />
-      <button
-        type="button"
-        className="arrow down"
-        disabled={!movability.down}
-        onClick={() => {
-          if (movability.down) moveCallback({ name: ext.name, type: 'down' });
-        }}
-      />
-    </div>
+    <MoveArrows
+      extensionName={ext.name}
+      movability={movability}
+      moveCallback={moveCallback}
+    />
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
 
   const enableButton = !active ? (
-    <OverlayTrigger placement="right" overlay={renderTooltip}>
-      <button
-        type="button"
-        className="fs-8 enable-arrow"
-        onClick={clickCallback}
-        disabled={revDeps.length > 0}
-      />
-    </OverlayTrigger>
+    <ArrowButton
+      className="enable-arrow"
+      clickCallback={clickCallback}
+      buttonText={buttonText}
+      disabled={revDeps.length > 0}
+    />
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
   );
 
   const disableButton = active ? (
-    <OverlayTrigger placement="left" overlay={renderTooltip}>
-      <button
-        type="button"
-        className="fs-8 disable-arrow"
-        onClick={clickCallback}
-        disabled={revDeps.length > 0}
-      />
-    </OverlayTrigger>
+    <ArrowButton
+      className="disable-arrow"
+      clickCallback={clickCallback}
+      buttonText={
+        revDeps.length > 0
+          ? t('gui-editor:extensions.is.dependency', {
+              dependencies: revDeps.map((e) => `${e}`).join(', '),
+            })
+          : buttonText
+      }
+      disabled={revDeps.length > 0}
+    />
   ) : (
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <></>
@@ -174,6 +202,47 @@ export function ExtensionElement(props: {
       {versionDropdown}
       {arrows}
       {enableButton}
+    </div>
+  );
+}
+
+export function CustomisationsExtensionElement() {
+  const [t] = useTranslation(['gui-editor']);
+
+  const setUserConfig = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  const [extensionsState, setExtensionsState] = useAtom(
+    EXTENSION_STATE_INTERFACE_ATOM,
+  );
+
+  const trashButton = (
+    <button
+      type="button"
+      className="fs-8 disable-arrow-trash-button"
+      onClick={() => {
+        setUserConfig({ type: 'clear-all' });
+        setExtensionsState({ ...extensionsState });
+      }}
+      onPointerEnter={() => {
+        setStatusBarMessage('Clear customisations');
+      }}
+      onPointerLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
+      <TrashFill />
+    </button>
+  );
+
+  return (
+    <div key="user-customisations" className="extension-element">
+      {trashButton}
+      <div className="extension-name-box">
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <span className="extension-name-box__name">{t('Customisations')}</span>
+      </div>
     </div>
   );
 }

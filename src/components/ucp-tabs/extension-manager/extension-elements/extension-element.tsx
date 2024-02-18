@@ -1,9 +1,10 @@
 import './extension-element.css';
+import '../buttons/customize-extension-button.css';
 
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { TrashFill } from 'react-bootstrap-icons';
+import { GearFill, TrashFill } from 'react-bootstrap-icons';
 import {
   AvailableExtensionVersionsDictionary,
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
@@ -22,6 +23,8 @@ import {
 } from '../extension-viewer/extension-viewer';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../../function/configuration/state';
+import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
+import { customizeExtensionButtonCallback } from './customize-extension-button-callback';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -76,6 +79,28 @@ function ArrowButton(props: {
   );
 }
 
+function CustomizeButton(props: { clickCallback: () => void }) {
+  const { clickCallback } = props;
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+  return (
+    <button
+      type="button"
+      className="fs-8 customize-extension-button"
+      onClick={clickCallback}
+      onPointerEnter={() => {
+        setStatusBarMessage('Modify this extension');
+      }}
+      onPointerLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
+      <span>
+        <GearFill />
+      </span>
+    </button>
+  );
+}
+
 export function ExtensionElement(props: {
   ext: Extension;
   fixedVersion: boolean;
@@ -85,6 +110,7 @@ export function ExtensionElement(props: {
   clickCallback: () => void;
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
   revDeps: string[];
+  displayCustomizeButton: boolean;
 }) {
   const {
     ext,
@@ -95,6 +121,7 @@ export function ExtensionElement(props: {
     revDeps,
     clickCallback,
     buttonText,
+    displayCustomizeButton,
   } = props;
   const { name, version, author } = ext.definition;
   const displayName = ext.definition['display-name'];
@@ -199,6 +226,14 @@ export function ExtensionElement(props: {
           {displayName}
         </span>
       </div>
+      {displayCustomizeButton ? (
+        <CustomizeButton
+          clickCallback={() => customizeExtensionButtonCallback(ext)}
+        />
+      ) : (
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <></>
+      )}
       {versionDropdown}
       {arrows}
       {enableButton}
@@ -294,6 +329,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
             extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
             -1,
         )}
+      displayCustomizeButton={false}
     />
   );
 }
@@ -337,6 +373,16 @@ export function ActiveExtensionElement(props: {
     [],
   );
 
+  const theRevDeps = extensionsState.tree
+    .reverseDependenciesFor(ext)
+    .map((e) => e.name)
+    .filter(
+      (n) =>
+        extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !== -1,
+    );
+
+  const guiCreatorMode = useAtomValue(CREATOR_MODE_ATOM);
+
   return (
     <ExtensionElement
       ext={ext}
@@ -346,14 +392,10 @@ export function ActiveExtensionElement(props: {
       buttonText={t('gui-general:deactivate')}
       clickCallback={clickCallback}
       moveCallback={moveCallback}
-      revDeps={extensionsState.tree
-        .reverseDependenciesFor(ext)
-        .map((e) => e.name)
-        .filter(
-          (n) =>
-            extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
-            -1,
-        )}
+      displayCustomizeButton={
+        guiCreatorMode && ext.type === 'plugin' && theRevDeps.length === 0
+      }
+      revDeps={theRevDeps}
     />
   );
 }

@@ -59,6 +59,63 @@ const updatePreferredExtensionVersions = (
   getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
 };
 
+export const constructUserConfigObjects = (config: ConfigFile) => {
+  let userConfigEntries: { [key: string]: ConfigEntry } = {};
+
+  const parseEntry = ([extensionName, data]: [
+    string,
+    {
+      config: ConfigFileExtensionEntry;
+    },
+  ]) => {
+    const result = collectConfigEntries(
+      data.config as {
+        [key: string]: unknown;
+        contents: unknown;
+      },
+      extensionName,
+    );
+
+    userConfigEntries = { ...userConfigEntries, ...result };
+  };
+
+  Object.entries(config['config-sparse'].modules).forEach(parseEntry);
+  Object.entries(config['config-sparse'].plugins).forEach(parseEntry);
+
+  // ConsoleLogger.debug('parsed user config entries: ', userConfigEntries);
+
+  const userConfigDB: ConfigMetaObjectDB = {};
+
+  const newConfigurationQualifier: {
+    [key: string]: ConfigurationQualifier;
+  } = {};
+
+  Object.entries(userConfigEntries).forEach(([url, data]) => {
+    const m = buildConfigMetaContentDB('user', data);
+    userConfigDB[url] = {
+      url,
+      modifications: m,
+    };
+    // TODO: do checking here if the user part is not conflicting?
+
+    let q = m.value.qualifier;
+    if (q === 'unspecified') q = 'suggested';
+    newConfigurationQualifier[url] = q as ConfigurationQualifier;
+  });
+
+  const newUserConfiguration: { [key: string]: unknown } = {};
+
+  Object.entries(userConfigDB).forEach(([url, cmo]) => {
+    // Set the user configuration value
+    newUserConfiguration[url] = cmo.modifications.value.content;
+  });
+
+  return {
+    userConfig: newUserConfiguration,
+    userConfigQualifiers: newConfigurationQualifier,
+  };
+};
+
 const importButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (arg0: string) => void,
@@ -147,11 +204,13 @@ const importButtonCallback = async (
 
   const config = parsingResult.result;
 
+  // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
   // Get the load order from the sparse part of the config file
   const loadOrder = config['config-sparse']['load-order'];
   if (loadOrder !== undefined && loadOrder.length > 0) {
     const explicitActiveExtensions: Extension[] = [];
 
+    // TODO: use tree for this part
     // eslint-disable-next-line no-restricted-syntax
     for (const dependencyStatementString of loadOrder) {
       // Get the dependency
@@ -262,60 +321,9 @@ const importButtonCallback = async (
 
   // ConsoleLogger.debug('opened config', parsingResult.result);
 
-  let userConfigEntries: { [key: string]: ConfigEntry } = {};
-
-  const parseEntry = ([extensionName, data]: [
-    string,
-    {
-      config: ConfigFileExtensionEntry;
-    },
-  ]) => {
-    const result = collectConfigEntries(
-      data.config as {
-        [key: string]: unknown;
-        contents: unknown;
-      },
-      extensionName,
-    );
-
-    userConfigEntries = { ...userConfigEntries, ...result };
-  };
-
-  Object.entries(config['config-sparse'].modules).forEach(parseEntry);
-  Object.entries(config['config-sparse'].plugins).forEach(parseEntry);
-
-  // ConsoleLogger.debug('parsed user config entries: ', userConfigEntries);
-
-  const userConfigDB: ConfigMetaObjectDB = {};
-
-  const newConfigurationQualifier: {
-    [key: string]: ConfigurationQualifier;
-  } = {};
-
-  Object.entries(userConfigEntries).forEach(([url, data]) => {
-    const m = buildConfigMetaContentDB('user', data);
-    userConfigDB[url] = {
-      url,
-      modifications: m,
-    };
-    // TODO: do checking here if the user part is not conflicting?
-
-    let q = m.value.qualifier;
-    if (q === 'unspecified') q = 'suggested';
-    newConfigurationQualifier[url] = q as ConfigurationQualifier;
-  });
-
-  const newUserConfiguration: { [key: string]: unknown } = {};
-  const newConfigurationTouched: { [key: string]: boolean } = {};
-
-  Object.entries(userConfigDB).forEach(([url, cmo]) => {
-    // Set the user configuration value
-    newUserConfiguration[url] = cmo.modifications.value.content;
-
-    // Set this to touched as if the person has touched it?
-    // TODO: I don't think this fits the new definition of "touched"
-    // newConfigurationTouched[url] = true;
-  });
+  const ucos = constructUserConfigObjects(config);
+  const newUserConfiguration = ucos.userConfig;
+  const newConfigurationQualifier = ucos.userConfigQualifiers;
 
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'set-multiple',
@@ -323,7 +331,7 @@ const importButtonCallback = async (
   });
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'set-multiple',
-    value: newConfigurationTouched,
+    value: {},
   });
   getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'set-multiple',

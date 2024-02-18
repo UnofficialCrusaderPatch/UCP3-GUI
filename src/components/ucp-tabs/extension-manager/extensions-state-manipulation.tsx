@@ -10,7 +10,7 @@ const LOGGER = new Logger('extension-state.ts');
 
 export class DependencyError extends Error {}
 
-const addExtensionToExplicityActivatedExtensions = async (
+const addExtensionToExplicityActivatedExtensions = (
   extensionsState: ExtensionsState,
   ext: Extension,
 ) => {

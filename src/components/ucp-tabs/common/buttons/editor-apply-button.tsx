@@ -55,9 +55,10 @@ function EditorApplyButton(
         try {
           const { plugin } = await createPluginConfigFromCurrentState();
 
-          const missingDependencies = extensionsState.activeExtensions.filter(
-            (e) => extension.definition.dependencies[e.name] === undefined,
-          );
+          const missingDependencies =
+            extensionsState.explicitlyActivatedExtensions.filter(
+              (e) => extension.definition.dependencies[e.name] === undefined,
+            );
 
           const newDependencies = {
             ...extension.definition.dependencies,
@@ -77,16 +78,16 @@ function EditorApplyButton(
           await extension.io.handle(async (eh) => {
             const pluginDir = eh.path;
 
-            if (!(await exists(`${pluginDir}/definition.yml.original`))) {
+            if (!(await exists(`${pluginDir}/definition.original.yml`))) {
               await writeTextFile(
-                `${pluginDir}/definition.yml.original`,
+                `${pluginDir}/definition.original.yml`,
                 await eh.getTextContents(`definition.yml`),
               );
             }
 
-            if (!(await exists(`${pluginDir}/config.yml.original`))) {
+            if (!(await exists(`${pluginDir}/config.original.yml`))) {
               await writeTextFile(
-                `${pluginDir}/config.yml.original`,
+                `${pluginDir}/config.original.yml`,
                 await eh.getTextContents(`config.yml`),
               );
             }

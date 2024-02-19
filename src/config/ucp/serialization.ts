@@ -8,8 +8,11 @@ import { DependencyStatement } from './dependency-statement';
 export const serializeDefinition = (definition: Definition) =>
   ({
     ...definition,
-    dependencies: Object.entries(definition.dependencies).map(
-      ([name, r]) => `${name} ${r.toString()}`,
+    dependencies: Object.fromEntries(
+      Object.entries(definition.dependencies).map(([name, r]) => [
+        name,
+        r.toString(),
+      ]),
     ),
   }) as UCP3SerializedDefinition;
 

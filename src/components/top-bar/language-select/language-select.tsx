@@ -1,16 +1,16 @@
 import './language-select.css';
 
 import { startTransition } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/no-unresolved
 import translateIcon from 'assets/misc/translate.svg?raw';
 import SvgHelper from '../../general/svg-helper';
 import { LANGUAGE_ATOM } from '../../../function/gui-settings/settings';
-
-import languages from '../../../localization/languages.json';
+import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
 
 export default function LanguageSelect() {
+  const languages = useAtomValue(AVAILABLE_LANGUAGES_ATOM);
   const [lang, setLang] = useAtom(LANGUAGE_ATOM);
 
   const { t } = useTranslation('gui-landing');

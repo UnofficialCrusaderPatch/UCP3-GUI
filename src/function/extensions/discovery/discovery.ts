@@ -1,12 +1,8 @@
 // eslint-disable-next-line max-classes-per-file
-import { exists, type FileEntry } from '@tauri-apps/api/fs';
+import { type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
-
-import { readDir, renameFile } from '../../../tauri/tauri-files';
-
+import { readDir, renameFile, onFsExists } from '../../../tauri/tauri-files';
 import { extractZipToPath, slashify } from '../../../tauri/tauri-invoke';
-
-import languages from '../../../localization/languages.json';
 import {
   ConfigEntry,
   ConfigFile,
@@ -28,6 +24,8 @@ import {
   DefinitionMeta_1_0_0,
   parseDependencies,
 } from './definition-meta-version-1.0.0/parse-definition';
+import { getStore } from '../../../hooks/jotai/base';
+import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
 
 const LOGGER = new Logger('discovery.ts');
 
@@ -451,7 +449,7 @@ const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
 const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
   LOGGER.msg('Discovering extensions').info();
 
-  if (!(await exists(`${gameFolder}/ucp`))) {
+  if (!(await onFsExists(`${gameFolder}/ucp`))) {
     return [];
   }
 
@@ -509,7 +507,11 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
 
-        ext.locales = await readLocales(eh, ext, Object.keys(languages));
+        ext.locales = await readLocales(
+          eh,
+          ext,
+          Object.keys(await getStore().get(AVAILABLE_LANGUAGES_ATOM)),
+        );
         ext.config = await readConfig(eh);
 
         // ext.optionEntries = collectOptionEntries(

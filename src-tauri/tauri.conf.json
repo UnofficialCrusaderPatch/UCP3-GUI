@@ -21,6 +21,7 @@
           "$DOWNLOAD/*",
           "$LOCALDATA/*",
           "$APP/*",
+          "$RESOURCE/gameinfo/*.yaml",
           "$RESOURCE/lang/*.yaml",
           "$RESOURCE/lang/sources/*/*.yaml"
         ]
@@ -70,7 +71,8 @@
         "icons/icon.ico"
       ],
       "resources": [
-        "lang/*"
+        "lang/*",
+        "gameinfo/*"
       ],
       "identifier": "ucp.gui.tauri",
       "publisher": "ucp-team",

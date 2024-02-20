@@ -6,7 +6,7 @@ import { EXTREME_PATH_ATOM, VANILLA_PATH_ATOM } from './game-path';
 async function getGameVersionForPath(path: string) {
   return (await getGameExeHash(path))
     .map(getGameVersionForHash)
-    .getOrElse(EMPTY_GAME_VERSION);
+    .getOrReceive(() => Promise.resolve(EMPTY_GAME_VERSION));
 }
 
 export const VANILLA_VERSION_ATOM = atom(async (get) =>

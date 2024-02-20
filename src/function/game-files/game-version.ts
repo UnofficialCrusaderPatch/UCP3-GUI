@@ -1,9 +1,27 @@
+import { Atom, atom } from 'jotai';
 import Option from '../../util/structs/option';
+import { loadYaml, resolveResourcePath } from '../../tauri/tauri-files';
+import Logger from '../../util/scripts/logging';
+import {
+  GAME_INFO_DIRECTORY,
+  GAME_VERSION_FILE,
+} from '../global/constants/file-constants';
+import { getStore } from '../../hooks/jotai/base';
 
-import VERSIONS_JSON from './game-version.json';
+const LOGGER = new Logger('game-version.ts');
 
-// maps known hashes to known game versions
-const GAME_VERSIONS: Record<string, GameVersion> = {};
+type GameVersionFileEntry = {
+  type: string;
+  name: string;
+  region: string;
+  major: number;
+  minor: number;
+  patch: number;
+};
+
+type SHA = string;
+
+type GameVersionFile = Record<SHA, GameVersionFileEntry>;
 
 const GameType = {
   UNKNOWN: 'UNKNOWN',
@@ -20,7 +38,7 @@ interface GameVersionInterface {
   major: Option<number>;
   minor: Option<number>;
   patch: Option<number>;
-  sha: string;
+  sha: SHA;
 }
 
 class GameVersion implements GameVersionInterface {
@@ -36,11 +54,11 @@ class GameVersion implements GameVersionInterface {
 
   patch: Option<number>;
 
-  sha: string;
+  sha: SHA;
 
   constructor(
     type: GameTypeEnum,
-    sha: string,
+    sha: SHA,
     name?: string,
     region?: string,
     major?: number,
@@ -54,12 +72,9 @@ class GameVersion implements GameVersionInterface {
     this.major = Option.ofNullable(major);
     this.minor = Option.ofNullable(minor);
     this.patch = Option.ofNullable(patch);
-
-    // adding to global versions
-    GAME_VERSIONS[sha] = this;
   }
 
-  static ofUnknown(sha: string) {
+  static ofUnknown(sha: SHA) {
     return this.of(GameType.UNKNOWN, sha);
   }
 
@@ -100,20 +115,48 @@ class GameVersion implements GameVersionInterface {
   }
 }
 
-// adding actual game hashes:
-Object.entries(VERSIONS_JSON).forEach((entry) => {
-  const sha = entry[0];
-  const { type, name, region, major, minor, patch } = entry[1];
-  const realType =
-    type in GameType ? GameType[type as GameTypeEnum] : GameType.UNKNOWN;
-  GameVersion.of(realType, sha, name, region, major, minor, patch);
-});
+const GAME_VERSION_ATOM: Atom<Promise<Record<SHA, GameVersion>>> = atom(
+  async () => {
+    const versionData: GameVersionFile = await resolveResourcePath([
+      GAME_INFO_DIRECTORY,
+      GAME_VERSION_FILE,
+    ])
+      .then(loadYaml)
+      .then((res) => res.getOrThrow())
+      .catch((err) => {
+        LOGGER.msg('Failed to load game versions file: {}', err).error();
+        return {};
+      });
+
+    // adding actual game hashes:
+    const res: Record<SHA, GameVersion> = {};
+    Object.entries(versionData).forEach(([sha, versionEntry]) => {
+      const { type } = versionEntry;
+      const realType =
+        type in GameType ? GameType[type as GameTypeEnum] : GameType.UNKNOWN;
+      res[sha] = GameVersion.of(
+        realType,
+        sha,
+        versionEntry.name,
+        versionEntry.region,
+        versionEntry.major,
+        versionEntry.minor,
+        versionEntry.patch,
+      );
+    });
+    return res;
+  },
+);
 
 export type GameVersionInstance = GameVersion;
 
 export const EMPTY_GAME_VERSION: GameVersionInstance =
   GameVersion.ofUnknown('');
 
-export function getGameVersionForHash(sha: string): GameVersionInstance {
-  return GAME_VERSIONS[sha] ?? GameVersion.ofUnknown(sha);
+export async function getGameVersionForHash(
+  sha: string,
+): Promise<GameVersionInstance> {
+  return (
+    (await getStore().get(GAME_VERSION_ATOM))[sha] ?? GameVersion.ofUnknown(sha)
+  );
 }

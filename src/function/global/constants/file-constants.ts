@@ -14,3 +14,5 @@ export const UCP_ERROR_LOG = 'ucp3-error-log.log';
 export const LOCALIZATION_DIRECTORY = 'lang';
 export const AVAILABLE_LANGUAGES_FILENAME = 'languages.yaml';
 export const LOCALIZATION_SOURCES_DIRECTORY = 'sources';
+export const GAME_INFO_DIRECTORY = 'gameinfo';
+export const GAME_VERSION_FILE = 'game-version.yaml';

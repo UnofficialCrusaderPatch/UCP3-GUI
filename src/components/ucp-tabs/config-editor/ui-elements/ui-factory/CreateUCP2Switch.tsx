@@ -94,6 +94,8 @@ function CreateUCP2Switch(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const noText = text === null || text === undefined;
+
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
@@ -110,7 +112,18 @@ function CreateUCP2Switch(args: {
       ref={ref}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      <Accordion.Header as="div">{headerElement}</Accordion.Header>
+      {noText ? (
+        <Accordion.Header
+          bsPrefix="ucp-accordion-header ucp-accordion-header-no-button"
+          as="div"
+        >
+          {headerElement}
+        </Accordion.Header>
+      ) : (
+        <Accordion.Header bsPrefix="ucp-accordion-header" as="div">
+          {headerElement}
+        </Accordion.Header>
+      )}
       <Accordion.Body>{text}</Accordion.Body>
     </Accordion>
   );

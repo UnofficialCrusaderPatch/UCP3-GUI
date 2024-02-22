@@ -1,4 +1,5 @@
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
+import semver from 'semver';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -51,6 +52,23 @@ export const createPluginConfigFromCurrentState = async () => {
   };
 };
 
+const serializeDependencies = (deps: { [ext: string]: semver.Range }) =>
+  Object.fromEntries(
+    Object.entries(deps).map(([name, range]) => [name, range.raw]),
+  );
+
+const createDependenciesFromExplicitlyActiveExtensions = () => {
+  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const { explicitlyActivatedExtensions } = extensionsState;
+
+  return Object.fromEntries(
+    explicitlyActivatedExtensions.map((e) => [
+      e.name,
+      new semver.Range(`^${e.version}`),
+    ]),
+  );
+};
+
 function ExportAsPluginButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
@@ -68,7 +86,7 @@ function ExportAsPluginButton(
       {...props}
       onClick={async () => {
         try {
-          const { plugin, user } = await createPluginConfigFromCurrentState();
+          const { plugin } = await createPluginConfigFromCurrentState();
 
           const r = await showModalCreatePlugin({
             title: 'Create plugin',
@@ -82,7 +100,7 @@ function ExportAsPluginButton(
           if (await exists(pluginDir)) {
             await showModalOkCancel({
               title: 'Plugin already exists',
-              message: 'The plugin already exists, cannot proceed',
+              message: `The plugin already exists, cannot proceed:\n${pluginDir}`,
             });
 
             return;
@@ -95,8 +113,8 @@ function ExportAsPluginButton(
               name: r.pluginName,
               author: r.pluginAuthor,
               version: r.pluginVersion,
-              dependencies: user['config-sparse']['load-order'].map((s) =>
-                s.replaceAll('==', '>='),
+              dependencies: serializeDependencies(
+                createDependenciesFromExplicitlyActiveExtensions(),
               ),
             }),
           );

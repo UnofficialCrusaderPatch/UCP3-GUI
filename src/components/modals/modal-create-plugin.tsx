@@ -1,11 +1,6 @@
 import { useState } from 'react';
-import yaml from 'yaml';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
-import { openFolderDialog } from '../../tauri/tauri-dialog';
-import { useCurrentGameFolder } from '../../function/game-folder/state';
-import { onFsExists, readTextFile } from '../../tauri/tauri-files';
-import { UCP3SerializedDefinition } from '../../config/ucp/config-files';
 
 type Create = {
   type: 'create';
@@ -51,14 +46,12 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
 
   const [pluginName, setPluginName] = useState('');
   const [pluginAuthor, setPluginAuthor] = useState('');
-  const [pluginVersion, setPluginVersion] = useState('');
+  const [pluginVersion, setPluginVersion] = useState('1.0.0');
   const [createModpack, setCreateModpack] = useState(false);
 
   const pluginVersionValid = VERSION_REGEX.exec(pluginVersion) !== null;
 
   const [versionElementHasFocus, setVersionElementHasFocus] = useState(false);
-
-  const gameFolder = useCurrentGameFolder();
 
   const internalHandleClose = () => {
     setShow(false);
@@ -133,42 +126,6 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="secondary"
-          onClick={async () => {
-            const optionString = await openFolderDialog(
-              `${gameFolder}/ucp/plugins/`,
-              'Select plugin to overwrite',
-            );
-
-            if (!optionString.isPresent() || optionString.isEmpty()) {
-              return;
-            }
-
-            const pluginFolder = optionString.get();
-
-            if (!(await onFsExists(`${pluginFolder}/definition.yml`))) {
-              return;
-            }
-
-            const definition = (await yaml.parse(
-              (
-                await readTextFile(`${pluginFolder}/definition.yml`)
-              ).getOrThrow(),
-            )) as UCP3SerializedDefinition;
-
-            setShow(false);
-            handleAction({
-              type: 'overwrite',
-              pluginName: definition.name,
-              pluginVersion: definition.version,
-              pluginAuthor: definition.author,
-              createModpack,
-            });
-          }}
-        >
-          {ok.length > 0 ? ok : 'Merge into existing plugin'}
-        </Button>
         <Button
           variant="primary"
           disabled={

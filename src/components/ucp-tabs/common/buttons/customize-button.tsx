@@ -11,6 +11,8 @@ export function CustomizeButton() {
     GuiSettings.ADVANCED_MODE_ATOM,
   );
 
+  const setCreatorMode = useSetAtom(GuiSettings.CREATOR_MODE_ATOM);
+
   const setCurrentTab = useSetAtom(CURRENT_DISPLAYED_TAB);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -21,7 +23,11 @@ export function CustomizeButton() {
       className="ucp-button h-100"
       onClick={() => {
         const av = advancedMode;
-        setAdvancedMode(!advancedMode);
+        const newAv = !av;
+        if (av) {
+          setCreatorMode(false);
+        }
+        setAdvancedMode(newAv);
         if (!av) {
           setCurrentTab('config');
         }

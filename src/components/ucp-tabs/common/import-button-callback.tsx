@@ -1,5 +1,6 @@
 import * as semver from 'semver';
 import { TFunction } from 'i18next';
+import { collectConfigEntries } from '../../../function/extensions/discovery/collect-config-entries';
 import {
   ConfigurationQualifier,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
@@ -22,7 +23,6 @@ import {
   DependencyStatement,
   Version,
 } from '../../../config/ucp/dependency-statement';
-import { collectConfigEntries } from '../../../function/extensions/discovery/discovery';
 
 import {
   AVAILABLE_EXTENSION_VERSIONS_ATOM,

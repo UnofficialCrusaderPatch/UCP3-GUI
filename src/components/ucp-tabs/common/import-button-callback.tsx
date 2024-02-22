@@ -326,15 +326,15 @@ const importButtonCallback = async (
   const newConfigurationQualifier = ucos.userConfigQualifiers;
 
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
-    type: 'set-multiple',
+    type: 'reset',
     value: newUserConfiguration,
   });
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
-    type: 'set-multiple',
+    type: 'reset',
     value: {},
   });
   getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
-    type: 'set-multiple',
+    type: 'reset',
     value: newConfigurationQualifier,
   });
 

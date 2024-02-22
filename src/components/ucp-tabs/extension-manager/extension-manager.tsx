@@ -18,6 +18,7 @@ import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extensio
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
 import { ExtensionManagerToolbar } from './toolbar-extension-manager';
 import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-editor-mode';
+import { ConsoleLogger } from '../../../util/scripts/logging';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
@@ -88,8 +89,13 @@ export default function ExtensionManager() {
   const displayCustomisationsElement =
     hasCustomisations && editorState.state === 'inactive';
 
-  const displayGhostElement =
-    hasCustomisations && editorState.state === 'active';
+  const displayGhostElement = editorState.state === 'active';
+
+  ConsoleLogger.debug(
+    `Customisations: ${displayCustomisationsElement} Ghost: ${displayGhostElement}`,
+  );
+
+  ConsoleLogger.debug(`editorState`, editorState);
 
   return (
     <div className="flex-default extension-manager">

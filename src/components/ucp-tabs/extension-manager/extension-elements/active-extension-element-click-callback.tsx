@@ -16,7 +16,7 @@ import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state-manipulation';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
-import { filterOutExtensions } from './filter-out-extensions';
+import { filterOutExtensions as filterExtensions } from './filter-out-extensions';
 import reportAndConfirmBuildResult from './reporting';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
@@ -54,7 +54,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     }
   }
 
-  const newUserConfiguration = filterOutExtensions(
+  const newUserConfiguration = filterExtensions(
     userConfiguration,
     newExtensionState.installedExtensions,
   );
@@ -71,7 +71,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
     type: 'reset',
-    value: filterOutExtensions(
+    value: filterExtensions(
       configuration,
       newExtensionState.installedExtensions,
     ),
@@ -79,7 +79,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'reset',
-    value: filterOutExtensions<boolean>(
+    value: filterExtensions<boolean>(
       getStore().get(CONFIGURATION_TOUCHED_REDUCER_ATOM),
       newExtensionState.installedExtensions,
     ),
@@ -87,7 +87,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'reset',
-    value: filterOutExtensions<ConfigurationQualifier>(
+    value: filterExtensions<ConfigurationQualifier>(
       getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM),
       newExtensionState.installedExtensions,
     ),

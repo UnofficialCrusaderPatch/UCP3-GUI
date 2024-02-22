@@ -4,9 +4,7 @@ import yaml from 'yaml';
 import { readDir, renameFile, onFsExists } from '../../../tauri/tauri-files';
 import { extractZipToPath, slashify } from '../../../tauri/tauri-invoke';
 import {
-  ConfigEntry,
   ConfigFile,
-  ConfigFileExtensionEntry,
   Definition,
   DisplayConfigElement,
   Extension,
@@ -26,6 +24,8 @@ import {
 } from './definition-meta-version-1.0.0/parse-definition';
 import { getStore } from '../../../hooks/jotai/base';
 import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
+import { collectConfigEntries } from './collect-config-entries';
+import { parseConfigEntries } from './parse-config-entries';
 
 const LOGGER = new Logger('discovery.ts');
 
@@ -101,44 +101,6 @@ function applyLocale(ext: Extension, locale: { [key: string]: string }) {
   return ui.map((uiElement: { [key: string]: unknown }) =>
     changeLocale(locale, uiElement as { [key: string]: unknown }),
   );
-}
-
-function collectConfigEntries(
-  obj: { contents: unknown; [key: string]: unknown },
-  url?: string,
-  collection?: { [key: string]: ConfigEntry },
-) {
-  // eslint-disable-next-line no-param-reassign
-  if (collection === undefined) collection = {};
-  // eslint-disable-next-line no-param-reassign
-  if (url === undefined) url = '';
-
-  if (obj !== null && obj !== undefined && typeof obj === 'object') {
-    if (obj.contents !== undefined) {
-      const o = obj as ConfigEntry;
-      if (collection[url] !== undefined) {
-        throw new Error(`url already has been set: ${url}`);
-      }
-      // eslint-disable-next-line no-param-reassign
-      collection[url] = { ...o };
-    } else {
-      Object.keys(obj).forEach((key) => {
-        let newUrl = url;
-        if (newUrl === undefined) newUrl = '';
-        if (newUrl !== '') {
-          newUrl += '.';
-        }
-        newUrl += key;
-        collectConfigEntries(
-          obj[key] as { contents: unknown; [key: string]: unknown },
-          newUrl,
-          collection,
-        );
-      });
-    }
-  }
-
-  return collection;
 }
 
 async function unzipPlugins(pluginDirEnts: FileEntry[]) {
@@ -514,55 +476,15 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
         );
         ext.config = await readConfig(eh);
 
-        // ext.optionEntries = collectOptionEntries(
-        //   ext.ui as unknown as { [key: string]: unknown },
-        //   ext.name,
-        // );
+        const parseConfigEntriesResult = parseConfigEntries(ext.config);
 
-        ext.configEntries = {};
-
-        const parseEntry = ([extensionName, data]: [
-          string,
-          {
-            config: ConfigFileExtensionEntry;
-          },
-        ]) => {
-          const result = collectConfigEntries(
-            data.config as {
-              [key: string]: unknown;
-              contents: unknown;
-            },
-            extensionName,
-          );
-
-          ext.configEntries = { ...ext.configEntries, ...result };
-        };
-
-        if (
-          ext.config['config-sparse'] === undefined ||
-          ext.config['config-sparse'].modules === undefined ||
-          ext.config['config-sparse'].plugins === undefined ||
-          ext.config['config-sparse'] === null ||
-          ext.config['config-sparse'].modules === null ||
-          ext.config['config-sparse'].plugins === null
-        ) {
-          const msg = `config.yml of extension ${ext.name} does not adhere to the configuration spec.`;
+        if (parseConfigEntriesResult.status !== 'ok') {
+          const msg = `Warnings for config of ${ext.name}:\n${parseConfigEntriesResult.warnings.join('\n')}`;
           warnings.push(msg);
           LOGGER.msg(msg).warn();
-
-          const cs = ext.config['config-sparse'] || {
-            modules: {},
-            plugins: {},
-          };
-
-          cs.modules = cs.modules || {};
-          cs.plugins = cs.plugins || {};
-
-          ext.config['config-sparse'] = cs;
         }
 
-        Object.entries(ext.config['config-sparse'].modules).forEach(parseEntry);
-        Object.entries(ext.config['config-sparse'].plugins).forEach(parseEntry);
+        ext.configEntries = parseConfigEntriesResult.configEntries;
 
         ext.ui.forEach((v) => attachExtensionInformation(ext, v));
 

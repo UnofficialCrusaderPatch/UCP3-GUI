@@ -1,24 +1,29 @@
 import { t } from 'i18next';
-import { useAtom } from 'jotai';
-import { GearFill, Gear } from 'react-bootstrap-icons';
+import { useAtom, useSetAtom } from 'jotai';
+import { PaletteFill, Palette } from 'react-bootstrap-icons';
 import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 
 // eslint-disable-next-line import/prefer-default-export
 export function CreatorModeButton() {
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const [guiCreatorMode, setGuiCreatorMode] = useAtom(CREATOR_MODE_ATOM);
 
   return (
     <button
-      className="ucp-button ucp-button-variant"
+      className="ucp-button"
       type="button"
       onClick={() => {
         setGuiCreatorMode(!guiCreatorMode);
       }}
+      onMouseEnter={() => {
+        setStatusBarMessage(t('gui-editor:config.mode.creator'));
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
     >
-      <div className="ucp-button-variant-button-text">
-        <span className="mx-1">{guiCreatorMode ? <GearFill /> : <Gear />}</span>
-        <span className="mx-1">{t('gui-editor:config.mode.creator')}</span>
-      </div>
+      {guiCreatorMode ? <PaletteFill /> : <Palette />}
     </button>
   );
 }

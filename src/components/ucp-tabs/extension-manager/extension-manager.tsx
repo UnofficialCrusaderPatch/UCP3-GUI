@@ -2,26 +2,35 @@ import './extension-manager.css';
 
 import { useTranslation } from 'react-i18next';
 
-import { useAtomValue } from 'jotai';
+import { atom, useAtomValue } from 'jotai';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import {
   ActiveExtensionElement,
+  CustomisationsExtensionElement,
   ExtensionNameList,
+  GhostElement,
   InactiveExtensionsElement,
 } from './extension-elements/extension-element';
-import ApplyButton from '../common/buttons/apply-button';
-import ExportButton from '../config-editor/buttons/export-button';
-import ImportButton from '../config-editor/buttons/import-button';
-import { CustomizeButton } from '../common/buttons/customize-button';
 import { FilterButton } from './buttons/filter-button';
 import { InstallExtensionButton } from './buttons/install-extensions-button';
-import { CreateExtensionsPackButton } from './buttons/create-extensions-pack-button';
+import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extension-editor-state';
+import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
+import { ExtensionManagerToolbar } from './toolbar-extension-manager';
+import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-editor-mode';
+import { ConsoleLogger } from '../../../util/scripts/logging';
+
+const HAS_CUSTOMISATIONS = atom(
+  (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
+);
 
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const extensionEditorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
 
   const showAllExtensions = useAtomValue(GuiSettings.SHOW_ALL_EXTENSIONS_ATOM);
 
@@ -75,6 +84,19 @@ export default function ExtensionManager() {
     <span />
   );
 
+  const hasCustomisations = useAtomValue(HAS_CUSTOMISATIONS);
+  const editorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
+  const displayCustomisationsElement =
+    hasCustomisations && editorState.state === 'inactive';
+
+  const displayGhostElement = editorState.state === 'active';
+
+  ConsoleLogger.debug(
+    `Customisations: ${displayCustomisationsElement} Ghost: ${displayGhostElement}`,
+  );
+
+  ConsoleLogger.debug(`editorState`, editorState);
+
   return (
     <div className="flex-default extension-manager">
       <div className="extension-manager-control">
@@ -101,19 +123,24 @@ export default function ExtensionManager() {
           </div>
           <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">
-              {activated}
+              {[
+                displayCustomisationsElement ? (
+                  <CustomisationsExtensionElement key="user-customiastions" />
+                ) : undefined,
+                displayGhostElement ? (
+                  <GhostElement
+                    key={`${editorState.extension.name}-${editorState.extension.version}`}
+                    ext={editorState.extension}
+                  />
+                ) : undefined,
+                ...activated,
+              ]}
             </div>
-            <div className="extension-manager-control__box__buttons">
-              <div className="">
-                <CreateExtensionsPackButton />
-                <ImportButton />
-                <ExportButton />
-                <CustomizeButton />
-              </div>
-              <div className="extension-manager-control__box__buttons--apply-button">
-                <ApplyButton />
-              </div>
-            </div>
+            {editorState.state === 'inactive' ? (
+              <ExtensionManagerToolbar />
+            ) : (
+              <EditorExtensionManagerToolbar />
+            )}
           </div>
         </div>
       </div>

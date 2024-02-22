@@ -16,6 +16,7 @@ import {
 import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
 import { getStore } from '../../hooks/jotai/base';
 import Logger, { ConsoleLogger } from '../../util/scripts/logging';
+import { ExtensionsState } from '../extensions/extensions-state';
 
 export const LOGGER = new Logger('game-folder/initialization.ts');
 
@@ -95,7 +96,7 @@ export async function initializeGameFolder(newFolder: string) {
     explicitlyActivatedExtensions: [],
     installedExtensions: [...extensions],
     extensions,
-  };
+  } as ExtensionsState;
   loggerState.setMsg('Finished extension discovery').info();
   ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
 

@@ -38,3 +38,12 @@
 .ucp-accordion > .accordion-header {
   /*padding-bottom: 0.25rem;*/
 }
+
+.ucp-accordion-header {
+  margin-bottom: 0;
+}
+
+.ucp-accordion-header.ucp-accordion-header-no-button
+  > .accordion-button::after {
+  display: none;
+}

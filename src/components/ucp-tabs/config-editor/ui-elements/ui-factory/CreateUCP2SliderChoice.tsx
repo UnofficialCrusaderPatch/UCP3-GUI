@@ -217,6 +217,7 @@ function CreateUCP2SliderChoice(args: {
             id={`${url}-radio-${choice.name}`}
             disabled={!value.enabled}
             checked={value.choice === choice.name}
+            onChange={() => {}}
             onClick={() => {
               onClickRadio(choice.name);
             }}

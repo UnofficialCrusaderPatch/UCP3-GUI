@@ -13,12 +13,8 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state
 import { CREATOR_MODE_ATOM } from '../../../function/gui-settings/settings';
 import { UIFactory } from './ui-elements';
 
-import ExportButton from './buttons/export-button';
-import ApplyButton from '../common/buttons/apply-button';
-import ImportButton from './buttons/import-button';
-import ResetButton from './buttons/reset-button';
-import ExportAsPluginButton from './buttons/export-as-plugin-button';
-import { CreatorModeButton } from './buttons/creator-mode-button';
+import { ConfigEditorToolbar } from './config-editor-toolbar';
+import { ConfigEditorCreatorToolbar } from './config-editor-creator-toolbar';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -63,17 +59,11 @@ export default function ConfigEditor(args: { readonly: boolean }) {
         </div>
         {!readonly ? (
           <>
-            <div className="config-editor__buttons">
-              <ResetButton />
-              <ImportButton />
-              <ExportButton />
-              <CreatorModeButton />
-              {guiCreatorMode ? <ExportAsPluginButton /> : undefined}
-
-              <div className="config-editor__buttons--apply-button">
-                <ApplyButton />
-              </div>
-            </div>
+            {guiCreatorMode ? (
+              <ConfigEditorCreatorToolbar />
+            ) : (
+              <ConfigEditorToolbar />
+            )}
 
             <div className="config-warning-container">
               <div className="d-none config-warning-container__symbols">

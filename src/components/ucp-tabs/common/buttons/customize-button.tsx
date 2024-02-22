@@ -11,6 +11,8 @@ export function CustomizeButton() {
     GuiSettings.ADVANCED_MODE_ATOM,
   );
 
+  const setCreatorMode = useSetAtom(GuiSettings.CREATOR_MODE_ATOM);
+
   const setCurrentTab = useSetAtom(CURRENT_DISPLAYED_TAB);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -18,10 +20,14 @@ export function CustomizeButton() {
   return (
     <button
       type="button"
-      className="ucp-button text-light"
+      className="ucp-button h-100"
       onClick={() => {
         const av = advancedMode;
-        setAdvancedMode(!advancedMode);
+        const newAv = !av;
+        if (av) {
+          setCreatorMode(false);
+        }
+        setAdvancedMode(newAv);
         if (!av) {
           setCurrentTab('config');
         }
@@ -33,8 +39,8 @@ export function CustomizeButton() {
         setStatusBarMessage(undefined);
       }}
     >
-      <div className="ucp-button-variant-button-text">
-        {advancedMode ? <GearFill /> : <Gear />}
+      <div className="ucp-button-variant-button-text d-flex align-items-center">
+        <span className="me-1">{advancedMode ? <GearFill /> : <Gear />}</span>
         <span> {t('gui-editor:config.customize')}...</span>
       </div>
     </button>

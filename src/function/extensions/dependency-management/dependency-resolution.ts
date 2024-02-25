@@ -167,8 +167,9 @@ export class ExtensionTree {
 
     return node.edgesIn
       .filter((e) => !e.from.id.startsWith('__user__'))
-      .map((e) => this.extensionsById[e.from.id])
-      .filter((e) => e !== undefined);
+      .filter((e) => e.from.spec.name !== 'frontend')
+      .filter((e) => e.from.spec.name !== 'framework')
+      .map((e) => this.extensionsById[e.from.id]);
   }
 
   directDependenciesFor(ext: Extension) {
@@ -181,8 +182,9 @@ export class ExtensionTree {
 
     return node.edgesOut
       .map((e) => e.to!)
-      .map((n) => this.extensionsById[n.id])
-      .filter((e) => e !== undefined);
+      .filter((e) => e.spec.name !== 'frontend')
+      .filter((e) => e.spec.name !== 'framework')
+      .map((n) => this.extensionsById[n.id]);
   }
 
   dependenciesFor(ext: Extension): ExtensionSolution {
@@ -195,8 +197,9 @@ export class ExtensionTree {
     try {
       const s = this.tree
         .solve([node.spec])
-        .map((n) => this.extensionsById[n.id])
-        .filter((e) => e !== undefined);
+        .filter((e) => e.spec.name !== 'frontend')
+        .filter((e) => e.spec.name !== 'framework')
+        .map((n) => this.extensionsById[n.id]);
 
       return new ExtensionSolution('OK', s, []);
     } catch (e) {
@@ -213,8 +216,9 @@ export class ExtensionTree {
     try {
       const s = this.tree
         .solve(nodes.map((n) => n.spec))
-        .map((n) => this.extensionsById[n.id])
-        .filter((e) => e !== undefined);
+        .filter((e) => e.spec.name !== 'frontend')
+        .filter((e) => e.spec.name !== 'framework')
+        .map((n) => this.extensionsById[n.id]);
 
       return new ExtensionSolution('OK', s, []);
     } catch (e) {

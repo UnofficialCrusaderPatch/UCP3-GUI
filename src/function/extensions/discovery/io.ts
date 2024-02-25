@@ -2,7 +2,7 @@ import yaml from 'yaml';
 import { type FileEntry } from '@tauri-apps/api/fs';
 import { ExtensionHandle } from '../handles/extension-handle';
 import { TranslationDB, Translation } from './translation';
-import { ConfigFile, Extension } from '../../../config/ucp/common';
+import { ConfigFile } from '../../../config/ucp/common';
 import { renameFile } from '../../../tauri/tauri-files';
 import { extractZipToPath } from '../../../tauri/tauri-invoke';
 import { ZipReader } from '../../../util/structs/zip-handler';
@@ -39,7 +39,7 @@ export async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
 }
 export async function readLocales(
   eh: ExtensionHandle,
-  ext: Extension,
+  name: string,
   locales: string[],
 ) {
   const translations: TranslationDB = {};
@@ -63,7 +63,7 @@ export async function readLocales(
         );
       } else {
         LOGGER.msg(
-          `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
+          `No locale file found for: ${name}: ${LOCALE_FOLDER}/${language}.yml`,
         ).info();
       }
     }

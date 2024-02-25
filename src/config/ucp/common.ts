@@ -182,12 +182,9 @@ type Extension = {
   definition: Definition;
   ui: { [key: string]: unknown }[];
   locales: { [language: string]: { [key: string]: string } };
-  descriptionMD: string;
   description: string;
   config: ConfigFile;
-  path: string;
   configEntries: { [key: string]: ConfigEntry };
-  optionEntries: { [key: string]: OptionEntry };
   io: {
     isZip: boolean;
     isDirectory: boolean;

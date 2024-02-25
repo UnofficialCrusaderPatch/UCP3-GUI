@@ -1,6 +1,11 @@
 // eslint-disable-next-line max-classes-per-file
 import { onFsExists } from '../../../tauri/tauri-files';
-import { Definition, Extension } from '../../../config/ucp/common';
+import {
+  ConfigEntry,
+  ConfigFile,
+  Definition,
+  Extension,
+} from '../../../config/ucp/common';
 import Logger from '../../../util/scripts/logging';
 import { showModalOk } from '../../../components/modals/modal-ok';
 import { ExtensionHandle } from '../handles/extension-handle';
@@ -13,6 +18,7 @@ import { getExtensionHandles } from './extension-handles';
 import { attachExtensionInformationToDisplayConfigElement } from './components/ui';
 import { createIO } from './components/io';
 import { validateDefinition } from './components/definition';
+import { TranslationDB } from './translation';
 
 export const LOGGER = new Logger('discovery.ts');
 
@@ -71,7 +77,7 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
 
         const io = createIO(eh);
 
-        const { name, version, type } = definition;
+        const { name, version, type, meta, description } = definition;
 
         if (!checkVersionEquality(eh, version)) {
           return {
@@ -90,19 +96,27 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
         }
 
         const ext = {
+          meta,
+          description,
           name,
           version,
           type,
           definition,
           io,
-        } as unknown as Extension;
+          ui: [] as { [key: string]: unknown }[],
+          locales: {} as TranslationDB,
+          config: {} as ConfigFile,
+          configEntries: {} as {
+            [key: string]: ConfigEntry;
+          },
+        } as Extension;
 
         const uiRaw = await readUISpec(eh);
         ext.ui = (uiRaw || {}).options || [];
 
         ext.locales = await readLocales(
           eh,
-          ext,
+          ext.name,
           Object.keys(await getStore().get(AVAILABLE_LANGUAGES_ATOM)),
         );
         ext.config = await readConfig(eh);
@@ -126,7 +140,7 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
         if (warnings.length > 0) {
           return {
             status: 'warning',
-            content: ext,
+            content: ext as Extension,
             messages: warnings,
             handle: eh,
           } as ExtensionLoadResult;
@@ -134,7 +148,7 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
 
         return {
           status: 'ok',
-          content: ext,
+          content: ext as Extension,
           messages: [] as string[],
           handle: eh,
         } as ExtensionLoadResult;

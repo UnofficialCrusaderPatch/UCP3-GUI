@@ -16,14 +16,14 @@ export function StopButton() {
       className="ucp-button ucp-button-variant"
       type="button"
       onClick={async () => {
-        setEditorState({ state: 'inactive' });
-
         await importButtonCallback(
           gameFolder,
           () => {},
           t,
           `${gameFolder}/ucp-config.yml`,
         );
+
+        setEditorState({ state: 'inactive' });
       }}
     >
       Stop modifying

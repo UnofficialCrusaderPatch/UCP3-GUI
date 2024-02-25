@@ -1,10 +1,9 @@
 import './language-select.css';
+import translateIcon from 'assets/misc/translate.svg';
 
 import { startTransition } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-// eslint-disable-next-line import/no-unresolved
-import translateIcon from 'assets/misc/translate.svg?raw';
 import SvgHelper from '../../general/svg-helper';
 import { LANGUAGE_ATOM } from '../../../function/gui-settings/settings';
 import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
@@ -19,9 +18,8 @@ export default function LanguageSelect() {
       <div className="d-flex align-items-stretch">
         <div className="d-flex dark-dropdown ps-3 pe-2">
           <SvgHelper
-            href="#translate"
+            href={`${translateIcon}#translate`}
             title={t('gui-landing:select.language')}
-            data={translateIcon}
           />
         </div>
         <select

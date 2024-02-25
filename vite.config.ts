@@ -21,6 +21,24 @@ export default defineConfig({
     minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
     // produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_DEBUG,
+    // never inline svg, but use default for everything else
+    assetsInlineLimit: (filePath: string) => filePath.endsWith('.svg') ? false : undefined,
   },
-  plugins: [react(), tsconfigPaths(), ViteImageOptimizer()],
+  plugins: [
+    react(),
+    tsconfigPaths(),
+    ViteImageOptimizer({
+      svg: {
+        plugins: [
+          {
+            // need to keep ids for svg helper
+            name: 'cleanupIds',
+            params: {
+              minify: false,
+              remove: false,
+            }
+          }
+        ]
+      }
+    })],
 })

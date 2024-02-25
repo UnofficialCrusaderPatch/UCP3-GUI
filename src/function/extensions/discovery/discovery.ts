@@ -1,185 +1,20 @@
 // eslint-disable-next-line max-classes-per-file
-import { type FileEntry } from '@tauri-apps/api/fs';
-import yaml from 'yaml';
-import { readDir, onFsExists } from '../../../tauri/tauri-files';
-import { slashify } from '../../../tauri/tauri-invoke';
-import {
-  Definition,
-  DisplayConfigElement,
-  Extension,
-  ExtensionIOCallback,
-} from '../../../config/ucp/common';
+import { onFsExists } from '../../../tauri/tauri-files';
+import { Definition, Extension } from '../../../config/ucp/common';
 import Logger from '../../../util/scripts/logging';
 import { showModalOk } from '../../../components/modals/modal-ok';
 import { ExtensionHandle } from '../handles/extension-handle';
-import DirectoryExtensionHandle from '../handles/directory-extension-handle';
-import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
-import {
-  DefinitionMeta_1_0_0,
-  parseDependencies,
-} from './definition-meta-version-1.0.0/parse-definition';
 import { getStore } from '../../../hooks/jotai/base';
 import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
 import { collectConfigEntries } from './collect-config-entries';
 import { parseConfigEntries } from './parse-config-entries';
-import {
-  readUISpec,
-  readConfig,
-  readLocales,
-  unzipPlugins,
-  DEFINITION_FILE,
-} from './io';
+import { readUISpec, readConfig, readLocales } from './io';
+import { getExtensionHandles } from './extension-handles';
+import { attachExtensionInformationToDisplayConfigElement } from './components/ui';
+import { createIO } from './components/io';
+import { validateDefinition } from './components/definition';
 
 export const LOGGER = new Logger('discovery.ts');
-
-async function getExtensionHandles(ucpFolder: string) {
-  const moduleDir = `${ucpFolder}/modules/`;
-  const readModuleDirResult = await readDir(moduleDir);
-
-  if (readModuleDirResult.isErr()) {
-    const err = readModuleDirResult.err().get();
-    if (
-      (err as object)
-        .toString()
-        .startsWith('path not allowed on the configured scope')
-    ) {
-      throw Error(
-        `Cannot process extensions. List of extensions will be empty. \n\n Reason: App is not allowed to access: ${moduleDir}`,
-      );
-    }
-
-    readModuleDirResult.throwIfErr();
-
-    return [];
-  }
-
-  const modDirEnts = readModuleDirResult
-    .ok()
-    .getOrReceive(() => []) as FileEntry[];
-
-  const pluginDir = `${ucpFolder}/plugins/`;
-  let readPluginDirResult = await readDir(pluginDir);
-
-  if (readPluginDirResult.isErr()) {
-    const err = readPluginDirResult.err().get();
-    if (
-      (err as object)
-        .toString()
-        .startsWith('path not allowed on the configured scope')
-    ) {
-      throw Error(
-        `Cannot process extensions. List of extensions will be empty. \n\n Reason: App is not allowed to access: ${pluginDir}`,
-      );
-    }
-
-    readPluginDirResult.throwIfErr();
-
-    return [];
-  }
-  let pluginDirEnts = readPluginDirResult
-    .ok()
-    .getOrReceive(() => []) as FileEntry[];
-
-  await unzipPlugins(pluginDirEnts);
-
-  readPluginDirResult = await readDir(pluginDir);
-  pluginDirEnts = (
-    readPluginDirResult.ok().getOrReceive(() => []) as FileEntry[]
-  ).filter((fe) => !fe.path.endsWith('.zip'));
-
-  const de: FileEntry[] = [...modDirEnts, ...pluginDirEnts].filter(
-    (fe) =>
-      (fe.name || '').endsWith('.zip') ||
-      (fe.children !== null && fe.children !== undefined),
-  );
-  const den = de.map((f) => f.name);
-  const dirEnts = de.filter((e) => {
-    // Zip files supersede folders
-    // const isDirectory = e.children !== null && e.children !== undefined;
-    // if (isDirectory) {
-    //   const zipFileName = `${e.name}.zip`;
-    //   if (den.indexOf(zipFileName) !== -1) {
-    //     return false;
-    //   }
-    // }
-    // Folders supersede zip files?
-    if (e.name?.endsWith('.zip')) {
-      const dirName = e.name.split('.zip')[0];
-      if (den.indexOf(`${dirName}`) !== -1) {
-        return false;
-      }
-    }
-    return true;
-  });
-
-  const exts = await Promise.all(
-    dirEnts.map(async (fe: FileEntry) => {
-      const type = modDirEnts.indexOf(fe) === -1 ? 'plugin' : 'module';
-
-      const folder = await slashify(
-        type === 'module'
-          ? `${ucpFolder}/modules/${fe.name}`
-          : `${ucpFolder}/plugins/${fe.name}`,
-      );
-
-      if (fe.name !== undefined && fe.name.endsWith('.zip')) {
-        // TODO: Do hash check here!
-        const result = await RustZipExtensionHandle.fromPath(folder);
-        return result as ExtensionHandle;
-      }
-      if (fe.children !== null) {
-        // fe is a directory
-        return new DirectoryExtensionHandle(folder) as ExtensionHandle;
-      }
-      throw new Error(`${folder} not a valid extension directory`);
-    }),
-  );
-
-  return exts;
-}
-
-const attachExtensionInformation = (extension: Extension, obj: unknown) => {
-  // This code makes the extension read only to some extent, but more importantly, by excluding .ui, it avoids recursive errors
-  const { ui, ...rest } = { ...extension };
-  const ext: Extension = { ...rest, ui: [] };
-
-  const todo: unknown[] = [];
-  const done: unknown[] = [];
-
-  todo.push(obj);
-
-  while (todo.length > 0) {
-    const current = todo.pop();
-
-    if (done.indexOf(current) !== -1) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-
-    if (current instanceof Array) {
-      current.forEach((v) => todo.push(v));
-    } else if (current instanceof Object) {
-      // Assume something is a display config element
-
-      if ((current as DisplayConfigElement).display !== undefined) {
-        const dce = current as DisplayConfigElement;
-
-        dce.extension = ext;
-
-        if (dce.display === 'Group' || dce.display === 'GroupBox') {
-          if (dce.children !== undefined && dce.children instanceof Array) {
-            // Assume it is a DisplayConfigElement
-            dce.children.forEach((v) => todo.push(v));
-          }
-        }
-      }
-    } else {
-      // throw Error((obj as any).toString());
-    }
-
-    done.push(current);
-  }
-};
 
 type ExtensionLoadResult = {
   status: 'ok' | 'warning' | 'error';
@@ -187,100 +22,6 @@ type ExtensionLoadResult = {
   content: Extension | undefined;
   handle: ExtensionHandle;
 };
-
-type ExtensionDefinitionValidationResult = {
-  status: 'ok' | 'warning' | 'error';
-  messages: string[];
-  content?: Definition;
-};
-
-const validateDefinition = async (eh: ExtensionHandle) => {
-  const warnings: string[] = [];
-
-  const inferredType =
-    eh.path.indexOf('/modules/') !== -1 ? 'module' : 'plugin';
-  const definition = yaml.parse(
-    await eh.getTextContents(`${DEFINITION_FILE}`),
-  ) as Definition;
-  const { name, version } = definition;
-
-  if (name === undefined || name === null) {
-    const msg = `'name' missing in definition.yml of ${eh.path}`;
-    LOGGER.msg(msg).error();
-
-    return {
-      status: 'error',
-      messages: [msg],
-      content: undefined,
-    } as ExtensionDefinitionValidationResult;
-  }
-
-  if (version === undefined || version === null) {
-    const msg = `'version' missing in definition.yml of ${eh.path}`;
-    LOGGER.msg(msg).error();
-
-    return {
-      status: 'error',
-      messages: [msg],
-      content: undefined,
-    } as ExtensionDefinitionValidationResult;
-  }
-
-  const { type } = definition;
-
-  let assumedType = inferredType;
-  if (type === undefined) {
-    const warning = `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`;
-    LOGGER.msg(warning).warn();
-  } else if (type !== inferredType) {
-    const msg = `Extension type mismatch. Has a '${type}' (as found in definition.yml of ${name}-${version}) been placed in the folder for a ${inferredType}?`;
-    LOGGER.msg(msg).error();
-
-    return {
-      status: 'error',
-      messages: [msg],
-      content: undefined,
-    } as ExtensionDefinitionValidationResult;
-  } else {
-    assumedType = type;
-  }
-
-  const parsedDependencies = parseDependencies(
-    definition as unknown as DefinitionMeta_1_0_0,
-  );
-  if (parsedDependencies.status !== 'ok') {
-    return {
-      status: 'error',
-      messages: [
-        `Dependencies definition of extension "${name}-${version}" is not an array of strings or a dictionary: ${JSON.stringify(
-          definition.dependencies,
-        )}`,
-      ],
-      content: undefined,
-    } as ExtensionDefinitionValidationResult;
-  }
-  definition.dependencies = parsedDependencies.content;
-
-  return {
-    status: warnings.length === 0 ? 'ok' : 'warning',
-    messages: warnings,
-    content: { ...definition, type: assumedType } as Definition,
-  } as ExtensionDefinitionValidationResult;
-};
-
-const createIO = (eh: ExtensionHandle) => ({
-  handle: async <R>(cb: ExtensionIOCallback<R>) => {
-    const neh = await eh.clone();
-    try {
-      return await cb(neh);
-    } finally {
-      neh.close();
-    }
-  },
-  isZip: eh instanceof RustZipExtensionHandle,
-  isDirectory: eh instanceof DirectoryExtensionHandle,
-  path: eh.path,
-});
 
 const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
   if (eh.path.toLocaleLowerCase().endsWith(`-${version}`)) {
@@ -376,7 +117,9 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
 
         ext.configEntries = parseConfigEntriesResult.configEntries;
 
-        ext.ui.forEach((v) => attachExtensionInformation(ext, v));
+        ext.ui.forEach((v) =>
+          attachExtensionInformationToDisplayConfigElement(ext, v),
+        );
 
         eh.close();
 

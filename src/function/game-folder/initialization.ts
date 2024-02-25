@@ -100,6 +100,13 @@ export async function initializeGameFolder(newFolder: string) {
   loggerState.setMsg('Finished extension discovery').info();
   ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
 
+  const is = newExtensionsState.tree.tryResolveAllDependencies();
+  if (is.status !== 'ok') {
+    ConsoleLogger.warn(
+      `Not all dependencies for all extensions could be resolved:\n${is.messages.join('\n')}`,
+    );
+  }
+
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
 
   getStore().set(UCP_CONFIG_FILE_ATOM, file);

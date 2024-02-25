@@ -4,6 +4,7 @@ import { Dependency, Package, Repository, Tree } from 'lean-resolution';
 import { rcompare } from 'semver';
 
 import { Extension } from '../../../config/ucp/common';
+import { ConsoleLogger } from '../../../util/scripts/logging';
 
 function extensionToID(ext: Extension) {
   return `${ext.name}@${ext.version}`;
@@ -31,6 +32,17 @@ export class ExtensionSolution {
   }
 }
 
+type FailedInitialSolution = {
+  status: 'error';
+  messages: string[];
+};
+
+type SuccesfullInitialSolution = {
+  status: 'ok';
+};
+
+export type InitialSolution = SuccesfullInitialSolution | FailedInitialSolution;
+
 // eslint-disable-next-line import/prefer-default-export
 export class ExtensionTree {
   extensions: Extension[];
@@ -44,14 +56,13 @@ export class ExtensionTree {
     this.extensionsById = Object.fromEntries(
       extensions.map((e) => [extensionToID(e), e]),
     );
-    const repo: Repository = extensions.map(
+    const repo: Repository = this.extensions.map(
       (e) =>
         new Package(
           e.name,
           e.version,
           Object.entries(e.definition.dependencies).map(
-            ([ext, v]) =>
-              new Dependency(ext, v.toString().replaceAll('==', '=')),
+            ([ext, range]) => new Dependency(ext, range.raw),
           ),
         ),
     );
@@ -59,16 +70,75 @@ export class ExtensionTree {
     this.tree = new Tree(repo);
   }
 
-  tryResolveDependencies() {
-    this.tree.reset();
-
-    this.tree.setInitialTargetForAllEdges();
-
+  get initialSolution() {
     if (this.tree.state === 'OK') {
-      return '';
+      return {
+        status: 'ok',
+      } as InitialSolution;
     }
 
-    return this.tree.errors.join('\n');
+    return {
+      status: 'error',
+      messages: [...this.tree.errors],
+    } as InitialSolution;
+  }
+
+  reset() {
+    const repo: Repository = this.extensions.map(
+      (e) =>
+        new Package(
+          e.name,
+          e.version,
+          Object.entries(e.definition.dependencies).map(
+            ([ext, range]) => new Dependency(ext, range.raw),
+          ),
+        ),
+    );
+
+    this.tree = new Tree(repo);
+  }
+
+  // setExtensions(extensions: Extension[]) {
+  //   this.extensions = extensions;
+  //   this.extensionsById = Object.fromEntries(
+  //     extensions.map((e) => [extensionToID(e), e]),
+  //   );
+  //   const repo: Repository = this.extensions.map(
+  //     (e) =>
+  //       new Package(
+  //         e.name,
+  //         e.version,
+  //         Object.entries(e.definition.dependencies).map(
+  //           ([ext, range]) => new Dependency(ext, range.raw),
+  //         ),
+  //       ),
+  //   );
+
+  //   this.tree = new Tree(repo);
+  // }
+
+  tryResolveAllDependencies() {
+    try {
+      this.tree.reset();
+
+      this.tree.setInitialTargetForAllEdges();
+
+      if (this.tree.state === 'OK') {
+        return {
+          status: 'ok',
+        } as InitialSolution;
+      }
+
+      return {
+        status: 'error',
+        messages: [...this.tree.errors],
+      } as InitialSolution;
+    } catch (err: any) {
+      return {
+        status: 'error',
+        messages: [err.toString(), ...this.tree.errors],
+      } as InitialSolution;
+    }
   }
 
   nodeForExtension(ext: Extension) {
@@ -85,6 +155,11 @@ export class ExtensionTree {
 
   directDependenciesFor(ext: Extension) {
     const node = this.nodeForExtension(ext);
+
+    const und = node.edgesOut.filter((e) => e.to === undefined);
+    if (und.length > 0) {
+      ConsoleLogger.error('undefined edges for: ', ext, node, und);
+    }
 
     return node.edgesOut
       .map((e) => e.to!)

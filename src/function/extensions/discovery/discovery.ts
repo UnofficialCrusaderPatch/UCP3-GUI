@@ -16,7 +16,6 @@ import { ZipReader } from '../../../util/structs/zip-handler';
 import { ExtensionHandle } from '../handles/extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
 import { changeLocale } from '../locale/locale';
-import { ExtensionTree } from '../dependency-management/dependency-resolution';
 import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import {
   DefinitionMeta_1_0_0,
@@ -555,15 +554,5 @@ const Discovery = {
   discoverExtensions,
 };
 
-function tryResolveDependencies(extensions: Extension[]) {
-  return new ExtensionTree(extensions).tryResolveDependencies();
-}
-
 // eslint-disable-next-line import/prefer-default-export
-export {
-  Discovery,
-  collectConfigEntries,
-  tryResolveDependencies,
-  applyLocale,
-  getExtensionHandles,
-};
+export { Discovery, collectConfigEntries, applyLocale, getExtensionHandles };

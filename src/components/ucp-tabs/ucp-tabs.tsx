@@ -5,7 +5,6 @@ import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import Logger from '../../util/scripts/logging';
-import { tryResolveDependencies } from '../../function/extensions/discovery/discovery';
 import { showModalOk } from '../modals/modal-ok';
 import * as GuiSettings from '../../function/gui-settings/settings';
 import {
@@ -85,19 +84,22 @@ export default function UcpTabs() {
                     return;
                   }
 
-                  const messages = tryResolveDependencies(
-                    extensionsState.extensions,
-                  );
+                  const is = extensionsState.tree.initialSolution;
+
+                  if (is.status === 'ok') return;
+                  const { messages } = is;
 
                   if (messages.length === 0) return;
 
                   await showModalOk({
                     title: 'Error: missing dependencies',
-                    message: `Please be aware of the following missing dependencies:\n\n${messages}`,
+                    message: `Please be aware of the following missing dependencies:\n\n${messages.join('\n')}`,
                     handleAction: () => setShowErrorsWarning(false),
                   });
 
-                  LOGGER.msg(`Missing dependencies: ${messages}`).error();
+                  LOGGER.msg(
+                    `Missing dependencies: ${messages.join('\n')}`,
+                  ).error();
                 } catch (e: any) {
                   await showModalOk({
                     title: 'ERROR',

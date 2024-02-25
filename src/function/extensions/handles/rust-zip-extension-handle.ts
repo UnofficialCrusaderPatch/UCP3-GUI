@@ -64,6 +64,15 @@ class RustZipExtensionHandle implements ExtensionHandle {
     return new RustZipExtensionHandle(path, await ZipReader.open(path));
   }
 
+  static async with(path: string, cb: (eh: RustZipExtensionHandle) => void) {
+    const handle = new RustZipExtensionHandle(path, await ZipReader.open(path));
+    try {
+      await cb(handle);
+    } finally {
+      handle.close();
+    }
+  }
+
   async getTextContents(path: string): Promise<string> {
     if (!(await this.doesEntryExist(path))) {
       throw Error(`/File does not exist: ${path}`);

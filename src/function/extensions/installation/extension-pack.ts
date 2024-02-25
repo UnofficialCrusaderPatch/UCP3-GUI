@@ -125,17 +125,30 @@ class ExtensionPack {
     await removeDir(this.path, { dir: BaseDirectory.Temp, recursive: true });
   }
 
-  static async fromPath(path: string) {
-    const tempPath = `ucp3-gui-pack-${new Date().getTime()}`;
+  static async isPack(path: string) {
+    let result = false;
+
     await ZipReader.withZipReaderDo(path, async (reader) => {
       const pluginsExist = await reader.doesEntryExist('plugins/');
       const modulesExist = await reader.doesEntryExist('modules/');
       if (!pluginsExist && !modulesExist) {
-        throw new Error(
-          `Zip file does not contain a plugins nor a modules directory. Not an extension pack!`,
-        );
+        result = false;
+      } else {
+        result = true;
       }
     });
+
+    return result;
+  }
+
+  static async fromPath(path: string) {
+    if (!(await this.isPack(path))) {
+      throw new Error(
+        `Zip file does not contain a plugins nor a modules directory. Not an extension pack!`,
+      );
+    }
+
+    const tempPath = `ucp3-gui-pack-${new Date().getTime()}`;
 
     await createDir(tempPath, { dir: BaseDirectory.Temp });
 

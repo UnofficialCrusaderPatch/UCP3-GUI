@@ -21,6 +21,7 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/st
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { getStore } from '../../../../hooks/jotai/base';
+import { appendSystemDependencyStatements } from '../../../../function/extensions/discovery/system-dependencies';
 
 export const createPluginConfigFromCurrentState = async () => {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
@@ -114,7 +115,9 @@ function ExportAsPluginButton(
               author: r.pluginAuthor,
               version: r.pluginVersion,
               dependencies: serializeDependencies(
-                createDependenciesFromExplicitlyActiveExtensions(),
+                await appendSystemDependencyStatements(
+                  createDependenciesFromExplicitlyActiveExtensions(),
+                ),
               ),
             }),
           );

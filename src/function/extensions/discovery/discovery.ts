@@ -1,10 +1,9 @@
 // eslint-disable-next-line max-classes-per-file
 import { type FileEntry } from '@tauri-apps/api/fs';
 import yaml from 'yaml';
-import { readDir, renameFile, onFsExists } from '../../../tauri/tauri-files';
-import { extractZipToPath, slashify } from '../../../tauri/tauri-invoke';
+import { readDir, onFsExists } from '../../../tauri/tauri-files';
+import { slashify } from '../../../tauri/tauri-invoke';
 import {
-  ConfigFile,
   Definition,
   DisplayConfigElement,
   Extension,
@@ -12,10 +11,8 @@ import {
 } from '../../../config/ucp/common';
 import Logger from '../../../util/scripts/logging';
 import { showModalOk } from '../../../components/modals/modal-ok';
-import { ZipReader } from '../../../util/structs/zip-handler';
 import { ExtensionHandle } from '../handles/extension-handle';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
-import { changeLocale } from '../locale/locale';
 import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import {
   DefinitionMeta_1_0_0,
@@ -25,121 +22,15 @@ import { getStore } from '../../../hooks/jotai/base';
 import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
 import { collectConfigEntries } from './collect-config-entries';
 import { parseConfigEntries } from './parse-config-entries';
+import {
+  readUISpec,
+  readConfig,
+  readLocales,
+  unzipPlugins,
+  DEFINITION_FILE,
+} from './io';
 
-const LOGGER = new Logger('discovery.ts');
-
-const OPTIONS_FILE = 'options.yml';
-const CONFIG_FILE = 'config.yml';
-const DEFINITION_FILE = 'definition.yml';
-const LOCALE_FOLDER = 'locale';
-export const DESCRIPTION_FILE = 'description.md';
-
-async function readUISpec(
-  eh: ExtensionHandle,
-): Promise<{ options: { [key: string]: unknown }[] }> {
-  if (await eh.doesEntryExist(OPTIONS_FILE)) {
-    return yaml.parse(await eh.getTextContents(OPTIONS_FILE));
-  }
-  return { options: [] };
-}
-
-async function readConfig(eh: ExtensionHandle): Promise<ConfigFile> {
-  if (await eh.doesEntryExist(CONFIG_FILE)) {
-    return yaml.parse(await eh.getTextContents(CONFIG_FILE));
-  }
-  return {
-    meta: { version: '1.0.0' },
-    'config-sparse': {
-      modules: {},
-      plugins: {},
-      'load-order': [],
-    },
-  };
-}
-
-type Translation = { [key: string]: string };
-type TranslationDB = { [language: string]: Translation };
-
-async function readLocales(
-  eh: ExtensionHandle,
-  ext: Extension,
-  locales: string[],
-) {
-  const translations: TranslationDB = {};
-
-  const locFolder = await eh.doesEntryExist(`${LOCALE_FOLDER}/`);
-  if (locFolder) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const language of locales) {
-      // eslint-disable-next-line no-await-in-loop
-      if (await eh.doesEntryExist(`${LOCALE_FOLDER}/${language}.yml`)) {
-        const translation = yaml.parse(
-          // eslint-disable-next-line no-await-in-loop
-          await eh.getTextContents(`${LOCALE_FOLDER}/${language}.yml`),
-        ) as Translation;
-
-        translations[language] = Object.fromEntries(
-          Object.entries(translation).map(([key, value]) => [
-            key.toLowerCase(),
-            value.replaceAll('&', ''),
-          ]),
-        );
-      } else {
-        LOGGER.msg(
-          `No locale file found for: ${ext.name}: ${LOCALE_FOLDER}/${language}.yml`,
-        ).info();
-      }
-    }
-  }
-
-  return translations;
-}
-
-function applyLocale(ext: Extension, locale: { [key: string]: string }) {
-  const { ui } = ext;
-  return ui.map((uiElement: { [key: string]: unknown }) =>
-    changeLocale(locale, uiElement as { [key: string]: unknown }),
-  );
-}
-
-async function unzipPlugins(pluginDirEnts: FileEntry[]) {
-  const zipFiles = pluginDirEnts.filter(
-    (fe) => fe.name !== undefined && fe.name.endsWith('.zip'),
-  );
-
-  await Promise.all(
-    zipFiles.map(async (fe) => {
-      const { path } = fe;
-
-      let isPlugin = true;
-
-      try {
-        await ZipReader.withZipReaderDo(path, async (reader) => {
-          if (!(await reader.doesEntryExist('definition.yml'))) {
-            throw new Error(
-              `Zip file does not contain a definition.yml, can't be a plugin: ${path}`,
-            );
-          }
-        });
-      } catch (e) {
-        if (
-          (e as object)
-            .toString()
-            .startsWith(
-              `Zip file does not contain a definition.yml, can't be a plugin`,
-            )
-        ) {
-          isPlugin = false;
-        }
-      }
-
-      if (isPlugin) {
-        await extractZipToPath(path, path.slice(undefined, -4));
-        await renameFile(path, `${path}.backup`);
-      }
-    }),
-  );
-}
+export const LOGGER = new Logger('discovery.ts');
 
 async function getExtensionHandles(ucpFolder: string) {
   const moduleDir = `${ucpFolder}/modules/`;
@@ -555,4 +446,4 @@ const Discovery = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export { Discovery, collectConfigEntries, applyLocale, getExtensionHandles };
+export { Discovery, collectConfigEntries, getExtensionHandles };

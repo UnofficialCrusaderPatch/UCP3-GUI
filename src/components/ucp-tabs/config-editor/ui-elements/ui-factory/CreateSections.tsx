@@ -13,7 +13,7 @@ import {
 } from '../../../../../config/ucp/common';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../../function/extensions/state/state';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
-import { applyLocale } from '../../../../../function/extensions/discovery/discovery';
+import { applyLocale } from '../../../../../function/extensions/discovery/translation';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitize-id';

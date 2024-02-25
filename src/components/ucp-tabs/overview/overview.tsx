@@ -29,7 +29,7 @@ import { showModalOk } from '../../modals/modal-ok';
 import {
   GAME_FOLDER_LOADED_ATOM,
   useCurrentGameFolder,
-} from '../../../function/game-folder/state';
+} from '../../../function/game-folder/utils';
 import RecentFolders from './recent-folders';
 import OverviewButton from './overview-button';
 import { ToastType } from '../../toasts/toasts-display';
@@ -113,7 +113,7 @@ export default function Overview() {
               t('gui-download:ucp.version.check'),
             );
 
-            const vr = await getStore().get(UCP_VERSION_ATOM);
+            const vr = getStore().get(UCP_VERSION_ATOM);
             let version = '0.0.0';
             let sha = '';
             if (vr.status === 'ok') {

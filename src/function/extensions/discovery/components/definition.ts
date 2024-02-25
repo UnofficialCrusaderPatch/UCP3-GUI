@@ -7,6 +7,10 @@ import {
 } from '../definition-meta-version-1.0.0/parse-definition';
 import { DEFINITION_FILE } from '../io';
 import Logger from '../../../../util/scripts/logging';
+import {
+  checkFrameworkDependency,
+  checkFrontendDependency,
+} from '../system-dependencies';
 
 const LOGGER = new Logger('discovery/definitions.ts');
 
@@ -80,6 +84,35 @@ export const validateDefinition = async (eh: ExtensionHandle) => {
       content: undefined,
     } as ExtensionDefinitionValidationResult;
   }
+
+  const guiSupported = await checkFrontendDependency(
+    parsedDependencies.content,
+  );
+  const frameworkSupported = await checkFrameworkDependency(
+    parsedDependencies.content,
+  );
+
+  if (guiSupported.state === 'failed') {
+    return {
+      status: 'error',
+      messages: [
+        `Extension "${name}-${version}" requires gui version ${guiSupported.dependency} but gui version ${guiSupported.version} is supplied`,
+      ],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  }
+
+  if (frameworkSupported.state === 'failed') {
+    // eslint-disable-next-line no-constant-condition
+    return {
+      status: 'error',
+      messages: [
+        `Extension "${name}-${version}" requires framework version ${frameworkSupported.dependency} but framework version ${frameworkSupported.version} is installed`,
+      ],
+      content: undefined,
+    } as ExtensionDefinitionValidationResult;
+  }
+
   definition.dependencies = parsedDependencies.content;
 
   return {

@@ -18,7 +18,7 @@ import {
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
-import { useCurrentGameFolder } from '../../../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { getStore } from '../../../../hooks/jotai/base';
 

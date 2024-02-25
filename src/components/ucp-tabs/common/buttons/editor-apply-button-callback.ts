@@ -60,10 +60,14 @@ export const editorApplyButtonCallback = async (
     definition: newDefinition,
   } as Extension;
 
-  const tree = new ExtensionTree([
-    ...extensionsState.extensions.filter((e) => e.name !== newExtension.name),
-    newExtension,
-  ]);
+  const tree = new ExtensionTree(
+    [
+      ...extensionsState.extensions.filter((e) => e.name !== newExtension.name),
+      newExtension,
+    ],
+    extensionsState.tree.frontendVersion,
+    extensionsState.tree.frameworkVersion,
+  );
   const solution = tree.tryResolveAllDependencies();
 
   if (solution.status !== 'ok') {

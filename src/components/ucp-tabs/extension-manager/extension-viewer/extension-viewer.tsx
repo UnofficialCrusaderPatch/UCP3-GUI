@@ -7,7 +7,7 @@ import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import { LANGUAGE_ATOM } from '../../../../function/gui-settings/settings';
-import { DESCRIPTION_FILE } from '../../../../function/extensions/discovery/discovery';
+import { DESCRIPTION_FILE } from '../../../../function/extensions/discovery/io';
 
 export type ExtensionViewerProps = {
   extension: Extension;

@@ -35,8 +35,8 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
     );
   } catch (err: any) {
     await showModalOk({
-      title: 'error in adding extension',
-      message: err.toString(),
+      title: 'Could not activate extension',
+      message: `Could not activate extension due to missing extensions or dependency conflicts.\n\nLog:\n\n${err.toString()}`,
     });
 
     return;

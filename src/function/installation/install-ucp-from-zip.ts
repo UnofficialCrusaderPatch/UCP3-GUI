@@ -9,7 +9,7 @@ import {
   createRealBink,
 } from '../ucp-files/ucp-state';
 import { getStore } from '../../hooks/jotai/base';
-import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
+import { initializeUCPVersion } from '../ucp-files/ucp-version';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function installUCPFromZip(
@@ -31,7 +31,7 @@ export async function installUCPFromZip(
     }
 
     // Force a refresh on this atom to ensure activateUCP() is dealing with the right IO state
-    getStore().set(UCP_VERSION_ATOM);
+    await initializeUCPVersion(gameFolder);
 
     // Force a refresh on this atom to ensure activateUCP() is dealing with the right IO state
     getStore().set(UCP_STATE_ATOM);

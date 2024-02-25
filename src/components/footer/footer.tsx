@@ -9,7 +9,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { loadable } from 'jotai/utils';
 
 import { UCPState, UCP_STATE_ATOM } from '../../function/ucp-files/ucp-state';
-import { useCurrentGameFolder } from '../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../function/game-folder/utils';
 import { UCP_VERSION_ATOM } from '../../function/ucp-files/ucp-version';
 
 const UCP_STATE_MAP = new Map([

@@ -8,10 +8,8 @@ import { MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from '../../../tauri/tauri-dialog';
 import { RecentFolderHelper } from '../../../config/gui/recent-folder-helper';
-import {
-  GAME_FOLDER_INTERFACE_ASYNC_ATOM,
-  GAME_FOLDER_LOADED_ATOM,
-} from '../../../function/game-folder/state';
+import { GAME_FOLDER_LOADED_ATOM } from '../../../function/game-folder/utils';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../../../function/game-folder/game-folder-interface';
 import { reloadCurrentWindow } from '../../../function/window-actions';
 import { useRecentFolders } from '../../../hooks/jotai/hooks';
 import Result from '../../../util/structs/result';

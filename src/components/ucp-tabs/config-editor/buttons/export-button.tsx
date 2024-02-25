@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { FolderSymlink } from 'react-bootstrap-icons';
 import { useSetAtom } from 'jotai';
-import { useCurrentGameFolder } from '../../../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import { makeToast } from '../../../toasts/toasts-display';

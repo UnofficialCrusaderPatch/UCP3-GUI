@@ -311,6 +311,8 @@ const importButtonCallback = async (
           title: 'Error in dependencies',
         });
 
+        ConsoleLogger.error(de);
+
         return;
       }
     }

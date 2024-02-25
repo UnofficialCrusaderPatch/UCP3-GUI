@@ -55,7 +55,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
     LOGGER.msg(solution.message).error();
     await showModalOk({
       message: solution.message,
-      title: 'Error in dependencies',
+      title: 'Deactivating extension: Error in dependencies',
     });
 
     return extensionsState;

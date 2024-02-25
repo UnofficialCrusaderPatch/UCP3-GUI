@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { atom, useAtom, useAtomValue } from 'jotai';
+import {
+  INIT_DONE,
+  INIT_RUNNING,
+  INIT_ERROR,
+} from '../../function/game-folder/initialization-states';
 import Logger from '../../util/scripts/logging';
 import { showModalOk } from '../modals/modal-ok';
 import * as GuiSettings from '../../function/gui-settings/settings';
-import {
-  INIT_RUNNING,
-  INIT_DONE,
-  INIT_ERROR,
-} from '../../function/game-folder/initialization';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 
 import {

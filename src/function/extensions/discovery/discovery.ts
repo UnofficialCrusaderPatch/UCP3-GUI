@@ -166,23 +166,36 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
 
   const extensionsByID: { [id: string]: Extension } = {};
 
-  // TODO: inform the end-user of the swallowed errors
   const extensions: Extension[] = extensionDiscoveryResults
     .filter((edr) => edr.status !== 'error' && edr.content !== undefined)
     .map((edr) => edr.content) as Extension[];
 
   const extensionsWithErrors = extensionDiscoveryResults
     .filter((edr) => edr.status === 'error')
-    .map((elr) => `${elr.handle.path}:\n${elr.messages.join('\n')}`);
+    .map((elr) => {
+      const { path } = elr.handle;
+      const reportedPath = `ucp/${path.split('/ucp/')[1]}`;
+      return `${reportedPath}:\n${elr.messages.join('\n')}`;
+    });
 
   if (extensionsWithErrors.length > 0) {
     await showModalOk({
       title: 'Errors while discovering extensions',
-      message: `These extensions were skipped because they contain errors:\n\n ${extensionsWithErrors.join(
+      message: `These extensions were skipped because they contain errors or incompatiblities:\n\n ${extensionsWithErrors.join(
         '\n\n',
       )}`,
     });
   }
+
+  const extensionsWithWarnings = extensionDiscoveryResults
+    .filter((edr) => edr.status === 'warning')
+    .map((elr) => {
+      const { path } = elr.handle;
+      const reportedPath = `ucp/${path.split('/ucp/')[1]}`;
+      return `${reportedPath}:\n${elr.messages.join('\n')}`;
+    });
+
+  LOGGER.msg(extensionsWithWarnings.join('\n\n')).warn();
 
   // Should not happen anymore
   extensions.forEach((e) => {

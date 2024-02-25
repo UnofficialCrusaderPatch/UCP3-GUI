@@ -28,7 +28,7 @@ export class ExtensionSolution {
   }
 
   get message() {
-    return this.messages.join('\n');
+    return this.messages.join('\n\n');
   }
 }
 
@@ -51,7 +51,17 @@ export class ExtensionTree {
 
   extensionsById: { [extensionID: string]: Extension };
 
-  constructor(extensions: Extension[]) {
+  frontendVersion: string;
+
+  frameworkVersion: string;
+
+  constructor(
+    extensions: Extension[],
+    frontendVersion?: string,
+    frameworkVersion?: string,
+  ) {
+    this.frontendVersion = frontendVersion || '0.0.0';
+    this.frameworkVersion = frameworkVersion || '3.0.0';
     this.extensions = extensions;
     this.extensionsById = Object.fromEntries(
       extensions.map((e) => [extensionToID(e), e]),
@@ -66,6 +76,9 @@ export class ExtensionTree {
           ),
         ),
     );
+
+    repo.push(new Package('frontend', this.frontendVersion));
+    repo.push(new Package('framework', this.frameworkVersion));
 
     this.tree = new Tree(repo);
   }
@@ -95,6 +108,9 @@ export class ExtensionTree {
         ),
     );
 
+    repo.push(new Package('frontend', this.frontendVersion));
+    repo.push(new Package('framework', this.frameworkVersion));
+
     this.tree = new Tree(repo);
   }
 
@@ -120,6 +136,7 @@ export class ExtensionTree {
   tryResolveAllDependencies() {
     try {
       this.tree.reset();
+      this.tree.errors.splice(0, this.tree.errors.length);
 
       this.tree.setInitialTargetForAllEdges();
 
@@ -150,7 +167,8 @@ export class ExtensionTree {
 
     return node.edgesIn
       .filter((e) => !e.from.id.startsWith('__user__'))
-      .map((e) => this.extensionsById[e.from.id]);
+      .map((e) => this.extensionsById[e.from.id])
+      .filter((e) => e !== undefined);
   }
 
   directDependenciesFor(ext: Extension) {
@@ -163,19 +181,22 @@ export class ExtensionTree {
 
     return node.edgesOut
       .map((e) => e.to!)
-      .map((n) => this.extensionsById[n.id]);
+      .map((n) => this.extensionsById[n.id])
+      .filter((e) => e !== undefined);
   }
 
   dependenciesFor(ext: Extension): ExtensionSolution {
     const node = this.nodeForExtension(ext);
 
     this.tree.reset();
+    this.tree.errors.splice(0, this.tree.errors.length);
     this.tree.setInitialTargetForAllEdges();
 
     try {
       const s = this.tree
         .solve([node.spec])
-        .map((n) => this.extensionsById[n.id]);
+        .map((n) => this.extensionsById[n.id])
+        .filter((e) => e !== undefined);
 
       return new ExtensionSolution('OK', s, []);
     } catch (e) {
@@ -185,13 +206,15 @@ export class ExtensionTree {
 
   dependenciesForExtensions(extensions: Extension[]): ExtensionSolution {
     this.tree.reset();
+    this.tree.errors.splice(0, this.tree.errors.length);
 
     const nodes = extensions.map((e) => this.nodeForExtension(e));
 
     try {
       const s = this.tree
         .solve(nodes.map((n) => n.spec))
-        .map((n) => this.extensionsById[n.id]);
+        .map((n) => this.extensionsById[n.id])
+        .filter((e) => e !== undefined);
 
       return new ExtensionSolution('OK', s, []);
     } catch (e) {

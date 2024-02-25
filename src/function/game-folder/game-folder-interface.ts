@@ -1,11 +1,15 @@
+import { atom } from 'jotai';
+
 import { exists } from '@tauri-apps/api/fs';
 import i18next from 'i18next';
-import { atom } from 'jotai';
+import { getVersion } from '@tauri-apps/api/app';
+import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
+import { GAME_FOLDER_ATOM } from './game-folder-atom';
 import { showModalOk } from '../../components/modals/modal-ok';
 import importButtonCallback from '../../components/ucp-tabs/common/import-button-callback';
 import { Extension } from '../../config/ucp/common';
-import { getExtensions } from '../../config/ucp/extension-util';
-import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
+import { getStore } from '../../hooks/jotai/base';
+import Logger, { ConsoleLogger } from '../../util/scripts/logging';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
@@ -13,16 +17,16 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from '../configuration/state';
-import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
-import { getStore } from '../../hooks/jotai/base';
-import Logger, { ConsoleLogger } from '../../util/scripts/logging';
+import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
+import { Discovery } from '../extensions/discovery/discovery';
 import { ExtensionsState } from '../extensions/extensions-state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
+import {
+  UCP_VERSION_ATOM,
+  initializeUCPVersion,
+} from '../ucp-files/ucp-version';
 
-export const LOGGER = new Logger('game-folder/initialization.ts');
-
-export const INIT_DONE = atom(false);
-export const INIT_RUNNING = atom(false);
-export const INIT_ERROR = atom(false);
+const LOGGER = new Logger('game-folder-interface.ts');
 
 export async function initializeGameFolder(newFolder: string) {
   const loggerState = LOGGER.empty();
@@ -42,7 +46,7 @@ export async function initializeGameFolder(newFolder: string) {
     // TODO: currently only set on initial render and folder selection
     // TODO: resolve this type badness
     try {
-      extensions = await getExtensions(newFolder);
+      extensions = await Discovery.discoverExtensions(newFolder);
     } catch (e) {
       LOGGER.obj(e).error();
       await showModalOk({
@@ -91,7 +95,13 @@ export async function initializeGameFolder(newFolder: string) {
 
   const newExtensionsState = {
     ...extensionsState,
-    tree: new ExtensionTree([...extensions]),
+    tree: new ExtensionTree(
+      [...extensions],
+      await getVersion(),
+      getStore().get(UCP_VERSION_ATOM).version.isValidForSemanticVersioning
+        ? getStore().get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString()
+        : undefined,
+    ),
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
     installedExtensions: [...extensions],
@@ -133,3 +143,25 @@ export async function initializeGameFolder(newFolder: string) {
   getStore().set(INIT_DONE, true);
   getStore().set(INIT_RUNNING, false);
 } // normal atoms
+
+// eslint-disable-next-line import/prefer-default-export
+export const GAME_FOLDER_INTERFACE_ASYNC_ATOM = atom(
+  (get) => get(GAME_FOLDER_ATOM),
+  async (get, set, newValue: string) => {
+    const oldValue = get(GAME_FOLDER_ATOM);
+
+    if (newValue === oldValue || get(INIT_RUNNING)) {
+      return;
+    }
+
+    LOGGER.msg('Initializing ucp version information').debug();
+    await initializeUCPVersion(newValue);
+    LOGGER.msg('Initializing ucp version information finished').debug();
+
+    LOGGER.msg('Initializing game folder').debug();
+    await initializeGameFolder(newValue);
+    LOGGER.msg('Initializing game folder finished').debug();
+
+    set(GAME_FOLDER_ATOM, newValue);
+  },
+); // eslint-disable-next-line import/prefer-default-export

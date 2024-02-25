@@ -5,7 +5,7 @@ import { Stack } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
-import { useCurrentGameFolder } from '../../../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { saveFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { ZipWriter } from '../../../../util/structs/zip-handler';

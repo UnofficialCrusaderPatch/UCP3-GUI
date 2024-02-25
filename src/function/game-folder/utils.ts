@@ -2,26 +2,10 @@ import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
 import { exists } from '@tauri-apps/api/fs';
 import Logger from '../../util/scripts/logging';
-import { INIT_RUNNING, initializeGameFolder } from './initialization';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from './game-folder-interface';
+import { GAME_FOLDER_ATOM } from './game-folder-atom';
 
-export const LOGGER = new Logger('game-folder/state.ts');
-
-const GAME_FOLDER_ATOM = atom('');
-
-export const GAME_FOLDER_INTERFACE_ASYNC_ATOM = atom(
-  (get) => get(GAME_FOLDER_ATOM),
-  async (get, set, newValue: string) => {
-    const oldValue = get(GAME_FOLDER_ATOM);
-
-    if (newValue === oldValue || get(INIT_RUNNING)) {
-      return;
-    }
-
-    await initializeGameFolder(newValue);
-
-    set(GAME_FOLDER_ATOM, newValue);
-  },
-);
+export const LOGGER = new Logger('game-folder/utils.ts');
 
 export const GAME_FOLDER_LOADED_ASYNC_ATOM = atom((get) =>
   get(GAME_FOLDER_INTERFACE_ASYNC_ATOM),

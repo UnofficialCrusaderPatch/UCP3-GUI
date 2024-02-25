@@ -2,7 +2,7 @@ import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../extension-editor/extension-editor-state';
 import importButtonCallback from '../import-button-callback';
-import { useCurrentGameFolder } from '../../../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export function StopButton() {

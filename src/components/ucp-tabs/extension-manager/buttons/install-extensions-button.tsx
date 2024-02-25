@@ -4,9 +4,11 @@ import { PlusLg } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import ExtensionPack from '../../../../function/extensions/pack/extension-pack';
-import { LOGGER } from '../../../../function/game-folder/initialization';
-import { useCurrentGameFolder } from '../../../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { openFileDialog } from '../../../../tauri/tauri-dialog';
+import Logger from '../../../../util/scripts/logging';
+
+const LOGGER = new Logger('install-extensions-button.tsx');
 
 // eslint-disable-next-line import/prefer-default-export
 export function InstallExtensionButton() {

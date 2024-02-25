@@ -1,14 +1,9 @@
-import { Discovery } from '../../function/extensions/discovery/discovery';
 import {
   DisplayConfigElement,
   Extension,
   OptionEntry,
   SectionDescription,
 } from './common';
-
-export async function getExtensions(gameFolder: string) {
-  return Discovery.discoverExtensions(gameFolder);
-}
 
 export function optionEntriesToHierarchical(
   uiCollection: OptionEntry[],

@@ -5,7 +5,7 @@ import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import Result from '../../util/structs/result';
 import { getHexHashOfFile } from '../../util/scripts/hash';
 import Logger from '../../util/scripts/logging';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/state';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/game-folder-interface';
 import { getTranslation } from '../../localization/i18n';
 import {
   BINK_FILENAME,

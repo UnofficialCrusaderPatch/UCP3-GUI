@@ -1,12 +1,11 @@
 import { atom } from 'jotai';
-import { loadYaml, resolvePath } from '../../tauri/tauri-files';
+import { INIT_ERROR } from '../game-folder/initialization-states';
+import { loadYaml } from '../../tauri/tauri-files';
 import Option from '../../util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from '../../util/scripts/util';
 import { UCP_VERSION_FILE } from '../global/constants/file-constants';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/state';
-import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
+import { getStore } from '../../hooks/jotai/base';
 import Logger from '../../util/scripts/logging';
-import { INIT_ERROR } from '../game-folder/initialization';
 
 const LOGGER = new Logger('ucp-version.ts');
 export interface UCPVersionInterface {
@@ -32,6 +31,10 @@ export class UCPVersion implements UCPVersionInterface {
     return numOption.map((num) => num.toString()).getOrElse('?');
   }
 
+  getMajorMinorPatchAsString() {
+    return `${this.getMajorAsString()}.${this.getMinorAsString()}.${this.getPatchAsString()}`;
+  }
+
   getMajorAsString(): string | '?' {
     return UCPVersion.#getVersionNumAsString(this.major);
   }
@@ -50,6 +53,12 @@ export class UCPVersion implements UCPVersionInterface {
 
   getBuildRepresentation(): string | '?' {
     return this.build.getOrElse('?');
+  }
+
+  get isValidForSemanticVersioning() {
+    return (
+      this.major.isPresent() && this.minor.isPresent() && this.patch.isPresent()
+    );
   }
 
   constructor(object?: Record<string, unknown>) {
@@ -82,18 +91,6 @@ export class UCPVersion implements UCPVersionInterface {
   }
 }
 
-async function getUCPVersionFilePath(gameFolder: string) {
-  if (!gameFolder) {
-    return '';
-  }
-
-  return resolvePath(gameFolder, UCP_VERSION_FILE);
-}
-
-const UCP_VERSION_FILE_PATH_ATOM = atom((get) =>
-  getUCPVersionFilePath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM)),
-);
-
 export type UCPVersionFileProcessResult = {
   version: UCPVersion;
   status: 'ok' | 'warning' | 'error';
@@ -101,22 +98,28 @@ export type UCPVersionFileProcessResult = {
   errorCode?: 1 | 2 | 3;
 };
 
-export const UCP_VERSION_ATOM = atomWithRefresh(async (get) => {
-  const path = await get(UCP_VERSION_FILE_PATH_ATOM);
-  if (!path) {
-    return {
+export const UCP_VERSION_ATOM = atom<UCPVersionFileProcessResult>({
+  version: new UCPVersion(),
+} as UCPVersionFileProcessResult);
+
+export const initializeUCPVersion = async (gameFolder: string) => {
+  if (!gameFolder) {
+    getStore().set(UCP_VERSION_ATOM, {
       version: new UCPVersion(),
       status: 'error',
       errorCode: 2,
       messages: ['path is not defined'],
-    } as UCPVersionFileProcessResult;
+    } as UCPVersionFileProcessResult);
   }
-  return (await loadYaml(path)).consider(
-    async (yaml) =>
-      ({
+  const path = `${gameFolder}/${UCP_VERSION_FILE}`;
+  (await loadYaml(path)).consider(
+    async (yaml) => {
+      getStore().set(UCP_VERSION_ATOM, {
         version: new UCPVersion(yaml),
         status: 'ok',
-      }) as UCPVersionFileProcessResult,
+      } as UCPVersionFileProcessResult);
+    },
+
     async (err) => {
       LOGGER.obj(err).warn();
       let errorCode = 0;
@@ -145,12 +148,12 @@ export const UCP_VERSION_ATOM = atomWithRefresh(async (get) => {
         //   message: msg,
         // });
       }
-      return {
+      getStore().set(UCP_VERSION_ATOM, {
         version: new UCPVersion(),
         status: 'error',
         errorCode,
         messages,
-      } as UCPVersionFileProcessResult;
+      } as UCPVersionFileProcessResult);
     },
   );
-});
+};

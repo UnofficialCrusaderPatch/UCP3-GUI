@@ -22,7 +22,7 @@ import {
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
-import { useCurrentGameFolder } from '../../../../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../../../../function/game-folder/utils';
 
 import Logger from '../../../../../util/scripts/logging';
 import { showModalOkCancel } from '../../../../modals/modal-ok-cancel';

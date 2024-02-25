@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 import { resolvePath } from '../../tauri/tauri-files';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/state';
+import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/game-folder-interface';
 
 async function getVanillaPath(gameFolder: string): Promise<string> {
   if (!gameFolder) {

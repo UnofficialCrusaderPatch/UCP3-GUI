@@ -12,7 +12,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../function/configuration/state';
-import { useCurrentGameFolder } from '../../function/game-folder/state';
+import { useCurrentGameFolder } from '../../function/game-folder/utils';
 
 import {
   getLanguage,

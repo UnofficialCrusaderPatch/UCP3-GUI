@@ -128,7 +128,11 @@ export async function initializeGameFolder(newFolder: string) {
     const { t } = i18next;
 
     if (await exists(file)) {
-      await importButtonCallback(newFolder, () => {}, t, file);
+      try {
+        await importButtonCallback(newFolder, () => {}, t, file);
+      } catch (err: any) {
+        loggerState.setMsg(err).error();
+      }
     } else {
       loggerState.setMsg('no ucp-config.yml file found').info();
     }

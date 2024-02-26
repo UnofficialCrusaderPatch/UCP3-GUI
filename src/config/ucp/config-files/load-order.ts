@@ -14,7 +14,8 @@ export const serializeLoadOrderToYaml = (extensions: Extension[]) =>
 export const deserializeLoadOrder = (values: string[] | LoadOrder) => {
   const result: LoadOrder = [];
 
-  if (!(values instanceof Array)) throw Error('Illegal load-order spec');
+  if (!(values instanceof Array))
+    throw Error(`Illegal load-order spec ${JSON.stringify(values)}`);
 
   if (values.length === 0) return result;
 
@@ -25,13 +26,15 @@ export const deserializeLoadOrder = (values: string[] | LoadOrder) => {
   }
   const converted = values as string[];
   converted.forEach((val) => {
-    if (Object.keys(val).length !== 1) throw Error('Illegal load-order spec');
+    if (Object.keys(val).length !== 1)
+      throw Error(`Illegal load-order spec ${JSON.stringify(values)}`);
 
     const ds = DependencyStatement.fromString(val);
     const name = ds.extension;
     const { version } = ds;
 
-    if (ds.operator !== '==') throw Error('Illegal load-order spec');
+    if (ds.operator !== '==')
+      throw Error(`Illegal load-order spec ${JSON.stringify(values)}`);
 
     result.push({ extension: name, version: version.toString() });
   });

@@ -19,7 +19,7 @@ function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
       type="button"
       onClick={async () => {
         try {
-          importButtonCallback(gameFolder, setConfigStatus, t, '');
+          await importButtonCallback(gameFolder, setConfigStatus, t, '');
         } catch (e: any) {
           await showModalOk({
             title: 'ERROR',

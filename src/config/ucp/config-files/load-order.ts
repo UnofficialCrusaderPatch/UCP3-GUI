@@ -21,7 +21,7 @@ export const deserializeLoadOrder = (values: string[] | LoadOrder) => {
   const isObject = values[0] instanceof Object;
 
   if (isObject) {
-    return values;
+    return values as LoadOrder;
   }
   const converted = values as string[];
   converted.forEach((val) => {

@@ -25,19 +25,7 @@
       ]
     ],
     [
-      "assets/misc/chevron-compact-down.svg?raw",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
-    [
       "assets/misc/fullscreen-exit.svg",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
-    [
-      "assets/misc/fullscreen-exit.svg?raw",
       [
         "src\\components\\titlebar\\titlebar.tsx"
       ]
@@ -49,25 +37,13 @@
       ]
     ],
     [
-      "assets/misc/fullscreen.svg?raw",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
-    [
-      "assets/misc/translate.svg?raw",
+      "assets/misc/translate.svg",
       [
         "src\\components\\top-bar\\language-select\\language-select.tsx"
       ]
     ],
     [
       "assets/misc/x-lg.svg",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
-    [
-      "assets/misc/x-lg.svg?raw",
       [
         "src\\components\\titlebar\\titlebar.tsx"
       ]
@@ -84,7 +60,6 @@
   ],
   "ignoreUnimported": [
     "src/hooks/general/util.ts",
-    "src/components/general/svg-helper.tsx",
     "src/components/sandbox-menu/sandbox-frame-base.js",
     "src/components/ucp-tabs/common/create-pack-button-callback.tsx",
     "src/function/global/array-reducer.ts"

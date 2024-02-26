@@ -1,11 +1,10 @@
-/* eslint-disable import/no-unresolved */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import './titlebar.css';
-import closeIcon from 'assets/misc/x-lg.svg?raw';
-import minimizeIcon from 'assets/misc/chevron-compact-down.svg?raw';
-import maximizeIcon from 'assets/misc/fullscreen.svg?raw';
-import maximizeExitIcon from 'assets/misc/fullscreen-exit.svg?raw';
+import closeIcon from 'assets/misc/x-lg.svg';
+import minimizeIcon from 'assets/misc/chevron-compact-down.svg';
+import maximizeIcon from 'assets/misc/fullscreen.svg';
+import maximizeExitIcon from 'assets/misc/fullscreen-exit.svg';
 import mainIcon from 'assets/ucp3.png';
 
 import { TauriEvent } from '@tauri-apps/api/event';
@@ -44,9 +43,8 @@ export default function Titlebar() {
         onClick={() => currentWindow.minimize()}
       >
         <SvgHelper
-          href="#chevron-compact-down"
+          href={`${minimizeIcon}#chevron-compact-down`}
           title={t('gui-general:titlebar.alt.minimize')}
-          data={minimizeIcon}
         />
       </div>
       <div
@@ -56,15 +54,13 @@ export default function Titlebar() {
       >
         {isMax ? (
           <SvgHelper
-            href="#fullscreen-exit"
+            href={`${maximizeExitIcon}#fullscreen-exit`}
             title={t('gui-general:titlebar.alt.maximize')}
-            data={maximizeExitIcon}
           />
         ) : (
           <SvgHelper
-            href="#fullscreen"
+            href={`${maximizeIcon}#fullscreen`}
             title={t('gui-general:titlebar.alt.maximize')}
-            data={maximizeIcon}
           />
         )}
       </div>
@@ -75,9 +71,8 @@ export default function Titlebar() {
         onClick={() => currentWindow.emit(TauriEvent.WINDOW_CLOSE_REQUESTED)}
       >
         <SvgHelper
-          href="#x-lg"
+          href={`${closeIcon}#x-lg`}
           title={t('gui-general:titlebar.alt.close')}
-          data={closeIcon}
         />
       </div>
     </div>

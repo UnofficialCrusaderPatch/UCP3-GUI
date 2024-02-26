@@ -1,5 +1,5 @@
-import { FileEntry, readDir } from '@tauri-apps/api/fs';
-import { exists, t } from 'i18next';
+import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
+import { t } from 'i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Stack } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -9,6 +9,7 @@ import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { saveFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { ZipWriter } from '../../../../util/structs/zip-handler';
+import { makeToast } from '../../../toasts/toasts-display';
 
 const LOGGER = new Logger('create-extensions-pack.tsx');
 
@@ -132,6 +133,8 @@ export function CreateExtensionsPackButton() {
             message: e.toString(),
           });
         }
+
+        await makeToast({ title: 'Extension pack created!', body: '' });
       }}
       onMouseEnter={() => {
         setStatusBarMessage(t('gui-editor:config.tooltip.pack'));

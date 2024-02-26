@@ -17,13 +17,14 @@
       "fs": {
         "all": true,
         "scope": [
-          "$DATA/*",
+          "$TEMP/**/*",
+          "$DATA/**/*",
           "$DOWNLOAD/*",
-          "$LOCALDATA/*",
-          "$APP/*",
-          "$RESOURCE/gameinfo/*.yaml",
-          "$RESOURCE/lang/*.yaml",
-          "$RESOURCE/lang/sources/*/*.yaml"
+          "$LOCALDATA/**/*",
+          "$APP/**/*",
+          "$RESOURCE/gameinfo/**/*.yaml",
+          "$RESOURCE/lang/**/*.yaml",
+          "$RESOURCE/lang/sources/**/*.yaml"
         ]
       },
       "path": {

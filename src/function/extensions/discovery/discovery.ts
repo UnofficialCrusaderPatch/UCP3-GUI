@@ -1,4 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
+import { basename } from '@tauri-apps/api/path';
 import { onFsExists } from '../../../tauri/tauri-files';
 import {
   ConfigEntry,
@@ -45,6 +46,17 @@ const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
   return false;
 };
 
+const checkFullEquality = async (
+  eh: ExtensionHandle,
+  name: string,
+  version: string,
+) => {
+  const target = `${name}-${version}`;
+  const base = await basename(eh.path);
+
+  return base === `${target}` || base === `${target}.zip`;
+};
+
 const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
   LOGGER.msg('Discovering extensions').info();
 
@@ -85,6 +97,18 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
             messages: [
               ...warnings,
               `Version as defined in definition.yml (${version}) does not match file name version ${eh.path}`,
+            ],
+            content: undefined,
+            handle: eh,
+          } as ExtensionLoadResult;
+        }
+
+        if (!(await checkFullEquality(eh, name, version))) {
+          return {
+            status: 'error',
+            messages: [
+              ...warnings,
+              `Extension as defined in definition.yml (${name}-${version}) does not match file name ${eh.path}`,
             ],
             content: undefined,
             handle: eh,

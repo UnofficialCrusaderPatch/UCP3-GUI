@@ -65,7 +65,7 @@ const createDependenciesFromExplicitlyActiveExtensions = () => {
   return Object.fromEntries(
     explicitlyActivatedExtensions.map((e) => [
       e.name,
-      new semver.Range(`^${e.version}`),
+      new semver.Range(`^${e.version}`, { loose: true }),
     ]),
   );
 };

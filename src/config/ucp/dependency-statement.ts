@@ -1,6 +1,8 @@
 /* eslint-disable max-classes-per-file */
+
 const MATCHER = /^([a-zA-Z0-9-_]+)\s*([<>=]+)\s*([0-9.]+)$/;
 const MATCHER_SIMPLE = /^([a-zA-Z0-9-_]+)$/;
+const MATCHER_SIMPLE_HEAD = /^([a-zA-Z0-9-_]+)/;
 
 const VERSION_MATCHER = /([0-9]+)\.([0-9]+)\.([0-9]+)/;
 
@@ -234,8 +236,8 @@ class DependencyStatement {
   constructor(extension: string, operator: string, version: string) {
     this.extension = extension;
     this.version =
-      version === '' ? new Version(-1, -1, -1) : Version.fromString(version);
-    this.operator = operator;
+      version === '' ? new Version(0, 0, 0) : Version.fromString(version);
+    this.operator = operator === '' ? '>=' : operator;
   }
 
   static fromString(x: string): DependencyStatement {
@@ -247,6 +249,17 @@ class DependencyStatement {
     if (matchesSimple !== null) {
       return new DependencyStatement(matchesSimple[1], '', '');
     }
+
+    const matchesSimpleHead = MATCHER_SIMPLE_HEAD.exec(x);
+    if (matchesSimpleHead !== null) {
+      // try {
+      //   const range = new semver.Range(x.split(matchesSimpleHead[1])[1], {loose: true})
+      //   return new DependencyStatement(matchesSimpleHead[1], range.range, '');
+      // }
+
+      return new DependencyStatement(matchesSimpleHead[1], '>=', '0.0.0');
+    }
+
     throw new Error(`could not parse dependency string: ${x}`);
   }
 

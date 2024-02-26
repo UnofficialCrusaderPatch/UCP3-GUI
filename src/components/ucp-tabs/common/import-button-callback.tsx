@@ -17,7 +17,7 @@ import {
   ConfigEntry,
   ConfigFileExtensionEntry,
 } from '../../../config/ucp/common';
-import { loadConfigFromFile } from '../../../config/ucp/config-files';
+import { loadConfigFromFile } from '../../../config/ucp/config-files/config-files';
 import { ConfigMetaObjectDB } from '../../../config/ucp/config-merge/objects';
 import {
   DependencyStatement,
@@ -38,6 +38,7 @@ import {
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
+import { deserializeLoadOrder } from '../../../config/ucp/config-files/load-order';
 
 export const sanitizeVersionRange = (rangeString: string) => {
   if (rangeString.indexOf('==') !== -1) {
@@ -206,7 +207,7 @@ const importButtonCallback = async (
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
   // Get the load order from the sparse part of the config file
-  const loadOrder = config['config-sparse']['load-order'];
+  const loadOrder = deserializeLoadOrder(config['config-sparse']['load-order']);
   if (loadOrder !== undefined && loadOrder.length > 0) {
     const explicitActiveExtensions: Extension[] = [];
 
@@ -214,8 +215,10 @@ const importButtonCallback = async (
     // eslint-disable-next-line no-restricted-syntax
     for (const dependencyStatementString of loadOrder) {
       // Get the dependency
-      const dependencyStatement = DependencyStatement.fromString(
-        dependencyStatementString,
+      const dependencyStatement = new DependencyStatement(
+        dependencyStatementString.extension,
+        '==',
+        dependencyStatementString.version,
       );
 
       if (dependencyStatement.operator === '') {

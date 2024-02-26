@@ -1,12 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { TFunction } from 'i18next';
 import { stringify as yamlStringify } from 'yaml';
-import { writeTextFile, loadYaml } from '../../tauri/tauri-files';
-import Result from '../../util/structs/result';
-import { ConfigurationQualifier } from '../../function/configuration/state';
-import Logger from '../../util/scripts/logging';
-import { ConfigFile, Extension, ExtensionType } from './common';
-import { ConfigMeta, DefinitionMeta } from './config/meta';
+import { writeTextFile, loadYaml } from '../../../tauri/tauri-files';
+import Result from '../../../util/structs/result';
+import { ConfigurationQualifier } from '../../../function/configuration/state';
+import Logger from '../../../util/scripts/logging';
+import { ConfigFile, Extension, ExtensionType, LoadOrder } from '../common';
+import { ConfigMeta, DefinitionMeta } from '../config/meta';
+import { serializeLoadOrder } from './load-order';
 
 const LOGGER = new Logger('config-files.ts');
 
@@ -84,7 +85,7 @@ type ConfigExtensionPart = {
 };
 
 type ConfigPart = {
-  'load-order': string[];
+  'load-order': LoadOrder;
   modules: {
     [key: string]: ConfigExtensionPart;
   };
@@ -125,10 +126,7 @@ function saveUCPConfigPart(
   LOGGER.msg('Saving ucp config part').info();
   LOGGER.obj(finalConfig[subConfig]).debug();
 
-  finalConfig[subConfig]['load-order'] = extensions.map(
-    (e: Extension) =>
-      `${e.name} ${subConfig === 'config-sparse' ? '==' : '=='} ${e.version}`,
-  );
+  finalConfig[subConfig]['load-order'] = serializeLoadOrder(extensions);
 
   Object.entries(config)
     .filter(([, value]) => value !== undefined)

@@ -1,5 +1,5 @@
 import { Extension } from '../../../config/ucp/common';
-import { saveUCPConfig } from '../../../config/ucp/config-files';
+import { saveUCPConfig } from '../../../config/ucp/config-files/config-files';
 import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   ConfigurationQualifier,

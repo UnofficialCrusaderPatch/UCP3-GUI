@@ -240,6 +240,8 @@ const importButtonCallback = async (
 
       let options: Extension[] = [];
 
+      const dependencyStatementStringSerialized = `${dependencyStatementString.extension}-${dependencyStatementString.version}`;
+
       try {
         // Construct a range string that semver can parse
         const rstring = sanitizeVersionRange(
@@ -260,14 +262,14 @@ const importButtonCallback = async (
         if (options.length === 0) {
           setConfigStatus(
             t('gui-editor:config.status.missing.extension', {
-              extension: dependencyStatementString,
+              extension: dependencyStatementStringSerialized,
             }),
           );
 
           // eslint-disable-next-line no-await-in-loop
           await showModalOk({
             message: t('gui-editor:config.status.missing.extension', {
-              extension: dependencyStatementString,
+              extension: dependencyStatementStringSerialized,
             }),
             title: `Missing extension`,
           });
@@ -277,7 +279,7 @@ const importButtonCallback = async (
         }
       } catch (err: any) {
         // Couldn't be parsed by semver
-        const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementString}`;
+        const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementStringSerialized}`;
 
         // eslint-disable-next-line no-await-in-loop
         await showModalOk({

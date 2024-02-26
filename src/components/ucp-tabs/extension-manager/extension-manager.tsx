@@ -2,7 +2,8 @@ import './extension-manager.css';
 
 import { useTranslation } from 'react-i18next';
 
-import { atom, useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
+import { listen } from '@tauri-apps/api/event';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import {
@@ -18,10 +19,17 @@ import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extensio
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
 import { ExtensionManagerToolbar } from './toolbar-extension-manager';
 import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-editor-mode';
+import { ConsoleLogger } from '../../../util/scripts/logging';
+
+listen('tauri://file-drop', (event) => {
+  ConsoleLogger.debug(event);
+});
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
 );
+
+const EXPECTING_DROP = atom(false);
 
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
@@ -90,6 +98,8 @@ export default function ExtensionManager() {
 
   const displayGhostElement = editorState.state === 'active';
 
+  const [expectingDrop, setExpectingDrop] = useAtom(EXPECTING_DROP);
+
   return (
     <div className="flex-default extension-manager">
       <div className="extension-manager-control">
@@ -114,7 +124,17 @@ export default function ExtensionManager() {
           <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">{eUI}</div>
           </div>
-          <div className="extension-manager-control__box">
+          <div
+            className="extension-manager-control__box"
+            onMouseEnter={() => {
+              ConsoleLogger.debug('entering', expectingDrop);
+              setExpectingDrop(true);
+            }}
+            onMouseLeave={() => {
+              ConsoleLogger.debug('leaving', expectingDrop);
+              setExpectingDrop(false);
+            }}
+          >
             <div className="parchment-box extension-manager-list">
               {[
                 displayCustomisationsElement ? (

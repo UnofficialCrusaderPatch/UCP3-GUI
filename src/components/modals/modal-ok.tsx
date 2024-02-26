@@ -1,3 +1,5 @@
+import './modals.css';
+
 import { Modal, Button } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
@@ -26,20 +28,30 @@ function ModalOk(props: OkModalWindowProperties) {
     handleAction();
   };
 
+  const { style } = props;
+
+  let extraClassInfo = '';
+  if (style !== undefined) {
+    if (style.wide) {
+      extraClassInfo = 'wide';
+    }
+  }
+
   return (
     <Modal
+      bsPrefix="modal ucp-modal"
       show={show}
       onHide={internalHandleAction}
-      className="text-dark"
+      className={`text-dark ${extraClassInfo}`}
       style={{ whiteSpace: 'pre-line' }}
       // prevents escaping the modal:
       backdrop="static"
       keyboard={false}
     >
       <Modal.Header>
-        <Modal.Title>{title}</Modal.Title>
+        <Modal.Title className="h5">{title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>{message}</Modal.Body>
+      <Modal.Body className="fs-8">{message}</Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={internalHandleAction}>
           {ok.length > 0 ? ok : t('gui-general:ok')}

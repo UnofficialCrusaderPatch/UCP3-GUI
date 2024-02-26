@@ -13,6 +13,9 @@ export interface AbstractModalWindowProperties<R, C> {
   handleAction: (result: R) => void;
   handleClose: (cancelResult: C) => void;
   ok: string;
+  style?: {
+    wide: boolean;
+  };
 }
 
 type ModalCreator = () => ReactNode;

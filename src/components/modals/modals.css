@@ -1,0 +1,11 @@
+:root {
+  --bs-modal-width-wide: 750px;
+}
+
+.ucp-modal.wide .modal-dialog {
+  max-width: var(--bs-modal-width-wide);
+}
+
+.ucp-modal .modal-footer {
+  padding: calc(var(--bs-modal-padding) - var(--bs-modal-footer-gap));
+}

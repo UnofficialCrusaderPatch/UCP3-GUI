@@ -11,7 +11,7 @@ import {
   UCP3SerializedUserConfig,
   serializeUCPConfig,
   toYaml,
-} from '../../../../config/ucp/config-files';
+} from '../../../../config/ucp/config-files/config-files';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,

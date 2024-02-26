@@ -7,7 +7,7 @@ import {
 } from '../../../../config/ucp/common';
 import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { createPluginConfigFromCurrentState } from '../../config-editor/buttons/export-as-plugin-button';
-import { toYaml } from '../../../../config/ucp/config-files';
+import { toYaml } from '../../../../config/ucp/config-files/config-files';
 import { serializeDefinition } from '../../../../config/ucp/serialization';
 import { ExtensionTree } from '../../../../function/extensions/dependency-management/dependency-resolution';
 import { parseConfigEntries } from '../../../../function/extensions/discovery/parse-config-entries';

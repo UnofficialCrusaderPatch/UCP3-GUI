@@ -124,6 +124,8 @@ type ConfigFileExtensionEntry = {
   [key: string]: unknown;
 };
 
+export type LoadOrder = { extension: string; version: string }[];
+
 type ConfigFile = {
   meta: ConfigMeta;
   'config-sparse': {
@@ -137,7 +139,7 @@ type ConfigFile = {
         config: ConfigFileExtensionEntry;
       };
     };
-    'load-order': string[];
+    'load-order': LoadOrder;
   };
 };
 

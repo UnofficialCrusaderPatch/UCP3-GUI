@@ -1,5 +1,5 @@
 import { Definition } from './common';
-import { UCP3SerializedDefinition } from './config-files';
+import { UCP3SerializedDefinition } from './config-files/config-files';
 
 // eslint-disable-next-line import/prefer-default-export
 export const serializeDefinition = (definition: Definition) =>

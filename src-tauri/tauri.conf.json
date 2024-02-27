@@ -99,7 +99,11 @@
           "displayLanguageSelector": true,
           "languages": [
             "English"
-          ]
+          ],
+          "license": "../LICENSE",
+          "headerImage": "../installer/headerImage.bmp",
+          "sidebarImage": "../installer/sidebarImage.bmp",
+          "installerIcon": "../installer/ucp3.ico"
         }
       }
     },

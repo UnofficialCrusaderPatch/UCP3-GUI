@@ -24,7 +24,8 @@
           "$APP/**/*",
           "$RESOURCE/gameinfo/**/*.yaml",
           "$RESOURCE/lang/**/*.yaml",
-          "$RESOURCE/lang/sources/**/*.yaml"
+          "$RESOURCE/lang/sources/**/*.yaml",
+          "$RESOURCE/backgrounds/*"
         ]
       },
       "path": {
@@ -50,7 +51,10 @@
         "open": true
       },
       "protocol": {
-        "asset": true
+        "asset": true,
+        "assetScope": [
+          "$RESOURCE/backgrounds/*"
+        ]
       },
       "process": {
         "relaunch": true
@@ -73,7 +77,8 @@
       ],
       "resources": [
         "lang/*",
-        "gameinfo/*"
+        "gameinfo/*",
+        "backgrounds/*"
       ],
       "identifier": "ucp.gui.tauri",
       "publisher": "ucp-team",

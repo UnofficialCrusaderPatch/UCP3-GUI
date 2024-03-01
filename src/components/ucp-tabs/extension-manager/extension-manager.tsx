@@ -99,11 +99,21 @@ export default function ExtensionManager() {
 
   const showAllExtensions = useAtomValue(GuiSettings.SHOW_ALL_EXTENSIONS_ATOM);
 
-  const extensionsToDisplay = showAllExtensions
-    ? extensionsState.installedExtensions
-    : extensionsState.installedExtensions.filter(
+  const displayedActiveExtensions = showAllExtensions
+    ? extensionsState.activeExtensions
+    : extensionsState.activeExtensions.filter(
         (e) => !(e.type === 'module' && e.ui.length === 0),
       );
+
+  const activeExtensionNames = displayedActiveExtensions.map((ext) => ext.name);
+
+  const extensionsToDisplay = (
+    showAllExtensions
+      ? extensionsState.extensions
+      : extensionsState.extensions.filter(
+          (e) => !(e.type === 'module' && e.ui.length === 0),
+        )
+  ).filter((ext) => activeExtensionNames.indexOf(ext.name) === -1);
 
   const extensionsToDisplayByName = Array.from(
     new Set(extensionsToDisplay.map((e) => e.name)),
@@ -122,12 +132,6 @@ export default function ExtensionManager() {
         exts={enl.extensions}
       />
     ));
-
-  const displayedActiveExtensions = showAllExtensions
-    ? extensionsState.activeExtensions
-    : extensionsState.activeExtensions.filter(
-        (e) => !(e.type === 'module' && e.ui.length === 0),
-      );
 
   const activated = displayedActiveExtensions.map((ext, index, arr) => (
     <ActiveExtensionElement

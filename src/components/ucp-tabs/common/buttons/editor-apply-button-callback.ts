@@ -103,14 +103,20 @@ export const editorApplyButtonCallback = async (
   await extension.io.handle(async (eh) => {
     const pluginDir = eh.path;
 
-    if (!(await exists(`${pluginDir}/definition.original.yml`))) {
+    if (
+      !(await exists(`${pluginDir}/definition.original.yml`)) &&
+      (await eh.doesEntryExist('definition.yml'))
+    ) {
       await writeTextFile(
         `${pluginDir}/definition.original.yml`,
         await eh.getTextContents(`definition.yml`),
       );
     }
 
-    if (!(await exists(`${pluginDir}/config.original.yml`))) {
+    if (
+      !(await exists(`${pluginDir}/config.original.yml`)) &&
+      (await eh.doesEntryExist('config.yml'))
+    ) {
       await writeTextFile(
         `${pluginDir}/config.original.yml`,
         await eh.getTextContents(`config.yml`),

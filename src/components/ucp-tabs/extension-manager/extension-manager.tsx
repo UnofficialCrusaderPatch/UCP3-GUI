@@ -31,6 +31,7 @@ import { showModalOkCancel } from '../../modals/modal-ok-cancel';
 import { CURRENT_DISPLAYED_TAB } from '../tabs-state';
 import { showModalOk } from '../../modals/modal-ok';
 import { reloadCurrentWindow } from '../../../function/window-actions';
+import { makeToast } from '../../toasts/toasts-display';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
@@ -44,6 +45,7 @@ const handleFileDrop = async (event: Event<unknown>) => {
   if (getStore().get(CURRENT_DISPLAYED_TAB) === 'extensions') {
     ConsoleLogger.debug('Drop event: ', event);
     try {
+      let anythingInstalled = false;
       // eslint-disable-next-line no-restricted-syntax
       for (const path of event.payload as string[]) {
         // eslint-disable-next-line no-await-in-loop
@@ -53,19 +55,34 @@ const handleFileDrop = async (event: Event<unknown>) => {
         });
         // eslint-disable-next-line no-continue
         if (!answer) continue;
+
+        makeToast({
+          title: `Installing extension...`,
+          body: `Installing in the background`,
+        });
+
         // eslint-disable-next-line no-await-in-loop
         await installExtensionsButtonCallback(
           getStore().get(GAME_FOLDER_ATOM),
           path,
         );
+
+        // makeToast({
+        //   title: `Installed!`,
+        //   body: `Installation of extension complete`,
+        // });
+
+        anythingInstalled = true;
       }
 
-      await showModalOk({
-        title: 'Reload required',
-        message: 'The GUI will now reload.',
-      });
+      if (anythingInstalled) {
+        await showModalOk({
+          title: 'Reload required',
+          message: 'The GUI will now reload.',
+        });
 
-      reloadCurrentWindow();
+        reloadCurrentWindow();
+      }
     } catch (err: any) {
       ConsoleLogger.error(err);
     }
@@ -157,6 +174,38 @@ export default function ExtensionManager() {
     };
   }, []);
 
+  useEffect(() => {
+    const unlisten = listen<FileDropEvent>(
+      'tauri://file-drop-hover',
+      async () => {
+        setExpectingDrop(true);
+      },
+    );
+
+    // invoke a Rust function to start a loop for periodically emitting event.
+    // do something
+
+    return () => {
+      unlisten.then((f) => f()).catch((err) => ConsoleLogger.error(err));
+    };
+  }, [setExpectingDrop]);
+
+  useEffect(() => {
+    const unlisten = listen<FileDropEvent>(
+      'tauri://file-drop-cancelled',
+      async () => {
+        setExpectingDrop(false);
+      },
+    );
+
+    // invoke a Rust function to start a loop for periodically emitting event.
+    // do something
+
+    return () => {
+      unlisten.then((f) => f()).catch((err) => ConsoleLogger.error(err));
+    };
+  }, [setExpectingDrop]);
+
   return (
     <div className="flex-default extension-manager">
       <div className="extension-manager-control">
@@ -179,19 +228,20 @@ export default function ExtensionManager() {
         </div>
         <div className="extension-manager-control__box-container">
           <div className="extension-manager-control__box">
-            <div className="parchment-box extension-manager-list">{eUI}</div>
+            <div className="parchment-box extension-manager-list">
+              {expectingDrop ? (
+                <div
+                  className="d-flex text-dark justify-content-center fs-4 align-self-center"
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  Drop file here to install extension
+                </div>
+              ) : (
+                eUI
+              )}
+            </div>
           </div>
-          <div
-            className="extension-manager-control__box"
-            onMouseEnter={() => {
-              ConsoleLogger.debug('entering', expectingDrop);
-              setExpectingDrop(true);
-            }}
-            onMouseLeave={() => {
-              ConsoleLogger.debug('leaving', expectingDrop);
-              setExpectingDrop(false);
-            }}
-          >
+          <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">
               {[
                 displayCustomisationsElement ? (

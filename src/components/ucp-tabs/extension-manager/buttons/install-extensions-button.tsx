@@ -10,6 +10,7 @@ import { openFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { installExtension } from '../../../../function/extensions/installation/install-module';
 import { reloadCurrentWindow } from '../../../../function/window-actions';
+import { ToastType, makeToast } from '../../../toasts/toasts-display';
 
 const LOGGER = new Logger('install-extensions-button.tsx');
 
@@ -40,9 +41,10 @@ export const installExtensionsButtonCallback = async (
 
         try {
           await ep.install(`${gameFolder}/ucp`);
-          await showModalOk({
+          makeToast({
             title: 'Succesful install',
-            message: `Extension pack was succesfully installed`,
+            body: `Extension pack was succesfully installed`,
+            type: ToastType.SUCCESS,
           });
         } catch (e: any) {
           await showModalOk({
@@ -55,9 +57,11 @@ export const installExtensionsButtonCallback = async (
       } else {
         try {
           await installExtension(gameFolder, path);
-          await showModalOk({
+
+          makeToast({
             title: 'Succesful install',
-            message: `Extension was succesfully installed`,
+            body: `Extension was succesfully installed`,
+            type: ToastType.SUCCESS,
           });
         } catch (e: any) {
           await showModalOk({

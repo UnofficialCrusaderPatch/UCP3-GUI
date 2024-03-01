@@ -3,7 +3,9 @@ import './extension-manager.css';
 import { useTranslation } from 'react-i18next';
 
 import { atom, useAtom, useAtomValue } from 'jotai';
-import { listen } from '@tauri-apps/api/event';
+import { Event, listen } from '@tauri-apps/api/event';
+import { useEffect } from 'react';
+import { FileDropEvent } from '@tauri-apps/api/window';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import {
@@ -14,22 +16,61 @@ import {
   InactiveExtensionsElement,
 } from './extension-elements/extension-element';
 import { FilterButton } from './buttons/filter-button';
-import { InstallExtensionButton } from './buttons/install-extensions-button';
+import {
+  InstallExtensionButton,
+  installExtensionsButtonCallback,
+} from './buttons/install-extensions-button';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extension-editor-state';
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
 import { ExtensionManagerToolbar } from './toolbar-extension-manager';
 import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-editor-mode';
 import { ConsoleLogger } from '../../../util/scripts/logging';
-
-listen('tauri://file-drop', (event) => {
-  ConsoleLogger.debug(event);
-});
+import { getStore } from '../../../hooks/jotai/base';
+import { GAME_FOLDER_ATOM } from '../../../function/game-folder/game-folder-atom';
+import { showModalOkCancel } from '../../modals/modal-ok-cancel';
+import { CURRENT_DISPLAYED_TAB } from '../tabs-state';
+import { showModalOk } from '../../modals/modal-ok';
+import { reloadCurrentWindow } from '../../../function/window-actions';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
 );
 
 const EXPECTING_DROP = atom(false);
+// const HANDLED_DROP_EVENTS = atom<{ [id: number]: boolean }>({});
+
+const handleFileDrop = async (event: Event<unknown>) => {
+  if (event.event !== 'tauri://file-drop') return;
+  if (getStore().get(CURRENT_DISPLAYED_TAB) === 'extensions') {
+    ConsoleLogger.debug('Drop event: ', event);
+    try {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const path of event.payload as string[]) {
+        // eslint-disable-next-line no-await-in-loop
+        const answer = await showModalOkCancel({
+          title: 'Install extension?',
+          message: `Install extensions? ${path}`,
+        });
+        // eslint-disable-next-line no-continue
+        if (!answer) continue;
+        // eslint-disable-next-line no-await-in-loop
+        await installExtensionsButtonCallback(
+          getStore().get(GAME_FOLDER_ATOM),
+          path,
+        );
+      }
+
+      await showModalOk({
+        title: 'Reload required',
+        message: 'The GUI will now reload.',
+      });
+
+      reloadCurrentWindow();
+    } catch (err: any) {
+      ConsoleLogger.error(err);
+    }
+  }
+};
 
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
@@ -99,6 +140,22 @@ export default function ExtensionManager() {
   const displayGhostElement = editorState.state === 'active';
 
   const [expectingDrop, setExpectingDrop] = useAtom(EXPECTING_DROP);
+
+  useEffect(() => {
+    const unlisten = listen<FileDropEvent>(
+      'tauri://file-drop',
+      async (event) => {
+        await handleFileDrop(event);
+      },
+    );
+
+    // invoke a Rust function to start a loop for periodically emitting event.
+    // do something
+
+    return () => {
+      unlisten.then((f) => f()).catch((err) => ConsoleLogger.error(err));
+    };
+  }, []);
 
   return (
     <div className="flex-default extension-manager">

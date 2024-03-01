@@ -9,64 +9,75 @@ import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { openFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { installExtension } from '../../../../function/extensions/installation/install-module';
+import { reloadCurrentWindow } from '../../../../function/window-actions';
 
 const LOGGER = new Logger('install-extensions-button.tsx');
 
-const installExtensionsButtonCallback = async (gameFolder: string) => {
-  const result = await openFileDialog(gameFolder, [
-    { name: 'Zip files', extensions: ['zip'] },
-  ]);
-  if (result.isPresent()) {
-    const path = result.get();
+export const installExtensionsButtonCallback = async (
+  gameFolder: string,
+  location?: string,
+) => {
+  let path = location;
+  if (location === undefined) {
+    const result = await openFileDialog(gameFolder, [
+      { name: 'Zip files', extensions: ['zip'] },
+    ]);
+    if (!result.isPresent()) {
+      return;
+    }
 
-    LOGGER.msg(`Trying to install extensions from: ${path}`).info();
+    path = result.get();
+  }
 
-    if (await exists(path)) {
-      try {
-        if (await ExtensionPack.isPack(path)) {
-          const ep = await ExtensionPack.fromPath(path);
+  if (path === undefined) return;
 
-          try {
-            await ep.install(`${gameFolder}/ucp`);
-            await showModalOk({
-              title: 'Succesful install',
-              message: `Extension pack was succesfully installed`,
-            });
-          } catch (e: any) {
-            await showModalOk({
-              title: 'ERROR',
-              message: e.toString(),
-            });
-          } finally {
-            await ep.close();
-          }
-        } else {
-          try {
-            await installExtension(gameFolder, path);
-            await showModalOk({
-              title: 'Succesful install',
-              message: `Extension was succesfully installed`,
-            });
-          } catch (e: any) {
-            await showModalOk({
-              title: 'ERROR',
-              message: e.toString(),
-            });
-          }
+  LOGGER.msg(`Trying to install extensions from: ${path}`).info();
+
+  if (await exists(path)) {
+    try {
+      if (await ExtensionPack.isPack(path)) {
+        const ep = await ExtensionPack.fromPath(path);
+
+        try {
+          await ep.install(`${gameFolder}/ucp`);
+          await showModalOk({
+            title: 'Succesful install',
+            message: `Extension pack was succesfully installed`,
+          });
+        } catch (e: any) {
+          await showModalOk({
+            title: 'ERROR',
+            message: e.toString(),
+          });
+        } finally {
+          await ep.close();
         }
-      } catch (e: any) {
-        await showModalOk({
-          title: 'ERROR',
-          message: e.toString(),
-        });
+      } else {
+        try {
+          await installExtension(gameFolder, path);
+          await showModalOk({
+            title: 'Succesful install',
+            message: `Extension was succesfully installed`,
+          });
+        } catch (e: any) {
+          await showModalOk({
+            title: 'ERROR',
+            message: e.toString(),
+          });
+        }
       }
-    } else {
-      LOGGER.msg(`Path does not exist: ${path}`).warn();
+    } catch (e: any) {
       await showModalOk({
-        title: 'Path does not exist',
-        message: `Path does not exist: ${path}`,
+        title: 'ERROR',
+        message: e.toString(),
       });
     }
+  } else {
+    LOGGER.msg(`Path does not exist: ${path}`).warn();
+    await showModalOk({
+      title: 'Path does not exist',
+      message: `Path does not exist: ${path}`,
+    });
   }
 };
 
@@ -82,6 +93,13 @@ export function InstallExtensionButton() {
       onClick={async () => {
         try {
           await installExtensionsButtonCallback(gameFolder);
+
+          await showModalOk({
+            title: 'Reload required',
+            message: 'The GUI will now reload.',
+          });
+
+          reloadCurrentWindow();
         } catch (e: any) {
           await showModalOk({
             title: 'ERROR',

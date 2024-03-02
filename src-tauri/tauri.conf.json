@@ -75,11 +75,9 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "resources": [
-        "lang/*",
-        "gameinfo/*",
-        "backgrounds/*"
-      ],
+      "resources": {
+        "../resources/": "."
+      },
       "identifier": "ucp.gui.tauri",
       "publisher": "ucp-team",
       "longDescription": "",

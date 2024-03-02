@@ -2,16 +2,16 @@ import './gradient-img.css';
 
 interface GradientImgProps {
   src: string;
-  basedOnWidth?: boolean;
+  type: 'tab' | 'header';
 }
 
 export default function GradientImg(gradientImgProps: GradientImgProps) {
-  const { src, basedOnWidth } = gradientImgProps;
+  const { src, type } = gradientImgProps;
   return !src ? null : (
     <img
       src={src}
       alt=""
-      className={`gradient-img${basedOnWidth ? ' gradient-img--width' : ''}`}
+      className={`gradient-img ${type === 'header' ? 'gradient-img--header' : 'gradient-img--tab'}`}
     />
   );
 }

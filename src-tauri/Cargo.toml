@@ -7,7 +7,7 @@ license = ""
 repository = "https://github.com/UnofficialCrusaderPatch/UCP3-GUI"
 default-run = "ucp_gui"
 edition = "2021"
-rust-version = "1.64"
+rust-version = "1.70"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -15,14 +15,14 @@ rust-version = "1.64"
 tauri-build = { version = "=1.5.1", features = [] }
 
 [dependencies]
-serde_json = "=1.0.111"
-serde = { version = "=1.0.195", features = ["derive"] }
-tauri = { version = "=1.5.4", features = [ "process-relaunch", "updater", "shell-open", "protocol-asset", "os-all", "devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
+serde_json = "=1.0.114"
+serde = { version = "=1.0.197", features = ["derive"] }
+tauri = { version = "=1.6.1", features = [ "process-relaunch", "updater", "shell-open", "protocol-asset", "os-all", "devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
 zip = { version = "=0.6.6" } # currently uses all features
 sha2 = { version = "=0.10.8" }
-log = "=0.4.20"
-anyhow = "=1.0.79" # sadly needed to implement the appender for the web console
-log4rs = { version = "=1.2.0", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller"] }
+log = "=0.4.21"
+anyhow = "=1.0.80" # sadly needed to implement the appender for the web console
+log4rs = { version = "=1.3.0", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller"] }
 dunce = "=1.0.4"
 path-slash = "=0.2.1" # will try to implement path returning functions to return slash based
 glob = "=0.3.1" # required for our GlobPatterns, maybe we can use it directly in the future
@@ -35,7 +35,7 @@ default = [ "custom-protocol" ]
 # DO NOT remove this
 custom-protocol = [ "tauri/custom-protocol" ]
 
-# "recommanded" options for tauri release (https://tauri.app/v1/guides/building/app-size/#rust-build-time-optimizations)
+# "recommended" options for tauri release (https://tauri.app/v1/guides/building/app-size/#rust-build-time-optimizations)
 [profile.release]
 panic = "abort" # Strip expensive panic clean-up logic
 codegen-units = 1 # Compile crates one after another so the compiler can optimize better

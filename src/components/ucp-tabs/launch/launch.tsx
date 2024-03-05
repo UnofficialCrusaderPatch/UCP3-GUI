@@ -7,6 +7,8 @@ import { useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
 import { useAtomValue } from 'jotai';
+import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
+import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import GameStarter from './game-starter/game-starter';
 import {
   EXTREME_PATH_ATOM,
@@ -16,9 +18,6 @@ import {
   EXTREME_VERSION_ATOM,
   VANILLA_VERSION_ATOM,
 } from '../../../function/game-files/game-version-state';
-
-import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
-import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import { createLaunchOptionFuncs } from './launch-options/launch-options';
 import FreeArgs from './launch-options/free-args';
 import FreeEnvs from './launch-options/free-envs';

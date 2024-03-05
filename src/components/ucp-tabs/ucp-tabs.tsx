@@ -1,9 +1,11 @@
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
 import './ucp-tabs.css';
 
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { atom, useAtom, useAtomValue } from 'jotai';
+import { Atom, atom, useAtom, useAtomValue } from 'jotai';
 import {
   INIT_DONE,
   INIT_RUNNING,
@@ -13,7 +15,6 @@ import Logger from '../../util/scripts/logging';
 import { showModalOk } from '../modals/modal-ok';
 import * as GuiSettings from '../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
-
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
@@ -25,12 +26,50 @@ import Overview from './overview/overview';
 import Launch from './launch/launch';
 import { CURRENT_DISPLAYED_TAB, UITabs } from './tabs-state';
 import ExtensionManager from './extension-manager/extension-manager';
+import GradientImg from './common/gradient-img/gradient-img';
+import {
+  loadYaml,
+  receiveAssetUrl,
+  resolveResourcePath,
+} from '../../tauri/tauri-files';
+import {
+  BACKGROUNDS_DIRECTORY,
+  BACKGROUNDS_MAPPING_FILE,
+} from '../../function/global/constants/file-constants';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
 const DISPLAY_CONFIG_TABS_ATOM = atom(
   (get) => get(INIT_DONE) && !get(INIT_RUNNING) && !get(INIT_ERROR),
 );
+
+const BACKGROUNDS_PATH_ATOM: Atom<Promise<Record<string, string | undefined>>> =
+  atom(async () => {
+    const mapping: Record<string, string | undefined> =
+      await resolveResourcePath([
+        BACKGROUNDS_DIRECTORY,
+        BACKGROUNDS_MAPPING_FILE,
+      ])
+        .then(loadYaml)
+        .then((res) => res.getOrThrow())
+        .catch((err) => {
+          LOGGER.msg(
+            'Failed to load background mappings file: {}',
+            err,
+          ).error();
+          return {};
+        });
+
+    // resolve paths on load
+    for (const [key, file] of Object.entries(mapping)) {
+      mapping[key] = !file
+        ? undefined
+        : await resolveResourcePath([BACKGROUNDS_DIRECTORY, file])
+            .then(receiveAssetUrl)
+            .catch(() => undefined);
+    }
+    return mapping;
+  });
 
 export default function UcpTabs() {
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
@@ -53,6 +92,10 @@ export default function UcpTabs() {
 
   const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
 
+  const backgroundMapping = useAtomValue(BACKGROUNDS_PATH_ATOM);
+  const headerImage = backgroundMapping?.[`header.${currentTab}`] ?? '';
+  const tabImage = backgroundMapping?.[`tab.${currentTab}`] ?? '';
+
   return (
     <div
       className="ucp-tabs fs-7"
@@ -64,6 +107,8 @@ export default function UcpTabs() {
         onSelect={(newKey) => setCurrentTab(newKey as UITabs)}
       >
         <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
+          <GradientImg src={headerImage} type="header" />
+
           <Nav.Item>
             <Nav.Link
               eventKey="overview"
@@ -131,6 +176,8 @@ export default function UcpTabs() {
           </Nav.Item>
         </Nav>
         <Tab.Content className="ornament-border">
+          <GradientImg src={tabImage} type="tab" />
+
           <Tab.Pane eventKey="overview" className="tab-panel">
             <Overview />
           </Tab.Pane>

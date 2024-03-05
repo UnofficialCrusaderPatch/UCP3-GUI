@@ -8,12 +8,9 @@
 
 .ucp-tabs-header {
   padding: 100px 7px 0 7px;
-  background-image: url('/src/assets/ucp3/bg.png');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
   align-items: end;
   border: 0;
+  position: relative;
 }
 
 .tab-content {
@@ -24,6 +21,7 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .tab-panel {

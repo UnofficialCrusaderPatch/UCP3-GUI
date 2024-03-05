@@ -1,6 +1,6 @@
 [package]
 name = "ucp_gui"
-version = "0.0.28"
+version = "0.0.29"
 description = "UCP3 GUI"
 authors = ["gynt", "TheRedDaemon"]
 license = ""

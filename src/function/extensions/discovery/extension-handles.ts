@@ -4,7 +4,6 @@ import { slashify } from '../../../tauri/tauri-invoke';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';
 import { ExtensionHandle } from '../handles/extension-handle';
 import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
-import { unzipPlugins } from './io';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function getExtensionHandles(ucpFolder: string) {
@@ -54,8 +53,6 @@ export async function getExtensionHandles(ucpFolder: string) {
   let pluginDirEnts = readPluginDirResult
     .ok()
     .getOrReceive(() => []) as FileEntry[];
-
-  await unzipPlugins(pluginDirEnts);
 
   readPluginDirResult = await readDir(pluginDir);
   pluginDirEnts = (

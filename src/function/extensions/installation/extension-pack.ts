@@ -10,6 +10,7 @@ import {
 import { extractZipToPath } from '../../../tauri/tauri-invoke';
 import { ZipReader } from '../../../util/structs/zip-handler';
 import Logger from '../../../util/scripts/logging';
+import { showModalOk } from '../../../components/modals/modal-ok';
 
 const LOGGER = new Logger('extension-pack.ts');
 
@@ -48,7 +49,9 @@ class ExtensionPack {
         if (entry.children === null || entry.children === undefined) {
           const errorMsg = `Found a non-directory file in extension pack: ${entry.path}`;
           LOGGER.msg(errorMsg).error();
-          throw Error(errorMsg);
+          return new Promise<void>((resolve) => {
+            resolve();
+          });
         }
 
         if (entry.name === undefined) {
@@ -95,10 +98,14 @@ class ExtensionPack {
           throw Error(errorMsg);
         }
 
-        if (!entry.name.endsWith('.zip')) {
+        if (!entry.name.endsWith('.zip') && !entry.name.endsWith('.sig')) {
           const errorMsg = `Found a non-zip file in extension pack: ${entry.path}`;
           LOGGER.msg(errorMsg).error();
-          throw Error(errorMsg);
+
+          // Skip it
+          return new Promise<void>((resolve) => {
+            resolve();
+          });
         }
 
         const destination = `${ucpFolder}/modules/${entry.name}`;
@@ -112,8 +119,12 @@ class ExtensionPack {
           });
         }
 
-        return renameFile(entry.path, destination).catch((reason) => {
+        return renameFile(entry.path, destination).catch(async (reason) => {
           LOGGER.obj(reason).error();
+          await showModalOk({
+            title: 'An error occurred',
+            message: `An error occurred trying to install ${entry.name}. Not all files could be placed.`,
+          });
         });
       });
 

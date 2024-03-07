@@ -24,13 +24,13 @@ export const installExtensionsButtonCallback = async (
       { name: 'Zip files', extensions: ['zip'] },
     ]);
     if (!result.isPresent()) {
-      return;
+      return false;
     }
 
     path = result.get();
   }
 
-  if (path === undefined) return;
+  if (path === undefined) return false;
 
   LOGGER.msg(`Trying to install extensions from: ${path}`).info();
 
@@ -46,6 +46,7 @@ export const installExtensionsButtonCallback = async (
             body: `Extension pack was succesfully installed`,
             type: ToastType.SUCCESS,
           });
+          return true;
         } catch (e: any) {
           await showModalOk({
             title: 'ERROR',
@@ -54,22 +55,25 @@ export const installExtensionsButtonCallback = async (
         } finally {
           await ep.close();
         }
-      } else {
-        try {
-          await installExtension(gameFolder, path);
-
-          makeToast({
-            title: 'Succesful install',
-            body: `Extension was succesfully installed`,
-            type: ToastType.SUCCESS,
-          });
-        } catch (e: any) {
-          await showModalOk({
-            title: 'ERROR',
-            message: e.toString(),
-          });
-        }
+        return false;
       }
+      try {
+        await installExtension(gameFolder, path);
+
+        makeToast({
+          title: 'Succesful install',
+          body: `Extension was succesfully installed`,
+          type: ToastType.SUCCESS,
+        });
+
+        return true;
+      } catch (e: any) {
+        await showModalOk({
+          title: 'ERROR',
+          message: e.toString(),
+        });
+      }
+      return false;
     } catch (e: any) {
       await showModalOk({
         title: 'ERROR',
@@ -83,6 +87,7 @@ export const installExtensionsButtonCallback = async (
       message: `Path does not exist: ${path}`,
     });
   }
+  return false;
 };
 
 // eslint-disable-next-line import/prefer-default-export

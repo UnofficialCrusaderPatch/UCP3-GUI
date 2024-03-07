@@ -25,6 +25,9 @@ import {
   UCP_VERSION_ATOM,
   initializeUCPVersion,
 } from '../ucp-files/ucp-version';
+import { FIRST_TIME_USE_ATOM } from '../gui-settings/settings';
+import { addExtensionToExplicityActivatedExtensions } from '../../components/ucp-tabs/extension-manager/extensions-state-manipulation';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../components/ucp-tabs/common/buttons/config-serialized-state';
 
 const LOGGER = new Logger('game-folder-interface.ts');
 
@@ -128,6 +131,7 @@ export async function initializeGameFolder(newFolder: string) {
     const { t } = i18next;
 
     if (await exists(file)) {
+      getStore().set(FIRST_TIME_USE_ATOM, false);
       try {
         await importButtonCallback(newFolder, () => {}, t, file);
       } catch (err: any) {
@@ -135,6 +139,29 @@ export async function initializeGameFolder(newFolder: string) {
       }
     } else {
       loggerState.setMsg('no ucp-config.yml file found').info();
+
+      if (getStore().get(FIRST_TIME_USE_ATOM)) {
+        loggerState.setMsg('first time use!').info();
+        const targetExtensions = newExtensionsState.extensions.filter(
+          (ext) => ext.name === 'ucp2-legacy-defaults',
+        );
+        if (targetExtensions.length > 0) {
+          loggerState.setMsg('found ucp2-legacy-defaults').info();
+          const targetExtension = targetExtensions
+            .sort((a, b) => a.version.localeCompare(b.version))
+            .at(0)!;
+
+          const newerExtensionState =
+            addExtensionToExplicityActivatedExtensions(
+              newExtensionsState,
+              targetExtension,
+            );
+
+          getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
+
+          getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+        }
+      }
     }
 
     loggerState.setMsg('Finished loading ucp-config.yml').info();

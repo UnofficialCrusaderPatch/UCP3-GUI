@@ -31,6 +31,31 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../components/ucp-tabs/co
 
 const LOGGER = new Logger('game-folder-interface.ts');
 
+const activateFirstTimeUseExtensions = (extensionsState: ExtensionsState) => {
+  const extensionNames = ['ucp2-legacy-defaults', 'graphicsApiReplacer'];
+
+  const extensions: Extension[] = [];
+  extensionNames.forEach((n) => {
+    const options = extensionsState.extensions.filter((ext) => ext.name === n);
+    if (options.length > 0) {
+      extensions.push(
+        options.sort((a, b) => a.version.localeCompare(b.version)).at(0)!,
+      );
+    }
+  });
+
+  let newExtensionsState = extensionsState;
+
+  extensions.forEach((ext) => {
+    newExtensionsState = addExtensionToExplicityActivatedExtensions(
+      newExtensionsState,
+      ext,
+    );
+  });
+
+  return newExtensionsState;
+};
+
 export async function initializeGameFolder(newFolder: string) {
   const loggerState = LOGGER.empty();
 
@@ -142,25 +167,12 @@ export async function initializeGameFolder(newFolder: string) {
 
       if (getStore().get(FIRST_TIME_USE_ATOM)) {
         loggerState.setMsg('first time use!').info();
-        const targetExtensions = newExtensionsState.extensions.filter(
-          (ext) => ext.name === 'ucp2-legacy-defaults',
-        );
-        if (targetExtensions.length > 0) {
-          loggerState.setMsg('found ucp2-legacy-defaults').info();
-          const targetExtension = targetExtensions
-            .sort((a, b) => a.version.localeCompare(b.version))
-            .at(0)!;
 
-          const newerExtensionState =
-            addExtensionToExplicityActivatedExtensions(
-              newExtensionsState,
-              targetExtension,
-            );
+        const newerExtensionState =
+          activateFirstTimeUseExtensions(newExtensionsState);
+        getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
 
-          getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
-
-          getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
-        }
+        getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
       }
     }
 

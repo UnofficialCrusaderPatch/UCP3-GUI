@@ -102,6 +102,7 @@ export default function ExtensionManager() {
 
   const displayGhostElement = editorState.state === 'active';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isFileDragging, setIsFileDragging] = useAtom(IS_FILE_DRAGGING);
 
   const currentTab = useAtomValue(CURRENT_DISPLAYED_TAB);
@@ -181,24 +182,7 @@ export default function ExtensionManager() {
         </div>
         <div className="extension-manager-control__box-container">
           <div className="extension-manager-control__box">
-            <div className="parchment-box extension-manager-list">
-              {isFileDragging === true ? (
-                <div
-                  className="d-flex text-dark justify-content-center fs-4 align-self-center"
-                  style={{ width: '100%', height: '100%' }}
-                >
-                  <span>Drop file here to install extension or &nbsp;</span>
-                  <span
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setIsFileDragging(false)}
-                  >
-                    click here to abort
-                  </span>
-                </div>
-              ) : (
-                eUI
-              )}
-            </div>
+            <div className="parchment-box extension-manager-list">{eUI}</div>
           </div>
           <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">

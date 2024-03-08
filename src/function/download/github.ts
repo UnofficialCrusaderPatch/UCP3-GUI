@@ -76,13 +76,13 @@ export class UCP3Updater {
     return false;
   }
 
-  async fetchUpdate() {
+  async fetchUpdate(type: 'Release' | 'Developer') {
     LOGGER.msg('fetchUpdate').info();
     if (this.meta === undefined) {
       this.meta = await this.fetchMeta();
     }
 
-    const result = await fetch(`${this.meta.builds.Release.url}`, {
+    const result = await fetch(`${this.meta.builds[type].url}`, {
       responseType: ResponseType.Binary,
       method: 'GET',
     });

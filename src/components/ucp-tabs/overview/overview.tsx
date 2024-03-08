@@ -116,9 +116,14 @@ export default function Overview() {
             const vr = getStore().get(UCP_VERSION_ATOM);
             let version = '0.0.0';
             let sha = '';
+            let type: 'Release' | 'Developer' = 'Release';
             if (vr.status === 'ok') {
               version = `${vr.version.getMajorAsString()}.${vr.version.getMinorAsString()}.${vr.version.getPatchAsString()}`;
               sha = vr.version!.sha.getOrElse('!');
+              type =
+                vr.version.getBuildRepresentation() === 'Developer'
+                  ? 'Developer'
+                  : type;
             }
 
             const updater = new UCP3Updater(version, sha, new Date(0));
@@ -155,7 +160,7 @@ export default function Overview() {
               ToastType.INFO,
               t('gui-download:ucp.download.download'),
             );
-            const update = await updater.fetchUpdate();
+            const update = await updater.fetchUpdate(type);
 
             createStatusToast(
               ToastType.INFO,

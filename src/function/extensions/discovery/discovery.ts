@@ -12,7 +12,6 @@ import { showModalOk } from '../../../components/modals/modal-ok';
 import { ExtensionHandle } from '../handles/extension-handle';
 import { getStore } from '../../../hooks/jotai/base';
 import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
-import { collectConfigEntries } from './collect-config-entries';
 import { parseConfigEntries } from './parse-config-entries';
 import { readUISpec, readConfig, readLocales } from './io';
 import { getExtensionHandles } from './extension-handles';
@@ -57,14 +56,17 @@ const checkFullEquality = async (
   return base === `${target}` || base === `${target}.zip`;
 };
 
-const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
+export const discoverExtensions = async (
+  gameFolder: string,
+  mode?: 'Release' | 'Developer',
+): Promise<Extension[]> => {
   LOGGER.msg('Discovering extensions').info();
 
   if (!(await onFsExists(`${gameFolder}/ucp`))) {
     return [];
   }
 
-  const ehs = await getExtensionHandles(`${gameFolder}/ucp`);
+  const ehs = await getExtensionHandles(`${gameFolder}/ucp`, mode);
 
   const extensionDiscoveryResults = await Promise.all(
     ehs.map(async (eh) => {
@@ -234,10 +236,3 @@ const discoverExtensions = async (gameFolder: string): Promise<Extension[]> => {
 
   return extensions;
 };
-
-const Discovery = {
-  discoverExtensions,
-};
-
-// eslint-disable-next-line import/prefer-default-export
-export { Discovery, collectConfigEntries, getExtensionHandles };

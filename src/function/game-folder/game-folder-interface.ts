@@ -18,7 +18,6 @@ import {
   UCP_CONFIG_FILE_ATOM,
 } from '../configuration/state';
 import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
-import { Discovery } from '../extensions/discovery/discovery';
 import { ExtensionsState } from '../extensions/extensions-state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
 import {
@@ -28,6 +27,7 @@ import {
 import { FIRST_TIME_USE_ATOM } from '../gui-settings/settings';
 import { addExtensionToExplicityActivatedExtensions } from '../../components/ucp-tabs/extension-manager/extensions-state-manipulation';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../components/ucp-tabs/common/buttons/config-serialized-state';
+import { discoverExtensions } from '../extensions/discovery/discovery';
 
 const LOGGER = new Logger('game-folder-interface.ts');
 
@@ -56,7 +56,10 @@ const activateFirstTimeUseExtensions = (extensionsState: ExtensionsState) => {
   return newExtensionsState;
 };
 
-export async function initializeGameFolder(newFolder: string) {
+export async function initializeGameFolder(
+  newFolder: string,
+  mode?: 'Release' | 'Developer',
+) {
   const loggerState = LOGGER.empty();
 
   getStore().set(INIT_RUNNING, true);
@@ -74,7 +77,7 @@ export async function initializeGameFolder(newFolder: string) {
     // TODO: currently only set on initial render and folder selection
     // TODO: resolve this type badness
     try {
-      extensions = await Discovery.discoverExtensions(newFolder);
+      extensions = await discoverExtensions(newFolder, mode);
     } catch (e) {
       LOGGER.obj(e).error();
       await showModalOk({
@@ -202,7 +205,13 @@ export const GAME_FOLDER_INTERFACE_ASYNC_ATOM = atom(
     LOGGER.msg('Initializing ucp version information finished').debug();
 
     LOGGER.msg('Initializing game folder').debug();
-    await initializeGameFolder(newValue);
+    await initializeGameFolder(
+      newValue,
+      getStore().get(UCP_VERSION_ATOM).version.getBuildRepresentation() ===
+        'Developer'
+        ? 'Developer'
+        : 'Release',
+    );
     LOGGER.msg('Initializing game folder finished').debug();
 
     set(GAME_FOLDER_ATOM, newValue);

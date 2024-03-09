@@ -113,7 +113,7 @@
     "security": {
       "csp": {
         "default-src": "'self'",
-        "img-src": "'self' data: asset: https://asset.localhost https://raw.githubusercontent.com https://discordapp.com/api/guilds/426318193603117057/widget.png",
+        "img-src": "'self' data: asset: https://asset.localhost https://user-images.githubusercontent.com https://raw.githubusercontent.com https://discordapp.com/api/guilds/426318193603117057/widget.png",
         "script-src": "'self' 'unsafe-inline'",
         "style-src": "'self' 'unsafe-inline'"
       },

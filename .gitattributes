@@ -1,12 +1,23 @@
-*       text    eol=lf
-*.exe   binary
-*.png   binary
-*.jpg   binary
-*.jpeg  binary
-*.ico   binary
-*.icns  binary
-*.eot   binary
-*.otf   binary
-*.ttf   binary
-*.woff  binary
-*.woff2 binary
+# source: https://rehansaeed.com/gitattributes-best-practices
+# NOTE:
+# The source contains another part about LFS, but while it reduces the size of the repo somewhat,
+# Github offers it only with limits and charges for it after 1GB.
+# Strangely, using binary does not include any restriction, despite having to keep
+# a copy of the data for every change. So we handle the pictures as binary for now.
+
+###############################
+# Git Line Endings            #
+###############################
+
+# Set default behaviour to automatically normalize line endings.
+# EDIT: But we enforce "lf", since this was the setting before.
+* text=auto eol=lf
+
+# Force batch scripts to always use CRLF line endings so that if a repo is accessed
+# in Windows via a file share from Linux, the scripts will work.
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
+
+# Force bash scripts to always use LF line endings so that if a repo is accessed
+# in Unix via a file share from Windows, the scripts will work.
+*.sh text eol=lf

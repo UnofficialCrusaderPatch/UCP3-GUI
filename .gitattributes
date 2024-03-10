@@ -2,8 +2,8 @@
 # NOTE:
 # The source contains another part about LFS, but while it reduces the size of the repo somewhat,
 # Github offers it only with limits and charges for it after 1GB.
-# Strangely, using binary does not include any restriction.
-# So we handle the pictures as binary for now.
+# Strangely, using binary does not include any restriction, despite having to keep
+# a copy of the data for every change. So we handle the pictures as binary for now.
 
 ###############################
 # Git Line Endings            #

@@ -12,6 +12,9 @@ import {
 import { showModalOk } from '../../../modals/modal-ok';
 import Logger from '../../../../util/scripts/logging';
 import { sleep } from '../../../../util/scripts/util';
+import { CONFIG_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
+import { FIRST_TIME_USE_ATOM } from '../../../../function/gui-settings/settings';
+import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 
 const LOGGER = new Logger('game-starter.tsx');
 
@@ -97,8 +100,21 @@ function GameStarterButton(props: GameStarterProps) {
     cssClass = 'game-starter__starter--starting';
   }
 
+  const dirty = useAtomValue(CONFIG_DIRTY_STATE_ATOM);
+  const firstTimeUse = useAtomValue(FIRST_TIME_USE_ATOM);
+
   const startFunc = async () => {
     try {
+      if (dirty && firstTimeUse) {
+        const answer = await showModalOkCancel({
+          title: 'Continue?',
+          message:
+            'There are changes in your config that have not been applied yet, hit Apply to apply them. You can find this button in the Content tab.\n\nContinue with starting the game without these changes?',
+        });
+
+        if (!answer) return;
+      }
+
       setStarting(true);
       await osOpenProgram(path, receiveArgs?.(), receiveEnvs?.());
       // the game start takes a while, but we not observe it, so we simulate loading a bit instead

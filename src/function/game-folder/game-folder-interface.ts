@@ -28,6 +28,7 @@ import { FIRST_TIME_USE_ATOM } from '../gui-settings/settings';
 import { addExtensionToExplicityActivatedExtensions } from '../../components/ucp-tabs/extension-manager/extensions-state-manipulation';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../components/ucp-tabs/common/buttons/config-serialized-state';
 import { discoverExtensions } from '../extensions/discovery/discovery';
+import { buildExtensionConfigurationDB } from '../../components/ucp-tabs/extension-manager/extension-configuration';
 
 const LOGGER = new Logger('game-folder-interface.ts');
 
@@ -53,7 +54,7 @@ const activateFirstTimeUseExtensions = (extensionsState: ExtensionsState) => {
     );
   });
 
-  return newExtensionsState;
+  return buildExtensionConfigurationDB(newExtensionsState);
 };
 
 export async function initializeGameFolder(

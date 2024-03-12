@@ -87,7 +87,9 @@ export default function UcpTabs() {
     state.state === 'hasData'
       ? state.data === UCPState.ACTIVE ||
         state.data === UCPState.INACTIVE ||
-        state.data === UCPState.BINK_VERSION_DIFFERENCE
+        state.data === UCPState.BINK_VERSION_DIFFERENCE ||
+        state.data === UCPState.BINK_UCP_MISSING ||
+        state.data === UCPState.BINK_REAL_COPY_MISSING
       : false;
 
   const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);

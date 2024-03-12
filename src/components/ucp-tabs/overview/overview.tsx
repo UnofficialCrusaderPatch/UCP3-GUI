@@ -1,6 +1,6 @@
 import './overview.css';
 
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,12 +8,7 @@ import { installUCPFromZip } from '../../../function/installation/install-ucp-fr
 import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
 import { UCP3Updater } from '../../../function/download/github';
 import { getStore } from '../../../hooks/jotai/base';
-import {
-  removeDir,
-  removeFile,
-  resolvePath,
-  writeBinaryFile,
-} from '../../../tauri/tauri-files';
+import { removeDir, removeFile, resolvePath } from '../../../tauri/tauri-files';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPState,
@@ -44,6 +39,7 @@ import {
   UCP_FOLDER,
   UCP_LOG,
 } from '../../../function/global/constants/file-constants';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -53,6 +49,7 @@ export default function Overview() {
 
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const ucpStatePresent = loadableUcpState.state === 'hasData';
   const ucpState = ucpStatePresent ? loadableUcpState.data : UCPState.UNKNOWN;
   let activateButtonString = null;
@@ -160,7 +157,30 @@ export default function Overview() {
               ToastType.INFO,
               t('gui-download:ucp.download.download'),
             );
-            const update = await updater.fetchUpdate(type);
+
+            const downloadStart = new Date();
+            let previousFire = downloadStart;
+            const updateInterval = 500; // milliseconds
+
+            const update = await updater.fetchUpdateToGamefolder(
+              type,
+              (
+                chunkSize: number,
+                currentSize: number,
+                totalSize: number,
+                currentPercent: string,
+              ) => {
+                const tt = new Date();
+                if (tt.getTime() - previousFire.getTime() > updateInterval) {
+                  previousFire = tt;
+                  setStatusBarMessage(
+                    `Downloading... ${currentPercent}% (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
+                  );
+                }
+              },
+            );
+
+            setStatusBarMessage(undefined);
 
             createStatusToast(
               ToastType.INFO,
@@ -169,12 +189,9 @@ export default function Overview() {
               }),
             );
 
-            const path = `${gameFolder}/${update.name}`;
-            await writeBinaryFile(path, update.data);
-
             createStatusToast(ToastType.INFO, t('gui-download:ucp.installing'));
             const installResult = await installUCPFromZip(
-              path,
+              update.path,
               gameFolder,
               createStatusToast,
             );
@@ -192,7 +209,7 @@ export default function Overview() {
             }
 
             // TODO: in the future, use a cache?
-            const removeResult = await removeFile(path);
+            const removeResult = await removeFile(update.path);
             if (removeResult.isErr()) {
               await showModalOk({
                 message: t('gui-download:ucp.install.zip.remove.failed', {

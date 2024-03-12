@@ -2,7 +2,9 @@ import { SemVer } from 'semver';
 import { ResponseType } from '@tauri-apps/api/http';
 import Logger from '../../util/scripts/logging';
 import { UCP3_REPO_GIST_URL } from './download-enums';
-import { fetch } from '../../tauri/tauri-http';
+import { ProgressHandler, download, fetch } from '../../tauri/tauri-http';
+import { GAME_FOLDER_ATOM } from '../game-folder/game-folder-atom';
+import { getStore } from '../../hooks/jotai/base';
 
 const LOGGER = new Logger('github.ts');
 
@@ -76,11 +78,36 @@ export class UCP3Updater {
     return false;
   }
 
+  async fetchUpdateToGamefolder(
+    type: 'Release' | 'Developer',
+    progressHandler?: ProgressHandler,
+  ) {
+    const folder = getStore().get(GAME_FOLDER_ATOM);
+
+    if (this.meta === undefined) {
+      this.meta = await this.fetchMeta();
+    }
+
+    const { url } = this.meta.builds[type];
+
+    const fileName = `${url.split('/').splice(-1).at(0)}`;
+    const destination = `${folder}/${fileName}`;
+
+    await download(url, destination, progressHandler);
+
+    return {
+      name: fileName,
+      path: destination,
+    };
+  }
+
   async fetchUpdate(type: 'Release' | 'Developer') {
     LOGGER.msg('fetchUpdate').info();
     if (this.meta === undefined) {
       this.meta = await this.fetchMeta();
     }
+
+    const fileName = `${this.meta.builds[type].url.split('/').splice(-1).at(0)}`;
 
     const result = await fetch(`${this.meta.builds[type].url}`, {
       responseType: ResponseType.Binary,
@@ -92,7 +119,7 @@ export class UCP3Updater {
     }
 
     return {
-      name: `${this.meta.builds.Release.url.split('/').splice(-1).at(0)}`,
+      name: fileName,
       data: new Uint8Array(result.data as Array<number>),
     } as UpdateData;
   }

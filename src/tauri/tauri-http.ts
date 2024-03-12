@@ -4,6 +4,11 @@ import {
   Response,
   ResponseType,
 } from '@tauri-apps/api/http';
+import {
+  download as tauriPluginDownload,
+  upload as tauriPluginUpload,
+} from 'tauri-plugin-upload-api';
+import { resolvePath } from './tauri-files';
 
 function addToOptions(
   currentOptions: Partial<FetchOptions> | undefined,
@@ -69,4 +74,78 @@ export function getJSON<T>(
     headers: { Accept: 'application/json' },
   });
   return get<T>(url, nextOptions as FetchOptions);
+}
+
+// tauri-plugin-upload
+
+export type ProgressHandler = (
+  chunkSize: number,
+  currentSize: number,
+  totalSize: number,
+  currentPercent: string,
+) => void;
+
+function receiveWrappingProgressHandler(progressHandler?: ProgressHandler) {
+  if (!progressHandler) {
+    return undefined;
+  }
+  let currentSize = 0;
+  return (progress: number, total: number) => {
+    currentSize += progress;
+    const percentage =
+      total > 0
+        ? (currentSize / total).toLocaleString(undefined, {
+            style: 'percent',
+            minimumFractionDigits: 2,
+          })
+        : '?';
+    progressHandler(progress, currentSize, total, percentage);
+  };
+}
+
+async function load(
+  direction: 'UP' | 'DOWN',
+  url: string,
+  paths: string | string[],
+  progressHandler?: ProgressHandler,
+  headers?: Map<string, string>,
+) {
+  const path = Array.isArray(paths) ? await resolvePath(...paths) : paths;
+
+  let func;
+  switch (direction) {
+    case 'UP':
+      func = tauriPluginUpload;
+      break;
+    case 'DOWN':
+      func = tauriPluginDownload;
+      break;
+    default:
+      return Promise.reject(new Error('Invalid http load direction.'));
+  }
+  return func(
+    url,
+    path,
+    receiveWrappingProgressHandler(progressHandler),
+    headers,
+  );
+}
+
+// overwrites and there seems to be now way to cancel it
+export function download(
+  url: string,
+  paths: string | string[],
+  progressHandler?: ProgressHandler,
+  headers?: Map<string, string>,
+) {
+  return load('DOWN', url, paths, progressHandler, headers);
+}
+
+export function upload(
+  url: string,
+  paths: string | string[],
+  progressHandler?: ProgressHandler,
+  headers?: Map<string, string>,
+) {
+  return load('UP', url, paths, progressHandler, headers);
 }

@@ -17,6 +17,7 @@ fn main() {
         .plugin(logging::init()) // logging is loaded first, currently using INFO until set by config
         .plugin(gui_config::init())
         .plugin(zip_support::init())
+        .plugin(tauri_plugin_upload::init())
         .invoke_handler(tauri::generate_handler![
             hash_utils::get_sha256_of_file,
             run_program::os_open_program,

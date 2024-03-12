@@ -78,11 +78,36 @@ export function getJSON<T>(
 
 // tauri-plugin-upload
 
+export type ProgressHandler = (
+  chunkSize: number,
+  currentSize: number,
+  totalSize: number,
+  currentPercent: string,
+) => void;
+
+function receiveWrappingProgressHandler(progressHandler?: ProgressHandler) {
+  if (!progressHandler) {
+    return undefined;
+  }
+  let currentSize = 0;
+  return (progress: number, total: number) => {
+    currentSize += progress;
+    const percentage =
+      total > 0
+        ? (currentSize / total).toLocaleString(undefined, {
+            style: 'percent',
+            minimumFractionDigits: 2,
+          })
+        : '?';
+    progressHandler(progress, currentSize, total, percentage);
+  };
+}
+
 async function load(
   direction: 'UP' | 'DOWN',
   url: string,
   paths: string | string[],
-  progressHandler?: (progress: number, total: number, percent: string) => void,
+  progressHandler?: ProgressHandler,
   headers?: Map<string, string>,
 ) {
   const path = Array.isArray(paths) ? await resolvePath(...paths) : paths;
@@ -98,25 +123,19 @@ async function load(
     default:
       return Promise.reject(new Error('Invalid http load direction.'));
   }
-  const internalProgressHandler = progressHandler
-    ? (progress: number, total: number) => {
-        const percentage =
-          total > 0
-            ? ((progress / total) * 100).toLocaleString(undefined, {
-                style: 'percent',
-                minimumFractionDigits: 2,
-              })
-            : '?';
-        progressHandler(progress, total, percentage);
-      }
-    : undefined;
-  return func(url, path, internalProgressHandler, headers);
+  return func(
+    url,
+    path,
+    receiveWrappingProgressHandler(progressHandler),
+    headers,
+  );
 }
 
+// overwrites and there seems to be now way to cancel it
 export function download(
   url: string,
   paths: string | string[],
-  progressHandler?: (progress: number, total: number, percent: string) => void,
+  progressHandler?: ProgressHandler,
   headers?: Map<string, string>,
 ) {
   return load('DOWN', url, paths, progressHandler, headers);
@@ -125,7 +144,7 @@ export function download(
 export function upload(
   url: string,
   paths: string | string[],
-  progressHandler?: (progress: number, total: number, percent: string) => void,
+  progressHandler?: ProgressHandler,
   headers?: Map<string, string>,
 ) {
   return load('UP', url, paths, progressHandler, headers);

@@ -4,6 +4,11 @@ import {
   Response,
   ResponseType,
 } from '@tauri-apps/api/http';
+import {
+  download as tauriPluginDownload,
+  upload as tauriPluginUpload,
+} from 'tauri-plugin-upload-api';
+import { resolvePath } from './tauri-files';
 
 function addToOptions(
   currentOptions: Partial<FetchOptions> | undefined,
@@ -69,4 +74,59 @@ export function getJSON<T>(
     headers: { Accept: 'application/json' },
   });
   return get<T>(url, nextOptions as FetchOptions);
+}
+
+// tauri-plugin-upload
+
+async function load(
+  direction: 'UP' | 'DOWN',
+  url: string,
+  paths: string | string[],
+  progressHandler?: (progress: number, total: number, percent: string) => void,
+  headers?: Map<string, string>,
+) {
+  const path = Array.isArray(paths) ? await resolvePath(...paths) : paths;
+
+  let func;
+  switch (direction) {
+    case 'UP':
+      func = tauriPluginUpload;
+      break;
+    case 'DOWN':
+      func = tauriPluginDownload;
+      break;
+    default:
+      return Promise.reject(new Error('Invalid http load direction.'));
+  }
+  const internalProgressHandler = progressHandler
+    ? (progress: number, total: number) => {
+        const percentage =
+          total > 0
+            ? ((progress / total) * 100).toLocaleString(undefined, {
+                style: 'percent',
+                minimumFractionDigits: 2,
+              })
+            : '?';
+        progressHandler(progress, total, percentage);
+      }
+    : undefined;
+  return func(url, path, internalProgressHandler, headers);
+}
+
+export function download(
+  url: string,
+  paths: string | string[],
+  progressHandler?: (progress: number, total: number, percent: string) => void,
+  headers?: Map<string, string>,
+) {
+  return load('DOWN', url, paths, progressHandler, headers);
+}
+
+export function upload(
+  url: string,
+  paths: string | string[],
+  progressHandler?: (progress: number, total: number, percent: string) => void,
+  headers?: Map<string, string>,
+) {
+  return load('UP', url, paths, progressHandler, headers);
 }

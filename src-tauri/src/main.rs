@@ -23,7 +23,8 @@ fn main() {
             run_program::os_open_program,
             file_support::slashify,
             file_support::canonicalize,
-            file_support::read_and_filter_dir
+            file_support::read_and_filter_dir,
+            file_support::scan_file_for_bytes
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

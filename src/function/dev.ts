@@ -3,6 +3,8 @@ import {
   readAndFilterPaths,
   slashify,
   canonicalize,
+  scanFileForBytes,
+  joinPaths,
 } from '../tauri/tauri-files';
 import { getHexHashOfString, getHexHashOfFile } from '../util/scripts/hash';
 import { showModalCreatePlugin } from '../components/modals/modal-create-plugin';
@@ -31,6 +33,8 @@ const dev = {
   makeToast,
   download,
   upload,
+  scanFileForBytes,
+  joinPaths,
 };
 
 (globalThis as Record<string, unknown>).dev = dev;

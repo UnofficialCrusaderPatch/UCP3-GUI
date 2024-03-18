@@ -103,9 +103,10 @@ pub async fn canonicalize(
 pub async fn scan_file_for_bytes(
     app_handle: AppHandle,
     path: &str,
-    search_bytes: &[u8],
+    search_bytes: Vec<u8>,
     scan_amount: Option<usize>,
 ) -> Result<Option<usize>, String> {
+    let search_bytes = &search_bytes;
     let validated_path = get_allowed_path_with_string_error(&app_handle, path)?;
     if search_bytes.len() < 1 {
         return Err(String::from("Received no bytes to search for."));

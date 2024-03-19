@@ -1,3 +1,25 @@
+const urlDetectionGroup = '([a-zA-Z0-9_.-]+)';
+const anySpaces = '\\s*';
+const doubleQuotedString = `([^"]+)`;
+const number = `([0-9.]+)`;
+const isEqualOrNonEqual = `((?:==)|(?:!=))`;
+const trueOrFalse = `((?:true)|(?:false))`;
+const inversionOrNot = `([!]{0,1})`;
+
+const reLiteral = new RegExp(`^${anySpaces}${trueOrFalse}${anySpaces}$`);
+const reSimple = new RegExp(
+  `^${anySpaces}${inversionOrNot}${urlDetectionGroup}${anySpaces}$`,
+);
+const reBooleanComparison = new RegExp(
+  `^${anySpaces}${urlDetectionGroup}${anySpaces}${isEqualOrNonEqual}${anySpaces}${trueOrFalse}${anySpaces}$`,
+);
+const reNumericComparison = new RegExp(
+  `^${anySpaces}${urlDetectionGroup}${anySpaces}${isEqualOrNonEqual}${anySpaces}${number}${anySpaces}$`,
+);
+const reStringComparison = new RegExp(
+  `^${anySpaces}${urlDetectionGroup}${anySpaces}${isEqualOrNonEqual}${anySpaces}${doubleQuotedString}${anySpaces}$`,
+);
+
 const parseEnabledLogic = (
   statement: string,
   configuration: { [key: string]: unknown },
@@ -5,15 +27,7 @@ const parseEnabledLogic = (
 ) => {
   if (statement === undefined || statement === null) return true;
 
-  const reLiteral = /^(true|false)$/;
-  const reSimple = /^\s*([!]{0,1})([a-zA-Z0-9_.]+)\s*$/;
-  const reBooleanComparison =
-    /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*((?:true)|(?:false))\s*$/;
-  const reNumericComparison =
-    /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*([0-9.]+)\s*$/;
-  const reStringComparison =
-    /^\s*([a-zA-Z0-9_.]+)\s*((?:==)|(?:!=))\s*"([^"]+)"\s*$/;
-
+  // Check for true/false
   const sLiteral = reLiteral.exec(statement);
   if (sLiteral !== null) {
     const [, lit] = sLiteral;
@@ -21,6 +35,8 @@ const parseEnabledLogic = (
     if (lit === 'false') return false;
     throw new Error('we should never get here');
   }
+
+  //
   const sSimple = reSimple.exec(statement);
   if (sSimple !== null) {
     const [, exclamationMark, url] = sSimple;

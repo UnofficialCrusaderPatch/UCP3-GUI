@@ -1,22 +1,21 @@
 // Inspired by the "Option" Enum from Rust and Optional from Java
 // A bit weird decision: "null" and "undefined" might be the contained values.
 // But then by contract.
+
+const NONE = {};
 export default class Option<T> {
-  #content: T | undefined;
+  #content: T | typeof NONE;
 
-  #present: boolean;
-
-  private constructor(content: T | undefined, present: boolean) {
+  private constructor(content: T | typeof NONE) {
     this.#content = content;
-    this.#present = present;
   }
 
   isPresent(): boolean {
-    return this.#present;
+    return this.#content !== NONE;
   }
 
   isEmpty(): boolean {
-    return !this.#present;
+    return !this.isPresent();
   }
 
   // get content, throws if empty
@@ -82,16 +81,16 @@ export default class Option<T> {
   //* factories *//
 
   static of<T>(content: T): Option<T> {
-    return new Option<T>(content, true);
+    return new Option<T>(content);
   }
 
   static ofEmpty<T>(): Option<T> {
-    return new Option<T>(undefined, false);
+    return new Option<T>(NONE);
   }
 
   /** Simulates a Java Optional, since `undefined` or `null` will become empty */
   static ofNullable<T>(content: T): Option<NonNullable<T>> {
     // check fo null here includes undefined
-    return content == null ? this.ofEmpty() : this.of(content);
+    return content == null ? Option.ofEmpty() : Option.of(content);
   }
 }

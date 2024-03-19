@@ -1,13 +1,28 @@
 // Helper file, wrapping tauri invokes in simple functions
 
+import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { invoke } from '@tauri-apps/api/tauri';
 
 const PLUGIN_CONFIG = 'tauri-plugin-ucp-config';
 const PLUGIN_LOGGING = 'tauri-plugin-ucp-logging';
 const PLUGIN_ZIP = 'tauri-plugin-ucp-zip-support';
 
+const TEXT_ENCODER = new TextEncoder();
+
 function buildPluginCmd(pluginName: string, command: string) {
   return `plugin:${pluginName}|${command}`;
+}
+
+function generateBinaryDataFromContent(content: BinaryFileContents | string) {
+  let internalContent = content ?? [];
+  if (typeof internalContent === 'string') {
+    internalContent = TEXT_ENCODER.encode(internalContent);
+  }
+  return Array.from(
+    internalContent instanceof ArrayBuffer
+      ? new Uint8Array(internalContent)
+      : internalContent,
+  );
 }
 
 /* eslint-disable */
@@ -39,6 +54,7 @@ const TAURI_COMMAND = {
   FILES_SLASHIFY: 'slashify',
   FILES_CANONICALIZE: 'canonicalize',
   FILES_READ_AND_FILTER_DIR: 'read_and_filter_dir',
+  FILES_SCAN_FILE_FOR_BYTES: 'scan_file_for_bytes',
 
   LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
@@ -141,12 +157,12 @@ export async function addZipWriterDirectory(
 export async function writeZipWriterEntryFromBinary(
   id: number,
   path: string,
-  binary: ArrayBuffer,
+  binary: BinaryFileContents,
 ): Promise<void> {
   return invoke(TAURI_COMMAND.ZIP_WRITER_WRITE_ENTRY_FROM_BINARY, {
     id,
     path,
-    binary,
+    binary: generateBinaryDataFromContent(binary),
   });
 }
 
@@ -214,5 +230,17 @@ export async function readAndFilterPaths(
   return invoke(TAURI_COMMAND.FILES_READ_AND_FILTER_DIR, {
     base: baseDir,
     pattern,
+  });
+}
+
+export async function scanFileForBytes(
+  path: string,
+  searchBytes: string | BinaryFileContents,
+  scanAmount?: number,
+): Promise<number | null> {
+  return invoke(TAURI_COMMAND.FILES_SCAN_FILE_FOR_BYTES, {
+    path,
+    searchBytes: generateBinaryDataFromContent(searchBytes),
+    scanAmount,
   });
 }

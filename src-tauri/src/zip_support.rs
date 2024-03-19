@@ -356,10 +356,10 @@ fn write_zip_writer_entry_from_binary<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
-    binary: &[u8],
+    binary: Vec<u8>,
 ) -> Result<(), String> {
     do_with_writer(&app_handle, id, |writer| {
-        writer.write_entry_from_binary(path, binary)
+        writer.write_entry_from_binary(path, &binary)
     })
 }
 

@@ -1,4 +1,5 @@
 /* eslint-disable max-classes-per-file */
+import { BinaryFileContents } from '@tauri-apps/api/fs';
 import { showError } from '../../tauri/tauri-dialog';
 import {
   loadZipReader,
@@ -134,7 +135,7 @@ export class ZipWriter {
     return addZipWriterDirectory(this.#id, path);
   }
 
-  async writeEntryFromBinary(path: string, binary: ArrayBuffer) {
+  async writeEntryFromBinary(path: string, binary: BinaryFileContents) {
     return writeZipWriterEntryFromBinary(this.#id, path, binary);
   }
 

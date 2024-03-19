@@ -26,6 +26,10 @@ import {
   UcpLogLevel,
 } from './launch-options/verbosity-args';
 import { CONFIG_DIRTY_STATE_ATOM } from '../common/buttons/config-serialized-state';
+import {
+  EXTREME_UCP2_ATOM,
+  VANILLA_UCP2_ATOM,
+} from '../../../function/game-files/game-ucp2-check';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -50,6 +54,7 @@ export default function Launch() {
           imagePath={logoCrusaderVanilla}
           pathAtom={VANILLA_PATH_ATOM}
           versionAtom={VANILLA_VERSION_ATOM}
+          ucp2CheckAtom={VANILLA_UCP2_ATOM}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
         />
@@ -57,6 +62,7 @@ export default function Launch() {
           imagePath={logoCrusaderExtreme}
           pathAtom={EXTREME_PATH_ATOM}
           versionAtom={EXTREME_VERSION_ATOM}
+          ucp2CheckAtom={EXTREME_UCP2_ATOM}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
         />

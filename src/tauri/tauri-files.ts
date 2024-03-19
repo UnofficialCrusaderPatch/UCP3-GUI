@@ -23,6 +23,7 @@ import {
   normalize as normalizePath,
   resolve,
   resolveResource,
+  basename as tauriBasename,
 } from '@tauri-apps/api/path';
 import {
   DocumentOptions,
@@ -37,7 +38,9 @@ import {
   readAndFilterPaths as invokeReadAndFilterPaths,
   slashify as invokeSlashify,
   canonicalize as invokeCanonicalize,
+  scanFileForBytes as invokeScanFileForBytes,
 } from './tauri-invoke';
+import Option from '../util/structs/option';
 
 // WARNING: Tauri funcs lie about their return.
 // Void Promises return "null" as result instead of undefined.
@@ -81,6 +84,11 @@ export async function canonicalize(
   slashifyPath?: boolean,
 ): Promise<Result<string, Error>> {
   return Result.tryAsync(invokeCanonicalize, path, slashifyPath);
+}
+
+// only proxy
+export async function basename(path: string, ext?: string | undefined) {
+  return tauriBasename(path, ext);
 }
 
 // only proxy
@@ -221,6 +229,19 @@ export async function writeJson(
     const jsonStr = JSON.stringify(contents, replacer, space);
     (await writeTextFile(path, jsonStr)).throwIfErr();
   });
+}
+
+export async function scanFileForBytes(
+  paths: string | string[],
+  searchBytes: string | BinaryFileContents,
+  scanAmount?: number,
+): Promise<Result<Option<number>, Error>> {
+  const invokeFunc = (path: string) =>
+    Result.tryAsync(invokeScanFileForBytes, path, searchBytes, scanAmount);
+  const result = Array.isArray(paths)
+    ? joinPaths(...paths).then(invokeFunc)
+    : invokeFunc(paths);
+  return (await result).mapOk(Option.ofNullable);
 }
 
 // GET FOLDER

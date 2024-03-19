@@ -21,6 +21,7 @@ const LOGGER = new Logger('game-starter.tsx');
 interface GameStarterProps {
   pathAtom: Atom<Promise<string>>;
   versionAtom: Atom<Promise<GameVersionInstance>>;
+  ucp2CheckAtom: Atom<Promise<boolean>>;
   imagePath: string;
   receiveArgs?: () => string[];
   receiveEnvs?: () => Record<string, string>;
@@ -82,16 +83,24 @@ function GameStarterInfo(props: {
 }
 
 function GameStarterButton(props: GameStarterProps) {
-  const { imagePath, pathAtom, versionAtom, receiveArgs, receiveEnvs } = props;
+  const {
+    imagePath,
+    pathAtom,
+    versionAtom,
+    ucp2CheckAtom,
+    receiveArgs,
+    receiveEnvs,
+  } = props;
 
   const { t } = useTranslation(['gui-launch']);
 
   const path = useAtomValue(pathAtom);
   const version = useAtomValue(versionAtom);
+  const ucp2Present = useAtomValue(ucp2CheckAtom);
 
   const [starting, setStarting] = useState(false);
 
-  const startDisabled = version === EMPTY_GAME_VERSION;
+  const startDisabled = ucp2Present || version === EMPTY_GAME_VERSION;
 
   let cssClass = 'game-starter__starter';
   if (startDisabled) {
@@ -154,7 +163,14 @@ function GameStarterButton(props: GameStarterProps) {
 }
 
 export default function GameStarter(props: GameStarterProps) {
-  const { imagePath, pathAtom, versionAtom, receiveArgs, receiveEnvs } = props;
+  const {
+    imagePath,
+    pathAtom,
+    versionAtom,
+    ucp2CheckAtom,
+    receiveArgs,
+    receiveEnvs,
+  } = props;
 
   return (
     <div className="flex-default game-starter__box">
@@ -164,6 +180,7 @@ export default function GameStarter(props: GameStarterProps) {
           imagePath={imagePath}
           pathAtom={pathAtom}
           versionAtom={versionAtom}
+          ucp2CheckAtom={ucp2CheckAtom}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
         />

@@ -23,6 +23,7 @@ import {
   normalize as normalizePath,
   resolve,
   resolveResource,
+  basename as tauriBasename,
 } from '@tauri-apps/api/path';
 import {
   DocumentOptions,
@@ -83,6 +84,11 @@ export async function canonicalize(
   slashifyPath?: boolean,
 ): Promise<Result<string, Error>> {
   return Result.tryAsync(invokeCanonicalize, path, slashifyPath);
+}
+
+// only proxy
+export async function basename(path: string, ext?: string | undefined) {
+  return tauriBasename(path, ext);
 }
 
 // only proxy
@@ -227,7 +233,7 @@ export async function writeJson(
 
 export async function scanFileForBytes(
   paths: string | string[],
-  searchBytes: ArrayBuffer,
+  searchBytes: string | BinaryFileContents,
   scanAmount?: number,
 ): Promise<Result<Option<number>, Error>> {
   const invokeFunc = (path: string) =>

@@ -235,7 +235,7 @@ export async function readAndFilterPaths(
 
 export async function scanFileForBytes(
   path: string,
-  searchBytes: BinaryFileContents,
+  searchBytes: string | BinaryFileContents,
   scanAmount?: number,
 ): Promise<number | null> {
   return invoke(TAURI_COMMAND.FILES_SCAN_FILE_FOR_BYTES, {

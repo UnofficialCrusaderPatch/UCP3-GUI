@@ -80,16 +80,16 @@ function CreateGroupBox(args: {
   return (
     // <Form key={`${name}-groupbox`}>
     <div
-      className={`ui-element ${(spec.style || {}).className} ${className}`}
+      className={`ui-element pb-3 ${(spec.style || {}).className} ${className}`}
       style={(spec.style || {}).css}
     >
-      <Row className="my-3">
+      <Row>
         <h5>{header}</h5>
         <div>
           <span>{finalDescription}</span>
         </div>
       </Row>
-      <Row className="mt-1">{cs}</Row>
+      <Row>{cs}</Row>
       {/* <Row>
           <span className="text-muted text-end">module-name-v1.0.0</span>
         </Row> */}

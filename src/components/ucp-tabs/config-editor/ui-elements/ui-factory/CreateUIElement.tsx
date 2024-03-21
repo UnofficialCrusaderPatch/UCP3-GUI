@@ -2,7 +2,10 @@ import './common.css';
 import './UCPAccordion.css';
 
 import { useTranslation } from 'react-i18next';
-import { DisplayConfigElement } from '../../../../../config/ucp/common';
+import {
+  DisplayConfigElement,
+  UrlableDisplayConfigElement,
+} from '../../../../../config/ucp/common';
 import Logger from '../../../../../util/scripts/logging';
 import CreateChoice from './CreateChoice';
 // eslint-disable-next-line import/no-cycle
@@ -20,6 +23,8 @@ import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
 import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput from './CreateFileInput';
+// eslint-disable-next-line import/no-cycle
+import { CreateModal } from './CreateModal';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -126,9 +131,18 @@ function CreateUIElement(args: {
           className={className}
         />
       );
+    case 'Modal':
+      return (
+        <CreateModal spec={spec} disabled={disabled} className={className} />
+      );
     default: {
       LOGGER.msg(
-        t('gui-editor:config.element.unsupported.type', JSON.stringify(spec)),
+        t('gui-editor:config.element.unsupported.type', {
+          url:
+            (spec as UrlableDisplayConfigElement).url ||
+            (spec as DisplayConfigElement).name,
+          type: (spec as DisplayConfigElement).display,
+        }),
       ).warn();
       return <div />;
     }

@@ -333,6 +333,12 @@ export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
     display: 'GroupBox';
   };
 
+export type ModalDisplayConfigElement = BaseDisplayConfigElement &
+  HeaderableDisplayConfigElement &
+  ChildrenableDisplayConfigElement & {
+    display: 'Modal';
+  };
+
 export type NumberInputDisplayConfigElement = BaseDisplayConfigElement &
   UrlableDisplayConfigElement &
   TextableDisplayConfigElement &
@@ -422,7 +428,8 @@ type DisplayConfigElement =
   | UCP2RadioGroupDisplayConfigElement
   | UCP2SliderDisplayConfigElement
   | UCP2SliderChoiceDisplayConfigElement
-  | UCP2SwitchDisplayConfigElement;
+  | UCP2SwitchDisplayConfigElement
+  | ModalDisplayConfigElement;
 
 type SectionDescription = {
   elements: DisplayConfigElement[];

@@ -1,16 +1,31 @@
-type Qualifier = 'required' | 'suggested' | 'unspecified';
+import { Extension } from '../common';
 
-// Can be reduced to ValueDefinition but that ruins documentation? :)
-// Premature optimization is the root of all evil.
-type ConfigMetaContent = {
+export type Qualifier = 'required' | 'suggested' | 'unspecified';
+
+type ExtensionConfigMetaContent = {
+  type: 'extension';
+  entityName: string;
   // The extension that specified this meta content
   // Only the last extension is retained if multiple extensions have non-conflictual settings.
-  entity: string | 'user';
+  entity: Extension;
 
   // The original value specified by the option definition is 'suggested' for 'value', but 'min' & 'max' are required.
   qualifier: Qualifier;
   content: unknown;
 };
+
+type UserConfigMetaContent = {
+  type: 'user';
+  entityName: 'user';
+
+  // The original value specified by the option definition is 'suggested' for 'value', but 'min' & 'max' are required.
+  qualifier: Qualifier;
+  content: unknown;
+};
+
+// Can be reduced to ValueDefinition but that ruins documentation? :)
+// Premature optimization is the root of all evil.
+type ConfigMetaContent = UserConfigMetaContent | ExtensionConfigMetaContent;
 
 type ConfigMetaContentDB = {
   [key: string]: ConfigMetaContent;
@@ -54,7 +69,6 @@ type UserValueDB = {
 // For user level suggestions, requirements
 
 export type {
-  Qualifier,
   ConfigMetaObject,
   ConfigMetaContent,
   ConfigMetaObjectDB,

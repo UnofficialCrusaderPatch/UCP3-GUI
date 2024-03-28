@@ -1,10 +1,15 @@
 import './extension-element.css';
 import '../buttons/customize-extension-button.css';
+import '../../../common/minimal.css';
 
 import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { GearFill, TrashFill } from 'react-bootstrap-icons';
+import {
+  ExclamationCircleFill,
+  GearFill,
+  TrashFill,
+} from 'react-bootstrap-icons';
 import {
   AvailableExtensionVersionsDictionary,
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
@@ -26,6 +31,7 @@ import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../../function/configurat
 import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
 import { customizeExtensionButtonCallback } from './customize-extension-button-callback';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
+import { OverrideViewer, OverrideViewerProps } from './override-viewer';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -129,6 +135,7 @@ export function ExtensionElement(props: {
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
   revDeps: string[];
   displayCustomizeButton: boolean;
+  showExclamationMark: boolean;
 }) {
   const {
     ext,
@@ -140,6 +147,7 @@ export function ExtensionElement(props: {
     clickCallback,
     buttonText,
     displayCustomizeButton,
+    showExclamationMark,
   } = props;
   const { name, version, author } = ext.definition;
   const displayName = ext.definition['display-name'];
@@ -252,6 +260,19 @@ export function ExtensionElement(props: {
         // eslint-disable-next-line react/jsx-no-useless-fragment
         <></>
       )}
+      {showExclamationMark ? (
+        <button
+          type="button"
+          className="minimal-button"
+          onClick={() => {
+            setOverlayContent<OverrideViewerProps>(OverrideViewer, true, true, {
+              extension: ext,
+            });
+          }}
+        >
+          <ExclamationCircleFill style={{ color: 'gray' }} />
+        </button>
+      ) : null}
       {versionDropdown}
       {arrows}
       {enableButton}
@@ -366,6 +387,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
             -1,
         )}
       displayCustomizeButton={false}
+      showExclamationMark={false}
     />
   );
 }
@@ -419,6 +441,15 @@ export function ActiveExtensionElement(props: {
 
   const guiCreatorMode = useAtomValue(CREATOR_MODE_ATOM);
 
+  const overrides = extensionsState.configuration.overrides.get(ext.name);
+  const showExclamationMark =
+    overrides !== undefined &&
+    overrides.filter(
+      (override) =>
+        !override.overridden.url.endsWith('.menu') &&
+        !override.overridden.url.endsWith('.defaultLanguage'),
+    ).length > 0;
+
   return (
     <ExtensionElement
       ext={ext}
@@ -430,6 +461,7 @@ export function ActiveExtensionElement(props: {
       moveCallback={moveCallback}
       displayCustomizeButton={guiCreatorMode && ext.type === 'plugin'}
       revDeps={theRevDeps}
+      showExclamationMark={showExclamationMark}
     />
   );
 }

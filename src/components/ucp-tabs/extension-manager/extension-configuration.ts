@@ -6,6 +6,7 @@ import {
   ConfigMetaObjectDB,
 } from '../../../config/ucp/config-merge/objects';
 import Logger from '../../../util/scripts/logging';
+import { Override } from '../../../function/configuration/overrides';
 
 const LOGGER = new Logger('extension-configuration.ts');
 
@@ -14,7 +15,11 @@ type ConfigurationDBBuildingResult = {
   state: ExtensionsState;
 };
 
-function buildConfigMetaContent(extName: string, k: string, v: unknown) {
+function buildConfigMetaContent(
+  ext: Extension | undefined,
+  k: string,
+  v: unknown,
+) {
   let truekey = k;
   let qualifier = 'unspecified';
   if (k.startsWith('required-')) {
@@ -29,25 +34,81 @@ function buildConfigMetaContent(extName: string, k: string, v: unknown) {
 
   return {
     truekey,
-    configMetaContent: {
-      entity: extName,
-      content: v,
-      qualifier,
-    } as ConfigMetaContent,
+    configMetaContent:
+      ext === undefined
+        ? ({
+            type: 'user',
+            entityName: 'user',
+            content: v,
+            qualifier,
+          } as ConfigMetaContent)
+        : ({
+            type: 'extension',
+            entity: ext,
+            entityName: ext.name,
+            content: v,
+            qualifier,
+          } as ConfigMetaContent),
   };
 }
 
-function buildConfigMetaContentDB(extName: string, ce: ConfigEntry) {
+function buildConfigMetaContentDB(ext: Extension | undefined, ce: ConfigEntry) {
   const m: ConfigMetaContentDB = {};
 
   Object.entries(ce.contents)
-    .map(([k, v]) => buildConfigMetaContent(extName, k, v))
+    .map(([k, v]) => buildConfigMetaContent(ext, k, v))
     .forEach(({ truekey, configMetaContent }) => {
       m[truekey] = configMetaContent;
     });
 
   return m;
 }
+
+export function buildConfigMetaContentDBForUser(ce: ConfigEntry) {
+  return buildConfigMetaContentDB(undefined, ce);
+}
+
+const createOverride = (
+  overridden: ConfigMetaContent,
+  overriding: ConfigMetaContent,
+  url: string,
+) =>
+  ({
+    overridden:
+      overridden.type === 'user'
+        ? {
+            type: 'user',
+            qualifier: overridden.qualifier,
+            url,
+            value: overridden.content,
+            name: overridden.entityName,
+          }
+        : {
+            type: 'extension',
+            entity: overridden.entity,
+            qualifier: overridden.qualifier,
+            url,
+            value: overridden.content,
+            name: overridden.entityName,
+          },
+    overriding:
+      overriding.type === 'user'
+        ? {
+            type: 'user',
+            qualifier: overriding.qualifier,
+            url,
+            value: overriding.content,
+            name: overriding.entityName,
+          }
+        : {
+            type: 'extension',
+            entity: overriding.entity,
+            qualifier: overriding.qualifier,
+            url,
+            value: overriding.content,
+            name: overriding.entityName,
+          },
+  }) as Override;
 
 function buildExtensionConfigurationDBFromActiveExtensions(
   activeExtensions: Extension[],
@@ -61,6 +122,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
   const errors: string[] = [];
   const warnings: string[] = [];
+  const overrides: Map<string, Override[]> = new Map<string, Override[]>();
 
   ae.forEach((ext) => {
     Object.entries(ext.configEntries).forEach(([url, data]) => {
@@ -70,7 +132,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
         currentCMO = { url, modifications: {} };
       }
 
-      const m = buildConfigMetaContentDB(ext.name, data);
+      const m = buildConfigMetaContentDB(ext, data);
 
       Object.entries(m).forEach(([key, cmc]) => {
         const currentM = currentCMO.modifications[key];
@@ -79,27 +141,51 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             currentM.qualifier === 'required' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Suggested value by extension ('${ext.name}') dropped because of a required value from previously activated extension ('${currentM.entity}')`;
-            LOGGER.msg(w).warn();
+            const w = `Value for '${url}' suggested by higher priority extension ('${ext.name}') overridden by a required value from a lower priority extension ('${currentM.entityName}')`;
+            // LOGGER.msg(w).warn();
             warnings.push(w);
+
+            const n = ext.name;
+            if (!overrides.has(n)) {
+              overrides.set(n, []);
+            }
+
+            overrides.get(n)!.push(createOverride(cmc, currentM, url));
+
             return;
           }
           if (
             currentM.qualifier === 'suggested' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Suggested value by extension ('${currentM.entity}') overriden by suggested value from later activated extension ('${ext.name}')`;
-            LOGGER.msg(w).warn();
+            const w = `Value for '${url}' suggested by lower priority extension ('${currentM.entityName}') overridden by suggested value from a higher priority extension ('${ext.name}')`;
+            // LOGGER.msg(w).warn();
             warnings.push(w);
+
+            const n = currentM.entityName;
+            if (!overrides.has(n)) {
+              overrides.set(n, []);
+            }
+
+            overrides.get(n)!.push(createOverride(currentM, cmc, url));
+
             return;
           }
           if (
             currentM.qualifier === 'suggested' &&
             cmc.qualifier === 'required'
           ) {
-            const w = `Suggested value by extension ('${currentM.entity}') overriden by required value from later activated extension ('${ext.name}')`;
-            LOGGER.msg(w).warn();
+            const w = `Value for '${url}' suggested by lower priority extension ('${currentM.entityName}') overridden by required value from a higher priority extension ('${ext.name}')`;
+            // LOGGER.msg(w).warn();
             warnings.push(w);
+
+            const n = currentM.entityName;
+            if (!overrides.has(n)) {
+              overrides.set(n, []);
+            }
+
+            overrides.get(n)!.push(createOverride(currentM, cmc, url));
+
             return;
           }
           if (
@@ -110,15 +196,19 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             if (
               JSON.stringify(currentM.content) !== JSON.stringify(cmc.content)
             ) {
-              const e = `Incompatible extension ('${ext.name}') and ('${currentM.entity}') because they both require different values for feature '${url}'`;
+              const e = `Incompatible extension ('${ext.name}') and ('${currentM.entityName}') because they both require different values for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
             }
+
+            return;
           }
         }
 
         m[key] = {
-          entity: ext.name,
+          type: 'extension',
+          entity: ext,
+          entityName: ext.name,
           content: cmc.content,
           qualifier: cmc.qualifier,
         } as ConfigMetaContent;
@@ -145,6 +235,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
   return {
     state: db,
     warnings,
+    overrides,
     errors,
     statusCode,
   };

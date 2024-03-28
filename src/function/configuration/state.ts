@@ -3,6 +3,7 @@ import { atomWithReducer } from 'jotai/utils';
 import { KeyValueReducer } from '../global/key-value-reducer';
 import { Warning } from '../global/types';
 import { ConfigMetaObjectDB } from '../../config/ucp/config-merge/objects';
+import { Override } from './overrides';
 
 const configurationFullReducer = KeyValueReducer<unknown>();
 const configurationDefaultsReducer = KeyValueReducer<unknown>();
@@ -67,6 +68,7 @@ export type ConfigurationQualifier = 'required' | 'suggested' | 'unspecified';
 export type ConfigurationState = {
   state: ConfigMetaObjectDB;
   warnings: string[];
+  overrides: Map<string, Override[]>;
   errors: string[];
   statusCode: number;
 };

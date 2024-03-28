@@ -34,11 +34,12 @@ import { showModalOk } from '../../modals/modal-ok';
 import { ConsoleLogger } from '../../../util/scripts/logging';
 import {
   buildExtensionConfigurationDB,
-  buildConfigMetaContentDB,
+  buildConfigMetaContentDBForUser,
 } from '../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extension-manager/extensions-state-manipulation';
 import warnClearingOfConfiguration from './warn-clearing-of-configuration';
 import { deserializeLoadOrder } from '../../../config/ucp/config-files/load-order';
+import { Override } from '../../../function/configuration/overrides';
 
 export const sanitizeVersionRange = (rangeString: string) => {
   if (rangeString.indexOf('==') !== -1) {
@@ -92,7 +93,7 @@ export const constructUserConfigObjects = (config: ConfigFile) => {
   } = {};
 
   Object.entries(userConfigEntries).forEach(([url, data]) => {
-    const m = buildConfigMetaContentDB('user', data);
+    const m = buildConfigMetaContentDBForUser(data);
     userConfigDB[url] = {
       url,
       modifications: m,
@@ -181,6 +182,7 @@ const importButtonCallback = async (
       warnings: [],
       errors: [],
       statusCode: 0,
+      overrides: new Map<string, Override[]>(),
     },
   } as ExtensionsState;
 

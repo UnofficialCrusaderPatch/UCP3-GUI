@@ -35,3 +35,19 @@
     margin-left: auto;
   }
 }
+
+.launch__options__box--game-data-path {
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    width: 100%;
+    display: flex;
+
+    > input {
+      flex-grow: 1;
+    }
+  }
+}

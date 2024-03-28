@@ -30,6 +30,7 @@ import {
   EXTREME_UCP2_ATOM,
   VANILLA_UCP2_ATOM,
 } from '../../../function/game-files/game-ucp2-check';
+import GameDataPath from './launch-options/game-data-path';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -98,6 +99,15 @@ export default function Launch() {
       >
         <h4>{t('gui-launch:launch.options')}</h4>
         <div className="parchment-box launch__options__box">
+          <div className="launch__options__box__row">
+            <GameDataPath
+              {...createLaunchOptionFuncs(
+                'GAME_DATA_PATH_ARGS',
+                internalArgs,
+                internalEnvs,
+              )}
+            />
+          </div>
           <div className="launch__options__box__row">
             <UcpLogLevel
               {...createLaunchOptionFuncs(

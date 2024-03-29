@@ -50,6 +50,7 @@
     "@tauri-apps/api": "^1.5.3",
     "bootstrap": "^5.3.3",
     "highlight.js": "^11.9.0",
+    "deep-equal": "^2.2.3",
     "i18next": "^23.10.0",
     "i18next-resources-to-backend": "^1.2.0",
     "jotai": "^2.6.5",
@@ -70,6 +71,7 @@
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.10",
     "@types/bootstrap": "^5.2.10",
+    "@types/deep-equal": "^1.0.4",
     "@types/node": "^20.11.20",
     "@types/react": "^18.2.58",
     "@types/react-dom": "^18.2.19",

@@ -32,6 +32,7 @@ import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
 import { customizeExtensionButtonCallback } from './customize-extension-button-callback';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { OverrideViewer, OverrideViewerProps } from './override-viewer';
+import { compareObjects } from '../../../../util/scripts/objectCompare';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -444,11 +445,16 @@ export function ActiveExtensionElement(props: {
   const overrides = extensionsState.configuration.overrides.get(ext.name);
   const showExclamationMark =
     overrides !== undefined &&
-    overrides.filter(
-      (override) =>
-        !override.overridden.url.endsWith('.menu') &&
-        !override.overridden.url.endsWith('.defaultLanguage'),
-    ).length > 0;
+    overrides
+      .filter(
+        (override) =>
+          !override.overridden.url.endsWith('.menu') &&
+          !override.overridden.url.endsWith('.defaultLanguage'),
+      )
+      .filter(
+        (override) =>
+          !compareObjects(override.overridden.value, override.overriding.value),
+      ).length > 0;
 
   return (
     <ExtensionElement

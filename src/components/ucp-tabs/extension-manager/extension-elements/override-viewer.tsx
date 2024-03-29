@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
+import { compareObjects } from '../../../../util/scripts/objectCompare';
 
 export type OverrideViewerProps = {
   extension: Extension;
@@ -21,25 +22,23 @@ export function OverrideViewer(
       (override) =>
         !override.overridden.url.endsWith('.menu') &&
         !override.overridden.url.endsWith('.defaultLanguage'),
+    )
+    .filter(
+      (override) =>
+        !compareObjects(override.overridden.value, override.overriding.value),
     );
 
   const content = overrides.map((override) => (
     <p key={override.overridden.url}>
       The value for {override.overridden.url} as {override.overridden.qualifier}{' '}
-      by {override.overridden.name} is being overridden by{' '}
-      {override.overriding.name}
-      <br />
-      Value as {override.overridden.qualifier} by {override.overridden.name}:
-      <br />
+      by {override.overridden.name}{' '}
       {override.overridden.value instanceof Object
-        ? '<object>'
-        : `${override.overridden.value}`}
-      <br />
-      Value as {override.overriding.qualifier} by {override.overriding.name}:
-      <br />
+        ? ''
+        : `(${override.overridden.value})`}{' '}
+      is being overridden with a different value by {override.overriding.name}{' '}
       {override.overriding.value instanceof Object
-        ? '<object>'
-        : `${override.overriding.value}`}
+        ? ''
+        : `(${override.overriding.value})`}
     </p>
   ));
 

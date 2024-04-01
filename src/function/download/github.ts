@@ -64,10 +64,13 @@ export class UCP3Updater {
 
     const currentVersion = new SemVer(this.version);
     const remoteVersion = new SemVer(this.meta.version);
-    if (remoteVersion > currentVersion) {
-      return true;
+    if (currentVersion.compare(remoteVersion) !== 0) {
+      // Return true if currentVersion is less than the remote version
+      return currentVersion.compare(remoteVersion) === -1;
     }
 
+    // If the versions are equal, then check the SHA
+    // and the build date, which is not implemented currently (comparison is always true)
     if (
       !this.sha.startsWith(this.meta.sha) &&
       this.meta.build_date > this.date

@@ -40,6 +40,9 @@ import {
   UCP_LOG,
 } from '../../../function/global/constants/file-constants';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
+import Logger from '../../../util/scripts/logging';
+
+const LOGGER = new Logger('overview.tsx');
 
 export default function Overview() {
   const currentFolder = useCurrentGameFolder();
@@ -94,6 +97,8 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
           try {
+            LOGGER.msg('check for updates and install').info();
+
             const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
 
             if (gameFolderState.state !== 'hasData') {

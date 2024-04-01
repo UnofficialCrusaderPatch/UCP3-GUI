@@ -83,6 +83,14 @@ export class ExtensionTree {
     this.tree = new Tree(repo);
   }
 
+  copy() {
+    return new ExtensionTree(
+      this.extensions,
+      this.frontendVersion,
+      this.frameworkVersion,
+    );
+  }
+
   get initialSolution() {
     if (this.tree.state === 'OK') {
       return {

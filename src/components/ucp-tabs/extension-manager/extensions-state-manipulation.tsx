@@ -34,6 +34,7 @@ const addExtensionToExplicityActivatedExtensions = (
     throw new DependencyError(solution.message);
   }
 
+  // Yoink ext to the top in extensions state here!
   const allDependenciesInLoadOrder = [
     ext,
     ...solution.extensions.filter((e) => e !== ext).reverse(),

@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { OverlayContentProps } from '../overlay/overlay';
 import { getStore } from '../../hooks/jotai/base';
 import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -28,7 +29,7 @@ import {
 import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
-import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
+import { ConsoleLogger } from '../../util/scripts/logging';
 
 export interface SandboxSource {
   html: string;
@@ -48,12 +49,25 @@ export interface SandboxArgs {
 }
 
 function saveConfig(baseUrl: string, config: Record<string, unknown>) {
+  ConsoleLogger.debug(`sandbox-menu: saveConfig: ${baseUrl}`, config);
+
+  const toBeCleared = Object.entries(config)
+    .filter(([, value]) => value === undefined)
+    .map(([subUrl]) => subUrl);
+
   const userConfigEntries = Object.fromEntries(
-    Object.entries(config).map(([subUrl, newConfigValue]) => [
-      `${baseUrl}.${subUrl}`,
-      newConfigValue,
-    ]),
+    Object.entries(config)
+      .filter(([, value]) => value !== undefined)
+      .map(([subUrl, newConfigValue]) => [
+        `${baseUrl}.${subUrl}`,
+        newConfigValue,
+      ]),
   );
+
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+    type: 'clear-keys',
+    keys: toBeCleared,
+  });
 
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'set-multiple',
@@ -63,16 +77,12 @@ function saveConfig(baseUrl: string, config: Record<string, unknown>) {
   // compute result based on baseline and user values
   // TODO?: could be better, although bigger changes might require changes in config handling
   // also, currently no support for setting required/suggested
-  const baseline = getStore().get(EXTENSION_STATE_REDUCER_ATOM).configuration
-    .state;
-  const baselineEntries: [string, unknown][] = Object.entries(baseline)
-    .filter(([url]) => url.startsWith(baseUrl))
-    .map(([key, value]) => [key, value.modifications.value.content]);
+  const baseline = getStore().get(CONFIGURATION_DEFAULTS_REDUCER_ATOM);
+  const baselineEntries: [string, unknown][] = Object.entries(baseline).filter(
+    ([url]) => url.startsWith(baseUrl),
+  );
 
-  const finalConfigEntries: Record<string, unknown> = {};
-  baselineEntries.forEach(([key, value]) => {
-    finalConfigEntries[key] = value;
-  });
+  const finalConfigEntries: Record<string, unknown> = { ...baselineEntries };
   Object.entries(userConfigEntries).forEach(([key, value]) => {
     // also set value if user config and baseline undefined, to overwrite old values
     if (value !== undefined || finalConfigEntries[key] === undefined) {
@@ -88,7 +98,7 @@ function saveConfig(baseUrl: string, config: Record<string, unknown>) {
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'set-multiple',
     value: Object.fromEntries(
-      Object.keys(finalConfigEntries).map((key) => [key, true]),
+      Object.keys(userConfigEntries).map((key) => [key, true]),
     ),
   });
 }

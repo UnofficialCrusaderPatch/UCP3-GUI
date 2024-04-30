@@ -29,6 +29,7 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
+    // Yoink ext to the top in extensions state here?
     newExtensionsState = await addExtensionToExplicityActivatedExtensions(
       currentExtensionsState,
       ext,
@@ -45,6 +46,8 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   const res = buildExtensionConfigurationDB(newExtensionsState);
 
   if (!(await reportAndConfirmBuildResult(res))) return;
+
+  // Yoink ext to the top in extensions state here?
 
   // TODO: insert logic to integrate existing customisations with the new thing.
   const userConfig = Object.entries(

@@ -34,7 +34,10 @@ const addExtensionToExplicityActivatedExtensions = (
     throw new DependencyError(solution.message);
   }
 
-  const allDependenciesInLoadOrder = solution.extensions.reverse();
+  const allDependenciesInLoadOrder = [
+    ext,
+    ...solution.extensions.filter((e) => e !== ext).reverse(),
+  ];
 
   // Filter out extensions with a different version than those that are now going to be activated
   const depNames = new Set(allDependenciesInLoadOrder.map((e) => e.name));

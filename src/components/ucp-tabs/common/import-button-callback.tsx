@@ -209,6 +209,8 @@ const importButtonCallback = async (
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
   // Get the load order from the sparse part of the config file
+
+  // BUG: this should be done on the config-full order to retain reproducibility between GUI refreshes...
   const loadOrder = deserializeLoadOrder(config['config-sparse']['load-order']);
   if (loadOrder !== undefined && loadOrder.length > 0) {
     const explicitActiveExtensions: Extension[] = [];

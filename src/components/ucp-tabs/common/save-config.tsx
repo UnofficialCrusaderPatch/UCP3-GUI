@@ -1,9 +1,14 @@
 import { Extension } from '../../../config/ucp/common';
 import { saveUCPConfig } from '../../../config/ucp/config-files/config-files';
 import {
+  CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_USER_REDUCER_ATOM,
   ConfigurationQualifier,
 } from '../../../function/configuration/state';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
+import { GAME_FOLDER_ATOM } from '../../../function/game-folder/game-folder-atom';
 import { getStore } from '../../../hooks/jotai/base';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
 
@@ -34,6 +39,20 @@ function saveConfig(
 
     return value;
   });
+}
+
+export function saveCurrentConfig() {
+  return saveConfig(
+    { ...getStore().get(CONFIGURATION_FULL_REDUCER_ATOM) },
+    { ...getStore().get(CONFIGURATION_USER_REDUCER_ATOM) },
+    getStore().get(GAME_FOLDER_ATOM),
+    [
+      ...getStore().get(EXTENSION_STATE_REDUCER_ATOM)
+        .explicitlyActivatedExtensions,
+    ],
+    [...getStore().get(EXTENSION_STATE_REDUCER_ATOM).activeExtensions],
+    getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM),
+  );
 }
 
 export default saveConfig;

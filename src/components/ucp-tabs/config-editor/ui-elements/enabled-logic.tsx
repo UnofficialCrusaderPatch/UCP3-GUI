@@ -1,5 +1,3 @@
-import { ConsoleLogger } from '../../../../util/scripts/logging';
-
 const urlDetectionGroup = '([a-zA-Z0-9_.-]+)';
 const anySpaces = '\\s*';
 const doubleQuotedString = `["]([^"]+)["]`;
@@ -27,8 +25,6 @@ const parseEnabledLogic = (
   configuration: { [key: string]: unknown },
   configurationDefaults: { [key: string]: unknown },
 ) => {
-  ConsoleLogger.debug(`statement`);
-
   if (statement === undefined || statement === null) return true;
 
   // Check for true/false

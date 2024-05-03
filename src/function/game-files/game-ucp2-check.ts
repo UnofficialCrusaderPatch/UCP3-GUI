@@ -1,5 +1,4 @@
 import { atom } from 'jotai';
-import { exists } from '@tauri-apps/api/fs';
 import {
   basename,
   onFsExists,
@@ -20,23 +19,19 @@ async function checkIfUCP2Installed(path: string) {
   const filename = await basename(path).catch(() => 'NONE');
   const t = getTranslation(['gui-launch']);
 
-  if (!(await exists(path))) {
-    return false;
-  }
-
   const result = await scanFileForBytes(path, UCP2_MARK, BYTES_TO_SCAN);
   if (result.isErr()) {
-    if (!(await onFsExists(path).catch(() => false))) {
-      makeToast({
-        title: t('gui-launch:launch'),
-        body: t('gui-launch:launch.ucp2.check.fail', {
-          file: filename,
-          reason: String(result.err().get()),
-        }),
-        type: ToastType.ERROR,
-      });
-    }
-    return false;
+    const exeExists = await onFsExists(path).catch(() => false);
+    if (!exeExists) return false;
+
+    makeToast({
+      title: t('gui-launch:launch'),
+      body: t('gui-launch:launch.ucp2.check.fail', {
+        file: filename,
+        reason: String(result.err().get()),
+      }),
+      type: ToastType.ERROR,
+    });
   }
   const ucp2Present = result.ok().get().isPresent();
   if (ucp2Present) {

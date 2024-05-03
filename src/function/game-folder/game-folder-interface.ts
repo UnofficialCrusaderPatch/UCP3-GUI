@@ -179,7 +179,11 @@ export async function initializeGameFolder(
 
         getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
-        saveCurrentConfig();
+        ConsoleLogger.debug(
+          await saveCurrentConfig({
+            file,
+          }),
+        );
       }
     }
 

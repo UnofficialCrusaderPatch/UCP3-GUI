@@ -6,16 +6,16 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
   ConfigurationQualifier,
+  UCP_CONFIG_FILE_ATOM,
 } from '../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
-import { GAME_FOLDER_ATOM } from '../../../function/game-folder/game-folder-atom';
 import { getStore } from '../../../hooks/jotai/base';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
 
 function saveConfig(
   configuration: { [key: string]: unknown },
   userConfiguration: { [key: string]: unknown },
-  folder: string,
+  filePath: string,
   sparseExtensions: Extension[],
   allExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
@@ -27,7 +27,7 @@ function saveConfig(
     { ...configuration },
     [...sparseExtensions].reverse(),
     [...allExtensions].reverse(),
-    folder,
+    filePath,
     configurationQualifier,
   ).then((value) => {
     getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
@@ -41,11 +41,23 @@ function saveConfig(
   });
 }
 
-export function saveCurrentConfig() {
+export function saveCurrentConfig(helpingInfo?: { file?: string }) {
+  let file = getStore().get(UCP_CONFIG_FILE_ATOM);
+  if (file === undefined || file.length === 0) {
+    if (helpingInfo !== undefined) {
+      if (helpingInfo.file !== undefined) {
+        file = helpingInfo.file;
+      } else {
+        throw Error(`no folder specified`);
+      }
+    } else {
+      throw Error(`no folder specified`);
+    }
+  }
   return saveConfig(
     { ...getStore().get(CONFIGURATION_FULL_REDUCER_ATOM) },
     { ...getStore().get(CONFIGURATION_USER_REDUCER_ATOM) },
-    getStore().get(GAME_FOLDER_ATOM),
+    file,
     [
       ...getStore().get(EXTENSION_STATE_REDUCER_ATOM)
         .explicitlyActivatedExtensions,

@@ -53,7 +53,7 @@ function saveConfig(baseUrl: string, config: Record<string, unknown>) {
 
   const toBeCleared = Object.entries(config)
     .filter(([, value]) => value === undefined)
-    .map(([subUrl]) => subUrl);
+    .map(([subUrl]) => `${baseUrl}.${subUrl}`);
 
   const userConfigEntries = Object.fromEntries(
     Object.entries(config)

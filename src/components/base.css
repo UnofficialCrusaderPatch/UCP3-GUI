@@ -89,6 +89,12 @@ body {
   background-color: transparent;
 }
 
+.icon-button[disabled] {
+  pointer-events: none;
+  opacity: 0.75;
+  color: gray;
+}
+
 /*
   Border and box elements:
 */

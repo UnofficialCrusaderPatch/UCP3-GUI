@@ -4,6 +4,8 @@ import { atomWithStorage } from 'jotai/utils';
 // The below code would set up the storage to a certain file in the GUI's AppData directory.
 // const storage: FileBackedStorage = new FileBackedStorage('guiSettings.json');
 
+export const AUTOSAVE_ON_LAUNCH = atomWithStorage('autoSaveOnLaunch', true);
+
 export const FIRST_TIME_USE_ATOM = atomWithStorage('guiFirstTimeUse', true);
 export const SHOW_ALL_EXTENSIONS_ATOM = atomWithStorage(
   'guiShowAllExtensions',

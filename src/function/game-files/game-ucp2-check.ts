@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { exists } from '@tauri-apps/api/fs';
 import {
   basename,
   onFsExists,
@@ -18,6 +19,10 @@ async function checkIfUCP2Installed(path: string) {
   }
   const filename = await basename(path).catch(() => 'NONE');
   const t = getTranslation(['gui-launch']);
+
+  if (!(await exists(path))) {
+    return false;
+  }
 
   const result = await scanFileForBytes(path, UCP2_MARK, BYTES_TO_SCAN);
   if (result.isErr()) {

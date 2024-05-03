@@ -90,7 +90,7 @@ export default function Overview() {
       <RecentFolders />
 
       <OverviewButton
-        buttonActive={overviewButtonActive}
+        buttonActive={overviewButtonActive && currentFolder !== ''}
         buttonText={t('gui-editor:overview.update.idle')}
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
@@ -242,7 +242,7 @@ export default function Overview() {
         toastTitle={t('gui-editor:overview.update.toast.title')}
       />
       <OverviewButton
-        buttonActive={overviewButtonActive}
+        buttonActive={overviewButtonActive && currentFolder !== ''}
         buttonText={t('gui-editor:overview.zip.idle')}
         buttonVariant="zip-icon icon-button"
         funcBefore={() => setOverviewButtonActive(false)}

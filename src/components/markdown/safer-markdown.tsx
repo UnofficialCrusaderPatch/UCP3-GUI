@@ -11,6 +11,11 @@ function LinkRenderer(props: any) {
 
 // eslint-disable-next-line import/prefer-default-export
 export function SaferMarkdown(props: any) {
-  const { children } = props;
-  return <Markdown components={{ a: LinkRenderer }}>{children}</Markdown>;
+  const { children, ...other } = props;
+  return (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Markdown components={{ a: LinkRenderer }} {...other}>
+      {children}
+    </Markdown>
+  );
 }

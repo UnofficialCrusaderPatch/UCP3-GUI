@@ -11,6 +11,9 @@
   },
   "tauri": {
     "allowlist": {
+      "clipboard": {
+        "writeText": true
+      },
       "os": {
         "all": true
       },

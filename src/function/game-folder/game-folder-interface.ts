@@ -29,6 +29,7 @@ import { addExtensionToExplicityActivatedExtensions } from '../../components/ucp
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../components/ucp-tabs/common/buttons/config-serialized-state';
 import { discoverExtensions } from '../extensions/discovery/discovery';
 import { buildExtensionConfigurationDB } from '../../components/ucp-tabs/extension-manager/extension-configuration';
+import { saveCurrentConfig } from '../../components/ucp-tabs/common/save-config';
 
 const LOGGER = new Logger('game-folder-interface.ts');
 
@@ -177,6 +178,12 @@ export async function initializeGameFolder(
         getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
 
         getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+
+        ConsoleLogger.debug(
+          await saveCurrentConfig({
+            file,
+          }),
+        );
       }
     }
 

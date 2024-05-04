@@ -25,6 +25,7 @@ interface GameStarterProps {
   imagePath: string;
   receiveArgs?: () => string[];
   receiveEnvs?: () => Record<string, string>;
+  beforeLaunch?: () => void;
 }
 
 function GameStarterInfo(props: {
@@ -90,6 +91,7 @@ function GameStarterButton(props: GameStarterProps) {
     ucp2CheckAtom,
     receiveArgs,
     receiveEnvs,
+    beforeLaunch,
   } = props;
 
   const { t } = useTranslation(['gui-launch']);
@@ -113,6 +115,7 @@ function GameStarterButton(props: GameStarterProps) {
   const firstTimeUse = useAtomValue(FIRST_TIME_USE_ATOM);
 
   const startFunc = async () => {
+    if (beforeLaunch !== undefined) beforeLaunch();
     try {
       if (dirty && firstTimeUse) {
         const answer = await showModalOkCancel({
@@ -170,6 +173,7 @@ export default function GameStarter(props: GameStarterProps) {
     ucp2CheckAtom,
     receiveArgs,
     receiveEnvs,
+    beforeLaunch,
   } = props;
 
   return (
@@ -183,6 +187,7 @@ export default function GameStarter(props: GameStarterProps) {
           ucp2CheckAtom={ucp2CheckAtom}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
+          beforeLaunch={beforeLaunch}
         />
       </Suspense>
     </div>

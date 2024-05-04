@@ -246,7 +246,7 @@ export async function saveUCPConfig(
   filePath: string,
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
-  await writeTextFile(
+  const result = await writeTextFile(
     filePath,
     toYaml(
       serializeUCPConfig(
@@ -258,6 +258,8 @@ export async function saveUCPConfig(
       ),
     ),
   );
+
+  result.throwIfErr();
 
   return `Saved!`;
 }

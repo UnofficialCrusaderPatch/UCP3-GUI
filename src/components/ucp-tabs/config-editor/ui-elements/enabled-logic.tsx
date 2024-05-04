@@ -1,6 +1,6 @@
 const urlDetectionGroup = '([a-zA-Z0-9_.-]+)';
 const anySpaces = '\\s*';
-const doubleQuotedString = `([^"]+)`;
+const doubleQuotedString = `["]([^"]+)["]`;
 const number = `([0-9.]+)`;
 const isEqualOrNonEqual = `((?:==)|(?:!=))`;
 const trueOrFalse = `((?:true)|(?:false))`;

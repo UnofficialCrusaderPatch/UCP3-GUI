@@ -4,9 +4,9 @@ import './launch-options/launch-options.css'; // currently imported here, als lo
 
 import { useTranslation } from 'react-i18next';
 import { useRef, useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import GameStarter from './game-starter/game-starter';
@@ -31,6 +31,8 @@ import {
   VANILLA_UCP2_ATOM,
 } from '../../../function/game-files/game-ucp2-check';
 import GameDataPath from './launch-options/game-data-path';
+import * as GuiSettings from '../../../function/gui-settings/settings';
+import { saveCurrentConfig } from '../common/save-config';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -48,6 +50,8 @@ export default function Launch() {
 
   const configurationDirtyState = useAtomValue(CONFIG_DIRTY_STATE_ATOM);
 
+  const [autoSave, setAutoSave] = useAtom(GuiSettings.AUTOSAVE_ON_LAUNCH);
+
   return (
     <div className="launch__container flex-default">
       <div className="launch__boxes">
@@ -58,6 +62,11 @@ export default function Launch() {
           ucp2CheckAtom={VANILLA_UCP2_ATOM}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
+          beforeLaunch={() => {
+            if (autoSave) {
+              saveCurrentConfig();
+            }
+          }}
         />
         <GameStarter
           imagePath={logoCrusaderExtreme}
@@ -66,12 +75,20 @@ export default function Launch() {
           ucp2CheckAtom={EXTREME_UCP2_ATOM}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
+          beforeLaunch={() => {
+            if (autoSave) {
+              saveCurrentConfig();
+            }
+          }}
         />
       </div>
       <div
         className={`d-flex align-self-start ps-4 ${
-          configurationDirtyState ? '' : 'd-none'
+          configurationDirtyState && !autoSave ? '' : 'd-none'
         }`}
+        style={{
+          lineHeight: '1.5rem',
+        }}
       >
         <ExclamationCircleFill color="yellow" size={20} />
         <span className="ps-3">
@@ -79,17 +96,23 @@ export default function Launch() {
         </span>
       </div>
       <div className="d-flex align-self-start">
-        <Button
+        <Form.Switch
           variant="link"
-          onClick={() =>
-            setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions)
-          }
-        >
-          {!displayAdvancedLaunchOptions
-            ? t('gui-launch:launch.options.view')
-            : t('gui-launch:launch.options.hide')}
-        </Button>
+          defaultChecked={displayAdvancedLaunchOptions}
+          id="display-launch-options-switch"
+          onChange={(e) => setDisplayAdvancedLaunchOptions(e.target.checked)}
+          className="ps-5"
+          label={t('gui-launch:launch.options.view')}
+        />
+        <Form.Switch
+          label="Save (apply) configuration before launching the game"
+          defaultChecked={autoSave}
+          id="save-config-before-launch-switch"
+          onChange={(e) => setAutoSave(e.target.checked)}
+          className="ps-5"
+        />
       </div>
+      <div className="d-flex align-self-start" />
       <div
         className={
           displayAdvancedLaunchOptions

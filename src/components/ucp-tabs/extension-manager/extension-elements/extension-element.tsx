@@ -33,6 +33,7 @@ function MoveArrows(props: {
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
 }) {
   const { extensionName, movability, moveCallback } = props;
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   return (
     <div className="arrow-container">
       <button
@@ -42,6 +43,14 @@ function MoveArrows(props: {
         onClick={() => {
           if (movability.up) moveCallback({ name: extensionName, type: 'up' });
         }}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            `Give this extension higher priority. It will override settings from lower priority extensions when relevant.`,
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
       />
       <button
         type="button"
@@ -50,6 +59,14 @@ function MoveArrows(props: {
         onClick={() => {
           if (movability.down)
             moveCallback({ name: extensionName, type: 'down' });
+        }}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            `Give this extension lower priority. Its settings can be overridden by higher priority extensions when relevant.`,
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
         }}
       />
     </div>

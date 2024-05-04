@@ -62,7 +62,11 @@ export function ExtensionViewer(
           </SaferMarkdown>
         </div>
       </div>
-      <button type="button" className="credits-close" onClick={closeFunc}>
+      <button
+        type="button"
+        className="credits-close credits-close-button"
+        onClick={closeFunc}
+      >
         {t('gui-general:close')}
       </button>
     </div>

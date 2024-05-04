@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { OverlayContentProps } from '../overlay/overlay';
 import { getStore } from '../../hooks/jotai/base';
 import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -28,7 +29,7 @@ import {
 import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
-import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
+import { ConsoleLogger } from '../../util/scripts/logging';
 
 export interface SandboxSource {
   html: string;
@@ -48,48 +49,70 @@ export interface SandboxArgs {
 }
 
 function saveConfig(baseUrl: string, config: Record<string, unknown>) {
-  const userConfigEntries = Object.fromEntries(
+  // Log what was returned from the custom menu
+  ConsoleLogger.debug(`sandbox-menu: saveConfig: ${baseUrl}`, config);
+
+  // Prepend the baseUrl to the entries returned from the config menu
+  const prependedConfig = Object.fromEntries(
     Object.entries(config).map(([subUrl, newConfigValue]) => [
       `${baseUrl}.${subUrl}`,
       newConfigValue,
     ]),
   );
 
+  // Gather the keys that were set to value `undefined`
+  // These keys will be cleared from the user config
+  // Note they are not cleared from the baseline or defaults config
+  // If that is desired, a special "none" value should be defined that the backend understands too
+  const toBeCleared = Object.entries(prependedConfig)
+    .filter(([, value]) => value === undefined)
+    .map(([url]) => url);
+
+  // Clear from the user config
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+    type: 'clear-keys',
+    keys: toBeCleared,
+  });
+
+  // Gather the new user config entries that should be overridden
+  // in the user config and the full config
+  const userConfigEntries = Object.fromEntries(
+    Object.entries(prependedConfig).filter(([, value]) => value !== undefined),
+  );
+
+  // Overwrite the values in the user config.
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'set-multiple',
     value: userConfigEntries,
   });
 
-  // compute result based on baseline and user values
-  // TODO?: could be better, although bigger changes might require changes in config handling
-  // also, currently no support for setting required/suggested
-  const baseline = getStore().get(EXTENSION_STATE_REDUCER_ATOM).configuration
-    .state;
-  const baselineEntries: [string, unknown][] = Object.entries(baseline)
-    .filter(([url]) => url.startsWith(baseUrl))
-    .map(([key, value]) => [key, value.modifications.value.content]);
-
-  const finalConfigEntries: Record<string, unknown> = {};
-  baselineEntries.forEach(([key, value]) => {
-    finalConfigEntries[key] = value;
-  });
-  Object.entries(userConfigEntries).forEach(([key, value]) => {
-    // also set value if user config and baseline undefined, to overwrite old values
-    if (value !== undefined || finalConfigEntries[key] === undefined) {
-      finalConfigEntries[key] = value;
-    }
-  });
-
-  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
-    type: 'set-multiple',
-    value: finalConfigEntries,
-  });
-
+  // Update the touched state with which things were touched
+  // Note we only include things that are not undefined
   getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
     type: 'set-multiple',
     value: Object.fromEntries(
-      Object.keys(finalConfigEntries).map((key) => [key, true]),
+      Object.keys(userConfigEntries).map((key) => [key, true]),
     ),
+  });
+
+  // Compute full config based on defaults and user values
+  // TODO: currently no support for setting required/suggested
+  const baseline = getStore().get(CONFIGURATION_DEFAULTS_REDUCER_ATOM);
+  const baselineEntries: [string, unknown][] = Object.entries(baseline).filter(
+    ([url]) => url.startsWith(baseUrl),
+  );
+
+  // TODO: not 100% sure if this "recomputation" of the config values is necessary in all cases
+  // but since this is a Custom Menu let's do it this way anyway
+  const fullConfigEntries: Record<string, unknown> = {
+    ...baselineEntries,
+    ...userConfigEntries,
+  };
+
+  // Update the full config
+  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: fullConfigEntries,
   });
 }
 

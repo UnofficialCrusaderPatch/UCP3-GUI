@@ -33,6 +33,11 @@
 
 .credits-close {
   margin-left: auto;
-  background-color: black;
+
   background-clip: padding-box;
+}
+
+.credits-close-button {
+  background-color: black;
+  color: rgba(var(--bs-light-rgb), var(--bs-text-opacity)) !important;
 }

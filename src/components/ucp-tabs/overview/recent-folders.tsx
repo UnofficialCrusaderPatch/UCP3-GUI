@@ -77,7 +77,7 @@ export default function RecentFolders() {
               updateCurrentFolderSelectState,
             )
           }
-          value={currentFolder}
+          value={currentFolder.length > 0 ? currentFolder : ` Browse . . . `}
         />
         <button
           type="button"

@@ -1,4 +1,5 @@
 import ApplyButton from '../common/buttons/apply-button';
+import { ViewConfigFileButton } from '../common/buttons/view-config-file';
 import { CreatorModeButton } from './buttons/creator-mode-button';
 import ExportButton from './buttons/export-button';
 import ImportButton from './buttons/import-button';
@@ -14,6 +15,7 @@ export function ConfigEditorToolbar() {
 
       <div className="config-editor__buttons--apply-button">
         <CreatorModeButton />
+        <ViewConfigFileButton />
         <ApplyButton />
       </div>
     </div>

@@ -89,6 +89,12 @@ body {
   background-color: transparent;
 }
 
+.icon-button[disabled] {
+  pointer-events: none;
+  opacity: 0.75;
+  color: gray;
+}
+
 /*
   Border and box elements:
 */
@@ -165,4 +171,12 @@ body {
   border-style: solid;
   border-width: 2px;
   border-color: transparent;
+}
+
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+
+  align-self: flex-end;
 }

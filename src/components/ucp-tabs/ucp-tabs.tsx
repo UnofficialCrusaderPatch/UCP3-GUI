@@ -36,6 +36,7 @@ import {
   BACKGROUNDS_DIRECTORY,
   BACKGROUNDS_MAPPING_FILE,
 } from '../../function/global/constants/file-constants';
+import { useCurrentGameFolder } from '../../function/game-folder/utils';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
@@ -97,6 +98,8 @@ export default function UcpTabs() {
   const backgroundMapping = useAtomValue(BACKGROUNDS_PATH_ATOM);
   const headerImage = backgroundMapping?.[`header.${currentTab}`] ?? '';
   const tabImage = backgroundMapping?.[`tab.${currentTab}`] ?? '';
+
+  const currentFolder = useCurrentGameFolder();
 
   return (
     <div
@@ -172,6 +175,8 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="launch"
               className="ornament-border-button tab-link"
+              disabled={currentFolder === ''}
+              hidden={currentFolder === ''}
             >
               {t('gui-launch:launch')}
             </Nav.Link>

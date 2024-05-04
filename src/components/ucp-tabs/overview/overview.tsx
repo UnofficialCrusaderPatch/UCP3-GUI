@@ -41,6 +41,7 @@ import {
 } from '../../../function/global/constants/file-constants';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
+import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -96,6 +97,11 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
+          if (await hintThatGameMayBeRunning()) {
+            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            return;
+          }
+
           try {
             LOGGER.msg('check for updates and install').info();
 
@@ -248,6 +254,11 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
+          if (await hintThatGameMayBeRunning()) {
+            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            return;
+          }
+
           try {
             const zipFilePath = await openFileDialog(currentFolder, [
               { name: t('gui-general:file.zip'), extensions: ['zip'] },
@@ -313,6 +324,11 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
+          if (await hintThatGameMayBeRunning()) {
+            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            return;
+          }
+
           try {
             let result = Result.emptyOk();
             if (
@@ -352,6 +368,11 @@ export default function Overview() {
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
+          if (await hintThatGameMayBeRunning()) {
+            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            return;
+          }
+
           if (
             !(await showModalOkCancel({
               message: t('gui-editor:overview.uninstall.question'),

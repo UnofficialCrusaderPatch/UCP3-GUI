@@ -6,7 +6,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
 import { GAME_FOLDER_ATOM } from './game-folder-atom';
 import { showModalOk } from '../../components/modals/modal-ok';
-import importButtonCallback from '../../components/ucp-tabs/common/import-button-callback';
+import importButtonCallback from '../../components/ucp-tabs/common/importing/import-button-callback';
 import { Extension } from '../../config/ucp/common';
 import { getStore } from '../../hooks/jotai/base';
 import Logger, { ConsoleLogger } from '../../util/scripts/logging';

@@ -1,7 +1,7 @@
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../extension-editor/extension-editor-state';
-import importButtonCallback from '../import-button-callback';
+import importButtonCallback from '../importing/import-button-callback';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { showModalOk } from '../../../modals/modal-ok';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './config-serialized-state';

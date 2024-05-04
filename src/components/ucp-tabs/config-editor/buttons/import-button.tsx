@@ -5,7 +5,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import { makeToast } from '../../../toasts/toasts-display';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
-import importButtonCallback from '../../common/import-button-callback';
+import importButtonCallback from '../../common/importing/import-button-callback';
 
 function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);

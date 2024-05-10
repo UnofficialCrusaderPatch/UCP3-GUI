@@ -57,8 +57,12 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          releaseId: v1.0.2-linux
+          releaseId: "155298210"
+          tagName: v1.0.2-linux
           includeRelease: true
           includeUpdaterJson: false
           updaterJsonPreferNsis: true
+          releaseDraft: true
+          prerelease: true
+          releaseCommitish: linux
 

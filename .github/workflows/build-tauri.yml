@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout git repo
@@ -37,7 +37,7 @@ jobs:
         with:
           toolchain: stable
       - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
@@ -50,91 +50,15 @@ jobs:
       - name: install app dependencies
         run: |
           npm ci
-      - name: Create changelog URL
-        run: |
-          $m = "${{ inputs.release_message }}"
-          $t = "[Changelog](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/wiki/Changelog#)"
-          if ( $m.Contains($t) ) {
-
-            Install-Module -Name PSToml -Scope CurrentUser -Force
-            Import-Module PSToml
-
-            ## Get the version
-            $conf = Get-Content -Raw -Path "src-tauri/Cargo.toml" | ConvertFrom-Toml
-            $v = $conf.package.version
-            $vm = $v.Replace(".", "") # Needed this way for pound urls
-
-            ## Create the version URL
-            $url = $t.Replace("#", "#v$vm")
-            $n = $m.Replace($t, $url)
-
-            ## Write the url
-            echo "RELEASE_BODY=$n" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          } else {
-            echo "RELEASE_BODY=$m" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          }
-        shell: pwsh
-      - name: Build the app and publish it
+      - name: Build the app and upload assets
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
+          releaseId: v1.0.2-linux
           includeRelease: true
-          includeUpdaterJson: true
+          includeUpdaterJson: false
           updaterJsonPreferNsis: true
-          tagName: v__VERSION__
-          releaseName: 'UCP3-GUI: v__VERSION__'
-          releaseBody: '${{ env.RELEASE_BODY }}'
-          releaseDraft: false
-          prerelease: ${{ inputs.pre_release }}
-          # TODO: include owner and repo to push to the main UCP repo
 
-      - name: Push release to auto updater
-        if: ${{ inputs.pre_release == false }}
-        uses: exuanbo/actions-deploy-gist@v1
-        with:
-          token: '${{ secrets.UCP3_MACHINE_GIST_TOKEN }}'
-          gist_id: 2a179c892f49448c85dfcc9e5f9a3c6b
-          file_path: latest.json
-          file_type: text
-
-      # - name: create latest.json
-      #   shell: pwsh
-      #   run: |
-      #     $json = Get-Content .\src-tauri\tauri.conf.json | ConvertFrom-Json
-      #     $version = $json.package.version
-
-      #     $latest = @{
-      #       'version' = $version
-      #       'notes' = "Latest Tauri build"
-      #       'pub_date' = Get-Date -Format "o"
-      #       'platforms' = @{
-      #         'windows-x86_64' = @{
-      #           'signature' = ''
-      #           'url' = '' # Don't know how to solve this with a private repo
-      #         }
-      #       }
-      #     }
-
-      #     ConvertTo-Json $latest | Set-Content -Path latest.json
-
-      # - uses: 'marvinpinto/action-automatic-releases@latest'
-      #   with:
-      #     repo_token: '${{ secrets.GITHUB_TOKEN }}'
-      #     automatic_release_tag: 'latest'
-      #     prerelease: true
-      #     draft: false
-      #     title: 'Tauri Development Build'
-      #     files: |
-      #       latest.json
-      #       src-tauri/target/release/*.exe
-      #       src-tauri/target/release/*.zip
-      #       src-tauri/target/release/*.sig
-      #       src-tauri/target/release/bundle/msi/*.msi
-      #       src-tauri/target/release/bundle/msi/*.zip
-      #       src-tauri/target/release/bundle/msi/*.sig
-      #       src-tauri/target/release/bundle/nsis/*.nsis
-      #       src-tauri/target/release/bundle/nsis/*.zip
-      #       src-tauri/target/release/bundle/nsis/*.sig

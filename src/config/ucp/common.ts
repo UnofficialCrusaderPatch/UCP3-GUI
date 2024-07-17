@@ -141,6 +141,19 @@ type ConfigFile = {
     };
     'load-order': LoadOrder;
   };
+  'config-full'?: {
+    modules: {
+      [key: string]: {
+        config: ConfigFileExtensionEntry;
+      };
+    };
+    plugins: {
+      [key: string]: {
+        config: ConfigFileExtensionEntry;
+      };
+    };
+    'load-order': LoadOrder;
+  };
 };
 
 type OptionEntry = {

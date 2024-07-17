@@ -18,7 +18,7 @@ import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { makeToast } from '../../../toasts/toasts-display';
 import { CONFIG_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../../common/extension-editor/extension-editor-state';
-import { constructUserConfigObjects } from '../../common/import-button-callback';
+import { constructUserConfigObjects } from '../../common/importing/import-button-callback';
 import saveConfig from '../../common/save-config';
 import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';

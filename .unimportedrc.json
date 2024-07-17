@@ -53,15 +53,22 @@
       [
         "src\\components\\titlebar\\titlebar.tsx"
       ]
+    ],
+    [
+      "components/ucp-tabs/common/importing/import-strategies",
+      [
+        "src\\components\\ucp-tabs\\common\\importing\\import-button-callback.tsx"
+      ]
     ]
   ],
   "ignoreUnused": [
     "bootstrap"
   ],
   "ignoreUnimported": [
-    "src/hooks/general/util.ts",
     "src/components/sandbox-menu/sandbox-frame-base.js",
     "src/components/ucp-tabs/common/create-pack-button-callback.tsx",
-    "src/function/global/array-reducer.ts"
+    "src/components/ucp-tabs/common/importing/import-strategies.ts",
+    "src/function/global/array-reducer.ts",
+    "src/hooks/general/util.ts"
   ]
 }

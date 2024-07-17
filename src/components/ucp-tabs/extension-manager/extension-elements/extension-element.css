@@ -29,11 +29,15 @@
 }
 
 .extension-version-dropdown {
-  margin: 0 0.5rem 0 0.5rem;
+  margin: 0rem 0rem 0rem 0rem;
   font-size: smaller;
   background-color: transparent;
   border: none;
   min-width: 60px;
+}
+
+.extension-version-dropdown:disabled {
+  appearance: none;
 }
 
 .disable-arrow-trash-button {

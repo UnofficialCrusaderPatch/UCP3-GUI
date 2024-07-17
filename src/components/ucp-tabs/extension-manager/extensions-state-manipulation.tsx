@@ -129,9 +129,15 @@ const moveExtension = (
   ae.splice(aei, 1);
   ae.splice(newIndex, 0, element);
 
+  const eaeNames = extensionsState.explicitlyActivatedExtensions.map(
+    (extension) => extension.name,
+  );
+  const eae = ae.filter((extension) => eaeNames.indexOf(extension.name) !== -1);
+
   return {
     ...extensionsState,
     activeExtensions: ae,
+    explicitlyActivatedExtensions: eae,
   } as ExtensionsState;
 };
 

@@ -42,13 +42,22 @@ type Success = {
   newExtensionsState: ExtensionsState;
 };
 
-type Failure = {
+type GenericFailure = {
   status: 'error';
-  newExtensionsState?: ExtensionsState;
   messages: string[];
+  code: 'GENERIC';
 };
 
-export type StrategyResult = Success | Failure;
+type MissingDependenciesFailure = {
+  status: 'error';
+  messages: string[];
+  code: 'MISSING_DEPENDENCIES';
+  dependencies: string[];
+};
+
+export type StrategyResult =
+  | Success
+  | (GenericFailure | MissingDependenciesFailure);
 
 export type Strategy = (
   newExtensionsState: ExtensionsState,
@@ -56,6 +65,15 @@ export type Strategy = (
   setConfigStatus: (arg0: string) => void,
 ) => Promise<StrategyResult>;
 
+/**
+ * Builds the new extension state and load order from the
+ * sparse part of the ConfigFile. Uses setConfigStatus to
+ * report on progress
+ * @param newExtensionsState the new extension state to base on
+ * @param config the ConfigFile to use the sparse part from
+ * @param setConfigStatus the callback to report status with
+ * @returns A StrategyResult object
+ */
 // eslint-disable-next-line import/prefer-default-export
 export const sparseStrategy: Strategy = async (
   newExtensionsState: ExtensionsState,
@@ -146,7 +164,9 @@ export const sparseStrategy: Strategy = async (
           return {
             status: 'error',
             messages: [],
-          } as Failure;
+            code: 'MISSING_DEPENDENCIES',
+            dependencies: [dependencyStatementStringSerialized],
+          } as MissingDependenciesFailure;
         }
       } catch (err: any) {
         // Couldn't be parsed by semver
@@ -160,8 +180,8 @@ export const sparseStrategy: Strategy = async (
 
         return {
           status: 'error',
-          messages: [],
-        } as Failure;
+          messages: [errorMsg],
+        } as GenericFailure;
       }
 
       // A suitable version can be found and is pushed to the explicitly activated
@@ -194,8 +214,9 @@ export const sparseStrategy: Strategy = async (
 
         return {
           status: 'error',
-          messages: [],
-        } as Failure;
+          messages: [de.toString()],
+          code: 'GENERIC',
+        } as GenericFailure;
       }
     }
 
@@ -210,6 +231,18 @@ export const sparseStrategy: Strategy = async (
   } as Success;
 };
 
+/**
+ * Builds the new extension state and load order from the
+ * full part of the ConfigFile. Uses setConfigStatus to
+ * report on progress.
+ *
+ * @note Key difference with sparse version is that
+ * the preferred used version of an extension is not set.
+ * @param newExtensionsState the new extension state to base on
+ * @param config the ConfigFile to use the full part from
+ * @param setConfigStatus the callback to report status with
+ * @returns A StrategyResult object
+ */
 export const fullStrategy: Strategy = async (
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
@@ -223,10 +256,9 @@ export const fullStrategy: Strategy = async (
     return {
       status: 'error',
       messages: ['no config-full present'],
-    } as Failure;
+    } as GenericFailure;
   }
 
-  // BUG: this should be done on the config-full order to retain reproducibility between GUI refreshes...
   const loadOrder = deserializeLoadOrder(config['config-full']['load-order']);
   if (loadOrder !== undefined && loadOrder.length > 0) {
     const activeExtensions: Extension[] = [];
@@ -237,60 +269,53 @@ export const fullStrategy: Strategy = async (
 
       const dependencyStatementStringSerialized = `${dependencyStatementString.extension}-${dependencyStatementString.version}`;
 
-      try {
-        // Construct a range string that semver can parse
-        const rstring = sanitizeVersionRange(
-          `== ${dependencyStatementString.version}`,
-        );
-        const range: semver.Range = new semver.Range(rstring, { loose: true });
+      // Construct a range string that semver can parse
+      const versionIsEqualString = `=${sanitizeVersionRange(
+        dependencyStatementString.version,
+      )}`;
+      const isEqualRange: semver.Range = new semver.Range(
+        versionIsEqualString,
+        {
+          loose: true,
+        },
+      );
 
-        // Set of extensions that satisfy the requirement.
-        options = extensions.filter(
-          (ext: Extension) =>
-            ext.name === dependencyStatementString.extension &&
-            semver.satisfies(ext.version, range),
-        );
+      // Set of extensions that satisfy the requirement.
+      options = extensions.filter(
+        (ext: Extension) =>
+          ext.name === dependencyStatementString.extension &&
+          semver.satisfies(ext.version, isEqualRange),
+      );
 
-        // ConsoleLogger.debug('options', options);
+      // ConsoleLogger.debug('options', options);
 
-        // If there are no options, we are probably missing an extension
-        if (options.length === 0) {
-          LOGGER.msg(
-            `Missing extension? ${t(
-              'gui-editor:config.status.missing.extension',
-              {
-                extension: dependencyStatementStringSerialized,
-              },
-            )}`,
-          ).error();
+      // If there are no options, we are probably missing an extension
+      if (options.length !== 1) {
+        LOGGER.msg(`options: ${options.length}`).warn();
+        LOGGER.msg(
+          `Missing extension? ${t(
+            'gui-editor:config.status.missing.extension',
+            {
+              extension: dependencyStatementStringSerialized,
+            },
+          )}`,
+        ).error();
 
-          // Abort the import
-          return {
-            status: 'error',
-            messages: [],
-          } as Failure;
-        }
-      } catch (err: any) {
-        // Couldn't be parsed by semver
-        const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementStringSerialized}`;
-
-        LOGGER.msg(`Illegal dependency statement? ${errorMsg}`).error();
-
+        // Abort the import
         return {
           status: 'error',
           messages: [],
-        } as Failure;
+          code: 'MISSING_DEPENDENCIES',
+          dependencies: [dependencyStatementStringSerialized],
+        } as MissingDependenciesFailure;
       }
 
       // A suitable version can be found and is pushed to the activated extensions
       // This is a bit silly because options will always be of length 1 or 0 in this strategy...
-      activeExtensions.push(
-        options.sort((a, b) => semver.compare(b.version, a.version))[0],
-      );
+      activeExtensions.push(options[0]);
     }
 
-    updatePreferredExtensionVersions(activeExtensions);
-
+    // Now we use the sparse order to set the explicitly active extensions
     const sparseLoadOrder = deserializeLoadOrder(
       config['config-sparse']['load-order'],
     );
@@ -317,8 +342,8 @@ export const fullStrategy: Strategy = async (
 
         return {
           status: 'error',
-          messages: [],
-        } as Failure;
+          messages: [de.toString()],
+        } as GenericFailure;
       }
     }
 
@@ -331,7 +356,11 @@ export const fullStrategy: Strategy = async (
       explicitlyActivatedExtensions: eae,
     });
   } else {
-    LOGGER.msg(`config does not contain load-order`).warn();
+    return {
+      status: 'error',
+      code: 'GENERIC',
+      messages: ['no sparse "load-order" found in config file'],
+    };
   }
 
   return {

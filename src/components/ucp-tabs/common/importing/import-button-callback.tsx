@@ -1,3 +1,4 @@
+import * as semver from 'semver';
 import { TFunction } from 'i18next';
 import { collectConfigEntries } from '../../../../function/extensions/discovery/collect-config-entries';
 import {
@@ -12,26 +13,53 @@ import { getStore } from '../../../../hooks/jotai/base';
 
 import {
   ConfigFile,
+  Extension,
   ConfigEntry,
   ConfigFileExtensionEntry,
 } from '../../../../config/ucp/common';
 import { loadConfigFromFile } from '../../../../config/ucp/config-files/config-files';
+import { ConfigMetaObjectDB } from '../../../../config/ucp/config-merge/objects';
+import {
+  DependencyStatement,
+  Version,
+} from '../../../../config/ucp/dependency-statement';
 
 import {
+  AVAILABLE_EXTENSION_VERSIONS_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
-import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
-import { buildConfigMetaContentDB } from '../../extension-manager/extension-configuration';
-import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
+import { showModalOk } from '../../../modals/modal-ok';
+import { ConsoleLogger } from '../../../../util/scripts/logging';
 import {
-  StrategyResult,
-  fullStrategy,
-  sparseStrategy,
-} from './import-strategies';
-import { ConfigMetaObjectDB } from '../../../../config/ucp/config-merge/objects';
+  buildExtensionConfigurationDB,
+  buildConfigMetaContentDBForUser,
+} from '../../extension-manager/extension-configuration';
+import { addExtensionToExplicityActivatedExtensions } from '../../extension-manager/extensions-state-manipulation';
+import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
+import { deserializeLoadOrder } from '../../../../config/ucp/config-files/load-order';
+import { Override } from '../../../../function/configuration/overrides';
 
-const LOGGER = new Logger('import-button-callback.tsx');
+export const sanitizeVersionRange = (rangeString: string) => {
+  if (rangeString.indexOf('==') !== -1) {
+    return rangeString.replaceAll('==', '');
+  }
+  return rangeString;
+};
+
+const updatePreferredExtensionVersions = (
+  explicitActiveExtensions: Extension[],
+) => {
+  // Set the new preferences for which version to use for each extension
+  const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };
+
+  explicitActiveExtensions.forEach((e: Extension) => {
+    newPrefs[e.name] = e.version;
+  });
+
+  getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
+};
 
 export const constructUserConfigObjects = (config: ConfigFile) => {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -65,7 +93,7 @@ export const constructUserConfigObjects = (config: ConfigFile) => {
   } = {};
 
   Object.entries(userConfigEntries).forEach(([url, data]) => {
-    const m = buildConfigMetaContentDB('user', data);
+    const m = buildConfigMetaContentDBForUser(data);
     userConfigDB[url] = {
       url,
       modifications: m,
@@ -96,10 +124,19 @@ const importButtonCallback = async (
   t: TFunction<[string, string], undefined>,
   file: string | undefined,
 ) => {
+  // Get the current available versions database
+  // This updates every time extension state changes but since no extensions will be installed during an import
+  // This is fine to declare as const here.
+  const availableVersionsDatabase = getStore().get(
+    AVAILABLE_EXTENSION_VERSIONS_ATOM,
+  );
+
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
   // ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
+
+  const { extensions } = extensionsState;
 
   // Get which elements have been touched
   const configurationTouched = getStore().get(
@@ -145,6 +182,7 @@ const importButtonCallback = async (
       warnings: [],
       errors: [],
       statusCode: 0,
+      overrides: new Map<string, Override[]>(),
     },
   } as ExtensionsState;
 
@@ -169,38 +207,128 @@ const importButtonCallback = async (
 
   const config = parsingResult.result;
 
-  let strategyResult: StrategyResult;
+  // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
+  // Get the load order from the sparse part of the config file
 
-  strategyResult = await fullStrategy(
-    newExtensionsState,
-    config,
-    setConfigStatus,
-  );
+  // BUG: this should be done on the config-full order to retain reproducibility between GUI refreshes...
+  const loadOrder = deserializeLoadOrder(config['config-sparse']['load-order']);
+  if (loadOrder !== undefined && loadOrder.length > 0) {
+    const explicitActiveExtensions: Extension[] = [];
 
-  if (strategyResult.status !== 'ok') {
-    LOGGER.msg(
-      `Import strategy #1 failed (full strategy). Reasons:\n${strategyResult.messages.join('\n')}`,
-    ).warn();
+    // TODO: use tree for this part
+    // eslint-disable-next-line no-restricted-syntax
+    for (const dependencyStatementString of loadOrder) {
+      // Get the dependency
+      const dependencyStatement = new DependencyStatement(
+        dependencyStatementString.extension,
+        '==',
+        dependencyStatementString.version,
+      );
 
-    strategyResult = await sparseStrategy(
-      newExtensionsState,
-      config,
-      setConfigStatus,
-    );
+      if (dependencyStatement.operator === '') {
+        // Get the available versions for this extension name
+        const availableVersions =
+          availableVersionsDatabase[dependencyStatement.extension];
+        if (availableVersions === undefined || availableVersions.length === 0) {
+          // eslint-disable-next-line no-await-in-loop
+          await showModalOk({
+            message: `hmmm, how did we get here?`,
+            title: `Illegal dependency statement`,
+          });
+          throw Error(`hmmm, how did we get here?`);
+        }
+        dependencyStatement.operator = '==';
+        // Choose the firstmost version (the highest version)
+        dependencyStatement.version = Version.fromString(availableVersions[0]);
+      }
 
-    if (strategyResult.status !== 'ok') {
-      LOGGER.msg(
-        `Import strategy #2 failed (sparse strategy), could not import config. Reasons:\n${strategyResult.messages.join('\n')}`,
-      ).error();
+      let options: Extension[] = [];
 
-      return;
+      const dependencyStatementStringSerialized = `${dependencyStatementString.extension}-${dependencyStatementString.version}`;
+
+      try {
+        // Construct a range string that semver can parse
+        const rstring = sanitizeVersionRange(
+          `${dependencyStatement.operator} ${dependencyStatement.version}`,
+        );
+        const range: semver.Range = new semver.Range(rstring, { loose: true });
+
+        // Set of extensions that satisfy the requirement.
+        options = extensions.filter(
+          (ext: Extension) =>
+            ext.name === dependencyStatement.extension &&
+            semver.satisfies(ext.version, range),
+        );
+
+        // ConsoleLogger.debug('options', options);
+
+        // If there are no options, we are probably missing an extension
+        if (options.length === 0) {
+          setConfigStatus(
+            t('gui-editor:config.status.missing.extension', {
+              extension: dependencyStatementStringSerialized,
+            }),
+          );
+
+          // eslint-disable-next-line no-await-in-loop
+          await showModalOk({
+            message: t('gui-editor:config.status.missing.extension', {
+              extension: dependencyStatementStringSerialized,
+            }),
+            title: `Missing extension`,
+          });
+
+          // Abort the import
+          return;
+        }
+      } catch (err: any) {
+        // Couldn't be parsed by semver
+        const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementStringSerialized}`;
+
+        // eslint-disable-next-line no-await-in-loop
+        await showModalOk({
+          message: errorMsg,
+          title: `Illegal dependency statement`,
+        });
+
+        return;
+      }
+
+      // A suitable version can be found and is pushed to the explicitly activated
+      // (since we are dealing with the sparse load order here!)
+      explicitActiveExtensions.push(
+        options.sort((a, b) => semver.compare(b.version, a.version))[0],
+      );
     }
-    LOGGER.msg(`Config imported with strategy #2 (sparse strategy)`).info();
-  } else {
-    LOGGER.msg(`Config imported with strategy #1 (full strategy)`).info();
-  }
 
-  newExtensionsState = strategyResult.newExtensionsState;
+    updatePreferredExtensionVersions(explicitActiveExtensions);
+
+    // Reverse the array of explicitly Active Extensions such that we deal it from the ground up (lowest dependency first)
+    // eslint-disable-next-line no-restricted-syntax
+    for (const ext of explicitActiveExtensions.slice().reverse()) {
+      try {
+        // Add each dependency iteratively, recomputing the dependency tree as we go
+        // eslint-disable-next-line no-await-in-loop
+        newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+          newExtensionsState,
+          ext,
+        );
+      } catch (de: any) {
+        // eslint-disable-next-line no-await-in-loop
+        await showModalOk({
+          message: de.toString(),
+          title: 'Error in dependencies',
+        });
+
+        ConsoleLogger.error(de);
+
+        return;
+      }
+    }
+
+    // Complete the new extension state by building the configuration DB
+    newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
+  }
 
   // ConsoleLogger.debug('opened config', parsingResult.result);
 

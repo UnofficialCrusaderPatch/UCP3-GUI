@@ -115,7 +115,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 ) {
   // ae has the order that the highest is the last added.
   const ae = [...activeExtensions];
-  // So we reverse it
+  // So we reverse it: we process it from lowest to highest priority
   ae.reverse();
 
   const db: ConfigMetaObjectDB = {};
@@ -125,23 +125,29 @@ function buildExtensionConfigurationDBFromActiveExtensions(
   const overrides: Map<string, Override[]> = new Map<string, Override[]>();
 
   ae.forEach((ext) => {
-    Object.entries(ext.configEntries).forEach(([url, data]) => {
+    Object.entries(ext.configEntries).forEach(([url, configEntryData]) => {
+      // Is a CMO already present for this url?
       let currentCMO = db[url];
-
+      // If not, set a new value
       if (currentCMO === undefined) {
         currentCMO = { url, modifications: {} };
       }
 
-      const m = buildConfigMetaContentDB(ext, data);
+      // build ConfigMetaContentDB
+      const m = buildConfigMetaContentDB(ext, configEntryData);
 
+      // For each entry in the ConfigMetaContentDB
       Object.entries(m).forEach(([key, cmc]) => {
-        const currentM = currentCMO.modifications[key];
-        if (currentM !== undefined) {
+        // e.g., for the key named "value", we do the following:
+        // Get the currentModifications for this key
+        const currentModifications = currentCMO.modifications[key];
+        if (currentModifications !== undefined) {
+          // Process the four different types of overriding behavior and set warnings and overrides
           if (
-            currentM.qualifier === 'required' &&
+            currentModifications.qualifier === 'required' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Value for '${url}' suggested by higher priority extension ('${ext.name}') overridden by a required value from a lower priority extension ('${currentM.entityName}')`;
+            const w = `Value for '${url}' suggested by higher priority extension ('${ext.name}') overridden by a required value from a lower priority extension ('${currentModifications.entityName}')`;
             // LOGGER.msg(w).warn();
             warnings.push(w);
 
@@ -150,53 +156,60 @@ function buildExtensionConfigurationDBFromActiveExtensions(
               overrides.set(n, []);
             }
 
-            overrides.get(n)!.push(createOverride(cmc, currentM, url));
+            overrides
+              .get(n)!
+              .push(createOverride(cmc, currentModifications, url));
 
             return;
           }
           if (
-            currentM.qualifier === 'suggested' &&
+            currentModifications.qualifier === 'suggested' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Value for '${url}' suggested by lower priority extension ('${currentM.entityName}') overridden by suggested value from a higher priority extension ('${ext.name}')`;
+            const w = `Value for '${url}' suggested by lower priority extension ('${currentModifications.entityName}') overridden by suggested value from a higher priority extension ('${ext.name}')`;
             // LOGGER.msg(w).warn();
             warnings.push(w);
 
-            const n = currentM.entityName;
+            const n = currentModifications.entityName;
             if (!overrides.has(n)) {
               overrides.set(n, []);
             }
 
-            overrides.get(n)!.push(createOverride(currentM, cmc, url));
+            overrides
+              .get(n)!
+              .push(createOverride(currentModifications, cmc, url));
 
             return;
           }
           if (
-            currentM.qualifier === 'suggested' &&
+            currentModifications.qualifier === 'suggested' &&
             cmc.qualifier === 'required'
           ) {
-            const w = `Value for '${url}' suggested by lower priority extension ('${currentM.entityName}') overridden by required value from a higher priority extension ('${ext.name}')`;
+            const w = `Value for '${url}' suggested by lower priority extension ('${currentModifications.entityName}') overridden by required value from a higher priority extension ('${ext.name}')`;
             // LOGGER.msg(w).warn();
             warnings.push(w);
 
-            const n = currentM.entityName;
+            const n = currentModifications.entityName;
             if (!overrides.has(n)) {
               overrides.set(n, []);
             }
 
-            overrides.get(n)!.push(createOverride(currentM, cmc, url));
+            overrides
+              .get(n)!
+              .push(createOverride(currentModifications, cmc, url));
 
             return;
           }
           if (
-            currentM.qualifier === 'required' &&
+            currentModifications.qualifier === 'required' &&
             cmc.qualifier === 'required'
           ) {
             // TODO: remove this hack and replace it with a proper equality check
             if (
-              JSON.stringify(currentM.content) !== JSON.stringify(cmc.content)
+              JSON.stringify(currentModifications.content) !==
+              JSON.stringify(cmc.content)
             ) {
-              const e = `Incompatible extension ('${ext.name}') and ('${currentM.entityName}') because they both require different values for feature '${url}'`;
+              const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both require different values for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
             }
@@ -205,6 +218,8 @@ function buildExtensionConfigurationDBFromActiveExtensions(
           }
         }
 
+        // If there was no ConfigMetaContent set yet, set it
+        // For e.g. key "value" update the config meta content
         m[key] = {
           type: 'extension',
           entity: ext,
@@ -214,6 +229,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
         } as ConfigMetaContent;
       });
 
+      // Add m to the modifications of the currentCMO
       db[url] = {
         ...currentCMO,
         modifications: {

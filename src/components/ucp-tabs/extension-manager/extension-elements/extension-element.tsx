@@ -253,14 +253,6 @@ export function ExtensionElement(props: {
           {displayName}
         </span>
       </div>
-      {displayCustomizeButton ? (
-        <CustomizeButton
-          clickCallback={() => customizeExtensionButtonCallback(ext)}
-        />
-      ) : (
-        // eslint-disable-next-line react/jsx-no-useless-fragment
-        <></>
-      )}
       {showExclamationMark ? (
         <button
           type="button"
@@ -274,6 +266,14 @@ export function ExtensionElement(props: {
           <ExclamationCircleFill style={{ color: 'gray' }} />
         </button>
       ) : null}
+      {displayCustomizeButton ? (
+        <CustomizeButton
+          clickCallback={() => customizeExtensionButtonCallback(ext)}
+        />
+      ) : (
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <></>
+      )}
       {versionDropdown}
       {arrows}
       {enableButton}

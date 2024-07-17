@@ -99,7 +99,7 @@ body {
   Border and box elements:
 */
 
-:is(.ornament-border-shadow, .parchment-box) {
+:is(.ornament-border-shadow, .parchment-box, .parchment-box-dark) {
   border-image: url('/src/assets/ucp3/ornament_border_shadow.png');
   border-image-slice: 16;
   border-image-repeat: round;
@@ -115,6 +115,13 @@ body {
 
 .parchment-box {
   background-image: url('/src/assets/ucp3/parchment_bg.png');
+  overflow-y: scroll;
+  overflow-x: clip;
+  font-family: 'River Avenue';
+}
+
+.parchment-box-dark {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
   overflow-y: scroll;
   overflow-x: clip;
   font-family: 'River Avenue';

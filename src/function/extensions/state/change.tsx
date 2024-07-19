@@ -38,7 +38,7 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
       configDefinedValues[url] = cmo.modifications.value.content;
       if (cmo.modifications.value.qualifier === 'required') {
         locks[url] = {
-          lockedBy: cmo.modifications.value.entity,
+          lockedBy: cmo.modifications.value.entityName,
           lockedValue: cmo.modifications.value.content,
         };
       } else if (
@@ -46,7 +46,7 @@ function propagateActiveExtensionsChange(extensionsState: ExtensionsState) {
         cmo.modifications.value.qualifier === 'unspecified'
       ) {
         suggestions[url] = {
-          suggestedBy: cmo.modifications.value.entity,
+          suggestedBy: cmo.modifications.value.entityName,
           suggestedValue: cmo.modifications.value.content,
         };
       }

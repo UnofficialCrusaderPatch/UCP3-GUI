@@ -3,6 +3,8 @@ import { atom } from 'jotai';
 import { ExtensionTree } from '../dependency-management/dependency-resolution';
 import { ExtensionsState } from '../extensions-state';
 import { propagateActiveExtensionsChange } from './change';
+import { ConfigurationState } from '../../configuration/state';
+import { Override } from '../../configuration/overrides';
 
 export const extensionStateReducer = (
   oldState: ExtensionsState,
@@ -21,11 +23,12 @@ export const EXTENSION_STATE_INTERNAL_ATOM = atomWithReducer(
     explicitlyActivatedExtensions: [],
     tree: new ExtensionTree([]),
     configuration: {
-      statusCode: 0,
       errors: [],
-      warnings: [],
+      overrides: new Map<string, Override[]>(),
       state: {},
-    },
+      statusCode: -1,
+      warnings: [],
+    } as ConfigurationState,
   },
   extensionStateReducer,
 );

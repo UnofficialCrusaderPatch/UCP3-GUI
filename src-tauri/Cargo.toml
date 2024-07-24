@@ -1,6 +1,6 @@
 [package]
 name = "ucp_gui"
-version = "1.0.3"
+version = "1.0.4"
 description = "UCP3 GUI"
 authors = ["gynt", "TheRedDaemon"]
 license = ""
@@ -12,12 +12,12 @@ rust-version = "1.70"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "=1.5.1", features = [] }
+tauri-build = { version = "=1.5.3", features = [] }
 
 [dependencies]
 serde_json = "=1.0.114"
 serde = { version = "=1.0.197", features = ["derive"] }
-tauri = { version = "=1.6.1", features = [ "clipboard-write-text", "process-relaunch", "updater", "shell-open", "protocol-asset", "os-all", "devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
+tauri = { version = "=1.7.1", features = [ "clipboard-write-text", "process-relaunch", "updater", "shell-open", "protocol-asset", "os-all", "devtools", "dialog-all", "fs-all", "http-all", "path-all", "window-all"] }
 zip = { version = "=0.6.6" } # currently uses all features
 sha2 = { version = "=0.10.8" }
 log = "=0.4.21"

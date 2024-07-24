@@ -37,6 +37,7 @@ import {
   BACKGROUNDS_MAPPING_FILE,
 } from '../../function/global/constants/file-constants';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
+import { ContentManager } from './content-manager/content-manager';
 
 const LOGGER = new Logger('ucp-taps.tsx');
 
@@ -181,6 +182,16 @@ export default function UcpTabs() {
               {t('gui-launch:launch')}
             </Nav.Link>
           </Nav.Item>
+          <Nav.Item>
+            <Nav.Link
+              eventKey="content-manager"
+              className="ornament-border-button tab-link"
+              disabled={currentFolder === ''}
+              hidden={currentFolder === ''}
+            >
+              Online
+            </Nav.Link>
+          </Nav.Item>
         </Nav>
         <Tab.Content className="ornament-border">
           <GradientImg src={tabImage} type="tab" />
@@ -196,6 +207,9 @@ export default function UcpTabs() {
           </Tab.Pane>
           <Tab.Pane eventKey="launch" className="tab-panel">
             <Launch />
+          </Tab.Pane>
+          <Tab.Pane eventKey="content-manager" className="tab-panel">
+            <ContentManager />
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

@@ -11,6 +11,7 @@ import { Provider } from 'jotai';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import Window from './components/window';
+import { getStore } from './hooks/jotai/base';
 
 const queryClient = new QueryClient();
 
@@ -20,10 +21,11 @@ const HydrateAtoms = ({ children }) => {
   return children;
 };
 
+// TODO: bug: extensions are not listed if main.tsx contains wrapper for react-query
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Provider>
+      <Provider store={getStore()}>
         {/*
    This Provider initialisation step is needed so that we reference the same
    queryClient in both atomWithQuery and other parts of the app. Without this,

@@ -4,30 +4,32 @@ import {
   ExclamationCircleFill,
   Globe,
 } from 'react-bootstrap-icons';
-import { ContentElement } from '../../../function/content/types/content-element';
 import { CONTENT_INTERFACE_STATE_ATOM } from '../content-manager/state/atoms';
+import { ExtensionContent } from '../../../function/content/store/fetch';
 
 export type ContentElementViewProps = {
-  element: ContentElement;
+  data: ExtensionContent;
 };
 // eslint-disable-next-line import/prefer-default-export
 export function ContentElementView(props: ContentElementViewProps) {
-  const { element } = props;
-  const { name, version, displayName } = element;
+  const { data } = props;
+  const { definition } = data;
+  const { name, version, 'display-name': displayName } = definition;
 
   const [contentInterfaceState, setContentInterfaceState] = useAtom(
     CONTENT_INTERFACE_STATE_ATOM,
   );
 
   const isSelected =
-    contentInterfaceState.selected.find((e) => e === element) === element;
+    contentInterfaceState.selected.find((e) => e === data) === data;
 
   const selectedStyle = isSelected
     ? { background: 'rgba(255, 255, 0, 0.42)' }
     : {};
 
-  const isOnline = element.online;
-  const isInstalled = element.installed;
+  // TODO: implement
+  const isOnline = true;
+  const isInstalled = false;
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -39,17 +41,19 @@ export function ContentElementView(props: ContentElementViewProps) {
         let newSelection = [...contentInterfaceState.selected];
         if (!isSelected) {
           if (e.shiftKey) {
-            newSelection.push(element);
+            newSelection.push(data);
           } else {
-            newSelection = [element];
+            newSelection = [data];
           }
         } else if (e.shiftKey) {
-          const index = newSelection.findIndex((value) => value === element);
+          const index = newSelection.findIndex((value) => value === data);
           if (index !== -1) {
             newSelection.splice(index, 1);
           }
+        } else if (contentInterfaceState.selected.length > 1) {
+          newSelection = [data];
         } else {
-          newSelection = [element];
+          newSelection = [];
         }
         setContentInterfaceState({
           ...contentInterfaceState,

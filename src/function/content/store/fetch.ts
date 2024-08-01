@@ -24,6 +24,7 @@ export type DescriptionContent =
 export type BinaryModulePackageContent = {
   method: 'binary';
   type: 'module';
+  size: number;
   url: string;
   signer: string;
   hash: string;
@@ -33,6 +34,7 @@ export type BinaryModulePackageContent = {
 export type PluginPackageContent = {
   method: 'zip';
   type: 'plugin';
+  size: number;
   url: string;
 };
 
@@ -78,11 +80,7 @@ export type ContentStore = {
   };
 };
 
-export const fetchDescription = async ({
-  queryKey: [, url],
-}: {
-  queryKey: string[];
-}): Promise<string> => {
+export const fetchDescription = async (url: string): Promise<string> => {
   if (url === '')
     return new Promise((resolve) => {
       resolve(''); // Or reject?
@@ -142,12 +140,13 @@ extensions:
         package:
           - method: binary
             type: module
+            size: 1000000
             url: stub
             signer: UCP-team-1
             hash: stubadwlkmaqwld219kf121d
             signature: stubsfksemlfsk112dd
     - definition:
-        name: online-module-test-two
+        name: online-plugin-test-two
         type: plugin
         url: Where to find more INFO
         author: authors
@@ -163,6 +162,28 @@ extensions:
           - method: zip
             type: plugin
             url: stub
+            size: 2000000
+    - definition:
+        name: online-module-test-three
+        type: plugin
+        url: Where to find more INFO
+        author: authors
+        version: 0.0.1
+        dependencies: {}
+        display-name: "Online Plugin #3"
+      sources:
+        description:
+          - language: default
+            method: online
+            url: https://raw.githubusercontent.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv/main/README.md
+          - language: default
+            method: inline
+            content: Hello!
+        package:
+          - method: zip
+            type: plugin
+            url: stub
+            size: 2000000
   lookup:
     module-name-version:
       hash: sha256

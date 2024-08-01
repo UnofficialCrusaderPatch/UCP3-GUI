@@ -8,59 +8,23 @@ import {
   CONTENT_STATE_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
+import { dummyFetchStore } from '../../../function/content/store/fetch';
+import Logger from '../../../util/scripts/logging';
 import {
-  dummyFetchStore,
-  fetchDescription,
-} from '../../../function/content/store/fetch';
-import { ContentInterfaceState } from '../../../function/content/state/content-interface-state';
+  SELECTED_CONTENT_DESCRIPTION_ATOM,
+  distillInlineDescription,
+  chooseSingleFromSelection,
+} from './description/fetching';
+
+const LOGGER = new Logger('content-manager.tsx');
 
 // TODO: request is now done when rendering the whole GUI, not optimal!
 // Consider: atomWithQuery but that gave errors with hooks not being React proper
 const CONTENT_STORE_ATOM = atomWithQuery(() => ({
   queryKey: ['store'],
   queryFn: false || dummyFetchStore,
+  retry: false,
   // staleTime: Infinity,
-}));
-
-const distillURLFromSelection = (interfaceState: ContentInterfaceState) => {
-  if (interfaceState.selected.length < 1) return '';
-
-  const d = interfaceState.selected.at(-1);
-
-  const descriptionSources = d!.sources.description.filter(
-    (dc) => dc.method === 'online',
-  );
-
-  if (descriptionSources.length === 0) {
-    return '';
-  }
-
-  return descriptionSources.at(0)!.url;
-};
-
-const distillInlineDescription = (interfaceState: ContentInterfaceState) => {
-  if (interfaceState.selected.length < 1) return '';
-
-  const d = interfaceState.selected.at(-1);
-
-  const descriptionSources = d!.sources.description.filter(
-    (dc) => dc.method === 'inline',
-  );
-
-  if (descriptionSources.length === 0) {
-    return '';
-  }
-
-  return descriptionSources.at(0)!.content;
-};
-
-const SELECTED_CONTENT_ONLINE_DESCRIPTION_ATOM = atomWithQuery((get) => ({
-  queryKey: [
-    'description',
-    distillURLFromSelection(get(CONTENT_INTERFACE_STATE_ATOM)),
-  ],
-  queryFn: fetchDescription,
-  staleTime: Infinity,
 }));
 
 // eslint-disable-next-line react/prop-types
@@ -86,11 +50,10 @@ export function ContentManager() {
   const [
     {
       data: descriptionData,
-      isPending: descriptionIsPending,
       isError: descriptionIsError,
       error: descriptionError,
     },
-  ] = useAtom(SELECTED_CONTENT_ONLINE_DESCRIPTION_ATOM);
+  ] = useAtom(SELECTED_CONTENT_DESCRIPTION_ATOM);
 
   let msg = <div className="extension-element" />;
 
@@ -126,28 +89,29 @@ export function ContentManager() {
       <div>Unknown error occurred...</div>
     );
 
-  const { selected } = interfaceState;
+  // const { selected } = interfaceState;
 
-  const inlineDescriptionContent = distillInlineDescription(interfaceState);
-  let onlineDescriptionContent =
-    !descriptionIsPending && !descriptionIsError
-      ? descriptionData
-      : 'Fetching online description...';
+  // const inlineDescriptionContent = distillInlineDescription(interfaceState);
+  // let onlineDescriptionContent =
+  //   !descriptionIsPending && !descriptionIsError
+  //     ? descriptionData
+  //     : 'Fetching online description...';
+
+  // if (descriptionIsError) {
+  //   onlineDescriptionContent = `Failed to fetch description, reason: ${descriptionError}`;
+  // }
 
   if (descriptionIsError) {
-    onlineDescriptionContent = `Failed to fetch description, reason: ${descriptionError}`;
+    LOGGER.msg(descriptionError.toString()).error();
   }
 
-  const description =
-    selected !== undefined && selected.length > 0 ? (
-      <SaferMarkdown>
-        {onlineDescriptionContent.length > 0
-          ? onlineDescriptionContent
-          : inlineDescriptionContent}
-      </SaferMarkdown>
-    ) : (
-      <SaferMarkdown>{}</SaferMarkdown>
-    );
+  const description = (
+    <SaferMarkdown>
+      {!descriptionIsError
+        ? descriptionData
+        : `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(chooseSingleFromSelection(interfaceState.selected))}`}
+    </SaferMarkdown>
+  );
 
   return (
     <div className="flex-default extension-manager">

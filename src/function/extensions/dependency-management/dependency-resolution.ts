@@ -62,19 +62,39 @@ type SuccesfullInitialSolution = {
 export type InitialSolution = SuccesfullInitialSolution | FailedInitialSolution;
 
 // eslint-disable-next-line import/prefer-default-export
-export abstract class AbstractExtensionTree {
+export class DependencyTree {
   tree: Tree = new Tree([]);
 
   frontendVersion: string;
 
   frameworkVersion: string;
 
-  constructor(frontendVersion?: string, frameworkVersion?: string) {
+  constructor(
+    packages: Package[],
+    frontendVersion?: string,
+    frameworkVersion?: string,
+  ) {
     this.frontendVersion = frontendVersion || '0.0.0';
     this.frameworkVersion = frameworkVersion || '3.0.0';
+
+    this.tree = new Tree([
+      ...packages,
+      new Package('frontend', this.frontendVersion),
+      new Package('framework', this.frameworkVersion),
+    ]);
   }
 
-  abstract copy(): AbstractExtensionTree;
+  copy() {
+    const result = new DependencyTree(
+      [...this.tree.packages],
+      this.frontendVersion,
+      this.frameworkVersion,
+    );
+
+    result.tree = new Tree(this.tree.packages);
+
+    return result;
+  }
 
   get initialSolution() {
     if (this.tree.state === 'OK') {
@@ -195,7 +215,7 @@ export abstract class AbstractExtensionTree {
   }
 }
 
-export class ExtensionTree extends AbstractExtensionTree {
+export class ExtensionDependencyTree extends DependencyTree {
   extensions: Extension[];
 
   extensionsById: { [k: string]: Extension };
@@ -205,31 +225,28 @@ export class ExtensionTree extends AbstractExtensionTree {
     frontendVersion?: string,
     frameworkVersion?: string,
   ) {
-    super(frontendVersion, frameworkVersion);
+    super(
+      extensions.map(
+        (e) =>
+          new Package(
+            e.name,
+            e.version,
+            Object.entries(e.definition.dependencies).map(
+              ([ext, range]) => new Dependency(ext, range.raw),
+            ),
+          ),
+      ),
+      frontendVersion,
+      frameworkVersion,
+    );
     this.extensions = extensions;
     this.extensionsById = Object.fromEntries(
       extensions.map((e) => [extensionToID(e), e]),
     );
-
-    const repo: Repository = this.extensions.map(
-      (e) =>
-        new Package(
-          e.name,
-          e.version,
-          Object.entries(e.definition.dependencies).map(
-            ([ext, range]) => new Dependency(ext, range.raw),
-          ),
-        ),
-    );
-
-    repo.push(new Package('frontend', this.frontendVersion));
-    repo.push(new Package('framework', this.frameworkVersion));
-
-    this.tree = new Tree(repo);
   }
 
   copy() {
-    return new ExtensionTree(
+    return new ExtensionDependencyTree(
       this.extensions,
       this.frontendVersion,
       this.frameworkVersion,

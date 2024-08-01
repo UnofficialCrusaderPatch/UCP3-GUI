@@ -17,7 +17,7 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   UCP_CONFIG_FILE_ATOM,
 } from '../configuration/state';
-import { ExtensionTree } from '../extensions/dependency-management/dependency-resolution';
+import { ExtensionDependencyTree } from '../extensions/dependency-management/dependency-resolution';
 import { ExtensionsState } from '../extensions/extensions-state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../extensions/state/state';
 import {
@@ -128,7 +128,7 @@ export async function initializeGameFolder(
 
   const newExtensionsState = {
     ...extensionsState,
-    tree: new ExtensionTree(
+    tree: new ExtensionDependencyTree(
       [...extensions],
       await getVersion(),
       getStore().get(UCP_VERSION_ATOM).version.isValidForSemanticVersioning

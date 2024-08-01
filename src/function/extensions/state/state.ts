@@ -59,7 +59,7 @@ export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
     return Object.fromEntries(
       Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
         name,
-        tree.allVersionsForName(name),
+        tree.allExtensionVersionsForName(name),
       ]),
     ) as AvailableExtensionVersionsDictionary;
   });

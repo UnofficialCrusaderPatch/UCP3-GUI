@@ -369,7 +369,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
 
   const [t] = useTranslation(['gui-editor']);
 
-  const revDeps = extensionsState.tree.reverseDependenciesFor(ext);
+  const revDeps = extensionsState.tree.reverseExtensionDependenciesFor(ext);
 
   return (
     <ExtensionElement
@@ -408,10 +408,10 @@ export function ActiveExtensionElement(props: {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const revDeps = extensionsState.tree
-    .reverseDependenciesFor(ext)
+    .reverseExtensionDependenciesFor(ext)
     .map((e) => e.name);
   const depsFor = extensionsState.tree
-    .directDependenciesFor(ext)
+    .directExtensionDependenciesFor(ext)
     .map((e) => e.name);
 
   const movability = {
@@ -433,7 +433,7 @@ export function ActiveExtensionElement(props: {
   );
 
   const theRevDeps = extensionsState.tree
-    .reverseDependenciesFor(ext)
+    .reverseExtensionDependenciesFor(ext)
     .map((e) => e.name)
     .filter(
       (n) =>

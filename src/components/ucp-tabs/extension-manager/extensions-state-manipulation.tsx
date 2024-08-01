@@ -20,14 +20,14 @@ const addExtensionToExplicityActivatedExtensions = (
 
   const tempTree = tree.copy();
 
-  const tempSolution = tempTree.dependenciesForExtensions(newEAE);
+  const tempSolution = tempTree.extensionDependenciesForExtensions(newEAE);
 
   if (tempSolution.status !== 'OK' || tempSolution.extensions === undefined) {
     LOGGER.msg(tempSolution.message).error();
     throw new DependencyError(tempSolution.message);
   }
 
-  const solution = tree.dependenciesForExtensions(newEAE);
+  const solution = tree.extensionDependenciesForExtensions(newEAE);
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     // We should never get here
     LOGGER.msg(solution.message).error();
@@ -65,7 +65,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
 
   const tempTree = tree.copy();
 
-  const tempSolution = tempTree.dependenciesForExtensions(newEAE);
+  const tempSolution = tempTree.extensionDependenciesForExtensions(newEAE);
 
   if (tempSolution.status !== 'OK' || tempSolution.extensions === undefined) {
     LOGGER.msg(tempSolution.message).error();
@@ -73,7 +73,7 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
   }
 
   // All needed extensions without ext being active
-  const solution = tree.dependenciesForExtensions(newEAE);
+  const solution = tree.extensionDependenciesForExtensions(newEAE);
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     LOGGER.msg(solution.message).error();

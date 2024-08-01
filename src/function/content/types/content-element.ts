@@ -1,14 +1,8 @@
-export type ContentElementDescriptions = {
-  default: string;
-  en?: string;
-  de?: string;
-};
+import { Extension } from '../../../config/ucp/common';
+import { ExtensionContent } from '../store/fetch';
 
-export type ContentElement = {
-  name: string;
-  displayName: string;
+export type ContentElement = ExtensionContent & {
   online: boolean;
   installed: boolean;
-  version: string;
-  description: ContentElementDescriptions;
+  extension?: Extension;
 };

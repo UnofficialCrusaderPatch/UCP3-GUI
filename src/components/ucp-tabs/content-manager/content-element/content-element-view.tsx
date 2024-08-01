@@ -5,16 +5,16 @@ import {
   Globe,
 } from 'react-bootstrap-icons';
 import { CONTENT_INTERFACE_STATE_ATOM } from '../state/atoms';
-import { ExtensionContent } from '../../../../function/content/store/fetch';
 import { DOWNLOAD_PROGRESS_ATOM } from '../state/downloads/download-progress';
+import { ContentElement } from '../../../../function/content/types/content-element';
 
 export type ContentElementViewProps = {
-  data: ExtensionContent;
+  data: ContentElement;
 };
 // eslint-disable-next-line import/prefer-default-export
 export function ContentElementView(props: ContentElementViewProps) {
   const { data } = props;
-  const { definition } = data;
+  const { definition, installed, online } = data;
   const { name, version, 'display-name': displayName } = definition;
 
   const [contentInterfaceState, setContentInterfaceState] = useAtom(
@@ -41,8 +41,8 @@ export function ContentElementView(props: ContentElementViewProps) {
     : {};
 
   // TODO: implement
-  const isOnline = true;
-  const isInstalled = false;
+  const isOnline = online;
+  const isInstalled = installed;
 
   const progressElement = progress.pending ? (
     <span className="ms-2">
@@ -56,6 +56,7 @@ export function ContentElementView(props: ContentElementViewProps) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       key={`${name}-${version}`}
+      className="extension-element"
       style={{
         ...{ cursor: 'pointer' },
         position: 'relative',
@@ -64,12 +65,12 @@ export function ContentElementView(props: ContentElementViewProps) {
       onClick={(e) => {
         let newSelection = [...contentInterfaceState.selected];
         if (!isSelected) {
-          if (e.shiftKey) {
+          if (e.ctrlKey) {
             newSelection.push(data);
           } else {
             newSelection = [data];
           }
-        } else if (e.shiftKey) {
+        } else if (e.ctrlKey) {
           const index = newSelection.findIndex((value) => value === data);
           if (index !== -1) {
             newSelection.splice(index, 1);
@@ -96,25 +97,23 @@ export function ContentElementView(props: ContentElementViewProps) {
           backgroundColor: 'rgba(0, 255, 0, 0.42)',
         }}
       />
-      <div className="extension-element">
-        <div className="extension-name-box">
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-          <span className="extension-name-box__name">{displayName}</span>
-        </div>
-        <div className="me-2">{progressElement}</div>
-        <div style={{ paddingRight: '3px' }}>
-          {
-            // eslint-disable-next-line no-nested-ternary
-            isOnline ? (
-              <Globe />
-            ) : isInstalled ? (
-              <CheckCircle />
-            ) : (
-              <ExclamationCircleFill />
-            )
-          }
-        </div>
-        <div>{version}</div>
+      <div className="extension-name-box">
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <span className="extension-name-box__name">{displayName}</span>
+      </div>
+      <div>{version}</div>
+      <div className="me-2">{progressElement}</div>
+      <div className="me-auto" style={{ paddingRight: '3px' }}>
+        {
+          // eslint-disable-next-line no-nested-ternary
+          isOnline ? (
+            <Globe />
+          ) : isInstalled ? (
+            <CheckCircle />
+          ) : (
+            <ExclamationCircleFill />
+          )
+        }
       </div>
     </div>
   );

@@ -184,6 +184,55 @@ extensions:
             type: plugin
             url: stub
             size: 2000000
+    - definition:
+        name: Legends-Of-The-Orient
+        display-name: Legends Of The Orient
+        author: Crusader Pilaw
+        version: 3.0.1
+        dependencies:
+          Legends-Of-The-Orient-AI: ^3.0.1
+          framework: ">=3.0.1"
+          frontend: ">=1.0.2"
+          ucp2-legacy: ^2.15.1
+          startResources: ^1.0.0
+          maploader: ^1.0.0
+        type: plugin
+      sources:
+        description:
+          - language: default
+            method: online
+            url: https://raw.githubusercontent.com/CrusaderPilaw/extension-Legends-of-the-Orient/main/locale/description-en.md
+          - language: default
+            method: inline
+            content: Hello!
+        package:
+          - method: zip
+            type: plugin
+            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient/archive/refs/heads/main.zip
+            size: 2000000
+    - definition:
+        name: Legends-Of-The-Orient-AI
+        display-name: Legends Of The Orient AI
+        author: Crusader Pilaw
+        version: 3.0.1
+        dependencies:
+          framework: ">=3.0.1"
+          frontend: ">=1.0.2"
+          aiSwapper: ^1.1.0
+        type: plugin
+      sources:
+        description:
+          - language: default
+            method: online
+            url: https://raw.githubusercontent.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/main/locale/description-en.md
+          - language: default
+            method: inline
+            content: Hello!
+        package:
+          - method: zip
+            type: plugin
+            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/refs/heads/main.zip
+            size: 2000000
   lookup:
     module-name-version:
       hash: sha256

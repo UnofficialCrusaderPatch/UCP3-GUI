@@ -1,11 +1,9 @@
 import { atomWithQuery } from 'jotai-tanstack-query';
-import {
-  ExtensionContent,
-  fetchDescription,
-} from '../../../../function/content/store/fetch';
+import { fetchDescription } from '../../../../function/content/store/fetch';
 import { CONTENT_INTERFACE_STATE_ATOM } from '../state/atoms';
+import { ContentElement } from '../../../../function/content/types/content-element';
 
-export const chooseSingleFromSelection = (selected: ExtensionContent[]) => {
+export const chooseSingleFromSelection = (selected: ContentElement[]) => {
   if (selected.length < 1) return undefined;
 
   const d = selected.at(-1);
@@ -13,7 +11,7 @@ export const chooseSingleFromSelection = (selected: ExtensionContent[]) => {
   return d!;
 };
 
-export const distillInlineDescription = (e?: ExtensionContent) => {
+export const distillInlineDescription = (e?: ContentElement) => {
   if (e === undefined) return '';
 
   const descriptionSources = e.sources.description.filter(
@@ -27,10 +25,11 @@ export const distillInlineDescription = (e?: ExtensionContent) => {
   return descriptionSources.at(0)!.content;
 };
 
+// TODO: implement locale
 const resolveDescription = async ({
   queryKey: [, e],
 }: {
-  queryKey: [string, ExtensionContent?];
+  queryKey: [string, ContentElement?];
 }) => {
   if (e === undefined)
     return new Promise((resolve) => {
@@ -52,8 +51,12 @@ const resolveDescription = async ({
       });
     }
 
+    if (e.extension !== undefined) {
+      return e.extension.io.fetchDescription();
+    }
+
     return new Promise((resolve) => {
-      resolve(inlineDescriptionSources.at(-1)!.content);
+      resolve(inlineDescriptionSources.at(-1)!.content || "missing 'content'");
     });
   }
 
@@ -66,7 +69,7 @@ export const SELECTED_CONTENT_DESCRIPTION_ATOM = atomWithQuery((get) => ({
   queryKey: [
     'description',
     chooseSingleFromSelection(get(CONTENT_INTERFACE_STATE_ATOM).selected),
-  ] as [string, ExtensionContent?],
+  ] as [string, ContentElement?],
   queryFn: resolveDescription,
   retry: false,
   staleTime: Infinity,

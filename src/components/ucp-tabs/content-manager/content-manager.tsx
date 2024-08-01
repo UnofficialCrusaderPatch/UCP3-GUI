@@ -1,14 +1,14 @@
 import { useAtom, useAtomValue } from 'jotai';
-import { atomWithQuery } from 'jotai-tanstack-query';
 import { ContentState } from '../../../function/content/state/content-state';
 import { ContentManagerToolbar } from './content-manager-toolbar';
 import { ContentElementView } from './content-element/content-element-view';
 import {
+  CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STATE_ATOM,
+  CONTENT_STORE_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
-import { dummyFetchStore } from '../../../function/content/store/fetch';
 import Logger from '../../../util/scripts/logging';
 import {
   SELECTED_CONTENT_DESCRIPTION_ATOM,
@@ -17,15 +17,6 @@ import {
 } from './description/fetching';
 
 const LOGGER = new Logger('content-manager.tsx');
-
-// TODO: request is now done when rendering the whole GUI, not optimal!
-// Consider: atomWithQuery but that gave errors with hooks not being React proper
-const CONTENT_STORE_ATOM = atomWithQuery(() => ({
-  queryKey: ['store'],
-  queryFn: false || dummyFetchStore,
-  retry: false,
-  // staleTime: Infinity,
-}));
 
 // eslint-disable-next-line react/prop-types
 function StatusElement({ children }: { children: any }) {
@@ -44,7 +35,7 @@ export function ContentManager() {
   const interfaceState = useAtomValue(CONTENT_INTERFACE_STATE_ATOM);
   const state: ContentState = useAtomValue(CONTENT_STATE_ATOM);
 
-  const [{ data, isPending, isError, isSuccess, isPaused, isFetching, error }] =
+  const [{ isPending, isError, isSuccess, isPaused, isFetching, error }] =
     useAtom(CONTENT_STORE_ATOM);
 
   const [
@@ -79,39 +70,30 @@ export function ContentManager() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { extensions } = state;
 
-  const elements =
-    data !== undefined ? (
-      // state.extensions.map((ext) => ContentElementView({ element: ext }))
-      data.extensions.list.map((ext) => (
-        <ContentElementView key={`${ext.definition.name}`} data={ext} />
-      ))
-    ) : (
-      <div>Unknown error occurred...</div>
-    );
+  const elements = useAtomValue(CONTENT_ELEMENTS_ATOM).map((ext) => (
+    <ContentElementView
+      key={`${ext.definition.name}@${ext.definition.version}`}
+      data={ext}
+    />
+  ));
 
-  // const { selected } = interfaceState;
-
-  // const inlineDescriptionContent = distillInlineDescription(interfaceState);
-  // let onlineDescriptionContent =
-  //   !descriptionIsPending && !descriptionIsError
-  //     ? descriptionData
-  //     : 'Fetching online description...';
-
-  // if (descriptionIsError) {
-  //   onlineDescriptionContent = `Failed to fetch description, reason: ${descriptionError}`;
-  // }
-
-  if (descriptionIsError) {
+  const selected = chooseSingleFromSelection(interfaceState.selected);
+  let description = '';
+  if (interfaceState.selected.length === 0) {
+    description = '(select content to install or uninstall on the left)';
+  } else if (descriptionIsError) {
     LOGGER.msg(descriptionError.toString()).error();
+    description = `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(chooseSingleFromSelection(interfaceState.selected))}`;
+  } else {
+    let size;
+    if (selected !== undefined) {
+      if (selected.sources.package.length > 0) {
+        size = selected.sources.package.at(0)!.size / 1000 / 1000;
+      }
+    }
+    // eslint-disable-next-line no-unsafe-optional-chaining
+    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined ? '?' : size} MB  \n\n${descriptionData}`;
   }
-
-  const description = (
-    <SaferMarkdown>
-      {!descriptionIsError
-        ? descriptionData
-        : `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(chooseSingleFromSelection(interfaceState.selected))}`}
-    </SaferMarkdown>
-  );
 
   return (
     <div className="flex-default extension-manager">
@@ -142,7 +124,7 @@ export function ContentManager() {
               className="parchment-box extension-manager-list text-dark"
               style={{ padding: '10px 10px' }}
             >
-              {description}
+              <SaferMarkdown>{description}</SaferMarkdown>
             </div>
             <ContentManagerToolbar />
           </div>

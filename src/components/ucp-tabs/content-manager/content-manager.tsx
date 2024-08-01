@@ -2,7 +2,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { ContentState } from '../../../function/content/state/content-state';
 import { ContentManagerToolbar } from './content-manager-toolbar';
-import { ContentElementView } from '../content-element/content-element-view';
+import { ContentElementView } from './content-element/content-element-view';
 import {
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STATE_ATOM,

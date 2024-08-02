@@ -32,7 +32,7 @@ export type BinaryModulePackageContent = {
 };
 
 export type PluginPackageContent = {
-  method: 'zip';
+  method: 'github-zip';
   type: 'plugin';
   size: number;
   url: string;
@@ -206,10 +206,10 @@ extensions:
             method: inline
             content: Hello!
         package:
-          - method: zip
+          - method: github-zip
             type: plugin
-            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient/archive/refs/heads/main.zip
-            size: 2000000
+            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient/archive/d85e33d25e40dad63b503e684aa099c53c81c783.zip
+            size: ~
     - definition:
         name: Legends-Of-The-Orient-AI
         display-name: Legends Of The Orient AI
@@ -229,10 +229,10 @@ extensions:
             method: inline
             content: Hello!
         package:
-          - method: zip
+          - method: github-zip
             type: plugin
-            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/refs/heads/main.zip
-            size: 2000000
+            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/8f288d604d1db1daee7553b2bc9860975e1312d8.zip
+            size: ~
   lookup:
     module-name-version:
       hash: sha256

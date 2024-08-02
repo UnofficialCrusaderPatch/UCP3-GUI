@@ -24,13 +24,13 @@ export function ContentElementView(props: ContentElementViewProps) {
   const [contentDownloadProgressDB] = useAtom(DOWNLOAD_PROGRESS_ATOM);
 
   const progress = contentDownloadProgressDB[
-    `${data.definition.name}-${data.definition.version}`
+    `${data.definition.name}@${data.definition.version}`
   ] || {
-    pending: true,
+    pending: false,
     error: false,
     name: data.definition.name,
     version: data.definition.version,
-    progress: 50,
+    progress: 0,
   };
 
   const isSelected =

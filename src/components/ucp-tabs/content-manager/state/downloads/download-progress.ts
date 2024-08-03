@@ -1,15 +1,45 @@
 import { atom } from 'jotai';
 
-export type DownloadProgress = {
+type BasicContentInstallationStatus = {
   name: string;
   version: string;
-  pending: boolean;
-  error: boolean;
-  progress: number;
+};
+export type IdleContentInstallationStatus = BasicContentInstallationStatus & {
+  action: 'idle';
+};
+export type DownloadContentInstallationStatus =
+  BasicContentInstallationStatus & {
+    action: 'download';
+    progress: number;
+    description?: string;
+  };
+export type InstallationContentInstallationStatus =
+  BasicContentInstallationStatus & {
+    action: 'install';
+    progress: number;
+    description?: string;
+  };
+
+export type ErrorContentInstallationStatus = BasicContentInstallationStatus & {
+  action: 'error';
+  message: string;
 };
 
-export type DownloadProgressDatabase = {
-  [key: string]: DownloadProgress;
+export type CompleteContentInstallationStatus =
+  BasicContentInstallationStatus & {
+    action: 'complete';
+  };
+
+export type ContentInstallationStatus =
+  | IdleContentInstallationStatus
+  | DownloadContentInstallationStatus
+  | InstallationContentInstallationStatus
+  | ErrorContentInstallationStatus
+  | CompleteContentInstallationStatus;
+
+export type ContentInstallationStatusDatabase = {
+  [id: string]: ContentInstallationStatus;
 };
 
-export const DOWNLOAD_PROGRESS_ATOM = atom<DownloadProgressDatabase>({});
+export const CONTENT_INSTALLATION_STATUS_ATOM =
+  atom<ContentInstallationStatusDatabase>({});

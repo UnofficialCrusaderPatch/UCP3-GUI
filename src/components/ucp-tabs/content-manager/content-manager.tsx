@@ -92,7 +92,7 @@ export function ContentManager() {
       }
     }
     // eslint-disable-next-line no-unsafe-optional-chaining
-    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined ? '?' : size} MB  \n\n${descriptionData}`;
+    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${size}MB`}  \n\n${descriptionData}`;
   }
 
   return (

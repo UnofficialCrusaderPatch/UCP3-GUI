@@ -5,7 +5,7 @@ import { getStore } from '../../../../../hooks/jotai/base';
 import { download } from '../../../../../tauri/tauri-http';
 import Logger from '../../../../../util/scripts/logging';
 import { showModalOk } from '../../../../modals/modal-ok';
-import { DOWNLOAD_PROGRESS_ATOM } from '../../state/downloads/download-progress';
+import { CONTENT_INSTALLATION_STATUS_ATOM } from '../../state/downloads/download-progress';
 import { installPlugin } from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
 
@@ -13,23 +13,14 @@ const LOGGER = new Logger('download-button.tsx');
 
 const guessTotalSize = (currentSize: number) => {
   const steps = [
-    1000 * 100,
-    1000 * 200,
     1000 * 500,
-    1000 * 1000 * 1,
-    1000 * 1000 * 2,
-    1000 * 1000 * 5,
+
     1000 * 1000 * 10,
-    1000 * 1000 * 20,
-    1000 * 1000 * 30,
-    1000 * 1000 * 40,
-    1000 * 1000 * 50,
+
     1000 * 1000 * 100,
-    1000 * 1000 * 200,
-    1000 * 1000 * 300,
-    1000 * 1000 * 400,
+
     1000 * 1000 * 500,
-    1000 * 1000 * 600,
+
     1000 * 1000 * 1000,
   ];
 
@@ -43,26 +34,39 @@ const guessTotalSize = (currentSize: number) => {
   return steps.at(-1)!;
 };
 
-export const downloadPlugin = async (contentElement: ContentElement) => {
+export const downloadAndInstallPlugin = async (
+  contentElement: ContentElement,
+) => {
+  const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
+
+  const contentDownloadProgressDB = getStore().get(
+    CONTENT_INSTALLATION_STATUS_ATOM,
+  );
+
   const zipSources = contentElement.sources.package.filter(
     (pc) => pc.method === 'github-zip',
   );
 
   if (zipSources.length === 0) {
-    throw new Error(`No zip sources`);
+    contentDownloadProgressDB[id] = {
+      action: 'error',
+      message: `No zip package found for this content`,
+      name: contentElement.definition.name,
+      version: contentElement.definition.version,
+    };
+    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+      ...contentDownloadProgressDB,
+    });
+    return;
   }
 
   const src = zipSources.at(0)!;
-
-  const contentDownloadProgressDB = getStore().get(DOWNLOAD_PROGRESS_ATOM);
-
-  const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
 
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   const cacheDir = `${gameFolder}/ucp/.cache/`;
   if (!(await onFsExists(cacheDir))) {
-    LOGGER.msg(`.cache directory doesn't exist, creating it!`);
+    LOGGER.msg(`.cache directory doesn't exist, creating it!`).warn();
     await createDir(cacheDir);
   }
 
@@ -93,35 +97,93 @@ export const downloadPlugin = async (contentElement: ContentElement) => {
       }
 
       contentDownloadProgressDB[id] = {
+        action: 'download',
         progress: Math.floor(percentage),
         name: contentElement.definition.name,
         version: contentElement.definition.version,
-        error: false,
-        pending: true,
       };
-      getStore().set(DOWNLOAD_PROGRESS_ATOM, { ...contentDownloadProgressDB });
+      getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+        ...contentDownloadProgressDB,
+      });
     },
   );
 
   contentDownloadProgressDB[id] = {
+    action: 'download',
     progress: 100,
     name: contentElement.definition.name,
     version: contentElement.definition.version,
-    error: false,
-    pending: false,
   };
-  getStore().set(DOWNLOAD_PROGRESS_ATOM, { ...contentDownloadProgressDB });
+  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+    ...contentDownloadProgressDB,
+  });
 
   LOGGER.msg(
     `Installing ${contentElement.definition.name} from ${destination} into ${gameFolder}/ucp/plugins`,
   ).debug();
 
-  await installPlugin(gameFolder, destination, {
-    zapRootFolder: true,
+  contentDownloadProgressDB[id] = {
+    action: 'install',
+    progress: 30, // Start at 10%
+    name: contentElement.definition.name,
+    version: contentElement.definition.version,
+  };
+  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+    ...contentDownloadProgressDB,
+  });
+
+  try {
+    await installPlugin(gameFolder, destination, {
+      zapRootFolder: true,
+    });
+  } catch (e: any) {
+    contentDownloadProgressDB[id] = {
+      action: 'error',
+      message: e.toString(),
+      name: contentElement.definition.name,
+      version: contentElement.definition.version,
+    };
+    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+      ...contentDownloadProgressDB,
+    });
+    return;
+  }
+
+  contentDownloadProgressDB[id] = {
+    action: 'install',
+    progress: 60,
+    name: contentElement.definition.name,
+    version: contentElement.definition.version,
+  };
+  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+    ...contentDownloadProgressDB,
   });
 
   LOGGER.msg(`Removing ${destination}`).debug();
-  await removeFile(destination);
+  const removeResult = await removeFile(destination);
+
+  if (removeResult.isErr()) {
+    contentDownloadProgressDB[id] = {
+      action: 'error',
+      message: JSON.stringify(removeResult.err().get()),
+      name: contentElement.definition.name,
+      version: contentElement.definition.version,
+    };
+    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+      ...contentDownloadProgressDB,
+    });
+    return;
+  }
+
+  contentDownloadProgressDB[id] = {
+    action: 'install',
+    progress: 100,
+    name: contentElement.definition.name,
+    version: contentElement.definition.version,
+  };
+  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+    ...contentDownloadProgressDB,
+  });
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -169,5 +231,31 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
     return;
   }
 
-  plugins.forEach((plugin) => downloadPlugin(plugin));
+  const contentDownloadProgressDB = getStore().get(
+    CONTENT_INSTALLATION_STATUS_ATOM,
+  );
+
+  plugins.forEach(async (plugin) => {
+    const id = `${plugin.definition.name}@${plugin.definition.version}`;
+    contentDownloadProgressDB[id] = {
+      action: 'download',
+      progress: 0,
+      name: plugin.definition.name,
+      version: plugin.definition.version,
+    };
+    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+      ...contentDownloadProgressDB,
+    });
+
+    await downloadAndInstallPlugin(plugin);
+
+    contentDownloadProgressDB[id] = {
+      action: 'complete',
+      name: plugin.definition.name,
+      version: plugin.definition.version,
+    };
+    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
+      ...contentDownloadProgressDB,
+    });
+  });
 };

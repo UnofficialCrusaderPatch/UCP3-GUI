@@ -31,6 +31,10 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
           (ec) => ({ ...ec, online: true, installed: false }) as ContentElement,
         );
 
+  const spIDs = storePackages.map(
+    (ce) => `${ce.definition.name}@${ce.definition.version}`,
+  );
+
   const extensionPackages = extensions.map(
     (e) =>
       ({
@@ -54,7 +58,8 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
             },
           ],
         },
-        online: false,
+        online:
+          spIDs.indexOf(`${e.definition.name}@${e.definition.version}`) !== -1,
         installed: true,
         extension: e,
       }) as ContentElement,

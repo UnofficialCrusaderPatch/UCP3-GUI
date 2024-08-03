@@ -1,12 +1,14 @@
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import {
   CheckCircle,
+  CheckCircleFill,
   ExclamationCircleFill,
   Globe,
 } from 'react-bootstrap-icons';
 import { CONTENT_INTERFACE_STATE_ATOM } from '../state/atoms';
-import { DOWNLOAD_PROGRESS_ATOM } from '../state/downloads/download-progress';
+import { CONTENT_INSTALLATION_STATUS_ATOM } from '../state/downloads/download-progress';
 import { ContentElement } from '../../../../function/content/types/content-element';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 
 export type ContentElementViewProps = {
   data: ContentElement;
@@ -21,16 +23,16 @@ export function ContentElementView(props: ContentElementViewProps) {
     CONTENT_INTERFACE_STATE_ATOM,
   );
 
-  const [contentDownloadProgressDB] = useAtom(DOWNLOAD_PROGRESS_ATOM);
+  const [contentInstallationStatusDB] = useAtom(
+    CONTENT_INSTALLATION_STATUS_ATOM,
+  );
 
-  const progress = contentDownloadProgressDB[
+  const installationStatus = contentInstallationStatusDB[
     `${data.definition.name}@${data.definition.version}`
   ] || {
-    pending: false,
-    error: false,
     name: data.definition.name,
     version: data.definition.version,
-    progress: 0,
+    action: 'idle',
   };
 
   const isSelected =
@@ -44,13 +46,121 @@ export function ContentElementView(props: ContentElementViewProps) {
   const isOnline = online;
   const isInstalled = installed;
 
-  const progressElement = progress.pending ? (
-    <span className="ms-2">
-      (<span className="ps-2">{`${progress.progress}`}</span>%)
-    </span>
-  ) : (
-    <span />
-  );
+  const progressElement =
+    installationStatus.action === 'download' ||
+    installationStatus.action === 'install' ? (
+      <span className="ms-2">
+        (<span className="ps-2">{`${installationStatus.progress}`}</span>%)
+      </span>
+    ) : (
+      <span />
+    );
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  let statusElement;
+  if (
+    installationStatus.action === 'download' ||
+    installationStatus.action === 'install'
+  ) {
+    statusElement = (
+      <div
+        className="spinner-border"
+        role="status"
+        style={{
+          width: '1rem',
+          height: '1rem',
+          verticalAlign: 'middle',
+        }}
+      >
+        <span className="visually-hidden">Processing...</span>
+      </div>
+    );
+  } else if (installationStatus.action === 'error') {
+    statusElement = (
+      <ExclamationCircleFill
+        onMouseEnter={() => {
+          setStatusBarMessage(installationStatus.message);
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    );
+  } else if (installationStatus.action === 'idle' && isOnline && !isInstalled) {
+    statusElement = (
+      <Globe
+        style={{
+          color: 'blue',
+        }}
+        onMouseEnter={() => {
+          setStatusBarMessage(`This content is available for installation`);
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    );
+  } else if (installationStatus.action === 'idle' && isOnline && isInstalled) {
+    statusElement = (
+      <CheckCircleFill
+        style={{
+          color: 'darkgreen',
+        }}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            `This content is already installed and available online`,
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    );
+  } else if (installationStatus.action === 'idle' && !isOnline && isInstalled) {
+    statusElement = (
+      <CheckCircle
+        style={{
+          color: 'darkgreen',
+        }}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            `This content is installed but not available online (anymore)`,
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    );
+  } else if (installationStatus.action === 'complete') {
+    statusElement = (
+      <ExclamationCircleFill
+        style={{
+          color: 'black',
+        }}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            `This content is available after a restart of the GUI`,
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    );
+  }
+
+  let progressBarColor;
+  if (installationStatus.action === 'download') {
+    progressBarColor = 'rgba(0, 200, 0, 0.62)';
+  } else if (installationStatus.action === 'install') {
+    progressBarColor = 'rgba(0, 0, 200, 0.62)';
+  } else if (installationStatus.action === 'error') {
+    progressBarColor = 'rgba(200, 0, 0, 1.00)';
+  } else {
+    progressBarColor = 'rgba(0, 0, 0, 0.62)';
+  }
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -86,17 +196,20 @@ export function ContentElementView(props: ContentElementViewProps) {
         });
       }}
     >
-      <div
-        style={{
-          width: `${progress.progress}%`,
-          height: '80%',
-          position: 'absolute',
-          top: 3,
-          left: 0,
-          display: 'flex',
-          backgroundColor: 'rgba(0, 255, 0, 0.42)',
-        }}
-      />
+      {installationStatus.action !== 'idle' ? (
+        <div
+          style={{
+            // eslint-disable-next-line no-nested-ternary
+            width: `${installationStatus.action === 'download' || installationStatus.action === 'install' ? installationStatus.progress : installationStatus.action === 'complete' ? 0 : 100}%`,
+            height: '20%',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            display: 'flex',
+            backgroundColor: progressBarColor,
+          }}
+        />
+      ) : undefined}
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span className="extension-name-box__name">{displayName}</span>
@@ -104,16 +217,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       <div>{version}</div>
       <div className="me-2">{progressElement}</div>
       <div className="me-auto" style={{ paddingRight: '3px' }}>
-        {
-          // eslint-disable-next-line no-nested-ternary
-          isOnline ? (
-            <Globe />
-          ) : isInstalled ? (
-            <CheckCircle />
-          ) : (
-            <ExclamationCircleFill />
-          )
-        }
+        {statusElement}
       </div>
     </div>
   );

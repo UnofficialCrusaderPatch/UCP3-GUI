@@ -233,6 +233,25 @@ extensions:
             type: plugin
             url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/8f288d604d1db1daee7553b2bc9860975e1312d8.zip
             size: ~
+    - definition:
+        name: Legends-Of-The-Orient-AI
+        display-name: Legends Of The Orient AI
+        author: Crusader Pilaw
+        version: 3.0.0
+        dependencies:
+          framework: ">=3.0.1"
+          frontend: ">=1.0.2"
+          aiSwapper: ^1.1.0
+        type: plugin
+      sources:
+        description:
+          - language: default
+            method: online
+            url: https://raw.githubusercontent.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/main/locale/description-en.md
+          - language: default
+            method: inline
+            content: Hello!
+        package: []
   lookup:
     module-name-version:
       hash: sha256

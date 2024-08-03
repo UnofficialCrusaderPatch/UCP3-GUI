@@ -51,16 +51,14 @@ export const CONTENT_COLLECTION_ATOM = atom<Package[] | undefined>((get) => {
     }
   });
 
-  const duplicates = Object.entries(frequencies).filter(
-    ([, count]) => count > 1,
-  );
-  if (duplicates.length > 0) {
-    throw new Error(
-      `There are duplicates: ${duplicates.map(([n]) => n).join(', ')}`,
-    );
-  }
+  const duplicates = Object.entries(frequencies)
+    .filter(([, count]) => count > 1)
+    .map(([id]) => id);
 
-  return [...storePackages, ...extensionPackages];
+  return [
+    ...storePackages.filter((p) => duplicates.indexOf(p.id) === -1),
+    ...extensionPackages,
+  ];
 });
 
 export const CONTENT_TREE_ATOM = atom((get) => {

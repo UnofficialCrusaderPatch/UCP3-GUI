@@ -2,6 +2,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import {
   CheckCircle,
   CheckCircleFill,
+  CircleFill,
   ExclamationCircleFill,
   Globe,
 } from 'react-bootstrap-icons';
@@ -48,7 +49,8 @@ export function ContentElementView(props: ContentElementViewProps) {
 
   const progressElement =
     installationStatus.action === 'download' ||
-    installationStatus.action === 'install' ? (
+    installationStatus.action === 'install' ||
+    installationStatus.action === 'uninstall' ? (
       <span className="ms-2">
         (<span className="ps-2">{`${installationStatus.progress}`}</span>%)
       </span>
@@ -61,7 +63,8 @@ export function ContentElementView(props: ContentElementViewProps) {
   let statusElement;
   if (
     installationStatus.action === 'download' ||
-    installationStatus.action === 'install'
+    installationStatus.action === 'install' ||
+    installationStatus.action === 'uninstall'
   ) {
     statusElement = (
       <div
@@ -125,7 +128,7 @@ export function ContentElementView(props: ContentElementViewProps) {
         }}
         onMouseEnter={() => {
           setStatusBarMessage(
-            `This content is installed but not available online (anymore)`,
+            `This content is installed but not available online (deprecation)`,
           );
         }}
         onMouseLeave={() => {
@@ -135,13 +138,13 @@ export function ContentElementView(props: ContentElementViewProps) {
     );
   } else if (installationStatus.action === 'complete') {
     statusElement = (
-      <ExclamationCircleFill
+      <CircleFill
         style={{
-          color: 'black',
+          color: 'orange',
         }}
         onMouseEnter={() => {
           setStatusBarMessage(
-            `This content is available after a restart of the GUI`,
+            `This content's status changed. Please restart the GUI to finalize.`,
           );
         }}
         onMouseLeave={() => {
@@ -156,10 +159,25 @@ export function ContentElementView(props: ContentElementViewProps) {
     progressBarColor = 'rgba(0, 200, 0, 0.62)';
   } else if (installationStatus.action === 'install') {
     progressBarColor = 'rgba(0, 0, 200, 0.62)';
+  } else if (installationStatus.action === 'uninstall') {
+    progressBarColor = 'rgba(200, 0, 0, 0.62)';
   } else if (installationStatus.action === 'error') {
     progressBarColor = 'rgba(200, 0, 0, 1.00)';
   } else {
     progressBarColor = 'rgba(0, 0, 0, 0.62)';
+  }
+
+  let progressValue;
+  if (
+    installationStatus.action === 'install' ||
+    installationStatus.action === 'download' ||
+    installationStatus.action === 'uninstall'
+  ) {
+    progressValue = installationStatus.progress;
+  } else if (installationStatus.action === 'complete') {
+    progressValue = 0;
+  } else {
+    progressValue = 100;
   }
 
   return (
@@ -200,7 +218,7 @@ export function ContentElementView(props: ContentElementViewProps) {
         <div
           style={{
             // eslint-disable-next-line no-nested-ternary
-            width: `${installationStatus.action === 'download' || installationStatus.action === 'install' ? installationStatus.progress : installationStatus.action === 'complete' ? 0 : 100}%`,
+            width: `${progressValue}%`,
             height: '20%',
             position: 'absolute',
             bottom: 0,

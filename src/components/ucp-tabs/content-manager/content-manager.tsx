@@ -70,12 +70,16 @@ export function ContentManager() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { extensions } = state;
 
-  const elements = useAtomValue(CONTENT_ELEMENTS_ATOM).map((ext) => (
-    <ContentElementView
-      key={`${ext.definition.name}@${ext.definition.version}`}
-      data={ext}
-    />
-  ));
+  // TODO: implement for modules (signatures and hashes)
+  const elements = useAtomValue(CONTENT_ELEMENTS_ATOM)
+    .filter((ce) => ce.definition.type === 'plugin')
+    .sort((a, b) => a.definition.name.localeCompare(b.definition.name))
+    .map((ext) => (
+      <ContentElementView
+        key={`${ext.definition.name}@${ext.definition.version}`}
+        data={ext}
+      />
+    ));
 
   const selected = chooseSingleFromSelection(interfaceState.selected);
   let description = '';

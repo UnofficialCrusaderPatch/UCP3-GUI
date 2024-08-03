@@ -20,6 +20,13 @@ export type InstallationContentInstallationStatus =
     description?: string;
   };
 
+export type UninstallationContentInstallationStatus =
+  BasicContentInstallationStatus & {
+    action: 'uninstall';
+    progress: number;
+    description?: string;
+  };
+
 export type ErrorContentInstallationStatus = BasicContentInstallationStatus & {
   action: 'error';
   message: string;
@@ -35,7 +42,8 @@ export type ContentInstallationStatus =
   | DownloadContentInstallationStatus
   | InstallationContentInstallationStatus
   | ErrorContentInstallationStatus
-  | CompleteContentInstallationStatus;
+  | CompleteContentInstallationStatus
+  | UninstallationContentInstallationStatus;
 
 export type ContentInstallationStatusDatabase = {
   [id: string]: ContentInstallationStatus;

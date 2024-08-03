@@ -5,9 +5,10 @@ import {
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
 } from '../state/atoms';
-import { downloadContent } from './callbacks/download-content';
+import { downloadContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { showModalOk } from '../../../modals/modal-ok';
+import { CONTENT_INSTALLATION_STATUS_ATOM } from '../state/downloads/download-progress';
 
 // eslint-disable-next-line import/prefer-default-export
 export function DownloadButton(
@@ -28,58 +29,92 @@ export function DownloadButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
+  const contentInstallationStatusDB = useAtomValue(
+    CONTENT_INSTALLATION_STATUS_ATOM,
+  );
+  const selectedIDs = interfaceState.selected.map(
+    (ce) => `${ce.definition.name}@${ce.definition.version}`,
+  );
+  const installedCount = interfaceState.selected.filter(
+    (ce) => ce.installed,
+  ).length;
+  const onlineOnlyCount = interfaceState.selected.filter(
+    (ce) => !ce.installed && ce.online,
+  ).length;
+  const busyCount = Object.entries(contentInstallationStatusDB).filter(
+    ([id, status]) =>
+      selectedIDs.indexOf(id) !== -1 && status.action !== 'idle',
+  ).length;
+
+  let enabled = true;
+  let helpText = 'Install selected content';
+  if (installedCount > 0) {
+    enabled = false;
+    helpText = 'Selection includes already installed content';
+  } else if (onlineOnlyCount === 0) {
+    enabled = false;
+    helpText = 'Select at least one content element';
+  } else if (busyCount > 0) {
+    enabled = false;
+    helpText =
+      'Cannot install content that changed status. Please wait and restart first';
+  }
+
   const tree = useAtomValue(CONTENT_TREE_ATOM);
 
   return (
-    <button
-      className="ucp-button ucp-button-variant"
-      disabled={tree === undefined || selectionCount === 0}
-      type="button"
+    <div
       onMouseEnter={() => {
-        setStatusBarMessage('Download selected content and dependencies');
+        setStatusBarMessage(helpText);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
       }}
-      onClick={async () => {
-        const ids = interfaceState.selected.map(
-          (ec) => `${ec.definition.name}@${ec.definition.version}`,
-        );
-
-        const solution = tree!.dependenciesForMultiple(ids);
-
-        if (solution.status !== 'OK') {
-          await showModalOk({
-            title: 'Cannot install',
-            message: solution.message,
-          });
-          return;
-        }
-
-        const solutionIDs = solution.packages.map((p) => p.id);
-
-        const notInstalledDependencies = contentElements
-          // Retain elements that are in the solution
-          .filter(
-            (ce) =>
-              solutionIDs.indexOf(
-                `${ce.definition.name}@${ce.definition.version}`,
-              ) !== -1,
-          )
-          // Retain elements that are not installed yet
-          .filter((ce) => !ce.installed);
-        downloadContent(notInstalledDependencies);
-      }}
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      {...props}
     >
-      <div className="ucp-button-variant-button-text d-flex align-items-center">
-        <span className="ps-2">
-          <Download />
-        </span>
-        <span className="ms-auto me-auto">Install</span>
-        {countElement}
-      </div>
-    </button>
+      <button
+        className="ucp-button ucp-button-variant"
+        disabled={tree === undefined || !enabled}
+        type="button"
+        onClick={async () => {
+          const ids = interfaceState.selected.map(
+            (ec) => `${ec.definition.name}@${ec.definition.version}`,
+          );
+
+          const solution = tree!.dependenciesForMultiple(ids);
+
+          if (solution.status !== 'OK') {
+            await showModalOk({
+              title: 'Cannot install',
+              message: solution.message,
+            });
+            return;
+          }
+
+          const solutionIDs = solution.packages.map((p) => p.id);
+
+          const notInstalledDependencies = contentElements
+            // Retain elements that are in the solution
+            .filter(
+              (ce) =>
+                solutionIDs.indexOf(
+                  `${ce.definition.name}@${ce.definition.version}`,
+                ) !== -1,
+            )
+            // Retain elements that are not installed yet
+            .filter((ce) => !ce.installed);
+          downloadContent(notInstalledDependencies);
+        }}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...props}
+      >
+        <div className="ucp-button-variant-button-text d-flex align-items-center">
+          <span className="ps-2">
+            <Download />
+          </span>
+          <span className="ms-auto me-auto">Install</span>
+          {countElement}
+        </div>
+      </button>
+    </div>
   );
 }

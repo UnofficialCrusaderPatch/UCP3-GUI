@@ -15,6 +15,10 @@ import {
   distillInlineDescription,
   chooseSingleFromSelection,
 } from './description/fetching';
+import {
+  ContentFilterButton,
+  UI_FILTER_SETTING_ATOM,
+} from './buttons/filter-button';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -70,8 +74,11 @@ export function ContentManager() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { extensions } = state;
 
+  const onlyIncludeOnline = useAtomValue(UI_FILTER_SETTING_ATOM);
+
   // TODO: implement for modules (signatures and hashes)
   const elements = useAtomValue(CONTENT_ELEMENTS_ATOM)
+    .filter((ce) => (onlyIncludeOnline ? ce.online && !ce.installed : true))
     .filter((ce) => ce.definition.type === 'plugin')
     .sort((a, b) => a.definition.name.localeCompare(b.definition.name))
     .map((ext) => (
@@ -108,7 +115,7 @@ export function ContentManager() {
               Online Content
             </h4>
             <div className="extension-manager-control__box__header__buttons">
-              (filter buttons)
+              <ContentFilterButton />
             </div>
           </div>
           <div className="extension-manager-control__header">

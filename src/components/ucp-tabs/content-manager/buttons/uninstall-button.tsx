@@ -58,7 +58,7 @@ export function UninstallButton(
   } else if (busyCount > 0) {
     enabled = false;
     helpText =
-      'Cannot install content that changed status. Please wait and restart first';
+      'Cannot install content that is not idle. Please wait and restart first';
   }
 
   return (

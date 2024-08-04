@@ -177,22 +177,22 @@ export default function UcpTabs() {
           </Nav.Item>
           <Nav.Item>
             <Nav.Link
+              eventKey="content-manager"
+              className="ornament-border-button tab-link"
+              disabled={currentFolder === ''}
+              hidden={currentFolder === ''}
+            >
+              Store
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link
               eventKey="launch"
               className="ornament-border-button tab-link"
               disabled={currentFolder === ''}
               hidden={currentFolder === ''}
             >
               {t('gui-launch:launch')}
-            </Nav.Link>
-          </Nav.Item>
-          <Nav.Item>
-            <Nav.Link
-              eventKey="content-manager"
-              className="ornament-border-button tab-link"
-              disabled={currentFolder === ''}
-              hidden={currentFolder === ''}
-            >
-              Online
             </Nav.Link>
           </Nav.Item>
         </Nav>

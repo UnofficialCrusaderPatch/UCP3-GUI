@@ -5,9 +5,10 @@ import { getStore } from '../../../../../hooks/jotai/base';
 import { download } from '../../../../../tauri/tauri-http';
 import Logger from '../../../../../util/scripts/logging';
 import { showModalOk } from '../../../../modals/modal-ok';
-import { CONTENT_INSTALLATION_STATUS_ATOM } from '../../state/downloads/download-progress';
+import { ContentInstallationStatus } from '../../state/downloads/download-progress';
 import { installPlugin } from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
+import { contentInstallationStatusAtoms } from '../../state/atoms';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -39,23 +40,19 @@ export const downloadAndInstallPlugin = async (
 ) => {
   const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
 
-  const contentDownloadProgressDB = getStore().get(
-    CONTENT_INSTALLATION_STATUS_ATOM,
-  );
-
   const zipSources = contentElement.sources.package.filter(
     (pc) => pc.method === 'github-zip',
   );
 
+  const setStatus = (value: ContentInstallationStatus) =>
+    getStore().set(contentInstallationStatusAtoms[id], value);
+
   if (zipSources.length === 0) {
-    contentDownloadProgressDB[id] = {
+    setStatus({
       action: 'error',
       message: `No zip package found for this content`,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
-    };
-    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-      ...contentDownloadProgressDB,
     });
     return;
   }
@@ -96,40 +93,31 @@ export const downloadAndInstallPlugin = async (
         }
       }
 
-      contentDownloadProgressDB[id] = {
+      setStatus({
         action: 'download',
         progress: Math.floor(percentage),
         name: contentElement.definition.name,
         version: contentElement.definition.version,
-      };
-      getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-        ...contentDownloadProgressDB,
       });
     },
   );
 
-  contentDownloadProgressDB[id] = {
+  setStatus({
     action: 'download',
     progress: 100,
     name: contentElement.definition.name,
     version: contentElement.definition.version,
-  };
-  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-    ...contentDownloadProgressDB,
   });
 
   LOGGER.msg(
     `Installing ${contentElement.definition.name} from ${destination} into ${gameFolder}/ucp/plugins`,
   ).debug();
 
-  contentDownloadProgressDB[id] = {
+  setStatus({
     action: 'install',
     progress: 30, // Start at 10%
     name: contentElement.definition.name,
     version: contentElement.definition.version,
-  };
-  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-    ...contentDownloadProgressDB,
   });
 
   try {
@@ -137,52 +125,40 @@ export const downloadAndInstallPlugin = async (
       zapRootFolder: true,
     });
   } catch (e: any) {
-    contentDownloadProgressDB[id] = {
+    setStatus({
       action: 'error',
       message: e.toString(),
       name: contentElement.definition.name,
       version: contentElement.definition.version,
-    };
-    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-      ...contentDownloadProgressDB,
     });
     return;
   }
 
-  contentDownloadProgressDB[id] = {
+  setStatus({
     action: 'install',
     progress: 60,
     name: contentElement.definition.name,
     version: contentElement.definition.version,
-  };
-  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-    ...contentDownloadProgressDB,
   });
 
   LOGGER.msg(`Removing ${destination}`).debug();
   const removeResult = await removeFile(destination);
 
   if (removeResult.isErr()) {
-    contentDownloadProgressDB[id] = {
+    setStatus({
       action: 'error',
       message: JSON.stringify(removeResult.err().get()),
       name: contentElement.definition.name,
       version: contentElement.definition.version,
-    };
-    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-      ...contentDownloadProgressDB,
     });
     return;
   }
 
-  contentDownloadProgressDB[id] = {
+  setStatus({
     action: 'install',
     progress: 100,
     name: contentElement.definition.name,
     version: contentElement.definition.version,
-  };
-  getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-    ...contentDownloadProgressDB,
   });
 };
 
@@ -231,31 +207,23 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
     return;
   }
 
-  const contentDownloadProgressDB = getStore().get(
-    CONTENT_INSTALLATION_STATUS_ATOM,
-  );
-
   plugins.forEach(async (plugin) => {
     const id = `${plugin.definition.name}@${plugin.definition.version}`;
-    contentDownloadProgressDB[id] = {
+    const setStatus = (value: ContentInstallationStatus) =>
+      getStore().set(contentInstallationStatusAtoms[id], value);
+    setStatus({
       action: 'download',
       progress: 0,
       name: plugin.definition.name,
       version: plugin.definition.version,
-    };
-    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-      ...contentDownloadProgressDB,
     });
 
     await downloadAndInstallPlugin(plugin);
 
-    contentDownloadProgressDB[id] = {
+    setStatus({
       action: 'complete',
       name: plugin.definition.name,
       version: plugin.definition.version,
-    };
-    getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-      ...contentDownloadProgressDB,
     });
   });
 };

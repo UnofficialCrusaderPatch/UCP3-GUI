@@ -4,11 +4,12 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import {
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
+  contentInstallationStatusAtoms,
 } from '../state/atoms';
 import { downloadContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { showModalOk } from '../../../modals/modal-ok';
-import { CONTENT_INSTALLATION_STATUS_ATOM } from '../state/downloads/download-progress';
+import { getStore } from '../../../../hooks/jotai/base';
 
 // eslint-disable-next-line import/prefer-default-export
 export function DownloadButton(
@@ -29,9 +30,6 @@ export function DownloadButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
-  const contentInstallationStatusDB = useAtomValue(
-    CONTENT_INSTALLATION_STATUS_ATOM,
-  );
   const selectedIDs = interfaceState.selected.map(
     (ce) => `${ce.definition.name}@${ce.definition.version}`,
   );
@@ -41,9 +39,9 @@ export function DownloadButton(
   const onlineOnlyCount = interfaceState.selected.filter(
     (ce) => !ce.installed && ce.online,
   ).length;
-  const busyCount = Object.entries(contentInstallationStatusDB).filter(
-    ([id, status]) =>
-      selectedIDs.indexOf(id) !== -1 && status.action !== 'idle',
+  const busyCount = Object.entries(contentInstallationStatusAtoms).filter(
+    ([id, atom]) =>
+      selectedIDs.indexOf(id) !== -1 && getStore().get(atom).action !== 'idle',
   ).length;
 
   let enabled = true;
@@ -57,7 +55,7 @@ export function DownloadButton(
   } else if (busyCount > 0) {
     enabled = false;
     helpText =
-      'Cannot install content that changed status. Please wait and restart first';
+      'Cannot install content that is not idle. Please wait and restart first';
   }
 
   const tree = useAtomValue(CONTENT_TREE_ATOM);

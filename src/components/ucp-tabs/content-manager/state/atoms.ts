@@ -1,10 +1,11 @@
-import { atom } from 'jotai';
+import { atom, PrimitiveAtom } from 'jotai';
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { DEFAULT_CONTENT_STATE } from '../../../../function/content/state/content-state';
 import { DEFAULT_CONTENT_INTERFACE_STATE } from '../../../../function/content/state/content-interface-state';
 import { dummyFetchStore } from '../../../../function/content/store/fetch';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
 import { ContentElement } from '../../../../function/content/types/content-element';
+import { ContentInstallationStatus } from './downloads/download-progress';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -78,3 +79,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     ...extensionPackages,
   ];
 });
+
+export const contentInstallationStatusAtoms: {
+  [id: string]: PrimitiveAtom<ContentInstallationStatus>;
+} = {};

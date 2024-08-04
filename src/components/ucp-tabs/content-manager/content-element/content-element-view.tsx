@@ -1,4 +1,4 @@
-import { useAtom, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   CheckCircle,
   CheckCircleFill,
@@ -6,10 +6,25 @@ import {
   ExclamationCircleFill,
   Globe,
 } from 'react-bootstrap-icons';
-import { CONTENT_INTERFACE_STATE_ATOM } from '../state/atoms';
-import { CONTENT_INSTALLATION_STATUS_ATOM } from '../state/downloads/download-progress';
+import { useMemo } from 'react';
+import {
+  CONTENT_INTERFACE_STATE_ATOM,
+  contentInstallationStatusAtoms,
+} from '../state/atoms';
+import { ContentInstallationStatus } from '../state/downloads/download-progress';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
+
+function registerAtom(name: string, version: string) {
+  const id = `${name}@${version}`;
+  if (contentInstallationStatusAtoms[id] === undefined) {
+    contentInstallationStatusAtoms[id] = atom<ContentInstallationStatus>({
+      name,
+      version,
+      action: 'idle',
+    });
+  }
+}
 
 export type ContentElementViewProps = {
   data: ContentElement;
@@ -20,21 +35,17 @@ export function ContentElementView(props: ContentElementViewProps) {
   const { definition, installed, online } = data;
   const { name, version, 'display-name': displayName } = definition;
 
+  const id = `${definition.name}@${definition.version}`;
+
   const [contentInterfaceState, setContentInterfaceState] = useAtom(
     CONTENT_INTERFACE_STATE_ATOM,
   );
 
-  const [contentInstallationStatusDB] = useAtom(
-    CONTENT_INSTALLATION_STATUS_ATOM,
-  );
+  useMemo(() => {
+    registerAtom(name, version);
+  }, [name, version]);
 
-  const installationStatus = contentInstallationStatusDB[
-    `${data.definition.name}@${data.definition.version}`
-  ] || {
-    name: data.definition.name,
-    version: data.definition.version,
-    action: 'idle',
-  };
+  const installationStatus = useAtomValue(contentInstallationStatusAtoms[id]);
 
   const isSelected =
     contentInterfaceState.selected.find((e) => e === data) === data;

@@ -60,7 +60,7 @@ export function ContentManager() {
     );
   } else if (isPending) msg = <StatusElement>Loading...</StatusElement>;
 
-  if (isError) {
+  if (isError && error !== null) {
     msg = (
       <StatusElement>
         <strong>Failed to fetch online content:</strong>
@@ -92,8 +92,10 @@ export function ContentManager() {
   let description = '';
   if (interfaceState.selected.length === 0) {
     description = '(select content to install or uninstall on the left)';
-  } else if (descriptionIsError) {
-    LOGGER.msg(descriptionError.toString()).error();
+  } else if (descriptionIsError && descriptionError !== null) {
+    LOGGER.msg(
+      (descriptionError === null ? '' : descriptionError).toString(),
+    ).error();
     description = `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(chooseSingleFromSelection(interfaceState.selected))}`;
   } else {
     let size;

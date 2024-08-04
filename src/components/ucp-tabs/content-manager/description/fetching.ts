@@ -1,5 +1,9 @@
 import { atomWithQuery } from 'jotai-tanstack-query';
-import { fetchDescription } from '../../../../function/content/store/fetch';
+import {
+  fetchDescription,
+  InlineDescriptionContent,
+  OnlineDescriptionContent,
+} from '../../../../function/content/store/fetch';
 import { CONTENT_INTERFACE_STATE_ATOM } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 
@@ -22,7 +26,7 @@ export const distillInlineDescription = (e?: ContentElement) => {
     return '';
   }
 
-  return descriptionSources.at(0)!.content;
+  return (descriptionSources.at(0)! as InlineDescriptionContent).content;
 };
 
 // TODO: implement locale
@@ -56,11 +60,14 @@ const resolveDescription = async ({
     }
 
     return new Promise((resolve) => {
-      resolve(inlineDescriptionSources.at(-1)!.content || "missing 'content'");
+      resolve(
+        (inlineDescriptionSources.at(-1)! as InlineDescriptionContent)
+          .content || "missing 'content'",
+      );
     });
   }
 
-  const { url } = onlineDescriptionSources.at(0)!;
+  const { url } = onlineDescriptionSources.at(0)! as OnlineDescriptionContent;
 
   return fetchDescription(url);
 };

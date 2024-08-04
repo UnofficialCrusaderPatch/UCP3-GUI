@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ import { getStore } from './hooks/jotai/base';
 const queryClient = new QueryClient();
 
 // eslint-disable-next-line react/prop-types
-const HydrateAtoms = ({ children }) => {
+const HydrateAtoms = ({ children }: PropsWithChildren) => {
   useHydrateAtoms([[queryClientAtom, queryClient]]);
   return children;
 };

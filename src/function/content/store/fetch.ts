@@ -208,7 +208,7 @@ extensions:
         package:
           - method: github-zip
             type: plugin
-            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient/archive/d85e33d25e40dad63b503e684aa099c53c81c783.zip
+            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient/archive/9b35f668b6312a344a70999cedcc82bb1770f921.zip
             size: 15000000
     - definition:
         name: Legends-Of-The-Orient-AI
@@ -231,7 +231,7 @@ extensions:
         package:
           - method: github-zip
             type: plugin
-            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/8f288d604d1db1daee7553b2bc9860975e1312d8.zip
+            url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/371103bdcd876eea9c005943cf749bbdadf77981.zip
             size: 280000000
     - definition:
         name: Legends-Of-The-Orient-AI

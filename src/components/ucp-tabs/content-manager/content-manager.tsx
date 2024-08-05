@@ -1,4 +1,5 @@
 import { useAtom, useAtomValue } from 'jotai';
+import { ExclamationCircleFill } from 'react-bootstrap-icons';
 import { ContentState } from '../../../function/content/state/content-state';
 import { ContentManagerToolbar } from './content-manager-toolbar';
 import { ContentElementView } from './content-element/content-element-view';
@@ -7,6 +8,7 @@ import {
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STATE_ATOM,
   CONTENT_STORE_ATOM,
+  contentInstallationStatusAtoms,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
 import Logger from '../../../util/scripts/logging';
@@ -19,6 +21,7 @@ import {
   ContentFilterButton,
   UI_FILTER_SETTING_ATOM,
 } from './buttons/filter-button';
+import { getStore } from '../../../hooks/jotai/base';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -108,6 +111,26 @@ export function ContentManager() {
     description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${size}MB`}  \n\n${descriptionData}`;
   }
 
+  const completed = Object.entries(contentInstallationStatusAtoms)
+    .filter(([, theAtom]) => {
+      const status = getStore().get(theAtom);
+      return status.action === 'complete';
+    })
+    .map(([id]) => id);
+
+  let restartElement;
+  if (completed.length > 0) {
+    restartElement = (
+      <div
+        className="text-warning d-flex me-1"
+        style={{ alignItems: 'center' }}
+      >
+        <ExclamationCircleFill />
+        <span className="ms-1">Restart required</span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-default extension-manager">
       <div className="extension-manager-control">
@@ -117,6 +140,7 @@ export function ContentManager() {
               Online Content
             </h4>
             <div className="extension-manager-control__box__header__buttons">
+              {restartElement}
               <ContentFilterButton />
             </div>
           </div>

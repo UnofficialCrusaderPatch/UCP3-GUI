@@ -1,5 +1,3 @@
-import { atom } from 'jotai';
-
 type BasicContentInstallationStatus = {
   name: string;
   version: string;
@@ -44,10 +42,3 @@ export type ContentInstallationStatus =
   | ErrorContentInstallationStatus
   | CompleteContentInstallationStatus
   | UninstallationContentInstallationStatus;
-
-export type ContentInstallationStatusDatabase = {
-  [id: string]: ContentInstallationStatus;
-};
-
-export const CONTENT_INSTALLATION_STATUS_ATOM =
-  atom<ContentInstallationStatusDatabase>({});

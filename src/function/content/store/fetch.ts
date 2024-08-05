@@ -124,66 +124,66 @@ timestamp: 2024-07-31T19:11:08.975Z
 signer: UCP-Team-key-1
 extensions:
   list:
-    - definition:
-        name: online-module-test-one
-        type: module
-        url: Where to find more INFO
-        author: authors
-        version: 0.0.1
-        dependencies: {}
-        display-name: "Online Module #1"
-      sources:
-        description:
-          - language: default
-            method: inline
-            content: Online content temporary stub description 1
-        package:
-          - method: binary
-            type: module
-            size: 1000000
-            url: stub
-            signer: UCP-team-1
-            hash: stubadwlkmaqwld219kf121d
-            signature: stubsfksemlfsk112dd
-    - definition:
-        name: online-plugin-test-two
-        type: plugin
-        url: Where to find more INFO
-        author: authors
-        version: 0.0.1
-        dependencies: {}
-        display-name: "Online Plugin #2"
-      sources:
-        description:
-          - language: default
-            method: online
-            url: https://raw.githubusercontent.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv/main/README.md
-        package:
-          - method: zip
-            type: plugin
-            url: stub
-            size: 2000000
-    - definition:
-        name: online-module-test-three
-        type: plugin
-        url: Where to find more INFO
-        author: authors
-        version: 0.0.1
-        dependencies: {}
-        display-name: "Online Plugin #3"
-      sources:
-        description:
-          - language: default
-            method: online
-            url: https://raw.githubusercontent.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv/main/README.md
-          - language: default
-            method: inline
-            content: Hello!
-        package:
-          - method: zip
-            type: plugin
-            url: stub
-            size: 2000000
+#    - definition:
+#        name: online-module-test-one
+#        type: module
+#        url: Where to find more INFO
+#        author: authors
+#        version: 0.0.1
+#        dependencies: {}
+#        display-name: "Online Module #1"
+#      sources:
+#        description:
+#          - language: default
+#            method: inline
+#            content: Online content temporary stub description 1
+#        package:
+#          - method: binary
+#            type: module
+#            size: 1000000
+#            url: stub
+#            signer: UCP-team-1
+#            hash: stubadwlkmaqwld219kf121d
+#            signature: stubsfksemlfsk112dd
+#    - definition:
+#        name: online-plugin-test-two
+#        type: plugin
+#        url: Where to find more INFO
+#        author: authors
+#        version: 0.0.1
+#        dependencies: {}
+#        display-name: "Online Plugin #2"
+#      sources:
+#        description:
+#          - language: default
+#            method: online
+#            url: https://raw.githubusercontent.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv/main/README.md
+#        package:
+#          - method: zip
+#            type: plugin
+#            url: stub
+#            size: 2000000
+#    - definition:
+#        name: online-module-test-three
+#        type: plugin
+#        url: Where to find more INFO
+#        author: authors
+#        version: 0.0.1
+#        dependencies: {}
+#        display-name: "Online Plugin #3"
+#      sources:
+#        description:
+#          - language: default
+#            method: online
+#            url: https://raw.githubusercontent.com/UnofficialCrusaderPatch/extension-ucp2-evrey-aiv/main/README.md
+#          - language: default
+#            method: inline
+#            content: Hello!
+#        package:
+#          - method: zip
+#            type: plugin
+#            url: stub
+#            size: 2000000
     - definition:
         name: Legends-Of-The-Orient
         display-name: Legends Of The Orient
@@ -233,25 +233,25 @@ extensions:
             type: plugin
             url: https://github.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/archive/371103bdcd876eea9c005943cf749bbdadf77981.zip
             size: 280000000
-    - definition:
-        name: Legends-Of-The-Orient-AI
-        display-name: Legends Of The Orient AI
-        author: Crusader Pilaw
-        version: 3.0.0
-        dependencies:
-          framework: ">=3.0.1"
-          frontend: ">=1.0.2"
-          aiSwapper: ^1.1.0
-        type: plugin
-      sources:
-        description:
-          - language: default
-            method: online
-            url: https://raw.githubusercontent.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/main/locale/description-en.md
-          - language: default
-            method: inline
-            content: Hello!
-        package: []
+#    - definition:
+#        name: Legends-Of-The-Orient-AI
+#        display-name: Legends Of The Orient AI
+#        author: Crusader Pilaw
+#        version: 3.0.0
+#        dependencies:
+#          framework: ">=3.0.1"
+#          frontend: ">=1.0.2"
+#          aiSwapper: ^1.1.0
+#        type: plugin
+#      sources:
+#        description:
+#          - language: default
+#            method: online
+#            url: https://raw.githubusercontent.com/CrusaderPilaw/extension-Legends-of-the-Orient-AI/main/locale/description-en.md
+#          - language: default
+#            method: inline
+#            content: Hello!
+#        package: []
   lookup:
     module-name-version:
       hash: sha256

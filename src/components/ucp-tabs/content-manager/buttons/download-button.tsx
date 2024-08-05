@@ -1,5 +1,6 @@
-import { useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { Download } from 'react-bootstrap-icons';
+import { useMemo } from 'react';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import {
   CONTENT_ELEMENTS_ATOM,
@@ -9,7 +10,6 @@ import {
 import { downloadContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { showModalOk } from '../../../modals/modal-ok';
-import { getStore } from '../../../../hooks/jotai/base';
 
 // eslint-disable-next-line import/prefer-default-export
 export function DownloadButton(
@@ -30,19 +30,34 @@ export function DownloadButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
-  const selectedIDs = interfaceState.selected.map(
-    (ce) => `${ce.definition.name}@${ce.definition.version}`,
+  const selectedIDsAtom = useMemo(
+    () =>
+      atom(() =>
+        interfaceState.selected.map(
+          (ce) => `${ce.definition.name}@${ce.definition.version}`,
+        ),
+      ),
+    [interfaceState.selected],
   );
+  const selectedIDs = useAtomValue(selectedIDsAtom);
   const installedCount = interfaceState.selected.filter(
     (ce) => ce.installed,
   ).length;
   const onlineOnlyCount = interfaceState.selected.filter(
     (ce) => !ce.installed && ce.online,
   ).length;
-  const busyCount = Object.entries(contentInstallationStatusAtoms).filter(
-    ([id, atom]) =>
-      selectedIDs.indexOf(id) !== -1 && getStore().get(atom).action !== 'idle',
-  ).length;
+  const busyCountAtom = useMemo(
+    () =>
+      atom(
+        (get) =>
+          Object.entries(contentInstallationStatusAtoms).filter(
+            ([id, at]) =>
+              selectedIDs.indexOf(id) !== -1 && get(at).action !== 'idle',
+          ).length,
+      ),
+    [selectedIDs],
+  );
+  const busyCount = useAtomValue(busyCountAtom);
 
   let enabled = true;
   let helpText = 'Install selected content';

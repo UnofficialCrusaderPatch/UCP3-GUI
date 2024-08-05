@@ -72,7 +72,23 @@ export function ContentElementView(props: ContentElementViewProps) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   let statusElement;
-  if (
+  if (installationStatus.action === 'complete') {
+    statusElement = (
+      <CircleFill
+        style={{
+          color: 'orange',
+        }}
+        onMouseEnter={() => {
+          setStatusBarMessage(
+            `This content's status changed. Please restart the GUI to finalize.`,
+          );
+        }}
+        onMouseLeave={() => {
+          setStatusBarMessage(undefined);
+        }}
+      />
+    );
+  } else if (
     installationStatus.action === 'download' ||
     installationStatus.action === 'install' ||
     installationStatus.action === 'uninstall'
@@ -140,22 +156,6 @@ export function ContentElementView(props: ContentElementViewProps) {
         onMouseEnter={() => {
           setStatusBarMessage(
             `This content is installed but not available online (deprecation)`,
-          );
-        }}
-        onMouseLeave={() => {
-          setStatusBarMessage(undefined);
-        }}
-      />
-    );
-  } else if (installationStatus.action === 'complete') {
-    statusElement = (
-      <CircleFill
-        style={{
-          color: 'orange',
-        }}
-        onMouseEnter={() => {
-          setStatusBarMessage(
-            `This content's status changed. Please restart the GUI to finalize.`,
           );
         }}
         onMouseLeave={() => {

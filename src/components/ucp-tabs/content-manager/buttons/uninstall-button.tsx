@@ -1,12 +1,16 @@
-import { useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { XSquare } from 'react-bootstrap-icons';
+import { useMemo } from 'react';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
-import { CONTENT_INTERFACE_STATE_ATOM } from '../state/atoms';
-import { CONTENT_INSTALLATION_STATUS_ATOM } from '../state/downloads/download-progress';
+import {
+  CONTENT_INTERFACE_STATE_ATOM,
+  contentInstallationStatusAtoms,
+} from '../state/atoms';
 import { showModalOk } from '../../../modals/modal-ok';
 import { uninstallContents } from './callbacks/uninstall-content';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import Logger from '../../../../util/scripts/logging';
+import { getStore } from '../../../../hooks/jotai/base';
 
 const LOGGER = new Logger('uninstall-button.tsx');
 
@@ -16,15 +20,18 @@ export function UninstallButton(
 ) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const contentInstallationStatusDB = useAtomValue(
-    CONTENT_INSTALLATION_STATUS_ATOM,
-  );
-
   const interfaceState = useAtomValue(CONTENT_INTERFACE_STATE_ATOM);
 
-  const selectedIDs = interfaceState.selected.map(
-    (ce) => `${ce.definition.name}@${ce.definition.version}`,
+  const selectedIDsAtom = useMemo(
+    () =>
+      atom(() =>
+        interfaceState.selected.map(
+          (ce) => `${ce.definition.name}@${ce.definition.version}`,
+        ),
+      ),
+    [interfaceState.selected],
   );
+  const selectedIDs = useAtomValue(selectedIDsAtom);
   const selectionCount = interfaceState.selected.length;
   const installedCount = interfaceState.selected.filter(
     (ce) => ce.installed,
@@ -35,10 +42,10 @@ export function UninstallButton(
   const deprecated = interfaceState.selected.filter(
     (ce) => ce.installed && !ce.online,
   );
-  const busyCount = Object.entries(contentInstallationStatusDB).filter(
-    ([id, status]) =>
-      selectedIDs.indexOf(id) !== -1 && status.action !== 'idle',
-  ).length;
+  const busy = selectedIDs
+    .map((id) => getStore().get(contentInstallationStatusAtoms[id]))
+    .filter((cis) => cis.action !== 'idle');
+  const busyCount = busy.length;
 
   const countElement =
     selectionCount < 2 ? (
@@ -47,6 +54,7 @@ export function UninstallButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
+  LOGGER.msg(`${installedCount}, ${onlineOnlyCount}, ${busyCount}`).debug();
   let enabled = true;
   let helpText = 'Uninstall selected content';
   if (installedCount === 0) {
@@ -57,8 +65,7 @@ export function UninstallButton(
     helpText = 'Cannot uninstall online content';
   } else if (busyCount > 0) {
     enabled = false;
-    helpText =
-      'Cannot install content that is not idle. Please wait and restart first';
+    helpText = `Cannot install content that is not idle. Please wait and then restart`;
   }
 
   return (

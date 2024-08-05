@@ -2,7 +2,8 @@ import { ContentElement } from '../../../../../function/content/types/content-el
 import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { removeDir } from '../../../../../tauri/tauri-files';
-import { CONTENT_INSTALLATION_STATUS_ATOM } from '../../state/downloads/download-progress';
+import { contentInstallationStatusAtoms } from '../../state/atoms';
+import { ContentInstallationStatus } from '../../state/downloads/download-progress';
 
 export const uninstallPlugin = async (plugin: ContentElement) => {
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
@@ -19,55 +20,42 @@ export const uninstallContents = (contentElements: ContentElement[]) => {
     .forEach(async (ce) => {
       const id = `${ce.definition.name}@${ce.definition.version}`;
 
-      const contentDownloadProgressDB = getStore().get(
-        CONTENT_INSTALLATION_STATUS_ATOM,
-      );
+      const setStatus = (value: ContentInstallationStatus) =>
+        getStore().set(contentInstallationStatusAtoms[id], value);
 
-      contentDownloadProgressDB[id] = {
+      setStatus({
         action: 'uninstall',
         progress: 30,
         name: ce.definition.name,
         version: ce.definition.version,
-      };
-      getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-        ...contentDownloadProgressDB,
       });
 
       try {
         const uninstallResult = await uninstallPlugin(ce);
 
         if (!uninstallResult) {
-          contentDownloadProgressDB[id] = {
+          setStatus({
             action: 'error',
             message: `Failed to remove this content`,
             name: ce.definition.name,
             version: ce.definition.version,
-          };
-          getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-            ...contentDownloadProgressDB,
           });
           return;
         }
       } catch (e: any) {
-        contentDownloadProgressDB[id] = {
+        setStatus({
           action: 'error',
           message: `${e.toString()}`,
           name: ce.definition.name,
           version: ce.definition.version,
-        };
-        getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-          ...contentDownloadProgressDB,
         });
         return;
       }
 
-      contentDownloadProgressDB[id] = {
+      setStatus({
         action: 'complete',
         name: ce.definition.name,
         version: ce.definition.version,
-      };
-      getStore().set(CONTENT_INSTALLATION_STATUS_ATOM, {
-        ...contentDownloadProgressDB,
       });
     });
 };

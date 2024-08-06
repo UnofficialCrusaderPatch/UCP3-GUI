@@ -185,7 +185,7 @@ export default function Overview() {
                 if (tt.getTime() - previousFire.getTime() > updateInterval) {
                   previousFire = tt;
                   setStatusBarMessage(
-                    `Downloading... ${currentPercent}% (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
+                    `Downloading... ${currentPercent} (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
                   );
                 }
               },

@@ -1,6 +1,6 @@
 import { Extension } from '../../config/ucp/common';
 import { ConfigurationState } from '../configuration/state';
-import { ExtensionTree } from './dependency-management/dependency-resolution';
+import { ExtensionDependencyTree } from './dependency-management/dependency-resolution';
 
 export type ExtensionsState = {
   /**
@@ -33,5 +33,5 @@ export type ExtensionsState = {
    */
   configuration: ConfigurationState;
 
-  tree: ExtensionTree;
+  tree: ExtensionDependencyTree;
 };

@@ -4,9 +4,32 @@ import { basename } from '@tauri-apps/api/path';
 import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import { Definition } from '../../../config/ucp/common';
 import { extractZipToPath } from '../../../tauri/tauri-invoke';
-import { copyFile } from '../../../tauri/tauri-files';
+import {
+  copyFile,
+  readDir,
+  removeDir,
+  renameFile,
+} from '../../../tauri/tauri-files';
+import Logger from '../../../util/scripts/logging';
 
-const installPlugin = async (gameFolder: string, path: string) => {
+const LOGGER = new Logger(`install-extensions.ts`);
+
+export type InstallPluginOptions = {
+  zapRootFolder?: boolean;
+  cacheDir?: string;
+};
+
+const InstallPluginDefaults = {
+  zapRootFolder: false,
+  cacheDir: `ucp/.cache/`,
+} as InstallPluginOptions;
+
+export const installPlugin = async (
+  gameFolder: string,
+  path: string,
+  opts?: InstallPluginOptions,
+) => {
+  const options = { ...InstallPluginDefaults, ...opts };
   const fileName = await basename(path);
   const folderName = fileName.slice(undefined, -4);
   const destination = `${gameFolder}/ucp/plugins/${folderName}`;
@@ -15,10 +38,60 @@ const installPlugin = async (gameFolder: string, path: string) => {
     throw Error(`plugin already exists: ${folderName}`);
   }
 
-  await extractZipToPath(path, destination);
+  if (options.zapRootFolder) {
+    const tempFolder = `${gameFolder}/${options.cacheDir}${folderName}`;
+    if (await exists(tempFolder)) {
+      throw Error(`temp folder already exists: ${tempFolder}`);
+    }
+    LOGGER.msg(`Extracting zip ${path} to temp folder: ${tempFolder}`).debug();
+    await extractZipToPath(path, tempFolder);
+
+    const readDirResult = await readDir(tempFolder, {
+      recursive: false,
+    });
+
+    if (!readDirResult.isOk()) {
+      throw Error(
+        `Failed to read dir: ${tempFolder}. Reason: ${readDirResult.err().get()}`,
+      );
+    }
+
+    const entries = readDirResult
+      .getOrThrow()
+      .filter((fe) => fe.children !== null);
+
+    if (entries.length !== 1) {
+      throw Error(
+        `Unexpected number of directories in directory, expected one: ${tempFolder}`,
+      );
+    }
+
+    const subFolder = entries.at(0)!.path;
+
+    LOGGER.msg(
+      `Moving folder ${subFolder} to new location: ${destination}`,
+    ).debug();
+    const renameResult = await renameFile(subFolder, destination);
+
+    if (!renameResult.isOk()) {
+      throw Error(
+        `Failed to move plugin folder ${subFolder} to new location: ${renameResult.err().get()}`,
+      );
+    }
+
+    LOGGER.msg(`Removing temp folder: ${tempFolder}`).debug();
+    const removeResult = await removeDir(tempFolder);
+    if (!removeResult.isOk()) {
+      throw Error(
+        `Failed to remove temp folder ${tempFolder}. Reason: ${removeResult.err().get()}`,
+      );
+    }
+  } else {
+    await extractZipToPath(path, destination);
+  }
 };
 
-const installModule = async (gameFolder: string, path: string) => {
+export const installModule = async (gameFolder: string, path: string) => {
   const destination = `${gameFolder}/ucp/modules/`;
 
   const name = await basename(path);

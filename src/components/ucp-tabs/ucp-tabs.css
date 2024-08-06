@@ -55,3 +55,7 @@
 
   height: 60px;
 }
+
+.tab-link.disabled {
+  color: var(--bs-gray-600);
+}

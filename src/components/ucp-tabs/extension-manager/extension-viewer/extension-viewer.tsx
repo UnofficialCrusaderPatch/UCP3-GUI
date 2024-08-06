@@ -6,8 +6,6 @@ import { loadable } from 'jotai/utils';
 import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
-import { LANGUAGE_ATOM } from '../../../../function/gui-settings/settings';
-import { DESCRIPTION_FILE } from '../../../../function/extensions/discovery/io';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -19,33 +17,9 @@ export function ExtensionViewer(
   const { args, closeFunc } = props;
   const { extension } = args;
 
-  const lang = useAtomValue(LANGUAGE_ATOM);
-
   const contentAtom = useMemo(
-    () =>
-      loadable(
-        atom(async () => {
-          const content = await extension.io.handle(async (eh) => {
-            if (await eh.doesEntryExist(`locale/description-${lang}.md`)) {
-              return eh.getTextContents(`locale/description-${lang}.md`);
-            }
-            if (await eh.doesEntryExist(`locale/${DESCRIPTION_FILE}`)) {
-              return eh.getTextContents(`locale/${DESCRIPTION_FILE}`);
-            }
-            if (await eh.doesEntryExist(DESCRIPTION_FILE)) {
-              return eh.getTextContents(DESCRIPTION_FILE);
-            }
-            if (extension.description !== undefined) {
-              return extension.description;
-            }
-
-            return 'Sorry, no description.md file was found';
-          });
-
-          return content;
-        }),
-      ),
-    [extension, lang],
+    () => loadable(atom(async () => extension.io.fetchDescription())),
+    [extension],
   );
 
   const content = useAtomValue(contentAtom);

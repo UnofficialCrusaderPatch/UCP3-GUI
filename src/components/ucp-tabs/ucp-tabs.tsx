@@ -37,8 +37,9 @@ import {
   BACKGROUNDS_MAPPING_FILE,
 } from '../../function/global/constants/file-constants';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
+import { ContentManager } from './content-manager/content-manager';
 
-const LOGGER = new Logger('ucp-taps.tsx');
+const LOGGER = new Logger('ucp-tabs.tsx');
 
 const DISPLAY_CONFIG_TABS_ATOM = atom(
   (get) => get(INIT_DONE) && !get(INIT_RUNNING) && !get(INIT_ERROR),
@@ -76,7 +77,7 @@ export default function UcpTabs() {
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
 
   const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
-  const displayConfigTabs = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
+  const initIsDoneAndWithoutErrors = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
@@ -109,7 +110,10 @@ export default function UcpTabs() {
       <Tab.Container
         defaultActiveKey="overview"
         activeKey={currentTab}
-        onSelect={(newKey) => setCurrentTab(newKey as UITabs)}
+        onSelect={(newKey) => {
+          LOGGER.msg(`Selected tab: ${newKey}`).debug();
+          setCurrentTab(newKey as UITabs);
+        }}
       >
         <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
           <GradientImg src={headerImage} type="header" />
@@ -126,7 +130,7 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="extensions"
               className="ornament-border-button tab-link"
-              disabled={!displayConfigTabs}
+              disabled={!initIsDoneAndWithoutErrors}
               hidden={!ucpFolderExists}
               onClick={async () => {
                 try {
@@ -165,10 +169,20 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="config"
               className="ornament-border-button tab-link"
-              disabled={!displayConfigTabs}
+              disabled={!initIsDoneAndWithoutErrors}
               hidden={!advancedMode || !ucpFolderExists}
             >
               {t('gui-editor:config.title')}
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link
+              eventKey="content-manager"
+              className="ornament-border-button tab-link"
+              disabled={currentFolder === ''}
+              hidden={currentFolder === ''}
+            >
+              Store
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -196,6 +210,9 @@ export default function UcpTabs() {
           </Tab.Pane>
           <Tab.Pane eventKey="launch" className="tab-panel">
             <Launch />
+          </Tab.Pane>
+          <Tab.Pane eventKey="content-manager" className="tab-panel">
+            <ContentManager />
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

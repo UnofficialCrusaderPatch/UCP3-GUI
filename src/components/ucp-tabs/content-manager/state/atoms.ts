@@ -2,7 +2,11 @@ import { atom, PrimitiveAtom } from 'jotai';
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { DEFAULT_CONTENT_STATE } from '../../../../function/content/state/content-state';
 import { DEFAULT_CONTENT_INTERFACE_STATE } from '../../../../function/content/state/content-interface-state';
-import { dummyFetchStore } from '../../../../function/content/store/fetch';
+import {
+  dummyFetchStore,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  fetchStore,
+} from '../../../../function/content/store/fetch';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { ContentInstallationStatus } from './downloads/download-progress';
@@ -15,7 +19,7 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
 
 export const CONTENT_STORE_ATOM = atomWithQuery(() => ({
   queryKey: ['store'],
-  queryFn: false || dummyFetchStore,
+  queryFn: dummyFetchStore,
   retry: false,
   // staleTime: Infinity,
 }));

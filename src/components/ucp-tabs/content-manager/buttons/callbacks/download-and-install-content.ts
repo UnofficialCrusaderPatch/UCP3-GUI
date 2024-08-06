@@ -220,8 +220,11 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
 
     await downloadAndInstallPlugin(plugin);
 
+    // eslint-disable-next-line no-param-reassign
+    plugin.installed = true;
+
     setStatus({
-      action: 'complete',
+      action: 'idle',
       name: plugin.definition.name,
       version: plugin.definition.version,
     });

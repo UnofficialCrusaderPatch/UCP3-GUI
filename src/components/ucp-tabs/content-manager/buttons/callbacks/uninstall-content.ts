@@ -20,8 +20,9 @@ export const uninstallContents = (contentElements: ContentElement[]) => {
     .forEach(async (ce) => {
       const id = `${ce.definition.name}@${ce.definition.version}`;
 
-      const setStatus = (value: ContentInstallationStatus) =>
+      const setStatus = (value: ContentInstallationStatus) => {
         getStore().set(contentInstallationStatusAtoms[id], value);
+      };
 
       setStatus({
         action: 'uninstall',
@@ -52,8 +53,11 @@ export const uninstallContents = (contentElements: ContentElement[]) => {
         return;
       }
 
+      // eslint-disable-next-line no-param-reassign
+      ce.installed = false;
+
       setStatus({
-        action: 'complete',
+        action: 'idle',
         name: ce.definition.name,
         version: ce.definition.version,
       });

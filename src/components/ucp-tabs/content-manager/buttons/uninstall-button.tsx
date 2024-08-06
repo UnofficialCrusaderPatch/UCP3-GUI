@@ -54,7 +54,6 @@ export function UninstallButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
-  LOGGER.msg(`${installedCount}, ${onlineOnlyCount}, ${busyCount}`).debug();
   let enabled = true;
   let helpText = 'Uninstall selected content';
   if (installedCount === 0) {

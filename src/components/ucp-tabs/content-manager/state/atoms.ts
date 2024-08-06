@@ -17,6 +17,16 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
   DEFAULT_CONTENT_INTERFACE_STATE,
 );
 
+export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
+  const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
+
+  if (selected.length < 1) return undefined;
+
+  const d = selected.at(-1);
+
+  return d!;
+});
+
 export const CONTENT_STORE_ATOM = atomWithQuery(() => ({
   queryKey: ['store'],
   queryFn: dummyFetchStore,
@@ -24,21 +34,26 @@ export const CONTENT_STORE_ATOM = atomWithQuery(() => ({
   // staleTime: Infinity,
 }));
 
-export const CONTENT_ELEMENTS_ATOM = atom((get) => {
+const storePackagesAtom = atom((get) => {
   const { data } = get(CONTENT_STORE_ATOM);
+  return data === undefined
+    ? []
+    : data.extensions.list.map(
+        (ec) => ({ ...ec, online: true, installed: false }) as ContentElement,
+      );
+});
 
+const spIDsAtom = atom((get) =>
+  get(storePackagesAtom).map(
+    (ce) => `${ce.definition.name}@${ce.definition.version}`,
+  ),
+);
+
+export const CONTENT_ELEMENTS_ATOM = atom((get) => {
   const { extensions } = get(EXTENSION_STATE_INTERFACE_ATOM);
 
-  const storePackages =
-    data === undefined
-      ? []
-      : data.extensions.list.map(
-          (ec) => ({ ...ec, online: true, installed: false }) as ContentElement,
-        );
-
-  const spIDs = storePackages.map(
-    (ce) => `${ce.definition.name}@${ce.definition.version}`,
-  );
+  const storePackages = get(storePackagesAtom);
+  const spIDs = get(spIDsAtom);
 
   const extensionPackages = extensions.map(
     (e) =>

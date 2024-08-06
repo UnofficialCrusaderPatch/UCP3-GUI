@@ -1,21 +1,19 @@
-import { useAtom, useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
-import { ContentState } from '../../../function/content/state/content-state';
 import { ContentManagerToolbar } from './content-manager-toolbar';
 import { ContentElementView } from './content-element/content-element-view';
 import {
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
-  CONTENT_STATE_ATOM,
   CONTENT_STORE_ATOM,
   contentInstallationStatusAtoms,
+  SINGLE_CONTENT_SELECTION_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
 import Logger from '../../../util/scripts/logging';
 import {
   SELECTED_CONTENT_DESCRIPTION_ATOM,
   distillInlineDescription,
-  chooseSingleFromSelection,
 } from './description/fetching';
 import {
   ContentFilterButton,
@@ -37,10 +35,24 @@ function StatusElement({ children }: { children: any }) {
   );
 }
 
+const elementsAtom = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM)
+    .filter((ce) =>
+      get(UI_FILTER_SETTING_ATOM) ? ce.online && !ce.installed : true,
+    )
+    .filter((ce) => ce.definition.type === 'plugin')
+    .sort((a, b) => a.definition.name.localeCompare(b.definition.name))
+    .map((ext) => (
+      <ContentElementView
+        key={`${ext.definition.name}@${ext.definition.version}`}
+        data={ext}
+      />
+    )),
+);
+
 /* eslint-disable import/prefer-default-export */
 export function ContentManager() {
   const interfaceState = useAtomValue(CONTENT_INTERFACE_STATE_ATOM);
-  const state: ContentState = useAtomValue(CONTENT_STATE_ATOM);
 
   const [{ isPending, isError, isSuccess, isPaused, isFetching, error }] =
     useAtom(CONTENT_STORE_ATOM);
@@ -74,24 +86,11 @@ export function ContentManager() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { extensions } = state;
-
-  const onlyIncludeOnline = useAtomValue(UI_FILTER_SETTING_ATOM);
-
   // TODO: implement for modules (signatures and hashes)
-  const elements = useAtomValue(CONTENT_ELEMENTS_ATOM)
-    .filter((ce) => (onlyIncludeOnline ? ce.online && !ce.installed : true))
-    .filter((ce) => ce.definition.type === 'plugin')
-    .sort((a, b) => a.definition.name.localeCompare(b.definition.name))
-    .map((ext) => (
-      <ContentElementView
-        key={`${ext.definition.name}@${ext.definition.version}`}
-        data={ext}
-      />
-    ));
+  const elements = useAtomValue(elementsAtom);
 
-  const selected = chooseSingleFromSelection(interfaceState.selected);
+  const singleSelection = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
+  const selected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
   let description = '';
   if (interfaceState.selected.length === 0) {
     description = '(select content to install or uninstall on the left)';
@@ -99,7 +98,7 @@ export function ContentManager() {
     LOGGER.msg(
       (descriptionError === null ? '' : descriptionError).toString(),
     ).error();
-    description = `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(chooseSingleFromSelection(interfaceState.selected))}`;
+    description = `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(singleSelection)}`;
   } else {
     let size;
     if (selected !== undefined) {

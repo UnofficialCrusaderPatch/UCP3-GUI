@@ -132,3 +132,25 @@ export const contentInstallationStatusAtoms = atomFamily((id: string) =>
     name: id,
   }),
 );
+
+export const COMPLETED_CONTENT_ELEMENTS_ATOM = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM)
+    .map((ce) => `${ce.definition.name}@${ce.definition.version}`)
+    .filter((id) => {
+      const status = get(contentInstallationStatusAtoms(id));
+      return status.action === 'complete';
+    }),
+);
+
+export const BUSY_CONTENT_ELEMENTS_ATOM = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM)
+    .map((ce) => `${ce.definition.name}@${ce.definition.version}`)
+    .filter((id) => {
+      const status = get(contentInstallationStatusAtoms(id));
+      return (
+        status.action === 'download' ||
+        status.action === 'install' ||
+        status.action === 'uninstall'
+      );
+    }),
+);

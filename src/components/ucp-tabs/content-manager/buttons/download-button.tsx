@@ -1,11 +1,10 @@
-import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Download } from 'react-bootstrap-icons';
-import { useMemo } from 'react';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import {
+  BUSY_CONTENT_ELEMENTS_ATOM,
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
-  contentInstallationStatusAtoms,
 } from '../state/atoms';
 import { downloadContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
@@ -30,34 +29,13 @@ export function DownloadButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
-  const selectedIDsAtom = useMemo(
-    () =>
-      atom(() =>
-        interfaceState.selected.map(
-          (ce) => `${ce.definition.name}@${ce.definition.version}`,
-        ),
-      ),
-    [interfaceState.selected],
-  );
-  const selectedIDs = useAtomValue(selectedIDsAtom);
   const installedCount = interfaceState.selected.filter(
     (ce) => ce.installed,
   ).length;
   const onlineOnlyCount = interfaceState.selected.filter(
     (ce) => !ce.installed && ce.online,
   ).length;
-  const busyCountAtom = useMemo(
-    () =>
-      atom(
-        (get) =>
-          Object.entries(contentInstallationStatusAtoms).filter(
-            ([id, at]) =>
-              selectedIDs.indexOf(id) !== -1 && get(at).action !== 'idle',
-          ).length,
-      ),
-    [selectedIDs],
-  );
-  const busyCount = useAtomValue(busyCountAtom);
+  const busyCount = useAtomValue(BUSY_CONTENT_ELEMENTS_ATOM).length;
 
   let enabled = true;
   let helpText = 'Install selected content';
@@ -70,7 +48,7 @@ export function DownloadButton(
   } else if (busyCount > 0) {
     enabled = false;
     helpText =
-      'Cannot install content that is not idle. Please wait and restart first';
+      'Cannot install content when other content is processing. Please wait first';
   }
 
   const tree = useAtomValue(CONTENT_TREE_ATOM);

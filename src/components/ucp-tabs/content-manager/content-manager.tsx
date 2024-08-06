@@ -3,10 +3,10 @@ import { ExclamationCircleFill } from 'react-bootstrap-icons';
 import { ContentManagerToolbar } from './content-manager-toolbar';
 import { ContentElementView } from './content-element/content-element-view';
 import {
+  COMPLETED_CONTENT_ELEMENTS_ATOM,
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STORE_ATOM,
-  contentInstallationStatusAtoms,
   SINGLE_CONTENT_SELECTION_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
@@ -47,15 +47,6 @@ const elementsAtom = atom((get) =>
         data={ext}
       />
     )),
-);
-
-const completedAtom = atom((get) =>
-  get(CONTENT_ELEMENTS_ATOM)
-    .map((ce) => `${ce.definition.name}@${ce.definition.version}`)
-    .filter((id) => {
-      const status = get(contentInstallationStatusAtoms(id));
-      return status.action === 'complete';
-    }),
 );
 
 /* eslint-disable import/prefer-default-export */
@@ -118,7 +109,7 @@ export function ContentManager() {
     description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${size}MB`}  \n\n${descriptionData}`;
   }
 
-  const completed = useAtomValue(completedAtom);
+  const completed = useAtomValue(COMPLETED_CONTENT_ELEMENTS_ATOM);
 
   let restartElement;
   if (completed.length > 0) {

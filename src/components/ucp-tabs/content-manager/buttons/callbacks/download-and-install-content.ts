@@ -45,7 +45,7 @@ export const downloadAndInstallPlugin = async (
   );
 
   const setStatus = (value: ContentInstallationStatus) =>
-    getStore().set(contentInstallationStatusAtoms[id], value);
+    getStore().set(contentInstallationStatusAtoms(id), value);
 
   if (zipSources.length === 0) {
     setStatus({
@@ -210,7 +210,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
   plugins.forEach(async (plugin) => {
     const id = `${plugin.definition.name}@${plugin.definition.version}`;
     const setStatus = (value: ContentInstallationStatus) =>
-      getStore().set(contentInstallationStatusAtoms[id], value);
+      getStore().set(contentInstallationStatusAtoms(id), value);
     setStatus({
       action: 'download',
       progress: 0,

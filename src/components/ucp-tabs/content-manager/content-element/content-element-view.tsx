@@ -11,20 +11,8 @@ import {
   CONTENT_INTERFACE_STATE_ATOM,
   contentInstallationStatusAtoms,
 } from '../state/atoms';
-import { ContentInstallationStatus } from '../state/downloads/download-progress';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
-
-function registerAtom(name: string, version: string) {
-  const id = `${name}@${version}`;
-  if (contentInstallationStatusAtoms[id] === undefined) {
-    contentInstallationStatusAtoms[id] = atom<ContentInstallationStatus>({
-      name,
-      version,
-      action: 'idle',
-    });
-  }
-}
 
 export type ContentElementViewProps = {
   data: ContentElement;
@@ -41,10 +29,6 @@ export function ContentElementView(props: ContentElementViewProps) {
     CONTENT_INTERFACE_STATE_ATOM,
   );
 
-  useMemo(() => {
-    registerAtom(name, version);
-  }, [name, version]);
-
   const isSelected =
     contentInterfaceState.selected.find((e) => e === data) === data;
 
@@ -58,7 +42,7 @@ export function ContentElementView(props: ContentElementViewProps) {
   const progressElementAtom = useMemo(
     () =>
       atom((get) => {
-        const installationStatus = get(contentInstallationStatusAtoms[id]);
+        const installationStatus = get(contentInstallationStatusAtoms(id));
         const progressElement =
           installationStatus.action === 'download' ||
           installationStatus.action === 'install' ||
@@ -83,7 +67,7 @@ export function ContentElementView(props: ContentElementViewProps) {
   const statusElementAtom = useMemo(
     () =>
       atom((get) => {
-        const installationStatus = get(contentInstallationStatusAtoms[id]);
+        const installationStatus = get(contentInstallationStatusAtoms(id));
         let statusElement;
         if (installationStatus.action === 'complete') {
           statusElement = (
@@ -201,7 +185,7 @@ export function ContentElementView(props: ContentElementViewProps) {
   const progressBarColorAtom = useMemo(
     () =>
       atom((get) => {
-        const installationStatus = get(contentInstallationStatusAtoms[id]);
+        const installationStatus = get(contentInstallationStatusAtoms(id));
         let progressBarColor;
         if (installationStatus.action === 'download') {
           progressBarColor = 'rgba(0, 200, 0, 0.62)';
@@ -223,7 +207,7 @@ export function ContentElementView(props: ContentElementViewProps) {
   const progressValueAtom = useMemo(
     () =>
       atom((get) => {
-        const installationStatus = get(contentInstallationStatusAtoms[id]);
+        const installationStatus = get(contentInstallationStatusAtoms(id));
         let progressValue;
         if (
           installationStatus.action === 'install' ||
@@ -245,7 +229,7 @@ export function ContentElementView(props: ContentElementViewProps) {
   const progressOverlayElementAtom = useMemo(
     () =>
       atom((get) => {
-        const installationStatus = get(contentInstallationStatusAtoms[id]);
+        const installationStatus = get(contentInstallationStatusAtoms(id));
         return installationStatus.action !== 'idle' ? (
           <div
             style={{

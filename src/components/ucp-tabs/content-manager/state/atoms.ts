@@ -1,12 +1,9 @@
-import { atom, PrimitiveAtom } from 'jotai';
+import { atom } from 'jotai';
 import { atomWithQuery } from 'jotai-tanstack-query';
+import { atomFamily } from 'jotai/utils';
 import { DEFAULT_CONTENT_STATE } from '../../../../function/content/state/content-state';
 import { DEFAULT_CONTENT_INTERFACE_STATE } from '../../../../function/content/state/content-interface-state';
-import {
-  dummyFetchStore,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  fetchStore,
-} from '../../../../function/content/store/fetch';
+import { dummyFetchStore } from '../../../../function/content/store/fetch';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { ContentInstallationStatus } from './downloads/download-progress';
@@ -55,35 +52,61 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
   const storePackages = get(storePackagesAtom);
   const spIDs = get(spIDsAtom);
 
-  const extensionPackages = extensions.map(
-    (e) =>
-      ({
-        definition: {
-          ...e.definition,
-          url: 'nonsense',
-          dependencies: Object.fromEntries(
-            Object.entries(e.definition.dependencies).map(([n, range]) => [
-              n,
-              range.raw,
-            ]),
-          ),
-        },
-        sources: {
-          package: [],
-          description: [
-            {
-              language: 'default',
-              content: e.description || '< not loaded >',
-              method: 'inline',
-            },
-          ],
-        },
-        online:
-          spIDs.indexOf(`${e.definition.name}@${e.definition.version}`) !== -1,
-        installed: true,
-        extension: e,
-      }) as ContentElement,
-  );
+  const extensionPackages = extensions.map((e) => {
+    const deps = Object.fromEntries(
+      Object.entries(e.definition.dependencies).map(([n, range]) => [
+        n,
+        range.raw,
+      ]),
+    );
+
+    const matchingStorePackage =
+      spIDs.indexOf(`${e.definition.name}@${e.definition.version}`) !== -1
+        ? storePackages
+            .filter(
+              (ce) =>
+                ce.definition.name === e.definition.name &&
+                ce.definition.version === e.definition.version,
+            )
+            .at(0)!
+        : undefined;
+
+    const pack =
+      matchingStorePackage !== undefined
+        ? matchingStorePackage.sources.package
+        : [];
+
+    const isOnline =
+      spIDs.indexOf(`${e.definition.name}@${e.definition.version}`) !== -1;
+
+    const descriptions = [
+      {
+        language: 'default',
+        content: e.description || '< not loaded >',
+        method: 'inline',
+      },
+      ...(matchingStorePackage !== undefined
+        ? matchingStorePackage.sources.description
+        : []),
+    ];
+
+    const p = {
+      definition: {
+        ...e.definition,
+        url: 'nonsense',
+        dependencies: deps,
+      },
+      sources: {
+        package: pack,
+        description: descriptions,
+      },
+      online: isOnline,
+      installed: true,
+      extension: e,
+    } as ContentElement;
+
+    return p;
+  });
 
   const epIDs = extensionPackages.map(
     (ce) => `${ce.definition.name}@${ce.definition.version}`,
@@ -99,6 +122,13 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
   ];
 });
 
-export const contentInstallationStatusAtoms: {
-  [id: string]: PrimitiveAtom<ContentInstallationStatus>;
-} = {};
+// export const contentInstallationStatusAtoms: {
+//   [id: string]: PrimitiveAtom<ContentInstallationStatus>;
+// } = {};
+
+export const contentInstallationStatusAtoms = atomFamily((id: string) =>
+  atom<ContentInstallationStatus>({
+    action: 'idle',
+    name: id,
+  }),
+);

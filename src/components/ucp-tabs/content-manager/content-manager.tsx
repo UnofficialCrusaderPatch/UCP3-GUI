@@ -19,7 +19,6 @@ import {
   ContentFilterButton,
   UI_FILTER_SETTING_ATOM,
 } from './buttons/filter-button';
-import { getStore } from '../../../hooks/jotai/base';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -48,6 +47,15 @@ const elementsAtom = atom((get) =>
         data={ext}
       />
     )),
+);
+
+const completedAtom = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM)
+    .map((ce) => `${ce.definition.name}@${ce.definition.version}`)
+    .filter((id) => {
+      const status = get(contentInstallationStatusAtoms(id));
+      return status.action === 'complete';
+    }),
 );
 
 /* eslint-disable import/prefer-default-export */
@@ -110,12 +118,7 @@ export function ContentManager() {
     description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${size}MB`}  \n\n${descriptionData}`;
   }
 
-  const completed = Object.entries(contentInstallationStatusAtoms)
-    .filter(([, theAtom]) => {
-      const status = getStore().get(theAtom);
-      return status.action === 'complete';
-    })
-    .map(([id]) => id);
+  const completed = useAtomValue(completedAtom);
 
   let restartElement;
   if (completed.length > 0) {

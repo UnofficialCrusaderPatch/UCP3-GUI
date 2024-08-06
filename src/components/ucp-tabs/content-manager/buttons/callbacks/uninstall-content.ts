@@ -21,7 +21,7 @@ export const uninstallContents = (contentElements: ContentElement[]) => {
       const id = `${ce.definition.name}@${ce.definition.version}`;
 
       const setStatus = (value: ContentInstallationStatus) => {
-        getStore().set(contentInstallationStatusAtoms[id], value);
+        getStore().set(contentInstallationStatusAtoms(id), value);
       };
 
       setStatus({

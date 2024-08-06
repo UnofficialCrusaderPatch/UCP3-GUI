@@ -1,6 +1,6 @@
 type BasicContentInstallationStatus = {
-  name: string;
-  version: string;
+  name?: string;
+  version?: string;
 };
 export type IdleContentInstallationStatus = BasicContentInstallationStatus & {
   action: 'idle';

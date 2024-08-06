@@ -43,7 +43,7 @@ export function UninstallButton(
     (ce) => ce.installed && !ce.online,
   );
   const busy = selectedIDs
-    .map((id) => getStore().get(contentInstallationStatusAtoms[id]))
+    .map((id) => getStore().get(contentInstallationStatusAtoms(id)))
     .filter((cis) => cis.action !== 'idle');
   const busyCount = busy.length;
 

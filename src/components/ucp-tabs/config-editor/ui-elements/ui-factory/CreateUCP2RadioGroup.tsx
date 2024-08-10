@@ -163,7 +163,12 @@ function CreateUCP2RadioGroup(args: {
       ref={ref}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      <Accordion.Header as="div">{headerElement}</Accordion.Header>
+      <Accordion.Header
+        bsPrefix="ucp-accordion-header ucp-accordion-header-left-button"
+        as="div"
+      >
+        {headerElement}
+      </Accordion.Header>
       <Accordion.Body>
         <div>
           <label className="form-check-label" htmlFor={`${url}-choice`}>

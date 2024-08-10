@@ -120,7 +120,10 @@ function CreateUCP2Switch(args: {
           {headerElement}
         </Accordion.Header>
       ) : (
-        <Accordion.Header bsPrefix="ucp-accordion-header" as="div">
+        <Accordion.Header
+          bsPrefix="ucp-accordion-header ucp-accordion-header-left-button"
+          as="div"
+        >
           {headerElement}
         </Accordion.Header>
       )}

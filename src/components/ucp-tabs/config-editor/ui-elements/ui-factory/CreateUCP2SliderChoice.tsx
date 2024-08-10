@@ -370,7 +370,12 @@ function CreateUCP2SliderChoice(args: {
       style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      <Accordion.Header as="div">{headerElement}</Accordion.Header>
+      <Accordion.Header
+        bsPrefix="ucp-accordion-header ucp-accordion-header-left-button"
+        as="div"
+      >
+        {headerElement}
+      </Accordion.Header>
       <Accordion.Body>
         <p>{text}</p>
         <div // Radiogroup

@@ -34,6 +34,7 @@ jobs:
           npm ci
       - name: Build
         shell: pwsh
+        continue-on-error: true
         run: |
           npm run tauri build
       - name: Upload

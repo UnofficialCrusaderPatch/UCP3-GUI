@@ -1,4 +1,4 @@
-name: 'Build & Release Tauri app'
+name: 'Build for PR, upload asset'
 
 on:
   pull_request:

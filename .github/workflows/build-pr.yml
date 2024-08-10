@@ -37,7 +37,7 @@ jobs:
         run: |
           npm run tauri build
       - name: Upload
-        uses: actions/upload-artifacts@v4
+        uses: actions/upload-artifact@v4
         with:
           name: UCP3-GUI.zip
           path: src-tauri/target/release/UCP3-GUI.exe

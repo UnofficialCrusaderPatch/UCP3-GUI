@@ -40,7 +40,7 @@ export const downloadAndInstallPlugin = async (
 ) => {
   const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
 
-  const zipSources = contentElement.sources.package.filter(
+  const zipSources = contentElement.contents.package.filter(
     (pc) => pc.method === 'github-zip',
   );
 
@@ -169,7 +169,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
   ).debug();
 
   const contentElementsWithoutPackageSource = contentElements.filter(
-    (ce) => ce.sources.package.length === 0,
+    (ce) => ce.contents.package.length === 0,
   );
 
   if (contentElementsWithoutPackageSource.length > 0) {

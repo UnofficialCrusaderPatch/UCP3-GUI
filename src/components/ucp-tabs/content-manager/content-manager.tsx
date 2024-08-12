@@ -101,8 +101,8 @@ export function ContentManager() {
   } else {
     let size;
     if (selected !== undefined) {
-      if (selected.sources.package.length > 0) {
-        size = selected.sources.package.at(0)!.size / 1000 / 1000;
+      if (selected.contents.package.length > 0) {
+        size = selected.contents.package.at(0)!.size / 1000 / 1000;
       }
     }
     // eslint-disable-next-line no-unsafe-optional-chaining

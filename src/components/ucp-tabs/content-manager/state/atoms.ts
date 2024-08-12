@@ -73,7 +73,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
 
     const pack =
       matchingStorePackage !== undefined
-        ? matchingStorePackage.sources.package
+        ? matchingStorePackage.contents.package
         : [];
 
     const isOnline =
@@ -86,7 +86,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
         method: 'inline',
       },
       ...(matchingStorePackage !== undefined
-        ? matchingStorePackage.sources.description
+        ? matchingStorePackage.contents.description
         : []),
     ];
 
@@ -96,7 +96,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
         url: 'nonsense',
         dependencies: deps,
       },
-      sources: {
+      contents: {
         package: pack,
         description: descriptions,
       },

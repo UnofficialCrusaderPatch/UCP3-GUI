@@ -50,7 +50,7 @@ export type ExtensionContent = {
     'display-name': string;
     type: 'module' | 'plugin';
   };
-  sources: {
+  contents: {
     description: DescriptionContent[];
     package: PackageContent[];
   };

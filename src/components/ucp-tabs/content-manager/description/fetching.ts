@@ -10,7 +10,7 @@ import { ContentElement } from '../../../../function/content/types/content-eleme
 export const distillInlineDescription = (e?: ContentElement) => {
   if (e === undefined) return '';
 
-  const descriptionSources = e.sources.description.filter(
+  const descriptionSources = e.contents.description.filter(
     (dc) => dc.method === 'inline',
   );
 
@@ -32,12 +32,12 @@ const resolveDescription = async ({
       resolve('');
     });
 
-  const onlineDescriptionSources = e.sources.description.filter(
+  const onlineDescriptionSources = e.contents.description.filter(
     (dc) => dc.method === 'online',
   );
 
   if (onlineDescriptionSources.length === 0) {
-    const inlineDescriptionSources = e.sources.description.filter(
+    const inlineDescriptionSources = e.contents.description.filter(
       (dc) => dc.method === 'inline',
     );
 

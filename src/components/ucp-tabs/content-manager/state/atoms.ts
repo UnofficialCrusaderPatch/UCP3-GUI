@@ -3,10 +3,11 @@ import { atomWithQuery } from 'jotai-tanstack-query';
 import { atomFamily } from 'jotai/utils';
 import { DEFAULT_CONTENT_STATE } from '../../../../function/content/state/content-state';
 import { DEFAULT_CONTENT_INTERFACE_STATE } from '../../../../function/content/state/content-interface-state';
-import { dummyFetchStore } from '../../../../function/content/store/fetch';
+import { fetchStore } from '../../../../function/content/store/fetch';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { ContentInstallationStatus } from './downloads/download-progress';
+import { UCP_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -24,9 +25,12 @@ export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   return d!;
 });
 
-export const CONTENT_STORE_ATOM = atomWithQuery(() => ({
-  queryKey: ['store'],
-  queryFn: dummyFetchStore,
+export const CONTENT_STORE_ATOM = atomWithQuery((get) => ({
+  queryKey: [
+    'store',
+    get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString(),
+  ] as [string, string],
+  queryFn: fetchStore,
   retry: false,
   // staleTime: Infinity,
 }));

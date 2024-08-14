@@ -95,17 +95,28 @@ export const fetchDescription = async (url: string): Promise<string> => {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const fetchStore = async () => {
-  LOGGER.msg('Fetching store from web...').warn();
+export const fetchStore = async ({
+  queryKey: [, version],
+}: {
+  queryKey: [string, string];
+}) => {
+  LOGGER.msg(`Fetching store from web for version ${version}...`).debug();
+  if (version.indexOf('?') !== -1) {
+    throw new Error('invalid UCP version');
+  }
   const result = await fetch<string>(
-    'https://gist.githubusercontent.com/gynt/236ebddce3dbd73d1482676c8c6e7186/raw/store.yml',
+    `https://github.com/UnofficialCrusaderPatch/UCP3-extensions-store/releases/download/v${version}/store.yml`,
     {
       method: 'GET',
       responseType: ResponseType.Text,
     },
   )
-    .then((resp) => resp.data)
+    .then((resp) =>
+      resp.ok ? resp.data : Promise.reject(new Error('Store not found')),
+    )
     .then((data) => parseYaml(data) as ContentStore);
+
+  LOGGER.msg(`Web store result: ${JSON.stringify(result)}`).debug();
 
   return result;
 };

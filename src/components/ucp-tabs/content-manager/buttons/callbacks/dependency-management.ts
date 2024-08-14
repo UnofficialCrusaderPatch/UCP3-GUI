@@ -3,11 +3,17 @@ import { Dependency, Package } from 'lean-resolution';
 import { DependencyTree } from '../../../../../function/extensions/dependency-management/dependency-resolution';
 import { CONTENT_STORE_ATOM } from '../../state/atoms';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../../function/extensions/state/state';
+import Logger from '../../../../../util/scripts/logging';
+
+const LOGGER = new Logger('dependency-management.ts');
 
 export const CONTENT_COLLECTION_ATOM = atom<Package[] | undefined>((get) => {
-  const { data, isSuccess } = get(CONTENT_STORE_ATOM);
+  const { data, isSuccess, error } = get(CONTENT_STORE_ATOM);
 
-  if (!isSuccess) return undefined;
+  if (!isSuccess) {
+    LOGGER.msg(`No content collection atom state yet because: ${error}`).warn();
+    return undefined;
+  }
 
   const { extensions } = get(EXTENSION_STATE_INTERFACE_ATOM);
 
@@ -16,7 +22,7 @@ export const CONTENT_COLLECTION_ATOM = atom<Package[] | undefined>((get) => {
       new Package(
         ec.definition.name,
         ec.definition.version,
-        Object.entries(ec.definition.dependencies).map(
+        Object.entries(ec.definition.dependencies || {}).map(
           ([ext, version]) => new Dependency(ext, version),
         ),
       ),

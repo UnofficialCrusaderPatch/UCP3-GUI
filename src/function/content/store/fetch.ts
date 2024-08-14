@@ -22,7 +22,7 @@ export type DescriptionContent =
   | InlineDescriptionContent;
 
 export type BinaryModulePackageContent = {
-  method: 'binary';
+  method: 'binary' | 'github-binary';
   type: 'module';
   size: number;
   url: string;
@@ -32,10 +32,11 @@ export type BinaryModulePackageContent = {
 };
 
 export type PluginPackageContent = {
-  method: 'github-zip';
+  method: 'github-zip' | 'github-binary' | 'binary';
   type: 'plugin';
   size: number;
   url: string;
+  hash: string;
 };
 
 export type PackageContent = BinaryModulePackageContent | PluginPackageContent;

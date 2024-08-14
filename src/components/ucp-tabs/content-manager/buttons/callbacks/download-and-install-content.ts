@@ -9,6 +9,7 @@ import { ContentInstallationStatus } from '../../state/downloads/download-progre
 import { installPlugin } from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
 import { contentInstallationStatusAtoms } from '../../state/atoms';
+import { getHexHashOfFile } from '../../../../../util/scripts/hash';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -41,7 +42,7 @@ export const downloadAndInstallPlugin = async (
   const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
 
   const zipSources = contentElement.contents.package.filter(
-    (pc) => pc.method === 'github-zip',
+    (pc) => pc.method === 'binary' || pc.method === 'github-binary',
   );
 
   const setStatus = (value: ContentInstallationStatus) =>
@@ -109,6 +110,19 @@ export const downloadAndInstallPlugin = async (
     version: contentElement.definition.version,
   });
 
+  LOGGER.msg(`Verifying hash`).debug();
+
+  const hash = await getHexHashOfFile(destination);
+  if (hash.toLowerCase() !== src.hash.toLowerCase()) {
+    setStatus({
+      action: 'error',
+      message: 'hashes not equal, download was corrupted',
+      name: contentElement.definition.name,
+      version: contentElement.definition.version,
+    });
+    return;
+  }
+
   LOGGER.msg(
     `Installing ${contentElement.definition.name} from ${destination} into ${gameFolder}/ucp/plugins`,
   ).debug();
@@ -122,7 +136,7 @@ export const downloadAndInstallPlugin = async (
 
   try {
     await installPlugin(gameFolder, destination, {
-      zapRootFolder: true,
+      zapRootFolder: src.method === 'github-zip',
     });
   } catch (e: any) {
     setStatus({
@@ -157,6 +171,15 @@ export const downloadAndInstallPlugin = async (
   setStatus({
     action: 'install',
     progress: 100,
+    name: contentElement.definition.name,
+    version: contentElement.definition.version,
+  });
+
+  // eslint-disable-next-line no-param-reassign
+  contentElement.installed = true;
+
+  setStatus({
+    action: 'idle',
     name: contentElement.definition.name,
     version: contentElement.definition.version,
   });
@@ -218,15 +241,15 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
       version: plugin.definition.version,
     });
 
-    await downloadAndInstallPlugin(plugin);
-
-    // eslint-disable-next-line no-param-reassign
-    plugin.installed = true;
-
-    setStatus({
-      action: 'idle',
-      name: plugin.definition.name,
-      version: plugin.definition.version,
-    });
+    try {
+      await downloadAndInstallPlugin(plugin);
+    } catch (e: any) {
+      setStatus({
+        action: 'error',
+        message: e.toString(),
+        name: plugin.definition.name,
+        version: plugin.definition.version,
+      });
+    }
   });
 };

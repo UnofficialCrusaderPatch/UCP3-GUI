@@ -11,6 +11,11 @@ import { uninstallContents } from './callbacks/uninstall-content';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import Logger from '../../../../util/scripts/logging';
 import { getStore } from '../../../../hooks/jotai/base';
+import { ExtensionDependencyTree } from '../../../../function/extensions/dependency-management/dependency-resolution';
+import {
+  EXTENSIONS_ATOM,
+  EXTENSIONS_STATE_TREE_ATOM,
+} from '../../../../function/extensions/state/focus';
 
 const LOGGER = new Logger('uninstall-button.tsx');
 
@@ -86,7 +91,43 @@ export function UninstallButton(
           }
 
           if (busyCount > 0) {
-            // TODO:
+            // TODO: fixed elsewhere
+          }
+
+          const extensions = getStore().get(EXTENSIONS_ATOM);
+          const toBeRemovedExtensions = installed.map(
+            (ce) =>
+              extensions.filter(
+                (ext) =>
+                  ext.name === ce.definition.name &&
+                  ext.version === ce.definition.version,
+              )[0],
+          );
+          const leftOverExtensions = extensions.filter(
+            (ext) => toBeRemovedExtensions.indexOf(ext) === -1,
+          );
+          const etree = getStore().get(EXTENSIONS_STATE_TREE_ATOM);
+          const tree = new ExtensionDependencyTree(
+            leftOverExtensions,
+            etree.frontendVersion,
+            etree.frameworkVersion,
+          );
+
+          const solution = tree.tryResolveAllDependencies();
+
+          if (solution.status !== 'ok') {
+            const okCancelResult = await showModalOkCancel({
+              title: 'Removal of dependencies',
+              message:
+                'Deinstallation of the selected content will lead to unresolved dependencies.\n\nAre you sure you want to uninstall the selected?',
+            });
+            if (okCancelResult === false) {
+              getStore().set(
+                CONTENT_TAB_LOCK,
+                getStore().get(CONTENT_TAB_LOCK) - 1,
+              );
+              return;
+            }
           }
 
           getStore().set(

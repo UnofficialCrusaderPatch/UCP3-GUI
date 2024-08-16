@@ -15,3 +15,13 @@ export const ACTIVE_EXTENSIONS_ID_ATOM = atom<string[]>((get) => {
   );
   return result;
 });
+
+export const EXTENSIONS_STATE_TREE_ATOM = focusAtom(
+  EXTENSION_STATE_INTERFACE_ATOM,
+  (optic) => optic.prop('tree'),
+);
+
+export const EXTENSIONS_ATOM = focusAtom(
+  EXTENSION_STATE_INTERFACE_ATOM,
+  (optic) => optic.prop('extensions'),
+);

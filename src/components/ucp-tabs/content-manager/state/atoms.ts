@@ -10,6 +10,11 @@ import { ContentInstallationStatus } from './downloads/download-progress';
 import { UCP_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
 import { SHOW_ALL_EXTENSIONS_ATOM } from '../../../../function/gui-settings/settings';
 import { UI_FILTER_SETTING_ATOM } from '../buttons/filter-button';
+import {
+  ACTIVE_EXTENSIONS_ID_ATOM,
+  EXTENSIONS_ATOM,
+  EXTENSIONS_STATE_TREE_ATOM,
+} from '../../../../function/extensions/state/focus';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -175,4 +180,28 @@ export const filteredContentElementsAtom = atom((get) =>
         get(SHOW_ALL_EXTENSIONS_ATOM) === true,
     )
     .sort((a, b) => a.definition.name.localeCompare(b.definition.name)),
+);
+
+export const isContentInUseAtom = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM).filter(
+    (ce) =>
+      get(ACTIVE_EXTENSIONS_ID_ATOM).indexOf(
+        `${ce.definition.name}@${ce.definition.version}`,
+      ) !== -1,
+  ),
+);
+
+export const isTopLevelContentAtom = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM).filter((ce) => {
+    const tree = get(EXTENSIONS_STATE_TREE_ATOM);
+    const extensions = get(EXTENSIONS_ATOM);
+    const extOpt = extensions.filter(
+      (ext) =>
+        ext.name === ce.definition.name &&
+        ext.version === ce.definition.version,
+    );
+    if (extOpt.length === 0) return true;
+
+    return tree.reverseExtensionDependenciesFor(extOpt[0]).length === 0;
+  }),
 );

@@ -11,6 +11,7 @@ import {
   CONTENT_INTERFACE_STATE_ATOM,
   contentInstallationStatusAtoms,
   filteredContentElementsAtom,
+  isContentInUseAtom,
 } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -68,6 +69,16 @@ export function ContentElementView(props: ContentElementViewProps) {
   const progressElement = useAtomValue(progressElementAtom);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  const isInUseAtom = useMemo(
+    () =>
+      atom(
+        (get) =>
+          get(isContentInUseAtom).filter((iuce) => iuce === data).length > 0,
+      ),
+    [data],
+  );
+  const isInUse = useAtomValue(isInUseAtom);
 
   const statusElementAtom = useMemo(
     () =>
@@ -148,6 +159,7 @@ export function ContentElementView(props: ContentElementViewProps) {
             <CheckCircleFill
               style={{
                 color: 'darkgreen',
+                opacity: isInUse ? '50%' : '100%',
               }}
               onMouseEnter={() => {
                 setStatusBarMessage(
@@ -182,7 +194,7 @@ export function ContentElementView(props: ContentElementViewProps) {
         }
         return statusElement;
       }),
-    [id, isInstalled, isOnline, setStatusBarMessage],
+    [id, isInstalled, isOnline, isInUse, setStatusBarMessage],
   );
 
   const statusElement = useAtomValue(statusElementAtom);
@@ -255,17 +267,6 @@ export function ContentElementView(props: ContentElementViewProps) {
 
   const progressOverlayElement = useAtomValue(progressOverlayElementAtom);
 
-  const isInUseAtom = useMemo(
-    () =>
-      atom(
-        (get) =>
-          get(ACTIVE_EXTENSIONS_ID_ATOM).filter((aeid) => aeid === id).length >
-          0,
-      ),
-    [id],
-  );
-  const isInUse = useAtomValue(isInUseAtom);
-
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
@@ -284,9 +285,11 @@ export function ContentElementView(props: ContentElementViewProps) {
             }
       }
       onMouseEnter={() => {
-        setStatusBarMessage(
-          `Cannot select content as it is an activated extension. Deactivate it before uninstalling: ${name}`,
-        );
+        if (isInUse) {
+          setStatusBarMessage(
+            `Cannot select content as it is an activated extension. Deactivate it before uninstalling: ${name}`,
+          );
+        }
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

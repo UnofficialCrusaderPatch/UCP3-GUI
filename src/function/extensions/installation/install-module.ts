@@ -9,6 +9,7 @@ import {
   readDir,
   removeDir,
   renameFile,
+  writeTextFile,
 } from '../../../tauri/tauri-files';
 import Logger from '../../../util/scripts/logging';
 
@@ -91,7 +92,14 @@ export const installPlugin = async (
   }
 };
 
-export const installModule = async (gameFolder: string, path: string) => {
+export const installModule = async (
+  gameFolder: string,
+  path: string,
+  signature?: string,
+) => {
+  LOGGER.msg(
+    `Installing module (${signature === undefined ? 'unsigned' : 'signed'}): ${path}`,
+  ).debug();
   const destination = `${gameFolder}/ucp/modules/`;
 
   const name = await basename(path);
@@ -99,8 +107,11 @@ export const installModule = async (gameFolder: string, path: string) => {
   const sigPath = `${path}.sig`;
 
   if (await exists(sigPath)) {
-    const copyResult1 = await copyFile(sigPath, `${destination}/${name}.sig`);
-    copyResult1.throwIfErr();
+    (await copyFile(sigPath, `${destination}/${name}.sig`)).throwIfErr();
+  }
+
+  if (signature !== undefined) {
+    (await writeTextFile(sigPath, signature)).throwIfErr();
   }
 
   (await copyFile(path, `${destination}/${name}`)).throwIfErr();

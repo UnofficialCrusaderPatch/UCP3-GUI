@@ -19,6 +19,7 @@ import {
   ContentFilterButton,
   UI_FILTER_SETTING_ATOM,
 } from './buttons/filter-button';
+import { SHOW_ALL_EXTENSIONS_ATOM } from '../../../function/gui-settings/settings';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -39,7 +40,11 @@ const elementsAtom = atom((get) =>
     .filter((ce) =>
       get(UI_FILTER_SETTING_ATOM) ? ce.online && !ce.installed : true,
     )
-    .filter((ce) => ce.definition.type === 'plugin')
+    .filter(
+      (ce) =>
+        ce.definition.type === 'plugin' ||
+        get(SHOW_ALL_EXTENSIONS_ATOM) === true,
+    )
     .sort((a, b) => a.definition.name.localeCompare(b.definition.name))
     .map((ext) => (
       <ContentElementView
@@ -106,7 +111,7 @@ export function ContentManager() {
       }
     }
     // eslint-disable-next-line no-unsafe-optional-chaining
-    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${size}MB`}  \n\n${descriptionData}`;
+    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${Math.ceil(size)} MB`}  \n\n${descriptionData}`;
   }
 
   const completed = useAtomValue(COMPLETED_CONTENT_ELEMENTS_ATOM);

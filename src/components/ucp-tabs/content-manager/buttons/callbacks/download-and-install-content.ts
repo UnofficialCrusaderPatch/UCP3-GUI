@@ -6,10 +6,14 @@ import { download } from '../../../../../tauri/tauri-http';
 import Logger from '../../../../../util/scripts/logging';
 import { showModalOk } from '../../../../modals/modal-ok';
 import { ContentInstallationStatus } from '../../state/downloads/download-progress';
-import { installPlugin } from '../../../../../function/extensions/installation/install-module';
+import {
+  installModule,
+  installPlugin,
+} from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
 import { contentInstallationStatusAtoms } from '../../state/atoms';
 import { getHexHashOfFile } from '../../../../../util/scripts/hash';
+import { BinaryModulePackageContent } from '../../../../../function/content/store/fetch';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -36,22 +40,22 @@ const guessTotalSize = (currentSize: number) => {
   return steps.at(-1)!;
 };
 
-export const downloadAndInstallPlugin = async (
+export const downloadAndInstallContent = async (
   contentElement: ContentElement,
 ) => {
   const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
 
-  const zipSources = contentElement.contents.package.filter(
-    (pc) => pc.method === 'binary' || pc.method === 'github-binary',
-  );
-
   const setStatus = (value: ContentInstallationStatus) =>
     getStore().set(contentInstallationStatusAtoms(id), value);
+
+  const zipSources = contentElement.contents.package.filter(
+    (pc) => pc.method === 'github-binary',
+  );
 
   if (zipSources.length === 0) {
     setStatus({
       action: 'error',
-      message: `No zip package found for this content`,
+      message: `No package found for this content that supports the methods: github-binary`,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
     });
@@ -124,7 +128,7 @@ export const downloadAndInstallPlugin = async (
   }
 
   LOGGER.msg(
-    `Installing ${contentElement.definition.name} from ${destination} into ${gameFolder}/ucp/plugins`,
+    `Installing ${contentElement.definition.name} from ${destination} into ${gameFolder}/ucp/ extension subfolder`,
   ).debug();
 
   setStatus({
@@ -135,9 +139,17 @@ export const downloadAndInstallPlugin = async (
   });
 
   try {
-    await installPlugin(gameFolder, destination, {
-      zapRootFolder: src.method === 'github-zip',
-    });
+    if (contentElement.definition.type === 'module') {
+      await installModule(
+        gameFolder,
+        destination,
+        (src as BinaryModulePackageContent).signature,
+      );
+    } else {
+      await installPlugin(gameFolder, destination, {
+        zapRootFolder: src.method === 'github-zip',
+      });
+    }
   } catch (e: any) {
     setStatus({
       action: 'error',
@@ -204,51 +216,25 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
     return;
   }
 
-  const modules = contentElements.filter(
-    (ce) => ce.definition.type === 'module',
-  );
-
-  if (modules.length > 0) {
-    await showModalOk({
-      title: 'Failed to install content',
-      message: `Some content are modules, installing modules is not implemented yet: ${modules.map((ce) => ce.definition.name).join(', ')}`,
-    });
-
-    return;
-  }
-
-  const plugins = contentElements.filter(
-    (ce) => ce.definition.type === 'plugin',
-  );
-
-  if (plugins.length === 0) {
-    await showModalOk({
-      title: 'Failed to install content',
-      message: `No content to install`,
-    });
-
-    return;
-  }
-
-  plugins.forEach(async (plugin) => {
-    const id = `${plugin.definition.name}@${plugin.definition.version}`;
+  contentElements.forEach(async (ce) => {
+    const id = `${ce.definition.name}@${ce.definition.version}`;
     const setStatus = (value: ContentInstallationStatus) =>
       getStore().set(contentInstallationStatusAtoms(id), value);
     setStatus({
       action: 'download',
       progress: 0,
-      name: plugin.definition.name,
-      version: plugin.definition.version,
+      name: ce.definition.name,
+      version: ce.definition.version,
     });
 
     try {
-      await downloadAndInstallPlugin(plugin);
+      await downloadAndInstallContent(ce);
     } catch (e: any) {
       setStatus({
         action: 'error',
         message: e.toString(),
-        name: plugin.definition.name,
-        version: plugin.definition.version,
+        name: ce.definition.name,
+        version: ce.definition.version,
       });
     }
   });

@@ -5,7 +5,6 @@ import {
   BUSY_CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
 } from '../state/atoms';
-import { showModalOk } from '../../../modals/modal-ok';
 import { uninstallContents } from './callbacks/uninstall-content';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import Logger from '../../../../util/scripts/logging';
@@ -66,19 +65,6 @@ export function UninstallButton(
         disabled={!enabled}
         type="button"
         onClick={async () => {
-          if (
-            interfaceState.selected.filter(
-              (ce) => ce.definition.type !== 'plugin',
-            ).length > 0
-          ) {
-            await showModalOk({
-              title: 'Cannot uninstall modules',
-              message: 'Uninstall modules is currently not implemented yet.',
-            });
-
-            return;
-          }
-
           if (deprecated.length > 0) {
             const deprecationAnswer = await showModalOkCancel({
               title: 'Permanent removal warning',

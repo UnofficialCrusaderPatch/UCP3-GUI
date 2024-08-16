@@ -22,18 +22,16 @@ export type DescriptionContent =
   | InlineDescriptionContent;
 
 export type BinaryModulePackageContent = {
-  method: 'binary' | 'github-binary';
-  type: 'module';
+  method: 'github-binary';
   size: number;
   url: string;
-  signer: string;
   hash: string;
+  signer: string;
   signature: string;
 };
 
 export type PluginPackageContent = {
-  method: 'github-zip' | 'github-binary' | 'binary';
-  type: 'plugin';
+  method: 'github-zip' | 'github-binary';
   size: number;
   url: string;
   hash: string;

@@ -287,7 +287,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       {progressOverlayElement}
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-        <span className="extension-name-box__name">{displayName}</span>
+        <span className="extension-name-box__name">{displayName || name}</span>
       </div>
       <div>{version}</div>
       <div className="me-2">{progressElement}</div>

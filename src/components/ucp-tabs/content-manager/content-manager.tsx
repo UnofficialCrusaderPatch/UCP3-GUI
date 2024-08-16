@@ -4,9 +4,9 @@ import { ContentManagerToolbar } from './content-manager-toolbar';
 import { ContentElementView } from './content-element/content-element-view';
 import {
   COMPLETED_CONTENT_ELEMENTS_ATOM,
-  CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STORE_ATOM,
+  filteredContentElementsAtom,
   SINGLE_CONTENT_SELECTION_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
@@ -15,13 +15,18 @@ import {
   SELECTED_CONTENT_DESCRIPTION_ATOM,
   distillInlineDescription,
 } from './description/fetching';
-import {
-  ContentFilterButton,
-  UI_FILTER_SETTING_ATOM,
-} from './buttons/filter-button';
-import { SHOW_ALL_EXTENSIONS_ATOM } from '../../../function/gui-settings/settings';
+import { ContentFilterButton } from './buttons/filter-button';
 
 const LOGGER = new Logger('content-manager.tsx');
+
+const elementsAtom = atom((get) =>
+  get(filteredContentElementsAtom).map((ext) => (
+    <ContentElementView
+      key={`${ext.definition.name}@${ext.definition.version}`}
+      data={ext}
+    />
+  )),
+);
 
 // eslint-disable-next-line react/prop-types
 function StatusElement({ children }: { children: any }) {
@@ -34,25 +39,6 @@ function StatusElement({ children }: { children: any }) {
     </div>
   );
 }
-
-const elementsAtom = atom((get) =>
-  get(CONTENT_ELEMENTS_ATOM)
-    .filter((ce) =>
-      get(UI_FILTER_SETTING_ATOM) ? ce.online && !ce.installed : true,
-    )
-    .filter(
-      (ce) =>
-        ce.definition.type === 'plugin' ||
-        get(SHOW_ALL_EXTENSIONS_ATOM) === true,
-    )
-    .sort((a, b) => a.definition.name.localeCompare(b.definition.name))
-    .map((ext) => (
-      <ContentElementView
-        key={`${ext.definition.name}@${ext.definition.version}`}
-        data={ext}
-      />
-    )),
-);
 
 /* eslint-disable import/prefer-default-export */
 export function ContentManager() {

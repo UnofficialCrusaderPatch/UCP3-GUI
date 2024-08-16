@@ -8,6 +8,8 @@ import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { ContentInstallationStatus } from './downloads/download-progress';
 import { UCP_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
+import { SHOW_ALL_EXTENSIONS_ATOM } from '../../../../function/gui-settings/settings';
+import { UI_FILTER_SETTING_ATOM } from '../buttons/filter-button';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -161,3 +163,16 @@ export const BUSY_CONTENT_ELEMENTS_ATOM = atom((get) =>
 
 export const CONTENT_TAB_LOCK = atom(0);
 export const EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM = atom(false);
+
+export const filteredContentElementsAtom = atom((get) =>
+  get(CONTENT_ELEMENTS_ATOM)
+    .filter((ce) =>
+      get(UI_FILTER_SETTING_ATOM) ? ce.online && !ce.installed : true,
+    )
+    .filter(
+      (ce) =>
+        ce.definition.type === 'plugin' ||
+        get(SHOW_ALL_EXTENSIONS_ATOM) === true,
+    )
+    .sort((a, b) => a.definition.name.localeCompare(b.definition.name)),
+);

@@ -56,6 +56,7 @@
     "i18next": "^23.10.0",
     "i18next-resources-to-backend": "^1.2.0",
     "jotai": "^2.6.5",
+    "jotai-optics": "^0.4.0",
     "jotai-tanstack-query": "^0.8.5",
     "lean-resolution": "github:gynt/lean-resolution",
     "react": "^18.2.0",

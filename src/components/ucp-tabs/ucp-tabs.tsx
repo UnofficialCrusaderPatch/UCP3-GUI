@@ -186,7 +186,7 @@ export default function UcpTabs() {
 
                   await showModalOk({
                     title: 'Error: missing dependencies',
-                    message: `Please be aware of the following missing dependencies:\n\n${messages.join('\n')}`,
+                    message: `Please be aware of the following missing dependencies:\n\n${messages.join('\n')}\n\nTry installing them by visiting the Store`,
                     handleAction: () => setShowErrorsWarning(false),
                   });
 

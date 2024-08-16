@@ -10,9 +10,14 @@ import { useMemo } from 'react';
 import {
   CONTENT_INTERFACE_STATE_ATOM,
   contentInstallationStatusAtoms,
+  filteredContentElementsAtom,
 } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
+import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
+import { getStore } from '../../../../hooks/jotai/base';
+
+const shiftSelectionStartAtom = atom<string>('');
 
 export type ContentElementViewProps = {
   data: ContentElement;
@@ -23,7 +28,7 @@ export function ContentElementView(props: ContentElementViewProps) {
   const { definition, installed, online } = data;
   const { name, version, 'display-name': displayName } = definition;
 
-  const id = `${definition.name}@${definition.version}`;
+  const id = `${name}@${version}`;
 
   const [contentInterfaceState, setContentInterfaceState] = useAtom(
     CONTENT_INTERFACE_STATE_ATOM,
@@ -250,33 +255,97 @@ export function ContentElementView(props: ContentElementViewProps) {
 
   const progressOverlayElement = useAtomValue(progressOverlayElementAtom);
 
+  const isInUseAtom = useMemo(
+    () =>
+      atom(
+        (get) =>
+          get(ACTIVE_EXTENSIONS_ID_ATOM).filter((aeid) => aeid === id).length >
+          0,
+      ),
+    [id],
+  );
+  const isInUse = useAtomValue(isInUseAtom);
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       key={`${name}-${version}`}
-      className="extension-element"
-      style={{
-        ...{ cursor: 'pointer' },
-        position: 'relative',
-        ...selectedStyle,
+      className={`extension-element ${isInUse ? 'disabled' : ''}`}
+      style={
+        isInUse
+          ? {
+              position: 'relative',
+              ...selectedStyle,
+            }
+          : {
+              cursor: 'pointer',
+              position: 'relative',
+              ...selectedStyle,
+            }
+      }
+      onMouseEnter={() => {
+        setStatusBarMessage(
+          `Cannot select content as it is an activated extension. Deactivate it before uninstalling: ${name}`,
+        );
+      }}
+      onMouseLeave={() => {
+        setStatusBarMessage(undefined);
       }}
       onClick={(e) => {
+        if (isInUse) return;
         let newSelection = [...contentInterfaceState.selected];
-        if (!isSelected) {
-          if (e.ctrlKey) {
-            newSelection.push(data);
-          } else {
-            newSelection = [data];
-          }
-        } else if (e.ctrlKey) {
-          const index = newSelection.findIndex((value) => value === data);
-          if (index !== -1) {
-            newSelection.splice(index, 1);
-          }
-        } else if (contentInterfaceState.selected.length > 1) {
+
+        const sssa = getStore().get(shiftSelectionStartAtom);
+        if (sssa === '') {
+          getStore().set(shiftSelectionStartAtom, id);
           newSelection = [data];
+        }
+
+        if (e.shiftKey) {
+          if (sssa !== '') {
+            const f = getStore().get(filteredContentElementsAtom);
+            const ids = f.map(
+              (ce) => `${ce.definition.name}@${ce.definition.version}`,
+            );
+
+            const lastIndex = ids.indexOf(id);
+            const firstIndex = ids.indexOf(
+              getStore().get(shiftSelectionStartAtom),
+            );
+            newSelection = f
+              .filter((value, index) =>
+                firstIndex < lastIndex
+                  ? index >= firstIndex && index <= lastIndex
+                  : index >= lastIndex && index <= firstIndex,
+              )
+              .filter(
+                (ce) =>
+                  getStore()
+                    .get(ACTIVE_EXTENSIONS_ID_ATOM)
+                    .indexOf(
+                      `${ce.definition.name}@${ce.definition.version}`,
+                    ) === -1,
+              );
+            // getStore().set(shiftSelectionStartAtom, '');
+          }
         } else {
-          newSelection = [];
+          getStore().set(shiftSelectionStartAtom, id);
+          if (!isSelected) {
+            if (e.ctrlKey) {
+              newSelection.push(data);
+            } else {
+              newSelection = [data];
+            }
+          } else if (e.ctrlKey) {
+            const index = newSelection.findIndex((value) => value === data);
+            if (index !== -1) {
+              newSelection.splice(index, 1);
+            }
+          } else if (contentInterfaceState.selected.length > 1) {
+            newSelection = [data];
+          } else {
+            newSelection = [];
+          }
         }
         setContentInterfaceState({
           ...contentInterfaceState,
@@ -287,7 +356,11 @@ export function ContentElementView(props: ContentElementViewProps) {
       {progressOverlayElement}
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-        <span className="extension-name-box__name">{displayName || name}</span>
+        <span
+          className={`extension-name-box__name ${isInUse ? 'disabled text-muted' : ''}`}
+        >
+          {displayName || name}
+        </span>
       </div>
       <div>{version}</div>
       <div className="me-2">{progressElement}</div>

@@ -4,10 +4,13 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import {
   BUSY_CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
+  CONTENT_TAB_LOCK,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../state/atoms';
 import { uninstallContents } from './callbacks/uninstall-content';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import Logger from '../../../../util/scripts/logging';
+import { getStore } from '../../../../hooks/jotai/base';
 
 const LOGGER = new Logger('uninstall-button.tsx');
 
@@ -19,9 +22,8 @@ export function UninstallButton(
 
   const interfaceState = useAtomValue(CONTENT_INTERFACE_STATE_ATOM);
   const selectionCount = interfaceState.selected.length;
-  const installedCount = interfaceState.selected.filter(
-    (ce) => ce.installed,
-  ).length;
+  const installed = interfaceState.selected.filter((ce) => ce.installed);
+  const installedCount = installed.length;
   const onlineOnlyCount = interfaceState.selected.filter(
     (ce) => !ce.installed && ce.online,
   ).length;
@@ -65,6 +67,11 @@ export function UninstallButton(
         disabled={!enabled}
         type="button"
         onClick={async () => {
+          getStore().set(
+            CONTENT_TAB_LOCK,
+            getStore().get(CONTENT_TAB_LOCK) + 1,
+          );
+
           if (deprecated.length > 0) {
             const deprecationAnswer = await showModalOkCancel({
               title: 'Permanent removal warning',
@@ -82,7 +89,13 @@ export function UninstallButton(
             // TODO:
           }
 
-          await uninstallContents(interfaceState.selected);
+          getStore().set(
+            CONTENT_TAB_LOCK,
+            getStore().get(CONTENT_TAB_LOCK) + installed.length - 1,
+          );
+
+          getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
+          await uninstallContents(installed);
         }}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...props}

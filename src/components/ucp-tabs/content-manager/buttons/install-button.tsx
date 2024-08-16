@@ -5,13 +5,16 @@ import {
   BUSY_CONTENT_ELEMENTS_ATOM,
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
+  CONTENT_TAB_LOCK,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../state/atoms';
 import { downloadContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { showModalOk } from '../../../modals/modal-ok';
+import { getStore } from '../../../../hooks/jotai/base';
 
 // eslint-disable-next-line import/prefer-default-export
-export function DownloadButton(
+export function InstallButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -67,6 +70,11 @@ export function DownloadButton(
         disabled={tree === undefined || !enabled}
         type="button"
         onClick={async () => {
+          getStore().set(
+            CONTENT_TAB_LOCK,
+            getStore().get(CONTENT_TAB_LOCK) + 1,
+          );
+
           const ids = interfaceState.selected.map(
             (ec) => `${ec.definition.name}@${ec.definition.version}`,
           );
@@ -93,7 +101,16 @@ export function DownloadButton(
             )
             // Retain elements that are not installed yet
             .filter((ce) => !ce.installed);
-          downloadContent(notInstalledDependencies);
+
+          getStore().set(
+            CONTENT_TAB_LOCK,
+            getStore().get(CONTENT_TAB_LOCK) +
+              notInstalledDependencies.length -
+              1,
+          );
+
+          getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
+          await downloadContent(notInstalledDependencies);
         }}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...props}

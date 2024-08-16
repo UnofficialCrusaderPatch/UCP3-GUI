@@ -11,7 +11,10 @@ import {
   installPlugin,
 } from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
-import { contentInstallationStatusAtoms } from '../../state/atoms';
+import {
+  CONTENT_TAB_LOCK,
+  contentInstallationStatusAtoms,
+} from '../../state/atoms';
 import { getHexHashOfFile } from '../../../../../util/scripts/hash';
 import { BinaryModulePackageContent } from '../../../../../function/content/store/fetch';
 
@@ -216,26 +219,30 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
     return;
   }
 
-  contentElements.forEach(async (ce) => {
-    const id = `${ce.definition.name}@${ce.definition.version}`;
-    const setStatus = (value: ContentInstallationStatus) =>
-      getStore().set(contentInstallationStatusAtoms(id), value);
-    setStatus({
-      action: 'download',
-      progress: 0,
-      name: ce.definition.name,
-      version: ce.definition.version,
-    });
-
-    try {
-      await downloadAndInstallContent(ce);
-    } catch (e: any) {
+  await Promise.all(
+    contentElements.map(async (ce) => {
+      const id = `${ce.definition.name}@${ce.definition.version}`;
+      const setStatus = (value: ContentInstallationStatus) =>
+        getStore().set(contentInstallationStatusAtoms(id), value);
       setStatus({
-        action: 'error',
-        message: e.toString(),
+        action: 'download',
+        progress: 0,
         name: ce.definition.name,
         version: ce.definition.version,
       });
-    }
-  });
+
+      try {
+        await downloadAndInstallContent(ce);
+      } catch (e: any) {
+        setStatus({
+          action: 'error',
+          message: e.toString(),
+          name: ce.definition.name,
+          version: ce.definition.version,
+        });
+      }
+
+      getStore().set(CONTENT_TAB_LOCK, getStore().get(CONTENT_TAB_LOCK) - 1);
+    }),
+  );
 };

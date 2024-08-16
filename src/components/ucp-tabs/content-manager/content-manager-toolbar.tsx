@@ -1,5 +1,5 @@
 import { useAtomValue } from 'jotai';
-import { DownloadButton } from './buttons/download-button';
+import { InstallButton } from './buttons/install-button';
 import { CONTENT_INTERFACE_STATE_ATOM } from './state/atoms';
 import { UninstallButton } from './buttons/uninstall-button';
 
@@ -14,7 +14,7 @@ export function ContentManagerToolbar() {
     <div className="extension-manager-control__box__buttons">
       <div className="" />
       <div className="extension-manager-control__box__buttons--apply-button">
-        {containsInstalled ? <UninstallButton /> : <DownloadButton />}
+        {containsInstalled ? <UninstallButton /> : <InstallButton />}
       </div>
     </div>
   );

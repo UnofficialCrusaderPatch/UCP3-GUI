@@ -158,3 +158,6 @@ export const BUSY_CONTENT_ELEMENTS_ATOM = atom((get) =>
       );
     }),
 );
+
+export const CONTENT_TAB_LOCK = atom(0);
+export const EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM = atom(false);

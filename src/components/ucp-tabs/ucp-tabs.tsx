@@ -5,7 +5,7 @@ import './ucp-tabs.css';
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { Atom, atom, useAtom, useAtomValue } from 'jotai';
+import { Atom, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   INIT_DONE,
   INIT_RUNNING,
@@ -38,6 +38,13 @@ import {
 } from '../../function/global/constants/file-constants';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
 import { ContentManager } from './content-manager/content-manager';
+import {
+  CONTENT_TAB_LOCK,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
+} from './content-manager/state/atoms';
+import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
+import { reloadCurrentWindow } from '../../function/window-actions';
+import { showModalOkCancel } from '../modals/modal-ok-cancel';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -102,6 +109,14 @@ export default function UcpTabs() {
 
   const currentFolder = useCurrentGameFolder();
 
+  const contentTabLock = useAtomValue(CONTENT_TAB_LOCK);
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  const isExtensionsStateDiskDirty = useAtomValue(
+    EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
+  );
+
   return (
     <div
       className="ucp-tabs fs-7"
@@ -126,15 +141,39 @@ export default function UcpTabs() {
               {t('gui-editor:overview.title')}
             </Nav.Link>
           </Nav.Item>
-          <Nav.Item>
+          <Nav.Item
+            onMouseEnter={() => {
+              if (contentTabLock > 0) {
+                setStatusBarMessage(
+                  `Some content is still processing, please wait until finished. Waiting for ... ${contentTabLock}`,
+                );
+              }
+            }}
+            onMouseLeave={() => {
+              setStatusBarMessage(undefined);
+            }}
+          >
             <Nav.Link
               eventKey="extensions"
               className="ornament-border-button tab-link"
-              disabled={!initIsDoneAndWithoutErrors}
+              disabled={!initIsDoneAndWithoutErrors || contentTabLock > 0}
               hidden={!ucpFolderExists}
               onClick={async () => {
                 try {
                   if (!showErrorsWarning) {
+                    return;
+                  }
+
+                  if (isExtensionsStateDiskDirty) {
+                    const okCancelResult = await showModalOkCancel({
+                      title: 'GUI restart required',
+                      message:
+                        "The GUI needs to restart as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel",
+                    });
+                    if (okCancelResult) {
+                      await reloadCurrentWindow();
+                    }
+
                     return;
                   }
 

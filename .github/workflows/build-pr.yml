@@ -2,7 +2,7 @@ name: 'Build for PR, upload asset'
 
 on:
   pull_request:
-    types: [review_requested]
+    types: [review_requested, synchronize]
   workflow_dispatch: {}
 
 jobs:

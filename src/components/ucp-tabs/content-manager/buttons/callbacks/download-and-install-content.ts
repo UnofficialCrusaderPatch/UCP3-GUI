@@ -5,20 +5,16 @@ import { getStore } from '../../../../../hooks/jotai/base';
 import { download } from '../../../../../tauri/tauri-http';
 import Logger from '../../../../../util/scripts/logging';
 import { showModalOk } from '../../../../modals/modal-ok';
-import { ContentInstallationStatus } from '../../state/downloads/download-progress';
 import {
   installModule,
   installPlugin,
 } from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
-import {
-  CONTENT_TAB_LOCK,
-  contentInstallationStatusAtoms,
-} from '../../state/atoms';
+import { CONTENT_TAB_LOCK } from '../../state/atoms';
 import { getHexHashOfFile } from '../../../../../util/scripts/hash';
 import { BinaryModulePackageContent } from '../../../../../function/content/store/fetch';
 import { UCP_CACHE_FOLDER } from '../../../../../function/global/constants/file-constants';
-import { createExtensionID } from '../../../../../function/global/constants/extension-id';
+import { createStatusSetter } from './status';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -48,10 +44,7 @@ const guessTotalSize = (currentSize: number) => {
 export const downloadAndInstallContent = async (
   contentElement: ContentElement,
 ) => {
-  const id = createExtensionID(contentElement);
-
-  const setStatus = (value: ContentInstallationStatus) =>
-    getStore().set(contentInstallationStatusAtoms(id), value);
+  const setStatus = createStatusSetter(contentElement);
 
   const zipSources = contentElement.contents.package.filter(
     (pc) => pc.method === 'github-binary',
@@ -227,9 +220,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
 
   await Promise.all(
     contentElements.map(async (ce) => {
-      const id = createExtensionID(ce);
-      const setStatus = (value: ContentInstallationStatus) =>
-        getStore().set(contentInstallationStatusAtoms(id), value);
+      const setStatus = createStatusSetter(ce);
       setStatus({
         action: 'download',
         progress: 0,

@@ -1,6 +1,5 @@
 import { ContentElement } from '../../../../../function/content/types/content-element';
 import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
-import { createExtensionID } from '../../../../../function/global/constants/extension-id';
 import {
   UCP_MODULES_FOLDER,
   UCP_PLUGINS_FOLDER,
@@ -8,11 +7,8 @@ import {
 import { getStore } from '../../../../../hooks/jotai/base';
 import { removeDir, removeFile } from '../../../../../tauri/tauri-files';
 import Logger from '../../../../../util/scripts/logging';
-import {
-  CONTENT_TAB_LOCK,
-  contentInstallationStatusAtoms,
-} from '../../state/atoms';
-import { ContentInstallationStatus } from '../../state/downloads/download-progress';
+import { CONTENT_TAB_LOCK } from '../../state/atoms';
+import { createStatusSetter } from './status';
 
 const LOGGER = new Logger('uninstall-content.ts');
 
@@ -48,11 +44,7 @@ export const uninstallContent = async (ce: ContentElement) => {
 export const uninstallContents = (contentElements: ContentElement[]) =>
   Promise.all(
     contentElements.map(async (ce) => {
-      const id = createExtensionID(ce);
-
-      const setStatus = (value: ContentInstallationStatus) => {
-        getStore().set(contentInstallationStatusAtoms(id), value);
-      };
+      const setStatus = createStatusSetter(ce);
 
       setStatus({
         action: 'uninstall',

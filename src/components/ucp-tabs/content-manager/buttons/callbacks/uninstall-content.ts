@@ -1,5 +1,6 @@
 import { ContentElement } from '../../../../../function/content/types/content-element';
 import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
+import { createExtensionID } from '../../../../../function/global/constants/extension-id';
 import {
   UCP_MODULES_FOLDER,
   UCP_PLUGINS_FOLDER,
@@ -47,7 +48,7 @@ export const uninstallContent = async (ce: ContentElement) => {
 export const uninstallContents = (contentElements: ContentElement[]) =>
   Promise.all(
     contentElements.map(async (ce) => {
-      const id = `${ce.definition.name}@${ce.definition.version}`;
+      const id = createExtensionID(ce);
 
       const setStatus = (value: ContentInstallationStatus) => {
         getStore().set(contentInstallationStatusAtoms(id), value);

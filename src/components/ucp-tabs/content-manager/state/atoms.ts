@@ -15,6 +15,7 @@ import {
   EXTENSIONS_ATOM,
   EXTENSIONS_STATE_TREE_ATOM,
 } from '../../../../function/extensions/state/focus';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -52,9 +53,7 @@ const storePackagesAtom = atom((get) => {
 });
 
 const spIDsAtom = atom((get) =>
-  get(storePackagesAtom).map(
-    (ce) => `${ce.definition.name}@${ce.definition.version}`,
-  ),
+  get(storePackagesAtom).map((ce) => createExtensionID(ce)),
 );
 
 export const CONTENT_ELEMENTS_ATOM = atom((get) => {
@@ -72,7 +71,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     );
 
     const matchingStorePackage =
-      spIDs.indexOf(`${e.definition.name}@${e.definition.version}`) !== -1
+      spIDs.indexOf(createExtensionID(e)) !== -1
         ? storePackages
             .filter(
               (ce) =>
@@ -87,8 +86,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
         ? matchingStorePackage.contents.package
         : [];
 
-    const isOnline =
-      spIDs.indexOf(`${e.definition.name}@${e.definition.version}`) !== -1;
+    const isOnline = spIDs.indexOf(createExtensionID(e)) !== -1;
 
     const descriptions = [
       {
@@ -119,15 +117,12 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     return p;
   });
 
-  const epIDs = extensionPackages.map(
-    (ce) => `${ce.definition.name}@${ce.definition.version}`,
-  );
+  const epIDs = extensionPackages.map((ce) => createExtensionID(ce));
 
   return [
     // Filter out already installed elements
     ...storePackages.filter(
-      (ce) =>
-        epIDs.indexOf(`${ce.definition.name}@${ce.definition.version}`) === -1,
+      (ce) => epIDs.indexOf(createExtensionID(ce)) === -1,
     ),
     ...extensionPackages,
   ];
@@ -146,7 +141,7 @@ export const contentInstallationStatusAtoms = atomFamily((id: string) =>
 
 export const COMPLETED_CONTENT_ELEMENTS_ATOM = atom((get) =>
   get(CONTENT_ELEMENTS_ATOM)
-    .map((ce) => `${ce.definition.name}@${ce.definition.version}`)
+    .map((ce) => createExtensionID(ce))
     .filter((id) => {
       const status = get(contentInstallationStatusAtoms(id));
       return status.action === 'complete';
@@ -155,7 +150,7 @@ export const COMPLETED_CONTENT_ELEMENTS_ATOM = atom((get) =>
 
 export const BUSY_CONTENT_ELEMENTS_ATOM = atom((get) =>
   get(CONTENT_ELEMENTS_ATOM)
-    .map((ce) => `${ce.definition.name}@${ce.definition.version}`)
+    .map((ce) => createExtensionID(ce))
     .filter((id) => {
       const status = get(contentInstallationStatusAtoms(id));
       return (
@@ -185,9 +180,7 @@ export const filteredContentElementsAtom = atom((get) =>
 export const isContentInUseAtom = atom((get) =>
   get(CONTENT_ELEMENTS_ATOM).filter(
     (ce) =>
-      get(ACTIVE_EXTENSIONS_ID_ATOM).indexOf(
-        `${ce.definition.name}@${ce.definition.version}`,
-      ) !== -1,
+      get(ACTIVE_EXTENSIONS_ID_ATOM).indexOf(createExtensionID(ce)) !== -1,
   ),
 );
 

@@ -12,6 +12,7 @@ import { downloadContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { showModalOk } from '../../../modals/modal-ok';
 import { getStore } from '../../../../hooks/jotai/base';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
 
 // eslint-disable-next-line import/prefer-default-export
 export function InstallButton(
@@ -75,8 +76,8 @@ export function InstallButton(
             getStore().get(CONTENT_TAB_LOCK) + 1,
           );
 
-          const ids = interfaceState.selected.map(
-            (ec) => `${ec.definition.name}@${ec.definition.version}`,
+          const ids = interfaceState.selected.map((ec) =>
+            createExtensionID(ec),
           );
 
           const solution = tree!.dependenciesForMultiple(ids);
@@ -93,12 +94,7 @@ export function InstallButton(
 
           const notInstalledDependencies = contentElements
             // Retain elements that are in the solution
-            .filter(
-              (ce) =>
-                solutionIDs.indexOf(
-                  `${ce.definition.name}@${ce.definition.version}`,
-                ) !== -1,
-            )
+            .filter((ce) => solutionIDs.indexOf(createExtensionID(ce)) !== -1)
             // Retain elements that are not installed yet
             .filter((ce) => !ce.installed);
 

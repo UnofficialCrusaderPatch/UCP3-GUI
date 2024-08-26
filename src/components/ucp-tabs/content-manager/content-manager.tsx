@@ -16,15 +16,13 @@ import {
   distillInlineDescription,
 } from './description/fetching';
 import { ContentFilterButton } from './buttons/filter-button';
+import { createExtensionID } from '../../../function/global/constants/extension-id';
 
 const LOGGER = new Logger('content-manager.tsx');
 
 const elementsAtom = atom((get) =>
   get(filteredContentElementsAtom).map((ext) => (
-    <ContentElementView
-      key={`${ext.definition.name}@${ext.definition.version}`}
-      data={ext}
-    />
+    <ContentElementView key={createExtensionID(ext)} data={ext} />
   )),
 );
 

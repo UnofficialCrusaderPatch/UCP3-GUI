@@ -18,6 +18,7 @@ import {
 import { getHexHashOfFile } from '../../../../../util/scripts/hash';
 import { BinaryModulePackageContent } from '../../../../../function/content/store/fetch';
 import { UCP_CACHE_FOLDER } from '../../../../../function/global/constants/file-constants';
+import { createExtensionID } from '../../../../../function/global/constants/extension-id';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -47,7 +48,7 @@ const guessTotalSize = (currentSize: number) => {
 export const downloadAndInstallContent = async (
   contentElement: ContentElement,
 ) => {
-  const id = `${contentElement.definition.name}@${contentElement.definition.version}`;
+  const id = createExtensionID(contentElement);
 
   const setStatus = (value: ContentInstallationStatus) =>
     getStore().set(contentInstallationStatusAtoms(id), value);
@@ -226,7 +227,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
 
   await Promise.all(
     contentElements.map(async (ce) => {
-      const id = `${ce.definition.name}@${ce.definition.version}`;
+      const id = createExtensionID(ce);
       const setStatus = (value: ContentInstallationStatus) =>
         getStore().set(contentInstallationStatusAtoms(id), value);
       setStatus({

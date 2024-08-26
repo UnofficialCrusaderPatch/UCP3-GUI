@@ -17,6 +17,7 @@ import { ContentElement } from '../../../../function/content/types/content-eleme
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { getStore } from '../../../../hooks/jotai/base';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
 
 const shiftSelectionStartAtom = atom<string>('');
 
@@ -307,9 +308,7 @@ export function ContentElementView(props: ContentElementViewProps) {
         if (e.shiftKey) {
           if (sssa !== '') {
             const f = getStore().get(filteredContentElementsAtom);
-            const ids = f.map(
-              (ce) => `${ce.definition.name}@${ce.definition.version}`,
-            );
+            const ids = f.map((ce) => createExtensionID(ce));
 
             const lastIndex = ids.indexOf(id);
             const firstIndex = ids.indexOf(
@@ -325,9 +324,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 (ce) =>
                   getStore()
                     .get(ACTIVE_EXTENSIONS_ID_ATOM)
-                    .indexOf(
-                      `${ce.definition.name}@${ce.definition.version}`,
-                    ) === -1,
+                    .indexOf(createExtensionID(ce)) === -1,
               );
             // getStore().set(shiftSelectionStartAtom, '');
           }

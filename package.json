@@ -70,7 +70,6 @@
     "rehype-highlight": "^7.0.0",
     "semver": "^7.6.0",
     "tauri-plugin-upload-api": "github:tauri-apps/tauri-plugin-upload#v1",
-    "wonka": "^6.3.4",
     "yaml": "^2.4.0"
   },
   "devDependencies": {

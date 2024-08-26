@@ -105,13 +105,14 @@ export const installModule = async (
   const name = await basename(path);
 
   const sigPath = `${path}.sig`;
+  const sigDestPath = `${destination}/${name}.sig`;
 
   if (await exists(sigPath)) {
-    (await copyFile(sigPath, `${destination}/${name}.sig`)).throwIfErr();
+    (await copyFile(sigPath, sigDestPath)).throwIfErr();
   }
 
   if (signature !== undefined) {
-    (await writeTextFile(sigPath, signature)).throwIfErr();
+    (await writeTextFile(sigDestPath, signature)).throwIfErr();
   }
 
   (await copyFile(path, `${destination}/${name}`)).throwIfErr();

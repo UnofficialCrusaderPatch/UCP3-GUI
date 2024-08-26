@@ -70,10 +70,6 @@ export const downloadAndInstallContent = async (
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   const cacheDir = `${gameFolder}/ucp/.cache/`;
-  if (!(await onFsExists(cacheDir))) {
-    LOGGER.msg(`.cache directory doesn't exist, creating it!`).warn();
-    await createDir(cacheDir);
-  }
 
   const destination = `${cacheDir}${contentElement.definition.name}-${contentElement.definition.version}.zip`;
 
@@ -205,6 +201,14 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
   LOGGER.msg(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();
+
+  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+
+  const cacheDir = `${gameFolder}/ucp/.cache/`;
+  if (!(await onFsExists(cacheDir))) {
+    LOGGER.msg(`.cache directory doesn't exist, creating it!`).warn();
+    await createDir(cacheDir);
+  }
 
   const contentElementsWithoutPackageSource = contentElements.filter(
     (ce) => ce.contents.package.length === 0,

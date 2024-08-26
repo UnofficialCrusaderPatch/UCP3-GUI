@@ -2,26 +2,41 @@ import { ContentElement } from '../../../../../function/content/types/content-el
 import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { removeDir, removeFile } from '../../../../../tauri/tauri-files';
+import Logger from '../../../../../util/scripts/logging';
 import {
   CONTENT_TAB_LOCK,
   contentInstallationStatusAtoms,
 } from '../../state/atoms';
 import { ContentInstallationStatus } from '../../state/downloads/download-progress';
 
+const LOGGER = new Logger('uninstall-content.ts');
+
 export const uninstallContent = async (ce: ContentElement) => {
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
-  let removeResult;
 
   if (ce.definition.type === 'module') {
     const path = `${gameFolder}/ucp/modules/${ce.definition.name}-${ce.definition.version}.zip`;
-    removeResult = await removeFile(path, false);
-    removeResult = await removeFile(`${path}.sig`, true);
-  } else {
-    const path = `${gameFolder}/ucp/plugins/${ce.definition.name}-${ce.definition.version}`;
-    removeResult = await removeDir(path, true);
+    const result = await removeFile(path, false);
+    const result2 = await removeFile(`${path}.sig`, true);
+
+    if (result.isErr()) {
+      LOGGER.msg(`${result.err().get()}`);
+    }
+
+    if (result2.isErr()) {
+      LOGGER.msg(`${result.err().get()}`);
+    }
+
+    return result.isOk() && result2.isOk();
   }
 
-  return removeResult.isOk();
+  const path = `${gameFolder}/ucp/plugins/${ce.definition.name}-${ce.definition.version}`;
+  const result = await removeDir(path, true);
+  if (result.isErr()) {
+    LOGGER.msg(`${result.err().get()}`);
+  }
+
+  return result.isOk();
 };
 
 // eslint-disable-next-line import/prefer-default-export

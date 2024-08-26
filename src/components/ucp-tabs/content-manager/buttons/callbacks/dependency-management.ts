@@ -7,6 +7,12 @@ import Logger from '../../../../../util/scripts/logging';
 
 const LOGGER = new Logger('dependency-management.ts');
 
+/**
+ * Filters out store packages for which an extension on the local file system already exists.
+ * Could be done the other way around, doesn't matter much.
+ * But since dependency resolution in the Content tab (not in the Store tab) based on what is on disk,
+ * It makes sense to me (gynt) to let the disk version (extensionPackages) be the authority.
+ */
 export const CONTENT_COLLECTION_ATOM = atom<Package[] | undefined>((get) => {
   const { data, isSuccess, error } = get(CONTENT_STORE_ATOM);
 

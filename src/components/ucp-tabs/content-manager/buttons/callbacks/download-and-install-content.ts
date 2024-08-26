@@ -80,9 +80,9 @@ export const downloadAndInstallContent = async (
       chunkSize: number,
       currentSize: number,
       totalSize: number,
-      currentPercent: string,
+      currentPercent: number,
     ) => {
-      let percentage = parseFloat(currentPercent.replaceAll('%', ''));
+      let percentage = currentPercent;
       if (Number.isNaN(percentage)) {
         if (src.size && src.size > 0) {
           percentage = 100 * (currentSize / src.size);

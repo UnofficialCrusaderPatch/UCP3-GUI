@@ -59,6 +59,7 @@ export const uninstallContents = (contentElements: ContentElement[]) =>
         if (!uninstallResult) {
           setStatus({
             action: 'error',
+            /* todo:locale: */
             message: `Failed to remove this content`,
             name: ce.definition.name,
             version: ce.definition.version,
@@ -68,6 +69,7 @@ export const uninstallContents = (contentElements: ContentElement[]) =>
       } catch (e: any) {
         setStatus({
           action: 'error',
+          /* todo:locale: */
           message: `${e.toString()}`,
           name: ce.definition.name,
           version: ce.definition.version,

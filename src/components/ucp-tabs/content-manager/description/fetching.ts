@@ -53,6 +53,7 @@ const resolveDescription = async ({
 
     return new Promise((resolve) => {
       resolve(
+        /* todo:locale: */
         (inlineDescriptionSources.at(-1)! as InlineDescriptionContent)
           .content || "missing 'content'",
       );

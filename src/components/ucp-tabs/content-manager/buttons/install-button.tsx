@@ -42,15 +42,19 @@ export function InstallButton(
   const busyCount = useAtomValue(BUSY_CONTENT_ELEMENTS_ATOM).length;
 
   let enabled = true;
+  /* todo:locale: */
   let helpText = 'Install selected content';
   if (installedCount > 0) {
     enabled = false;
+    /* todo:locale: */
     helpText = 'Selection includes already installed content';
   } else if (onlineOnlyCount === 0) {
     enabled = false;
+    /* todo:locale: */
     helpText = 'Select at least one content element';
   } else if (busyCount > 0) {
     enabled = false;
+    /* todo:locale: */
     helpText =
       'Cannot install content when other content is processing. Please wait first';
   }
@@ -84,6 +88,7 @@ export function InstallButton(
 
           if (solution.status !== 'OK') {
             await showModalOk({
+              /* todo:locale: */
               title: 'Cannot install',
               message: solution.message,
             });

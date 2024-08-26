@@ -93,6 +93,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 color: 'orange',
               }}
               onMouseEnter={() => {
+                /* todo:locale: */
                 setStatusBarMessage(
                   `This content's status changed. Please restart the GUI to finalize.`,
                 );
@@ -117,6 +118,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 verticalAlign: 'middle',
               }}
             >
+              {/* todo:locale: */}
               <span className="visually-hidden">Processing...</span>
             </div>
           );
@@ -142,6 +144,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 color: 'blue',
               }}
               onMouseEnter={() => {
+                /* todo:locale: */
                 setStatusBarMessage(
                   `This content is available for installation`,
                 );
@@ -163,6 +166,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 opacity: isInUse ? '50%' : '100%',
               }}
               onMouseEnter={() => {
+                /* todo:locale: */
                 setStatusBarMessage(
                   `This content is already installed and available online`,
                 );
@@ -183,6 +187,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 color: 'darkgreen',
               }}
               onMouseEnter={() => {
+                /* todo:locale: */
                 setStatusBarMessage(
                   `This content is installed but not available online (deprecation)`,
                 );
@@ -287,6 +292,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       }
       onMouseEnter={() => {
         if (isInUse) {
+          /* todo:locale: */
           setStatusBarMessage(
             `Cannot select content as it is an activated extension. Deactivate it before uninstalling: ${name}`,
           );

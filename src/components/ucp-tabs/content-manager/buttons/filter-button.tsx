@@ -19,6 +19,7 @@ export function ContentFilterButton() {
         setShowOnlineContentOnly(!showOnlineContentOnly);
       }}
       onMouseEnter={() => {
+        /* todo:locale: */
         setStatusBarMessage('Show / hide installed content');
       }}
       onMouseLeave={() => {

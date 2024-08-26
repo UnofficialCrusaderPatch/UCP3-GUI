@@ -46,15 +46,19 @@ export function UninstallButton(
     );
 
   let enabled = true;
+  /* todo:locale: */
   let helpText = 'Uninstall selected content';
   if (installedCount === 0) {
     enabled = false;
+    /* todo:locale: */
     helpText = 'Select at least one extension to uninstall';
   } else if (onlineOnlyCount > 0) {
     enabled = false;
+    /* todo:locale: */
     helpText = 'Cannot uninstall online content';
   } else if (busyCount > 0) {
     enabled = false;
+    /* todo:locale: */
     helpText = `Cannot install content that is not idle. Please wait and then restart`;
   }
 
@@ -79,6 +83,7 @@ export function UninstallButton(
 
           if (deprecated.length > 0) {
             const deprecationAnswer = await showModalOkCancel({
+              /* todo:locale: */
               title: 'Permanent removal warning',
               message: `The following content has been removed from the online store, removal will be permanent, are you sure you want to continue?\n\n${deprecated.map((ce) => ce.definition.name).join('\n')}`,
             });
@@ -117,7 +122,9 @@ export function UninstallButton(
 
           if (solution.status !== 'ok') {
             const okCancelResult = await showModalOkCancel({
+              /* todo:locale: */
               title: 'Removal of dependencies',
+              /* todo:locale: */
               message:
                 'Deinstallation of the selected content will lead to unresolved dependencies.\n\nAre you sure you want to uninstall the selected?',
             });

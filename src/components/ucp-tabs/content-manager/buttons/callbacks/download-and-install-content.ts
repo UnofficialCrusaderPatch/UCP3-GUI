@@ -53,6 +53,7 @@ export const downloadAndInstallContent = async (
   if (zipSources.length === 0) {
     setStatus({
       action: 'error',
+      /* todo:locale: */
       message: `No package found for this content that supports the methods: github-binary`,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
@@ -114,6 +115,7 @@ export const downloadAndInstallContent = async (
   if (hash.toLowerCase() !== src.hash.toLowerCase()) {
     setStatus({
       action: 'error',
+      /* todo:locale: */
       message: 'hashes not equal, download was corrupted',
       name: contentElement.definition.name,
       version: contentElement.definition.version,
@@ -147,6 +149,7 @@ export const downloadAndInstallContent = async (
   } catch (e: any) {
     setStatus({
       action: 'error',
+      /* todo:locale: */
       message: e.toString(),
       name: contentElement.definition.name,
       version: contentElement.definition.version,
@@ -167,6 +170,7 @@ export const downloadAndInstallContent = async (
   if (removeResult.isErr()) {
     setStatus({
       action: 'error',
+      /* todo:locale: */
       message: JSON.stringify(removeResult.err().get()),
       name: contentElement.definition.name,
       version: contentElement.definition.version,
@@ -210,6 +214,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
   );
 
   if (contentElementsWithoutPackageSource.length > 0) {
+    /* todo:locale: */
     await showModalOk({
       title: 'Failed to install content',
       message: `Some content doesn't have a download source: ${contentElementsWithoutPackageSource.map((ce) => ce.definition.name).join(', ')}`,
@@ -233,6 +238,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
       } catch (e: any) {
         setStatus({
           action: 'error',
+          /* todo:locale: */
           message: e.toString(),
           name: ce.definition.name,
           version: ce.definition.version,

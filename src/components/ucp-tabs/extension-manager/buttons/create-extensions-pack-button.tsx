@@ -10,6 +10,10 @@ import { saveFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { ZipWriter } from '../../../../util/structs/zip-handler';
 import { makeToast } from '../../../toasts/toasts-display';
+import {
+  UCP_MODULES_FOLDER,
+  UCP_PLUGINS_FOLDER,
+} from '../../../../function/global/constants/file-constants';
 
 const LOGGER = new Logger('create-extensions-pack.tsx');
 
@@ -49,7 +53,7 @@ export function CreateExtensionsPackButton() {
               const pathPrefix = `${gameFolder}/ucp/`;
               let originalPath = '';
               if (ext.type === 'plugin') {
-                originalPath = `${gameFolder}/ucp/plugins/${fpath}`;
+                originalPath = `${gameFolder}/${UCP_PLUGINS_FOLDER}${fpath}`;
                 // eslint-disable-next-line no-await-in-loop
                 const touch = await exists(originalPath);
 
@@ -97,7 +101,7 @@ export function CreateExtensionsPackButton() {
                   await zw.writeEntryFromFile(makeRelative(fe), fe.path);
                 }
               } else if (ext.type === 'module') {
-                originalPath = `${gameFolder}/ucp/modules/${fpath}.zip`;
+                originalPath = `${gameFolder}/${UCP_MODULES_FOLDER}${fpath}.zip`;
                 const dstPath = `modules/${fpath}.zip`;
 
                 // eslint-disable-next-line no-await-in-loop

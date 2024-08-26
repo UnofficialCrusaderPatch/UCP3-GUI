@@ -17,6 +17,7 @@ import {
 } from '../../state/atoms';
 import { getHexHashOfFile } from '../../../../../util/scripts/hash';
 import { BinaryModulePackageContent } from '../../../../../function/content/store/fetch';
+import { UCP_CACHE_FOLDER } from '../../../../../function/global/constants/file-constants';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -69,7 +70,7 @@ export const downloadAndInstallContent = async (
 
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
-  const cacheDir = `${gameFolder}/ucp/.cache/`;
+  const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
 
   const destination = `${cacheDir}${contentElement.definition.name}-${contentElement.definition.version}.zip`;
 
@@ -204,7 +205,7 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
 
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
-  const cacheDir = `${gameFolder}/ucp/.cache/`;
+  const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
   if (!(await onFsExists(cacheDir))) {
     LOGGER.msg(`.cache directory doesn't exist, creating it!`).warn();
     await createDir(cacheDir);

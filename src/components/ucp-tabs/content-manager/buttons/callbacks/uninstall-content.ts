@@ -1,5 +1,9 @@
 import { ContentElement } from '../../../../../function/content/types/content-element';
 import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
+import {
+  UCP_MODULES_FOLDER,
+  UCP_PLUGINS_FOLDER,
+} from '../../../../../function/global/constants/file-constants';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { removeDir, removeFile } from '../../../../../tauri/tauri-files';
 import Logger from '../../../../../util/scripts/logging';
@@ -15,7 +19,7 @@ export const uninstallContent = async (ce: ContentElement) => {
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   if (ce.definition.type === 'module') {
-    const path = `${gameFolder}/ucp/modules/${ce.definition.name}-${ce.definition.version}.zip`;
+    const path = `${gameFolder}/${UCP_MODULES_FOLDER}${ce.definition.name}-${ce.definition.version}.zip`;
     const result = await removeFile(path, false);
     const result2 = await removeFile(`${path}.sig`, true);
 
@@ -30,7 +34,7 @@ export const uninstallContent = async (ce: ContentElement) => {
     return result.isOk() && result2.isOk();
   }
 
-  const path = `${gameFolder}/ucp/plugins/${ce.definition.name}-${ce.definition.version}`;
+  const path = `${gameFolder}/${UCP_PLUGINS_FOLDER}${ce.definition.name}-${ce.definition.version}`;
   const result = await removeDir(path, true);
   if (result.isErr()) {
     LOGGER.msg(`${result.err().get()}`);

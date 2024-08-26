@@ -12,6 +12,11 @@ import {
   writeTextFile,
 } from '../../../tauri/tauri-files';
 import Logger from '../../../util/scripts/logging';
+import {
+  UCP_CACHE_FOLDER,
+  UCP_MODULES_FOLDER,
+  UCP_PLUGINS_FOLDER,
+} from '../../global/constants/file-constants';
 
 const LOGGER = new Logger(`install-extensions.ts`);
 
@@ -22,7 +27,7 @@ export type InstallPluginOptions = {
 
 const InstallPluginDefaults = {
   zapRootFolder: false,
-  cacheDir: `ucp/.cache/`,
+  cacheDir: `${UCP_CACHE_FOLDER}`,
 } as InstallPluginOptions;
 
 export const installPlugin = async (
@@ -33,7 +38,7 @@ export const installPlugin = async (
   const options = { ...InstallPluginDefaults, ...opts };
   const fileName = await basename(path);
   const folderName = fileName.slice(undefined, -4);
-  const destination = `${gameFolder}/ucp/plugins/${folderName}`;
+  const destination = `${gameFolder}/${UCP_PLUGINS_FOLDER}${folderName}`;
 
   if (await exists(destination)) {
     throw Error(`plugin already exists: ${folderName}`);
@@ -100,7 +105,7 @@ export const installModule = async (
   LOGGER.msg(
     `Installing module (${signature === undefined ? 'unsigned' : 'signed'}): ${path}`,
   ).debug();
-  const destination = `${gameFolder}/ucp/modules/`;
+  const destination = `${gameFolder}/${UCP_MODULES_FOLDER}`;
 
   const name = await basename(path);
 

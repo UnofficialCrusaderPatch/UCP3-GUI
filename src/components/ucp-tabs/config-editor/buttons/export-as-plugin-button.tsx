@@ -22,6 +22,7 @@ import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { getStore } from '../../../../hooks/jotai/base';
 import { appendSystemDependencyStatements } from '../../../../function/extensions/discovery/system-dependencies';
+import { UCP_PLUGINS_FOLDER } from '../../../../function/global/constants/file-constants';
 
 export const createPluginConfigFromCurrentState = async () => {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
@@ -96,7 +97,7 @@ function ExportAsPluginButton(
 
           if (r === undefined) return;
 
-          const pluginDir = `${gameFolder}/ucp/plugins/${r.pluginName}-${r.pluginVersion}`;
+          const pluginDir = `${gameFolder}/${UCP_PLUGINS_FOLDER}${r.pluginName}-${r.pluginVersion}`;
 
           if (await exists(pluginDir)) {
             await showModalOkCancel({

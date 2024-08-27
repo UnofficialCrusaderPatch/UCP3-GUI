@@ -20,10 +20,10 @@ export type EditorApplyButtonCallbackResult = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const editorApplyButtonCallback = async (
+export async function editorApplyButtonCallback(
   extensionsState: ExtensionsState,
   extension: Extension,
-) => {
+) {
   const { plugin } = await createPluginConfigFromCurrentState();
 
   const missingDependencies =
@@ -139,4 +139,4 @@ export const editorApplyButtonCallback = async (
     apply: true,
     state: { ...extensionsState },
   } as EditorApplyButtonCallbackResult;
-};
+}

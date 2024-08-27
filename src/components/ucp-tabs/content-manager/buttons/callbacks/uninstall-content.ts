@@ -12,7 +12,7 @@ import { createStatusSetter } from './status';
 
 const LOGGER = new Logger('uninstall-content.ts');
 
-export const uninstallContent = async (ce: ContentElement) => {
+export async function uninstallContent(ce: ContentElement) {
   const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   if (ce.definition.type === 'module') {
@@ -38,11 +38,11 @@ export const uninstallContent = async (ce: ContentElement) => {
   }
 
   return result.isOk();
-};
+}
 
 // eslint-disable-next-line import/prefer-default-export
-export const uninstallContents = (contentElements: ContentElement[]) =>
-  Promise.all(
+export function uninstallContents(contentElements: ContentElement[]) {
+  return Promise.all(
     contentElements.map(async (ce) => {
       const setStatus = createStatusSetter(ce);
 
@@ -89,3 +89,4 @@ export const uninstallContents = (contentElements: ContentElement[]) =>
       getStore().set(CONTENT_TAB_LOCK, getStore().get(CONTENT_TAB_LOCK) - 1);
     }),
   );
+}

@@ -24,7 +24,7 @@ import { getStore } from '../../../../hooks/jotai/base';
 import { appendSystemDependencyStatements } from '../../../../function/extensions/discovery/system-dependencies';
 import { UCP_PLUGINS_FOLDER } from '../../../../function/global/constants/file-constants';
 
-export const createPluginConfigFromCurrentState = async () => {
+export async function createPluginConfigFromCurrentState() {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
   const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
@@ -52,14 +52,15 @@ export const createPluginConfigFromCurrentState = async () => {
     } as UCP3SerializedPluginConfig,
     user: result as UCP3SerializedUserConfig,
   };
-};
+}
 
-const serializeDependencies = (deps: { [ext: string]: semver.Range }) =>
-  Object.fromEntries(
+function serializeDependencies(deps: { [ext: string]: semver.Range }) {
+  return Object.fromEntries(
     Object.entries(deps).map(([name, range]) => [name, range.raw]),
   );
+}
 
-const createDependenciesFromExplicitlyActiveExtensions = () => {
+function createDependenciesFromExplicitlyActiveExtensions() {
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
   const { explicitlyActivatedExtensions } = extensionsState;
 
@@ -69,7 +70,7 @@ const createDependenciesFromExplicitlyActiveExtensions = () => {
       new semver.Range(`^${e.version}`, { loose: true }),
     ]),
   );
-};
+}
 
 function ExportAsPluginButton(
   props: React.ButtonHTMLAttributes<HTMLButtonElement>,

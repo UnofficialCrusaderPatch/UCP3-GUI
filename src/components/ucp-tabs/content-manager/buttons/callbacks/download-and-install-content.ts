@@ -18,7 +18,7 @@ import { createStatusSetter } from './status';
 
 const LOGGER = new Logger('download-button.tsx');
 
-const guessTotalSize = (currentSize: number) => {
+function guessTotalSize(currentSize: number) {
   const steps = [
     1000 * 500,
 
@@ -39,11 +39,11 @@ const guessTotalSize = (currentSize: number) => {
   }
 
   return steps.at(-1)!;
-};
+}
 
-export const downloadAndInstallContent = async (
+export async function downloadAndInstallContent(
   contentElement: ContentElement,
-) => {
+) {
   const setStatus = createStatusSetter(contentElement);
 
   const zipSources = contentElement.contents.package.filter(
@@ -129,7 +129,7 @@ export const downloadAndInstallContent = async (
 
   setStatus({
     action: 'install',
-    progress: 30, // Start at 10%
+    progress: 30, // Start at 30%
     name: contentElement.definition.name,
     version: contentElement.definition.version,
   });
@@ -193,10 +193,10 @@ export const downloadAndInstallContent = async (
     name: contentElement.definition.name,
     version: contentElement.definition.version,
   });
-};
+}
 
 // eslint-disable-next-line import/prefer-default-export
-export const downloadContent = async (contentElements: ContentElement[]) => {
+export async function downloadContent(contentElements: ContentElement[]) {
   LOGGER.msg(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();
@@ -248,4 +248,4 @@ export const downloadContent = async (contentElements: ContentElement[]) => {
       getStore().set(CONTENT_TAB_LOCK, getStore().get(CONTENT_TAB_LOCK) - 1);
     }),
   );
-};
+}

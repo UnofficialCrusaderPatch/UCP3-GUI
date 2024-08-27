@@ -25,6 +25,15 @@ export function CreateExtensionsPackButton() {
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
+  const pathPrefix = `${gameFolder}/ucp/`;
+  function makeRelative(fe: FileEntry) {
+    if (!fe.path.startsWith(pathPrefix)) {
+      throw Error(fe.path);
+    }
+
+    return fe.path.substring(pathPrefix.length);
+  }
+
   return (
     <button
       type="button"
@@ -50,7 +59,7 @@ export function CreateExtensionsPackButton() {
             // eslint-disable-next-line no-restricted-syntax
             for (const ext of extensionsState.activeExtensions) {
               const fpath = `${ext.name}-${ext.version}`;
-              const pathPrefix = `${gameFolder}/ucp/`;
+
               let originalPath = '';
               if (ext.type === 'plugin') {
                 originalPath = `${gameFolder}/${UCP_PLUGINS_FOLDER}${fpath}`;
@@ -65,14 +74,6 @@ export function CreateExtensionsPackButton() {
                   });
                   return;
                 }
-
-                const makeRelative = (fe: FileEntry) => {
-                  if (!fe.path.startsWith(pathPrefix)) {
-                    throw Error(fe.path);
-                  }
-
-                  return fe.path.substring(pathPrefix.length);
-                };
 
                 // eslint-disable-next-line no-await-in-loop
                 const entries = await readDir(originalPath, {

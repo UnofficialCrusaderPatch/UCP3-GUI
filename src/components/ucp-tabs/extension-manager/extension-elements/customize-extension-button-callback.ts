@@ -24,7 +24,7 @@ import { buildExtensionConfigurationDB } from '../extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 
 // eslint-disable-next-line import/prefer-default-export
-export const customizeExtensionButtonCallback = async (ext: Extension) => {
+export async function customizeExtensionButtonCallback(ext: Extension) {
   ConsoleLogger.debug('customizeExtensionButtonCallback');
 
   if (getStore().get(CONFIG_DIRTY_STATE_ATOM)) {
@@ -135,4 +135,4 @@ export const customizeExtensionButtonCallback = async (ext: Extension) => {
       message: `Cannot customize ${ext.name} because:\n${err.toString()}`,
     });
   }
-};
+}

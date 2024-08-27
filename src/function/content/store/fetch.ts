@@ -79,7 +79,7 @@ export type ContentStore = {
   };
 };
 
-export const fetchDescription = async (url: string): Promise<string> => {
+export async function fetchDescription(url: string): Promise<string> {
   if (url === '')
     return new Promise((resolve) => {
       resolve(''); // Or reject?
@@ -91,14 +91,14 @@ export const fetchDescription = async (url: string): Promise<string> => {
   });
 
   return result.data;
-};
+}
 
 // eslint-disable-next-line import/prefer-default-export
-export const fetchStore = async ({
+export async function fetchStore({
   queryKey: [, version],
 }: {
   queryKey: [string, string];
-}) => {
+}) {
   LOGGER.msg(`Fetching store from web for version ${version}...`).debug();
   if (version.indexOf('?') !== -1) {
     throw new Error('invalid UCP version');
@@ -118,9 +118,9 @@ export const fetchStore = async ({
   LOGGER.msg(`Web store result: ${JSON.stringify(result)}`).debug();
 
   return result;
-};
+}
 
-export const dummyFetchStore = async () => {
+export async function dummyFetchStore() {
   LOGGER.msg('Fetching store from dummy...').warn();
   return new Promise<ContentStore>((resolve) => {
     const data = `
@@ -271,4 +271,4 @@ extensions:
     `;
     resolve(parseYaml(data) as ContentStore);
   });
-};
+}

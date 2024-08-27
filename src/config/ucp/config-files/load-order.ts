@@ -2,16 +2,18 @@ import yaml from 'yaml';
 import { Extension, LoadOrder } from '../common';
 import { DependencyStatement } from '../dependency-statement';
 
-export const serializeLoadOrder = (extensions: Extension[]) =>
-  extensions.map((ext) => ({
+export function serializeLoadOrder(extensions: Extension[]) {
+  return extensions.map((ext) => ({
     extension: ext.name,
     version: `${ext.version}`,
   }));
+}
 
-export const serializeLoadOrderToYaml = (extensions: Extension[]) =>
-  yaml.stringify(serializeLoadOrder(extensions));
+export function serializeLoadOrderToYaml(extensions: Extension[]) {
+  return yaml.stringify(serializeLoadOrder(extensions));
+}
 
-export const deserializeLoadOrder = (values: string[] | LoadOrder) => {
+export function deserializeLoadOrder(values: string[] | LoadOrder) {
   const result: LoadOrder = [];
 
   if (!(values instanceof Array))
@@ -40,7 +42,8 @@ export const deserializeLoadOrder = (values: string[] | LoadOrder) => {
   });
 
   return result;
-};
+}
 
-export const deserializeLoadOrderFromYaml = (value: string) =>
-  deserializeLoadOrder(yaml.parse(value));
+export function deserializeLoadOrderFromYaml(value: string) {
+  return deserializeLoadOrder(yaml.parse(value));
+}

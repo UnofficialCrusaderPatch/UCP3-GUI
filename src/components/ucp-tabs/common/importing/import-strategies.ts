@@ -19,14 +19,14 @@ import { getStore } from '../../../../hooks/jotai/base';
 
 const LOGGER = new Logger('import-strategies.ts');
 
-export const sanitizeVersionRange = (rangeString: string) => {
+export function sanitizeVersionRange(rangeString: string) {
   if (rangeString.indexOf('==') !== -1) {
     return rangeString.replaceAll('==', '');
   }
   return rangeString;
-};
+}
 
-const updatePreferredExtensionVersions = (extensions: Extension[]) => {
+function updatePreferredExtensionVersions(extensions: Extension[]) {
   // Set the new preferences for which version to use for each extension
   const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };
 
@@ -35,9 +35,9 @@ const updatePreferredExtensionVersions = (extensions: Extension[]) => {
   });
 
   getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
-};
+}
 
-type Success = {
+export type Success = {
   status: 'ok';
   newExtensionsState: ExtensionsState;
 };
@@ -75,11 +75,11 @@ export type Strategy = (
  * @returns A StrategyResult object
  */
 // eslint-disable-next-line import/prefer-default-export
-export const sparseStrategy: Strategy = async (
+export async function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (arg0: string) => void,
-) => {
+) {
   const { extensions } = newExtensionsState;
 
   // Get the current available versions database
@@ -229,7 +229,7 @@ export const sparseStrategy: Strategy = async (
     newExtensionsState,
     status: 'ok',
   } as Success;
-};
+}
 
 /**
  * Builds the new extension state and load order from the
@@ -243,10 +243,11 @@ export const sparseStrategy: Strategy = async (
  * @param setConfigStatus the callback to report status with
  * @returns A StrategyResult object
  */
-export const fullStrategy: Strategy = async (
+export async function fullStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
-) => {
+  setConfigStatus: (arg0: string) => void,
+) {
   const { extensions } = newExtensionsState;
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
@@ -300,7 +301,7 @@ export const fullStrategy: Strategy = async (
             },
           )}`,
         ).error();
-
+        setConfigStatus('missing dependencies');
         // Abort the import
         return {
           status: 'error',
@@ -367,4 +368,4 @@ export const fullStrategy: Strategy = async (
     newExtensionsState,
     status: 'ok',
   } as Success;
-};
+}

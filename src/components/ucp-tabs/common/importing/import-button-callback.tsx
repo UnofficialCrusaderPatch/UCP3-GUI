@@ -1,5 +1,5 @@
 import { TFunction } from 'i18next';
-import { fullStrategy, sparseStrategy } from './import-strategies';
+import { fullStrategy, sparseStrategy, Success } from './import-strategies';
 import { collectConfigEntries } from '../../../../function/extensions/discovery/collect-config-entries';
 import {
   ConfigurationQualifier,
@@ -31,22 +31,22 @@ import { Override } from '../../../../function/configuration/overrides';
 
 const LOGGER = new Logger('import-button-callback.tsx');
 
-export const sanitizeVersionRange = (rangeString: string) => {
+export function sanitizeVersionRange(rangeString: string) {
   if (rangeString.indexOf('==') !== -1) {
     return rangeString.replaceAll('==', '');
   }
   return rangeString;
-};
+}
 
-export const constructUserConfigObjects = (config: ConfigFile) => {
+export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
 
-  const parseEntry = ([extensionName, data]: [
+  function parseEntry([extensionName, data]: [
     string,
     {
       config: ConfigFileExtensionEntry;
     },
-  ]) => {
+  ]) {
     const result = collectConfigEntries(
       data.config as {
         [key: string]: unknown;
@@ -56,7 +56,7 @@ export const constructUserConfigObjects = (config: ConfigFile) => {
     );
 
     userConfigEntries = { ...userConfigEntries, ...result };
-  };
+  }
 
   Object.entries(config['config-sparse'].modules).forEach(parseEntry);
   Object.entries(config['config-sparse'].plugins).forEach(parseEntry);
@@ -93,14 +93,14 @@ export const constructUserConfigObjects = (config: ConfigFile) => {
     userConfig: newUserConfiguration,
     userConfigQualifiers: newConfigurationQualifier,
   };
-};
+}
 
-const importButtonCallback = async (
+async function importButtonCallback(
   gameFolder: string,
   setConfigStatus: (arg0: string) => void,
   t: TFunction<[string, string], undefined>,
   file: string | undefined,
-) => {
+) {
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -225,7 +225,7 @@ const importButtonCallback = async (
     return;
   }
 
-  newExtensionsState = strategyResult.newExtensionsState;
+  newExtensionsState = (strategyResult as Success).newExtensionsState;
 
   // ConsoleLogger.debug('opened config', parsingResult.result);
 
@@ -252,6 +252,6 @@ const importButtonCallback = async (
   );
   // Set the new extension state, which fires an update of the full config
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
-};
+}
 
 export default importButtonCallback;

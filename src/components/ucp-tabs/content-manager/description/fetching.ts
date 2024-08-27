@@ -7,7 +7,7 @@ import {
 import { SINGLE_CONTENT_SELECTION_ATOM } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 
-export const distillInlineDescription = (e?: ContentElement) => {
+export function distillInlineDescription(e?: ContentElement) {
   if (e === undefined) return '';
 
   const descriptionSources = e.contents.description.filter(
@@ -19,14 +19,14 @@ export const distillInlineDescription = (e?: ContentElement) => {
   }
 
   return (descriptionSources.at(0)! as InlineDescriptionContent).content;
-};
+}
 
 // TODO: implement locale
-const resolveDescription = async ({
+async function resolveDescription({
   queryKey: [, e],
 }: {
   queryKey: [string, ContentElement?];
-}) => {
+}) {
   if (e === undefined)
     return new Promise((resolve) => {
       resolve('');
@@ -63,7 +63,7 @@ const resolveDescription = async ({
   const { url } = onlineDescriptionSources.at(0)! as OnlineDescriptionContent;
 
   return fetchDescription(url);
-};
+}
 
 export const SELECTED_CONTENT_DESCRIPTION_ATOM = atomWithQuery((get) => ({
   queryKey: ['description', get(SINGLE_CONTENT_SELECTION_ATOM)] as [

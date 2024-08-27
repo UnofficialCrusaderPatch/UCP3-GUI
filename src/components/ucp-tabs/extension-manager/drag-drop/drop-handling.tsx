@@ -11,7 +11,7 @@ import { CURRENT_DISPLAYED_TAB } from '../../tabs-state';
 import { installExtensionsButtonCallback } from '../buttons/install-extensions-button';
 
 export const IS_FILE_DRAGGING = atom(false); // const HANDLED_DROP_EVENTS = atom<{ [id: number]: boolean }>({});
-export const handleFileDrop = async (event: Event<unknown>) => {
+export async function handleFileDrop(event: Event<unknown>) {
   ConsoleLogger.debug('Drop event? ', event);
   if (event.event !== 'tauri://file-drop') {
     ConsoleLogger.debug('Non drop event: ', event);
@@ -66,4 +66,4 @@ export const handleFileDrop = async (event: Event<unknown>) => {
       ConsoleLogger.error(err);
     }
   }
-};
+}

@@ -8,7 +8,7 @@ import {
   CONTENT_TAB_LOCK,
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../state/atoms';
-import { downloadContent } from './callbacks/download-and-install-content';
+import { installOnlineContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { showModalOk } from '../../../modals/modal-ok';
 import { getStore } from '../../../../hooks/jotai/base';
@@ -111,7 +111,7 @@ export function InstallButton(
           );
 
           getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
-          await downloadContent(notInstalledDependencies);
+          await installOnlineContent(notInstalledDependencies);
         }}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...props}

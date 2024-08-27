@@ -196,7 +196,7 @@ export async function downloadAndInstallContent(
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export async function downloadContent(contentElements: ContentElement[]) {
+export async function installOnlineContent(contentElements: ContentElement[]) {
   LOGGER.msg(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();

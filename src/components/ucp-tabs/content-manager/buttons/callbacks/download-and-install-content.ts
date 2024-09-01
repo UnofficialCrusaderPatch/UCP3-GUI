@@ -18,29 +18,6 @@ import { createStatusSetter } from './status';
 
 const LOGGER = new Logger('download-button.tsx');
 
-function guessTotalSize(currentSize: number) {
-  const steps = [
-    1000 * 500,
-
-    1000 * 1000 * 10,
-
-    1000 * 1000 * 100,
-
-    1000 * 1000 * 500,
-
-    1000 * 1000 * 1000,
-  ];
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const step of steps) {
-    if (currentSize < step) {
-      return step;
-    }
-  }
-
-  return steps.at(-1)!;
-}
-
 export async function downloadAndInstallContent(
   contentElement: ContentElement,
 ) {
@@ -87,9 +64,8 @@ export async function downloadAndInstallContent(
         if (src.size && src.size > 0) {
           percentage = 100 * (currentSize / src.size);
         } else {
-          // eslint-disable-next-line no-param-reassign
-          totalSize = guessTotalSize(currentSize);
-          percentage = 100 * (currentSize / totalSize);
+          // If we don't know the binary size, display no progress
+          percentage = 0;
         }
       }
 

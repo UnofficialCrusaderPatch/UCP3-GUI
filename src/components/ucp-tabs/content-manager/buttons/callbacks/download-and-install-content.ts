@@ -105,7 +105,7 @@ export async function downloadAndInstallContent(
 
   setStatus({
     action: 'install',
-    progress: 30, // Start at 30%
+    progress: 30,
     name: contentElement.definition.name,
     version: contentElement.definition.version,
   });

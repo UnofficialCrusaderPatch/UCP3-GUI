@@ -37,6 +37,8 @@ export async function uninstallContentButtonCallback(
       const deprecationAnswer = await showModalOkCancel({
         /* todo:locale: */
         title: 'Permanent removal warning',
+
+        /* todo:locale: */
         message: `The following content has been removed from the online store, removal will be permanent, are you sure you want to continue?\n\n${deprecated.map((ce) => ce.definition.name).join('\n')}`,
       });
 

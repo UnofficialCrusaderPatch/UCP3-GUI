@@ -38,6 +38,8 @@ export async function installContentButtonCallback(
       await showModalOk({
         /* todo:locale: */
         title: 'Cannot install',
+
+        /* todo:locale: */
         message: solution.message,
       });
       return;

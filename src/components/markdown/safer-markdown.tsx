@@ -1,4 +1,5 @@
 import Markdown from 'react-markdown';
+import { ResizeImage100PercentWidth } from '../ucp-tabs/common/markdown/images';
 
 function LinkRenderer(props: any) {
   const { href, children } = props;
@@ -13,8 +14,11 @@ function LinkRenderer(props: any) {
 export function SaferMarkdown(props: any) {
   const { children, ...other } = props;
   return (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Markdown components={{ a: LinkRenderer }} {...other}>
+    <Markdown
+      components={{ a: LinkRenderer, img: ResizeImage100PercentWidth }}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...other}
+    >
       {children}
     </Markdown>
   );

@@ -12,6 +12,7 @@ import {
   BUSY_CONTENT_COUNT,
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../../state/atoms';
+import { ErrorContentMutationResult } from '../../types/content-store-mutation-result';
 import { uninstallContents } from './uninstall-content';
 
 export const LOGGER = new Logger('uninstall-button-callback.tsx');
@@ -95,11 +96,11 @@ export async function uninstallContentButtonCallback(
     });
 
     const report = results
-      .filter((r) => r.status !== 'ok')
+      .filter((r) => r.status === 'error')
       .map(
         (r) =>
           /* todo:locale: */
-          `Deinstallation of ${r.contentElement.definition.name} failed (${r.status}). Reason: ${r.message}`,
+          `Deinstallation of ${r.contentElement.definition.name} failed (${r.status}). Reason: ${(r as ErrorContentMutationResult).message}`,
       )
       .join('\n');
 

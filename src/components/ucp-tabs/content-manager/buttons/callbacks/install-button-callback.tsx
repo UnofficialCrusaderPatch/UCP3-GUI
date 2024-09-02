@@ -8,6 +8,7 @@ import {
   BUSY_CONTENT_COUNT,
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../../state/atoms';
+import { ErrorContentMutationResult } from '../../types/content-store-mutation-result';
 import { installOnlineContent } from './install-content';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -62,11 +63,11 @@ export async function installContentButtonCallback(
     });
 
     const report = results
-      .filter((r) => r.status !== 'ok')
+      .filter((r) => r.status === 'error')
       .map(
         (r) =>
           /* todo:locale: */
-          `Installation of ${r.contentElement.definition.name} failed (${r.status}). Reason: ${r.message}`,
+          `Installation of ${r.contentElement.definition.name} failed (${r.status}). Reason: ${(r as ErrorContentMutationResult).message}`,
       )
       .join('\n');
 

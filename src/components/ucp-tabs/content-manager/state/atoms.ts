@@ -16,6 +16,7 @@ import {
   EXTENSIONS_STATE_TREE_ATOM,
 } from '../../../../function/extensions/state/focus';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
+import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -180,7 +181,10 @@ export const filteredContentElementsAtom = atom((get) =>
 export const isContentInUseAtom = atom((get) =>
   get(CONTENT_ELEMENTS_ATOM).filter(
     (ce) =>
-      get(ACTIVE_EXTENSIONS_ID_ATOM).indexOf(createExtensionID(ce)) !== -1,
+      get(ACTIVE_EXTENSIONS_ID_ATOM).indexOf(createExtensionID(ce)) !== -1 ||
+      get(CONFIGURATION_DISK_STATE_ATOM)
+        .map((ext) => createExtensionID(ext))
+        .indexOf(createExtensionID(ce)) !== -1,
   ),
 );
 

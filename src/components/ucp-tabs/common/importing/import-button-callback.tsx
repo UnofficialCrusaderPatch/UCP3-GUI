@@ -28,6 +28,7 @@ import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildConfigMetaContentDBForUser } from '../../extension-manager/extension-configuration';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { Override } from '../../../../function/configuration/overrides';
+import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 
 const LOGGER = new Logger('import-button-callback.tsx');
 
@@ -226,6 +227,11 @@ async function importButtonCallback(
   }
 
   newExtensionsState = (strategyResult as Success).newExtensionsState;
+
+  /* Remember the active extensions as on disk (ucp-config.yml file) */
+  getStore().set(CONFIGURATION_DISK_STATE_ATOM, [
+    ...newExtensionsState.activeExtensions,
+  ]);
 
   // ConsoleLogger.debug('opened config', parsingResult.result);
 

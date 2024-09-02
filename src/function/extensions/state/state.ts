@@ -6,6 +6,7 @@ import { propagateActiveExtensionsChange } from './change';
 import { ConfigurationState } from '../../configuration/state';
 import { Override } from '../../configuration/overrides';
 
+// eslint-disable-next-line func-style
 export const extensionStateReducer = (
   oldState: ExtensionsState,
   newState: Partial<ExtensionsState>,

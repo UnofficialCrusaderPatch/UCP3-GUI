@@ -80,10 +80,6 @@ export async function uninstallContentButtonCallback(
           'Deinstallation of the selected content will lead to unresolved dependencies.\n\nAre you sure you want to uninstall the selected?',
       });
       if (okCancelResult === false) {
-        getStore().set(
-          BUSY_CONTENT_COUNT,
-          getStore().get(BUSY_CONTENT_COUNT) - 1,
-        );
         return;
       }
     }

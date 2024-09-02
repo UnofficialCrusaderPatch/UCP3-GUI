@@ -8,6 +8,7 @@ import {
   ConfigurationQualifier,
   UCP_CONFIG_FILE_ATOM,
 } from '../../../function/configuration/state';
+import { CONFIGURATION_DISK_STATE_ATOM as CONFIGURATION_DISK_STATE_ACTIVE_EXTENSIONS } from '../../../function/extensions/state/disk';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import { getStore } from '../../../hooks/jotai/base';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
@@ -36,6 +37,11 @@ function saveConfig(
     });
 
     getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, false);
+
+    /* Remember the active extensions that are now on disk */
+    getStore().set(CONFIGURATION_DISK_STATE_ACTIVE_EXTENSIONS, [
+      ...allExtensions,
+    ]);
 
     return value;
   });

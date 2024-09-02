@@ -72,16 +72,14 @@ export async function uninstallContentButtonCallback(
     const solution = tree.tryResolveAllDependencies();
 
     if (solution.status !== 'ok') {
-      const okCancelResult = await showModalOkCancel({
+      await showModalOk({
         /* todo:locale: */
         title: 'Removal of dependencies',
         /* todo:locale: */
         message:
-          'Deinstallation of the selected content will lead to unresolved dependencies.\n\nAre you sure you want to uninstall the selected?',
+          'Deinstallation of the selected content will lead to unresolved dependencies.\n\nAborting...',
       });
-      if (okCancelResult === false) {
-        return;
-      }
+      return;
     }
 
     changeCount(-1 + installed.length);

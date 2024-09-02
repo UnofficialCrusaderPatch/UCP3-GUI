@@ -111,7 +111,8 @@
           "license": "../LICENSE",
           "headerImage": "../installer/headerImage.bmp",
           "sidebarImage": "../installer/sidebarImage.bmp",
-          "installerIcon": "../installer/ucp3.ico"
+          "installerIcon": "../installer/ucp3.ico",
+          "template": "nsis-template-with-msvc.nsi"
         }
       }
     },

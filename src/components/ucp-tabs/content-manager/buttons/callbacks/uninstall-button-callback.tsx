@@ -95,7 +95,7 @@ export async function uninstallContentButtonCallback(
     });
 
     const report = results
-      .filter((r) => r.status !== 'ok')
+      .filter((r) => r.status === 'error')
       .map(
         (r) =>
           /* todo:locale: */

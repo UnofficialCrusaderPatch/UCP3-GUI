@@ -72,12 +72,14 @@ export async function uninstallContentButtonCallback(
     const solution = tree.tryResolveAllDependencies();
 
     if (solution.status !== 'ok') {
+      const reqs = solution.messages
+        .map((m) => m.split('required by ')[1].split(')')[0])
+        .flat();
       await showModalOk({
         /* todo:locale: */
         title: 'Removal of dependencies',
         /* todo:locale: */
-        message:
-          'Deinstallation of the selected content will lead to unresolved dependencies.\n\nAborting...',
+        message: `Cannot deinstall the selected extensions. Deinstallation of the selected content will lead to unresolved dependencies for the following extensions:\n${reqs.join('\n')}`,
       });
       return;
     }

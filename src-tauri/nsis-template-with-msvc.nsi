@@ -499,6 +499,66 @@ Section WebView2
   webview2_done:
 SectionEnd
 
+
+Section MSVC
+  ; Check if MSVC is already installed and skip this section
+  ${If} ${RunningX64}
+    ReadRegDWORD $4 HKLM "SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
+  ${Else}
+    ReadRegDWORD $4 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
+  ${EndIf}
+
+  IntCmp $4 1 MSVC_done 0
+
+  ; Webview2 install modes
+  ; !if "${INSTALLWEBVIEW2MODE}" == "downloadBootstrapper"
+    Delete "$TEMP\VC_redist.x86.exe"
+    DetailPrint "Downloading Microsoft Visual C++ Redistributable"
+    NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$TEMP\VC_redist.x86.exe"
+    Pop $0
+    ${If} $0 == "success"
+      DetailPrint "Microsoft Visual C++ Redistributable downloaded succesfully ($0)"
+    ${Else}
+      DetailPrint "Microsoft Visual C++ Redistributable download failed ($0). Please install it manually"
+      Goto MSVC_done
+      ; Abort "$(webview2AbortError)"
+    ${EndIf}
+    StrCpy $6 "$TEMP\VC_redist.x86.exe"
+    Goto install_MSVC
+  ; !endif
+
+  ; !if "${INSTALLWEBVIEW2MODE}" == "embedBootstrapper"
+  ;   Delete "$TEMP\MicrosoftEdgeWebview2Setup.exe"
+  ;   File "/oname=$TEMP\MicrosoftEdgeWebview2Setup.exe" "${WEBVIEW2BOOTSTRAPPERPATH}"
+  ;   DetailPrint "$(installingWebview2)"
+  ;   StrCpy $6 "$TEMP\MicrosoftEdgeWebview2Setup.exe"
+  ;   Goto install_MSVC
+  ; !endif
+
+  ; !if "${INSTALLWEBVIEW2MODE}" == "offlineInstaller"
+  ;   Delete "$TEMP\MicrosoftEdgeWebView2RuntimeInstaller.exe"
+  ;   File "/oname=$TEMP\MicrosoftEdgeWebView2RuntimeInstaller.exe" "${WEBVIEW2INSTALLERPATH}"
+  ;   DetailPrint "$(installingWebview2)"
+  ;   StrCpy $6 "$TEMP\MicrosoftEdgeWebView2RuntimeInstaller.exe"
+  ;   Goto install_MSVC
+  ; !endif
+
+  Goto MSVC_done
+
+  install_MSVC:
+    DetailPrint "Installing Microsoft Visual C++ Redistributable"
+    ; $6 holds the path to the webview2 installer
+    ExecWait "$6 /install /passive /norestart" $1
+    ${If} $1 == 0
+      DetailPrint "Microsoft Visual C++ Redistributable installation succesful ($1)"
+    ${Else}
+      DetailPrint "Microsoft Visual C++ Redistributable installation failed ($1). Please install it manually"
+      Goto MSVC_done
+      ; Abort "$(webview2AbortError)"
+    ${EndIf}
+  MSVC_done:
+SectionEnd
+
 !macro CheckIfAppIsRunning
   !if "${INSTALLMODE}" == "currentUser"
     nsis_tauri_utils::FindProcessCurrentUser "${MAINBINARYNAME}.exe"

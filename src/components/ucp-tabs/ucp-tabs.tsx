@@ -39,7 +39,7 @@ import {
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
 import { ContentManager } from './content-manager/content-manager';
 import {
-  CONTENT_TAB_LOCK,
+  BUSY_CONTENT_COUNT,
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from './content-manager/state/atoms';
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
@@ -109,7 +109,7 @@ export default function UcpTabs() {
 
   const currentFolder = useCurrentGameFolder();
 
-  const contentTabLock = useAtomValue(CONTENT_TAB_LOCK);
+  const contentTabLock = useAtomValue(BUSY_CONTENT_COUNT);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 

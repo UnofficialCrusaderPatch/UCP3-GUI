@@ -7,7 +7,10 @@ import {
 import { getStore } from '../../../../../hooks/jotai/base';
 import { removeDir, removeFile } from '../../../../../tauri/tauri-files';
 import Logger from '../../../../../util/scripts/logging';
-import { CONTENT_TAB_LOCK } from '../../state/atoms';
+import {
+  ErrorContentMutationResult,
+  OkayContentMutationResult,
+} from '../../types/content-store-mutation-result';
 import { createStatusSetter } from './status';
 
 const LOGGER = new Logger('uninstall-content.ts');
@@ -20,28 +23,58 @@ export async function uninstallContent(ce: ContentElement) {
     const result = await removeFile(path, false);
     const result2 = await removeFile(`${path}.sig`, true);
 
+    let err: string = '';
+
     if (result.isErr()) {
-      LOGGER.msg(`${result.err().get()}`);
+      err = `${result.err().get()}`;
+      LOGGER.msg(err);
     }
 
     if (result2.isErr()) {
-      LOGGER.msg(`${result.err().get()}`);
+      err = `${result2.err().get()}`;
+      LOGGER.msg(err);
     }
 
-    return result.isOk() && result2.isOk();
+    if (result.isOk() && result2.isOk()) {
+      return {
+        contentElement: ce,
+        status: 'ok',
+        type: 'uninstall',
+      } as OkayContentMutationResult;
+    }
+    return {
+      contentElement: ce,
+      status: 'error',
+      message: err,
+      type: 'uninstall',
+    } as ErrorContentMutationResult;
   }
 
   const path = `${gameFolder}/${UCP_PLUGINS_FOLDER}${ce.definition.name}-${ce.definition.version}`;
   const result = await removeDir(path, true);
   if (result.isErr()) {
-    LOGGER.msg(`${result.err().get()}`);
+    const err = `${result.err().get()}`;
+    LOGGER.msg(err);
+    return {
+      contentElement: ce,
+      status: 'error',
+      message: err,
+      type: 'uninstall',
+    } as ErrorContentMutationResult;
   }
 
-  return result.isOk();
+  return {
+    contentElement: ce,
+    status: 'ok',
+    type: 'uninstall',
+  } as OkayContentMutationResult;
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function uninstallContents(contentElements: ContentElement[]) {
+export function uninstallContents(
+  contentElements: ContentElement[],
+  onSettled?: (result?: any) => void,
+) {
   return Promise.all(
     contentElements.map(async (ce) => {
       const setStatus = createStatusSetter(ce);
@@ -56,25 +89,38 @@ export function uninstallContents(contentElements: ContentElement[]) {
       try {
         const uninstallResult = await uninstallContent(ce);
 
-        if (!uninstallResult) {
+        if (uninstallResult.status !== 'ok') {
           setStatus({
             action: 'error',
             /* todo:locale: */
-            message: `Failed to remove this content`,
+            message: uninstallResult.message,
             name: ce.definition.name,
             version: ce.definition.version,
           });
-          return;
+          return {
+            contentElement: ce,
+            status: 'error',
+            message: uninstallResult.message,
+            type: 'uninstall',
+          } as ErrorContentMutationResult;
         }
       } catch (e: any) {
+        const err = `${e.toString()}`;
         setStatus({
           action: 'error',
           /* todo:locale: */
-          message: `${e.toString()}`,
+          message: err,
           name: ce.definition.name,
           version: ce.definition.version,
         });
-        return;
+        return {
+          contentElement: ce,
+          status: 'error',
+          message: err,
+          type: 'uninstall',
+        } as ErrorContentMutationResult;
+      } finally {
+        if (onSettled) onSettled();
       }
 
       // eslint-disable-next-line no-param-reassign
@@ -86,7 +132,11 @@ export function uninstallContents(contentElements: ContentElement[]) {
         version: ce.definition.version,
       });
 
-      getStore().set(CONTENT_TAB_LOCK, getStore().get(CONTENT_TAB_LOCK) - 1);
+      return {
+        contentElement: ce,
+        status: 'ok',
+        type: 'uninstall',
+      } as OkayContentMutationResult;
     }),
   );
 }

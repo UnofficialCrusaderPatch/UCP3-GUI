@@ -5,14 +5,9 @@ import {
   BUSY_CONTENT_ELEMENTS_ATOM,
   CONTENT_ELEMENTS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
-  CONTENT_TAB_LOCK,
-  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../state/atoms';
-import { installOnlineContent } from './callbacks/download-and-install-content';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
-import { showModalOk } from '../../../modals/modal-ok';
-import { getStore } from '../../../../hooks/jotai/base';
-import { createExtensionID } from '../../../../function/global/constants/extension-id';
+import { installContentButtonCallback } from './callbacks/install-button-callback';
 
 // eslint-disable-next-line import/prefer-default-export
 export function InstallButton(
@@ -74,45 +69,9 @@ export function InstallButton(
         className="ucp-button ucp-button-variant"
         disabled={tree === undefined || !enabled}
         type="button"
-        onClick={async () => {
-          getStore().set(
-            CONTENT_TAB_LOCK,
-            getStore().get(CONTENT_TAB_LOCK) + 1,
-          );
-
-          const ids = interfaceState.selected.map((ec) =>
-            createExtensionID(ec),
-          );
-
-          const solution = tree!.dependenciesForMultiple(ids);
-
-          if (solution.status !== 'OK') {
-            await showModalOk({
-              /* todo:locale: */
-              title: 'Cannot install',
-              message: solution.message,
-            });
-            return;
-          }
-
-          const solutionIDs = solution.packages.map((p) => p.id);
-
-          const notInstalledDependencies = contentElements
-            // Retain elements that are in the solution
-            .filter((ce) => solutionIDs.indexOf(createExtensionID(ce)) !== -1)
-            // Retain elements that are not installed yet
-            .filter((ce) => !ce.installed);
-
-          getStore().set(
-            CONTENT_TAB_LOCK,
-            getStore().get(CONTENT_TAB_LOCK) +
-              notInstalledDependencies.length -
-              1,
-          );
-
-          getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
-          await installOnlineContent(notInstalledDependencies);
-        }}
+        onClick={async () =>
+          installContentButtonCallback(interfaceState, contentElements, tree!)
+        }
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...props}
       >

@@ -10,11 +10,15 @@ import {
   installPlugin,
 } from '../../../../../function/extensions/installation/install-module';
 import { onFsExists, removeFile } from '../../../../../tauri/tauri-files';
-import { CONTENT_TAB_LOCK } from '../../state/atoms';
 import { getHexHashOfFile } from '../../../../../util/scripts/hash';
 import { BinaryModulePackageContent } from '../../../../../function/content/store/fetch';
 import { UCP_CACHE_FOLDER } from '../../../../../function/global/constants/file-constants';
 import { createStatusSetter } from './status';
+import {
+  ErrorContentMutationResult,
+  OkayContentMutationResult,
+  DownloadAndInstallContentResult,
+} from '../../types/content-store-mutation-result';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -28,14 +32,20 @@ export async function downloadAndInstallContent(
   );
 
   if (zipSources.length === 0) {
+    /* todo:locale: */
+    const msg = `No package found for this content that supports the methods: github-binary`;
     setStatus({
       action: 'error',
-      /* todo:locale: */
-      message: `No package found for this content that supports the methods: github-binary`,
+      message: msg,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
     });
-    return;
+    return {
+      contentElement,
+      status: 'error',
+      message: msg,
+      type: 'download_and_install',
+    } as ErrorContentMutationResult;
   }
 
   const src = zipSources.at(0)!;
@@ -89,14 +99,20 @@ export async function downloadAndInstallContent(
 
   const hash = await getHexHashOfFile(destination);
   if (hash.toLowerCase() !== src.hash.toLowerCase()) {
+    /* todo:locale: */
+    const msg = 'hashes not equal, download was corrupted';
     setStatus({
       action: 'error',
-      /* todo:locale: */
-      message: 'hashes not equal, download was corrupted',
+      message: msg,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
     });
-    return;
+    return {
+      contentElement,
+      status: 'error',
+      message: msg,
+      type: 'download_and_install',
+    } as ErrorContentMutationResult;
   }
 
   LOGGER.msg(
@@ -123,14 +139,20 @@ export async function downloadAndInstallContent(
       });
     }
   } catch (e: any) {
+    /* todo:locale: */
+    const msg = e.toString();
     setStatus({
       action: 'error',
-      /* todo:locale: */
-      message: e.toString(),
+      message: msg,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
     });
-    return;
+    return {
+      contentElement,
+      status: 'error',
+      message: msg,
+      type: 'download_and_install',
+    } as ErrorContentMutationResult;
   }
 
   setStatus({
@@ -144,14 +166,20 @@ export async function downloadAndInstallContent(
   const removeResult = await removeFile(destination);
 
   if (removeResult.isErr()) {
+    /* todo:locale: */
+    const msg = JSON.stringify(removeResult.err().get());
     setStatus({
       action: 'error',
-      /* todo:locale: */
-      message: JSON.stringify(removeResult.err().get()),
+      message: msg,
       name: contentElement.definition.name,
       version: contentElement.definition.version,
     });
-    return;
+    return {
+      contentElement,
+      status: 'error',
+      message: msg,
+      type: 'download_and_install',
+    } as ErrorContentMutationResult;
   }
 
   setStatus({
@@ -169,10 +197,19 @@ export async function downloadAndInstallContent(
     name: contentElement.definition.name,
     version: contentElement.definition.version,
   });
+
+  return {
+    contentElement,
+    status: 'ok',
+    type: 'download_and_install',
+  } as OkayContentMutationResult;
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export async function installOnlineContent(contentElements: ContentElement[]) {
+export async function installOnlineContent(
+  contentElements: ContentElement[],
+  onSettled?: (result: DownloadAndInstallContentResult) => void,
+) {
   LOGGER.msg(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();
@@ -196,10 +233,21 @@ export async function installOnlineContent(contentElements: ContentElement[]) {
       message: `Some content doesn't have a download source: ${contentElementsWithoutPackageSource.map((ce) => ce.definition.name).join(', ')}`,
     });
 
-    return;
+    return contentElementsWithoutPackageSource.map((ce) => {
+      /* todo:locale: */
+      const msg = `Some content doesn't have a download source: ${ce.definition.name}`;
+
+      // We don't use onSettled here because we never even started any installing or downloading
+      return {
+        contentElement: ce,
+        status: 'error',
+        message: msg,
+        type: 'download_and_install',
+      } as ErrorContentMutationResult;
+    });
   }
 
-  await Promise.all(
+  return Promise.all(
     contentElements.map(async (ce) => {
       const setStatus = createStatusSetter(ce);
       setStatus({
@@ -210,18 +258,28 @@ export async function installOnlineContent(contentElements: ContentElement[]) {
       });
 
       try {
-        await downloadAndInstallContent(ce);
+        const result = await downloadAndInstallContent(ce);
+        if (onSettled) onSettled(result);
+        return result;
       } catch (e: any) {
+        /* todo:locale: */
+        const msg = e.toString();
         setStatus({
           action: 'error',
-          /* todo:locale: */
-          message: e.toString(),
+          message: msg,
           name: ce.definition.name,
           version: ce.definition.version,
         });
-      }
+        const result = {
+          contentElement: ce,
+          status: 'error',
+          message: msg,
+          type: 'download_and_install',
+        } as ErrorContentMutationResult;
+        if (onSettled) onSettled(result);
 
-      getStore().set(CONTENT_TAB_LOCK, getStore().get(CONTENT_TAB_LOCK) - 1);
+        return result;
+      }
     }),
   );
 }

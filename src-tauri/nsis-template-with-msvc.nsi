@@ -499,7 +499,7 @@ Section WebView2
   webview2_done:
 SectionEnd
 
-
+; Copied from Section webview2
 Section MSVC
   ; Check if MSVC is already installed and skip this section
   ${If} ${RunningX64}
@@ -513,13 +513,18 @@ Section MSVC
   ; Webview2 install modes
   ; !if "${INSTALLWEBVIEW2MODE}" == "downloadBootstrapper"
     Delete "$TEMP\VC_redist.x86.exe"
+    ; TODO:locale:
     DetailPrint "Downloading Microsoft Visual C++ Redistributable"
     NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$TEMP\VC_redist.x86.exe"
     Pop $0
     ${If} $0 == "success"
+    ; TODO:locale:
       DetailPrint "Microsoft Visual C++ Redistributable downloaded succesfully ($0)"
     ${Else}
+      ; TODO:locale:
       DetailPrint "Microsoft Visual C++ Redistributable download failed ($0). Please install it manually"
+      ; TODO:locale:
+      MessageBox MB_OK "Microsoft Visual C++ Redistributable download and install failed ($0). Please install it manually from here: https://aka.ms/vs/17/release/vc_redist.x86.exe"
       Goto MSVC_done
       ; Abort "$(webview2AbortError)"
     ${EndIf}
@@ -546,13 +551,18 @@ Section MSVC
   Goto MSVC_done
 
   install_MSVC:
+    ; TODO:locale:
     DetailPrint "Installing Microsoft Visual C++ Redistributable"
     ; $6 holds the path to the webview2 installer
     ExecWait "$6 /install /passive /norestart" $1
     ${If} $1 == 0
+      ; TODO:locale:
       DetailPrint "Microsoft Visual C++ Redistributable installation succesful ($1)"
     ${Else}
+      ; TODO:locale:
       DetailPrint "Microsoft Visual C++ Redistributable installation failed ($1). Please install it manually"
+      ; TODO:locale:
+      MessageBox MB_OK "Microsoft Visual C++ Redistributable installation failed ($1). Please install it manually from here: https://aka.ms/vs/17/release/vc_redist.x86.exe"
       Goto MSVC_done
       ; Abort "$(webview2AbortError)"
     ${EndIf}

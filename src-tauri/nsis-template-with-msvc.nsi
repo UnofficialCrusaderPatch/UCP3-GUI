@@ -514,17 +514,17 @@ Section MSVC
   ; !if "${INSTALLWEBVIEW2MODE}" == "downloadBootstrapper"
     Delete "$TEMP\VC_redist.x86.exe"
     ; TODO:locale:
-    DetailPrint "Downloading Microsoft Visual C++ Redistributable"
+    DetailPrint "Downloading Microsoft Visual C++ Redistributable (x86) "
     NSISdl::download "https://aka.ms/vs/17/release/vc_redist.x86.exe" "$TEMP\VC_redist.x86.exe"
     Pop $0
     ${If} $0 == "success"
     ; TODO:locale:
-      DetailPrint "Microsoft Visual C++ Redistributable downloaded succesfully ($0)"
+      DetailPrint "Microsoft Visual C++ Redistributable (x86) downloaded succesfully ($0)"
     ${Else}
       ; TODO:locale:
-      DetailPrint "Microsoft Visual C++ Redistributable download failed ($0). Please install it manually"
+      DetailPrint "Microsoft Visual C++ Redistributable (x86) download failed ($0). Please install it manually"
       ; TODO:locale:
-      MessageBox MB_OK "Microsoft Visual C++ Redistributable download and install failed ($0). Please install it manually from here: https://aka.ms/vs/17/release/vc_redist.x86.exe"
+      MessageBox MB_OK "Microsoft Visual C++ Redistributable (x86) download and install failed ($0). Please install it manually from here: https://aka.ms/vs/17/release/vc_redist.x86.exe"
       Goto MSVC_done
       ; Abort "$(webview2AbortError)"
     ${EndIf}
@@ -552,17 +552,17 @@ Section MSVC
 
   install_MSVC:
     ; TODO:locale:
-    DetailPrint "Installing Microsoft Visual C++ Redistributable"
+    DetailPrint "Installing Microsoft Visual C++ Redistributable (x86) "
     ; $6 holds the path to the webview2 installer
     ExecWait "$6 /install /passive /norestart" $1
     ${If} $1 == 0
       ; TODO:locale:
-      DetailPrint "Microsoft Visual C++ Redistributable installation succesful ($1)"
+      DetailPrint "Microsoft Visual C++ Redistributable (x86) installation succesful ($1)"
     ${Else}
       ; TODO:locale:
-      DetailPrint "Microsoft Visual C++ Redistributable installation failed ($1). Please install it manually"
+      DetailPrint "Microsoft Visual C++ Redistributable (x86) installation failed ($1). Please install it manually"
       ; TODO:locale:
-      MessageBox MB_OK "Microsoft Visual C++ Redistributable installation failed ($1). Please install it manually from here: https://aka.ms/vs/17/release/vc_redist.x86.exe"
+      MessageBox MB_OK "Microsoft Visual C++ Redistributable (x86) installation failed ($1). Please install it manually from here: https://aka.ms/vs/17/release/vc_redist.x86.exe"
       Goto MSVC_done
       ; Abort "$(webview2AbortError)"
     ${EndIf}

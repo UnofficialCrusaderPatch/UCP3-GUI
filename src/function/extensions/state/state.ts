@@ -1,11 +1,12 @@
 import { atomWithReducer } from 'jotai/utils';
 import { atom } from 'jotai';
-import { ExtensionTree } from '../dependency-management/dependency-resolution';
+import { ExtensionDependencyTree } from '../dependency-management/dependency-resolution';
 import { ExtensionsState } from '../extensions-state';
 import { propagateActiveExtensionsChange } from './change';
 import { ConfigurationState } from '../../configuration/state';
 import { Override } from '../../configuration/overrides';
 
+// eslint-disable-next-line func-style
 export const extensionStateReducer = (
   oldState: ExtensionsState,
   newState: Partial<ExtensionsState>,
@@ -21,7 +22,7 @@ export const EXTENSION_STATE_INTERNAL_ATOM = atomWithReducer(
     installedExtensions: [],
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
-    tree: new ExtensionTree([]),
+    tree: new ExtensionDependencyTree([]),
     configuration: {
       errors: [],
       overrides: new Map<string, Override[]>(),
@@ -59,7 +60,7 @@ export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
     return Object.fromEntries(
       Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
         name,
-        tree.allVersionsForName(name),
+        tree.allExtensionVersionsForName(name),
       ]),
     ) as AvailableExtensionVersionsDictionary;
   });

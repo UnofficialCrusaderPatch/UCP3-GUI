@@ -204,6 +204,7 @@ type Extension = {
     isZip: boolean;
     isDirectory: boolean;
     path: string;
+    fetchDescription: () => Promise<string>;
     handle: <R>(cb: ExtensionIOCallback<R>) => Promise<R>;
   };
 };

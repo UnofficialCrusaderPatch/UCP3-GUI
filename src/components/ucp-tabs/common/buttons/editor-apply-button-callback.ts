@@ -9,7 +9,7 @@ import { ExtensionsState } from '../../../../function/extensions/extensions-stat
 import { createPluginConfigFromCurrentState } from '../../config-editor/buttons/export-as-plugin-button';
 import { toYaml } from '../../../../config/ucp/config-files/config-files';
 import { serializeDefinition } from '../../../../config/ucp/serialization';
-import { ExtensionTree } from '../../../../function/extensions/dependency-management/dependency-resolution';
+import { ExtensionDependencyTree } from '../../../../function/extensions/dependency-management/dependency-resolution';
 import { parseConfigEntries } from '../../../../function/extensions/discovery/parse-config-entries';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
@@ -20,10 +20,10 @@ export type EditorApplyButtonCallbackResult = {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const editorApplyButtonCallback = async (
+export async function editorApplyButtonCallback(
   extensionsState: ExtensionsState,
   extension: Extension,
-) => {
+) {
   const { plugin } = await createPluginConfigFromCurrentState();
 
   const missingDependencies =
@@ -60,7 +60,7 @@ export const editorApplyButtonCallback = async (
     definition: newDefinition,
   } as Extension;
 
-  const tree = new ExtensionTree(
+  const tree = new ExtensionDependencyTree(
     [
       ...extensionsState.extensions.filter((e) => e.name !== newExtension.name),
       newExtension,
@@ -139,4 +139,4 @@ export const editorApplyButtonCallback = async (
     apply: true,
     state: { ...extensionsState },
   } as EditorApplyButtonCallbackResult;
-};
+}

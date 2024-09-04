@@ -14,10 +14,10 @@ import { ToastType, makeToast } from '../../../toasts/toasts-display';
 
 const LOGGER = new Logger('install-extensions-button.tsx');
 
-export const installExtensionsButtonCallback = async (
+export async function installExtensionsButtonCallback(
   gameFolder: string,
   location?: string,
-) => {
+) {
   let path = location;
   if (location === undefined) {
     const result = await openFileDialog(gameFolder, [
@@ -88,7 +88,7 @@ export const installExtensionsButtonCallback = async (
     });
   }
   return false;
-};
+}
 
 // eslint-disable-next-line import/prefer-default-export
 export function InstallExtensionButton() {

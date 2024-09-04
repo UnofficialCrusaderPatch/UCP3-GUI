@@ -29,6 +29,7 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
   const [t] = useTranslation(['gui-general', 'gui-editor']);
 
+  // eslint-disable-next-line func-style
   const setConfigStatus = (msg: string) => makeToast({ title: msg, body: '' });
 
   const configurationDirtyState = useAtomValue(CONFIG_DIRTY_STATE_ATOM);

@@ -29,7 +29,7 @@ type ExtensionLoadResult = {
   handle: ExtensionHandle;
 };
 
-const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
+function checkVersionEquality(eh: ExtensionHandle, version: string) {
   if (eh.path.toLocaleLowerCase().endsWith(`-${version}`)) {
     return true;
   }
@@ -43,23 +43,23 @@ const checkVersionEquality = (eh: ExtensionHandle, version: string) => {
     return true;
   }
   return false;
-};
+}
 
-const checkFullEquality = async (
+async function checkFullEquality(
   eh: ExtensionHandle,
   name: string,
   version: string,
-) => {
+) {
   const target = `${name}-${version}`;
   const base = await basename(eh.path);
 
   return base === `${target}` || base === `${target}.zip`;
-};
+}
 
-export const discoverExtensions = async (
+export async function discoverExtensions(
   gameFolder: string,
   mode?: 'Release' | 'Developer',
-): Promise<Extension[]> => {
+): Promise<Extension[]> {
   LOGGER.msg('Discovering extensions').info();
 
   if (!(await onFsExists(`${gameFolder}/ucp`))) {
@@ -235,4 +235,4 @@ export const discoverExtensions = async (
   });
 
   return extensions;
-};
+}

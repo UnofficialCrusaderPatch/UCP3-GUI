@@ -2,13 +2,14 @@ import { Definition } from './common';
 import { UCP3SerializedDefinition } from './config-files/config-files';
 
 // eslint-disable-next-line import/prefer-default-export
-export const serializeDefinition = (definition: Definition) =>
-  ({
+export function serializeDefinition(definition: Definition) {
+  return {
     ...definition,
     dependencies: Object.fromEntries(
       Object.entries(definition.dependencies).map(([name, r]) => [name, r.raw]),
     ),
-  }) as UCP3SerializedDefinition;
+  } as UCP3SerializedDefinition;
+}
 
 // Handled in Discovery.ts
 // export const deserializeDefinition = (text: string) => {

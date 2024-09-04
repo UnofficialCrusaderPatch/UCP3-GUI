@@ -82,8 +82,15 @@ export type ProgressHandler = (
   chunkSize: number,
   currentSize: number,
   totalSize: number,
-  currentPercent: string,
+  currentPercent: number,
 ) => void;
+
+export function asPercentage(value: number) {
+  return value.toLocaleString(undefined, {
+    style: 'percent',
+    minimumFractionDigits: 2,
+  });
+}
 
 function receiveWrappingProgressHandler(progressHandler?: ProgressHandler) {
   if (!progressHandler) {
@@ -92,13 +99,7 @@ function receiveWrappingProgressHandler(progressHandler?: ProgressHandler) {
   let currentSize = 0;
   return (progress: number, total: number) => {
     currentSize += progress;
-    const percentage =
-      total > 0
-        ? (currentSize / total).toLocaleString(undefined, {
-            style: 'percent',
-            minimumFractionDigits: 2,
-          })
-        : '?';
+    const percentage = total > 0 ? currentSize / total : NaN;
     progressHandler(progress, currentSize, total, percentage);
   };
 }

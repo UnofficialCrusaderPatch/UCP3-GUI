@@ -5,7 +5,7 @@ import './ucp-tabs.css';
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
-import { Atom, atom, useAtom, useAtomValue } from 'jotai';
+import { Atom, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   INIT_DONE,
   INIT_RUNNING,
@@ -37,8 +37,16 @@ import {
   BACKGROUNDS_MAPPING_FILE,
 } from '../../function/global/constants/file-constants';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
+import { ContentManager } from './content-manager/content-manager';
+import {
+  BUSY_CONTENT_COUNT,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
+} from './content-manager/state/atoms';
+import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
+import { reloadCurrentWindow } from '../../function/window-actions';
+import { showModalOkCancel } from '../modals/modal-ok-cancel';
 
-const LOGGER = new Logger('ucp-taps.tsx');
+const LOGGER = new Logger('ucp-tabs.tsx');
 
 const DISPLAY_CONFIG_TABS_ATOM = atom(
   (get) => get(INIT_DONE) && !get(INIT_RUNNING) && !get(INIT_ERROR),
@@ -76,7 +84,7 @@ export default function UcpTabs() {
   const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
 
   const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
-  const displayConfigTabs = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
+  const initIsDoneAndWithoutErrors = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
@@ -101,6 +109,14 @@ export default function UcpTabs() {
 
   const currentFolder = useCurrentGameFolder();
 
+  const contentTabLock = useAtomValue(BUSY_CONTENT_COUNT);
+
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+
+  const isExtensionsStateDiskDirty = useAtomValue(
+    EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
+  );
+
   return (
     <div
       className="ucp-tabs fs-7"
@@ -109,7 +125,10 @@ export default function UcpTabs() {
       <Tab.Container
         defaultActiveKey="overview"
         activeKey={currentTab}
-        onSelect={(newKey) => setCurrentTab(newKey as UITabs)}
+        onSelect={(newKey) => {
+          LOGGER.msg(`Selected tab: ${newKey}`).debug();
+          setCurrentTab(newKey as UITabs);
+        }}
       >
         <Nav variant="tabs" className="ucp-tabs-header" data-tauri-drag-region>
           <GradientImg src={headerImage} type="header" />
@@ -122,15 +141,39 @@ export default function UcpTabs() {
               {t('gui-editor:overview.title')}
             </Nav.Link>
           </Nav.Item>
-          <Nav.Item>
+          <Nav.Item
+            onMouseEnter={() => {
+              if (contentTabLock > 0) {
+                setStatusBarMessage(
+                  `Some content is still processing, please wait until finished. Waiting for ... ${contentTabLock}`,
+                );
+              }
+            }}
+            onMouseLeave={() => {
+              setStatusBarMessage(undefined);
+            }}
+          >
             <Nav.Link
               eventKey="extensions"
               className="ornament-border-button tab-link"
-              disabled={!displayConfigTabs}
+              disabled={!initIsDoneAndWithoutErrors || contentTabLock > 0}
               hidden={!ucpFolderExists}
               onClick={async () => {
                 try {
                   if (!showErrorsWarning) {
+                    return;
+                  }
+
+                  if (isExtensionsStateDiskDirty) {
+                    const okCancelResult = await showModalOkCancel({
+                      title: 'GUI restart required',
+                      message:
+                        "The GUI needs to restart as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel",
+                    });
+                    if (okCancelResult) {
+                      await reloadCurrentWindow();
+                    }
+
                     return;
                   }
 
@@ -143,7 +186,7 @@ export default function UcpTabs() {
 
                   await showModalOk({
                     title: 'Error: missing dependencies',
-                    message: `Please be aware of the following missing dependencies:\n\n${messages.join('\n')}`,
+                    message: `Please be aware of the following missing dependencies:\n\n${messages.join('\n')}\n\nTry installing them by visiting the Store`,
                     handleAction: () => setShowErrorsWarning(false),
                   });
 
@@ -165,10 +208,20 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="config"
               className="ornament-border-button tab-link"
-              disabled={!displayConfigTabs}
+              disabled={!initIsDoneAndWithoutErrors}
               hidden={!advancedMode || !ucpFolderExists}
             >
               {t('gui-editor:config.title')}
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link
+              eventKey="content-manager"
+              className="ornament-border-button tab-link"
+              disabled={currentFolder === ''}
+              hidden={currentFolder === ''}
+            >
+              Store
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -196,6 +249,9 @@ export default function UcpTabs() {
           </Tab.Pane>
           <Tab.Pane eventKey="launch" className="tab-panel">
             <Launch />
+          </Tab.Pane>
+          <Tab.Pane eventKey="content-manager" className="tab-panel">
+            <ContentManager />
           </Tab.Pane>
         </Tab.Content>
       </Tab.Container>

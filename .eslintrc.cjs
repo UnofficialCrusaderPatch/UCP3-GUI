@@ -51,7 +51,8 @@ module.exports = {
    "prettier/prettier": "error",
    "@typescript-eslint/no-unused-vars": "error",
    "no-console": "error",
-   "@typescript-eslint/no-explicit-any": "warn"
+   "@typescript-eslint/no-explicit-any": "warn",
+   "func-style": ["error", "declaration"],
   },
   plugins: ["prettier"]
 };

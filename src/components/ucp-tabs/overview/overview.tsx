@@ -42,6 +42,7 @@ import {
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
 import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
+import { asPercentage } from '../../../tauri/tauri-http';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -179,13 +180,13 @@ export default function Overview() {
                 chunkSize: number,
                 currentSize: number,
                 totalSize: number,
-                currentPercent: string,
+                currentPercent: number,
               ) => {
                 const tt = new Date();
                 if (tt.getTime() - previousFire.getTime() > updateInterval) {
                   previousFire = tt;
                   setStatusBarMessage(
-                    `Downloading... ${currentPercent}% (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
+                    `Downloading... ${asPercentage(currentPercent)} (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
                   );
                 }
               },

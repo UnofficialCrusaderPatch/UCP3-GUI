@@ -28,6 +28,11 @@
   cursor: pointer;
 }
 
+.extension-name-box__name.disabled {
+  font-size: smaller;
+  cursor: default;
+}
+
 .extension-version-dropdown {
   margin: 0rem 0rem 0rem 0rem;
   font-size: smaller;

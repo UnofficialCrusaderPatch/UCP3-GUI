@@ -10,10 +10,10 @@ const LOGGER = new Logger('extension-state.ts');
 
 export class DependencyError extends Error {}
 
-const addExtensionToExplicityActivatedExtensions = (
+function addExtensionToExplicityActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
-) => {
+) {
   const { tree } = extensionsState;
 
   const newEAE = [...extensionsState.explicitlyActivatedExtensions, ext];
@@ -51,12 +51,12 @@ const addExtensionToExplicityActivatedExtensions = (
     activeExtensions: allDependenciesInLoadOrder,
     installedExtensions: installedExtensionsFilteredList,
   };
-};
+}
 
-const removeExtensionFromExplicitlyActivatedExtensions = async (
+async function removeExtensionFromExplicitlyActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
-) => {
+) {
   const { tree } = extensionsState;
 
   const newEAE = extensionsState.explicitlyActivatedExtensions.filter(
@@ -112,12 +112,12 @@ const removeExtensionFromExplicitlyActivatedExtensions = async (
     activeExtensions: ae,
     installedExtensions: ie,
   } as ExtensionsState;
-};
+}
 
-const moveExtension = (
+function moveExtension(
   extensionsState: ExtensionsState,
   event: { name: string; type: 'up' | 'down' },
-) => {
+) {
   const { name, type } = event;
 
   const ae = [...extensionsState.activeExtensions];
@@ -139,7 +139,7 @@ const moveExtension = (
     activeExtensions: ae,
     explicitlyActivatedExtensions: eae,
   } as ExtensionsState;
-};
+}
 
 export {
   addExtensionToExplicityActivatedExtensions,

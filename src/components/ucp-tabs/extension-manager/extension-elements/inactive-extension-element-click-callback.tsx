@@ -16,13 +16,16 @@ import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import reportAndConfirmBuildResult from './reporting';
 import { showModalOk } from '../../../modals/modal-ok';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
 
-const LOGGER = new Logger('InactiveExtensionElementClickCallback.tsx');
+const LOGGER = new Logger('inactive-extension-element-click-callback.tsx');
 
-const inactiveExtensionElementClickCallback = async (ext: Extension) => {
+async function inactiveExtensionElementClickCallback(ext: Extension) {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
 
-  LOGGER.msg('inactiveExtensionElementClickCallback').info();
+  LOGGER.msg(
+    `inactiveExtensionElementClickCallback(${createExtensionID(ext)})`,
+  ).info();
 
   const currentExtensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -106,6 +109,6 @@ const inactiveExtensionElementClickCallback = async (ext: Extension) => {
   ConsoleLogger.info('New extension state', res);
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
-};
+}
 
 export default inactiveExtensionElementClickCallback;

@@ -71,6 +71,7 @@ function CreateRadioGroup(args: {
 
   const selectedValue = value === undefined ? defaultChoice : (value as string);
 
+  // eslint-disable-next-line func-style
   const onRadioClick = (newValue: string) => {
     setUserConfiguration({
       type: 'set-multiple',
@@ -92,6 +93,7 @@ function CreateRadioGroup(args: {
     <div key={choice.name} className="form-check">
       <input
         type="radio"
+        disabled={isDisabled}
         className="form-check-input"
         checked={choice.name === selectedValue}
         onClick={() => {
@@ -114,7 +116,7 @@ function CreateRadioGroup(args: {
 
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || { className: '' }).className} ${className}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

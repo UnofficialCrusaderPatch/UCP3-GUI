@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
-import Text from '../general/text';
+import Message from '../general/message';
 
 type Create = {
   type: 'create';
@@ -67,7 +67,10 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
     >
       <Modal.Header closeButton>
         <Modal.Title>
-          <Text message={title} alternativeSource={alternativeMessageSource} />
+          <Message
+            message={title}
+            alternativeSource={alternativeMessageSource}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -143,7 +146,7 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
             });
           }}
         >
-          <Text
+          <Message
             message={ok !== undefined ? ok : 'create'}
             alternativeSource={alternativeMessageSource}
           />

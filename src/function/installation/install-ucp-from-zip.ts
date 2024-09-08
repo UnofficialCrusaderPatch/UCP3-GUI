@@ -9,13 +9,13 @@ import {
 } from '../ucp-files/ucp-state';
 import { getStore } from '../../hooks/jotai/base';
 import { initializeUCPVersion } from '../ucp-files/ucp-version';
-import { Message } from '../../localization/localization';
+import { MessageType } from '../../localization/localization';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function installUCPFromZip(
   zipFilePath: string,
   gameFolder: string,
-  createStatusToast: (type: ToastType, status: Message) => void,
+  createStatusToast: (type: ToastType, status: MessageType) => void,
 ): Promise<Result<void, FileUtilError>> {
   return Result.tryAsync(async () => {
     (await createRealBink()).throwIfErr();

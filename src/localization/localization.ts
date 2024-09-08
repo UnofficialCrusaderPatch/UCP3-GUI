@@ -19,10 +19,10 @@ export interface MessageObject {
 
 export type MessageFunction = (localize: MessageResolver) => ReactNode;
 
-export type SimpleMessage = string | MessageObject;
-export type Message = SimpleMessage | MessageFunction;
+export type SimpleMessageType = string | MessageObject;
+export type MessageType = SimpleMessageType | MessageFunction;
 
-export type MessageResolver = <T extends Message>(
+export type MessageResolver = <T extends MessageType>(
   message: T,
 ) => T extends MessageFunction ? ReactNode : string;
 
@@ -116,7 +116,7 @@ export function createMessageResolver(
     currentLanguage === defaultLanguage ? null : defaultLocalization;
 
   // NOTE: breaking type system, found no way with it
-  const resolverFunction: unknown = (message: Message) => {
+  const resolverFunction: unknown = (message: MessageType) => {
     if (typeof message === 'function') {
       return message(resolverFunction as MessageResolver);
     }

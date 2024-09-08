@@ -4,7 +4,7 @@ import importButtonCallback from '../importing/import-button-callback';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { showModalOk } from '../../../modals/modal-ok';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './config-serialized-state';
-import Text, { useText } from '../../../general/text';
+import Message, { useMessage } from '../../../general/message';
 
 // eslint-disable-next-line import/prefer-default-export
 export function StopButton() {
@@ -14,7 +14,7 @@ export function StopButton() {
 
   const setDirty = useSetAtom(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM);
 
-  const localize = useText();
+  const localize = useMessage();
   return (
     <button
       className="ucp-button ucp-button-variant"
@@ -39,7 +39,7 @@ export function StopButton() {
         }
       }}
     >
-      <Text message="stop modifying" />
+      <Message message="stop modifying" />
     </button>
   );
 }

@@ -44,7 +44,7 @@ import {
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
 import { reloadCurrentWindow } from '../../function/window-actions';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
-import Text from '../general/text';
+import Message from '../general/message';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -136,7 +136,7 @@ export default function UcpTabs() {
               eventKey="overview"
               className="ornament-border-button tab-link"
             >
-              <Text message="overview.title" />
+              <Message message="overview.title" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item
@@ -199,7 +199,7 @@ export default function UcpTabs() {
                 }
               }}
             >
-              <Text message="extensions.title" />
+              <Message message="extensions.title" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -209,7 +209,7 @@ export default function UcpTabs() {
               disabled={!initIsDoneAndWithoutErrors}
               hidden={!advancedMode || !ucpFolderExists}
             >
-              <Text message="config.title" />
+              <Message message="config.title" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -229,7 +229,7 @@ export default function UcpTabs() {
               disabled={currentFolder === ''}
               hidden={currentFolder === ''}
             >
-              <Text message="launch" />
+              <Message message="launch" />
             </Nav.Link>
           </Nav.Item>
         </Nav>

@@ -3,27 +3,27 @@ import { useAtomValue } from 'jotai';
 import { Suspense } from 'react';
 import {
   GUI_LOCALIZATION_ATOM,
-  Message,
+  MessageType,
   MessageResolverAtom,
 } from '../../localization/localization';
 
 interface MessageProps {
-  message: Message;
+  message: MessageType;
   alternativeSource?: MessageResolverAtom;
 }
 
 // usage for cases where node not directly applicable, but still inside React context
-export function useText(alternativeSource?: MessageResolverAtom) {
+export function useMessage(alternativeSource?: MessageResolverAtom) {
   return useAtomValue(alternativeSource ?? GUI_LOCALIZATION_ATOM);
 }
 
-function InnerText(props: MessageProps) {
+function InnerMessage(props: MessageProps) {
   const { message, alternativeSource } = props;
-  const localize = useText(alternativeSource);
+  const localize = useMessage(alternativeSource);
   return localize(message);
 }
 
-export default function Text(props: Partial<MessageProps>) {
+export default function Message(props: Partial<MessageProps>) {
   const { message, alternativeSource } = props;
   if (!message) {
     return null;
@@ -31,7 +31,7 @@ export default function Text(props: Partial<MessageProps>) {
 
   return (
     <Suspense>
-      <InnerText message={message} alternativeSource={alternativeSource} />
+      <InnerMessage message={message} alternativeSource={alternativeSource} />
     </Suspense>
   );
 }

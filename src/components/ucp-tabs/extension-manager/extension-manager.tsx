@@ -24,7 +24,7 @@ import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-edito
 import { ConsoleLogger } from '../../../util/scripts/logging';
 import { IS_FILE_DRAGGING, handleFileDrop } from './drag-drop/drop-handling';
 import { CURRENT_DISPLAYED_TAB } from '../tabs-state';
-import Text from '../../general/text';
+import Message from '../../general/message';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
@@ -86,7 +86,7 @@ export default function ExtensionManager() {
 
   const filterInfoElement = !showAllExtensions ? (
     <span className="fs-8">
-      <Text
+      <Message
         message={{
           key: 'config.filtered',
           args: { all: a, displayed: b },
@@ -168,7 +168,7 @@ export default function ExtensionManager() {
         <div className="extension-manager-control__header-container">
           <div className="extension-manager-control__header">
             <h4 className="extension-manager-control__box__header__headline">
-              <Text message="extensions.available" />
+              <Message message="extensions.available" />
             </h4>
             <div className="extension-manager-control__box__header__buttons">
               {filterInfoElement}
@@ -178,7 +178,7 @@ export default function ExtensionManager() {
           </div>
           <div className="extension-manager-control__header">
             <h4 className="extension-manager-control__box__header__headline">
-              <Text message="extensions.activated" />
+              <Message message="extensions.activated" />
             </h4>
           </div>
         </div>

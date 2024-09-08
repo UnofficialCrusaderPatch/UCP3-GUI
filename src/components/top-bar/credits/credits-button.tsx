@@ -2,7 +2,7 @@ import './credits-button.css';
 
 import { setOverlayContent } from '../../overlay/overlay';
 import { Credits } from '../../credits/credits';
-import Text from '../../general/text';
+import Message from '../../general/message';
 
 export default function CreditsButton() {
   return (
@@ -11,7 +11,7 @@ export default function CreditsButton() {
       className="credits-button"
       onClick={() => setOverlayContent(Credits, true, true)}
     >
-      <Text message="credits.open" />
+      <Message message="credits.open" />
     </button>
   );
 }

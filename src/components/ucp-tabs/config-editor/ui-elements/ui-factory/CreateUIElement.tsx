@@ -19,7 +19,7 @@ import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
 import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput from './CreateFileInput';
-import { useText } from '../../../../general/text';
+import { useMessage } from '../../../../general/message';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -30,7 +30,7 @@ function CreateUIElement(args: {
 }) {
   const { spec, disabled, className } = args;
 
-  const localize = useText();
+  const localize = useMessage();
 
   switch (spec.display) {
     case 'UCP2Slider':

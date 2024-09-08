@@ -2,12 +2,12 @@
 import { Modal, Button } from 'react-bootstrap';
 import { useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
-import { Message } from '../../localization/localization';
-import Text from '../general/text';
+import { MessageType } from '../../localization/localization';
+import Message from '../general/message';
 
 export interface OkCancelModalWindowProperties
   extends AbstractModalWindowProperties<boolean, boolean> {
-  cancel?: Message;
+  cancel?: MessageType;
 }
 
 const DEFAULT_OK_CANCEL_MODAL_PROPERTIES: OkCancelModalWindowProperties = {
@@ -21,7 +21,6 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
     handleAction,
     title,
     message,
-
     ok,
     cancel,
     alternativeMessageSource,
@@ -51,21 +50,27 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
     >
       <Modal.Header>
         <Modal.Title>
-          <Text message={title} alternativeSource={alternativeMessageSource} />
+          <Message
+            message={title}
+            alternativeSource={alternativeMessageSource}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Text message={message} alternativeSource={alternativeMessageSource} />
+        <Message
+          message={message}
+          alternativeSource={alternativeMessageSource}
+        />
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={internalHandleClose}>
-          <Text
+          <Message
             message={cancel !== undefined ? ok : 'cancel'}
             alternativeSource={alternativeMessageSource}
           />
         </Button>
         <Button variant="primary" onClick={internalHandleAction}>
-          <Text
+          <Message
             message={ok !== undefined ? ok : 'ok'}
             alternativeSource={alternativeMessageSource}
           />

@@ -5,17 +5,18 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import { makeToast } from '../../../toasts/toasts-display';
 import exportButtonCallback from '../../common/export-button-callback';
-import { Message } from '../../../../localization/localization';
-import { useText } from '../../../general/text';
+import { MessageType } from '../../../../localization/localization';
+import { useMessage } from '../../../general/message';
 
 function ExportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const setConfigStatus = (msg: Message) => makeToast({ title: msg, body: '' });
+  const setConfigStatus = (msg: MessageType) =>
+    makeToast({ title: msg, body: '' });
 
   const gameFolder = useCurrentGameFolder();
 
-  const localize = useText();
+  const localize = useMessage();
 
   return (
     <button

@@ -4,8 +4,11 @@ import { atom, useAtomValue } from 'jotai';
 import { ToastContainer, Toast } from 'react-bootstrap';
 
 import { getStore } from '../../hooks/jotai/base';
-import { Message, MessageResolverAtom } from '../../localization/localization';
-import Text from '../general/text';
+import {
+  MessageType,
+  MessageResolverAtom,
+} from '../../localization/localization';
+import Message from '../general/message';
 
 export const enum ToastType {
   CUSTOM,
@@ -22,8 +25,8 @@ type ToastConfig = {
 };
 
 export type ToastProps = ToastConfig & {
-  title: Message;
-  body: Message;
+  title: MessageType;
+  body: MessageType;
   alternativeMessageSource?: MessageResolverAtom;
   type?: ToastType;
 };
@@ -101,11 +104,14 @@ function TheToast(props: { id: string; state: ToastState }) {
       <Toast.Header>
         <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
         <strong className="me-auto">
-          <Text message={title} alternativeSource={alternativeMessageSource} />
+          <Message
+            message={title}
+            alternativeSource={alternativeMessageSource}
+          />
         </strong>
       </Toast.Header>
       <Toast.Body className="text-dark">
-        <Text message={body} alternativeSource={alternativeMessageSource} />
+        <Message message={body} alternativeSource={alternativeMessageSource} />
       </Toast.Body>
     </Toast>
   );

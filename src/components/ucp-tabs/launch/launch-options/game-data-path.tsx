@@ -5,7 +5,7 @@ import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { showModalOk } from '../../../modals/modal-ok';
 import { openFolderDialog } from '../../../../tauri/tauri-dialog';
 import { LaunchOptions } from './launch-options';
-import Text, { useText } from '../../../general/text';
+import Message, { useMessage } from '../../../general/message';
 
 interface GameDataPathMapping {
   date: number;
@@ -88,7 +88,7 @@ export default function GameDataPath({ getArgs, setArgs }: LaunchOptions) {
     useGameDataStorageMap(currentFolder);
 
   // needed for file interaction
-  const localize = useText();
+  const localize = useMessage();
 
   const currentArgs = getArgs();
   const gamesDataPathArg = currentArgs.length > 0 ? currentArgs[1] : undefined;
@@ -102,7 +102,7 @@ export default function GameDataPath({ getArgs, setArgs }: LaunchOptions) {
   return (
     <div className="launch__options__box--game-data-path">
       <h5>
-        <Text message="launch.options.game.data.path" />
+        <Message message="launch.options.game.data.path" />
       </h5>
       <div>
         <input

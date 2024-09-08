@@ -1,24 +1,27 @@
 /* eslint-disable react/require-default-props */
 import { useState } from 'react';
 import { ToastType, makeToast } from '../../toasts/toasts-display';
-import Text, { useText } from '../../general/text';
-import { Message, SimpleMessage } from '../../../localization/localization';
+import Message, { useMessage } from '../../general/message';
+import {
+  MessageType,
+  SimpleMessageType,
+} from '../../../localization/localization';
 
 interface OverviewButtonProps {
   buttonActive: boolean;
-  buttonText: Message;
+  buttonText: MessageType;
   buttonVariant: string | undefined;
-  toastTitle: Message;
+  toastTitle: MessageType;
   func: (
-    createStatusToast: (type: ToastType, content: Message) => void,
+    createStatusToast: (type: ToastType, content: MessageType) => void,
   ) => Promise<void>;
   funcBefore?: () => void;
   funcAfter?: () => void;
-  tooltip?: SimpleMessage;
+  tooltip?: SimpleMessageType;
 }
 
-function createToastHandler(title: Message) {
-  return (type: ToastType, content: Message) => {
+function createToastHandler(title: MessageType) {
+  return (type: ToastType, content: MessageType) => {
     if (content == null) {
       // ignore if body null or undefined
       return;
@@ -40,7 +43,7 @@ export default function OverviewButton(props: OverviewButtonProps) {
   } = props;
   const [active, setActive] = useState(true);
 
-  const localize = useText();
+  const localize = useMessage();
 
   return (
     <button
@@ -60,7 +63,7 @@ export default function OverviewButton(props: OverviewButtonProps) {
     >
       <div className="icon-placeholder" />
       <div className="button-text">
-        <Text message={buttonText} />
+        <Message message={buttonText} />
       </div>
     </button>
   );

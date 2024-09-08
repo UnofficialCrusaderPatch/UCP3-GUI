@@ -32,7 +32,7 @@ import {
 import GameDataPath from './launch-options/game-data-path';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { saveCurrentConfig } from '../common/save-config';
-import Text from '../../general/text';
+import Message from '../../general/message';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -100,7 +100,7 @@ export default function Launch() {
           id="display-launch-options-switch"
           onChange={(e) => setDisplayAdvancedLaunchOptions(e.target.checked)}
           className="ps-5"
-          label={<Text message="launch.options.view" />}
+          label={<Message message="launch.options.view" />}
         />
         <Form.Switch
           label="Save (apply) configuration before launching the game"
@@ -119,7 +119,7 @@ export default function Launch() {
         }
       >
         <h4>
-          <Text message="launch.options" />
+          <Message message="launch.options" />
         </h4>
         <div className="parchment-box launch__options__box">
           <div className="launch__options__box__row">

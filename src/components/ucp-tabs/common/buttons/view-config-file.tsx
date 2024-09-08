@@ -16,7 +16,7 @@ import {
 } from '../../../overlay/overlay';
 import { UCP_CONFIG_FILE_ATOM } from '../../../../function/configuration/state';
 import { onFsExists, readTextFile } from '../../../../tauri/tauri-files';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 export function ConfigFileViewer(props: OverlayContentProps<void>) {
   const { closeFunc } = props;
@@ -76,7 +76,7 @@ export function ConfigFileViewer(props: OverlayContentProps<void>) {
           className="credits-close-button"
           onClick={closeFunc}
         >
-          <Text message="close" />
+          <Message message="close" />
         </button>
       </div>
     </div>

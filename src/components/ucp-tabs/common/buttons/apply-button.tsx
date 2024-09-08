@@ -12,7 +12,7 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/st
 import { makeToast } from '../../../toasts/toasts-display';
 import saveConfig from '../save-config';
 import { CONFIG_DIRTY_STATE_ATOM } from './config-serialized-state';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -68,7 +68,7 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
           <>
             <span style={{ paddingRight: '5px' }} />
             <span className="ms-auto pe-4">
-              <Text message="apply" /> *
+              <Message message="apply" /> *
             </span>
           </>
         ) : (
@@ -76,7 +76,7 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
             <span style={{ paddingRight: '10px' }} />
             <CheckCircleFill className="" color="green" />{' '}
             <span className="ms-auto pe-4">
-              <Text message="applied" />
+              <Message message="applied" />
             </span>
           </>
         )}

@@ -7,11 +7,11 @@ import {
 } from '../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import saveConfig from './save-config';
-import { Message } from '../../../localization/localization';
+import { MessageType } from '../../../localization/localization';
 
 const exportButtonCallback = async (
   gameFolder: string,
-  setConfigStatus: (value: Message) => void,
+  setConfigStatus: (value: MessageType) => void,
   localizeString: (message: string) => string,
 ) => {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);

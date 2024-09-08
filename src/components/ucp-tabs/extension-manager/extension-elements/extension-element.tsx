@@ -32,8 +32,8 @@ import { customizeExtensionButtonCallback } from './customize-extension-button-c
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { OverrideViewer, OverrideViewerProps } from './override-viewer';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
-import { Message } from '../../../../localization/localization';
-import Text from '../../../general/text';
+import { MessageType } from '../../../../localization/localization';
+import Message from '../../../general/message';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -84,7 +84,7 @@ function MoveArrows(props: {
 function ArrowButton(props: {
   clickCallback: () => void;
   disabled: boolean;
-  buttonText: Message;
+  buttonText: MessageType;
   className: string;
 }) {
   const { clickCallback, disabled, buttonText, className } = props;
@@ -132,7 +132,7 @@ export function ExtensionElement(props: {
   fixedVersion: boolean;
   active: boolean;
   movability: { up: boolean; down: boolean };
-  buttonText: Message;
+  buttonText: MessageType;
   clickCallback: () => void;
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
   revDeps: string[];
@@ -318,7 +318,7 @@ export function CustomisationsExtensionElement() {
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span className="extension-name-box__name">
-          <Text message="Customisations" />
+          <Message message="Customisations" />
         </span>
       </div>
     </div>

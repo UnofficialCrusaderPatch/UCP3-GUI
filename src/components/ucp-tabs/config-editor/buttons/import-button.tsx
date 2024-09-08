@@ -5,15 +5,16 @@ import { showModalOk } from '../../../modals/modal-ok';
 import { makeToast } from '../../../toasts/toasts-display';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import importButtonCallback from '../../common/importing/import-button-callback';
-import { Message } from '../../../../localization/localization';
-import { useText } from '../../../general/text';
+import { MessageType } from '../../../../localization/localization';
+import { useMessage } from '../../../general/message';
 
 function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const setConfigStatus = (msg: Message) => makeToast({ title: msg, body: '' });
+  const setConfigStatus = (msg: MessageType) =>
+    makeToast({ title: msg, body: '' });
 
-  const localize = useText();
+  const localize = useMessage();
 
   const gameFolder = useCurrentGameFolder();
   return (

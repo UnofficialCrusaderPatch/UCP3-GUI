@@ -12,7 +12,7 @@ import {
   UCP_BINK_FILENAME,
 } from '../global/constants/file-constants';
 import { showModalOk } from '../../components/modals/modal-ok';
-import { Message } from '../../localization/localization';
+import { MessageType } from '../../localization/localization';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
@@ -133,7 +133,7 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
 
 export const LOADABLE_UCP_STATE_ATOM = loadable(UCP_STATE_ATOM);
 
-export async function createRealBink(): Promise<Result<void, Message>> {
+export async function createRealBink(): Promise<Result<void, MessageType>> {
   switch (await getStore().get(UCP_STATE_ATOM)) {
     case UCPState.WRONG_FOLDER:
       return Result.err('bink.missing');
@@ -157,7 +157,7 @@ export async function createRealBink(): Promise<Result<void, Message>> {
   }
 }
 
-export async function activateUCP(): Promise<Result<void, Message>> {
+export async function activateUCP(): Promise<Result<void, MessageType>> {
   const ucpState = await getStore().get(UCP_STATE_ATOM);
   switch (ucpState) {
     case UCPState.WRONG_FOLDER:
@@ -221,7 +221,7 @@ export async function activateUCP(): Promise<Result<void, Message>> {
   }
 }
 
-export async function deactivateUCP(): Promise<Result<void, Message>> {
+export async function deactivateUCP(): Promise<Result<void, MessageType>> {
   const ucpState = await getStore().get(UCP_STATE_ATOM);
   switch (ucpState) {
     case UCPState.WRONG_FOLDER:

@@ -28,7 +28,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import { ConsoleLogger } from '../../util/scripts/logging';
-import Text from '../general/text';
+import Message from '../general/message';
 
 export interface SandboxSource {
   html: string;
@@ -204,7 +204,7 @@ function SandboxInternal(
           saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
         }
       >
-        <Text message="sandbox.save" />
+        <Message message="sandbox.save" />
       </button>
       <button
         type="button"
@@ -215,14 +215,14 @@ function SandboxInternal(
           closeFunc();
         }}
       >
-        <Text message="sandbox.save.close" />
+        <Message message="sandbox.save.close" />
       </button>
       <button
         type="button"
         className="ucp-button sandbox-control-button"
         onClick={closeFunc}
       >
-        <Text message="sandbox.close" />
+        <Message message="sandbox.close" />
       </button>
     </div>
   );

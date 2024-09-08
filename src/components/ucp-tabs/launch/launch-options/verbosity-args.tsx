@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LaunchOptions } from './launch-options';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 const LOG_LEVELS: Record<string, string> = {
   DEFAULT: '',
@@ -37,7 +37,7 @@ function LogLevelSetting(
   return (
     <div className="launch__options__box--ucp-log-level">
       <h5>
-        <Text message={`launch.options.${label}`} />
+        <Message message={`launch.options.${label}`} />
       </h5>
       <select
         value={logLevel}

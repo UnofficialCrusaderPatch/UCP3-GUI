@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { FormEvent, useEffect, useState } from 'react';
 import { LaunchOptions } from './launch-options';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 function FreeEnvsForm(props: {
   handleEnvsChange: (e: FormEvent) => void;
@@ -92,7 +92,7 @@ export default function FreeEnvs(props: LaunchOptions) {
   return (
     <div className="launch__options__box--free-envs">
       <h5>
-        <Text message="launch.options.free.envs" />
+        <Message message="launch.options.free.envs" />
       </h5>
       {Object.entries(internalEnvs).map(([key, value]) => (
         <FreeEnvsForm

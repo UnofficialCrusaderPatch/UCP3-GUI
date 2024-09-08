@@ -14,7 +14,7 @@ import { sleep } from '../../../../util/scripts/util';
 import { CONFIG_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { FIRST_TIME_USE_ATOM } from '../../../../function/gui-settings/settings';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
-import Text, { useText } from '../../../general/text';
+import Message, { useMessage } from '../../../general/message';
 
 const LOGGER = new Logger('game-starter.tsx');
 
@@ -33,7 +33,7 @@ function GameStarterInfo(props: {
 }) {
   const { versionAtom } = props;
 
-  const localize = useText();
+  const localize = useMessage();
 
   const version = useAtomValue(versionAtom);
 
@@ -42,28 +42,28 @@ function GameStarterInfo(props: {
       <tbody>
         <tr className="game-starter__info__row">
           <td>
-            <Text message="info.name" />
+            <Message message="info.name" />
           </td>
           <td>:</td>
           <td>{version.name.getOrElse('')}</td>
         </tr>
         <tr className="game-starter__info__row">
           <td>
-            <Text message="info.region" />
+            <Message message="info.region" />
           </td>
           <td>:</td>
           <td>{version.region.getOrElse('')}</td>
         </tr>
         <tr className="game-starter__info__row">
           <td>
-            <Text message="info.version" />
+            <Message message="info.version" />
           </td>
           <td>:</td>
           <td>{`${version.getMajorAsString()}.${version.getMinorAsString()}.${version.getPatchAsString()}`}</td>
         </tr>
         <tr className="game-starter__info__row">
           <td>
-            <Text message="info.sha" />
+            <Message message="info.sha" />
           </td>
           <td>:</td>
           <td>
@@ -102,7 +102,7 @@ function GameStarterButton(props: GameStarterProps) {
     beforeLaunch,
   } = props;
 
-  const localize = useText();
+  const localize = useMessage();
 
   const path = useAtomValue(pathAtom);
   const version = useAtomValue(versionAtom);

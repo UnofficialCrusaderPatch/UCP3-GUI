@@ -1,9 +1,9 @@
-import { Message } from '../../localization/localization';
-import Text from './text';
+import { MessageType } from '../../localization/localization';
+import Message from './message';
 
 interface SvgHelperProps {
   href: string;
-  title: Message;
+  title: MessageType;
 }
 
 export default function SvgHelper(svgProps: SvgHelperProps) {
@@ -11,7 +11,7 @@ export default function SvgHelper(svgProps: SvgHelperProps) {
   return (
     <svg role="img" viewBox="0 0 100 100" preserveAspectRatio="none">
       <title>
-        <Text message={title} />
+        <Message message={title} />
       </title>
       <use href={href} width="100" height="100" />
     </svg>

@@ -25,7 +25,7 @@ import Logger from '../../../../../util/scripts/logging';
 
 import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';
-import Text from '../../../../general/text';
+import Message from '../../../../general/message';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
 
 const LOGGER = new Logger('CreateCustomMenu.tsx');
@@ -133,7 +133,7 @@ function CreateCustomMenu(args: {
           }}
           disabled={!isEnabled || disabled || activatingMenu}
         >
-          <Text message="sandbox.open" />
+          <Message message="sandbox.open" />
         </button>
       </div>
     </div>

@@ -17,7 +17,7 @@ import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitize-id';
 import CreateSectionsNav from './CreateSectionsNav';
-import Text from '../../../../general/text';
+import Message from '../../../../general/message';
 
 const ACTIVE_EXTENSIONS_ATOM = selectAtom(
   EXTENSION_STATE_REDUCER_ATOM,
@@ -119,7 +119,7 @@ function CreateSections(args: { readonly: boolean }): {
       >
         <div id="config-general">
           <h1>
-            <Text message="config.general" />
+            <Message message="config.general" />
           </h1>
           {elements}
         </div>

@@ -10,8 +10,8 @@ import { loadable } from 'jotai/utils';
 import { UCPState, UCP_STATE_ATOM } from '../../function/ucp-files/ucp-state';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
 import { UCP_VERSION_ATOM } from '../../function/ucp-files/ucp-version';
-import { Message } from '../../localization/localization';
-import Text, { useText } from '../general/text';
+import { MessageType } from '../../localization/localization';
+import Message, { useMessage } from '../general/message';
 
 const UCP_STATE_MAP = new Map([
   [UCPState.WRONG_FOLDER, 'wrong.folder'],
@@ -39,7 +39,7 @@ const UCP_STATE_COLOR_MAP = new Map([
   [UCPState.UNKNOWN, 'red'],
 ]);
 
-export const STATUS_BAR_MESSAGE_ATOM = atom<Message | undefined>(undefined);
+export const STATUS_BAR_MESSAGE_ATOM = atom<MessageType | undefined>(undefined);
 
 export const GUI_VERSION_ASYNC_ATOM = atom(async () => getVersion());
 
@@ -56,7 +56,7 @@ function VersionAndState() {
       ? guiVersionLoadable.data
       : 'unknown';
 
-  const localize = useText();
+  const localize = useMessage();
 
   let ucpFooterVersionString = null;
   switch (ucpState) {
@@ -135,7 +135,7 @@ export default function Footer() {
   const statusBarMessage = isDisplayingCurrentFolder ? (
     displayCurrentFolder
   ) : (
-    <Text message={msg} />
+    <Message message={msg} />
   );
 
   const overflowPreventionStyle: CSSProperties = {

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { LaunchOptions } from './launch-options';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 export default function FreeArgs(props: LaunchOptions) {
   const { getArgs, setArgs } = props;
@@ -12,7 +12,7 @@ export default function FreeArgs(props: LaunchOptions) {
   return (
     <div className="launch__options__box--free-args">
       <h5>
-        <Text message="launch.options.free.args" />
+        <Message message="launch.options.free.args" />
       </h5>
       <form
         ref={formRef}

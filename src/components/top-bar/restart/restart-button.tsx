@@ -1,7 +1,7 @@
 import { relaunch } from '@tauri-apps/api/process';
 
 import './restart-button.css';
-import Text from '../../general/text';
+import Message from '../../general/message';
 
 // eslint-disable-next-line import/prefer-default-export
 export function RestartButton() {
@@ -13,7 +13,7 @@ export function RestartButton() {
         await relaunch();
       }}
     >
-      <Text message="restart" />
+      <Message message="restart" />
     </button>
   );
 }

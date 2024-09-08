@@ -3,7 +3,7 @@ import { GearFill, Gear } from 'react-bootstrap-icons';
 import { CURRENT_DISPLAYED_TAB } from '../../tabs-state';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import * as GuiSettings from '../../../../function/gui-settings/settings';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 // eslint-disable-next-line import/prefer-default-export
 export function CustomizeButton() {
@@ -42,7 +42,7 @@ export function CustomizeButton() {
       <div className="ucp-button-variant-button-text d-flex align-items-center">
         <span className="me-1">{advancedMode ? <GearFill /> : <Gear />}</span>
         <span>
-          <Text message="config.customize" />
+          <Message message="config.customize" />
           ...
         </span>
       </div>

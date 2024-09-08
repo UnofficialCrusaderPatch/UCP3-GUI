@@ -12,7 +12,7 @@ import { UIFactory } from './ui-elements';
 
 import { ConfigEditorToolbar } from './config-editor-toolbar';
 import { ConfigEditorCreatorToolbar } from './config-editor-creator-toolbar';
-import Text from '../../general/text';
+import Message from '../../general/message';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -71,7 +71,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   ⚠
                 </span>
                 <span className="mx-1">
-                  <Text
+                  <Message
                     message={{
                       key: 'errors',
                       args: { count: errorCount },
@@ -86,7 +86,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   ⚠
                 </span>
                 <span className="mx-1">
-                  <Text
+                  <Message
                     message={{
                       key: 'warnings',
                       args: { count: warningCount },

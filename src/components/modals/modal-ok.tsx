@@ -3,7 +3,7 @@ import './modals.css';
 import { Modal, Button } from 'react-bootstrap';
 import { useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
-import Text from '../general/text';
+import Message from '../general/message';
 
 export interface OkModalWindowProperties
   extends Omit<AbstractModalWindowProperties<void, void>, 'handleClose'> {}
@@ -45,15 +45,21 @@ function ModalOk(props: OkModalWindowProperties) {
     >
       <Modal.Header>
         <Modal.Title className="h5">
-          <Text message={title} alternativeSource={alternativeMessageSource} />
+          <Message
+            message={title}
+            alternativeSource={alternativeMessageSource}
+          />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="fs-8">
-        <Text message={message} alternativeSource={alternativeMessageSource} />
+        <Message
+          message={message}
+          alternativeSource={alternativeMessageSource}
+        />
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={internalHandleAction}>
-          <Text
+          <Message
             message={ok !== undefined ? ok : 'ok'}
             alternativeSource={alternativeMessageSource}
           />

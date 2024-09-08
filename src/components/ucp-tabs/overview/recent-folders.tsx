@@ -12,7 +12,7 @@ import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../../../function/game-folder/
 import { reloadCurrentWindow } from '../../../function/window-actions';
 import { useRecentFolders } from '../../../hooks/jotai/hooks';
 import Result from '../../../util/structs/result';
-import Text from '../../general/text';
+import Message from '../../general/message';
 
 export default function RecentFolders() {
   const setFolder = useSetAtom(GAME_FOLDER_INTERFACE_ASYNC_ATOM);
@@ -58,14 +58,14 @@ export default function RecentFolders() {
   if (recentFolderResult.isEmpty()) {
     return (
       <p>
-        <Text message="loading" />
+        <Message message="loading" />
       </p>
     );
   }
 
   return (
     <div className="text-input">
-      <Text message="select.folder" />
+      <Message message="select.folder" />
       <div className="ornament-border-inset text-input-field">
         <input
           id="browseresult"

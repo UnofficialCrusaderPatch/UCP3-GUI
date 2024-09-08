@@ -4,7 +4,7 @@ import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 /* eslint-disable react/jsx-props-no-spreading */
 const theme = {
@@ -83,7 +83,7 @@ ${override.overridden.url}:
         </div>
       </div>
       <button type="button" className="credits-close" onClick={closeFunc}>
-        <Text message="close" />
+        <Message message="close" />
       </button>
     </div>
   );

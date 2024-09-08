@@ -15,7 +15,7 @@ import {
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from '../../../../function/extensions/state/state';
 import { getStore } from '../../../../hooks/jotai/base';
-import { Message } from '../../../../localization/localization';
+import { MessageType } from '../../../../localization/localization';
 
 const LOGGER = new Logger('import-strategies.ts');
 
@@ -78,7 +78,7 @@ export type Strategy = (
 export async function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
-  setConfigStatus: (message: Message) => void,
+  setConfigStatus: (message: MessageType) => void,
 ) {
   const { extensions } = newExtensionsState;
 
@@ -250,7 +250,7 @@ export async function sparseStrategy(
 export async function fullStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
-  setConfigStatus: (message: Message) => void,
+  setConfigStatus: (message: MessageType) => void,
 ) {
   const { extensions } = newExtensionsState;
 

@@ -13,7 +13,7 @@ import SvgHelper from '../general/svg-helper';
 import { getCurrentWindow } from '../../tauri/tauri-window';
 import { registerTauriEventListener } from '../../tauri/tauri-hooks';
 import { getStore } from '../../hooks/jotai/base';
-import { useText } from '../general/text';
+import { useMessage } from '../general/message';
 
 const TITLE_ATOM = atom(getCurrentWindow().title());
 const IS_MAX_ATOM = atom(false);
@@ -26,7 +26,7 @@ export default function Titlebar() {
   const title = useAtomValue(TITLE_ATOM);
   const isMax = useAtomValue(IS_MAX_ATOM);
 
-  const localize = useText();
+  const localize = useMessage();
 
   const currentWindow = getCurrentWindow();
   return (

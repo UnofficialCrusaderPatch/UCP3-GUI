@@ -28,7 +28,7 @@ import { buildConfigMetaContentDBForUser } from '../../extension-manager/extensi
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { Override } from '../../../../function/configuration/overrides';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
-import { Message } from '../../../../localization/localization';
+import { MessageType } from '../../../../localization/localization';
 
 const LOGGER = new Logger('import-button-callback.tsx');
 
@@ -98,7 +98,7 @@ export function constructUserConfigObjects(config: ConfigFile) {
 
 async function importButtonCallback(
   gameFolder: string,
-  setConfigStatus: (message: Message) => void,
+  setConfigStatus: (message: MessageType) => void,
   localizeString: (message: string) => string,
   file: string | undefined,
 ) {

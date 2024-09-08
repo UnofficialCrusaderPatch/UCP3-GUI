@@ -4,7 +4,7 @@ import { loadable } from 'jotai/utils';
 import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
-import Text from '../../../general/text';
+import Message from '../../../general/message';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -26,7 +26,7 @@ export function ExtensionViewer(
   return (
     <div className="credits-container">
       <h1 className="credits-title">
-        <Text message="extensions.viewer" />
+        <Message message="extensions.viewer" />
       </h1>
       <div className="parchment-box credits-text-box">
         <div className="credits-text">
@@ -40,7 +40,7 @@ export function ExtensionViewer(
         className="credits-close credits-close-button"
         onClick={closeFunc}
       >
-        <Text message="close" />
+        <Message message="close" />
       </button>
     </div>
   );

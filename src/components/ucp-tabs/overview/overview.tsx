@@ -42,7 +42,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
 import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
 import { asPercentage } from '../../../tauri/tauri-http';
-import { useText } from '../../general/text';
+import { useMessage } from '../../general/message';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -53,7 +53,7 @@ export default function Overview() {
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
   // needed for file interaction at the moment
-  const localize = useText();
+  const localize = useMessage();
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const ucpStatePresent = loadableUcpState.state === 'hasData';

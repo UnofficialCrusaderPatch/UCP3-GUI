@@ -12,7 +12,7 @@ import { Message } from '../../../localization/localization';
 const exportButtonCallback = async (
   gameFolder: string,
   setConfigStatus: (value: Message) => void,
-  localize: (message: Message) => string,
+  localizeString: (message: string) => string,
 ) => {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
   const fullConfiguration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
@@ -24,10 +24,10 @@ const exportButtonCallback = async (
 
   const filePathOptional = await saveFileDialog(gameFolder, [
     {
-      name: localize('file.config'),
+      name: localizeString('file.config'),
       extensions: ['yml', 'yaml'],
     },
-    { name: localize('file.all'), extensions: ['*'] },
+    { name: localizeString('file.all'), extensions: ['*'] },
   ]);
   if (filePathOptional.isEmpty()) {
     setConfigStatus('config.status.cancelled');

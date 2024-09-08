@@ -7,30 +7,28 @@ import {
   MessageResolverAtom,
 } from '../../localization/localization';
 
-interface TextProps {
-  message?: Message;
+interface MessageProps {
+  message: Message;
   alternativeSource?: MessageResolverAtom;
 }
 
 // usage for cases where node not directly applicable, but still inside React context
 export function useText(alternativeSource?: MessageResolverAtom) {
-  const resolveMessage = useAtomValue(
-    alternativeSource ?? GUI_LOCALIZATION_ATOM,
-  );
-  return <T extends undefined | Message>(message: T) =>
-    (!message ? null : resolveMessage(message)) as T extends undefined
-      ? null
-      : string;
+  return useAtomValue(alternativeSource ?? GUI_LOCALIZATION_ATOM);
 }
 
-function InnerText(props: TextProps) {
+function InnerText(props: MessageProps) {
   const { message, alternativeSource } = props;
   const localize = useText(alternativeSource);
   return localize(message);
 }
 
-export default function Text(props: TextProps) {
+export default function Text(props: Partial<MessageProps>) {
   const { message, alternativeSource } = props;
+  if (!message) {
+    return null;
+  }
+
   return (
     <Suspense>
       <InnerText message={message} alternativeSource={alternativeSource} />

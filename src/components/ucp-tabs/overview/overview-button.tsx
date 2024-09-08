@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { ToastType, makeToast } from '../../toasts/toasts-display';
 import Text, { useText } from '../../general/text';
-import { Message } from '../../../localization/localization';
+import { Message, SimpleMessage } from '../../../localization/localization';
 
 interface OverviewButtonProps {
   buttonActive: boolean;
@@ -14,7 +14,7 @@ interface OverviewButtonProps {
   ) => Promise<void>;
   funcBefore?: () => void;
   funcAfter?: () => void;
-  tooltip?: Message;
+  tooltip?: SimpleMessage;
 }
 
 function createToastHandler(title: Message) {
@@ -56,7 +56,7 @@ export default function OverviewButton(props: OverviewButtonProps) {
       }}
       data-bs-toggle="tooltip"
       data-bs-placement="top"
-      title={localize(tooltip) ?? ''}
+      title={tooltip ? localize(tooltip) : undefined}
     >
       <div className="icon-placeholder" />
       <div className="button-text">

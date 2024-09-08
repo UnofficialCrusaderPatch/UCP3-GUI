@@ -21,7 +21,7 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
     handleAction,
     title,
     message,
-    rawData,
+
     ok,
     cancel,
     alternativeMessageSource,
@@ -56,7 +56,6 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
       </Modal.Header>
       <Modal.Body>
         <Text message={message} alternativeSource={alternativeMessageSource} />
-        {rawData}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={internalHandleClose}>

@@ -14,14 +14,7 @@ const DEFAULT_OK_MODAL_PROPERTIES: AbstractModalWindowProperties<void, void> = {
 };
 
 function ModalOk(props: OkModalWindowProperties) {
-  const {
-    handleAction,
-    title,
-    message,
-    rawData,
-    ok,
-    alternativeMessageSource,
-  } = props;
+  const { handleAction, title, message, ok, alternativeMessageSource } = props;
 
   const [show, setShow] = useState(true);
 
@@ -57,7 +50,6 @@ function ModalOk(props: OkModalWindowProperties) {
       </Modal.Header>
       <Modal.Body className="fs-8">
         <Text message={message} alternativeSource={alternativeMessageSource} />
-        {rawData}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={internalHandleAction}>

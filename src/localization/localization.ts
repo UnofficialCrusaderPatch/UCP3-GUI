@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { Atom } from 'jotai/vanilla';
+import { ReactNode } from 'react';
 import {
   AVAILABLE_LANGUAGES_FILENAME,
   LOCALIZATION_DIRECTORY,
@@ -16,9 +17,14 @@ export interface MessageObject {
   args?: Record<string, unknown>;
 }
 
-export type Message = string | MessageObject;
+export type MessageFunction = (localize: MessageResolver) => ReactNode;
 
-export type MessageResolver = (message: Message) => string;
+export type SimpleMessage = string | MessageObject;
+export type Message = SimpleMessage | MessageFunction;
+
+export type MessageResolver = <T extends Message>(
+  message: T,
+) => T extends MessageFunction ? ReactNode : string;
 
 export type MessageResolverAtom = Atom<Promise<MessageResolver>>;
 
@@ -27,9 +33,6 @@ export type MessageResolverAtom = Atom<Promise<MessageResolver>>;
 const LOGGER = new Logger('localization.ts');
 
 const DEFAULT_LANG = 'en';
-
-// can be used to stringify raw data via the message system
-export const RAW_DATA_KEY = '}}DATA{{';
 
 // functions
 
@@ -90,10 +93,6 @@ function resolveLocalizationTextWithFallback(
 }
 
 function resolveParameterText(text: string, args: Record<string, unknown>) {
-  if (RAW_DATA_KEY === text) {
-    return JSON.stringify(args);
-  }
-
   return text.replaceAll(/{{(.*?)}}/g, (match, id) => {
     if (!(id in args)) {
       return match;
@@ -115,7 +114,13 @@ export function createMessageResolver(
 ) {
   const usedDefaultLocalization =
     currentLanguage === defaultLanguage ? null : defaultLocalization;
-  return (message: Message) => {
+
+  // NOTE: breaking type system, found no way with it
+  const resolverFunction: unknown = (message: Message) => {
+    if (typeof message === 'function') {
+      return message(resolverFunction as MessageResolver);
+    }
+
     const isSimpleKey = typeof message === 'string';
 
     const key = isSimpleKey ? message : message.key;
@@ -133,6 +138,7 @@ export function createMessageResolver(
 
     return resolveParameterText(text, message.args);
   };
+  return resolverFunction as MessageResolver;
 }
 
 // atoms

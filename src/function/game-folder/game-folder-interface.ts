@@ -162,7 +162,7 @@ export async function initializeGameFolder(
         await importButtonCallback(
           newFolder,
           () => {},
-          (message) => (typeof message === 'string' ? message : message.key), // TODO: will need a refactoring
+          (message) => message, // TODO: will need a refactoring
           file,
         );
       } catch (err: unknown) {

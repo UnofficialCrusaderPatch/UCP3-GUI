@@ -99,7 +99,7 @@ export function constructUserConfigObjects(config: ConfigFile) {
 async function importButtonCallback(
   gameFolder: string,
   setConfigStatus: (message: Message) => void,
-  localize: (message: Message) => string,
+  localizeString: (message: string) => string,
   file: string | undefined,
 ) {
   // Get the current extension state
@@ -118,10 +118,10 @@ async function importButtonCallback(
   if (file === undefined || file.length === 0) {
     const pathResult = await openFileDialog(gameFolder, [
       {
-        name: localize('file.config'),
+        name: localizeString('file.config'),
         extensions: ['yml', 'yaml'],
       },
-      { name: localize('file.all'), extensions: ['*'] },
+      { name: localizeString('file.all'), extensions: ['*'] },
     ]);
     if (pathResult.isEmpty()) {
       setConfigStatus('config.status.no.file');
@@ -166,7 +166,8 @@ async function importButtonCallback(
 
   if (parsingResult.status !== 'OK') {
     setConfigStatus(
-      `${parsingResult.status}: ${localize(parsingResult.message)}`,
+      (localize) =>
+        `${parsingResult.status}: ${localize(parsingResult.message)}`,
     );
     return;
   }

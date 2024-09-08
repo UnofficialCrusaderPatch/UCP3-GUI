@@ -130,7 +130,7 @@ function CreateUIElement(args: {
       LOGGER.msg(
         localize({
           key: 'config.element.unsupported.type',
-          args: JSON.stringify(spec),
+          args: spec,
         }),
       ).warn();
       return <div />;

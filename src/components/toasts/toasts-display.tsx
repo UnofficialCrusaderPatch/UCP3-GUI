@@ -1,7 +1,6 @@
 import './toasts.css';
 
 import { atom, useAtomValue } from 'jotai';
-import { ReactNode } from 'react';
 import { ToastContainer, Toast } from 'react-bootstrap';
 
 import { getStore } from '../../hooks/jotai/base';
@@ -24,18 +23,10 @@ type ToastConfig = {
 
 export type ToastProps = ToastConfig & {
   title: Message;
+  body: Message;
   alternativeMessageSource?: MessageResolverAtom;
   type?: ToastType;
-} & (
-    | {
-        body: ReactNode;
-        hasDataBody: true;
-      }
-    | {
-        body: Message;
-        hasDataBody?: false;
-      }
-  );
+};
 
 type ToastState = ToastProps;
 
@@ -96,7 +87,6 @@ function TheToast(props: { id: string; state: ToastState }) {
     customAutohide,
     customDelay,
     customCSSClass,
-    hasDataBody,
     alternativeMessageSource,
   } = state;
   return (
@@ -115,11 +105,7 @@ function TheToast(props: { id: string; state: ToastState }) {
         </strong>
       </Toast.Header>
       <Toast.Body className="text-dark">
-        {hasDataBody ? (
-          body
-        ) : (
-          <Text message={body} alternativeSource={alternativeMessageSource} />
-        )}
+        <Text message={body} alternativeSource={alternativeMessageSource} />
       </Toast.Body>
     </Toast>
   );

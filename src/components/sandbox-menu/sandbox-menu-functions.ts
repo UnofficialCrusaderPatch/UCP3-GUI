@@ -1,4 +1,3 @@
-import i18next from 'i18next';
 import { FileEntry } from '@tauri-apps/api/fs';
 import {
   readTextFile,
@@ -14,9 +13,10 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
 } from '../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
+import { LANGUAGE_ATOM } from '../../function/gui-settings/settings';
 
 export async function getLanguage(): Promise<string> {
-  return i18next.language; // is kinda enough, using the hook might be overkill
+  return getStore().get(LANGUAGE_ATOM);
 }
 
 export function createGetLocalizedStringFunction(

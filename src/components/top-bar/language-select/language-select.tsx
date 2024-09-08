@@ -5,7 +5,7 @@ import { startTransition } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 import SvgHelper from '../../general/svg-helper';
 import { LANGUAGE_ATOM } from '../../../function/gui-settings/settings';
-import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
+import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/localization';
 
 export default function LanguageSelect() {
   const languages = useAtomValue(AVAILABLE_LANGUAGES_ATOM);

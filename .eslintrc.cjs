@@ -52,7 +52,6 @@ module.exports = {
    "@typescript-eslint/no-unused-vars": "error",
    "no-console": "error",
    "@typescript-eslint/no-explicit-any": "warn",
-   "func-style": ["error", "declaration"],
   },
   plugins: ["prettier"]
 };

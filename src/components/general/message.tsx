@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { useAtomValue } from 'jotai';
-import { Suspense } from 'react';
+import { memo, Suspense } from 'react';
 import {
   GUI_LOCALIZATION_ATOM,
   MessageType,
@@ -23,7 +23,7 @@ function InnerMessage(props: MessageProps) {
   return localize(message);
 }
 
-export default function Message(props: Partial<MessageProps>) {
+function Message(props: Partial<MessageProps>) {
   const { message, alternativeSource } = props;
   if (!message) {
     return null;
@@ -35,3 +35,7 @@ export default function Message(props: Partial<MessageProps>) {
     </Suspense>
   );
 }
+
+// simple memo for Text components
+// will help with simply keys out of the box, other Messages would need work from the parent
+export default memo(Message);

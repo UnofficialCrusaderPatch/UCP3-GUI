@@ -1,11 +1,10 @@
-import { useTranslation } from 'react-i18next';
 import { relaunch } from '@tauri-apps/api/process';
 
 import './restart-button.css';
+import Text from '../../general/text';
 
 // eslint-disable-next-line import/prefer-default-export
 export function RestartButton() {
-  const [t] = useTranslation(['gui-landing']);
   return (
     <button
       type="button"
@@ -14,7 +13,7 @@ export function RestartButton() {
         await relaunch();
       }}
     >
-      {t('gui-landing:restart')}
+      <Text message="restart" />
     </button>
   );
 }

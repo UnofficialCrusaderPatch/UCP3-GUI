@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { useAtom, useSetAtom } from 'jotai';
 import { Funnel, FunnelFill } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -19,7 +18,7 @@ export function FilterButton() {
         setShowAllExtensions(!showAllExtensions);
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.filter'));
+        setStatusBarMessage('config.tooltip.filter');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

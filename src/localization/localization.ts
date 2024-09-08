@@ -28,6 +28,9 @@ const LOGGER = new Logger('localization.ts');
 
 const DEFAULT_LANG = 'en';
 
+// can be used to stringify raw data via the message system
+export const RAW_DATA_KEY = '}}DATA{{';
+
 // functions
 
 async function loadLanguageResource(
@@ -87,7 +90,15 @@ function resolveLocalizationTextWithFallback(
 }
 
 function resolveParameterText(text: string, args: Record<string, unknown>) {
-  return text.replaceAll(/{{(.*?)}}/g, (_, id) => {
+  if (RAW_DATA_KEY === text) {
+    return JSON.stringify(args);
+  }
+
+  return text.replaceAll(/{{(.*?)}}/g, (match, id) => {
+    if (!(id in args)) {
+      return match;
+    }
+
     const value = args[id];
     if (typeof value === 'string') {
       return value;

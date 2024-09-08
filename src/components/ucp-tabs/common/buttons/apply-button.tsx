@@ -1,5 +1,4 @@
 import { useAtomValue, useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
 import { CheckCircleFill } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -13,6 +12,7 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/st
 import { makeToast } from '../../../toasts/toasts-display';
 import saveConfig from '../save-config';
 import { CONFIG_DIRTY_STATE_ATOM } from './config-serialized-state';
+import Text from '../../../general/text';
 
 function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -27,8 +27,6 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   );
 
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
-
   // eslint-disable-next-line func-style
   const setConfigStatus = (msg: string) => makeToast({ title: msg, body: '' });
 
@@ -39,7 +37,7 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
       className="ucp-button ucp-button-variant"
       type="button"
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.apply'));
+        setStatusBarMessage('config.tooltip.apply');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
@@ -55,10 +53,10 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
             configurationQualifier,
           );
           setConfigStatus(result);
-        } catch (e: any) {
+        } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: e.toString(),
+            message: String(e),
           });
         }
       }}
@@ -69,13 +67,17 @@ function ApplyButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
         {configurationDirtyState ? (
           <>
             <span style={{ paddingRight: '5px' }} />
-            <span className="ms-auto pe-4">{t('gui-general:apply')} *</span>
+            <span className="ms-auto pe-4">
+              <Text message="apply" /> *
+            </span>
           </>
         ) : (
           <>
             <span style={{ paddingRight: '10px' }} />
             <CheckCircleFill className="" color="green" />{' '}
-            <span className="ms-auto pe-4">{t('gui-general:applied')}</span>
+            <span className="ms-auto pe-4">
+              <Text message="applied" />
+            </span>
           </>
         )}
       </div>

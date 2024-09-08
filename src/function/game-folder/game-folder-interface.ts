@@ -1,7 +1,6 @@
 import { atom } from 'jotai';
 
 import { exists } from '@tauri-apps/api/fs';
-import i18next from 'i18next';
 import { getVersion } from '@tauri-apps/api/app';
 import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
 import { GAME_FOLDER_ATOM } from './game-folder-atom';
@@ -157,15 +156,17 @@ export async function initializeGameFolder(
   if (getStore().get(INIT_ERROR) === false) {
     loggerState.setMsg('Trying to load ucp-config.yml').info();
 
-    // const [t] = useTranslation(['gui-general', 'gui-editor']);
-    const { t } = i18next;
-
     if (await exists(file)) {
       getStore().set(FIRST_TIME_USE_ATOM, false);
       try {
-        await importButtonCallback(newFolder, () => {}, t, file);
-      } catch (err: any) {
-        loggerState.setMsg(err).error();
+        await importButtonCallback(
+          newFolder,
+          () => {},
+          (message) => (typeof message === 'string' ? message : message.key), // TODO: will need a refactoring
+          file,
+        );
+      } catch (err: unknown) {
+        loggerState.setMsg(String(err)).error();
       }
     } else {
       loggerState.setMsg('no ucp-config.yml file found').info();

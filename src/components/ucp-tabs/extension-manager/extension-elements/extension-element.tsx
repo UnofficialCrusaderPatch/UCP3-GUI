@@ -2,7 +2,6 @@ import './extension-element.css';
 import '../buttons/customize-extension-button.css';
 import '../../../common/minimal.css';
 
-import { useTranslation } from 'react-i18next';
 import { useCallback } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -33,6 +32,8 @@ import { customizeExtensionButtonCallback } from './customize-extension-button-c
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { OverrideViewer, OverrideViewerProps } from './override-viewer';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
+import { Message } from '../../../../localization/localization';
+import Text from '../../../general/text';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -83,7 +84,7 @@ function MoveArrows(props: {
 function ArrowButton(props: {
   clickCallback: () => void;
   disabled: boolean;
-  buttonText: string;
+  buttonText: Message;
   className: string;
 }) {
   const { clickCallback, disabled, buttonText, className } = props;
@@ -131,7 +132,7 @@ export function ExtensionElement(props: {
   fixedVersion: boolean;
   active: boolean;
   movability: { up: boolean; down: boolean };
-  buttonText: string;
+  buttonText: Message;
   clickCallback: () => void;
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
   revDeps: string[];
@@ -152,8 +153,6 @@ export function ExtensionElement(props: {
   } = props;
   const { name, version, author } = ext.definition;
   const displayName = ext.definition['display-name'];
-
-  const [t] = useTranslation(['gui-editor']);
 
   const arrows = active ? (
     <MoveArrows
@@ -184,9 +183,10 @@ export function ExtensionElement(props: {
       clickCallback={clickCallback}
       buttonText={
         revDeps.length > 0
-          ? t('gui-editor:extensions.is.dependency', {
-              dependencies: revDeps.map((e) => `${e}`).join(', '),
-            })
+          ? {
+              key: 'extensions.is.dependency',
+              args: { dependencies: revDeps.map((e) => `${e}`).join(', ') },
+            }
           : buttonText
       }
       disabled={revDeps.length > 0}
@@ -282,8 +282,6 @@ export function ExtensionElement(props: {
 }
 
 export function CustomisationsExtensionElement() {
-  const [t] = useTranslation(['gui-editor']);
-
   const setUserConfig = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -319,7 +317,9 @@ export function CustomisationsExtensionElement() {
       {trashButton}
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-        <span className="extension-name-box__name">{t('Customisations')}</span>
+        <span className="extension-name-box__name">
+          <Text message="Customisations" />
+        </span>
       </div>
     </div>
   );
@@ -367,8 +367,6 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
     [ext],
   );
 
-  const [t] = useTranslation(['gui-editor']);
-
   const revDeps = extensionsState.tree.reverseExtensionDependenciesFor(ext);
 
   return (
@@ -377,7 +375,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
       fixedVersion={false}
       active={false}
       movability={{ up: false, down: false }}
-      buttonText={t('gui-general:activate')}
+      buttonText="activate"
       clickCallback={clickCallback}
       moveCallback={() => {}}
       revDeps={revDeps
@@ -418,8 +416,6 @@ export function ActiveExtensionElement(props: {
     up: index > 0 && revDeps.indexOf(arr[index - 1].name) === -1,
     down: index < arr.length - 1 && depsFor.indexOf(arr[index + 1].name) === -1,
   };
-
-  const [t] = useTranslation(['gui-editor']);
 
   const clickCallback = useCallback(
     () => activeExtensionElementClickCallback(ext),
@@ -462,7 +458,7 @@ export function ActiveExtensionElement(props: {
       fixedVersion
       active
       movability={movability}
-      buttonText={t('gui-general:deactivate')}
+      buttonText="deactivate"
       clickCallback={clickCallback}
       moveCallback={moveCallback}
       displayCustomizeButton={guiCreatorMode && ext.type === 'plugin'}

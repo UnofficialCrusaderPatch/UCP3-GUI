@@ -10,6 +10,7 @@ const LOGGER = new Logger('abstract-modal.tsx');
 
 export interface AbstractModalWindowProperties<R, C> {
   message?: Message;
+  rawData?: ReactNode;
   title?: Message;
   handleAction: (result: R) => void;
   handleClose: (cancelResult: C) => void;

@@ -1,4 +1,3 @@
-import { TFunction } from 'i18next';
 import { fullStrategy, sparseStrategy, Success } from './import-strategies';
 import { collectConfigEntries } from '../../../../function/extensions/discovery/collect-config-entries';
 import {
@@ -29,6 +28,7 @@ import { buildConfigMetaContentDBForUser } from '../../extension-manager/extensi
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { Override } from '../../../../function/configuration/overrides';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
+import { Message } from '../../../../localization/localization';
 
 const LOGGER = new Logger('import-button-callback.tsx');
 
@@ -98,8 +98,8 @@ export function constructUserConfigObjects(config: ConfigFile) {
 
 async function importButtonCallback(
   gameFolder: string,
-  setConfigStatus: (arg0: string) => void,
-  t: TFunction<[string, string], undefined>,
+  setConfigStatus: (message: Message) => void,
+  localize: (message: Message) => string,
   file: string | undefined,
 ) {
   // Get the current extension state
@@ -118,13 +118,13 @@ async function importButtonCallback(
   if (file === undefined || file.length === 0) {
     const pathResult = await openFileDialog(gameFolder, [
       {
-        name: t('gui-general:file.config'),
+        name: localize('file.config'),
         extensions: ['yml', 'yaml'],
       },
-      { name: t('gui-general:file.all'), extensions: ['*'] },
+      { name: localize('file.all'), extensions: ['*'] },
     ]);
     if (pathResult.isEmpty()) {
-      setConfigStatus(t('gui-editor:config.status.no.file'));
+      setConfigStatus('config.status.no.file');
       return;
     }
 
@@ -160,17 +160,19 @@ async function importButtonCallback(
     status: string;
     message: string;
     result: ConfigFile;
-  } = await loadConfigFromFile(path, t);
+  } = await loadConfigFromFile(path);
 
   // ConsoleLogger.debug(`Parsing result: `, parsingResult);
 
   if (parsingResult.status !== 'OK') {
-    setConfigStatus(`${parsingResult.status}: ${parsingResult.message}`);
+    setConfigStatus(
+      `${parsingResult.status}: ${localize(parsingResult.message)}`,
+    );
     return;
   }
 
   if (parsingResult.result === undefined) {
-    setConfigStatus(t('gui-editor:config.status.failed.unknown'));
+    setConfigStatus('config.status.failed.unknown');
     return;
   }
 

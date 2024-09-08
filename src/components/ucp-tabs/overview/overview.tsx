@@ -210,7 +210,7 @@ export default function Overview() {
             if (removeResult.isErr()) {
               await showModalOk({
                 message: {
-                  key: 'gui-download:ucp.install.zip.remove.failed',
+                  key: 'ucp.install.zip.remove.failed',
                   args: {
                     error: removeResult.err().get(),
                   },

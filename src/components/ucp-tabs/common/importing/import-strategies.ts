@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import * as semver from 'semver';
 import { ConfigFile, Extension } from '../../../../config/ucp/common';
 import { deserializeLoadOrder } from '../../../../config/ucp/config-files/load-order';
@@ -16,6 +15,7 @@ import {
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from '../../../../function/extensions/state/state';
 import { getStore } from '../../../../hooks/jotai/base';
+import { Message } from '../../../../localization/localization';
 
 const LOGGER = new Logger('import-strategies.ts');
 
@@ -78,7 +78,7 @@ export type Strategy = (
 export async function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
-  setConfigStatus: (arg0: string) => void,
+  setConfigStatus: (message: Message) => void,
 ) {
   const { extensions } = newExtensionsState;
 
@@ -146,17 +146,21 @@ export async function sparseStrategy(
 
         // If there are no options, we are probably missing an extension
         if (options.length === 0) {
-          setConfigStatus(
-            t('gui-editor:config.status.missing.extension', {
+          setConfigStatus({
+            key: 'config.status.missing.extension',
+            args: {
               extension: dependencyStatementStringSerialized,
-            }),
-          );
+            },
+          });
 
           // eslint-disable-next-line no-await-in-loop
           await showModalOk({
-            message: t('gui-editor:config.status.missing.extension', {
-              extension: dependencyStatementStringSerialized,
-            }),
+            message: {
+              key: 'config.status.missing.extension',
+              args: {
+                extension: dependencyStatementStringSerialized,
+              },
+            },
             title: `Missing extension`,
           });
 
@@ -168,7 +172,7 @@ export async function sparseStrategy(
             dependencies: [dependencyStatementStringSerialized],
           } as MissingDependenciesFailure;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Couldn't be parsed by semver
         const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementStringSerialized}`;
 
@@ -203,10 +207,10 @@ export async function sparseStrategy(
           newExtensionsState,
           ext,
         );
-      } catch (de: any) {
+      } catch (de: unknown) {
         // eslint-disable-next-line no-await-in-loop
         await showModalOk({
-          message: de.toString(),
+          message: String(de),
           title: 'Error in dependencies',
         });
 
@@ -214,7 +218,7 @@ export async function sparseStrategy(
 
         return {
           status: 'error',
-          messages: [de.toString()],
+          messages: [String(de)],
           code: 'GENERIC',
         } as GenericFailure;
       }
@@ -246,7 +250,7 @@ export async function sparseStrategy(
 export async function fullStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
-  setConfigStatus: (arg0: string) => void,
+  setConfigStatus: (message: Message) => void,
 ) {
   const { extensions } = newExtensionsState;
 
@@ -294,12 +298,7 @@ export async function fullStrategy(
       if (options.length !== 1) {
         LOGGER.msg(`options: ${options.length}`).warn();
         LOGGER.msg(
-          `Missing extension? ${t(
-            'gui-editor:config.status.missing.extension',
-            {
-              extension: dependencyStatementStringSerialized,
-            },
-          )}`,
+          `Missing extension? Could not import configuration. Missing extension: ${dependencyStatementStringSerialized}`,
         ).error();
         setConfigStatus('missing dependencies');
         // Abort the import
@@ -338,12 +337,12 @@ export async function fullStrategy(
         }
         ae.push(ext);
         ie.splice(ie.indexOf(ext), 1);
-      } catch (de: any) {
-        LOGGER.msg(de.toString()).error();
+      } catch (de: unknown) {
+        LOGGER.msg(String(de)).error();
 
         return {
           status: 'error',
-          messages: [de.toString()],
+          messages: [String(de)],
         } as GenericFailure;
       }
     }

@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { useAtomValue } from 'jotai';
+import { Suspense } from 'react';
 import {
   GUI_LOCALIZATION_ATOM,
   Message,
@@ -22,8 +23,17 @@ export function useText(alternativeSource?: MessageResolverAtom) {
       : string;
 }
 
-export default function Text(props: TextProps) {
+function InnerText(props: TextProps) {
   const { message, alternativeSource } = props;
   const localize = useText(alternativeSource);
   return localize(message);
+}
+
+export default function Text(props: TextProps) {
+  const { message, alternativeSource } = props;
+  return (
+    <Suspense>
+      <InnerText message={message} alternativeSource={alternativeSource} />
+    </Suspense>
+  );
 }

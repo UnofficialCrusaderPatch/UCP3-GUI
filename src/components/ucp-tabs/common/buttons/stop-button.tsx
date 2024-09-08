@@ -1,10 +1,10 @@
 import { useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../extension-editor/extension-editor-state';
 import importButtonCallback from '../importing/import-button-callback';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { showModalOk } from '../../../modals/modal-ok';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './config-serialized-state';
+import Text, { useText } from '../../../general/text';
 
 // eslint-disable-next-line import/prefer-default-export
 export function StopButton() {
@@ -14,7 +14,7 @@ export function StopButton() {
 
   const setDirty = useSetAtom(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM);
 
-  const [t] = useTranslation(['gui-editor']);
+  const localize = useText();
   return (
     <button
       className="ucp-button ucp-button-variant"
@@ -24,22 +24,22 @@ export function StopButton() {
           await importButtonCallback(
             gameFolder,
             () => {},
-            t,
+            localize,
             `${gameFolder}/ucp-config.yml`,
           );
 
           setEditorState({ state: 'inactive' });
 
           setDirty(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: err.toString(),
+            message: String(err),
           });
         }
       }}
     >
-      Stop modifying
+      <Text message="stop modifying" />
     </button>
   );
 }

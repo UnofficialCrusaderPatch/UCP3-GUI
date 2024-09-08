@@ -2,8 +2,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import './extension-manager.css';
 
-import { useTranslation } from 'react-i18next';
-
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { listen } from '@tauri-apps/api/event';
 import { useEffect } from 'react';
@@ -26,6 +24,7 @@ import { EditorExtensionManagerToolbar } from './toolbar-extension-manager-edito
 import { ConsoleLogger } from '../../../util/scripts/logging';
 import { IS_FILE_DRAGGING, handleFileDrop } from './drag-drop/drop-handling';
 import { CURRENT_DISPLAYED_TAB } from '../tabs-state';
+import Text from '../../general/text';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
@@ -33,8 +32,6 @@ const HAS_CUSTOMISATIONS = atom(
 
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
-
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const extensionEditorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
@@ -89,7 +86,12 @@ export default function ExtensionManager() {
 
   const filterInfoElement = !showAllExtensions ? (
     <span className="fs-8">
-      {t('gui-editor:config.filter', { all: a, displayed: b })}
+      <Text
+        message={{
+          key: 'config.filtered',
+          args: { all: a, displayed: b },
+        }}
+      />
     </span>
   ) : (
     <span />
@@ -113,7 +115,7 @@ export default function ExtensionManager() {
       async (event) => {
         try {
           await handleFileDrop(event);
-        } catch (e: any) {
+        } catch (e: unknown) {
           ConsoleLogger.error(e);
         }
       },
@@ -166,7 +168,7 @@ export default function ExtensionManager() {
         <div className="extension-manager-control__header-container">
           <div className="extension-manager-control__header">
             <h4 className="extension-manager-control__box__header__headline">
-              {t('gui-editor:extensions.available')}
+              <Text message="extensions.available" />
             </h4>
             <div className="extension-manager-control__box__header__buttons">
               {filterInfoElement}
@@ -176,7 +178,7 @@ export default function ExtensionManager() {
           </div>
           <div className="extension-manager-control__header">
             <h4 className="extension-manager-control__box__header__headline">
-              {t('gui-editor:extensions.activated')}
+              <Text message="extensions.activated" />
             </h4>
           </div>
         </div>

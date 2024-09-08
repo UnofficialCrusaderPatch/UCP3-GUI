@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { useAtom, useSetAtom } from 'jotai';
 import { PaletteFill, Palette } from 'react-bootstrap-icons';
 import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
@@ -17,7 +16,7 @@ export function CreatorModeButton() {
         setGuiCreatorMode(!guiCreatorMode);
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.mode.creator'));
+        setStatusBarMessage('config.mode.creator');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

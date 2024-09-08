@@ -1,22 +1,21 @@
 import './credits.css';
 
-import { useTranslation } from 'react-i18next';
-
 import { SaferMarkdown } from '../markdown/safer-markdown';
 import { OverlayContentProps } from '../overlay/overlay';
 
 // eslint-disable-next-line import/no-unresolved
 import credits from './credits.md?raw';
+import Text from '../general/text';
 
 // eslint-disable-next-line import/prefer-default-export
 export function Credits(props: OverlayContentProps) {
   const { closeFunc } = props;
 
-  const [t] = useTranslation(['gui-general', 'gui-landing']);
-
   return (
     <div className="credits-container">
-      <h1 className="credits-title">{t('gui-landing:credits.title')}</h1>
+      <h1 className="credits-title">
+        <Text message="credits.title" />
+      </h1>
       <div
         className="parchment-box credits-text-box"
         style={{ backgroundImage: '' }}
@@ -30,7 +29,7 @@ export function Credits(props: OverlayContentProps) {
         className="ucp-button credits-close"
         onClick={closeFunc}
       >
-        {t('gui-general:close')}
+        <Text message="close" />
       </button>
     </div>
   );

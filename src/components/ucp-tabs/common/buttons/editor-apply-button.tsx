@@ -1,5 +1,4 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
 import { CheckCircleFill } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -22,8 +21,6 @@ function EditorApplyButton(
     EXTENSION_STATE_REDUCER_ATOM,
   );
 
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
-
   const setConfigStatus = (msg: string) => makeToast({ title: msg, body: '' });
 
   const configurationDirtyState = useAtomValue(CONFIG_DIRTY_STATE_ATOM);
@@ -45,7 +42,7 @@ function EditorApplyButton(
       className="ucp-button ucp-button-variant"
       type="button"
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.apply'));
+        setStatusBarMessage('config.tooltip.apply');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
@@ -68,10 +65,10 @@ function EditorApplyButton(
           setDirtyState(false);
 
           setExtensionsState(result.state);
-        } catch (e: any) {
+        } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: e.toString(),
+            message: String(e),
           });
         }
       }}

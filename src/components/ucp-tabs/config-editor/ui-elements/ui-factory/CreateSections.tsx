@@ -1,5 +1,4 @@
 import { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
 import { atom, useAtomValue } from 'jotai';
 import { selectAtom } from 'jotai/utils';
 import {
@@ -18,6 +17,7 @@ import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitize-id';
 import CreateSectionsNav from './CreateSectionsNav';
+import Text from '../../../../general/text';
 
 const ACTIVE_EXTENSIONS_ATOM = selectAtom(
   EXTENSION_STATE_REDUCER_ATOM,
@@ -37,7 +37,7 @@ const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
     return localized;
   });
 
-  const uiCollection: any[] = [];
+  const uiCollection: unknown[] = [];
   euis.forEach((eui) => {
     uiCollection.push(...eui);
   });
@@ -58,8 +58,6 @@ function CreateSections(args: { readonly: boolean }): {
   const optionEntries = useAtomValue(LOCALIZED_UI_OPTION_ENTRIES_ATOM);
   const definition = useAtomValue(LOCALIZED_UI_HIERARCHICAL_ATOM);
   const { readonly } = args;
-
-  const [t] = useTranslation(['gui-editor']);
 
   if (optionEntries.length === 0) {
     return { nav: <CreateSectionsNav spec={definition} />, content: null };
@@ -120,7 +118,9 @@ function CreateSections(args: { readonly: boolean }): {
         id="config-sections"
       >
         <div id="config-general">
-          <h1>{t('gui-editor:config.general')}</h1>
+          <h1>
+            <Text message="config.general" />
+          </h1>
           {elements}
         </div>
         <div>{children}</div>

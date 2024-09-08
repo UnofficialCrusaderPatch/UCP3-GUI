@@ -1,9 +1,9 @@
-import { t } from 'i18next';
 import { useAtom, useSetAtom } from 'jotai';
 import { GearFill, Gear } from 'react-bootstrap-icons';
 import { CURRENT_DISPLAYED_TAB } from '../../tabs-state';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import * as GuiSettings from '../../../../function/gui-settings/settings';
+import Text from '../../../general/text';
 
 // eslint-disable-next-line import/prefer-default-export
 export function CustomizeButton() {
@@ -33,7 +33,7 @@ export function CustomizeButton() {
         }
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.customize'));
+        setStatusBarMessage('config.tooltip.customize');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
@@ -41,7 +41,10 @@ export function CustomizeButton() {
     >
       <div className="ucp-button-variant-button-text d-flex align-items-center">
         <span className="me-1">{advancedMode ? <GearFill /> : <Gear />}</span>
-        <span> {t('gui-editor:config.customize')}...</span>
+        <span>
+          <Text message="config.customize" />
+          ...
+        </span>
       </div>
     </button>
   );

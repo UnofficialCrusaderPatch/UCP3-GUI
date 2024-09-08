@@ -1,7 +1,6 @@
 import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import semver from 'semver';
 import { useSetAtom } from 'jotai';
-import { useTranslation } from 'react-i18next';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalCreatePlugin } from '../../../modals/modal-create-plugin';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -23,6 +22,7 @@ import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { getStore } from '../../../../hooks/jotai/base';
 import { appendSystemDependencyStatements } from '../../../../function/extensions/discovery/system-dependencies';
 import { UCP_PLUGINS_FOLDER } from '../../../../function/global/constants/file-constants';
+import Text from '../../../general/text';
 
 export async function createPluginConfigFromCurrentState() {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
@@ -77,8 +77,6 @@ function ExportAsPluginButton(
 ) {
   const gameFolder = useCurrentGameFolder();
 
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
-
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   return (
@@ -127,29 +125,29 @@ function ExportAsPluginButton(
           await writeTextFile(`${pluginDir}/config.yml`, toYaml(plugin));
 
           const confirmed = await showModalOkCancel({
-            title: t('gui-general:require.reload.title'),
-            message: t('gui-editor:overview.require.reload.text'),
+            title: 'require.reload.title',
+            message: 'overview.require.reload.text',
           });
 
           if (confirmed) {
             reloadCurrentWindow();
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: e.toString(),
+            message: String(e),
           });
         }
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.plugin'));
+        setStatusBarMessage('config.tooltip.plugin');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
       }}
     >
       <div className="ucp-button-variant-button-text">
-        {t('gui-editor:plugin.create')}
+        <Text message="plugin.create" />
       </div>
     </button>
   );

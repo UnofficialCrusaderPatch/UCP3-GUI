@@ -1,6 +1,5 @@
 import './footer.css';
 
-import { useTranslation } from 'react-i18next';
 import { CircleFill } from 'react-bootstrap-icons';
 
 import { CSSProperties, Suspense } from 'react';
@@ -11,6 +10,8 @@ import { loadable } from 'jotai/utils';
 import { UCPState, UCP_STATE_ATOM } from '../../function/ucp-files/ucp-state';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
 import { UCP_VERSION_ATOM } from '../../function/ucp-files/ucp-version';
+import { Message } from '../../localization/localization';
+import Text, { useText } from '../general/text';
 
 const UCP_STATE_MAP = new Map([
   [UCPState.WRONG_FOLDER, 'wrong.folder'],
@@ -38,7 +39,7 @@ const UCP_STATE_COLOR_MAP = new Map([
   [UCPState.UNKNOWN, 'red'],
 ]);
 
-export const STATUS_BAR_MESSAGE_ATOM = atom<string | undefined>(undefined);
+export const STATUS_BAR_MESSAGE_ATOM = atom<Message | undefined>(undefined);
 
 export const GUI_VERSION_ASYNC_ATOM = atom(async () => getVersion());
 
@@ -55,14 +56,14 @@ function VersionAndState() {
       ? guiVersionLoadable.data
       : 'unknown';
 
-  const { t } = useTranslation(['gui-general', 'gui-editor']);
+  const localize = useText();
 
   let ucpFooterVersionString = null;
   switch (ucpState) {
     case UCPState.NOT_INSTALLED:
     case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
     case UCPState.BINK_UCP_MISSING:
-      ucpFooterVersionString = t('gui-editor:footer.version.no.ucp');
+      ucpFooterVersionString = localize('footer.version.no.ucp');
       break;
     case UCPState.ACTIVE:
     case UCPState.INACTIVE:
@@ -86,16 +87,18 @@ function VersionAndState() {
           UCP_STATE_COLOR_MAP.get(UCPState.UNKNOWN)
         }
         onMouseEnter={() => {
-          setStatusBarMessage(
-            t('gui-editor:footer.state.prefix', {
-              state: t(
-                `gui-editor:footer.state.${
+          setStatusBarMessage({
+            key: 'footer.state.prefix',
+            args: {
+              // no safe nesting support
+              state: localize(
+                `footer.state.${
                   UCP_STATE_MAP.get(ucpState) ??
                   UCP_STATE_MAP.get(UCPState.UNKNOWN)
                 }`,
               ),
-            }),
-          );
+            },
+          });
         }}
         onMouseLeave={() => {
           setStatusBarMessage(undefined);
@@ -128,10 +131,12 @@ export default function Footer() {
   );
 
   const msg = useAtomValue(STATUS_BAR_MESSAGE_ATOM);
-  const isDisplayingCurrentFolder = msg === undefined || msg.length === 0;
-  const statusBarMessage = isDisplayingCurrentFolder
-    ? displayCurrentFolder
-    : msg;
+  const isDisplayingCurrentFolder = msg === undefined;
+  const statusBarMessage = isDisplayingCurrentFolder ? (
+    displayCurrentFolder
+  ) : (
+    <Text message={msg} />
+  );
 
   const overflowPreventionStyle: CSSProperties = {
     whiteSpace: 'nowrap',

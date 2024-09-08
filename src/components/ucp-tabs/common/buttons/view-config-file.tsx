@@ -4,8 +4,6 @@ import 'highlight.js/styles/github-dark.min.css';
 import { useSetAtom, atom, useAtomValue } from 'jotai';
 import { EyeFill } from 'react-bootstrap-icons';
 
-import { useTranslation } from 'react-i18next';
-
 import { useMemo } from 'react';
 import { loadable } from 'jotai/utils';
 
@@ -18,6 +16,7 @@ import {
 } from '../../../overlay/overlay';
 import { UCP_CONFIG_FILE_ATOM } from '../../../../function/configuration/state';
 import { onFsExists, readTextFile } from '../../../../tauri/tauri-files';
+import Text from '../../../general/text';
 
 export function ConfigFileViewer(props: OverlayContentProps<void>) {
   const { closeFunc } = props;
@@ -40,8 +39,6 @@ export function ConfigFileViewer(props: OverlayContentProps<void>) {
   );
 
   const content = useAtomValue(contentAtom);
-
-  const [t] = useTranslation(['gui-general', 'gui-landing', 'gui-editor']);
 
   return (
     <div className="credits-container">
@@ -79,7 +76,7 @@ export function ConfigFileViewer(props: OverlayContentProps<void>) {
           className="credits-close-button"
           onClick={closeFunc}
         >
-          {t('gui-general:close')}
+          <Text message="close" />
         </button>
       </div>
     </div>

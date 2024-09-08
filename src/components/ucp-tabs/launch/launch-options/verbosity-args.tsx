@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { LaunchOptions } from './launch-options';
+import Text from '../../../general/text';
 
 const LOG_LEVELS: Record<string, string> = {
   DEFAULT: '',
@@ -30,15 +30,15 @@ function LogLevelSetting(
 ) {
   const { arg, label, getArgs, setArgs } = props;
 
-  const [t] = useTranslation(['gui-launch']);
-
   const [logLevel, setLogLevel] = useState(
     LOG_LEVELS_INVERSE[getArgs().at(1) ?? ''],
   );
 
   return (
     <div className="launch__options__box--ucp-log-level">
-      <h5>{t(`gui-launch:launch.options.${label}`)}</h5>
+      <h5>
+        <Text message={`launch.options.${label}`} />
+      </h5>
       <select
         value={logLevel}
         onChange={(event) => {

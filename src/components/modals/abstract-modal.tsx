@@ -4,18 +4,20 @@ import { ReactNode } from 'react';
 import { getStore } from '../../hooks/jotai/base';
 import Logger from '../../util/scripts/logging';
 import { sleep } from '../../util/scripts/util';
+import { Message, MessageResolverAtom } from '../../localization/localization';
 
 const LOGGER = new Logger('abstract-modal.tsx');
 
 export interface AbstractModalWindowProperties<R, C> {
-  message: string;
-  title: string;
+  message?: Message;
+  title?: Message;
   handleAction: (result: R) => void;
   handleClose: (cancelResult: C) => void;
-  ok: string;
+  ok?: Message;
   style?: {
     wide: boolean;
   };
+  alternativeMessageSource?: MessageResolverAtom;
 }
 
 type ModalCreator = () => ReactNode;

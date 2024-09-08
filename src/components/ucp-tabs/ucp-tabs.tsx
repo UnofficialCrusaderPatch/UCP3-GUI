@@ -4,7 +4,6 @@ import './ucp-tabs.css';
 
 import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { Atom, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   INIT_DONE,
@@ -45,6 +44,7 @@ import {
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
 import { reloadCurrentWindow } from '../../function/window-actions';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
+import Text from '../general/text';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -81,8 +81,6 @@ const BACKGROUNDS_PATH_ATOM: Atom<Promise<Record<string, string | undefined>>> =
   });
 
 export default function UcpTabs() {
-  const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-launch']);
-
   const overlayActive = useAtomValue(OVERLAY_ACTIVE_ATOM);
   const initIsDoneAndWithoutErrors = useAtomValue(DISPLAY_CONFIG_TABS_ATOM);
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
@@ -138,7 +136,7 @@ export default function UcpTabs() {
               eventKey="overview"
               className="ornament-border-button tab-link"
             >
-              {t('gui-editor:overview.title')}
+              <Text message="overview.title" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item
@@ -193,15 +191,15 @@ export default function UcpTabs() {
                   LOGGER.msg(
                     `Missing dependencies: ${messages.join('\n')}`,
                   ).error();
-                } catch (e: any) {
+                } catch (e: unknown) {
                   await showModalOk({
                     title: 'ERROR',
-                    message: e.toString(),
+                    message: String(e),
                   });
                 }
               }}
             >
-              {t('gui-editor:extensions.title')}
+              <Text message="extensions.title" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -211,7 +209,7 @@ export default function UcpTabs() {
               disabled={!initIsDoneAndWithoutErrors}
               hidden={!advancedMode || !ucpFolderExists}
             >
-              {t('gui-editor:config.title')}
+              <Text message="config.title" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>
@@ -231,7 +229,7 @@ export default function UcpTabs() {
               disabled={currentFolder === ''}
               hidden={currentFolder === ''}
             >
-              {t('gui-launch:launch')}
+              <Text message="launch" />
             </Nav.Link>
           </Nav.Item>
         </Nav>

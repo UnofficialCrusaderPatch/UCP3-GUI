@@ -67,7 +67,7 @@ function resolveLocalizationTextWithFallback(
       return result;
     }
     LOGGER.msg(
-      'Missing localization key for lang {}: {}',
+      "Missing localization key for lang '{}': {}",
       currentLanguage,
       key,
     ).warn();
@@ -78,7 +78,7 @@ function resolveLocalizationTextWithFallback(
     return result;
   }
   LOGGER.msg(
-    'Missing localization key for default lang {}: {}',
+    "Missing localization key for default lang '{}': {}",
     defaultLanguage,
     key,
   ).error();

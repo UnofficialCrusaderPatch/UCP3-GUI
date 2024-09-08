@@ -1,22 +1,24 @@
 /* eslint-disable react/require-default-props */
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { ToastType, makeToast } from '../../toasts/toasts-display';
+import Text, { useText } from '../../general/text';
+import { Message } from '../../../localization/localization';
 
 interface OverviewButtonProps {
   buttonActive: boolean;
-  buttonText: string;
+  buttonText: Message;
   buttonVariant: string | undefined;
-  toastTitle: string;
+  toastTitle: Message;
   func: (
-    createStatusToast: (type: ToastType, content: ReactNode) => void,
+    createStatusToast: (type: ToastType, content: Message) => void,
   ) => Promise<void>;
   funcBefore?: () => void;
   funcAfter?: () => void;
-  tooltip?: string;
+  tooltip?: Message;
 }
 
-function createToastHandler(title: string) {
-  return (type: ToastType, content: ReactNode) => {
+function createToastHandler(title: Message) {
+  return (type: ToastType, content: Message) => {
     if (content == null) {
       // ignore if body null or undefined
       return;
@@ -38,6 +40,8 @@ export default function OverviewButton(props: OverviewButtonProps) {
   } = props;
   const [active, setActive] = useState(true);
 
+  const localize = useText();
+
   return (
     <button
       type="button"
@@ -52,10 +56,12 @@ export default function OverviewButton(props: OverviewButtonProps) {
       }}
       data-bs-toggle="tooltip"
       data-bs-placement="top"
-      title={tooltip}
+      title={localize(tooltip) ?? ''}
     >
       <div className="icon-placeholder" />
-      <div className="button-text">{buttonText}</div>
+      <div className="button-text">
+        <Text message={buttonText} />
+      </div>
     </button>
   );
 }

@@ -5,6 +5,8 @@ import { ReactNode } from 'react';
 import { ToastContainer, Toast } from 'react-bootstrap';
 
 import { getStore } from '../../hooks/jotai/base';
+import { Message, MessageResolverAtom } from '../../localization/localization';
+import Text from '../general/text';
 
 export const enum ToastType {
   CUSTOM,
@@ -21,10 +23,19 @@ type ToastConfig = {
 };
 
 export type ToastProps = ToastConfig & {
-  title: string;
-  body: ReactNode;
+  title: Message;
+  alternativeMessageSource?: MessageResolverAtom;
   type?: ToastType;
-};
+} & (
+    | {
+        body: ReactNode;
+        hasDataBody: true;
+      }
+    | {
+        body: Message;
+        hasDataBody?: false;
+      }
+  );
 
 type ToastState = ToastProps;
 
@@ -79,7 +90,15 @@ export function makeToast(props: ToastProps) {
 
 function TheToast(props: { id: string; state: ToastState }) {
   const { id, state } = props;
-  const { title, body, customAutohide, customDelay, customCSSClass } = state;
+  const {
+    title,
+    body,
+    customAutohide,
+    customDelay,
+    customCSSClass,
+    hasDataBody,
+    alternativeMessageSource,
+  } = state;
   return (
     <Toast
       onClose={() => deleteToast(id)}
@@ -91,10 +110,17 @@ function TheToast(props: { id: string; state: ToastState }) {
     >
       <Toast.Header>
         <img src="holder.js/20x20?text=%20" className="rounded me-2" alt="" />
-        <strong className="me-auto">{title}</strong>
-        {/* <small className="text-muted">just now</small> */}
+        <strong className="me-auto">
+          <Text message={title} alternativeSource={alternativeMessageSource} />
+        </strong>
       </Toast.Header>
-      <Toast.Body className="text-dark">{body}</Toast.Body>
+      <Toast.Body className="text-dark">
+        {hasDataBody ? (
+          body
+        ) : (
+          <Text message={body} alternativeSource={alternativeMessageSource} />
+        )}
+      </Toast.Body>
     </Toast>
   );
 }

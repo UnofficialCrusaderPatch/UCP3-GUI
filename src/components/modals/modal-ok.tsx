@@ -1,27 +1,22 @@
 import './modals.css';
 
 import { Modal, Button } from 'react-bootstrap';
-import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
+import Message from '../general/message';
 
 export interface OkModalWindowProperties
   extends Omit<AbstractModalWindowProperties<void, void>, 'handleClose'> {}
 
 const DEFAULT_OK_MODAL_PROPERTIES: AbstractModalWindowProperties<void, void> = {
-  message: '',
-  title: '',
   handleAction: () => {},
   handleClose: () => {},
-  ok: '',
 };
 
 function ModalOk(props: OkModalWindowProperties) {
-  const { handleAction, title, message, ok } = props;
+  const { handleAction, title, message, ok, alternativeMessageSource } = props;
 
   const [show, setShow] = useState(true);
-
-  const { t } = useTranslation(['gui-general']);
 
   const internalHandleAction = () => {
     setShow(false);
@@ -49,12 +44,25 @@ function ModalOk(props: OkModalWindowProperties) {
       keyboard={false}
     >
       <Modal.Header>
-        <Modal.Title className="h5">{title}</Modal.Title>
+        <Modal.Title className="h5">
+          <Message
+            message={title}
+            alternativeSource={alternativeMessageSource}
+          />
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="fs-8">{message}</Modal.Body>
+      <Modal.Body className="fs-8">
+        <Message
+          message={message}
+          alternativeSource={alternativeMessageSource}
+        />
+      </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={internalHandleAction}>
-          {ok.length > 0 ? ok : t('gui-general:ok')}
+          <Message
+            message={ok !== undefined ? ok : 'ok'}
+            alternativeSource={alternativeMessageSource}
+          />
         </Button>
       </Modal.Footer>
     </Modal>

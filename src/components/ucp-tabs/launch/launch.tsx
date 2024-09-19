@@ -2,7 +2,6 @@
 import './launch.css';
 import './launch-options/launch-options.css'; // currently imported here, als long as single files not needed
 
-import { useTranslation } from 'react-i18next';
 import { useRef, useState } from 'react';
 import { Form } from 'react-bootstrap';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
@@ -33,14 +32,13 @@ import {
 import GameDataPath from './launch-options/game-data-path';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { saveCurrentConfig } from '../common/save-config';
+import Message from '../../general/message';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
   const internalEnvs = useRef<Record<string, Record<string, string>>>(
     {},
   ).current;
-
-  const { t } = useTranslation(['gui-launch']);
 
   const receiveArgs = () => Object.values(internalArgs).flat();
   const receiveEnvs = () => Object.assign({}, ...Object.values(internalEnvs));
@@ -102,7 +100,7 @@ export default function Launch() {
           id="display-launch-options-switch"
           onChange={(e) => setDisplayAdvancedLaunchOptions(e.target.checked)}
           className="ps-5"
-          label={t('gui-launch:launch.options.view')}
+          label={<Message message="launch.options.view" />}
         />
         <Form.Switch
           label="Save (apply) configuration before launching the game"
@@ -120,7 +118,9 @@ export default function Launch() {
             : 'd-none'
         }
       >
-        <h4>{t('gui-launch:launch.options')}</h4>
+        <h4>
+          <Message message="launch.options" />
+        </h4>
         <div className="parchment-box launch__options__box">
           <div className="launch__options__box__row">
             <GameDataPath

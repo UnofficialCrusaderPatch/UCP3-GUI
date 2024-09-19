@@ -1,7 +1,6 @@
 import './common.css';
 import './UCPAccordion.css';
 
-import { useTranslation } from 'react-i18next';
 import { DisplayConfigElement } from '../../../../../config/ucp/common';
 import Logger from '../../../../../util/scripts/logging';
 import CreateChoice from './CreateChoice';
@@ -20,6 +19,7 @@ import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
 import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput from './CreateFileInput';
+import { useMessage } from '../../../../general/message';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -30,7 +30,7 @@ function CreateUIElement(args: {
 }) {
   const { spec, disabled, className } = args;
 
-  const [t] = useTranslation(['gui-editor']);
+  const localize = useMessage();
 
   switch (spec.display) {
     case 'UCP2Slider':
@@ -128,7 +128,10 @@ function CreateUIElement(args: {
       );
     default: {
       LOGGER.msg(
-        t('gui-editor:config.element.unsupported.type', JSON.stringify(spec)),
+        localize({
+          key: 'config.element.unsupported.type',
+          args: spec,
+        }),
       ).warn();
       return <div />;
     }

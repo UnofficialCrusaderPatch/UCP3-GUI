@@ -4,7 +4,6 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { MutableRefObject } from 'react';
 import { Button, Overlay } from 'react-bootstrap';
 
-import { useTranslation } from 'react-i18next';
 import { TrashFill } from 'react-bootstrap-icons';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -49,8 +48,6 @@ export function ConfigPopover(props: {
   const qualifier = qualifiers[url];
 
   const creatorMode = useAtomValue(CREATOR_MODE_ATOM);
-
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
@@ -135,8 +132,8 @@ export function ConfigPopover(props: {
                 onMouseEnter={() => {
                   setStatusBarMessage(
                     qualifier === 'required'
-                      ? t('gui-editor:config.popover.required')
-                      : t('gui-editor:config.popover.suggested'),
+                      ? 'config.popover.required'
+                      : 'config.popover.suggested',
                   );
                 }}
                 onMouseLeave={() => {
@@ -173,7 +170,7 @@ export function ConfigPopover(props: {
               });
             }}
             onMouseEnter={() => {
-              setStatusBarMessage(t('gui-editor:config.popover.reset'));
+              setStatusBarMessage('config.popover.reset');
             }}
             onMouseLeave={() => {
               setStatusBarMessage(undefined);

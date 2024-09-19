@@ -11,7 +11,6 @@ import Logger from '../../../util/scripts/logging';
 import { showModalOk } from '../../../components/modals/modal-ok';
 import { ExtensionHandle } from '../handles/extension-handle';
 import { getStore } from '../../../hooks/jotai/base';
-import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/i18n';
 import { parseConfigEntries } from './parse-config-entries';
 import { readUISpec, readConfig, readLocales } from './io';
 import { getExtensionHandles } from './extension-handles';
@@ -19,6 +18,7 @@ import { attachExtensionInformationToDisplayConfigElement } from './components/u
 import { createIO } from './components/io';
 import { validateDefinition } from './components/definition';
 import { TranslationDB } from './translation';
+import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/localization';
 
 export const LOGGER = new Logger('discovery.ts');
 

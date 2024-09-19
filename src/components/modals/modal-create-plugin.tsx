@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
+import Message from '../general/message';
 
 type Create = {
   type: 'create';
@@ -27,22 +28,18 @@ const VERSION_REGEX = /^[0-9]+[.][0-9]+[.][0-9]+$/;
 
 const DEFAULT_CREATE_PLUGIN_MODAL_PROPERTIES: CreatePluginModalWindowProperties =
   {
-    message: '',
-    title: '',
     handleAction: () => {},
     handleClose: () => {},
-    ok: '',
   };
 
 const sanitizePluginName = (s: string) => s.replaceAll(/[^a-zA-Z0-9-]/g, '');
 
 // eslint-disable-next-line import/prefer-default-export
 function CreatePluginModal(props: CreatePluginModalWindowProperties) {
-  const { handleAction, title, ok, handleClose } = props;
+  const { handleAction, title, ok, handleClose, alternativeMessageSource } =
+    props;
 
   const [show, setShow] = useState(true);
-
-  // const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
 
   const [pluginName, setPluginName] = useState('');
   const [pluginAuthor, setPluginAuthor] = useState('');
@@ -69,7 +66,12 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
       keyboard={false}
     >
       <Modal.Header closeButton>
-        <Modal.Title>{title}</Modal.Title>
+        <Modal.Title>
+          <Message
+            message={title}
+            alternativeSource={alternativeMessageSource}
+          />
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -144,7 +146,10 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
             });
           }}
         >
-          {ok.length > 0 ? ok : 'Create'}
+          <Message
+            message={ok !== undefined ? ok : 'create'}
+            alternativeSource={alternativeMessageSource}
+          />
         </Button>
       </Modal.Footer>
     </Modal>

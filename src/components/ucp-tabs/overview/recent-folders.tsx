@@ -5,7 +5,6 @@ import './recent-folders.css';
 
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MouseEvent, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { openFolderDialog } from '../../../tauri/tauri-dialog';
 import { RecentFolderHelper } from '../../../config/gui/recent-folder-helper';
 import { GAME_FOLDER_LOADED_ATOM } from '../../../function/game-folder/utils';
@@ -13,6 +12,7 @@ import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../../../function/game-folder/
 import { reloadCurrentWindow } from '../../../function/window-actions';
 import { useRecentFolders } from '../../../hooks/jotai/hooks';
 import Result from '../../../util/structs/result';
+import Message from '../../general/message';
 
 export default function RecentFolders() {
   const setFolder = useSetAtom(GAME_FOLDER_INTERFACE_ASYNC_ATOM);
@@ -21,9 +21,6 @@ export default function RecentFolders() {
     currentFolderState.state === 'hasData' ? currentFolderState.data : '';
   const [recentFolderResult] = useRecentFolders();
   const [showRecentFolders, setShowRecentFolders] = useState(false);
-
-  // lang
-  const [t] = useTranslation(['gui-general', 'gui-landing']);
 
   const recentFolderHelper = recentFolderResult
     .getOrReceive(Result.emptyErr)
@@ -59,12 +56,16 @@ export default function RecentFolders() {
 
   // needs better loading site
   if (recentFolderResult.isEmpty()) {
-    return <p>{t('gui-general:loading')}</p>;
+    return (
+      <p>
+        <Message message="loading" />
+      </p>
+    );
   }
 
   return (
     <div className="text-input">
-      <label htmlFor="browseresult">{t('gui-landing:select.folder')}</label>
+      <Message message="select.folder" />
       <div className="ornament-border-inset text-input-field">
         <input
           id="browseresult"

@@ -3,8 +3,6 @@ import './sandbox-menu.css';
 import { Suspense, useEffect, useState } from 'react';
 import Sandbox from '@jetbrains/websandbox';
 
-import { useTranslation } from 'react-i18next';
-
 import { OverlayContentProps } from '../overlay/overlay';
 import { getStore } from '../../hooks/jotai/base';
 import {
@@ -30,6 +28,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import { ConsoleLogger } from '../../util/scripts/logging';
+import Message from '../general/message';
 
 export interface SandboxSource {
   html: string;
@@ -161,7 +160,6 @@ function SandboxInternal(
   const { baseUrl, source, localization, fallbackLocalization, sandboxDiv } =
     args;
 
-  const [t] = useTranslation(['gui-editor']);
   const currentFolder = useCurrentGameFolder();
 
   const [sandbox, setSandbox] = useState<null | Sandbox>(null);
@@ -206,7 +204,7 @@ function SandboxInternal(
           saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
         }
       >
-        {t('gui-editor:sandbox.save')}
+        <Message message="sandbox.save" />
       </button>
       <button
         type="button"
@@ -217,14 +215,14 @@ function SandboxInternal(
           closeFunc();
         }}
       >
-        {t('gui-editor:sandbox.save.close')}
+        <Message message="sandbox.save.close" />
       </button>
       <button
         type="button"
         className="ucp-button sandbox-control-button"
         onClick={closeFunc}
       >
-        {t('gui-editor:sandbox.close')}
+        <Message message="sandbox.close" />
       </button>
     </div>
   );

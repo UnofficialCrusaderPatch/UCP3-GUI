@@ -3,7 +3,6 @@ import './game-starter.css';
 
 import { Atom, useAtomValue } from 'jotai';
 import { Suspense, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { osOpenProgram } from '../../../../tauri/tauri-invoke';
 import {
   EMPTY_GAME_VERSION,
@@ -15,6 +14,7 @@ import { sleep } from '../../../../util/scripts/util';
 import { CONFIG_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { FIRST_TIME_USE_ATOM } from '../../../../function/gui-settings/settings';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
+import Message, { useMessage } from '../../../general/message';
 
 const LOGGER = new Logger('game-starter.tsx');
 
@@ -33,7 +33,7 @@ function GameStarterInfo(props: {
 }) {
   const { versionAtom } = props;
 
-  const { t } = useTranslation(['gui-launch']);
+  const localize = useMessage();
 
   const version = useAtomValue(versionAtom);
 
@@ -41,27 +41,35 @@ function GameStarterInfo(props: {
     <table className="game-starter__info">
       <tbody>
         <tr className="game-starter__info__row">
-          <td>{t('gui-launch:info.name')}</td>
+          <td>
+            <Message message="info.name" />
+          </td>
           <td>:</td>
           <td>{version.name.getOrElse('')}</td>
         </tr>
         <tr className="game-starter__info__row">
-          <td>{t('gui-launch:info.region')}</td>
+          <td>
+            <Message message="info.region" />
+          </td>
           <td>:</td>
           <td>{version.region.getOrElse('')}</td>
         </tr>
         <tr className="game-starter__info__row">
-          <td>{t('gui-launch:info.version')}</td>
+          <td>
+            <Message message="info.version" />
+          </td>
           <td>:</td>
           <td>{`${version.getMajorAsString()}.${version.getMinorAsString()}.${version.getPatchAsString()}`}</td>
         </tr>
         <tr className="game-starter__info__row">
-          <td>{t('gui-launch:info.sha')}</td>
+          <td>
+            <Message message="info.sha" />
+          </td>
           <td>:</td>
           <td>
             <button
               type="button"
-              title={t('gui-launch:info.sha.copy')}
+              title={localize('info.sha.copy')}
               onClick={() =>
                 navigator.clipboard
                   .writeText(version.sha)
@@ -94,7 +102,7 @@ function GameStarterButton(props: GameStarterProps) {
     beforeLaunch,
   } = props;
 
-  const { t } = useTranslation(['gui-launch']);
+  const localize = useMessage();
 
   const path = useAtomValue(pathAtom);
   const version = useAtomValue(versionAtom);
@@ -160,7 +168,7 @@ function GameStarterButton(props: GameStarterProps) {
         &#9654;
       </button>
       <hr />
-      <img src={imagePath} alt={t('gui-launch:launch')} />
+      <img src={imagePath} alt={localize('launch')} />
     </>
   );
 }

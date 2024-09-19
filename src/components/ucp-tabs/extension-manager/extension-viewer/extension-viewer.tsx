@@ -1,11 +1,10 @@
-import { useTranslation } from 'react-i18next';
-
 import { atom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { loadable } from 'jotai/utils';
 import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
+import Message from '../../../general/message';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -24,11 +23,11 @@ export function ExtensionViewer(
 
   const content = useAtomValue(contentAtom);
 
-  const [t] = useTranslation(['gui-general', 'gui-landing', 'gui-editor']);
-
   return (
     <div className="credits-container">
-      <h1 className="credits-title">{t('gui-editor:extensions.viewer')}</h1>
+      <h1 className="credits-title">
+        <Message message="extensions.viewer" />
+      </h1>
       <div className="parchment-box credits-text-box">
         <div className="credits-text">
           <SaferMarkdown>
@@ -41,7 +40,7 @@ export function ExtensionViewer(
         className="credits-close credits-close-button"
         onClick={closeFunc}
       >
-        {t('gui-general:close')}
+        <Message message="close" />
       </button>
     </div>
   );

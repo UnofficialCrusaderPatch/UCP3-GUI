@@ -1,4 +1,3 @@
-import { TFunction } from 'i18next';
 import { saveFileDialog } from '../../../tauri/tauri-dialog';
 import { getStore } from '../../../hooks/jotai/base';
 import {
@@ -8,11 +7,12 @@ import {
 } from '../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import saveConfig from './save-config';
+import { MessageType } from '../../../localization/localization';
 
 const exportButtonCallback = async (
   gameFolder: string,
-  setConfigStatus: (value: string) => void,
-  t: TFunction<[string, string], undefined>,
+  setConfigStatus: (value: MessageType) => void,
+  localizeString: (message: string) => string,
 ) => {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
   const fullConfiguration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
@@ -24,13 +24,13 @@ const exportButtonCallback = async (
 
   const filePathOptional = await saveFileDialog(gameFolder, [
     {
-      name: t('gui-general:file.config'),
+      name: localizeString('file.config'),
       extensions: ['yml', 'yaml'],
     },
-    { name: t('gui-general:file.all'), extensions: ['*'] },
+    { name: localizeString('file.all'), extensions: ['*'] },
   ]);
   if (filePathOptional.isEmpty()) {
-    setConfigStatus(t('gui-editor:config.status.cancelled'));
+    setConfigStatus('config.status.cancelled');
     return;
   }
   let filePath = filePathOptional.get();
@@ -45,7 +45,7 @@ const exportButtonCallback = async (
     activeExtensions,
     configurationQualifier,
   )
-    .then(() => setConfigStatus(t('gui-editor:config.status.exported')))
+    .then(() => setConfigStatus('config.status.exported'))
     .catch((e) => {
       throw new Error(e);
     });

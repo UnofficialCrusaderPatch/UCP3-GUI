@@ -3,8 +3,6 @@ import './base.css';
 import './window.css';
 
 import { Suspense } from 'react';
-import { useAtomValue } from 'jotai';
-import { LANGUAGE_STATE_ATOM } from '../localization/i18n';
 import Titlebar from './titlebar/titlebar';
 import Main from './main-page';
 
@@ -14,7 +12,6 @@ if (import.meta.env.DEV) {
 }
 
 function WindowContent() {
-  useAtomValue(LANGUAGE_STATE_ATOM);
   return (
     <>
       <div className="page-titlebar">

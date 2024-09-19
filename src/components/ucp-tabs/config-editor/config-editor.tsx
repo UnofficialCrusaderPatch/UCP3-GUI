@@ -4,10 +4,7 @@
 import './config-editor.css';
 
 import { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-
 import { useAtomValue } from 'jotai';
-
 import { CONFIGURATION_WARNINGS_REDUCER_ATOM } from '../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import { CREATOR_MODE_ATOM } from '../../../function/gui-settings/settings';
@@ -15,6 +12,7 @@ import { UIFactory } from './ui-elements';
 
 import { ConfigEditorToolbar } from './config-editor-toolbar';
 import { ConfigEditorCreatorToolbar } from './config-editor-creator-toolbar';
+import Message from '../../general/message';
 
 export default function ConfigEditor(args: { readonly: boolean }) {
   const { readonly } = args;
@@ -25,8 +23,6 @@ export default function ConfigEditor(args: { readonly: boolean }) {
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
   const { activeExtensions } = extensionsState;
-
-  const [t] = useTranslation(['gui-general', 'gui-editor']);
 
   const warningCount = Object.values(configurationWarnings)
     .map((v) => (v.level === 'warning' ? 1 : 0))
@@ -44,7 +40,7 @@ export default function ConfigEditor(args: { readonly: boolean }) {
     //       })
     //     : '',
     // );
-  }, [activeExtensions, t]);
+  }, [activeExtensions]);
 
   const { nav, content } = UIFactory.CreateSections({ readonly });
 
@@ -75,7 +71,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   ⚠
                 </span>
                 <span className="mx-1">
-                  {t('gui-general:errors', { count: errorCount })}
+                  <Message
+                    message={{
+                      key: 'errors',
+                      args: { count: errorCount },
+                    }}
+                  />
                 </span>
                 <span
                   className={`text-warning mx-1${
@@ -85,7 +86,12 @@ export default function ConfigEditor(args: { readonly: boolean }) {
                   ⚠
                 </span>
                 <span className="mx-1">
-                  {t('gui-general:warnings', { count: warningCount })}
+                  <Message
+                    message={{
+                      key: 'warnings',
+                      args: { count: warningCount },
+                    }}
+                  />
                 </span>
               </div>
             </div>

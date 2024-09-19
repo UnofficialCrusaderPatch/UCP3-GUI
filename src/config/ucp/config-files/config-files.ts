@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { TFunction } from 'i18next';
 import { stringify as yamlStringify } from 'yaml';
 import { writeTextFile, loadYaml } from '../../../tauri/tauri-files';
 import Result from '../../../util/structs/result';
@@ -11,7 +10,7 @@ import { serializeLoadOrder } from './load-order';
 
 const LOGGER = new Logger('config-files.ts');
 
-export async function loadConfigFromFile(filePath: string, t: TFunction) {
+export async function loadConfigFromFile(filePath: string) {
   const configRes: Result<ConfigFile, unknown> = await loadYaml(filePath); // will only be one
 
   if (configRes.isErr()) {
@@ -27,7 +26,7 @@ export async function loadConfigFromFile(filePath: string, t: TFunction) {
   if (config['config-sparse'] === undefined) {
     return {
       status: 'FAIL',
-      message: t('gui-editor:config.not.valid'),
+      message: 'config.not.valid',
       result: {} as ConfigFile,
     };
   }

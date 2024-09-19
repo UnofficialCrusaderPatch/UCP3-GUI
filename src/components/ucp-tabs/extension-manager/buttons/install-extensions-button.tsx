@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { useSetAtom } from 'jotai';
 import { PlusLg } from 'react-bootstrap-icons';
 import { exists } from '@tauri-apps/api/fs';
@@ -47,10 +46,10 @@ export async function installExtensionsButtonCallback(
             type: ToastType.SUCCESS,
           });
           return true;
-        } catch (e: any) {
+        } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: e.toString(),
+            message: String(e),
           });
         } finally {
           await ep.close();
@@ -67,17 +66,17 @@ export async function installExtensionsButtonCallback(
         });
 
         return true;
-      } catch (e: any) {
+      } catch (e: unknown) {
         await showModalOk({
           title: 'ERROR',
-          message: e.toString(),
+          message: String(e),
         });
       }
       return false;
-    } catch (e: any) {
+    } catch (e: unknown) {
       await showModalOk({
         title: 'ERROR',
-        message: e.toString(),
+        message: String(e),
       });
     }
   } else {
@@ -109,15 +108,15 @@ export function InstallExtensionButton() {
           });
 
           reloadCurrentWindow();
-        } catch (e: any) {
+        } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: e.toString(),
+            message: String(e),
           });
         }
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.install'));
+        setStatusBarMessage('config.tooltip.install');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

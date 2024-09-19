@@ -2,7 +2,6 @@ import './overview.css';
 
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { installUCPFromZip } from '../../../function/installation/install-ucp-from-zip';
 import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
@@ -43,6 +42,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
 import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
 import { asPercentage } from '../../../tauri/tauri-http';
+import { useMessage } from '../../general/message';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -52,37 +52,38 @@ export default function Overview() {
 
   const [overviewButtonActive, setOverviewButtonActive] = useState(true);
 
-  const { t } = useTranslation(['gui-general', 'gui-editor', 'gui-download']);
+  // needed for file interaction at the moment
+  const localize = useMessage();
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const ucpStatePresent = loadableUcpState.state === 'hasData';
   const ucpState = ucpStatePresent ? loadableUcpState.data : UCPState.UNKNOWN;
   let activateButtonString = null;
   if (!ucpStatePresent) {
-    activateButtonString = t('gui-general:loading');
+    activateButtonString = 'loading';
   } else {
     switch (ucpState) {
       case UCPState.NOT_INSTALLED:
       case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
-        activateButtonString = t('gui-editor:overview.activate.not.installed');
+        activateButtonString = 'overview.activate.not.installed';
         break;
       case UCPState.ACTIVE:
       case UCPState.BINK_UCP_MISSING:
       case UCPState.BINK_VERSION_DIFFERENCE:
-        activateButtonString = t('gui-editor:overview.activate.do.deactivate');
+        activateButtonString = 'overview.activate.do.deactivate';
         break;
       case UCPState.INACTIVE:
       case UCPState.BINK_REAL_COPY_MISSING:
-        activateButtonString = t('gui-editor:overview.activate.do.activate');
+        activateButtonString = 'overview.activate.do.activate';
         break;
       case UCPState.WRONG_FOLDER:
-        activateButtonString = t('gui-editor:overview.wrong.folder');
+        activateButtonString = 'overview.wrong.folder';
         break;
       case UCPState.INVALID:
-        activateButtonString = t('gui-editor:overview.activate.invalid');
+        activateButtonString = 'overview.activate.invalid';
         break;
       default:
-        activateButtonString = t('gui-editor:overview.activate.unknown');
+        activateButtonString = 'overview.activate.unknown';
         break;
     }
   }
@@ -93,13 +94,13 @@ export default function Overview() {
 
       <OverviewButton
         buttonActive={overviewButtonActive && currentFolder !== ''}
-        buttonText={t('gui-editor:overview.update.idle')}
+        buttonText="overview.update.idle"
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
           if (await hintThatGameMayBeRunning()) {
-            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            createStatusToast(ToastType.ERROR, 'locked.files');
             return;
           }
 
@@ -117,10 +118,7 @@ export default function Overview() {
             }
             const gameFolder = gameFolderState.data;
 
-            createStatusToast(
-              ToastType.INFO,
-              t('gui-download:ucp.version.check'),
-            );
+            createStatusToast(ToastType.INFO, 'ucp.version.check');
 
             const vr = getStore().get(UCP_VERSION_ATOM);
             let version = '0.0.0';
@@ -138,37 +136,28 @@ export default function Overview() {
             const updater = new UCP3Updater(version, sha, new Date(0));
 
             if (await updater.doesUpdateExist()) {
-              createStatusToast(
-                ToastType.INFO,
-                t('gui-download:ucp.version.available'),
-              );
+              createStatusToast(ToastType.INFO, 'ucp.version.available');
             } else {
-              createStatusToast(
-                ToastType.WARN,
-                t('gui-download:ucp.version.not.available'),
-              );
+              createStatusToast(ToastType.WARN, 'ucp.version.not.available');
               return;
             }
 
             const dialogResult = await showModalOkCancel({
-              title: t('gui-general:confirm'),
-              message: t('gui-download:ucp.download.request', {
-                version: updater.meta!.version,
-              }),
+              title: 'confirm',
+              message: {
+                key: 'ucp.download.request',
+                args: {
+                  version: updater.meta!.version,
+                },
+              },
             });
 
             if (dialogResult !== true) {
-              createStatusToast(
-                ToastType.WARN,
-                t('gui-download:ucp.download.cancelled'),
-              );
+              createStatusToast(ToastType.WARN, 'ucp.download.cancelled');
               return;
             }
 
-            createStatusToast(
-              ToastType.INFO,
-              t('gui-download:ucp.download.download'),
-            );
+            createStatusToast(ToastType.INFO, 'ucp.download.download');
 
             const downloadStart = new Date();
             let previousFire = downloadStart;
@@ -194,14 +183,12 @@ export default function Overview() {
 
             setStatusBarMessage(undefined);
 
-            createStatusToast(
-              ToastType.INFO,
-              t(`gui-download:ucp.download.downloaded`, {
-                version: `${update.name}`,
-              }),
-            );
+            createStatusToast(ToastType.INFO, {
+              key: `ucp.download.downloaded`,
+              args: { version: `${update.name}` },
+            });
 
-            createStatusToast(ToastType.INFO, t('gui-download:ucp.installing'));
+            createStatusToast(ToastType.INFO, 'ucp.installing');
             const installResult = await installUCPFromZip(
               update.path,
               gameFolder,
@@ -209,14 +196,12 @@ export default function Overview() {
             );
 
             if (installResult.isErr()) {
-              installResult
-                .err()
-                .ifPresent((error) =>
-                  createStatusToast(
-                    ToastType.ERROR,
-                    t('gui-download:ucp.install.failed', { error }),
-                  ),
-                );
+              installResult.err().ifPresent((error) =>
+                createStatusToast(ToastType.ERROR, {
+                  key: 'ucp.install.failed',
+                  args: { error },
+                }),
+              );
               return;
             }
 
@@ -224,9 +209,12 @@ export default function Overview() {
             const removeResult = await removeFile(update.path);
             if (removeResult.isErr()) {
               await showModalOk({
-                message: t('gui-download:ucp.install.zip.remove.failed', {
-                  error: removeResult.err().get(),
-                }),
+                message: {
+                  key: 'ucp.install.zip.remove.failed',
+                  args: {
+                    error: removeResult.err().get(),
+                  },
+                },
                 title: 'Could not remove file',
               });
             }
@@ -238,39 +226,33 @@ export default function Overview() {
 
             reloadCurrentWindow();
 
-            createStatusToast(
-              ToastType.SUCCESS,
-              t('gui-editor:overview.update.success'),
-            );
-          } catch (e: any) {
-            createStatusToast(ToastType.ERROR, e.toString());
+            createStatusToast(ToastType.SUCCESS, 'overview.update.success');
+          } catch (e: unknown) {
+            createStatusToast(ToastType.ERROR, String(e));
           }
         }}
-        toastTitle={t('gui-editor:overview.update.toast.title')}
+        toastTitle="overview.update.toast.title"
       />
       <OverviewButton
         buttonActive={overviewButtonActive && currentFolder !== ''}
-        buttonText={t('gui-editor:overview.zip.idle')}
+        buttonText="overview.zip.idle"
         buttonVariant="zip-icon icon-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
           if (await hintThatGameMayBeRunning()) {
-            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            createStatusToast(ToastType.ERROR, 'locked.files');
             return;
           }
 
           try {
             const zipFilePath = await openFileDialog(currentFolder, [
-              { name: t('gui-general:file.zip'), extensions: ['zip'] },
-              { name: t('gui-general:file.all'), extensions: ['*'] },
+              { name: localize('file.zip'), extensions: ['zip'] },
+              { name: localize('file.all'), extensions: ['*'] },
             ]);
 
             if (zipFilePath.isEmpty()) {
-              createStatusToast(
-                ToastType.INFO,
-                t('gui-editor:overview.zip.failed'),
-              );
+              createStatusToast(ToastType.INFO, 'overview.zip.failed');
               return;
             }
 
@@ -283,12 +265,12 @@ export default function Overview() {
 
             if (zipInstallResult.ok().isPresent()) {
               const confirmed = await showModalOkCancel({
-                title: t('gui-general:require.reload.title'),
-                message: t('gui-editor:overview.require.reload.text'),
+                title: 'require.reload.title',
+                message: 'overview.require.reload.text',
               });
               // const confirmed = await confirm(
-              //   t('gui-editor:overview.require.reload.text'),
-              //   { title: t('gui-general:require.reload.title'), type: 'warning' }
+              //   'overview.require.reload.text',
+              //   { title: 'require.reload.title', type: 'warning' }
               // );
 
               if (confirmed) {
@@ -299,17 +281,14 @@ export default function Overview() {
               .mapErr((err) => String(err))
               .consider(
                 () =>
-                  createStatusToast(
-                    ToastType.SUCCESS,
-                    t('gui-editor:overview.zip.success'),
-                  ),
+                  createStatusToast(ToastType.SUCCESS, 'overview.zip.success'),
                 (err) => createStatusToast(ToastType.ERROR, err),
               );
-          } catch (e: any) {
-            await showModalOk({ message: e.toString(), title: 'ERROR' });
+          } catch (e: unknown) {
+            await showModalOk({ message: String(e), title: 'ERROR' });
           }
         }}
-        toastTitle={t('gui-editor:overview.zip.toast.title')}
+        toastTitle="overview.zip.toast.title"
       />
       <OverviewButton
         buttonActive={
@@ -326,7 +305,7 @@ export default function Overview() {
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
           if (await hintThatGameMayBeRunning()) {
-            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            createStatusToast(ToastType.ERROR, 'locked.files');
             return;
           }
 
@@ -348,12 +327,12 @@ export default function Overview() {
               .err()
               .map(String)
               .ifPresent((err) => createStatusToast(ToastType.ERROR, err));
-          } catch (e: any) {
-            await showModalOk({ message: e.toString(), title: 'ERROR' });
+          } catch (e: unknown) {
+            await showModalOk({ message: String(e), title: 'ERROR' });
           }
         }}
-        tooltip={t('gui-editor:overview.activate.tooltip')}
-        toastTitle={t('gui-editor:overview.activate.toast.title')}
+        tooltip="overview.activate.tooltip"
+        toastTitle="overview.activate.toast.title"
       />
       <OverviewButton
         buttonActive={
@@ -364,22 +343,22 @@ export default function Overview() {
             ucpState === UCPState.BINK_REAL_COPY_MISSING ||
             ucpState === UCPState.BINK_VERSION_DIFFERENCE)
         }
-        buttonText={t('gui-editor:overview.uninstall.idle')}
+        buttonText="overview.uninstall.idle"
         buttonVariant="ucp-button overview__text-button"
         funcBefore={() => setOverviewButtonActive(false)}
         funcAfter={() => setOverviewButtonActive(true)}
         func={async (createStatusToast) => {
           if (await hintThatGameMayBeRunning()) {
-            createStatusToast(ToastType.ERROR, t('gui-landing:locked.files'));
+            createStatusToast(ToastType.ERROR, 'locked.files');
             return;
           }
 
           if (
             !(await showModalOkCancel({
-              message: t('gui-editor:overview.uninstall.question'),
-              title: t('gui-editor:overview.uninstall.idle'),
-              ok: t('gui-general:yes'),
-              cancel: t('gui-general:no'),
+              message: 'overview.uninstall.question',
+              title: 'overview.uninstall.idle',
+              ok: 'yes',
+              cancel: 'no',
             }))
           ) {
             return;
@@ -387,10 +366,10 @@ export default function Overview() {
 
           if (
             !(await showModalOkCancel({
-              message: t('gui-editor:overview.uninstall.question.really'),
-              title: t('gui-editor:overview.uninstall.idle'),
-              ok: t('gui-general:yes'),
-              cancel: t('gui-general:no'),
+              message: 'overview.uninstall.question.really',
+              title: 'overview.uninstall.idle',
+              ok: 'yes',
+              cancel: 'no',
             }))
           ) {
             return;
@@ -449,44 +428,15 @@ export default function Overview() {
                 true,
               )
             ).throwIfErr();
-            createStatusToast(
-              ToastType.SUCCESS,
-              t('gui-editor:overview.uninstall.success'),
-            );
-          } catch (e: any) {
-            createStatusToast(ToastType.ERROR, e.toString());
+            createStatusToast(ToastType.SUCCESS, 'overview.uninstall.success');
+          } catch (e: unknown) {
+            createStatusToast(ToastType.ERROR, String(e));
           }
         }}
-        tooltip={t('gui-editor:overview.uninstall.tooltip')}
-        toastTitle={t('gui-editor:overview.uninstall.toast.title')}
+        tooltip="overview.uninstall.tooltip"
+        toastTitle="overview.uninstall.toast.title"
       />
       <div id="decor" />
-      {/* <StateButton
-        buttonActive={overviewButtonActive}
-        buttonValues={{
-          idle: t('gui-editor:overview.update.gui.idle'),
-          running: t('gui-editor:overview.update.gui.running'),
-          success: t('gui-editor:overview.update.gui.success'),
-          failed: t('gui-editor:overview.update.gui.failed'),
-        }}
-        buttonVariant="ucp-button overview__text-button"
-        funcBefore={() => setOverviewButtonActive(false)}
-        funcAfter={() => setOverviewButtonActive(true)}
-        func={async (stateUpdate) => {
-          try {
-            return await Result.tryAsync(() =>
-              checkForGUIUpdates(stateUpdate, t),
-            );
-          } catch (e: any) {
-            await showModalOk({ message: e.toString(), title: 'ERROR' });
-          }
-
-          return Result.emptyErr();
-        }}
-        setResultNodeState={createToastHandler(
-          t('gui-editor:overview.update.gui.toast.title'),
-        )}
-      /> */}
     </div>
   );
 }

@@ -1,12 +1,11 @@
 import { useAtom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { useTranslation } from 'react-i18next';
-import { TFunction } from 'i18next';
 import { TrashFill } from 'react-bootstrap-icons';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { showModalOk } from '../../../modals/modal-ok';
 import { openFolderDialog } from '../../../../tauri/tauri-dialog';
 import { LaunchOptions } from './launch-options';
+import Message, { useMessage } from '../../../general/message';
 
 interface GameDataPathMapping {
   date: number;
@@ -25,7 +24,6 @@ const GAME_DATA_PATH_MAP_STORAGE_ATOM = atomWithStorage(
 
 function useGameDataStorageMap(
   currentFolder: string,
-  t: TFunction,
 ): [string | undefined, (path?: string) => void] {
   const [mappingArray, setMappingArray] = useAtom(
     GAME_DATA_PATH_MAP_STORAGE_ATOM,
@@ -65,10 +63,13 @@ function useGameDataStorageMap(
 
         // no need to wait, is only confirm
         showModalOk({
-          title: t('gui-launch:launch.options.game.data.path.gone.title'),
-          message: t('gui-launch:launch.options.game.data.path.gone.message', {
-            gameFolder: removedMapping?.gameFolder,
-          }),
+          title: 'launch.options.game.data.path.gone.title',
+          message: {
+            key: 'launch.options.game.data.path.gone.message',
+            args: {
+              gameFolder: removedMapping?.gameFolder,
+            },
+          },
         });
       }
       mappingArray.push({
@@ -83,11 +84,11 @@ function useGameDataStorageMap(
 
 export default function GameDataPath({ getArgs, setArgs }: LaunchOptions) {
   const currentFolder = useCurrentGameFolder();
-  const [t] = useTranslation(['gui-launch']);
-  const [currentGameDataPath, setGameDataPath] = useGameDataStorageMap(
-    currentFolder,
-    t,
-  );
+  const [currentGameDataPath, setGameDataPath] =
+    useGameDataStorageMap(currentFolder);
+
+  // needed for file interaction
+  const localize = useMessage();
 
   const currentArgs = getArgs();
   const gamesDataPathArg = currentArgs.length > 0 ? currentArgs[1] : undefined;
@@ -100,7 +101,9 @@ export default function GameDataPath({ getArgs, setArgs }: LaunchOptions) {
 
   return (
     <div className="launch__options__box--game-data-path">
-      <h5>{t('gui-launch:launch.options.game.data.path')}</h5>
+      <h5>
+        <Message message="launch.options.game.data.path" />
+      </h5>
       <div>
         <input
           type="text"
@@ -109,7 +112,7 @@ export default function GameDataPath({ getArgs, setArgs }: LaunchOptions) {
           onClick={async () => {
             const configPath = await openFolderDialog(
               currentFolder,
-              t('gui-launch:launch.options.game.data.path.select.title'),
+              localize('launch.options.game.data.path.select.title'),
             );
             configPath.ifPresent(setGameDataPath);
           }}

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 
 import {
@@ -26,6 +25,8 @@ import Logger from '../../../../../util/scripts/logging';
 
 import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';
+import Message from '../../../../general/message';
+import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
 
 const LOGGER = new Logger('CreateCustomMenu.tsx');
 
@@ -78,8 +79,8 @@ function CreateCustomMenu(args: {
   const configurationDefaults = useAtomValue(
     CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   );
+  const currentLanguage = useAtomValue(LANGUAGE_ATOM);
 
-  const [t, i18n] = useTranslation(['gui-editor']);
   const [activatingMenu, setActivatingMenu] = useState(false);
 
   const { spec, disabled } = args;
@@ -124,7 +125,7 @@ function CreateCustomMenu(args: {
             setOverlayContent<SandboxArgs>(SandboxMenu, false, false, {
               baseUrl: url,
               source: await receiveSources(extension, sourcePaths),
-              localization: extension.locales[i18n.language] ?? {},
+              localization: extension.locales[currentLanguage] ?? {},
               fallbackLocalization: extension.locales.en ?? {},
               title: hasHeader ? header : undefined,
             });
@@ -132,7 +133,7 @@ function CreateCustomMenu(args: {
           }}
           disabled={!isEnabled || disabled || activatingMenu}
         >
-          {t('gui-editor:sandbox.open')}
+          <Message message="sandbox.open" />
         </button>
       </div>
     </div>

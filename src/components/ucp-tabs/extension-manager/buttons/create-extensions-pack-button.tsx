@@ -1,5 +1,4 @@
 import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
-import { t } from 'i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Stack } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -132,17 +131,17 @@ export function CreateExtensionsPackButton() {
           } finally {
             zw.close();
           }
-        } catch (e: any) {
+        } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',
-            message: e.toString(),
+            message: String(e),
           });
         }
 
         await makeToast({ title: 'Extension pack created!', body: '' });
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.pack'));
+        setStatusBarMessage('config.tooltip.pack');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

@@ -1,11 +1,9 @@
 import { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { LaunchOptions } from './launch-options';
+import Message from '../../../general/message';
 
 export default function FreeArgs(props: LaunchOptions) {
   const { getArgs, setArgs } = props;
-
-  const [t] = useTranslation(['gui-launch']);
 
   const [internalArgs, setInternalArgs] = useState(getArgs());
 
@@ -13,7 +11,9 @@ export default function FreeArgs(props: LaunchOptions) {
 
   return (
     <div className="launch__options__box--free-args">
-      <h5>{t('gui-launch:launch.options.free.args')}</h5>
+      <h5>
+        <Message message="launch.options.free.args" />
+      </h5>
       <form
         ref={formRef}
         onSubmit={(e) => {

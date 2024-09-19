@@ -1,10 +1,10 @@
 import { useAtomValue } from 'jotai';
-import { useTranslation } from 'react-i18next';
 import Markdown, { Components } from 'react-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
+import Message from '../../../general/message';
 
 /* eslint-disable react/jsx-props-no-spreading */
 const theme = {
@@ -66,8 +66,6 @@ ${override.overridden.url}:
     )
     .join('\n');
 
-  const [t] = useTranslation(['gui-general', 'gui-landing', 'gui-editor']);
-
   return (
     <div className="credits-container">
       <h1 className="credits-title">Configuration Conflict Information</h1>
@@ -85,7 +83,7 @@ ${override.overridden.url}:
         </div>
       </div>
       <button type="button" className="credits-close" onClick={closeFunc}>
-        {t('gui-general:close')}
+        <Message message="close" />
       </button>
     </div>
   );

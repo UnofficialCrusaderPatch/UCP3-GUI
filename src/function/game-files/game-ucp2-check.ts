@@ -6,7 +6,6 @@ import {
 } from '../../tauri/tauri-files';
 import { EXTREME_PATH_ATOM, VANILLA_PATH_ATOM } from './game-path';
 import { ToastType, makeToast } from '../../components/toasts/toasts-display';
-import { getTranslation } from '../../localization/i18n';
 import { showModalOk } from '../../components/modals/modal-ok';
 
 const UCP2_MARK = '.ucp';
@@ -17,7 +16,6 @@ async function checkIfUCP2Installed(path: string) {
     return false;
   }
   const filename = await basename(path).catch(() => 'NONE');
-  const t = getTranslation(['gui-launch']);
 
   const result = await scanFileForBytes(path, UCP2_MARK, BYTES_TO_SCAN);
   if (result.isErr()) {
@@ -25,21 +23,27 @@ async function checkIfUCP2Installed(path: string) {
     if (!exeExists) return false;
 
     makeToast({
-      title: t('gui-launch:launch'),
-      body: t('gui-launch:launch.ucp2.check.fail', {
-        file: filename,
-        reason: String(result.err().get()),
-      }),
+      title: 'launch',
+      body: {
+        key: 'launch.ucp2.check.fail',
+        args: {
+          file: filename,
+          reason: String(result.err().get()),
+        },
+      },
       type: ToastType.ERROR,
     });
   }
   const ucp2Present = result.ok().get().isPresent();
   if (ucp2Present) {
     await showModalOk({
-      title: t('gui-launch:launch.ucp2.check.title'),
-      message: t('gui-launch:launch.ucp2.check.message', {
-        file: filename,
-      }),
+      title: 'launch.ucp2.check.title',
+      message: {
+        key: 'launch.ucp2.check.message',
+        args: {
+          file: filename,
+        },
+      },
     });
   }
   return ucp2Present;

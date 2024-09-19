@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { TrashFill } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
@@ -40,7 +39,7 @@ function ResetButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
         });
       }}
       onMouseEnter={() => {
-        setStatusBarMessage(t('gui-editor:config.tooltip.reset'));
+        setStatusBarMessage('config.tooltip.reset');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

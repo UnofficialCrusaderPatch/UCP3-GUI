@@ -1,18 +1,18 @@
 import { atom } from 'jotai';
 import { loadable } from 'jotai/utils';
-import { copyFile, Error, resolvePath } from '../../tauri/tauri-files';
+import { copyFile, resolvePath } from '../../tauri/tauri-files';
 import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import Result from '../../util/structs/result';
 import { getHexHashOfFile } from '../../util/scripts/hash';
 import Logger from '../../util/scripts/logging';
 import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/game-folder-interface';
-import { getTranslation } from '../../localization/i18n';
 import {
   BINK_FILENAME,
   REAL_BINK_FILENAME,
   UCP_BINK_FILENAME,
 } from '../global/constants/file-constants';
 import { showModalOk } from '../../components/modals/modal-ok';
+import { MessageType } from '../../localization/localization';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
@@ -80,12 +80,10 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
     return UCPState.WRONG_FOLDER;
   }
 
-  const t = getTranslation(['gui-general', 'gui-download']);
-
   if (!!binkRealSha && !REAL_BINK_HASHS.has(binkRealSha)) {
     await showModalOk({
-      title: t('gui-general:warning'),
-      message: t('gui-download:bink.real.unknown'),
+      title: 'warning',
+      message: 'bink.real.unknown',
     });
   }
 
@@ -101,8 +99,8 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
       return UCPState.BINK_REAL_COPY_MISSING;
     }
     await showModalOk({
-      title: t('gui-general:warning'),
-      message: t('gui-download:bink.real.invalid.missing'),
+      title: 'warning',
+      message: 'bink.real.invalid.missing',
     });
     return UCPState.INVALID;
   }
@@ -114,8 +112,8 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
       return UCPState.INACTIVE;
     }
     await showModalOk({
-      title: t('gui-general:warning'),
-      message: t('gui-download:bink.all.same'),
+      title: 'warning',
+      message: 'bink.all.same',
     });
     return UCPState.UNKNOWN;
   }
@@ -127,20 +125,18 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
     return UCPState.BINK_VERSION_DIFFERENCE; // valid, since we still have a real one
   }
   await showModalOk({
-    title: t('gui-general:warning'),
-    message: t('gui-download:bink.mixed.real.unknown'),
+    title: 'warning',
+    message: 'bink.mixed.real.unknown',
   });
   return UCPState.UNKNOWN;
 });
 
 export const LOADABLE_UCP_STATE_ATOM = loadable(UCP_STATE_ATOM);
 
-export async function createRealBink(): Promise<Result<void, unknown>> {
-  const t = getTranslation('gui-download');
-
+export async function createRealBink(): Promise<Result<void, MessageType>> {
   switch (await getStore().get(UCP_STATE_ATOM)) {
     case UCPState.WRONG_FOLDER:
-      return Result.err(t('gui-download:bink.missing'));
+      return Result.err('bink.missing');
     case UCPState.BINK_REAL_COPY_MISSING: // safe, since verified
     case UCPState.NOT_INSTALLED: {
       const copyResult = (
@@ -148,33 +144,31 @@ export async function createRealBink(): Promise<Result<void, unknown>> {
           await getStore().get(BINK_PATH_ATOM),
           await getStore().get(BINK_REAL_PATH_ATOM),
         )
-      ).mapErr((error) => t('gui-download:bink.copy.error', { error }));
+      ).mapErr((error) => ({ key: 'bink.copy.error', args: { error } }));
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }
     case UCPState.UNKNOWN:
-      return Result.err(t('gui-download:bink.unknown.state'));
+      return Result.err('bink.unknown.state');
     case UCPState.INVALID:
-      return Result.err(t('gui-download:bink.invalid.state'));
+      return Result.err('bink.invalid.state');
     default:
       return Result.emptyOk();
   }
 }
 
-export async function activateUCP(): Promise<Result<void, Error>> {
-  const t = getTranslation('gui-download');
-
+export async function activateUCP(): Promise<Result<void, MessageType>> {
   const ucpState = await getStore().get(UCP_STATE_ATOM);
   switch (ucpState) {
     case UCPState.WRONG_FOLDER:
-      return Result.err(t('gui-download:bink.missing'));
+      return Result.err('bink.missing');
     case UCPState.NOT_INSTALLED:
     case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
-      return Result.err(t('gui-download:bink.not.installed'));
+      return Result.err('bink.not.installed');
     case UCPState.UNKNOWN:
-      return Result.err(t('gui-download:bink.unknown.state'));
+      return Result.err('bink.unknown.state');
     case UCPState.INVALID:
-      return Result.err(t('gui-download:bink.invalid.state'));
+      return Result.err('bink.invalid.state');
     case UCPState.ACTIVE:
       return Result.emptyOk();
     case UCPState.INACTIVE:
@@ -187,7 +181,10 @@ export async function activateUCP(): Promise<Result<void, Error>> {
             await getStore().get(BINK_PATH_ATOM),
             await getStore().get(BINK_REAL_PATH_ATOM),
           )
-        ).mapErr((error) => t('gui-download:bink.copy.error', { error }));
+        ).mapErr((error) => ({
+          key: 'bink.copy.error',
+          args: { error },
+        }));
         if (ucpBinkCopyResult.isErr()) {
           return ucpBinkCopyResult;
         }
@@ -198,7 +195,10 @@ export async function activateUCP(): Promise<Result<void, Error>> {
           await getStore().get(BINK_UCP_PATH_ATOM),
           await getStore().get(BINK_PATH_ATOM),
         )
-      ).mapErr((error) => t('gui-download:bink.copy.ucp.error', { error }));
+      ).mapErr((error) => ({
+        key: 'bink.copy.ucp.error',
+        args: { error },
+      }));
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }
@@ -209,7 +209,10 @@ export async function activateUCP(): Promise<Result<void, Error>> {
           await getStore().get(BINK_PATH_ATOM),
           await getStore().get(BINK_UCP_PATH_ATOM),
         )
-      ).mapErr((error) => t('gui-download:bink.copy.error', { error }));
+      ).mapErr((error) => ({
+        key: 'bink.copy.error',
+        args: { error },
+      }));
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }
@@ -218,20 +221,18 @@ export async function activateUCP(): Promise<Result<void, Error>> {
   }
 }
 
-export async function deactivateUCP(): Promise<Result<void, Error>> {
-  const t = getTranslation('gui-download');
-
+export async function deactivateUCP(): Promise<Result<void, MessageType>> {
   const ucpState = await getStore().get(UCP_STATE_ATOM);
   switch (ucpState) {
     case UCPState.WRONG_FOLDER:
-      return Result.err(t('gui-download:bink.missing'));
+      return Result.err('bink.missing');
     case UCPState.NOT_INSTALLED:
     case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
-      return Result.err(t('gui-download:bink.not.installed'));
+      return Result.err('bink.not.installed');
     case UCPState.UNKNOWN:
-      return Result.err(t('gui-download:bink.unknown.state'));
+      return Result.err('bink.unknown.state');
     case UCPState.INVALID:
-      return Result.err(t('gui-download:bink.invalid.state'));
+      return Result.err('bink.invalid.state');
     case UCPState.INACTIVE:
       return Result.emptyOk();
     case UCPState.ACTIVE:
@@ -244,7 +245,10 @@ export async function deactivateUCP(): Promise<Result<void, Error>> {
             await getStore().get(BINK_PATH_ATOM),
             await getStore().get(BINK_UCP_PATH_ATOM),
           )
-        ).mapErr((error) => t('gui-download:bink.copy.error', { error }));
+        ).mapErr((error) => ({
+          key: 'bink.copy.error',
+          args: { error },
+        }));
         if (ucpBinkCopyResult.isErr()) {
           return ucpBinkCopyResult;
         }
@@ -255,7 +259,10 @@ export async function deactivateUCP(): Promise<Result<void, Error>> {
           await getStore().get(BINK_REAL_PATH_ATOM),
           await getStore().get(BINK_PATH_ATOM),
         )
-      ).mapErr((error) => t('gui-download:bink.copy.real.error', { error }));
+      ).mapErr((error) => ({
+        key: 'bink.copy.real.error',
+        args: { error },
+      }));
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }
@@ -266,7 +273,10 @@ export async function deactivateUCP(): Promise<Result<void, Error>> {
           await getStore().get(BINK_PATH_ATOM),
           await getStore().get(BINK_REAL_PATH_ATOM),
         )
-      ).mapErr((error) => t('gui-download:bink.copy.error', { error }));
+      ).mapErr((error) => ({
+        key: 'bink.copy.error',
+        args: { error },
+      }));
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }

@@ -27,6 +27,7 @@ dunce = "=1.0.4"
 path-slash = "=0.2.1" # will try to implement path returning functions to return slash based
 glob = "=0.3.1" # required for our GlobPatterns, maybe we can use it directly in the future
 tauri-plugin-upload = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+thiserror = "1.0.63" # for potential customization of general error serialization
 
 [features]
 # by default Tauri runs in production mode

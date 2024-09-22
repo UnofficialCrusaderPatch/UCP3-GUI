@@ -6,8 +6,30 @@ use tauri::{AppHandle, Error, Manager, Runtime, State};
 
 use crate::constants::BASE_FOLDER;
 
+/// General error to control serialization
+///
+/// source: https://tauri.app/v1/guides/features/command/#error-handling
+#[derive(Debug, thiserror::Error)]
+pub enum GuiError {
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Tauri(#[from] tauri::Error),
+}
+
+// we must manually implement serde::Serialize
+impl serde::Serialize for GuiError {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::ser::Serializer,
+    {
+        // currently to string
+        serializer.serialize_str(self.to_string().as_ref())
+    }
+}
+
 // will panic if not present, but state should exists
-#[allow(dead_code)]
 pub fn do_with_mutex_state<R: Runtime, T: std::marker::Send + 'static, F>(
     app_handle: &AppHandle<R>,
     mut do_with_state: F,
@@ -19,20 +41,16 @@ pub fn do_with_mutex_state<R: Runtime, T: std::marker::Send + 'static, F>(
 }
 
 // will panic if not present, but state should exists
-#[allow(dead_code)]
 pub fn get_state_mutex<'a, T: std::marker::Send + 'static>(
-    state: &'a State<'a, Mutex<T>>
-) -> MutexGuard<'a, T>
-{
+    state: &'a State<'a, Mutex<T>>,
+) -> MutexGuard<'a, T> {
     state.lock().unwrap()
 }
 
 // will panic if not present, but state should exists
-#[allow(dead_code)]
 pub fn get_state_mutex_from_handle<R: Runtime, T: std::marker::Send + 'static>(
-    app_handle: &AppHandle<R>
-) -> MutexGuard<T>
-{
+    app_handle: &AppHandle<R>,
+) -> MutexGuard<T> {
     app_handle.state::<Mutex<T>>().inner().lock().unwrap()
 }
 

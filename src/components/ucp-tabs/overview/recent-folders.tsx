@@ -57,7 +57,7 @@ export default function RecentFolders() {
   });
 
   // needs better loading site
-  if (!recentFolders) {
+  if (recentFolders.length === 0) {
     return (
       <p>
         <Message message="loading" />
@@ -80,6 +80,8 @@ export default function RecentFolders() {
               undefined,
               currentFolder,
             );
+
+            // FIXME: still broken since selectNewRecentGameFolder only returns folders if they are new
             if (newFolder) {
               updateCurrentFolderSelectState(newFolder);
             }

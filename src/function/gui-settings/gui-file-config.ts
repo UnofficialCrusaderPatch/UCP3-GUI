@@ -69,6 +69,8 @@ export const MOST_RECENT_FOLDER_ATOM = unwrap(
   (prev) => prev ?? MOST_RECENT_FOLDER_EMPTY, // will stay the same until new update done
 );
 
+// FIXME: consider api again, does this make sense to control?
+// only returns selected folder if new, otherwise check return of most recent folder
 export function selectNewRecentGameFolder(
   title: string = '',
   baseDirectory: string = '',
@@ -95,6 +97,11 @@ export const BACKEND_LOG_LEVEL_ATOM = atom((get) =>
 
 export function setBackendLogLevel(level: keyof typeof BACKEND_LOG_LEVEL) {
   return setGuiConfigLogLevel(level);
+}
+
+// should only be used if there is really no other way
+export function saveGuiFileConfig() {
+  return saveGuiConfig();
 }
 
 // save on window close

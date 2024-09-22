@@ -5,30 +5,35 @@ import './recent-folders.css';
 
 import { useAtomValue, useSetAtom } from 'jotai';
 import { MouseEvent, useEffect, useState } from 'react';
-import { openFolderDialog } from '../../../tauri/tauri-dialog';
-import { RecentFolderHelper } from '../../../config/gui/recent-folder-helper';
+import { unwrap } from 'jotai/utils';
 import { GAME_FOLDER_LOADED_ATOM } from '../../../function/game-folder/utils';
 import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../../../function/game-folder/game-folder-interface';
 import { reloadCurrentWindow } from '../../../function/window-actions';
-import { useRecentFolders } from '../../../hooks/jotai/hooks';
-import Result from '../../../util/structs/result';
 import Message from '../../general/message';
+import {
+  MOST_RECENT_FOLDER_ATOM,
+  MOST_RECENT_FOLDER_EMPTY,
+  RECENT_FOLDERS_ATOM,
+  selectNewRecentGameFolder,
+  selectRecentGameFolder,
+} from '../../../function/gui-settings/gui-file-config';
+
+const UNWRAPPED_RECENT_FOLDERS = unwrap(
+  RECENT_FOLDERS_ATOM,
+  (prev) => prev ?? [], // will stay the same until new update done
+);
 
 export default function RecentFolders() {
   const setFolder = useSetAtom(GAME_FOLDER_INTERFACE_ASYNC_ATOM);
   const currentFolderState = useAtomValue(GAME_FOLDER_LOADED_ATOM);
   const currentFolder =
     currentFolderState.state === 'hasData' ? currentFolderState.data : '';
-  const [recentFolderResult] = useRecentFolders();
+  const recentFolders = useAtomValue(UNWRAPPED_RECENT_FOLDERS);
+  const mostRecentGameFolder = useAtomValue(MOST_RECENT_FOLDER_ATOM);
   const [showRecentFolders, setShowRecentFolders] = useState(false);
 
-  const recentFolderHelper = recentFolderResult
-    .getOrReceive(Result.emptyErr)
-    .ok()
-    .getOrElse(null as unknown as RecentFolderHelper);
-
   const updateCurrentFolderSelectState = (folder: string) => {
-    recentFolderHelper.addToRecentFolders(folder);
+    selectRecentGameFolder(folder);
     setFolder(folder);
   };
 
@@ -42,20 +47,17 @@ export default function RecentFolders() {
   };
 
   useEffect(() => {
-    if (recentFolderResult.isEmpty()) {
-      return;
-    }
-
     // set initial state
-    if (currentFolder === '' && recentFolderHelper?.getMostRecentGameFolder()) {
-      updateCurrentFolderSelectState(
-        recentFolderHelper.getMostRecentGameFolder(),
-      );
+    if (
+      currentFolder === '' &&
+      mostRecentGameFolder !== MOST_RECENT_FOLDER_EMPTY
+    ) {
+      updateCurrentFolderSelectState(mostRecentGameFolder.valueOf());
     }
   });
 
   // needs better loading site
-  if (recentFolderResult.isEmpty()) {
+  if (!recentFolders) {
     return (
       <p>
         <Message message="loading" />
@@ -73,11 +75,15 @@ export default function RecentFolders() {
           className="form-control"
           readOnly
           role="button"
-          onClick={async () =>
-            (await openFolderDialog(currentFolder)).ifPresent(
-              updateCurrentFolderSelectState,
-            )
-          }
+          onClick={async () => {
+            const newFolder = await selectNewRecentGameFolder(
+              undefined,
+              currentFolder,
+            );
+            if (newFolder) {
+              updateCurrentFolderSelectState(newFolder);
+            }
+          }}
           value={currentFolder.length > 0 ? currentFolder : ` Browse . . . `}
         />
         <button
@@ -91,8 +97,7 @@ export default function RecentFolders() {
           className="recent-folders-dropdown"
           style={{ display: showRecentFolders ? 'block' : 'none' }}
         >
-          {recentFolderHelper
-            .getRecentGameFolders()
+          {recentFolders
             .filter((_, index) => index !== 0)
             .map((recentFolder) => (
               <div

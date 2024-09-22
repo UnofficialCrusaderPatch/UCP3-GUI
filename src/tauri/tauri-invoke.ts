@@ -28,7 +28,6 @@ function generateBinaryDataFromContent(content: BinaryFileContents | string) {
 /* eslint-disable */
 const TAURI_COMMAND = {
   CONFIG_GET_RECENT_FOLDERS: buildPluginCmd(PLUGIN_CONFIG, 'get_config_recent_folders'),
-  CONFIG_GET_MOST_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'get_config_most_recent_folder'),
   CONFIG_SELECT_NEW_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'select_config_new_recent_folder'),
   CONFIG_REGISTER_RECENT_FOLDER_USAGE: buildPluginCmd(PLUGIN_CONFIG, 'register_config_recent_folder_usage'),
   CONFIG_REMOVE_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'remove_config_recent_folder'),
@@ -68,10 +67,6 @@ export async function getGuiConfigRecentFolders(): Promise<string[]> {
   return invoke(TAURI_COMMAND.CONFIG_GET_RECENT_FOLDERS);
 }
 
-export async function getGuiConfigMostRecentFolder(): Promise<string | null> {
-  return invoke(TAURI_COMMAND.CONFIG_GET_MOST_RECENT_FOLDER);
-}
-
 export async function selectGuiConfigNewRecentFolder(
   title: string,
   baseDirectory: string,
@@ -98,7 +93,7 @@ export async function getGuiConfigLogLevel(): Promise<string> {
 }
 
 // does not report success, wrong input sets default log level
-export async function setGuiConfigLevel(logLevel: string): Promise<void> {
+export async function setGuiConfigLogLevel(logLevel: string): Promise<void> {
   return invoke(TAURI_COMMAND.CONFIG_SET_LOG_LEVEL, { logLevel });
 }
 

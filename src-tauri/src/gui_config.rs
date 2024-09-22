@@ -177,13 +177,6 @@ impl<R: Runtime> GuiConfig<R> {
             .collect()
     }
 
-    pub fn get_most_recent_folder(&self) -> Option<&String> {
-        if let Some(recent_folder) = self.recent_folders.first() {
-            return Some(&recent_folder.path);
-        }
-        None
-    }
-
     /// Launches a blocking file dialog and needs to be called in an async thread.
     pub fn select_new_recent_folder(
         &mut self,
@@ -191,10 +184,14 @@ impl<R: Runtime> GuiConfig<R> {
         title: &str,
         base_directory: &str,
     ) -> Result<Option<String>, GuiError> {
-        let picked_folder = dialog::blocking::FileDialogBuilder::new()
-            .set_parent(window)
-            .set_title(title)
-            .set_directory(base_directory)
+        let mut folder_picker = dialog::blocking::FileDialogBuilder::new().set_parent(window);
+        if !title.is_empty() {
+            folder_picker = folder_picker.set_title(title);
+        }
+        if !base_directory.is_empty() {
+            folder_picker = folder_picker.set_directory(base_directory);
+        }
+        let picked_folder = folder_picker
             .pick_folder()
             .and_then(|path| path.to_slash().map(String::from));
 
@@ -266,13 +263,6 @@ fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String
         .collect()
 }
 
-#[tauri::command]
-fn get_config_most_recent_folder<R: Runtime>(app_handle: AppHandle<R>) -> Option<String> {
-    get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle)
-        .get_most_recent_folder()
-        .map(String::from)
-}
-
 // real async to allow execution of blocking file open
 #[tauri::command]
 async fn select_config_new_recent_folder<R: Runtime>(
@@ -321,7 +311,6 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tauri-plugin-ucp-config")
         .invoke_handler(tauri::generate_handler![
             get_config_recent_folders,
-            get_config_most_recent_folder,
             select_config_new_recent_folder,
             register_config_recent_folder_usage,
             remove_config_recent_folder,

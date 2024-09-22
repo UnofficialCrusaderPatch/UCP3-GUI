@@ -257,11 +257,6 @@ impl<R: Runtime> GuiConfig<R> {
     }
 }
 
-// These functions are not async, and will run in the Rust main thread.
-// It should therefore kinda behave like JS in a way.
-// Truly async stuff (other thread) is possible by using "async"
-// Currently it is not possible to delete enabled folders, and it will add the complete folder.
-
 #[tauri::command]
 fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String> {
     get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle)
@@ -278,6 +273,7 @@ fn get_config_most_recent_folder<R: Runtime>(app_handle: AppHandle<R>) -> Option
         .map(String::from)
 }
 
+// real async to allow execution of blocking file open
 #[tauri::command]
 async fn select_config_new_recent_folder<R: Runtime>(
     app_handle: AppHandle<R>,
@@ -297,14 +293,18 @@ fn register_config_recent_folder_usage<R: Runtime>(app_handle: AppHandle<R>, pat
     get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle).register_recent_folder_usage(path);
 }
 
+// Currently it seems not possible to remove enabled folders from the allowlist,
+// so this will only remove it from the listing.
 #[tauri::command]
 fn remove_config_recent_folder<R: Runtime>(app_handle: AppHandle<R>, path: &str) {
     get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle).remove_recent_folder(path);
 }
 
 #[tauri::command]
-fn get_config_log_level<R: Runtime>(app_handle: AppHandle<R>) {
-    get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle).get_log_level();
+fn get_config_log_level<R: Runtime>(app_handle: AppHandle<R>) -> String {
+    get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle)
+        .get_log_level()
+        .to_string()
 }
 
 #[tauri::command]

@@ -27,10 +27,14 @@ function generateBinaryDataFromContent(content: BinaryFileContents | string) {
 
 /* eslint-disable */
 const TAURI_COMMAND = {
-  CONFIG_GET_RECENT_FOLDERS: buildPluginCmd(PLUGIN_CONFIG, 'get_config_recent_folders',),
-  CONFIG_GET_MOST_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'get_config_most_recent_folder',),
-  CONFIG_ADD_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'add_config_recent_folder',),
-  CONFIG_REMOVE_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'remove_config_recent_folder',),
+  CONFIG_GET_RECENT_FOLDERS: buildPluginCmd(PLUGIN_CONFIG, 'get_config_recent_folders'),
+  CONFIG_GET_MOST_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'get_config_most_recent_folder'),
+  CONFIG_SELECT_NEW_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'select_config_new_recent_folder'),
+  CONFIG_REGISTER_RECENT_FOLDER_USAGE: buildPluginCmd(PLUGIN_CONFIG, 'register_config_recent_folder_usage'),
+  CONFIG_REMOVE_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'remove_config_recent_folder'),
+  CONFIG_GET_LOG_LEVEL: buildPluginCmd(PLUGIN_CONFIG, 'get_config_log_level'),
+  CONFIG_SET_LOG_LEVEL: buildPluginCmd(PLUGIN_CONFIG, 'set_config_log_level'),
+  CONFIG_SAVE: buildPluginCmd(PLUGIN_CONFIG, 'save_config'),
 
   ZIP_EXTRACT_TO_PATH: buildPluginCmd(PLUGIN_ZIP, 'extract_zip_to_path'),
   ZIP_READER_LOAD: buildPluginCmd(PLUGIN_ZIP, 'load_zip_reader'),
@@ -39,14 +43,14 @@ const TAURI_COMMAND = {
   ZIP_READER_GET_NUMBER_OF_ENTRIES: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_number_of_entries'),
   ZIP_READER_EXIST_ENTRY: buildPluginCmd(PLUGIN_ZIP, 'exist_zip_reader_entry'),
   ZIP_READER_GET_ENTRY_NAMES: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_names'),
-  ZIP_READER_GET_ENTRY_AS_BINARY: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_as_binary',),
-  ZIP_READER_GET_ENTRY_AS_TEXT: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_as_text',),
+  ZIP_READER_GET_ENTRY_AS_BINARY: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_as_binary'),
+  ZIP_READER_GET_ENTRY_AS_TEXT: buildPluginCmd(PLUGIN_ZIP, 'get_zip_reader_entry_as_text'),
   ZIP_WRITER_LOAD: buildPluginCmd(PLUGIN_ZIP, 'load_zip_writer'),
   ZIP_WRITER_CLOSE: buildPluginCmd(PLUGIN_ZIP, 'close_zip_writer'),
   ZIP_WRITER_ADD_DIRECTORY: buildPluginCmd(PLUGIN_ZIP, 'add_zip_writer_directory',),
-  ZIP_WRITER_WRITE_ENTRY_FROM_BINARY: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_binary',),
-  ZIP_WRITER_WRITE_ENTRY_FROM_TEXT: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_text',),
-  ZIP_WRITER_WRITE_ENTRY_FROM_FILE: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_file',),
+  ZIP_WRITER_WRITE_ENTRY_FROM_BINARY: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_binary'),
+  ZIP_WRITER_WRITE_ENTRY_FROM_TEXT: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_text'),
+  ZIP_WRITER_WRITE_ENTRY_FROM_FILE: buildPluginCmd(PLUGIN_ZIP, 'write_zip_writer_entry_from_file'),
 
   HASH_GET_SHA256_OF_FILE: 'get_sha256_of_file',
   OS_OPEN_PROGRAM: 'os_open_program',
@@ -68,12 +72,38 @@ export async function getGuiConfigMostRecentFolder(): Promise<string | null> {
   return invoke(TAURI_COMMAND.CONFIG_GET_MOST_RECENT_FOLDER);
 }
 
-export async function addGuiConfigRecentFolder(path: string): Promise<void> {
-  return invoke(TAURI_COMMAND.CONFIG_ADD_RECENT_FOLDER, { path });
+export async function selectGuiConfigNewRecentFolder(
+  title: string,
+  baseDirectory: string,
+): Promise<string | null> {
+  return invoke(TAURI_COMMAND.CONFIG_SELECT_NEW_RECENT_FOLDER, {
+    title,
+    baseDirectory,
+  });
 }
 
+export async function registerGuiConfigRecentFolderUsage(
+  path: string,
+): Promise<void> {
+  return invoke(TAURI_COMMAND.CONFIG_REGISTER_RECENT_FOLDER_USAGE, { path });
+}
+
+// will not remove them from the allowlist of the current run state
 export async function removeGuiConfigRecentFolder(path: string): Promise<void> {
   return invoke(TAURI_COMMAND.CONFIG_REMOVE_RECENT_FOLDER, { path });
+}
+
+export async function getGuiConfigLogLevel(): Promise<string> {
+  return invoke(TAURI_COMMAND.CONFIG_GET_LOG_LEVEL);
+}
+
+// does not report success, wrong input sets default log level
+export async function setGuiConfigLevel(logLevel: string): Promise<void> {
+  return invoke(TAURI_COMMAND.CONFIG_SET_LOG_LEVEL, { logLevel });
+}
+
+export async function saveGuiConfig(): Promise<void> {
+  return invoke(TAURI_COMMAND.CONFIG_SAVE);
 }
 
 export async function extractZipToPath(

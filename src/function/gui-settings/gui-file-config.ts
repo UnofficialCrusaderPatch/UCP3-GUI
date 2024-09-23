@@ -6,10 +6,9 @@ import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import {
   getGuiConfigLogLevel,
   getGuiConfigRecentFolders,
-  registerGuiConfigRecentFolderUsage,
   removeGuiConfigRecentFolder,
   saveGuiConfig,
-  selectGuiConfigNewRecentFolder,
+  selectGuiConfigRecentFolder,
   setGuiConfigLogLevel,
 } from '../../tauri/tauri-invoke';
 import { onGuiFileConfigChange } from '../../tauri/tauri-listen';
@@ -69,17 +68,16 @@ export const MOST_RECENT_FOLDER_ATOM = unwrap(
   (prev) => prev ?? MOST_RECENT_FOLDER_EMPTY, // will stay the same until new update done
 );
 
-// FIXME: consider api again, does this make sense to control?
 // only returns selected folder if new, otherwise check return of most recent folder
 export function selectNewRecentGameFolder(
-  title: string = '',
-  baseDirectory: string = '',
+  title?: string,
+  baseDirectory?: string,
 ) {
-  return selectGuiConfigNewRecentFolder(title, baseDirectory);
+  return selectGuiConfigRecentFolder(baseDirectory, true, title);
 }
 
 export function selectRecentGameFolder(path: string) {
-  return registerGuiConfigRecentFolderUsage(path);
+  return selectGuiConfigRecentFolder(path);
 }
 
 export function removeFromRecentFolders(path: string) {

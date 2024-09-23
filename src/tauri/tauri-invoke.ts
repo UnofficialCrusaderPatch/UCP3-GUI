@@ -28,8 +28,7 @@ function generateBinaryDataFromContent(content: BinaryFileContents | string) {
 /* eslint-disable */
 const TAURI_COMMAND = {
   CONFIG_GET_RECENT_FOLDERS: buildPluginCmd(PLUGIN_CONFIG, 'get_config_recent_folders'),
-  CONFIG_SELECT_NEW_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'select_config_new_recent_folder'),
-  CONFIG_REGISTER_RECENT_FOLDER_USAGE: buildPluginCmd(PLUGIN_CONFIG, 'register_config_recent_folder_usage'),
+  CONFIG_SELECT_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'select_config_recent_folder'),
   CONFIG_REMOVE_RECENT_FOLDER: buildPluginCmd(PLUGIN_CONFIG, 'remove_config_recent_folder'),
   CONFIG_GET_LOG_LEVEL: buildPluginCmd(PLUGIN_CONFIG, 'get_config_log_level'),
   CONFIG_SET_LOG_LEVEL: buildPluginCmd(PLUGIN_CONFIG, 'set_config_log_level'),
@@ -67,20 +66,16 @@ export async function getGuiConfigRecentFolders(): Promise<string[]> {
   return invoke(TAURI_COMMAND.CONFIG_GET_RECENT_FOLDERS);
 }
 
-export async function selectGuiConfigNewRecentFolder(
-  title: string,
-  baseDirectory: string,
+export async function selectGuiConfigRecentFolder(
+  directoryPath: string = '',
+  newDir: boolean = false,
+  title: string = '',
 ): Promise<string | null> {
-  return invoke(TAURI_COMMAND.CONFIG_SELECT_NEW_RECENT_FOLDER, {
+  return invoke(TAURI_COMMAND.CONFIG_SELECT_RECENT_FOLDER, {
+    directoryPath,
+    new: newDir,
     title,
-    baseDirectory,
   });
-}
-
-export async function registerGuiConfigRecentFolderUsage(
-  path: string,
-): Promise<void> {
-  return invoke(TAURI_COMMAND.CONFIG_REGISTER_RECENT_FOLDER_USAGE, { path });
 }
 
 // will not remove them from the allowlist of the current run state

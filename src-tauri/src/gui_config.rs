@@ -177,57 +177,57 @@ impl<R: Runtime> GuiConfig<R> {
             .collect()
     }
 
-    /// Launches a blocking file dialog and needs to be called in an async thread.
-    pub fn select_new_recent_folder(
+    /// I set to new, Launches a blocking file dialog and needs to be called in an async thread.
+    pub fn select_recent_folder(
         &mut self,
         window: &Window<R>,
+        directory_path: &str,
+        new: bool,
         title: &str,
-        base_directory: &str,
     ) -> Result<Option<String>, GuiError> {
-        let mut folder_picker = dialog::blocking::FileDialogBuilder::new().set_parent(window);
-        if !title.is_empty() {
-            folder_picker = folder_picker.set_title(title);
-        }
-        if !base_directory.is_empty() {
-            folder_picker = folder_picker.set_directory(base_directory);
-        }
-        let picked_folder = folder_picker
-            .pick_folder()
-            .and_then(|path| path.to_slash().map(String::from));
-
-        match picked_folder {
-            Some(path) => {
-                if self.register_recent_folder_usage(&path) {
-                    return Ok(None);
-                }
-                self.add_folder_to_scopes(&path)?;
-                self.recent_folders.push(RecentFolder::new(&path));
-                self.sort_recent_folders();
-                if self.recent_folders.len() > NUMBER_OF_RECENT_FOLDERS {
-                    self.recent_folders.truncate(NUMBER_OF_RECENT_FOLDERS);
-                }
-                self.emit_config_event(FILE_CONFIG_EVENT_RECENT_FOLDER_CHANGED);
-                Ok(Some(path))
+        let selected_folder_option = if new {
+            let mut folder_picker = dialog::blocking::FileDialogBuilder::new().set_parent(window);
+            if !title.is_empty() {
+                folder_picker = folder_picker.set_title(title);
             }
-            None => return Ok(None),
-        }
-    }
+            if !directory_path.is_empty() {
+                folder_picker = folder_picker.set_directory(directory_path);
+            }
+            folder_picker
+                .pick_folder()
+                .and_then(|path| path.to_slash().map(String::from))
+        } else if !directory_path.is_empty() {
+            Some(directory_path.to_string())
+        } else {
+            None
+        };
 
-    /// Return whether the path was found and updated
-    pub fn register_recent_folder_usage(&mut self, path: &str) -> bool {
-        match self
+        let selected_folder = if let Some(path) = selected_folder_option {
+            path
+        } else {
+            return Ok(None);
+        };
+
+        if let Some(recent_folder) = self
             .recent_folders
             .iter_mut()
-            .find(|recent_folder| recent_folder.path.eq(path))
+            .find(|recent_folder| recent_folder.path.eq(&selected_folder))
         {
-            Some(recent_folder) => {
-                recent_folder.update_entry_date();
-                self.sort_recent_folders();
-                self.emit_config_event(FILE_CONFIG_EVENT_RECENT_FOLDER_CHANGED);
-                true
-            }
-            None => false,
+            recent_folder.update_entry_date();
+        } else if new {
+            self.add_folder_to_scopes(&selected_folder)?;
+            self.recent_folders
+                .push(RecentFolder::new(&selected_folder));
+        } else {
+            return Ok(None);
         }
+
+        self.sort_recent_folders();
+        if self.recent_folders.len() > NUMBER_OF_RECENT_FOLDERS {
+            self.recent_folders.truncate(NUMBER_OF_RECENT_FOLDERS);
+        }
+        self.emit_config_event(FILE_CONFIG_EVENT_RECENT_FOLDER_CHANGED);
+        Ok(Some(selected_folder))
     }
 
     pub fn remove_recent_folder(&mut self, path: &str) {
@@ -265,22 +265,19 @@ fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String
 
 // real async to allow execution of blocking file open
 #[tauri::command]
-async fn select_config_new_recent_folder<R: Runtime>(
+async fn select_config_recent_folder<R: Runtime>(
     app_handle: AppHandle<R>,
     window: Window<R>,
+    directory_path: String,
+    new: bool,
     title: String,
-    base_directory: String,
 ) -> Result<Option<String>, GuiError> {
-    get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle).select_new_recent_folder(
+    get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle).select_recent_folder(
         &window,
+        &directory_path,
+        new,
         &title,
-        &base_directory,
     )
-}
-
-#[tauri::command]
-fn register_config_recent_folder_usage<R: Runtime>(app_handle: AppHandle<R>, path: &str) {
-    get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle).register_recent_folder_usage(path);
 }
 
 // Currently it seems not possible to remove enabled folders from the allowlist,
@@ -311,8 +308,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("tauri-plugin-ucp-config")
         .invoke_handler(tauri::generate_handler![
             get_config_recent_folders,
-            select_config_new_recent_folder,
-            register_config_recent_folder_usage,
+            select_config_recent_folder,
             remove_config_recent_folder,
             get_config_log_level,
             set_config_log_level,

@@ -81,7 +81,6 @@ export default function RecentFolders() {
               currentFolder,
             );
 
-            // FIXME: still broken since selectNewRecentGameFolder only returns folders if they are new
             if (newFolder) {
               updateCurrentFolderSelectState(newFolder);
             }

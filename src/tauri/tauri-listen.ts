@@ -13,7 +13,7 @@ export function onBackendLog(
 }
 
 export function onGuiFileConfigChange(
-  func: EventCallback<{ eventType: string }>,
+  func: EventCallback<{ event_type: string }>,
 ) {
   return listen(TAURI_EVENT.FILE_CONFIG, func);
 }

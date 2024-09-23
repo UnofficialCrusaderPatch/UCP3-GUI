@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/require-default-props */
 import './game-starter.css';
 
@@ -19,7 +20,7 @@ import Message, { useMessage } from '../../../general/message';
 const LOGGER = new Logger('game-starter.tsx');
 
 interface GameStarterProps {
-  pathAtom: Atom<Promise<string>>;
+  pathAtom: Atom<Promise<String>>;
   versionAtom: Atom<Promise<GameVersionInstance>>;
   ucp2CheckAtom: Atom<Promise<boolean>>;
   imagePath: string;
@@ -136,7 +137,7 @@ function GameStarterButton(props: GameStarterProps) {
       }
 
       setStarting(true);
-      await osOpenProgram(path, receiveArgs?.(), receiveEnvs?.());
+      await osOpenProgram(path.valueOf(), receiveArgs?.(), receiveEnvs?.());
       // the game start takes a while, but we not observe it, so we simulate loading a bit instead
       await sleep(2000);
     } catch (e) {

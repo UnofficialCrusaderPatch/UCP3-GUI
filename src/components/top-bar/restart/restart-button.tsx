@@ -4,6 +4,8 @@ import './restart-button.css';
 import Message from '../../general/message';
 import { saveGuiFileConfig } from '../../../function/gui-settings/gui-file-config';
 
+// TODO: check if this could be removed
+
 // eslint-disable-next-line import/prefer-default-export
 export function RestartButton() {
   return (

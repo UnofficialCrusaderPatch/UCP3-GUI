@@ -1,13 +1,13 @@
-import { atom } from 'jotai';
+/* eslint-disable no-new-wrappers */
 
 import { exists } from '@tauri-apps/api/fs';
 import { getVersion } from '@tauri-apps/api/app';
+import { unwrap } from 'jotai/utils';
 import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
-import { GAME_FOLDER_ATOM } from './game-folder-atom';
 import { showModalOk } from '../../components/modals/modal-ok';
 import importButtonCallback from '../../components/ucp-tabs/common/importing/import-button-callback';
 import { Extension } from '../../config/ucp/common';
-import { getStore } from '../../hooks/jotai/base';
+import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import Logger, { ConsoleLogger } from '../../util/scripts/logging';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -29,8 +29,11 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../components/ucp-tabs/co
 import { discoverExtensions } from '../extensions/discovery/discovery';
 import { buildExtensionConfigurationDB } from '../../components/ucp-tabs/extension-manager/extension-configuration';
 import { saveCurrentConfig } from '../../components/ucp-tabs/common/save-config';
+import { MOST_RECENT_FOLDER_ATOM } from '../gui-settings/gui-file-config';
 
 const LOGGER = new Logger('game-folder-interface.ts');
+
+export const GAME_FOLDER_EMPTY = new String('');
 
 const activateFirstTimeUseExtensions = (extensionsState: ExtensionsState) => {
   const extensionNames = ['ucp2-legacy-defaults', 'graphicsApiReplacer'];
@@ -199,30 +202,38 @@ export async function initializeGameFolder(
   getStore().set(INIT_RUNNING, false);
 } // normal atoms
 
-// eslint-disable-next-line import/prefer-default-export
-export const GAME_FOLDER_INTERFACE_ASYNC_ATOM = atom(
-  (get) => get(GAME_FOLDER_ATOM),
-  async (get, set, newValue: string) => {
-    const oldValue = get(GAME_FOLDER_ATOM);
+/**
+ * Return String wrapper objects to always generate updates.
+ * Be aware of this in case of comparisons!
+ */
+export const ASYNC_GAME_FOLDER_ATOM = atomWithRefresh(async (get) => {
+  const newFolder = await get(MOST_RECENT_FOLDER_ATOM);
 
-    if (newValue === oldValue || get(INIT_RUNNING)) {
-      return;
-    }
+  if (!newFolder) {
+    return GAME_FOLDER_EMPTY;
+  }
 
-    LOGGER.msg('Initializing ucp version information').debug();
-    await initializeUCPVersion(newValue);
-    LOGGER.msg('Initializing ucp version information finished').debug();
+  LOGGER.msg('Initializing ucp version information').debug();
+  await initializeUCPVersion(newFolder);
+  LOGGER.msg('Initializing ucp version information finished').debug();
 
-    LOGGER.msg('Initializing game folder').debug();
-    await initializeGameFolder(
-      newValue,
-      getStore().get(UCP_VERSION_ATOM).version.getBuildRepresentation() ===
-        'Developer'
-        ? 'Developer'
-        : 'Release',
-    );
-    LOGGER.msg('Initializing game folder finished').debug();
+  LOGGER.msg('Initializing game folder').debug();
+  await initializeGameFolder(
+    newFolder,
+    getStore().get(UCP_VERSION_ATOM).version.getBuildRepresentation() ===
+      'Developer'
+      ? 'Developer'
+      : 'Release',
+  );
+  LOGGER.msg('Initializing game folder finished').debug();
+  return new String(newFolder);
+});
 
-    set(GAME_FOLDER_ATOM, newValue);
-  },
-); // eslint-disable-next-line import/prefer-default-export
+export const GAME_FOLDER_ATOM = unwrap(
+  ASYNC_GAME_FOLDER_ATOM,
+  (prev) => prev ?? GAME_FOLDER_EMPTY,
+);
+
+export function reloadCurrentGameFolder() {
+  getStore().set(ASYNC_GAME_FOLDER_ATOM);
+}

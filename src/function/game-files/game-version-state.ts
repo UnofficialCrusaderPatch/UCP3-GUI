@@ -10,9 +10,9 @@ async function getGameVersionForPath(path: string) {
 }
 
 export const VANILLA_VERSION_ATOM = atom(async (get) =>
-  getGameVersionForPath(await get(VANILLA_PATH_ATOM)),
+  getGameVersionForPath((await get(VANILLA_PATH_ATOM)).valueOf()),
 );
 
 export const EXTREME_VERSION_ATOM = atom(async (get) =>
-  getGameVersionForPath(await get(EXTREME_PATH_ATOM)),
+  getGameVersionForPath((await get(EXTREME_PATH_ATOM)).valueOf()),
 );

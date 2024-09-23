@@ -1,7 +1,5 @@
-/* eslint-disable no-new-wrappers */
 import { TauriEvent } from '@tauri-apps/api/event';
 import { atom } from 'jotai';
-import { unwrap } from 'jotai/utils';
 import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import {
   getGuiConfigLogLevel,
@@ -13,8 +11,6 @@ import {
 } from '../../tauri/tauri-invoke';
 import { onGuiFileConfigChange } from '../../tauri/tauri-listen';
 import { registerTauriEventListener } from '../../tauri/tauri-hooks';
-
-export const MOST_RECENT_FOLDER_EMPTY = new String('');
 
 const GUI_CONFIG_FILE_EVENT = {
   RECENT_FOLDER: 'RECENT_FOLDER',
@@ -30,15 +26,11 @@ export const BACKEND_LOG_LEVEL = {
 };
 
 const INTERNAL_RECENT_FOLDERS_ATOM = atomWithRefresh(getGuiConfigRecentFolders);
-const INTERNAL_MOST_RECENT_FOLDER_ATOM = atom(async (get) => {
-  const folders = await get(INTERNAL_RECENT_FOLDERS_ATOM);
-  return folders.length > 0 ? new String(folders[0]) : MOST_RECENT_FOLDER_EMPTY;
-});
 
 const INTERNAL_BACKEND_LOG_LEVEL_ATOM = atomWithRefresh(getGuiConfigLogLevel);
 
 const configUnlistenPromise = onGuiFileConfigChange(({ payload }) => {
-  switch (payload.eventType) {
+  switch (payload.event_type) {
     case GUI_CONFIG_FILE_EVENT.RECENT_FOLDER:
       getStore().set(INTERNAL_RECENT_FOLDERS_ATOM);
       break;
@@ -57,16 +49,10 @@ export const RECENT_FOLDERS_ATOM = atom((get) =>
   get(INTERNAL_RECENT_FOLDERS_ATOM),
 );
 
-/**
- * Return String wrapper objects to always generate updates.
- * Be aware of this in case of comparisons!
- *
- * Until a value is loaded or if no folder is available, the value will be MOST_RECENT_FOLDER_EMPTY.
- */
-export const MOST_RECENT_FOLDER_ATOM = unwrap(
-  INTERNAL_MOST_RECENT_FOLDER_ATOM,
-  (prev) => prev ?? MOST_RECENT_FOLDER_EMPTY, // will stay the same until new update done
-);
+export const MOST_RECENT_FOLDER_ATOM = atom(async (get) => {
+  const folders = await get(INTERNAL_RECENT_FOLDERS_ATOM);
+  return folders.length > 0 ? folders[0] : undefined;
+});
 
 // only returns selected folder if new, otherwise check return of most recent folder
 export function selectNewRecentGameFolder(

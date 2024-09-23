@@ -3,8 +3,8 @@ import { ResponseType } from '@tauri-apps/api/http';
 import Logger from '../../util/scripts/logging';
 import { UCP3_REPO_GIST_URL } from './download-enums';
 import { ProgressHandler, download, fetch } from '../../tauri/tauri-http';
-import { GAME_FOLDER_ATOM } from '../game-folder/game-folder-atom';
 import { getStore } from '../../hooks/jotai/base';
+import { GAME_FOLDER_ATOM } from '../game-folder/game-folder-interface';
 
 const LOGGER = new Logger('github.ts');
 
@@ -85,7 +85,7 @@ export class UCP3Updater {
     type: 'Release' | 'Developer',
     progressHandler?: ProgressHandler,
   ) {
-    const folder = getStore().get(GAME_FOLDER_ATOM);
+    const folder = getStore().get(GAME_FOLDER_ATOM).valueOf();
 
     if (this.meta === undefined) {
       this.meta = await this.fetchMeta();

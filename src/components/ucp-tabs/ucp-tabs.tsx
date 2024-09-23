@@ -42,9 +42,9 @@ import {
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from './content-manager/state/atoms';
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
-import { reloadCurrentWindow } from '../../function/window-actions';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
 import Message from '../general/message';
+import { reloadCurrentGameFolder } from '../../function/game-folder/game-folder-interface';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -169,7 +169,7 @@ export default function UcpTabs() {
                         "The GUI needs to restart as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel",
                     });
                     if (okCancelResult) {
-                      await reloadCurrentWindow();
+                      reloadCurrentGameFolder();
                     }
 
                     return;

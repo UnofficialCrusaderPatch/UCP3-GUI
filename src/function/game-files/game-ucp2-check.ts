@@ -50,9 +50,9 @@ async function checkIfUCP2Installed(path: string) {
 }
 
 export const VANILLA_UCP2_ATOM = atom(async (get) =>
-  checkIfUCP2Installed(await get(VANILLA_PATH_ATOM)),
+  checkIfUCP2Installed((await get(VANILLA_PATH_ATOM)).valueOf()),
 );
 
 export const EXTREME_UCP2_ATOM = atom(async (get) =>
-  checkIfUCP2Installed(await get(EXTREME_PATH_ATOM)),
+  checkIfUCP2Installed((await get(EXTREME_PATH_ATOM)).valueOf()),
 );

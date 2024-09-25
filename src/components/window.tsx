@@ -6,9 +6,9 @@ import { Suspense } from 'react';
 import Titlebar from './titlebar/titlebar';
 import Main from './main-page';
 
-// adds dev object to globalThis, allowing to use some functions in the web console
+// // adds dev object to globalThis, allowing to use some functions in the web console
 if (import.meta.env.DEV) {
-  await import('../function/dev');
+  import('../function/dev');
 }
 
 function WindowContent() {

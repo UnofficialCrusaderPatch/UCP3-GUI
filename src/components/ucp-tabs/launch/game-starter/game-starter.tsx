@@ -16,13 +16,15 @@ import { CONFIG_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-
 import { FIRST_TIME_USE_ATOM } from '../../../../function/gui-settings/settings';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import Message, { useMessage } from '../../../general/message';
+import { GameDataWrapper } from '../../../../function/game-files/game-data';
 
 const LOGGER = new Logger('game-starter.tsx');
 
 interface GameStarterProps {
-  pathAtom: Atom<Promise<String>>;
-  versionAtom: Atom<Promise<GameVersionInstance>>;
-  ucp2CheckAtom: Atom<Promise<boolean>>;
+  exeType: keyof GameDataWrapper<never>;
+  pathAtom: Atom<Promise<GameDataWrapper<string>>>;
+  versionAtom: Atom<Promise<GameDataWrapper<GameVersionInstance>>>;
+  ucp2CheckAtom: Atom<Promise<GameDataWrapper<boolean>>>;
   imagePath: string;
   receiveArgs?: () => string[];
   receiveEnvs?: () => Record<string, string>;
@@ -30,13 +32,14 @@ interface GameStarterProps {
 }
 
 function GameStarterInfo(props: {
-  versionAtom: Atom<Promise<GameVersionInstance>>;
+  exeType: keyof GameDataWrapper<never>;
+  versionAtom: Atom<Promise<GameDataWrapper<GameVersionInstance>>>;
 }) {
-  const { versionAtom } = props;
+  const { exeType, versionAtom } = props;
 
   const localize = useMessage();
 
-  const version = useAtomValue(versionAtom);
+  const version = useAtomValue(versionAtom)[exeType];
 
   return (
     <table className="game-starter__info">
@@ -94,6 +97,7 @@ function GameStarterInfo(props: {
 
 function GameStarterButton(props: GameStarterProps) {
   const {
+    exeType,
     imagePath,
     pathAtom,
     versionAtom,
@@ -105,9 +109,9 @@ function GameStarterButton(props: GameStarterProps) {
 
   const localize = useMessage();
 
-  const path = useAtomValue(pathAtom);
-  const version = useAtomValue(versionAtom);
-  const ucp2Present = useAtomValue(ucp2CheckAtom);
+  const path = useAtomValue(pathAtom)[exeType];
+  const version = useAtomValue(versionAtom)[exeType];
+  const ucp2Present = useAtomValue(ucp2CheckAtom)[exeType];
 
   const [starting, setStarting] = useState(false);
 
@@ -176,6 +180,7 @@ function GameStarterButton(props: GameStarterProps) {
 
 export default function GameStarter(props: GameStarterProps) {
   const {
+    exeType,
     imagePath,
     pathAtom,
     versionAtom,
@@ -188,8 +193,9 @@ export default function GameStarter(props: GameStarterProps) {
   return (
     <div className="flex-default game-starter__box">
       <Suspense>
-        <GameStarterInfo versionAtom={versionAtom} />
+        <GameStarterInfo exeType={exeType} versionAtom={versionAtom} />
         <GameStarterButton
+          exeType={exeType}
           imagePath={imagePath}
           pathAtom={pathAtom}
           versionAtom={versionAtom}

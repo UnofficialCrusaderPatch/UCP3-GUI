@@ -1,4 +1,5 @@
 {
+  "extensions": [".js", ".jsx", ".ts", ".d.ts", ".tsx"],
   "ignoreUnresolved": [
     [
       "./credits.md?raw",

@@ -1,7 +1,13 @@
 import { atom } from 'jotai';
+import { Atom } from 'jotai/vanilla';
 import getGameExeHash from './game-hash';
-import { EMPTY_GAME_VERSION, getGameVersionForHash } from './game-version';
-import { EXTREME_PATH_ATOM, VANILLA_PATH_ATOM } from './game-path';
+import {
+  EMPTY_GAME_VERSION,
+  GameVersionInstance,
+  getGameVersionForHash,
+} from './game-version';
+import EXE_PATHS_ATOM from './game-path';
+import { GameDataWrapper } from './game-data';
 
 async function getGameVersionForPath(path: string) {
   return (await getGameExeHash(path))
@@ -9,10 +15,13 @@ async function getGameVersionForPath(path: string) {
     .getOrReceive(() => Promise.resolve(EMPTY_GAME_VERSION));
 }
 
-export const VANILLA_VERSION_ATOM = atom(async (get) =>
-  getGameVersionForPath((await get(VANILLA_PATH_ATOM)).valueOf()),
-);
+const GAME_VERSION_ATOM: Atom<Promise<GameDataWrapper<GameVersionInstance>>> =
+  atom(async (get) => {
+    const exePaths = await get(EXE_PATHS_ATOM);
+    return {
+      vanilla: await getGameVersionForPath(exePaths.vanilla),
+      extreme: await getGameVersionForPath(exePaths.extreme),
+    };
+  });
 
-export const EXTREME_VERSION_ATOM = atom(async (get) =>
-  getGameVersionForPath((await get(EXTREME_PATH_ATOM)).valueOf()),
-);
+export default GAME_VERSION_ATOM;

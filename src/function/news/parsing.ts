@@ -1,10 +1,9 @@
 import yaml from 'yaml';
-import { News, NewsMeta } from './types';
+import { News, NewsElement, NewsMeta } from './types';
 
 const docSeparator = /^---\n/gm;
 
-// eslint-disable-next-line import/prefer-default-export
-export function parseNews(content: string) {
+function parseNewsV1(content: string) {
   const metas: NewsMeta[] = [];
   const docs: string[] = [];
   const splitContent = content
@@ -29,4 +28,43 @@ export function parseNews(content: string) {
   });
 
   return newsElements;
+}
+
+const REGEX_META = /^\[meta\]:\s*<>\s*\(([^)]*)\)/gm;
+
+function parseNewsV2(content: string) {
+  const splitContent = content
+    .split(docSeparator)
+    .filter((s) => s.trim().length > 0);
+
+  return splitContent.map((docString) => {
+    const m = new RegExp(REGEX_META).exec(docString);
+    if (m === null || m.length < 2) throw Error('no meta');
+
+    const meta = yaml.parse(m[1]);
+    meta.timestamp = new Date(meta.timestamp);
+
+    return {
+      meta,
+      content: docString,
+    } as NewsElement;
+  });
+}
+
+// eslint-disable-next-line import/prefer-default-export
+export function parseNews(content: string): News {
+  try {
+    return parseNewsV2(content);
+  } catch {
+    try {
+      return parseNewsV1(content);
+    } catch {
+      return [
+        {
+          content: 'Failed to load news',
+          meta: { category: 'error', timestamp: new Date() },
+        },
+      ];
+    }
+  }
 }

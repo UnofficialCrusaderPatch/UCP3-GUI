@@ -1,6 +1,6 @@
 export type NewsMeta = {
   timestamp: Date;
-  category: 'framework' | 'frontend' | 'store' | 'community';
+  category: 'framework' | 'frontend' | 'store' | 'community' | 'error';
 };
 
 export type NewsElement = {

@@ -18,7 +18,9 @@ function dmy(d: Date) {
 
 function Headline(props: { news: NewsElement }) {
   const { news } = props;
-  const firstLine = news.content.split('\n')[0];
+  const firstLine = news.content
+    .split('\n')
+    .filter((s) => s.length > 0 && s.trim().length > 0)[0];
   const sanitized = firstLine.startsWith('#')
     ? firstLine.trim().split('#', 2)[1].trim()
     : firstLine;

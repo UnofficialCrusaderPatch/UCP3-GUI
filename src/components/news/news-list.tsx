@@ -19,7 +19,7 @@ export function NewsList(props: OverlayContentProps) {
       ? data
           .map(
             (ne) =>
-              `${ne.content}\n\nNews date: ${ymd(ne.meta.timestamp)}\n\nNews category: ${ne.meta.category}`,
+              `date: ${ymd(ne.meta.timestamp)}    category: ${ne.meta.category}\n\n${ne.content}`,
           )
           .join('\n___\n')
       : '';
@@ -34,7 +34,7 @@ export function NewsList(props: OverlayContentProps) {
         style={{ backgroundImage: '' }}
       >
         <div className="credits-text">
-          <SaferMarkdown>{`${newsList}\n___\n${newsList}`}</SaferMarkdown>
+          <SaferMarkdown>{`${newsList}`}</SaferMarkdown>
         </div>
       </div>
       <button

@@ -38,11 +38,18 @@ function parseNewsV2(content: string) {
     .filter((s) => s.trim().length > 0);
 
   return splitContent.map((docString) => {
-    const m = new RegExp(REGEX_META).exec(docString);
-    if (m === null || m.length < 2) throw Error('no meta');
+    let meta: NewsMeta;
 
-    const meta = yaml.parse(m[1]);
-    meta.timestamp = new Date(meta.timestamp);
+    const m = new RegExp(REGEX_META).exec(docString);
+    if (m === null || m.length < 2) {
+      meta = {
+        category: 'community',
+        timestamp: new Date(),
+      };
+    } else {
+      meta = yaml.parse(m[1]);
+      meta.timestamp = new Date(meta.timestamp);
+    }
 
     return {
       meta,
@@ -58,10 +65,10 @@ export function parseNews(content: string): News {
   } catch {
     try {
       return parseNewsV1(content);
-    } catch {
+    } catch (e) {
       return [
         {
-          content: 'Failed to load news',
+          content: `# Failed to load news\n\nreason:${e}`,
           meta: { category: 'error', timestamp: new Date() },
         },
       ];

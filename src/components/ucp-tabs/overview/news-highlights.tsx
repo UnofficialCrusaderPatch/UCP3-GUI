@@ -1,10 +1,16 @@
 import { useAtomValue } from 'jotai';
 import { XCircleFill } from 'react-bootstrap-icons';
 import { useState } from 'react';
-import { NEWS_HIGHLIGHT_ATOM } from '../../../function/news/state';
+import {
+  NEWS_HIGHLIGHT_ATOM,
+  newsID,
+  SCROLL_TO_NEWS_ATOM,
+} from '../../../function/news/state';
 import { NewsElement } from '../../../function/news/types';
 import { HIDDEN_NEWS_HIGHLIGHTS_ATOM } from '../../../function/gui-settings/settings';
 import { getStore } from '../../../hooks/jotai/base';
+import { NewsList } from '../../news/news-list';
+import { setOverlayContent } from '../../overlay/overlay';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function camelCase(s: string) {
@@ -28,6 +34,8 @@ function Headline(props: { news: NewsElement }) {
 
   const [isHovered, setHovered] = useState(false);
 
+  const id = newsID(news);
+
   return (
     <div
       className="text-start row fs-6 pb-2 px-0"
@@ -39,6 +47,7 @@ function Headline(props: { news: NewsElement }) {
       }}
     >
       {/* <span className="col-4">{`${category}`}</span> */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <span
         className="col mt-0 px-0"
         style={{
@@ -48,6 +57,10 @@ function Headline(props: { news: NewsElement }) {
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
+        }}
+        onClick={() => {
+          getStore().set(SCROLL_TO_NEWS_ATOM, id);
+          setOverlayContent(NewsList, true, true);
         }}
       >{`${sanitized}`}</span>
       {/* <span className="col-2">{`${dmy(news.meta.timestamp)}`}</span> */}

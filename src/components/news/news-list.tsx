@@ -1,28 +1,51 @@
 import { useAtomValue } from 'jotai';
+import { useEffect, useRef } from 'react';
 import Message from '../general/message';
-import { SaferMarkdown } from '../markdown/safer-markdown';
 import { OverlayContentProps } from '../overlay/overlay';
-import { NEWS_ATOM } from '../../function/news/state';
+import {
+  NEWS_ATOM,
+  newsID,
+  SCROLL_TO_NEWS_ATOM,
+} from '../../function/news/state';
+import { getStore } from '../../hooks/jotai/base';
+import { NewsItemWrapper } from './news-item-wrapper';
 
-function ymd(timestamp: Date) {
-  return `${timestamp.getFullYear()}-${timestamp.getMonth()}-${timestamp.getDay()}`;
-}
-
+/**
+ * News list visual element displaying all news available.
+ *
+ * @param props properties for this overlay content
+ * @returns NewsList
+ */
 // eslint-disable-next-line import/prefer-default-export
 export function NewsList(props: OverlayContentProps) {
   const { closeFunc } = props;
+
+  const scrollToNewsID = useAtomValue(SCROLL_TO_NEWS_ATOM);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const { data, isError, isFetched, isPending } = useAtomValue(NEWS_ATOM);
 
   const newsList =
     isFetched && !isError && !isPending
-      ? data
-          .map(
-            (ne) =>
-              `date: ${ymd(ne.meta.timestamp)}    category: ${ne.meta.category}\n\n${ne.content}`,
-          )
-          .join('\n___\n')
-      : '';
+      ? data.map((ne) => (
+          <NewsItemWrapper
+            ref={
+              scrollToNewsID.length > 0 && scrollToNewsID === newsID(ne)
+                ? wrapperRef
+                : undefined
+            }
+            key={`${newsID(ne)}-wrapper`}
+            item={ne}
+          />
+        ))
+      : null;
+
+  useEffect(() => {
+    if (wrapperRef.current !== null) {
+      wrapperRef.current.scrollIntoView();
+      getStore().set(SCROLL_TO_NEWS_ATOM, '');
+    }
+  }, []);
 
   return (
     <div className="credits-container">
@@ -33,9 +56,7 @@ export function NewsList(props: OverlayContentProps) {
         className="parchment-box credits-text-box"
         style={{ backgroundImage: '' }}
       >
-        <div className="credits-text">
-          <SaferMarkdown>{`${newsList}`}</SaferMarkdown>
-        </div>
+        <div className="credits-text">{newsList}</div>
       </div>
       <button
         type="button"

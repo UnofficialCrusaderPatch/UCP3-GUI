@@ -51,3 +51,9 @@ export const NEWS_HIGHLIGHT_ATOM = atom((get) => {
 
   return highlights as News;
 });
+
+export const SCROLL_TO_NEWS_ATOM = atom<string>('');
+
+export function newsID(news: NewsElement) {
+  return `${news.meta.category}-${news.meta.timestamp.toISOString()}`;
+}

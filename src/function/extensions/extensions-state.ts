@@ -19,12 +19,14 @@ export type ExtensionsState = {
   installedExtensions: Extension[];
 
   /**
-   * Extensions that are currently active. Used to determine UI option display
+   * Extensions that are currently active. Used to determine UI option display.
+   * Sorted in display order
    */
   activeExtensions: Extension[];
 
   /**
    * Extensions that are explicitly set to active
+   * Sorted in display order
    */
   explicitlyActivatedExtensions: Extension[];
 

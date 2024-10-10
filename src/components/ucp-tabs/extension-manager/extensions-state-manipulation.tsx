@@ -10,13 +10,23 @@ const LOGGER = new Logger('extension-state.ts');
 
 export class DependencyError extends Error {}
 
+function setDisplayOrder(
+  ordering: Extension[],
+  extensions: Extension[],
+): Extension[] {
+  const orderingNames = ordering.map((e) => e.name);
+  // Get the extensions that were not defined in the ordering.
+  const extra = extensions.filter((e) => orderingNames.indexOf(e.name) === -1);
+  return [...extra, ...ordering];
+}
+
 function addExtensionToExplicityActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
-) {
+): ExtensionsState {
   const { tree } = extensionsState;
 
-  const newEAE = [...extensionsState.explicitlyActivatedExtensions, ext];
+  const newEAE = [ext, ...extensionsState.explicitlyActivatedExtensions];
 
   const tempTree = tree.copy();
 
@@ -35,20 +45,24 @@ function addExtensionToExplicityActivatedExtensions(
   }
 
   // Yoink ext to the top in extensions state here!
-  const allDependenciesInLoadOrder = [
-    ext,
-    ...solution.extensions.filter((e) => e !== ext).reverse(),
-  ];
+  // const allDependenciesInLoadOrder = [
+  //   ext,
+  //   ...solution.extensions.filter((e) => e !== ext).reverse(),
+  // ];
+  const allDependenciesInDisplayOrder = setDisplayOrder(
+    extensionsState.activeExtensions,
+    solution.extensions.toReversed(),
+  );
 
   // Filter out extensions with a different version than those that are now going to be activated
-  const depNames = new Set(allDependenciesInLoadOrder.map((e) => e.name));
+  const depNames = new Set(allDependenciesInDisplayOrder.map((e) => e.name));
   const installedExtensionsFilteredList =
     extensionsState.installedExtensions.filter((e) => !depNames.has(e.name));
 
   return {
     ...extensionsState,
     explicitlyActivatedExtensions: newEAE,
-    activeExtensions: allDependenciesInLoadOrder,
+    activeExtensions: allDependenciesInDisplayOrder,
     installedExtensions: installedExtensionsFilteredList,
   };
 }
@@ -56,7 +70,7 @@ function addExtensionToExplicityActivatedExtensions(
 async function removeExtensionFromExplicitlyActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
-) {
+): Promise<ExtensionsState> {
   const { tree } = extensionsState;
 
   const newEAE = extensionsState.explicitlyActivatedExtensions.filter(
@@ -111,7 +125,7 @@ async function removeExtensionFromExplicitlyActivatedExtensions(
     explicitlyActivatedExtensions: eae,
     activeExtensions: ae,
     installedExtensions: ie,
-  } as ExtensionsState;
+  };
 }
 
 function moveExtension(

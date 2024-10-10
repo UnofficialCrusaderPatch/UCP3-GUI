@@ -201,6 +201,14 @@ export default function ExtensionManager() {
                 ...activated,
               ]}
             </div>
+            <div
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                paddingLeft: '10px',
+              }}
+            >
+              <Message message="extensions.priority.note" />
+            </div>
             {editorState.state === 'inactive' ? (
               <ExtensionManagerToolbar />
             ) : (

@@ -43,6 +43,7 @@ import Logger from '../../../util/scripts/logging';
 import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
 import { asPercentage } from '../../../tauri/tauri-http';
 import { useMessage } from '../../general/message';
+import { NewsHighlights } from './news-highlights';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -437,6 +438,7 @@ export default function Overview() {
         toastTitle="overview.uninstall.toast.title"
       />
       <div id="decor" />
+      <NewsHighlights />
     </div>
   );
 }

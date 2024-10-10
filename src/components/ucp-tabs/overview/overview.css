@@ -63,7 +63,7 @@
 
 .overview__text-button {
   height: 40px;
-  line-height: 0;
+  /* line-height: 0; */
   min-width: 100px;
   width: 40%;
   vertical-align: middle;

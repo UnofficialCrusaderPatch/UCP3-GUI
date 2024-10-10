@@ -52,3 +52,8 @@ export const CONFIG_IGNORE_ERRORS = atomWithStorage(
   'configMerging.ignoreErrors',
   false,
 );
+
+export const HIDDEN_NEWS_HIGHLIGHTS_ATOM = atomWithStorage<string[]>(
+  'news.highlights.hidden',
+  [],
+);

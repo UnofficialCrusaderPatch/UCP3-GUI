@@ -5,6 +5,7 @@ import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
 import CreditsButton from './credits/credits-button';
 import { RestartButton } from './restart/restart-button';
 import LanguageSelect from './language-select/language-select';
+import { NewsButton } from './news/news-button';
 
 // eslint-disable-next-line import/prefer-default-export
 export function TopBar() {
@@ -14,6 +15,8 @@ export function TopBar() {
       className="top-bar"
       {...{ inert: overlayActive ? '' : undefined }} // inert is not yet supported by React
     >
+      <NewsButton />
+      <span className="mx-1" />
       <CreditsButton />
       <span className="mx-1" />
       <RestartButton />

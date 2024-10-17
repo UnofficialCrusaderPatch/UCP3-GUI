@@ -43,6 +43,7 @@ import {
   GAME_FOLDER_ATOM,
   reloadCurrentGameFolder,
 } from '../../../function/game-folder/game-folder-interface';
+import { NewsHighlights } from './news-highlights';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -435,6 +436,7 @@ export default function Overview() {
         toastTitle="overview.uninstall.toast.title"
       />
       <div id="decor" />
+      <NewsHighlights />
     </div>
   );
 }

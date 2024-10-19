@@ -1,12 +1,14 @@
 import { atom } from 'jotai';
+import { Atom } from 'jotai/vanilla';
 import {
   basename,
   onFsExists,
   scanFileForBytes,
 } from '../../tauri/tauri-files';
-import { EXTREME_PATH_ATOM, VANILLA_PATH_ATOM } from './game-path';
+import EXE_PATHS_ATOM from './game-path';
 import { ToastType, makeToast } from '../../components/toasts/toasts-display';
 import { showModalOk } from '../../components/modals/modal-ok';
+import { GameDataWrapper } from './game-data';
 
 const UCP2_MARK = '.ucp';
 const BYTES_TO_SCAN = 1000;
@@ -49,10 +51,14 @@ async function checkIfUCP2Installed(path: string) {
   return ucp2Present;
 }
 
-export const VANILLA_UCP2_ATOM = atom(async (get) =>
-  checkIfUCP2Installed(await get(VANILLA_PATH_ATOM)),
+const UCP2_STATE_ATOM: Atom<Promise<GameDataWrapper<boolean>>> = atom(
+  async (get) => {
+    const exePaths = await get(EXE_PATHS_ATOM);
+    return {
+      vanilla: await checkIfUCP2Installed(exePaths.vanilla),
+      extreme: await checkIfUCP2Installed(exePaths.extreme),
+    };
+  },
 );
 
-export const EXTREME_UCP2_ATOM = atom(async (get) =>
-  checkIfUCP2Installed(await get(EXTREME_PATH_ATOM)),
-);
+export default UCP2_STATE_ATOM;

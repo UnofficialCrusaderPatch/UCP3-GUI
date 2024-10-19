@@ -218,8 +218,8 @@ class VersionRange {
     return new VersionRange({
       minimum: newMinimum || this.minimum,
       maximum: newMaximum || this.maximum,
-      exact: undefined || this.exact,
-      not: undefined || this.not,
+      exact: this.exact,
+      not: this.not,
       minimumInclusive: o.minimumInclusive,
       maximumInclusive: o.maximumInclusive,
     });

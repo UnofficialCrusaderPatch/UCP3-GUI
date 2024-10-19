@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file */
 import { BinaryFileContents } from '@tauri-apps/api/fs';
-import { showError } from '../../tauri/tauri-dialog';
 import {
   loadZipReader,
   closeZipReader,
@@ -17,15 +16,15 @@ import {
   getZipReaderNumberOfEntries,
   getZipReaderEntryNames,
 } from '../../tauri/tauri-invoke';
+import Logger from '../scripts/logging';
+
+const LOGGER = new Logger('zip-handler.ts');
 
 export class ZipReader {
   // do not change, handle like const!
   static #READER_GC_REGISTRY = new FinalizationRegistry((id: number) => {
     closeZipReader(id).catch((err) =>
-      showError(
-        `Error cleaning up not closed zip reader:\n${err}`,
-        'Zip Reader',
-      ),
+      LOGGER.msg('Error cleaning up not closed zip reader:\n{}', err).error(),
     );
   });
 
@@ -91,10 +90,7 @@ export class ZipWriter {
   // do not change, handle like const!
   static #WRITER_GC_REGISTRY = new FinalizationRegistry((id: number) => {
     closeZipWriter(id).catch((err) =>
-      showError(
-        `Error cleaning up not closed zip writer:\n${err}`,
-        'Zip Writer',
-      ),
+      LOGGER.msg('Error cleaning up not closed zip writer:\n{}', err).error(),
     );
   });
 

@@ -8,8 +8,8 @@ import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { openFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { installExtension } from '../../../../function/extensions/installation/install-module';
-import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { ToastType, makeToast } from '../../../toasts/toasts-display';
+import { reloadCurrentGameFolder } from '../../../../function/game-folder/game-folder-interface';
 
 const LOGGER = new Logger('install-extensions-button.tsx');
 
@@ -107,7 +107,7 @@ export function InstallExtensionButton() {
             message: 'The GUI will now reload.',
           });
 
-          reloadCurrentWindow();
+          reloadCurrentGameFolder();
         } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',

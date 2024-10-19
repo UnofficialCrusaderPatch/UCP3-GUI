@@ -8,7 +8,7 @@ use std::io::Write;
 use std::str::FromStr;
 use std::sync::Mutex;
 
-use log::{debug, info, Level, LevelFilter};
+use log::{debug, info, warn, Level, LevelFilter};
 use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
 use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
 use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
@@ -165,11 +165,6 @@ fn init_logging<R: Runtime>() -> Handle {
     handle
 }
 
-fn get_level_or_default_from_string(level_as_string: &str) -> LevelFilter {
-    LevelFilter::from_str(level_as_string.to_uppercase().as_str())
-        .unwrap_or_else(|_err| LevelFilter::from_str(LOG_LEVEL_DEFAULT).unwrap())
-}
-
 // copied, since "from_usize" are not public
 fn get_level_from_usize(level_number: usize) -> Result<Level, String> {
     let level = match level_number {
@@ -183,16 +178,14 @@ fn get_level_from_usize(level_number: usize) -> Result<Level, String> {
     Ok(level)
 }
 
-pub fn set_root_log_level_with_string<R: Runtime>(
-    app_handle: &AppHandle<R>,
-    config_handle: &Handle,
-    level_as_string: &str,
-) {
-    set_root_log_level(
-        app_handle,
-        config_handle,
-        get_level_or_default_from_string(level_as_string),
-    );
+pub fn get_level_or_default_from_string(level_as_string: &str) -> LevelFilter {
+    match LevelFilter::from_str(level_as_string.to_uppercase().as_str()) {
+        Ok(level) => level,
+        Err(err) => {
+            warn!("Received invalid log level: {}", err);
+            LevelFilter::from_str(LOG_LEVEL_DEFAULT).unwrap()
+        }
+    }
 }
 
 pub fn set_root_log_level<R: Runtime>(

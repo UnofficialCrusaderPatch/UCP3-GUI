@@ -4,7 +4,6 @@
 
 import { TauriEvent } from '@tauri-apps/api/event';
 import { appWindow } from '@tauri-apps/api/window';
-import { showError } from './tauri-dialog';
 
 class TauriEventHandler {
   intern_funcs: (() => void | Promise<void>)[] = [];
@@ -39,9 +38,7 @@ class TauriEventHandler {
 
   registerListener(func: () => void | Promise<void>): boolean {
     if (this.intern_getFuncIndex(func) > -1) {
-      showError(
-        `The following function was already registered for ${this.intern_handledEvent}:\n\n${func}`,
-      );
+      // already registered
       return false;
     }
     this.intern_funcs.push(func);
@@ -85,9 +82,7 @@ export function registerTauriEventListener(
   }
 
   if (tauriEvent === TauriEvent.WINDOW_DESTROYED) {
-    showError(
-      `The event ${tauriEvent} will not be noticed by the same window.`,
-    );
+    // The event will not be noticed by the same window.
     return false;
   }
 

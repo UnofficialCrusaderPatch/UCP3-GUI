@@ -18,11 +18,11 @@ import {
 } from '../../../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
-import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { getStore } from '../../../../hooks/jotai/base';
 import { appendSystemDependencyStatements } from '../../../../function/extensions/discovery/system-dependencies';
 import { UCP_PLUGINS_FOLDER } from '../../../../function/global/constants/file-constants';
 import Message from '../../../general/message';
+import { reloadCurrentGameFolder } from '../../../../function/game-folder/game-folder-interface';
 
 export async function createPluginConfigFromCurrentState() {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
@@ -130,7 +130,7 @@ function ExportAsPluginButton(
           });
 
           if (confirmed) {
-            reloadCurrentWindow();
+            reloadCurrentGameFolder();
           }
         } catch (e: unknown) {
           await showModalOk({

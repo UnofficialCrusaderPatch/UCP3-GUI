@@ -3,7 +3,7 @@ import './top-bar.css';
 import { useAtomValue } from 'jotai';
 import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
 import CreditsButton from './credits/credits-button';
-import { RestartButton } from './restart/restart-button';
+import { ReloadButton } from './restart/reload-button';
 import LanguageSelect from './language-select/language-select';
 import { NewsButton } from './news/news-button';
 
@@ -19,7 +19,7 @@ export function TopBar() {
       <span className="mx-1" />
       <CreditsButton />
       <span className="mx-1" />
-      <RestartButton />
+      <ReloadButton />
       <LanguageSelect />
     </div>
   );

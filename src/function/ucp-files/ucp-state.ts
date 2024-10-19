@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-new-wrappers */
 import { atom } from 'jotai';
 import { loadable } from 'jotai/utils';
 import { copyFile, resolvePath } from '../../tauri/tauri-files';
@@ -5,7 +7,6 @@ import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import Result from '../../util/structs/result';
 import { getHexHashOfFile } from '../../util/scripts/hash';
 import Logger from '../../util/scripts/logging';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/game-folder-interface';
 import {
   BINK_FILENAME,
   REAL_BINK_FILENAME,
@@ -13,6 +14,7 @@ import {
 } from '../global/constants/file-constants';
 import { showModalOk } from '../../components/modals/modal-ok';
 import { MessageType } from '../../localization/localization';
+import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/game-folder-interface';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 
@@ -33,31 +35,27 @@ export const enum UCPState {
   UNKNOWN,
 }
 
-async function getBinkPath(
-  gameFolder: string,
-  binkName: string,
-): Promise<string> {
+async function getBinkPath(gameFolder: string, binkName: string) {
   if (!gameFolder) {
     return '';
   }
-
   return resolvePath(gameFolder, binkName);
 }
 
-const BINK_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM), BINK_FILENAME),
-);
-const BINK_REAL_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM), REAL_BINK_FILENAME),
-);
-const BINK_UCP_PATH_ATOM = atom((get) =>
-  getBinkPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM), UCP_BINK_FILENAME),
-);
+const BINK_PATHS_ATOM = atom(async (get) => {
+  const gameFolder = (await get(ASYNC_GAME_FOLDER_ATOM)).valueOf();
+  return {
+    base: await getBinkPath(gameFolder, BINK_FILENAME),
+    real: await getBinkPath(gameFolder, REAL_BINK_FILENAME),
+    ucp: await getBinkPath(gameFolder, UCP_BINK_FILENAME),
+  };
+});
 
 export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
-  const binkPath = await get(BINK_PATH_ATOM);
-  const binkRealPath = await get(BINK_REAL_PATH_ATOM);
-  const binkUcpPath = await get(BINK_UCP_PATH_ATOM);
+  const binkPaths = await get(BINK_PATHS_ATOM);
+  const binkPath = binkPaths.base;
+  const binkRealPath = binkPaths.real;
+  const binkUcpPath = binkPaths.ucp;
 
   if (!binkPath || !binkRealPath || !binkUcpPath) {
     return UCPState.UNKNOWN;
@@ -134,16 +132,14 @@ export const UCP_STATE_ATOM = atomWithRefresh(async (get) => {
 export const LOADABLE_UCP_STATE_ATOM = loadable(UCP_STATE_ATOM);
 
 export async function createRealBink(): Promise<Result<void, MessageType>> {
+  const binkPaths = await getStore().get(BINK_PATHS_ATOM);
   switch (await getStore().get(UCP_STATE_ATOM)) {
     case UCPState.WRONG_FOLDER:
       return Result.err('bink.missing');
     case UCPState.BINK_REAL_COPY_MISSING: // safe, since verified
     case UCPState.NOT_INSTALLED: {
       const copyResult = (
-        await copyFile(
-          await getStore().get(BINK_PATH_ATOM),
-          await getStore().get(BINK_REAL_PATH_ATOM),
-        )
+        await copyFile(binkPaths.base, binkPaths.real)
       ).mapErr((error) => ({ key: 'bink.copy.error', args: { error } }));
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
@@ -158,6 +154,7 @@ export async function createRealBink(): Promise<Result<void, MessageType>> {
 }
 
 export async function activateUCP(): Promise<Result<void, MessageType>> {
+  const binkPaths = await getStore().get(BINK_PATHS_ATOM);
   const ucpState = await getStore().get(UCP_STATE_ATOM);
   switch (ucpState) {
     case UCPState.WRONG_FOLDER:
@@ -177,10 +174,7 @@ export async function activateUCP(): Promise<Result<void, MessageType>> {
       if (ucpState === UCPState.BINK_REAL_COPY_MISSING) {
         // copy bink to missing real bink, assuming this case installed manually
         const ucpBinkCopyResult = (
-          await copyFile(
-            await getStore().get(BINK_PATH_ATOM),
-            await getStore().get(BINK_REAL_PATH_ATOM),
-          )
+          await copyFile(binkPaths.base, binkPaths.real)
         ).mapErr((error) => ({
           key: 'bink.copy.error',
           args: { error },
@@ -190,29 +184,23 @@ export async function activateUCP(): Promise<Result<void, MessageType>> {
         }
       }
 
-      const copyResult = (
-        await copyFile(
-          await getStore().get(BINK_UCP_PATH_ATOM),
-          await getStore().get(BINK_PATH_ATOM),
-        )
-      ).mapErr((error) => ({
-        key: 'bink.copy.ucp.error',
-        args: { error },
-      }));
+      const copyResult = (await copyFile(binkPaths.ucp, binkPaths.base)).mapErr(
+        (error) => ({
+          key: 'bink.copy.ucp.error',
+          args: { error },
+        }),
+      );
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }
     case UCPState.BINK_UCP_MISSING: {
       // copy bink to missing ucp bink, assuming this case installed manually
-      const copyResult = (
-        await copyFile(
-          await getStore().get(BINK_PATH_ATOM),
-          await getStore().get(BINK_UCP_PATH_ATOM),
-        )
-      ).mapErr((error) => ({
-        key: 'bink.copy.error',
-        args: { error },
-      }));
+      const copyResult = (await copyFile(binkPaths.base, binkPaths.ucp)).mapErr(
+        (error) => ({
+          key: 'bink.copy.error',
+          args: { error },
+        }),
+      );
       getStore().set(UCP_STATE_ATOM);
       return copyResult;
     }
@@ -222,6 +210,7 @@ export async function activateUCP(): Promise<Result<void, MessageType>> {
 }
 
 export async function deactivateUCP(): Promise<Result<void, MessageType>> {
+  const binkPaths = await getStore().get(BINK_PATHS_ATOM);
   const ucpState = await getStore().get(UCP_STATE_ATOM);
   switch (ucpState) {
     case UCPState.WRONG_FOLDER:
@@ -241,10 +230,7 @@ export async function deactivateUCP(): Promise<Result<void, MessageType>> {
       if (ucpState === UCPState.BINK_UCP_MISSING) {
         // copy bink to missing ucp bink, assuming this case installed manually
         const ucpBinkCopyResult = (
-          await copyFile(
-            await getStore().get(BINK_PATH_ATOM),
-            await getStore().get(BINK_UCP_PATH_ATOM),
-          )
+          await copyFile(binkPaths.base, binkPaths.ucp)
         ).mapErr((error) => ({
           key: 'bink.copy.error',
           args: { error },
@@ -255,10 +241,7 @@ export async function deactivateUCP(): Promise<Result<void, MessageType>> {
       }
 
       const copyResult = (
-        await copyFile(
-          await getStore().get(BINK_REAL_PATH_ATOM),
-          await getStore().get(BINK_PATH_ATOM),
-        )
+        await copyFile(binkPaths.real, binkPaths.base)
       ).mapErr((error) => ({
         key: 'bink.copy.real.error',
         args: { error },
@@ -269,10 +252,7 @@ export async function deactivateUCP(): Promise<Result<void, MessageType>> {
     case UCPState.BINK_REAL_COPY_MISSING: {
       // copy bink to missing real bink, assuming this case installed manually
       const copyResult = (
-        await copyFile(
-          await getStore().get(BINK_PATH_ATOM),
-          await getStore().get(BINK_REAL_PATH_ATOM),
-        )
+        await copyFile(binkPaths.base, binkPaths.real)
       ).mapErr((error) => ({
         key: 'bink.copy.error',
         args: { error },

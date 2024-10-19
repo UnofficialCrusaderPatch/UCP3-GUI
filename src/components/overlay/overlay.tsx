@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import './overlay.css';
 
-import { useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { atom, useAtom } from 'jotai';
 import { getStore } from '../../hooks/jotai/base';
 
@@ -13,7 +13,7 @@ export type OverlayContentProps<T = undefined> = {
 };
 export type OverlayContent<T = undefined> = (
   props: OverlayContentProps<T>,
-) => JSX.Element;
+) => ReactNode;
 
 const OVERLAY_CONTENT_ATOM = atom<OverlayConfig<any>>(null);
 
@@ -31,6 +31,17 @@ export function setOverlayContent<T>(
     allowOutsideClick,
     args,
   ]);
+}
+
+/**
+ * Only use for cases in which the overlay should be controlled via code from the outside.
+ */
+export function forceClearOverlayContent() {
+  getStore().set(OVERLAY_CONTENT_ATOM, null);
+}
+
+export function BlankOverlayContent() {
+  return null;
 }
 
 export function Overlay() {

@@ -9,14 +9,6 @@ import { useAtom, useAtomValue } from 'jotai';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import GameStarter from './game-starter/game-starter';
-import {
-  EXTREME_PATH_ATOM,
-  VANILLA_PATH_ATOM,
-} from '../../../function/game-files/game-path';
-import {
-  EXTREME_VERSION_ATOM,
-  VANILLA_VERSION_ATOM,
-} from '../../../function/game-files/game-version-state';
 import { createLaunchOptionFuncs } from './launch-options/launch-options';
 import FreeArgs from './launch-options/free-args';
 import FreeEnvs from './launch-options/free-envs';
@@ -25,14 +17,13 @@ import {
   UcpLogLevel,
 } from './launch-options/verbosity-args';
 import { CONFIG_DIRTY_STATE_ATOM } from '../common/buttons/config-serialized-state';
-import {
-  EXTREME_UCP2_ATOM,
-  VANILLA_UCP2_ATOM,
-} from '../../../function/game-files/game-ucp2-check';
 import GameDataPath from './launch-options/game-data-path';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { saveCurrentConfig } from '../common/save-config';
 import Message from '../../general/message';
+import UCP2_STATE_ATOM from '../../../function/game-files/game-ucp2-check';
+import GAME_VERSION_ATOM from '../../../function/game-files/game-version-state';
+import EXE_PATHS_ATOM from '../../../function/game-files/game-path';
 
 export default function Launch() {
   const internalArgs = useRef<Record<string, string[]>>({}).current;
@@ -54,10 +45,11 @@ export default function Launch() {
     <div className="launch__container flex-default">
       <div className="launch__boxes">
         <GameStarter
+          exeType="vanilla"
           imagePath={logoCrusaderVanilla}
-          pathAtom={VANILLA_PATH_ATOM}
-          versionAtom={VANILLA_VERSION_ATOM}
-          ucp2CheckAtom={VANILLA_UCP2_ATOM}
+          pathAtom={EXE_PATHS_ATOM}
+          versionAtom={GAME_VERSION_ATOM}
+          ucp2CheckAtom={UCP2_STATE_ATOM}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
           beforeLaunch={() => {
@@ -67,10 +59,11 @@ export default function Launch() {
           }}
         />
         <GameStarter
+          exeType="extreme"
           imagePath={logoCrusaderExtreme}
-          pathAtom={EXTREME_PATH_ATOM}
-          versionAtom={EXTREME_VERSION_ATOM}
-          ucp2CheckAtom={EXTREME_UCP2_ATOM}
+          pathAtom={EXE_PATHS_ATOM}
+          versionAtom={GAME_VERSION_ATOM}
+          ucp2CheckAtom={UCP2_STATE_ATOM}
           receiveArgs={receiveArgs}
           receiveEnvs={receiveEnvs}
           beforeLaunch={() => {

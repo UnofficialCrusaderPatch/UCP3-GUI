@@ -14,16 +14,12 @@ import {
   activateUCP,
   deactivateUCP,
 } from '../../../function/ucp-files/ucp-state';
-import { reloadCurrentWindow } from '../../../function/window-actions';
 
 import { openFileDialog } from '../../../tauri/tauri-dialog';
 import Result from '../../../util/structs/result';
 import { showModalOkCancel } from '../../modals/modal-ok-cancel';
 import { showModalOk } from '../../modals/modal-ok';
-import {
-  GAME_FOLDER_LOADED_ATOM,
-  useCurrentGameFolder,
-} from '../../../function/game-folder/utils';
+import { useCurrentGameFolder } from '../../../function/game-folder/utils';
 import RecentFolders from './recent-folders';
 import OverviewButton from './overview-button';
 import { ToastType } from '../../toasts/toasts-display';
@@ -43,6 +39,10 @@ import Logger from '../../../util/scripts/logging';
 import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
 import { asPercentage } from '../../../tauri/tauri-http';
 import { useMessage } from '../../general/message';
+import {
+  GAME_FOLDER_ATOM,
+  reloadCurrentGameFolder,
+} from '../../../function/game-folder/game-folder-interface';
 import { NewsHighlights } from './news-highlights';
 
 const LOGGER = new Logger('overview.tsx');
@@ -108,16 +108,14 @@ export default function Overview() {
           try {
             LOGGER.msg('check for updates and install').info();
 
-            const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
-
-            if (gameFolderState.state !== 'hasData') {
+            const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+            if (gameFolder === '') {
               createStatusToast(
                 ToastType.ERROR,
                 'Game folder in bad state. Cannot save update to disk.', // TODO: needs localization
               );
               return;
             }
-            const gameFolder = gameFolderState.data;
 
             createStatusToast(ToastType.INFO, 'ucp.version.check');
 
@@ -225,7 +223,7 @@ export default function Overview() {
               message: 'The GUI will now reload.',
             });
 
-            reloadCurrentWindow();
+            reloadCurrentGameFolder();
 
             createStatusToast(ToastType.SUCCESS, 'overview.update.success');
           } catch (e: unknown) {
@@ -275,7 +273,7 @@ export default function Overview() {
               // );
 
               if (confirmed) {
-                reloadCurrentWindow();
+                reloadCurrentGameFolder();
               }
             }
             zipInstallResult

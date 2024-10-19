@@ -27,13 +27,27 @@ export const BACKEND_LOG_LEVEL = {
 
 const INTERNAL_RECENT_FOLDERS_ATOM = atomWithRefresh(getGuiConfigRecentFolders);
 
+const INTERNAL_MOST_RECENT_FOLDER_ATOM = atomWithRefresh(async () => {
+  const folders = await getStore().get(INTERNAL_RECENT_FOLDERS_ATOM); // breaks relation
+  return folders.length > 0 ? folders[0] : undefined;
+});
+
 const INTERNAL_BACKEND_LOG_LEVEL_ATOM = atomWithRefresh(getGuiConfigLogLevel);
 
-const configUnlistenPromise = onGuiFileConfigChange(({ payload }) => {
+const configUnlistenPromise = onGuiFileConfigChange(async ({ payload }) => {
   switch (payload.event_type) {
-    case GUI_CONFIG_FILE_EVENT.RECENT_FOLDER:
+    case GUI_CONFIG_FILE_EVENT.RECENT_FOLDER: {
       getStore().set(INTERNAL_RECENT_FOLDERS_ATOM);
+      const folders = await getStore().get(INTERNAL_RECENT_FOLDERS_ATOM);
+      const newMostRecent = folders.length > 0 ? folders[0] : undefined;
+      const currentMostRecent = await getStore().get(
+        INTERNAL_MOST_RECENT_FOLDER_ATOM,
+      );
+      if (newMostRecent !== currentMostRecent) {
+        getStore().set(INTERNAL_MOST_RECENT_FOLDER_ATOM);
+      }
       break;
+    }
     case GUI_CONFIG_FILE_EVENT.LOG:
       getStore().set(INTERNAL_BACKEND_LOG_LEVEL_ATOM);
       break;
@@ -49,10 +63,9 @@ export const RECENT_FOLDERS_ATOM = atom((get) =>
   get(INTERNAL_RECENT_FOLDERS_ATOM),
 );
 
-export const MOST_RECENT_FOLDER_ATOM = atom(async (get) => {
-  const folders = await get(INTERNAL_RECENT_FOLDERS_ATOM);
-  return folders.length > 0 ? folders[0] : undefined;
-});
+export const MOST_RECENT_FOLDER_ATOM = atom((get) =>
+  get(INTERNAL_MOST_RECENT_FOLDER_ATOM),
+);
 
 // only returns selected folder if new, otherwise check return of most recent folder
 export function selectNewRecentGameFolder(

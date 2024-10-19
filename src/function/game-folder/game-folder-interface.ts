@@ -203,7 +203,9 @@ export async function initializeGameFolder(
 } // normal atoms
 
 /**
- * Return String wrapper objects to always generate updates.
+ * Async Atoms always seem to handle the resulting Promise as new unique object,
+ * so any dependency change will trigger an update. However, to handle derived cases, a
+ * String wrapper object is used to handle the folder the same in all places.
  * Be aware of this in case of comparisons!
  */
 export const ASYNC_GAME_FOLDER_ATOM = atomWithRefresh(async (get) => {

@@ -6,9 +6,11 @@ import './recent-folders.css';
 import { useAtomValue } from 'jotai';
 import { MouseEvent, useState } from 'react';
 import { unwrap } from 'jotai/utils';
-import Message from '../../general/message';
+import { TrashFill } from 'react-bootstrap-icons';
+import Message, { useMessage } from '../../general/message';
 import {
   RECENT_FOLDERS_ATOM,
+  removeFromRecentFolders,
   selectNewRecentGameFolder,
   selectRecentGameFolder,
 } from '../../../function/gui-settings/gui-file-config';
@@ -24,6 +26,8 @@ export default function RecentFolders() {
   const currentFolder = useAtomValue(GAME_FOLDER_ATOM).valueOf();
   const [showRecentFolders, setShowRecentFolders] = useState(false);
 
+  const localize = useMessage();
+
   // needs better loading site
   if (recentFolders.length === 0) {
     return (
@@ -33,7 +37,6 @@ export default function RecentFolders() {
     );
   }
 
-  // TODO: fix localization
   return (
     <div className="text-input">
       <Message message="select.folder" />
@@ -45,7 +48,11 @@ export default function RecentFolders() {
           readOnly
           role="button"
           onClick={() => selectNewRecentGameFolder(undefined, currentFolder)}
-          value={currentFolder.length > 0 ? currentFolder : ` Browse . . . `}
+          value={
+            currentFolder.length > 0
+              ? currentFolder
+              : localize('select.folder.browse')
+          }
         />
         <button
           type="button"
@@ -74,12 +81,14 @@ export default function RecentFolders() {
                   }
                 }}
               >
-                <div className="death90">{recentFolder}</div>
-                <input
+                <div className="recent-folders-text">{recentFolder}</div>
+                <button
+                  className="recent-folders-remove"
                   type="button"
-                  style={{ display: 'none' }}
-                  onClick={(event) => event.stopPropagation()}
-                />
+                  onClick={() => removeFromRecentFolders(recentFolder)}
+                >
+                  <TrashFill color="white" />
+                </button>
               </div>
             ))}
         </div>

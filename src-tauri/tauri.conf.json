@@ -59,9 +59,6 @@
         "assetScope": [
           "$RESOURCE/backgrounds/*"
         ]
-      },
-      "process": {
-        "relaunch": true
       }
     },
     "bundle": {

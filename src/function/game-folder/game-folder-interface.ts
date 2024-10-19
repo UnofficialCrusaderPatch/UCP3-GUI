@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-new-wrappers */
 
 import { exists } from '@tauri-apps/api/fs';
@@ -30,6 +32,11 @@ import { discoverExtensions } from '../extensions/discovery/discovery';
 import { buildExtensionConfigurationDB } from '../../components/ucp-tabs/extension-manager/extension-configuration';
 import { saveCurrentConfig } from '../../components/ucp-tabs/common/save-config';
 import { MOST_RECENT_FOLDER_ATOM } from '../gui-settings/gui-file-config';
+import {
+  BlankOverlayContent,
+  forceClearOverlayContent,
+  setOverlayContent,
+} from '../../components/overlay/overlay';
 
 const LOGGER = new Logger('game-folder-interface.ts');
 
@@ -236,6 +243,49 @@ export const GAME_FOLDER_ATOM = unwrap(
   (prev) => prev ?? GAME_FOLDER_EMPTY,
 );
 
+async function waitForNewFolderSet(oldGameFolderObject: String) {
+  let waitForReload = true;
+  while (waitForReload) {
+    waitForReload = await new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(oldGameFolderObject === getStore().get(GAME_FOLDER_ATOM));
+      }, 100);
+    });
+  }
+}
+
+/**
+ * Needs to receive a function that changes the game folder in some way.
+ * If return is null, nothing happens, if the folder is equal to the current,
+ * it will reload. In any other case, the given function needs to return the expected new folder and
+ * this function will wait until the game atom updates, so be sure what you are doing if this used.
+ */
+export async function updateCurrentGameFolder(
+  gameFolderUpdateFunction: () => Promise<null | string>,
+) {
+  const oldGameFolderObject = getStore().get(GAME_FOLDER_ATOM);
+  setOverlayContent(BlankOverlayContent);
+  try {
+    const newFolder = await gameFolderUpdateFunction();
+    if (!newFolder) {
+      return;
+    }
+
+    // failsafe, in case this happens for some reason
+    if (newFolder === oldGameFolderObject.valueOf()) {
+      getStore().set(ASYNC_GAME_FOLDER_ATOM);
+    }
+    await waitForNewFolderSet(oldGameFolderObject);
+  } finally {
+    forceClearOverlayContent();
+  }
+}
+
 export function reloadCurrentGameFolder() {
-  getStore().set(ASYNC_GAME_FOLDER_ATOM);
+  updateCurrentGameFolder(async () => {
+    const currentGameFolderString = getStore().get(GAME_FOLDER_ATOM);
+    return currentGameFolderString != null
+      ? currentGameFolderString.valueOf()
+      : null;
+  });
 }

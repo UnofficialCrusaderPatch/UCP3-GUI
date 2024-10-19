@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
@@ -14,7 +15,10 @@ import {
   selectNewRecentGameFolder,
   selectRecentGameFolder,
 } from '../../../function/gui-settings/gui-file-config';
-import { GAME_FOLDER_ATOM } from '../../../function/game-folder/game-folder-interface';
+import {
+  GAME_FOLDER_ATOM,
+  updateCurrentGameFolder,
+} from '../../../function/game-folder/game-folder-interface';
 
 const UNWRAPPED_RECENT_FOLDERS = unwrap(
   RECENT_FOLDERS_ATOM,
@@ -23,8 +27,10 @@ const UNWRAPPED_RECENT_FOLDERS = unwrap(
 
 export default function RecentFolders() {
   const recentFolders = useAtomValue(UNWRAPPED_RECENT_FOLDERS);
-  const currentFolder = useAtomValue(GAME_FOLDER_ATOM).valueOf();
+  const currentFolderStringObject = useAtomValue(GAME_FOLDER_ATOM);
   const [showRecentFolders, setShowRecentFolders] = useState(false);
+
+  const currentFolder = currentFolderStringObject.valueOf();
 
   const localize = useMessage();
 
@@ -47,7 +53,11 @@ export default function RecentFolders() {
           className="form-control"
           readOnly
           role="button"
-          onClick={() => selectNewRecentGameFolder(undefined, currentFolder)}
+          onClick={() =>
+            updateCurrentGameFolder(() =>
+              selectNewRecentGameFolder(undefined, currentFolder),
+            )
+          }
           value={
             currentFolder.length > 0
               ? currentFolder
@@ -73,10 +83,12 @@ export default function RecentFolders() {
                 className="file-selector"
                 role="button"
                 title={recentFolder}
-                onClick={(event: MouseEvent<HTMLDivElement>) => {
+                onClick={async (event: MouseEvent<HTMLDivElement>) => {
                   const inputTarget = event.target as HTMLDivElement;
                   if (inputTarget.textContent) {
-                    selectRecentGameFolder(inputTarget.textContent as string);
+                    await updateCurrentGameFolder(() =>
+                      selectRecentGameFolder(inputTarget.textContent as string),
+                    );
                     setShowRecentFolders(false);
                   }
                 }}

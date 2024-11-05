@@ -65,7 +65,7 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
       <Modal.Footer>
         <Button variant="secondary" onClick={internalHandleClose}>
           <Message
-            message={cancel !== undefined ? ok : 'cancel'}
+            message={cancel !== undefined ? cancel : 'cancel'}
             alternativeSource={alternativeMessageSource}
           />
         </Button>

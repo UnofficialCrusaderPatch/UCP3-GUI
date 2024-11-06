@@ -17,6 +17,7 @@ import {
 } from './description/fetching';
 import { ContentFilterButton } from './buttons/filter-button';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
+import { ExtensionFilterButton } from './buttons/extension-filter-button';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -131,6 +132,7 @@ export function ContentManager() {
             </h4>
             <div className="extension-manager-control__box__header__buttons">
               {restartElement}
+              <ExtensionFilterButton />
               <ContentFilterButton />
             </div>
           </div>

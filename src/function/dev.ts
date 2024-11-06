@@ -35,6 +35,7 @@ const dev = {
   upload,
   scanFileForBytes,
   joinPaths,
+  LOGGER,
 };
 
 (globalThis as Record<string, unknown>).dev = dev;

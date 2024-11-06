@@ -14,9 +14,12 @@ pub const PATH_MATCH_OPTIONS: MatchOptions = MatchOptions {
 
 pub const NUMBER_OF_RECENT_FOLDERS: usize = 10;
 pub const CONFIG_FILE_NAME: &str = "config.json";
-pub const MESSAGE_TITLE: &str = "GUI-Configuration";
 
 pub const LOG_LEVEL_DEFAULT: &str = "INFO";
+
+pub const FILE_CONFIG_EVENT: &str = "file-config";
+pub const FILE_CONFIG_EVENT_RECENT_FOLDER_CHANGED: &str = "RECENT_FOLDER";
+pub const FILE_CONFIG_EVENT_LOG_CHANGED: &str = "LOG";
 
 // logging
 

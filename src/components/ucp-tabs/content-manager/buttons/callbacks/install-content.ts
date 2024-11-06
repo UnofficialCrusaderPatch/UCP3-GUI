@@ -1,6 +1,5 @@
 import { createDir } from '@tauri-apps/api/fs';
 import { ContentElement } from '../../../../../function/content/types/content-element';
-import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { download } from '../../../../../tauri/tauri-http';
 import Logger from '../../../../../util/scripts/logging';
@@ -19,6 +18,7 @@ import {
   OkayContentMutationResult,
   DownloadAndInstallContentResult,
 } from '../../types/content-store-mutation-result';
+import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-interface';
 
 const LOGGER = new Logger('download-button.tsx');
 
@@ -50,7 +50,7 @@ export async function downloadAndInstallContent(
 
   const src = zipSources.at(0)!;
 
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+  const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
 
   const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
 
@@ -138,9 +138,9 @@ export async function downloadAndInstallContent(
         zapRootFolder: src.method === 'github-zip',
       });
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     /* todo:locale: */
-    const msg = e.toString();
+    const msg = String(e);
     setStatus({
       action: 'error',
       message: msg,
@@ -214,7 +214,7 @@ export async function installOnlineContent(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();
 
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+  const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
 
   const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
   if (!(await onFsExists(cacheDir))) {
@@ -261,9 +261,9 @@ export async function installOnlineContent(
         const result = await downloadAndInstallContent(ce);
         if (onSettled) onSettled(result);
         return result;
-      } catch (e: any) {
+      } catch (e: unknown) {
         /* todo:locale: */
-        const msg = e.toString();
+        const msg = String(e);
         setStatus({
           action: 'error',
           message: msg,

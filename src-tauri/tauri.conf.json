@@ -35,7 +35,6 @@
         "all": true
       },
       "dialog": {
-        "all": true,
         "open": true,
         "save": true
       },
@@ -60,9 +59,6 @@
         "assetScope": [
           "$RESOURCE/backgrounds/*"
         ]
-      },
-      "process": {
-        "relaunch": true
       }
     },
     "bundle": {

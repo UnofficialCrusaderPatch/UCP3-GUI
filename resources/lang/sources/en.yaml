@@ -162,6 +162,8 @@ select.folder: "Browse to a Stronghold Crusader installation folder to get start
 select.folder.browse: "Browse..."
 select.language: "Select the language for the GUI:"
 store.content.status.change: "This content's status changed. Please restart the GUI to finalize."
+store.filter.condensed: "Full / Condensed list"
+store.filter.installed: "Show / Hide installed content"
 title: "Welcome to Unofficial Crusader Patch 3"
 titlebar.alt.close: "Close"
 titlebar.alt.icon: "Icon"

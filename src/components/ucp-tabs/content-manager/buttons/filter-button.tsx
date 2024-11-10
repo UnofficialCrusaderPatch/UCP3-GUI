@@ -1,9 +1,13 @@
 import { atom, useAtom, useSetAtom } from 'jotai';
-import { Funnel, FunnelFill } from 'react-bootstrap-icons';
+import { Globe2 } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 
 export const UI_FILTER_SETTING_ATOM = atom(true);
 
+/**
+ * ContentFilterButton is the internet only filter button
+ * @returns ContentFilterButton
+ */
 // eslint-disable-next-line import/prefer-default-export
 export function ContentFilterButton() {
   const [showOnlineContentOnly, setShowOnlineContentOnly] = useAtom(
@@ -20,13 +24,17 @@ export function ContentFilterButton() {
       }}
       onMouseEnter={() => {
         /* todo:locale: */
-        setStatusBarMessage('Show / hide installed content');
+        setStatusBarMessage('store.filter.installed');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
       }}
     >
-      {showOnlineContentOnly ? <FunnelFill /> : <Funnel />}
+      {showOnlineContentOnly ? (
+        <Globe2 />
+      ) : (
+        <Globe2 style={{ opacity: 0.25 }} />
+      )}
     </button>
   );
 }

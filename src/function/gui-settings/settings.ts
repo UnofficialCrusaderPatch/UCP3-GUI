@@ -11,6 +11,10 @@ export const SHOW_ALL_EXTENSIONS_ATOM = atomWithStorage(
   'guiShowAllExtensions',
   true,
 );
+export const STORE_SHOW_ALL_EXTENSION_TYPES_ATOM = atomWithStorage(
+  'storeShowAllExtensionTypes',
+  ['module', 'plugin'],
+);
 export const ADVANCED_MODE_ATOM = atomWithStorage('guiAdvancedMode', false);
 export const CREATOR_MODE_ATOM = atomWithStorage('guiCreatorMode', false);
 export const RECENT_FOLDERS_ATOM = atomWithStorage(

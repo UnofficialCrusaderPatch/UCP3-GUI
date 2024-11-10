@@ -8,7 +8,7 @@ import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { ContentInstallationStatus } from './downloads/download-progress';
 import { UCP_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
-import { SHOW_ALL_EXTENSIONS_ATOM } from '../../../../function/gui-settings/settings';
+import { STORE_SHOW_ALL_EXTENSION_TYPES_ATOM } from '../../../../function/gui-settings/settings';
 import { UI_FILTER_SETTING_ATOM } from '../buttons/filter-button';
 import {
   ACTIVE_EXTENSIONS_ID_ATOM,
@@ -172,8 +172,8 @@ export const filteredContentElementsAtom = atom((get) =>
     )
     .filter(
       (ce) =>
-        ce.definition.type === 'plugin' ||
-        get(SHOW_ALL_EXTENSIONS_ATOM) === true,
+        get(STORE_SHOW_ALL_EXTENSION_TYPES_ATOM).indexOf(ce.definition.type) !==
+        -1,
     )
     .sort((a, b) => a.definition.name.localeCompare(b.definition.name)),
 );

@@ -1,38 +1,20 @@
-import { useState } from 'react';
-import { LaunchOptions } from './launch-options';
+import { useAtom } from 'jotai';
 import Message from '../../../general/message';
+import {
+  LAUNCH_OPTION_LOG_LEVEL_CONSOLE_ATOM,
+  LOG_LEVELS,
+} from './option-log-level-console';
+import { LAUNCH_OPTION_LOG_LEVEL_FILE_ATOM } from './option-log-level-file';
 
-const LOG_LEVELS: Record<string, string> = {
-  DEFAULT: '',
-  FATAL: '-3',
-  ERROR: '-2',
-  WARNING: '-1',
-  INFO: '0',
-  DEBUG: '1',
-  VERBOSE: '2',
-};
+function LogLevelSetting(props: { label: string }) {
+  const { label } = props;
 
-const LOG_LEVELS_INVERSE: Record<string, string> = {
-  '': 'DEFAULT',
-  '-3': 'FATAL',
-  '-2': 'ERROR',
-  '-1': 'WARNING',
-  '0': 'INFO',
-  '1': 'DEBUG',
-  '2': 'VERBOSE',
-};
+  const fileLogLevel = useAtom(LAUNCH_OPTION_LOG_LEVEL_CONSOLE_ATOM);
+  const consoleLogLevel = useAtom(LAUNCH_OPTION_LOG_LEVEL_FILE_ATOM);
+  const [logLevel, setLogLevel] =
+    label === 'ucp.log.level' ? fileLogLevel : consoleLogLevel;
 
-const UCP_VERBOSITY_ARG = '--ucp-verbosity';
-const UCP_CONSOLE_VERBOSITY_ARG = '--ucp-console-verbosity';
-
-function LogLevelSetting(
-  props: LaunchOptions & { arg: string; label: string },
-) {
-  const { arg, label, getArgs, setArgs } = props;
-
-  const [logLevel, setLogLevel] = useState(
-    LOG_LEVELS_INVERSE[getArgs().at(1) ?? ''],
-  );
+  if (logLevel === '') setLogLevel('DEFAULT');
 
   return (
     <div className="launch__options__box--ucp-log-level">
@@ -44,10 +26,6 @@ function LogLevelSetting(
         onChange={(event) => {
           const newLevel = event.currentTarget.value;
           setLogLevel(newLevel);
-
-          const newArgs =
-            newLevel === 'DEFAULT' ? [] : [arg, LOG_LEVELS[newLevel]];
-          setArgs(newArgs);
         }}
       >
         {Object.keys(LOG_LEVELS).map((level) => (
@@ -60,18 +38,14 @@ function LogLevelSetting(
   );
 }
 
-export function UcpLogLevel(props: LaunchOptions) {
+export function UcpFileLogLevel() {
   return LogLevelSetting({
-    ...props,
-    arg: UCP_VERBOSITY_ARG,
     label: 'ucp.log.level',
   });
 }
 
-export function UcpConsoleLogLevel(props: LaunchOptions) {
+export function UcpConsoleLogLevel() {
   return LogLevelSetting({
-    ...props,
-    arg: UCP_CONSOLE_VERBOSITY_ARG,
     label: 'ucp.log.level.console',
   });
 }

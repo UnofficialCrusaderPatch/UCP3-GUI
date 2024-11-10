@@ -31,7 +31,24 @@
     margin: 0;
     vertical-align: center;
   }
+
   > select {
+    margin-left: auto;
+  }
+}
+
+.launch__options__box--ucp-checkbox {
+  width: 50%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+
+  > h5 {
+    margin: 0;
+    vertical-align: center;
+  }
+
+  > input {
     margin-left: auto;
   }
 }

@@ -1,7 +1,9 @@
 /* eslint-disable react/require-default-props */
 import { FormEvent, useEffect, useState } from 'react';
-import { LaunchOptions } from './launch-options';
+import { useAtom } from 'jotai';
+import { FloppyFill } from 'react-bootstrap-icons';
 import Message from '../../../general/message';
+import { LAUNCH_OPTION_ENVIRONMENT_VARIABLES_ATOM } from './option-environment-variables';
 
 function FreeEnvsForm(props: {
   handleEnvsChange: (e: FormEvent) => void;
@@ -55,15 +57,19 @@ function FreeEnvsForm(props: {
           setValue(event.target.value);
         }}
       />
-      <button type="submit" />
+      <button type="submit">
+        <FloppyFill />
+      </button>
     </form>
   );
 }
 
-export default function FreeEnvs(props: LaunchOptions) {
-  const { getEnvs, setEnvs } = props;
+export default function FreeEnvs() {
+  const [internalEnvs, setInternalEnvs] = useAtom(
+    LAUNCH_OPTION_ENVIRONMENT_VARIABLES_ATOM,
+  );
 
-  const [internalEnvs, setInternalEnvs] = useState(getEnvs());
+  if (internalEnvs === undefined) setInternalEnvs({});
 
   const handleEnvsChange = (e: FormEvent) => {
     e.preventDefault();
@@ -86,7 +92,7 @@ export default function FreeEnvs(props: LaunchOptions) {
     if (keyAttribute && keyAttribute !== key) {
       delete newEnvs[keyAttribute];
     }
-    setEnvs(newEnvs, setInternalEnvs);
+    setInternalEnvs(newEnvs);
   };
 
   return (

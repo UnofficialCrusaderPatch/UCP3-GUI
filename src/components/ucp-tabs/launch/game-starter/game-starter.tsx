@@ -132,16 +132,22 @@ function GameStarterButton(props: GameStarterProps) {
     try {
       if (dirty && firstTimeUse) {
         const answer = await showModalOkCancel({
-          title: 'Continue?',
-          message:
-            'There are changes in your config that have not been applied yet, hit Apply to apply them. You can find this button in the Content tab.\n\nContinue with starting the game without these changes?',
+          title: 'launch.unsaved.continue',
+          message: 'launch.unsaved.warning',
         });
 
         if (!answer) return;
       }
 
       setStarting(true);
-      await osOpenProgram(path.valueOf(), receiveArgs?.(), receiveEnvs?.());
+      const p = path.valueOf();
+      const args = receiveArgs?.();
+      const envs = receiveEnvs?.();
+
+      LOGGER.msg(
+        `Launching program: ${p} ${args?.join(' ')} with env variables:\n${JSON.stringify(envs, undefined, 2)}`,
+      ).info();
+      await osOpenProgram(p, args, envs);
       // the game start takes a while, but we not observe it, so we simulate loading a bit instead
       await sleep(2000);
     } catch (e) {

@@ -1,4 +1,5 @@
 import { atomWithStorage } from 'jotai/utils';
+import { LaunchSettings } from './LaunchSettings';
 
 // See:  https://jotai.org/docs/utilities/storage
 // The below code would set up the storage to a certain file in the GUI's AppData directory.
@@ -57,4 +58,22 @@ export const CONFIG_IGNORE_ERRORS = atomWithStorage(
 export const HIDDEN_NEWS_HIGHLIGHTS_ATOM = atomWithStorage<string[]>(
   'news.highlights.hidden',
   [],
+);
+
+export const LAUNCH_SETTINGS_ATOM = atomWithStorage<LaunchSettings>(
+  'launch.options',
+  {
+    gameDataPath: '',
+    view: false,
+    console: {
+      show: false,
+    },
+    customEnvVariables: {},
+    customLaunchArguments: '',
+    logLevel: {
+      file: 'DEFAULT',
+      console: 'DEFAULT',
+    },
+    security: true,
+  },
 );

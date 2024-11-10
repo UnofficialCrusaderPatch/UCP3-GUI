@@ -4,16 +4,14 @@ import { TrashFill } from 'react-bootstrap-icons';
 import { useCurrentGameFolder } from '../../../../function/game-folder/utils';
 import { showModalOk } from '../../../modals/modal-ok';
 import { openFolderDialog } from '../../../../tauri/tauri-dialog';
-import { LaunchOptions } from './launch-options';
 import Message, { useMessage } from '../../../general/message';
+import { LAUNCH_OPTION_GAME_DATA_PATH_ATOM } from './option-game-data-path';
 
 interface GameDataPathMapping {
   date: number;
   gameFolder: string;
   gameDataPath: string;
 }
-
-const UCP_GAME_DATA_PATH_ARG = '--ucp-game-data-path';
 
 const NUMBER_OF_PATH_MAPPINGS = 20;
 const GAME_DATA_PATH_MAP_KEY = 'gameDataPathMap';
@@ -82,22 +80,18 @@ function useGameDataStorageMap(
   ];
 }
 
-export default function GameDataPath({ getArgs, setArgs }: LaunchOptions) {
+export default function GameDataPath() {
   const currentFolder = useCurrentGameFolder();
   const [currentGameDataPath, setGameDataPath] =
     useGameDataStorageMap(currentFolder);
 
+  const [gdp, setGDP] = useAtom(LAUNCH_OPTION_GAME_DATA_PATH_ATOM);
+
+  if (gdp !== currentGameDataPath && currentGameDataPath !== undefined)
+    setGDP(currentGameDataPath);
+
   // needed for file interaction
   const localize = useMessage();
-
-  const currentArgs = getArgs();
-  const gamesDataPathArg = currentArgs.length > 0 ? currentArgs[1] : undefined;
-
-  if (currentGameDataPath !== gamesDataPathArg) {
-    setArgs(
-      currentGameDataPath ? [UCP_GAME_DATA_PATH_ARG, currentGameDataPath] : [],
-    );
-  }
 
   return (
     <div className="launch__options__box--game-data-path">

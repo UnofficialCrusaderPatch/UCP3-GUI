@@ -28,7 +28,7 @@ const elementsAtom = atom((get) =>
   )),
 );
 
-// eslint-disable-next-line react/prop-types
+// eslint-disable-next-line react/prop-types, @typescript-eslint/no-explicit-any
 function StatusElement({ children }: { children: any }) {
   return (
     <div
@@ -118,7 +118,7 @@ export function ContentManager() {
         <ExclamationCircleFill />
         {/* todo:locale: */}
         <span className="ms-1">
-          <Message key="extensions.reload.required.title" />
+          <Message message="extensions.reload.required.title" />
         </span>
       </div>
     );

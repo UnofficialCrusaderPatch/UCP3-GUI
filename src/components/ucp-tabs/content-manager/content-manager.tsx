@@ -17,6 +17,7 @@ import {
 } from './description/fetching';
 import { ContentFilterButton } from './buttons/filter-button';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
+import Message from '../../general/message';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -115,7 +116,9 @@ export function ContentManager() {
       >
         <ExclamationCircleFill />
         {/* todo:locale: */}
-        <span className="ms-1">Restart required</span>
+        <span className="ms-1">
+          <Message key="extensions.reload.required.title" />
+        </span>
       </div>
     );
   }

@@ -164,9 +164,8 @@ export default function UcpTabs() {
 
                   if (isExtensionsStateDiskDirty) {
                     const okCancelResult = await showModalOkCancel({
-                      title: 'GUI restart required',
-                      message:
-                        "The GUI needs to restart as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel",
+                      title: 'extensions.reload.required.title',
+                      message: 'extensions.reload.required.message',
                     });
                     if (okCancelResult) {
                       reloadCurrentGameFolder();

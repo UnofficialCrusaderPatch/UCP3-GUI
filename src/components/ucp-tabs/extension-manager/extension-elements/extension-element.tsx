@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   ExclamationCircleFill,
+  FolderFill,
   GearFill,
   TrashFill,
 } from 'react-bootstrap-icons';
@@ -34,6 +35,7 @@ import { OverrideViewer, OverrideViewerProps } from './override-viewer';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
 import { MessageType } from '../../../../localization/localization';
 import Message from '../../../general/message';
+import { shellOpen } from '../../../../tauri/tauri-shell';
 
 function MoveArrows(props: {
   extensionName: string;
@@ -123,6 +125,28 @@ function CustomizeButton(props: { clickCallback: () => void }) {
   );
 }
 
+function ShellOpenButton(props: { clickCallback: () => void }) {
+  const { clickCallback } = props;
+  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+  return (
+    <button
+      type="button"
+      className="fs-8 customize-extension-button"
+      onClick={clickCallback}
+      onPointerEnter={() => {
+        setStatusBarMessage('extensions.extension.shell.open');
+      }}
+      onPointerLeave={() => {
+        setStatusBarMessage(undefined);
+      }}
+    >
+      <span>
+        <FolderFill />
+      </span>
+    </button>
+  );
+}
+
 export function ExtensionElement(props: {
   ext: Extension;
   fixedVersion: boolean;
@@ -133,6 +157,7 @@ export function ExtensionElement(props: {
   moveCallback: (event: { name: string; type: 'up' | 'down' }) => void;
   revDeps: string[];
   displayCustomizeButton: boolean;
+  displayShellOpenButton: boolean;
   showExclamationMark: boolean;
 }) {
   const {
@@ -145,6 +170,7 @@ export function ExtensionElement(props: {
     clickCallback,
     buttonText,
     displayCustomizeButton,
+    displayShellOpenButton,
     showExclamationMark,
   } = props;
   const { name, version, author } = ext.definition;
@@ -261,6 +287,13 @@ export function ExtensionElement(props: {
         >
           <ExclamationCircleFill style={{ color: 'gray' }} />
         </button>
+      ) : null}
+      {displayShellOpenButton ? (
+        <ShellOpenButton
+          clickCallback={() => {
+            shellOpen(ext.io.path);
+          }}
+        />
       ) : null}
       {displayCustomizeButton ? (
         <CustomizeButton
@@ -382,6 +415,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
             -1,
         )}
       displayCustomizeButton={false}
+      displayShellOpenButton={false}
       showExclamationMark={false}
     />
   );
@@ -457,6 +491,7 @@ export function ActiveExtensionElement(props: {
       buttonText="deactivate"
       clickCallback={clickCallback}
       moveCallback={moveCallback}
+      displayShellOpenButton={guiCreatorMode && ext.type === 'plugin'}
       displayCustomizeButton={guiCreatorMode && ext.type === 'plugin'}
       revDeps={theRevDeps}
       showExclamationMark={showExclamationMark}

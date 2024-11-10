@@ -52,7 +52,7 @@
         ]
       },
       "shell": {
-        "open": true
+        "open": "^[A-Z]:[/\\\\]+.*"
       },
       "protocol": {
         "asset": true,

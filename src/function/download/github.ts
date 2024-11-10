@@ -3,8 +3,8 @@ import { ResponseType } from '@tauri-apps/api/http';
 import Logger from '../../util/scripts/logging';
 import { UCP3_REPO_GIST_URL } from './download-enums';
 import { ProgressHandler, download, fetch } from '../../tauri/tauri-http';
-import { GAME_FOLDER_ATOM } from '../game-folder/game-folder-atom';
 import { getStore } from '../../hooks/jotai/base';
+import { GAME_FOLDER_ATOM } from '../game-folder/interface';
 
 const LOGGER = new Logger('github.ts');
 

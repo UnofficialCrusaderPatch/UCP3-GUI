@@ -1,7 +1,5 @@
 import { Event } from '@tauri-apps/api/event';
 import { atom } from 'jotai';
-import { GAME_FOLDER_ATOM } from '../../../../function/game-folder/game-folder-atom';
-import { reloadCurrentWindow } from '../../../../function/window-actions';
 import { getStore } from '../../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -9,6 +7,8 @@ import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { makeToast } from '../../../toasts/toasts-display';
 import { CURRENT_DISPLAYED_TAB } from '../../tabs-state';
 import { installExtensionsButtonCallback } from '../buttons/install-extensions-button';
+import { GAME_FOLDER_ATOM } from '../../../../function/game-folder/interface';
+import { reloadCurrentGameFolder } from '../../../../function/game-folder/modifications/reload-current-game-folder';
 
 export const IS_FILE_DRAGGING = atom(false); // const HANDLED_DROP_EVENTS = atom<{ [id: number]: boolean }>({});
 export async function handleFileDrop(event: Event<unknown>) {
@@ -60,9 +60,9 @@ export async function handleFileDrop(event: Event<unknown>) {
           message: 'The GUI will now reload.',
         });
 
-        reloadCurrentWindow();
+        reloadCurrentGameFolder();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       ConsoleLogger.error(err);
     }
   }

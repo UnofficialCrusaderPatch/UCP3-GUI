@@ -1,8 +1,12 @@
+/* eslint-disable no-new-wrappers */
+/* eslint-disable @typescript-eslint/ban-types */
 import { atom } from 'jotai';
+import { Atom } from 'jotai/vanilla';
 import { resolvePath } from '../../tauri/tauri-files';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../game-folder/game-folder-interface';
+import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/interface';
+import { GameDataWrapper } from './game-data';
 
-async function getVanillaPath(gameFolder: string): Promise<string> {
+async function getVanillaPath(gameFolder: string) {
   if (!gameFolder) {
     return '';
   }
@@ -10,7 +14,7 @@ async function getVanillaPath(gameFolder: string): Promise<string> {
   return resolvePath(gameFolder, 'Stronghold Crusader.exe');
 }
 
-async function getExtremePath(gameFolder: string): Promise<string> {
+async function getExtremePath(gameFolder: string) {
   if (!gameFolder) {
     return '';
   }
@@ -18,10 +22,14 @@ async function getExtremePath(gameFolder: string): Promise<string> {
   return resolvePath(gameFolder, 'Stronghold_Crusader_Extreme.exe');
 }
 
-export const VANILLA_PATH_ATOM = atom((get) =>
-  getVanillaPath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM)),
+const EXE_PATHS_ATOM: Atom<Promise<GameDataWrapper<string>>> = atom(
+  async (get) => {
+    const gameFolder = await get(ASYNC_GAME_FOLDER_ATOM);
+    return {
+      vanilla: await getVanillaPath(gameFolder),
+      extreme: await getExtremePath(gameFolder),
+    };
+  },
 );
 
-export const EXTREME_PATH_ATOM = atom((get) =>
-  getExtremePath(get(GAME_FOLDER_INTERFACE_ASYNC_ATOM)),
-);
+export default EXE_PATHS_ATOM;

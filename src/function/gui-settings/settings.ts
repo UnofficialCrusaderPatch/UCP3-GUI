@@ -17,10 +17,7 @@ export const STORE_SHOW_ALL_EXTENSION_TYPES_ATOM = atomWithStorage(
 );
 export const ADVANCED_MODE_ATOM = atomWithStorage('guiAdvancedMode', false);
 export const CREATOR_MODE_ATOM = atomWithStorage('guiCreatorMode', false);
-export const RECENT_FOLDERS_ATOM = atomWithStorage(
-  'guiRecentFolders',
-  [] as string[],
-); // Or whatever it currently is! Is current folder just the most recent? Or do we need a currentFolder field too?
+
 export const LANGUAGE_ATOM = atomWithStorage('guiLanguage', 'en'); // Any other language we support
 
 // From here on, I am speculating on what we could need

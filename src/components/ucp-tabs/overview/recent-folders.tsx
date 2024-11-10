@@ -1,61 +1,39 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import './recent-folders.css';
 
-import { useAtomValue, useSetAtom } from 'jotai';
-import { MouseEvent, useEffect, useState } from 'react';
-import { openFolderDialog } from '../../../tauri/tauri-dialog';
-import { RecentFolderHelper } from '../../../config/gui/recent-folder-helper';
-import { GAME_FOLDER_LOADED_ATOM } from '../../../function/game-folder/utils';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from '../../../function/game-folder/game-folder-interface';
-import { reloadCurrentWindow } from '../../../function/window-actions';
-import { useRecentFolders } from '../../../hooks/jotai/hooks';
-import Result from '../../../util/structs/result';
-import Message from '../../general/message';
+import { useAtomValue } from 'jotai';
+import { MouseEvent, useState } from 'react';
+import { unwrap } from 'jotai/utils';
+import { TrashFill } from 'react-bootstrap-icons';
+import Message, { useMessage } from '../../general/message';
+import {
+  RECENT_FOLDERS_ATOM,
+  removeFromRecentFolders,
+  selectNewRecentGameFolder,
+  selectRecentGameFolder,
+} from '../../../function/gui-settings/gui-file-config';
+import { GAME_FOLDER_ATOM } from '../../../function/game-folder/interface';
+import { updateCurrentGameFolder } from '../../../function/game-folder/modifications/update-current-game-folder';
+
+const UNWRAPPED_RECENT_FOLDERS = unwrap(
+  RECENT_FOLDERS_ATOM,
+  (prev) => prev ?? [], // will stay the same until new update done
+);
 
 export default function RecentFolders() {
-  const setFolder = useSetAtom(GAME_FOLDER_INTERFACE_ASYNC_ATOM);
-  const currentFolderState = useAtomValue(GAME_FOLDER_LOADED_ATOM);
-  const currentFolder =
-    currentFolderState.state === 'hasData' ? currentFolderState.data : '';
-  const [recentFolderResult] = useRecentFolders();
+  const recentFolders = useAtomValue(UNWRAPPED_RECENT_FOLDERS);
+  const currentFolderStringObject = useAtomValue(GAME_FOLDER_ATOM);
   const [showRecentFolders, setShowRecentFolders] = useState(false);
 
-  const recentFolderHelper = recentFolderResult
-    .getOrReceive(Result.emptyErr)
-    .ok()
-    .getOrElse(null as unknown as RecentFolderHelper);
+  const currentFolder = currentFolderStringObject;
 
-  const updateCurrentFolderSelectState = (folder: string) => {
-    recentFolderHelper.addToRecentFolders(folder);
-    setFolder(folder);
-  };
-
-  const onClickUpdateRecentFolder = (event: MouseEvent<HTMLDivElement>) => {
-    const inputTarget = event.target as HTMLDivElement;
-    if (inputTarget.textContent) {
-      updateCurrentFolderSelectState(inputTarget.textContent as string);
-      setShowRecentFolders(false);
-      reloadCurrentWindow();
-    }
-  };
-
-  useEffect(() => {
-    if (recentFolderResult.isEmpty()) {
-      return;
-    }
-
-    // set initial state
-    if (currentFolder === '' && recentFolderHelper?.getMostRecentGameFolder()) {
-      updateCurrentFolderSelectState(
-        recentFolderHelper.getMostRecentGameFolder(),
-      );
-    }
-  });
+  const localize = useMessage();
 
   // needs better loading site
-  if (recentFolderResult.isEmpty()) {
+  if (recentFolders.length === 0) {
     return (
       <p>
         <Message message="loading" />
@@ -73,12 +51,16 @@ export default function RecentFolders() {
           className="form-control"
           readOnly
           role="button"
-          onClick={async () =>
-            (await openFolderDialog(currentFolder)).ifPresent(
-              updateCurrentFolderSelectState,
+          onClick={() =>
+            updateCurrentGameFolder(() =>
+              selectNewRecentGameFolder(undefined, currentFolder),
             )
           }
-          value={currentFolder.length > 0 ? currentFolder : ` Browse . . . `}
+          value={
+            currentFolder.length > 0
+              ? currentFolder
+              : localize('select.folder.browse')
+          }
         />
         <button
           type="button"
@@ -91,8 +73,7 @@ export default function RecentFolders() {
           className="recent-folders-dropdown"
           style={{ display: showRecentFolders ? 'block' : 'none' }}
         >
-          {recentFolderHelper
-            .getRecentGameFolders()
+          {recentFolders
             .filter((_, index) => index !== 0)
             .map((recentFolder) => (
               <div
@@ -100,14 +81,24 @@ export default function RecentFolders() {
                 className="file-selector"
                 role="button"
                 title={recentFolder}
-                onClick={onClickUpdateRecentFolder}
+                onClick={async (event: MouseEvent<HTMLDivElement>) => {
+                  const inputTarget = event.target as HTMLDivElement;
+                  if (inputTarget.textContent) {
+                    await updateCurrentGameFolder(() =>
+                      selectRecentGameFolder(inputTarget.textContent as string),
+                    );
+                    setShowRecentFolders(false);
+                  }
+                }}
               >
-                <div className="death90">{recentFolder}</div>
-                <input
+                <div className="recent-folders-text">{recentFolder}</div>
+                <button
+                  className="recent-folders-remove"
                   type="button"
-                  style={{ display: 'none' }}
-                  onClick={(event) => event.stopPropagation()}
-                />
+                  onClick={() => removeFromRecentFolders(recentFolder)}
+                >
+                  <TrashFill color="white" />
+                </button>
               </div>
             ))}
         </div>

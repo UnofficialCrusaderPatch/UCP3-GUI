@@ -3,7 +3,7 @@ import { Error as FileUtilError } from '../../tauri/tauri-files';
 import { extractZipToPath } from '../../tauri/tauri-invoke';
 import Result from '../../util/structs/result';
 import {
-  UCP_STATE_ATOM,
+  UCP_FILES_STATE_ATOM,
   activateUCP,
   createRealBink,
 } from '../ucp-files/ucp-state';
@@ -27,7 +27,7 @@ export async function installUCPFromZip(
     await initializeUCPVersion(gameFolder);
 
     // Force a refresh on this atom to ensure activateUCP() is dealing with the right IO state
-    getStore().set(UCP_STATE_ATOM);
+    getStore().set(UCP_FILES_STATE_ATOM);
 
     // Activate the UCP by default when installing
     (await activateUCP()).throwIfErr();

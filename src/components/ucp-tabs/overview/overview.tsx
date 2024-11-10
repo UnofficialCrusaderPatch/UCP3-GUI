@@ -10,20 +10,16 @@ import { getStore } from '../../../hooks/jotai/base';
 import { removeDir, removeFile, resolvePath } from '../../../tauri/tauri-files';
 import {
   LOADABLE_UCP_STATE_ATOM,
-  UCPState,
+  UCPFilesState,
   activateUCP,
   deactivateUCP,
 } from '../../../function/ucp-files/ucp-state';
-import { reloadCurrentWindow } from '../../../function/window-actions';
 
 import { openFileDialog } from '../../../tauri/tauri-dialog';
 import Result from '../../../util/structs/result';
 import { showModalOkCancel } from '../../modals/modal-ok-cancel';
 import { showModalOk } from '../../modals/modal-ok';
-import {
-  GAME_FOLDER_LOADED_ATOM,
-  useCurrentGameFolder,
-} from '../../../function/game-folder/utils';
+import { useCurrentGameFolder } from '../../../function/game-folder/utils';
 import RecentFolders from './recent-folders';
 import OverviewButton from './overview-button';
 import { ToastType } from '../../toasts/toasts-display';
@@ -40,10 +36,12 @@ import {
 } from '../../../function/global/constants/file-constants';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
-import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
+import { hintThatGameMayBeRunning } from '../../../function/game-folder/locks/file-locks';
 import { asPercentage } from '../../../tauri/tauri-http';
 import { useMessage } from '../../general/message';
+import { GAME_FOLDER_ATOM } from '../../../function/game-folder/interface';
 import { NewsHighlights } from './news-highlights';
+import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 
 const LOGGER = new Logger('overview.tsx');
 
@@ -58,29 +56,31 @@ export default function Overview() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const ucpStatePresent = loadableUcpState.state === 'hasData';
-  const ucpState = ucpStatePresent ? loadableUcpState.data : UCPState.UNKNOWN;
+  const ucpState = ucpStatePresent
+    ? loadableUcpState.data
+    : UCPFilesState.UNKNOWN;
   let activateButtonString = null;
   if (!ucpStatePresent) {
     activateButtonString = 'loading';
   } else {
     switch (ucpState) {
-      case UCPState.NOT_INSTALLED:
-      case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
+      case UCPFilesState.NOT_INSTALLED:
+      case UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK:
         activateButtonString = 'overview.activate.not.installed';
         break;
-      case UCPState.ACTIVE:
-      case UCPState.BINK_UCP_MISSING:
-      case UCPState.BINK_VERSION_DIFFERENCE:
+      case UCPFilesState.ACTIVE:
+      case UCPFilesState.BINK_UCP_MISSING:
+      case UCPFilesState.BINK_VERSION_DIFFERENCE:
         activateButtonString = 'overview.activate.do.deactivate';
         break;
-      case UCPState.INACTIVE:
-      case UCPState.BINK_REAL_COPY_MISSING:
+      case UCPFilesState.INACTIVE:
+      case UCPFilesState.BINK_REAL_COPY_MISSING:
         activateButtonString = 'overview.activate.do.activate';
         break;
-      case UCPState.WRONG_FOLDER:
+      case UCPFilesState.WRONG_FOLDER:
         activateButtonString = 'overview.wrong.folder';
         break;
-      case UCPState.INVALID:
+      case UCPFilesState.INVALID:
         activateButtonString = 'overview.activate.invalid';
         break;
       default:
@@ -108,16 +108,14 @@ export default function Overview() {
           try {
             LOGGER.msg('check for updates and install').info();
 
-            const gameFolderState = getStore().get(GAME_FOLDER_LOADED_ATOM);
-
-            if (gameFolderState.state !== 'hasData') {
+            const gameFolder = getStore().get(GAME_FOLDER_ATOM);
+            if (gameFolder === '') {
               createStatusToast(
                 ToastType.ERROR,
                 'Game folder in bad state. Cannot save update to disk.', // TODO: needs localization
               );
               return;
             }
-            const gameFolder = gameFolderState.data;
 
             createStatusToast(ToastType.INFO, 'ucp.version.check');
 
@@ -225,7 +223,7 @@ export default function Overview() {
               message: 'The GUI will now reload.',
             });
 
-            reloadCurrentWindow();
+            reloadCurrentGameFolder();
 
             createStatusToast(ToastType.SUCCESS, 'overview.update.success');
           } catch (e: unknown) {
@@ -275,7 +273,7 @@ export default function Overview() {
               // );
 
               if (confirmed) {
-                reloadCurrentWindow();
+                reloadCurrentGameFolder();
               }
             }
             zipInstallResult
@@ -294,11 +292,11 @@ export default function Overview() {
       <OverviewButton
         buttonActive={
           overviewButtonActive &&
-          (ucpState === UCPState.ACTIVE ||
-            ucpState === UCPState.INACTIVE ||
-            ucpState === UCPState.BINK_UCP_MISSING ||
-            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
-            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
+          (ucpState === UCPFilesState.ACTIVE ||
+            ucpState === UCPFilesState.INACTIVE ||
+            ucpState === UCPFilesState.BINK_UCP_MISSING ||
+            ucpState === UCPFilesState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPFilesState.BINK_VERSION_DIFFERENCE)
         }
         buttonText={activateButtonString}
         buttonVariant="ucp-button overview__text-button"
@@ -313,14 +311,14 @@ export default function Overview() {
           try {
             let result = Result.emptyOk();
             if (
-              ucpState === UCPState.ACTIVE ||
-              ucpState === UCPState.BINK_UCP_MISSING ||
-              ucpState === UCPState.BINK_VERSION_DIFFERENCE
+              ucpState === UCPFilesState.ACTIVE ||
+              ucpState === UCPFilesState.BINK_UCP_MISSING ||
+              ucpState === UCPFilesState.BINK_VERSION_DIFFERENCE
             ) {
               result = await deactivateUCP();
             } else if (
-              ucpState === UCPState.INACTIVE ||
-              ucpState === UCPState.BINK_REAL_COPY_MISSING
+              ucpState === UCPFilesState.INACTIVE ||
+              ucpState === UCPFilesState.BINK_REAL_COPY_MISSING
             ) {
               result = await activateUCP();
             }
@@ -338,11 +336,11 @@ export default function Overview() {
       <OverviewButton
         buttonActive={
           overviewButtonActive &&
-          (ucpState === UCPState.ACTIVE ||
-            ucpState === UCPState.INACTIVE ||
-            ucpState === UCPState.BINK_UCP_MISSING ||
-            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
-            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
+          (ucpState === UCPFilesState.ACTIVE ||
+            ucpState === UCPFilesState.INACTIVE ||
+            ucpState === UCPFilesState.BINK_UCP_MISSING ||
+            ucpState === UCPFilesState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPFilesState.BINK_VERSION_DIFFERENCE)
         }
         buttonText="overview.uninstall.idle"
         buttonVariant="ucp-button overview__text-button"

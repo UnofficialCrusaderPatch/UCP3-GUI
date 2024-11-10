@@ -93,10 +93,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 color: 'orange',
               }}
               onMouseEnter={() => {
-                /* todo:locale: */
-                setStatusBarMessage(
-                  `This content's status changed. Please restart the GUI to finalize.`,
-                );
+                setStatusBarMessage('store.content.status.change');
               }}
               onMouseLeave={() => {
                 setStatusBarMessage(undefined);

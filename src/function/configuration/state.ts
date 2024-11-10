@@ -72,3 +72,13 @@ export type ConfigurationState = {
   errors: string[];
   statusCode: number;
 };
+
+export function createEmptyConfigurationState() {
+  return {
+    state: {},
+    warnings: [],
+    overrides: new Map<string, Override[]>(),
+    errors: [],
+    statusCode: -1,
+  } as ConfigurationState;
+}

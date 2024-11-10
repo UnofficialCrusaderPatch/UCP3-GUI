@@ -9,14 +9,14 @@ import {
   INIT_DONE,
   INIT_RUNNING,
   INIT_ERROR,
-} from '../../function/game-folder/initialization-states';
+} from '../../function/game-folder/initialization/initialization-states';
 import Logger from '../../util/scripts/logging';
 import { showModalOk } from '../modals/modal-ok';
 import * as GuiSettings from '../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 import {
   LOADABLE_UCP_STATE_ATOM,
-  UCPState,
+  UCPFilesState,
 } from '../../function/ucp-files/ucp-state';
 import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
 import ConfigEditor from './config-editor/config-editor';
@@ -42,9 +42,9 @@ import {
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from './content-manager/state/atoms';
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
-import { reloadCurrentWindow } from '../../function/window-actions';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
 import Message from '../general/message';
+import { reloadCurrentGameFolder } from '../../function/game-folder/modifications/reload-current-game-folder';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -92,11 +92,11 @@ export default function UcpTabs() {
   const state = useAtomValue(LOADABLE_UCP_STATE_ATOM);
   const ucpFolderExists =
     state.state === 'hasData'
-      ? state.data === UCPState.ACTIVE ||
-        state.data === UCPState.INACTIVE ||
-        state.data === UCPState.BINK_VERSION_DIFFERENCE ||
-        state.data === UCPState.BINK_UCP_MISSING ||
-        state.data === UCPState.BINK_REAL_COPY_MISSING
+      ? state.data === UCPFilesState.ACTIVE ||
+        state.data === UCPFilesState.INACTIVE ||
+        state.data === UCPFilesState.BINK_VERSION_DIFFERENCE ||
+        state.data === UCPFilesState.BINK_UCP_MISSING ||
+        state.data === UCPFilesState.BINK_REAL_COPY_MISSING
       : false;
 
   const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
@@ -164,12 +164,11 @@ export default function UcpTabs() {
 
                   if (isExtensionsStateDiskDirty) {
                     const okCancelResult = await showModalOkCancel({
-                      title: 'GUI restart required',
-                      message:
-                        "The GUI needs to restart as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel",
+                      title: 'extensions.reload.required.title',
+                      message: 'extensions.reload.required.message',
                     });
                     if (okCancelResult) {
-                      await reloadCurrentWindow();
+                      reloadCurrentGameFolder();
                     }
 
                     return;

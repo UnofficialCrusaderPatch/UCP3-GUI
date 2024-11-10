@@ -2,18 +2,12 @@ import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
 import { exists } from '@tauri-apps/api/fs';
 import Logger from '../../util/scripts/logging';
-import { GAME_FOLDER_INTERFACE_ASYNC_ATOM } from './game-folder-interface';
-import { GAME_FOLDER_ATOM } from './game-folder-atom';
+import { GAME_FOLDER_ATOM } from './interface';
 
 export const LOGGER = new Logger('game-folder/utils.ts');
 
-export const GAME_FOLDER_LOADED_ASYNC_ATOM = atom((get) =>
-  get(GAME_FOLDER_INTERFACE_ASYNC_ATOM),
-);
-export const GAME_FOLDER_LOADED_ATOM = loadable(GAME_FOLDER_LOADED_ASYNC_ATOM);
-
 export function useCurrentGameFolder() {
-  return useAtomValue(GAME_FOLDER_INTERFACE_ASYNC_ATOM); // only a proxy
+  return useAtomValue(GAME_FOLDER_ATOM); // proxy to deliver a direct string
 }
 
 const DOES_UCP_FOLDER_EXIST_ASYNC_ATOM = atom(async (get) => {

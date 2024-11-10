@@ -7,7 +7,7 @@ export function NewsButton() {
   return (
     <button
       type="button"
-      className="restart-button"
+      className="reload-button"
       onClick={async () => {
         setOverlayContent(NewsList, true, true);
       }}

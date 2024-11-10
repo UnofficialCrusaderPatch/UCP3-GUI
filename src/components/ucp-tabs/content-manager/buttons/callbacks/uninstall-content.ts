@@ -1,5 +1,5 @@
 import { ContentElement } from '../../../../../function/content/types/content-element';
-import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-atom';
+import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/interface';
 import {
   UCP_MODULES_FOLDER,
   UCP_PLUGINS_FOLDER,
@@ -73,7 +73,7 @@ export async function uninstallContent(ce: ContentElement) {
 // eslint-disable-next-line import/prefer-default-export
 export function uninstallContents(
   contentElements: ContentElement[],
-  onSettled?: (result?: any) => void,
+  onSettled?: (result?: unknown) => void,
 ) {
   return Promise.all(
     contentElements.map(async (ce) => {
@@ -104,8 +104,8 @@ export function uninstallContents(
             type: 'uninstall',
           } as ErrorContentMutationResult;
         }
-      } catch (e: any) {
-        const err = `${e.toString()}`;
+      } catch (e: unknown) {
+        const err = `${e}`;
         setStatus({
           action: 'error',
           /* todo:locale: */

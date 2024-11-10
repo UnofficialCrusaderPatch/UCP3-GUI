@@ -1,7 +1,7 @@
-import { getStore } from '../../hooks/jotai/base';
-import { onFsExists, renameFile } from '../../tauri/tauri-files';
-import Logger from '../../util/scripts/logging';
-import { GAME_FOLDER_ATOM } from './game-folder-atom';
+import { getStore } from '../../../hooks/jotai/base';
+import { onFsExists, renameFile } from '../../../tauri/tauri-files';
+import Logger from '../../../util/scripts/logging';
+import { GAME_FOLDER_ATOM } from '../interface';
 
 const LOGGER = new Logger(`file-locks.ts`);
 
@@ -36,9 +36,9 @@ export const hintThatGameMayBeRunning = async () => {
       result = false;
       moved = true;
     }
-  } catch (e: any) {
+  } catch (e: unknown) {
     LOGGER.msg(
-      `Renaming binkw32.dll failed for an unknown reason: ${e.toString()}`,
+      `Renaming binkw32.dll failed for an unknown reason: ${e}`,
     ).error();
 
     result = true;

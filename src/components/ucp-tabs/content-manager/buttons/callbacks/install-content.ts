@@ -50,7 +50,7 @@ export async function downloadAndInstallContent(
 
   const src = zipSources.at(0)!;
 
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
 
@@ -214,7 +214,7 @@ export async function installOnlineContent(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();
 
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
   if (!(await onFsExists(cacheDir))) {

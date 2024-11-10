@@ -28,7 +28,7 @@ export default function RecentFolders() {
   const currentFolderStringObject = useAtomValue(GAME_FOLDER_ATOM);
   const [showRecentFolders, setShowRecentFolders] = useState(false);
 
-  const currentFolder = currentFolderStringObject.valueOf();
+  const currentFolder = currentFolderStringObject;
 
   const localize = useMessage();
 

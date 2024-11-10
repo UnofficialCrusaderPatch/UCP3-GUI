@@ -24,7 +24,7 @@ async function getExtremePath(gameFolder: string) {
 
 const EXE_PATHS_ATOM: Atom<Promise<GameDataWrapper<string>>> = atom(
   async (get) => {
-    const gameFolder = (await get(ASYNC_GAME_FOLDER_ATOM)).valueOf();
+    const gameFolder = await get(ASYNC_GAME_FOLDER_ATOM);
     return {
       vanilla: await getVanillaPath(gameFolder),
       extreme: await getExtremePath(gameFolder),

@@ -43,7 +43,7 @@ export async function handleFileDrop(event: Event<unknown>) {
 
         // eslint-disable-next-line no-await-in-loop
         const installResult = await installExtensionsButtonCallback(
-          getStore().get(GAME_FOLDER_ATOM).valueOf(),
+          getStore().get(GAME_FOLDER_ATOM),
           path,
         );
 

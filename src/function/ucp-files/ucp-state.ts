@@ -43,7 +43,7 @@ async function getBinkPath(gameFolder: string, binkName: string) {
 }
 
 const BINK_PATHS_ATOM = atom(async (get) => {
-  const gameFolder = (await get(ASYNC_GAME_FOLDER_ATOM)).valueOf();
+  const gameFolder = await get(ASYNC_GAME_FOLDER_ATOM);
   return {
     base: await getBinkPath(gameFolder, BINK_FILENAME),
     real: await getBinkPath(gameFolder, REAL_BINK_FILENAME),

@@ -106,7 +106,7 @@ export default function Overview() {
           try {
             LOGGER.msg('check for updates and install').info();
 
-            const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+            const gameFolder = getStore().get(GAME_FOLDER_ATOM);
             if (gameFolder === '') {
               createStatusToast(
                 ToastType.ERROR,

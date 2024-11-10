@@ -4,15 +4,21 @@ import {
   forceClearOverlayContent,
 } from '../../../components/overlay/overlay';
 import { getStore } from '../../../hooks/jotai/base';
-import { GAME_FOLDER_ATOM, ASYNC_GAME_FOLDER_ATOM } from '../interface';
+import {
+  GAME_FOLDER_ATOM,
+  ASYNC_GAME_FOLDER_ATOM,
+  GAME_FOLDER_SET_MOMENT_ATOM,
+} from '../interface';
 
-async function waitForNewFolderSet(oldGameFolderObject: string) {
+async function waitForNewFolderSet(oldMoment: number) {
   let waitForReload = true;
   while (waitForReload) {
     // eslint-disable-next-line no-await-in-loop
     waitForReload = await new Promise((resolve) => {
       setTimeout(() => {
-        resolve(oldGameFolderObject === getStore().get(GAME_FOLDER_ATOM));
+        // This line causes infinite spin when updating to the same folder
+        // eslint-disable-next-line eqeqeq
+        resolve(oldMoment == getStore().get(GAME_FOLDER_SET_MOMENT_ATOM));
       }, 100);
     });
   }
@@ -28,6 +34,7 @@ async function waitForNewFolderSet(oldGameFolderObject: string) {
 export async function updateCurrentGameFolder(
   gameFolderUpdateFunction: () => Promise<null | string>,
 ) {
+  const oldSetTime = getStore().get(GAME_FOLDER_SET_MOMENT_ATOM);
   const oldGameFolderObject = getStore().get(GAME_FOLDER_ATOM);
   setOverlayContent(BlankOverlayContent);
   try {
@@ -37,10 +44,10 @@ export async function updateCurrentGameFolder(
     }
 
     // failsafe, in case this happens for some reason
-    if (newFolder === oldGameFolderObject.valueOf()) {
+    if (newFolder === oldGameFolderObject) {
       getStore().set(ASYNC_GAME_FOLDER_ATOM);
     }
-    await waitForNewFolderSet(oldGameFolderObject.valueOf());
+    await waitForNewFolderSet(oldSetTime);
   } finally {
     forceClearOverlayContent();
   }

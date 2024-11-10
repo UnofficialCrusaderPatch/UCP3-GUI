@@ -7,7 +7,7 @@ const LOGGER = new Logger(`file-locks.ts`);
 
 // eslint-disable-next-line import/prefer-default-export
 export const hintThatGameMayBeRunning = async () => {
-  const folder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+  const folder = getStore().get(GAME_FOLDER_ATOM);
 
   const path = `${folder}/binkw32.dll`;
 

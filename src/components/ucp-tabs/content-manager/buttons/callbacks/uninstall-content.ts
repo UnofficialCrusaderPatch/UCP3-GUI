@@ -16,7 +16,7 @@ import { createStatusSetter } from './status';
 const LOGGER = new Logger('uninstall-content.ts');
 
 export async function uninstallContent(ce: ContentElement) {
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   if (ce.definition.type === 'module') {
     const path = `${gameFolder}/${UCP_MODULES_FOLDER}${ce.definition.name}-${ce.definition.version}.zip`;

@@ -7,11 +7,11 @@ import { GAME_FOLDER_ATOM } from './interface';
 export const LOGGER = new Logger('game-folder/utils.ts');
 
 export function useCurrentGameFolder() {
-  return useAtomValue(GAME_FOLDER_ATOM).valueOf(); // proxy to deliver a direct string
+  return useAtomValue(GAME_FOLDER_ATOM); // proxy to deliver a direct string
 }
 
 const DOES_UCP_FOLDER_EXIST_ASYNC_ATOM = atom(async (get) => {
-  const folder = get(GAME_FOLDER_ATOM).valueOf();
+  const folder = get(GAME_FOLDER_ATOM);
   if (
     folder === undefined ||
     folder === null ||

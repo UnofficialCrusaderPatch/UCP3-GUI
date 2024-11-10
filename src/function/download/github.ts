@@ -85,7 +85,7 @@ export class UCP3Updater {
     type: 'Release' | 'Developer',
     progressHandler?: ProgressHandler,
   ) {
-    const folder = getStore().get(GAME_FOLDER_ATOM).valueOf();
+    const folder = getStore().get(GAME_FOLDER_ATOM);
 
     if (this.meta === undefined) {
       this.meta = await this.fetchMeta();

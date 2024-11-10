@@ -88,7 +88,7 @@ export default function ExtensionManager() {
     <span className="fs-8">
       <Message
         message={{
-          key: 'config.filtered',
+          key: 'config.filter',
           args: { all: a, displayed: b },
         }}
       />

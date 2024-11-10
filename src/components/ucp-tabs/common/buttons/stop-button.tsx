@@ -39,7 +39,7 @@ export function StopButton() {
         }
       }}
     >
-      <Message message="stop modifying" />
+      <Message message="extensions.extension.customisations.stop" />
     </button>
   );
 }

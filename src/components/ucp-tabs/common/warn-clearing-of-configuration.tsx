@@ -17,8 +17,8 @@ async function warnClearingOfConfiguration(configurationTouched: {
       title: 'Warning',
       message:
         'Changing the active extensions will reset your configuration. Proceed anyway?',
-      ok: 'Yes',
-      cancel: 'No',
+      ok: 'yes',
+      cancel: 'no',
     });
 
     return confirmed;

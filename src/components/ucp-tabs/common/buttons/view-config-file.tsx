@@ -95,7 +95,7 @@ export function ViewConfigFileButton() {
         setOverlayContent<void>(ConfigFileViewer, true, true);
       }}
       onMouseEnter={() => {
-        setStatusBarMessage('View config file');
+        setStatusBarMessage('extensions.config.view');
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

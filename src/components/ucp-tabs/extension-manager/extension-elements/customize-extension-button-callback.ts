@@ -29,11 +29,10 @@ export async function customizeExtensionButtonCallback(ext: Extension) {
 
   if (getStore().get(CONFIG_DIRTY_STATE_ATOM)) {
     const answer = await showModalOkCancel({
-      title: 'Save current config?',
-      message:
-        'Customizing an extension will drop current unsaved changes to your config. Save your current config and changes?',
-      cancel: 'No',
-      ok: 'Yes',
+      title: 'extensions.extension.customisations.saveCurrent.title',
+      message: 'extensions.extension.customisations.saveCurrent.message',
+      cancel: 'no',
+      ok: 'yes',
     });
 
     if (answer) {

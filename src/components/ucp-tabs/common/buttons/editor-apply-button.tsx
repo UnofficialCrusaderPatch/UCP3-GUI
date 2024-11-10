@@ -60,7 +60,7 @@ function EditorApplyButton(
           // Update state
           setConfigurationTouched({ type: 'clear-all' });
 
-          setConfigStatus(`Saved!`);
+          setConfigStatus(`editor.saved`);
 
           setDirtyState(false);
 

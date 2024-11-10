@@ -152,6 +152,9 @@ export default function Launch() {
           variant="link"
           checked={displayAdvancedLaunchOptions}
           id="display-launch-options-switch"
+          onChange={() => {
+            setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions);
+          }}
           onClick={() =>
             setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions)
           }
@@ -163,6 +166,9 @@ export default function Launch() {
           checked={autoSave}
           id="save-config-before-launch-switch"
           onClick={() => setAutoSave(!autoSave)}
+          onChange={() => {
+            setAutoSave(!autoSave);
+          }}
           className="ps-5"
         />
       </div>
@@ -187,18 +193,26 @@ export default function Launch() {
               onClick={() => setConsoleShow(!consoleShow)}
             >
               <h5>
-                <Message message="Show Console" />
+                <Message message="launch.options.console.show" />
               </h5>
-              <input type="checkbox" checked={consoleShow} />
+              <input
+                type="checkbox"
+                checked={consoleShow}
+                onChange={() => setConsoleShow(!consoleShow)}
+              />
             </div>
             <div
               className="launch__options__box--ucp-checkbox"
               onClick={() => setNoSecurity(!noSecurity)}
             >
               <h5>
-                <Message message="Disable Security" />
+                <Message message="launch.options.disable.security" />
               </h5>
-              <input type="checkbox" checked={noSecurity} />
+              <input
+                type="checkbox"
+                checked={noSecurity}
+                onChange={() => setNoSecurity(!noSecurity)}
+              />
             </div>
           </div>
           <div className="launch__options__box__row">

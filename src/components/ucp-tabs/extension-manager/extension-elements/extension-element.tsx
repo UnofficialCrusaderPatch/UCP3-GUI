@@ -52,9 +52,7 @@ function MoveArrows(props: {
           if (movability.up) moveCallback({ name: extensionName, type: 'up' });
         }}
         onMouseEnter={() => {
-          setStatusBarMessage(
-            `Give this extension higher priority. It will override settings from lower priority extensions when relevant.`,
-          );
+          setStatusBarMessage(`extensions.extension.priority.higher`);
         }}
         onMouseLeave={() => {
           setStatusBarMessage(undefined);
@@ -69,9 +67,7 @@ function MoveArrows(props: {
             moveCallback({ name: extensionName, type: 'down' });
         }}
         onMouseEnter={() => {
-          setStatusBarMessage(
-            `Give this extension lower priority. Its settings can be overridden by higher priority extensions when relevant.`,
-          );
+          setStatusBarMessage(`extensions.extension.priority.lower`);
         }}
         onMouseLeave={() => {
           setStatusBarMessage(undefined);
@@ -114,7 +110,7 @@ function CustomizeButton(props: { clickCallback: () => void }) {
       className="fs-8 customize-extension-button"
       onClick={clickCallback}
       onPointerEnter={() => {
-        setStatusBarMessage('Modify this extension');
+        setStatusBarMessage('extensions.extension.modify');
       }}
       onPointerLeave={() => {
         setStatusBarMessage(undefined);
@@ -302,7 +298,7 @@ export function CustomisationsExtensionElement() {
         setExtensionsState({ ...extensionsState });
       }}
       onPointerEnter={() => {
-        setStatusBarMessage('Clear customisations');
+        setStatusBarMessage('extensions.extension.customisations.clear');
       }}
       onPointerLeave={() => {
         setStatusBarMessage(undefined);
@@ -318,7 +314,7 @@ export function CustomisationsExtensionElement() {
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span className="extension-name-box__name">
-          <Message message="Customisations" />
+          <Message message="extensions.customisations" />
         </span>
       </div>
     </div>

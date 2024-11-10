@@ -119,7 +119,7 @@ function CreatePluginModal(props: CreatePluginModalWindowProperties) {
             // Not implemented yet
             style={{ display: 'none' }}
             id="create-plugin-include-dependencies"
-            label="Also create a modpack"
+            label={<Message message="modal.create.plugin.modpack" />}
             checked={createModpack}
             onChange={(e) => {
               setCreateModpack(e.target.checked);

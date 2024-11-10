@@ -1,5 +1,11 @@
 {
-  "extensions": [".js", ".jsx", ".ts", ".d.ts", ".tsx"],
+  "extensions": [
+    ".js",
+    ".jsx",
+    ".ts",
+    ".d.ts",
+    ".tsx"
+  ],
   "ignoreUnresolved": [
     [
       "./credits.md?raw",
@@ -67,13 +73,13 @@
   ],
   "ignoreUnimported": [
     "src/components/sandbox-menu/sandbox-frame-base.js",
+    "src/components/ucp-tabs/common/buttons/customize-button.tsx",
     "src/components/ucp-tabs/common/create-pack-button-callback.tsx",
     "src/components/ucp-tabs/common/importing/import-strategies.ts",
     "src/components/ucp-tabs/content-manager/buttons/callbacks/dependency-management.ts",
-    "src/components/ucp-tabs/content-manager/buttons/callbacks/download-content.ts",
     "src/function/global/array-reducer.ts",
-    "src/hooks/general/util.ts",
     "src/function/window-actions.ts",
+    "src/hooks/general/util.ts",
     "src/tauri/tauri-misc.ts"
   ]
 }

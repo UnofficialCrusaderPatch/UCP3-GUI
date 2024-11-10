@@ -12,7 +12,7 @@ import {
 } from '../../function/game-folder/initialization/initialization-states';
 import Logger from '../../util/scripts/logging';
 import { showModalOk } from '../modals/modal-ok';
-import * as GuiSettings from '../../function/gui-settings/settings';
+// import * as GuiSettings from '../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 import {
   LOADABLE_UCP_STATE_ATOM,
@@ -87,7 +87,7 @@ export default function UcpTabs() {
 
   const [showErrorsWarning, setShowErrorsWarning] = useState(true);
 
-  const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
+  // const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
   const state = useAtomValue(LOADABLE_UCP_STATE_ATOM);
   const ucpFolderExists =
@@ -206,7 +206,10 @@ export default function UcpTabs() {
               eventKey="config"
               className="ornament-border-button tab-link"
               disabled={!initIsDoneAndWithoutErrors}
-              hidden={!advancedMode || !ucpFolderExists}
+              hidden={
+                // !advancedMode ||
+                !ucpFolderExists
+              }
             >
               <Message message="config.title" />
             </Nav.Link>

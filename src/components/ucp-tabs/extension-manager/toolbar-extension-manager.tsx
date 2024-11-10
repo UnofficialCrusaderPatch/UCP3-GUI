@@ -1,5 +1,5 @@
 import ApplyButton from '../common/buttons/apply-button';
-import { CustomizeButton } from '../common/buttons/customize-button';
+// import { CustomizeButton } from '../common/buttons/customize-button';
 import { ViewConfigFileButton } from '../common/buttons/view-config-file';
 import ExportButton from '../config-editor/buttons/export-button';
 import ImportButton from '../config-editor/buttons/import-button';
@@ -13,7 +13,7 @@ export function ExtensionManagerToolbar() {
         <CreateExtensionsPackButton />
         <ImportButton />
         <ExportButton />
-        <CustomizeButton />
+        {/* <CustomizeButton /> */}
       </div>
       <div className="extension-manager-control__box__buttons--apply-button">
         <ViewConfigFileButton />

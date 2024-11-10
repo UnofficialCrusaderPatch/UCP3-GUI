@@ -1,23 +1,20 @@
 import { getVersion } from '@tauri-apps/api/app';
-import { exists } from '@tauri-apps/api/fs';
 import { showModalOk } from '../../../components/modals/modal-ok';
-import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../components/ucp-tabs/common/buttons/config-serialized-state';
-import importButtonCallback from '../../../components/ucp-tabs/common/importing/import-button-callback';
-import { saveCurrentConfig } from '../../../components/ucp-tabs/common/save-config';
 import { Extension } from '../../../config/ucp/common';
 import { getStore } from '../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../util/scripts/logging';
 import { UCP_CONFIG_FILE_ATOM } from '../../configuration/state';
 import { discoverExtensions } from '../../extensions/discovery/discovery';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
-import { FIRST_TIME_USE_ATOM } from '../../gui-settings/settings';
 import { UCP_VERSION_ATOM } from '../../ucp-files/ucp-version';
-import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
 import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
 import { LOGGER } from '../logger';
-import { clearConfiguration } from '../../configuration/clearConfiguration';
 import { UCP_CONFIG_YML } from '../../global/constants/file-constants';
-import { createBasicExtensionsState } from '../../extensions/state/init';
+import {
+  clearConfigurationAndSetNewExtensionsState,
+  createBasicExtensionsState,
+} from '../../extensions/state/init';
+import { loadExtensionsState } from './load-extensions-state';
 
 /**
  * Initialize the game folder
@@ -31,10 +28,8 @@ export async function initializeGameFolder(
   folder: string,
   mode?: 'Release' | 'Developer',
 ) {
-  const loggerState = LOGGER.empty();
-
   if (folder.length === 0) {
-    loggerState.setMsg('No folder active.').info();
+    LOGGER.msg('No folder active.').info();
     return;
   }
 
@@ -47,7 +42,7 @@ export async function initializeGameFolder(
   let extensions: Extension[] = [];
   let file = '';
 
-  loggerState.setMsg(`Current folder: ${folder}`).info();
+  LOGGER.msg(`Current folder: ${folder}`).info();
 
   try {
     extensions = await discoverExtensions(folder, mode);
@@ -66,6 +61,8 @@ export async function initializeGameFolder(
 
   file = `${folder}/${UCP_CONFIG_YML}`;
 
+  getStore().set(UCP_CONFIG_FILE_ATOM, file);
+
   const frontendVersion = await getVersion();
   const frameworkVersion = getStore().get(UCP_VERSION_ATOM).version
     .isValidForSemanticVersioning
@@ -78,7 +75,7 @@ export async function initializeGameFolder(
     frameworkVersion,
   );
 
-  loggerState.setMsg('Finished extension discovery').info();
+  LOGGER.msg('Finished extension discovery').info();
   ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
 
   const is = newExtensionsState.tree.tryResolveAllDependencies();
@@ -88,58 +85,20 @@ export async function initializeGameFolder(
     );
   }
 
-  loggerState.setMsg('Setting new extensions state').info();
-  getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
+  LOGGER.msg('Setting new extensions state').info();
 
-  // This clear needs to be after the new extension state is set
-  // Otherwise the GUI tries to use default values that have been wiped
-  clearConfiguration();
-  if (getStore().get(INIT_ERROR) === false) {
-    loggerState.setMsg(`Trying to load ${UCP_CONFIG_YML}`).info();
-
-    if (await exists(file)) {
-      getStore().set(FIRST_TIME_USE_ATOM, false);
-      try {
-        await importButtonCallback(
-          folder,
-          () => {},
-          (message) => message, // TODO: will need a refactoring
-          file,
-        );
-      } catch (err: unknown) {
-        loggerState.setMsg(String(err)).error();
-      }
-    } else {
-      loggerState.setMsg(`no ${UCP_CONFIG_YML} file found`).info();
-
-      if (getStore().get(FIRST_TIME_USE_ATOM)) {
-        loggerState.setMsg('first time use!').info();
-
-        const newerExtensionState =
-          activateFirstTimeUseExtensions(newExtensionsState);
-        getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
-
-        getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
-
-        ConsoleLogger.debug(
-          await saveCurrentConfig({
-            file,
-          }),
-        );
-      }
-    }
-
-    loggerState.setMsg(`Finished loading ${UCP_CONFIG_YML}`).info();
+  const noInitErrors = getStore().get(INIT_ERROR) === false;
+  if (noInitErrors) {
+    await loadExtensionsState(newExtensionsState, folder, file);
   } else {
-    loggerState
-      .setMsg(`Not loading ${UCP_CONFIG_YML} as there were errors during init`)
-      .warn();
+    LOGGER.msg(
+      `Not loading ${UCP_CONFIG_YML} as there were errors during init`,
+    ).warn();
+    clearConfigurationAndSetNewExtensionsState(newExtensionsState);
   }
 
   getStore().set(INIT_DONE, true);
   getStore().set(INIT_RUNNING, false);
 
-  getStore().set(UCP_CONFIG_FILE_ATOM, file);
-
-  loggerState.msg('finished').info();
+  LOGGER.msg('finished').info();
 } // normal atoms

@@ -52,7 +52,12 @@ export const ASYNC_GAME_FOLDER_ATOM = atomWithRefresh(async (get) => {
   );
   LOGGER.msg('Initializing game folder finished').debug();
 
-  getStore().set(GAME_FOLDER_SET_MOMENT_ATOM, Date.now());
+  // This setting is slightly delayed to allow the GUI to render
+  // waitForNewFolderSet would otherwise be done slightly too early
+  setTimeout(() => {
+    getStore().set(GAME_FOLDER_SET_MOMENT_ATOM, Date.now());
+  }, 100);
+
   return newFolder;
 });
 

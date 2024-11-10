@@ -1,7 +1,7 @@
-import { getStore } from '../../hooks/jotai/base';
-import { onFsExists, renameFile } from '../../tauri/tauri-files';
-import Logger from '../../util/scripts/logging';
-import { GAME_FOLDER_ATOM } from './game-folder-interface';
+import { getStore } from '../../../hooks/jotai/base';
+import { onFsExists, renameFile } from '../../../tauri/tauri-files';
+import Logger from '../../../util/scripts/logging';
+import { GAME_FOLDER_ATOM } from '../interface';
 
 const LOGGER = new Logger(`file-locks.ts`);
 

@@ -3,7 +3,7 @@
 import { atom } from 'jotai';
 import { Atom } from 'jotai/vanilla';
 import { resolvePath } from '../../tauri/tauri-files';
-import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/game-folder-interface';
+import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/interface';
 import { GameDataWrapper } from './game-data';
 
 async function getVanillaPath(gameFolder: string) {

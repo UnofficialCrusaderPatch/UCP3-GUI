@@ -22,7 +22,7 @@ import { getStore } from '../../../../hooks/jotai/base';
 import { appendSystemDependencyStatements } from '../../../../function/extensions/discovery/system-dependencies';
 import { UCP_PLUGINS_FOLDER } from '../../../../function/global/constants/file-constants';
 import Message from '../../../general/message';
-import { reloadCurrentGameFolder } from '../../../../function/game-folder/game-folder-interface';
+import { reloadCurrentGameFolder } from '../../../../function/game-folder/modifications/reload-current-game-folder';
 
 export async function createPluginConfigFromCurrentState() {
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);

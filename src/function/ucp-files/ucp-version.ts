@@ -1,5 +1,5 @@
 import { atom } from 'jotai';
-import { INIT_ERROR } from '../game-folder/initialization-states';
+import { INIT_ERROR } from '../game-folder/initialization/initialization-states';
 import { loadYaml } from '../../tauri/tauri-files';
 import Option from '../../util/structs/option';
 import { getPropertyIfExistsAndTypeOf } from '../../util/scripts/util';

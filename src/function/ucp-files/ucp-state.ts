@@ -14,7 +14,7 @@ import {
 } from '../global/constants/file-constants';
 import { showModalOk } from '../../components/modals/modal-ok';
 import { MessageType } from '../../localization/localization';
-import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/game-folder-interface';
+import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/interface';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
 

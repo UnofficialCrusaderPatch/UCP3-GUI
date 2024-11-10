@@ -9,7 +9,7 @@ import { openFileDialog } from '../../../../tauri/tauri-dialog';
 import Logger from '../../../../util/scripts/logging';
 import { installExtension } from '../../../../function/extensions/installation/install-module';
 import { ToastType, makeToast } from '../../../toasts/toasts-display';
-import { reloadCurrentGameFolder } from '../../../../function/game-folder/game-folder-interface';
+import { reloadCurrentGameFolder } from '../../../../function/game-folder/modifications/reload-current-game-folder';
 
 const LOGGER = new Logger('install-extensions-button.tsx');
 

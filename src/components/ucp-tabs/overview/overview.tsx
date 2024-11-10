@@ -36,14 +36,12 @@ import {
 } from '../../../function/global/constants/file-constants';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
-import { hintThatGameMayBeRunning } from '../../../function/game-folder/file-locks';
+import { hintThatGameMayBeRunning } from '../../../function/game-folder/locks/file-locks';
 import { asPercentage } from '../../../tauri/tauri-http';
 import { useMessage } from '../../general/message';
-import {
-  GAME_FOLDER_ATOM,
-  reloadCurrentGameFolder,
-} from '../../../function/game-folder/game-folder-interface';
+import { GAME_FOLDER_ATOM } from '../../../function/game-folder/interface';
 import { NewsHighlights } from './news-highlights';
+import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 
 const LOGGER = new Logger('overview.tsx');
 

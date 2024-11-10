@@ -18,7 +18,7 @@ import {
   OkayContentMutationResult,
   DownloadAndInstallContentResult,
 } from '../../types/content-store-mutation-result';
-import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-interface';
+import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/interface';
 
 const LOGGER = new Logger('download-button.tsx');
 

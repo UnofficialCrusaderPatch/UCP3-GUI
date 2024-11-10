@@ -7,10 +7,8 @@ import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { makeToast } from '../../../toasts/toasts-display';
 import { CURRENT_DISPLAYED_TAB } from '../../tabs-state';
 import { installExtensionsButtonCallback } from '../buttons/install-extensions-button';
-import {
-  GAME_FOLDER_ATOM,
-  reloadCurrentGameFolder,
-} from '../../../../function/game-folder/game-folder-interface';
+import { GAME_FOLDER_ATOM } from '../../../../function/game-folder/interface';
+import { reloadCurrentGameFolder } from '../../../../function/game-folder/modifications/reload-current-game-folder';
 
 export const IS_FILE_DRAGGING = atom(false); // const HANDLED_DROP_EVENTS = atom<{ [id: number]: boolean }>({});
 export async function handleFileDrop(event: Event<unknown>) {

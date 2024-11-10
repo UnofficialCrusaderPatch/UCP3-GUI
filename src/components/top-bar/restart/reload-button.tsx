@@ -1,7 +1,7 @@
 import './restart-button.css';
 
 import Message from '../../general/message';
-import { reloadCurrentGameFolder } from '../../../function/game-folder/game-folder-interface';
+import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 
 // eslint-disable-next-line import/prefer-default-export
 export function ReloadButton() {

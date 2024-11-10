@@ -9,7 +9,7 @@ import {
   INIT_DONE,
   INIT_RUNNING,
   INIT_ERROR,
-} from '../../function/game-folder/initialization-states';
+} from '../../function/game-folder/initialization/initialization-states';
 import Logger from '../../util/scripts/logging';
 import { showModalOk } from '../modals/modal-ok';
 import * as GuiSettings from '../../function/gui-settings/settings';
@@ -44,7 +44,7 @@ import {
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
 import Message from '../general/message';
-import { reloadCurrentGameFolder } from '../../function/game-folder/game-folder-interface';
+import { reloadCurrentGameFolder } from '../../function/game-folder/modifications/reload-current-game-folder';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 

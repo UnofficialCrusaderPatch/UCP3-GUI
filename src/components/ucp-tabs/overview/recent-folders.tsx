@@ -15,10 +15,8 @@ import {
   selectNewRecentGameFolder,
   selectRecentGameFolder,
 } from '../../../function/gui-settings/gui-file-config';
-import {
-  GAME_FOLDER_ATOM,
-  updateCurrentGameFolder,
-} from '../../../function/game-folder/game-folder-interface';
+import { GAME_FOLDER_ATOM } from '../../../function/game-folder/interface';
+import { updateCurrentGameFolder } from '../../../function/game-folder/modifications/update-current-game-folder';
 
 const UNWRAPPED_RECENT_FOLDERS = unwrap(
   RECENT_FOLDERS_ATOM,

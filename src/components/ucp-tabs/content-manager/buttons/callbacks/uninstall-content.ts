@@ -1,5 +1,5 @@
 import { ContentElement } from '../../../../../function/content/types/content-element';
-import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/game-folder-interface';
+import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/interface';
 import {
   UCP_MODULES_FOLDER,
   UCP_PLUGINS_FOLDER,

@@ -7,36 +7,39 @@ import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { getVersion } from '@tauri-apps/api/app';
 import { loadable } from 'jotai/utils';
 
-import { UCPState, UCP_STATE_ATOM } from '../../function/ucp-files/ucp-state';
+import {
+  UCPFilesState,
+  UCP_FILES_STATE_ATOM,
+} from '../../function/ucp-files/ucp-state';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
 import { UCP_VERSION_ATOM } from '../../function/ucp-files/ucp-version';
 import { MessageType } from '../../localization/localization';
 import Message, { useMessage } from '../general/message';
 
 const UCP_STATE_MAP = new Map([
-  [UCPState.WRONG_FOLDER, 'wrong.folder'],
-  [UCPState.NOT_INSTALLED, 'not.installed'],
-  [UCPState.NOT_INSTALLED_WITH_REAL_BINK, 'not.installed'],
-  [UCPState.ACTIVE, 'active'],
-  [UCPState.INACTIVE, 'inactive'],
-  [UCPState.BINK_VERSION_DIFFERENCE, 'bink.version.differences'],
-  [UCPState.BINK_UCP_MISSING, 'bink.ucp.missing'],
-  [UCPState.BINK_REAL_COPY_MISSING, 'bink.real.copy.missing'],
-  [UCPState.INVALID, 'invalid'],
-  [UCPState.UNKNOWN, 'unknown'],
+  [UCPFilesState.WRONG_FOLDER, 'wrong.folder'],
+  [UCPFilesState.NOT_INSTALLED, 'not.installed'],
+  [UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK, 'not.installed'],
+  [UCPFilesState.ACTIVE, 'active'],
+  [UCPFilesState.INACTIVE, 'inactive'],
+  [UCPFilesState.BINK_VERSION_DIFFERENCE, 'bink.version.differences'],
+  [UCPFilesState.BINK_UCP_MISSING, 'bink.ucp.missing'],
+  [UCPFilesState.BINK_REAL_COPY_MISSING, 'bink.real.copy.missing'],
+  [UCPFilesState.INVALID, 'invalid'],
+  [UCPFilesState.UNKNOWN, 'unknown'],
 ]);
 
 const UCP_STATE_COLOR_MAP = new Map([
-  [UCPState.WRONG_FOLDER, 'red'],
-  [UCPState.NOT_INSTALLED, 'red'],
-  [UCPState.NOT_INSTALLED_WITH_REAL_BINK, 'red'],
-  [UCPState.ACTIVE, 'green'],
-  [UCPState.INACTIVE, 'yellow'],
-  [UCPState.BINK_VERSION_DIFFERENCE, 'yellow'], // assumes manuel UCP update
-  [UCPState.BINK_UCP_MISSING, 'yellow'],
-  [UCPState.BINK_REAL_COPY_MISSING, 'yellow'],
-  [UCPState.INVALID, 'red'],
-  [UCPState.UNKNOWN, 'red'],
+  [UCPFilesState.WRONG_FOLDER, 'red'],
+  [UCPFilesState.NOT_INSTALLED, 'red'],
+  [UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK, 'red'],
+  [UCPFilesState.ACTIVE, 'green'],
+  [UCPFilesState.INACTIVE, 'yellow'],
+  [UCPFilesState.BINK_VERSION_DIFFERENCE, 'yellow'], // assumes manuel UCP update
+  [UCPFilesState.BINK_UCP_MISSING, 'yellow'],
+  [UCPFilesState.BINK_REAL_COPY_MISSING, 'yellow'],
+  [UCPFilesState.INVALID, 'red'],
+  [UCPFilesState.UNKNOWN, 'red'],
 ]);
 
 export const STATUS_BAR_MESSAGE_ATOM = atom<MessageType | undefined>(undefined);
@@ -46,7 +49,7 @@ export const GUI_VERSION_ASYNC_ATOM = atom(async () => getVersion());
 export const GUI_VERSION_ATOM = loadable(GUI_VERSION_ASYNC_ATOM);
 
 function VersionAndState() {
-  const ucpState = useAtomValue(UCP_STATE_ATOM);
+  const ucpState = useAtomValue(UCP_FILES_STATE_ATOM);
   const vr = useAtomValue(UCP_VERSION_ATOM);
   const ucpVersion = vr.version;
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
@@ -60,15 +63,15 @@ function VersionAndState() {
 
   let ucpFooterVersionString = null;
   switch (ucpState) {
-    case UCPState.NOT_INSTALLED:
-    case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
-    case UCPState.BINK_UCP_MISSING:
+    case UCPFilesState.NOT_INSTALLED:
+    case UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK:
+    case UCPFilesState.BINK_UCP_MISSING:
       ucpFooterVersionString = localize('footer.version.no.ucp');
       break;
-    case UCPState.ACTIVE:
-    case UCPState.INACTIVE:
-    case UCPState.BINK_REAL_COPY_MISSING:
-    case UCPState.BINK_VERSION_DIFFERENCE:
+    case UCPFilesState.ACTIVE:
+    case UCPFilesState.INACTIVE:
+    case UCPFilesState.BINK_REAL_COPY_MISSING:
+    case UCPFilesState.BINK_VERSION_DIFFERENCE:
       ucpFooterVersionString = ucpVersion.toString();
       break;
     default:
@@ -84,7 +87,7 @@ function VersionAndState() {
       <CircleFill
         color={
           UCP_STATE_COLOR_MAP.get(ucpState) ??
-          UCP_STATE_COLOR_MAP.get(UCPState.UNKNOWN)
+          UCP_STATE_COLOR_MAP.get(UCPFilesState.UNKNOWN)
         }
         onMouseEnter={() => {
           setStatusBarMessage({
@@ -94,7 +97,7 @@ function VersionAndState() {
               state: localize(
                 `footer.state.${
                   UCP_STATE_MAP.get(ucpState) ??
-                  UCP_STATE_MAP.get(UCPState.UNKNOWN)
+                  UCP_STATE_MAP.get(UCPFilesState.UNKNOWN)
                 }`,
               ),
             },

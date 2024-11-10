@@ -10,7 +10,7 @@ import { getStore } from '../../../hooks/jotai/base';
 import { removeDir, removeFile, resolvePath } from '../../../tauri/tauri-files';
 import {
   LOADABLE_UCP_STATE_ATOM,
-  UCPState,
+  UCPFilesState,
   activateUCP,
   deactivateUCP,
 } from '../../../function/ucp-files/ucp-state';
@@ -56,29 +56,31 @@ export default function Overview() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const ucpStatePresent = loadableUcpState.state === 'hasData';
-  const ucpState = ucpStatePresent ? loadableUcpState.data : UCPState.UNKNOWN;
+  const ucpState = ucpStatePresent
+    ? loadableUcpState.data
+    : UCPFilesState.UNKNOWN;
   let activateButtonString = null;
   if (!ucpStatePresent) {
     activateButtonString = 'loading';
   } else {
     switch (ucpState) {
-      case UCPState.NOT_INSTALLED:
-      case UCPState.NOT_INSTALLED_WITH_REAL_BINK:
+      case UCPFilesState.NOT_INSTALLED:
+      case UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK:
         activateButtonString = 'overview.activate.not.installed';
         break;
-      case UCPState.ACTIVE:
-      case UCPState.BINK_UCP_MISSING:
-      case UCPState.BINK_VERSION_DIFFERENCE:
+      case UCPFilesState.ACTIVE:
+      case UCPFilesState.BINK_UCP_MISSING:
+      case UCPFilesState.BINK_VERSION_DIFFERENCE:
         activateButtonString = 'overview.activate.do.deactivate';
         break;
-      case UCPState.INACTIVE:
-      case UCPState.BINK_REAL_COPY_MISSING:
+      case UCPFilesState.INACTIVE:
+      case UCPFilesState.BINK_REAL_COPY_MISSING:
         activateButtonString = 'overview.activate.do.activate';
         break;
-      case UCPState.WRONG_FOLDER:
+      case UCPFilesState.WRONG_FOLDER:
         activateButtonString = 'overview.wrong.folder';
         break;
-      case UCPState.INVALID:
+      case UCPFilesState.INVALID:
         activateButtonString = 'overview.activate.invalid';
         break;
       default:
@@ -290,11 +292,11 @@ export default function Overview() {
       <OverviewButton
         buttonActive={
           overviewButtonActive &&
-          (ucpState === UCPState.ACTIVE ||
-            ucpState === UCPState.INACTIVE ||
-            ucpState === UCPState.BINK_UCP_MISSING ||
-            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
-            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
+          (ucpState === UCPFilesState.ACTIVE ||
+            ucpState === UCPFilesState.INACTIVE ||
+            ucpState === UCPFilesState.BINK_UCP_MISSING ||
+            ucpState === UCPFilesState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPFilesState.BINK_VERSION_DIFFERENCE)
         }
         buttonText={activateButtonString}
         buttonVariant="ucp-button overview__text-button"
@@ -309,14 +311,14 @@ export default function Overview() {
           try {
             let result = Result.emptyOk();
             if (
-              ucpState === UCPState.ACTIVE ||
-              ucpState === UCPState.BINK_UCP_MISSING ||
-              ucpState === UCPState.BINK_VERSION_DIFFERENCE
+              ucpState === UCPFilesState.ACTIVE ||
+              ucpState === UCPFilesState.BINK_UCP_MISSING ||
+              ucpState === UCPFilesState.BINK_VERSION_DIFFERENCE
             ) {
               result = await deactivateUCP();
             } else if (
-              ucpState === UCPState.INACTIVE ||
-              ucpState === UCPState.BINK_REAL_COPY_MISSING
+              ucpState === UCPFilesState.INACTIVE ||
+              ucpState === UCPFilesState.BINK_REAL_COPY_MISSING
             ) {
               result = await activateUCP();
             }
@@ -334,11 +336,11 @@ export default function Overview() {
       <OverviewButton
         buttonActive={
           overviewButtonActive &&
-          (ucpState === UCPState.ACTIVE ||
-            ucpState === UCPState.INACTIVE ||
-            ucpState === UCPState.BINK_UCP_MISSING ||
-            ucpState === UCPState.BINK_REAL_COPY_MISSING ||
-            ucpState === UCPState.BINK_VERSION_DIFFERENCE)
+          (ucpState === UCPFilesState.ACTIVE ||
+            ucpState === UCPFilesState.INACTIVE ||
+            ucpState === UCPFilesState.BINK_UCP_MISSING ||
+            ucpState === UCPFilesState.BINK_REAL_COPY_MISSING ||
+            ucpState === UCPFilesState.BINK_VERSION_DIFFERENCE)
         }
         buttonText="overview.uninstall.idle"
         buttonVariant="ucp-button overview__text-button"

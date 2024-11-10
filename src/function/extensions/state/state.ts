@@ -3,8 +3,7 @@ import { atom } from 'jotai';
 import { ExtensionDependencyTree } from '../dependency-management/dependency-resolution';
 import { ExtensionsState } from '../extensions-state';
 import { propagateActiveExtensionsChange } from './change';
-import { ConfigurationState } from '../../configuration/state';
-import { Override } from '../../configuration/overrides';
+import { createEmptyConfigurationState } from '../../configuration/state';
 
 // eslint-disable-next-line func-style
 export const extensionStateReducer = (
@@ -23,13 +22,7 @@ export const EXTENSION_STATE_INTERNAL_ATOM = atomWithReducer(
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
     tree: new ExtensionDependencyTree([]),
-    configuration: {
-      errors: [],
-      overrides: new Map<string, Override[]>(),
-      state: {},
-      statusCode: -1,
-      warnings: [],
-    } as ConfigurationState,
+    configuration: createEmptyConfigurationState(),
   },
   extensionStateReducer,
 );

@@ -5,6 +5,7 @@ import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
+  createEmptyConfigurationState,
 } from '../../../../function/configuration/state';
 import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { openFileDialog } from '../../../../tauri/tauri-dialog';
@@ -26,7 +27,6 @@ import { showModalOk } from '../../../modals/modal-ok';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildConfigMetaContentDBForUser } from '../../extension-manager/extension-configuration';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
-import { Override } from '../../../../function/configuration/overrides';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import { MessageType } from '../../../../localization/localization';
 
@@ -146,13 +146,7 @@ async function importButtonCallback(
     ...extensionsState,
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
-    configuration: {
-      state: {},
-      warnings: [],
-      errors: [],
-      statusCode: 0,
-      overrides: new Map<string, Override[]>(),
-    },
+    configuration: createEmptyConfigurationState(),
   } as ExtensionsState;
 
   // Parse the config file

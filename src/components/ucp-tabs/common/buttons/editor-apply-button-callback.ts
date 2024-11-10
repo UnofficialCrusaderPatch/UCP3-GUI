@@ -26,11 +26,35 @@ export async function editorApplyButtonCallback(
 ) {
   const { plugin } = await createPluginConfigFromCurrentState();
 
+  const eaeNames = extensionsState.explicitlyActivatedExtensions.map(
+    (ext) => ext.name,
+  );
+  const droppedExtensionNames = Object.entries(
+    extension.definition.dependencies,
+  )
+    .filter(([name]) => eaeNames.indexOf(name) === -1)
+    .map(([name]) => name);
+
+  /**
+   * Dependencies that are still in the active extensions list
+   */
+  const retainedDependencies = Object.fromEntries(
+    Object.entries(extension.definition.dependencies).filter(
+      ([name]) => droppedExtensionNames.indexOf(name) === -1,
+    ),
+  );
+
+  /**
+   * Dependencies that weren't in the definition yet
+   */
   const missingDependencies =
     extensionsState.explicitlyActivatedExtensions.filter(
       (e) => extension.definition.dependencies[e.name] === undefined,
     );
 
+  /**
+   * Dependencies that do not satisfy the existing definition
+   */
   const newVersionDependencies =
     extensionsState.explicitlyActivatedExtensions.filter(
       (e) =>
@@ -38,8 +62,11 @@ export async function editorApplyButtonCallback(
         !semver.satisfies(e.version, extension.definition.dependencies[e.name]),
     );
 
+  /**
+   * Collection of new dependencies and new versions of dependencies
+   */
   const newDependencies = {
-    ...extension.definition.dependencies,
+    ...retainedDependencies,
     ...Object.fromEntries(
       [...missingDependencies, ...newVersionDependencies].map((e) => [
         e.name,

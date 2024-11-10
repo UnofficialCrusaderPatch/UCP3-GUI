@@ -253,6 +253,24 @@ export class ExtensionDependencyTree extends DependencyTree {
     );
   }
 
+  reset() {
+    const packages = this.extensions.map(
+      (e) =>
+        new Package(
+          e.name,
+          e.version,
+          Object.entries(e.definition.dependencies).map(
+            ([ext, range]) => new Dependency(ext, range.raw),
+          ),
+        ),
+    );
+    this.tree = new Tree([
+      ...packages,
+      new Package('frontend', this.frontendVersion),
+      new Package('framework', this.frameworkVersion),
+    ]);
+  }
+
   nodeForExtension(ext: Extension) {
     return this.tree.nodeForID(extensionToID(ext));
   }

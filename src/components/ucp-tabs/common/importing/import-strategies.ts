@@ -321,19 +321,51 @@ export async function fullStrategy(
     );
 
     const ie = newExtensionsState.installedExtensions.slice();
-    const ae = [];
-    const eae = [];
+    const ae: Extension[] = [];
+    const eae: Extension[] = [];
 
     // Reverse the array of explicitly Active Extensions such that we deal it from the ground up (lowest dependency first)
+    const bottomUpOrdered = activeExtensions.slice();
     // eslint-disable-next-line no-restricted-syntax
-    for (const ext of activeExtensions.slice().reverse()) {
+    for (const ext of bottomUpOrdered) {
       try {
         if (
           sparseLoadOrder
             .map(({ extension }) => extension)
             .indexOf(ext.name) !== -1
         ) {
+          // Is an explicitly activated extension
           eae.push(ext);
+
+          // Check if all its dependencies have been loaded
+          const missingExtensionNames = Object.entries(
+            ext.definition.dependencies,
+          )
+            .filter(
+              ([name, range]) =>
+                ae.filter(
+                  (e) =>
+                    name === e.name &&
+                    semver.satisfies(e.definition.version, range),
+                ).length === 0,
+            )
+            .map(([name]) => name);
+
+          if (missingExtensionNames.length > 0) {
+            const msg2 = missingExtensionNames.join(' ');
+            LOGGER.msg(`Missing extensions: ${msg2}`).warn();
+            LOGGER.msg(
+              `Dependencies definition changed? Could not import configuration. Missing extension(s): ${msg2}`,
+            ).error();
+            setConfigStatus('missing dependencies');
+            // Abort the import
+            return {
+              status: 'error',
+              messages: [],
+              code: 'MISSING_DEPENDENCIES',
+              dependencies: [msg2],
+            } as MissingDependenciesFailure;
+          }
         }
         ae.push(ext);
         ie.splice(ie.indexOf(ext), 1);
@@ -347,11 +379,13 @@ export async function fullStrategy(
       }
     }
 
+    const topdownOrdered = ae.slice().reverse();
+
     // Complete the new extension state by building the configuration DB
     // eslint-disable-next-line no-param-reassign
     newExtensionsState = buildExtensionConfigurationDB({
       ...newExtensionsState,
-      activeExtensions: ae,
+      activeExtensions: topdownOrdered,
       installedExtensions: ie,
       explicitlyActivatedExtensions: eae,
     });

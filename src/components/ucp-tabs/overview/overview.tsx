@@ -195,12 +195,12 @@ export default function Overview() {
             );
 
             if (installResult.isErr()) {
-              installResult.err().ifPresent((error) =>
+              installResult.err().ifPresent((error) => {
                 createStatusToast(ToastType.ERROR, {
                   key: 'ucp.install.failed',
                   args: { error },
-                }),
-              );
+                });
+              });
               return;
             }
 
@@ -227,7 +227,13 @@ export default function Overview() {
 
             createStatusToast(ToastType.SUCCESS, 'overview.update.success');
           } catch (e: unknown) {
-            createStatusToast(ToastType.ERROR, String(e));
+            createStatusToast(ToastType.ERROR, {
+              key: 'overview.install.failed.unknown.reason',
+              args: {
+                error: String(e),
+                url: 'https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases',
+              },
+            });
           }
         }}
         toastTitle="overview.update.toast.title"

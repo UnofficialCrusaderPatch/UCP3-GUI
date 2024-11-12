@@ -7,7 +7,7 @@ import NavSection from './navigation/NavSection';
 
 import sanitizeID from '../sanitize-id';
 import Message, { useMessage } from '../../../../general/message';
-import { SEARCH_QUERY_ATOM } from './sections/atoms';
+import { SEARCH_QUERY_ATOM } from './sections/search';
 
 function CreateSectionsNav(args: { spec: SectionDescription }) {
   const { spec } = args;

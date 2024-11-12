@@ -9,10 +9,8 @@ import CreateSection from './CreateSection';
 import sanitizeID from '../sanitize-id';
 import Message from '../../../../general/message';
 import CreateSectionsNav from './CreateSectionsNav';
-import {
-  LOCALIZED_UI_OPTION_ENTRIES_ATOM,
-  LOCALIZED_UI_HIERARCHICAL_ATOM,
-} from './sections/atoms';
+import { LOCALIZED_UI_HIERARCHICAL_ATOM } from './sections/filter';
+import { LOCALIZED_UI_OPTION_ENTRIES_ATOM } from './sections/localized-options';
 
 function CreateSections(args: { readonly: boolean }): {
   nav: ReactElement | null;

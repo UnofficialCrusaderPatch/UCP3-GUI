@@ -48,7 +48,7 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
         <div className="d-flex justify-content-start w-100 py-1">
           <input
             className="flex-grow-1"
-            type="text"
+            type="search"
             placeholder={searchWord}
             defaultValue={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

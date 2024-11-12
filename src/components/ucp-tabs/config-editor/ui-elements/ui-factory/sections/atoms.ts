@@ -57,7 +57,6 @@ type TextObject = URLTextObject & {
 function collectTextFromOptionEntries(
   optionEntries: DisplayConfigElement[],
   collection?: TextObject[],
-  parent?: DisplayConfigElement,
 ) {
   const collect = collection ?? [];
 
@@ -74,21 +73,18 @@ function collectTextFromOptionEntries(
         url: oe.url,
         text: [oe.text, oe.tooltip, oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'CustomMenu') {
       oe.id = addToCollection({
         url: oe.url,
         text: [oe.text, oe.header, oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'FileInput') {
       oe.id = addToCollection({
         url: oe.url,
         text: [oe.text, oe.tooltip, oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'Group') {
       const url = `${oe.name}.group`;
@@ -97,9 +93,8 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.text, oe.description, oe.name].join('\n'),
       });
-      oe.parent = parent;
 
-      collectTextFromOptionEntries(oe.children, collect, oe);
+      collectTextFromOptionEntries(oe.children, collect);
     }
     if (oe.display === 'GroupBox') {
       const url = `${oe.name}.group`;
@@ -109,9 +104,7 @@ function collectTextFromOptionEntries(
         text: [oe.text, oe.description, oe.name].join('\n'),
       });
 
-      oe.parent = parent;
-
-      collectTextFromOptionEntries(oe.children, collect, oe);
+      collectTextFromOptionEntries(oe.children, collect);
     }
     if (oe.display === 'Number') {
       const { url } = oe;
@@ -120,7 +113,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.text, oe.tooltip, oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'Paragraph') {
       const url = `${oe.name}.group`;
@@ -129,7 +121,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.text, oe.header, oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'RadioGroup') {
       const { url } = oe;
@@ -138,7 +129,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.text, oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'Slider') {
       const { url } = oe;
@@ -147,7 +137,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.name].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'Switch') {
       const { url } = oe;
@@ -156,7 +145,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.name, oe.text, oe.tooltip].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'UCP2RadioGroup') {
       const { url } = oe;
@@ -165,7 +153,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.name, oe.text, oe.header].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'UCP2Slider') {
       const { url } = oe;
@@ -174,7 +161,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.name, oe.text, oe.header].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'UCP2SliderChoice') {
       const { url } = oe;
@@ -183,7 +169,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.name, oe.text, oe.header].join('\n'),
       });
-      oe.parent = parent;
     }
     if (oe.display === 'UCP2Switch') {
       const { url } = oe;
@@ -192,7 +177,6 @@ function collectTextFromOptionEntries(
         url,
         text: [oe.name, oe.text, oe.header].join('\n'),
       });
-      oe.parent = parent;
     }
 
     return undefined;
@@ -206,12 +190,14 @@ export const OPTIONS_TEXT_ATOM = atom((get) => {
     get(LOCALIZED_UI_OPTION_ENTRIES_ATOM),
   );
 
+  ConsoleLogger.debug('text content', documents);
+
   return documents;
 });
 
 export const MINISEARCH_ATOM = atom<MiniSearch>((get) => {
   const ms = new MiniSearch({
-    fields: ['content', 'url'],
+    fields: ['text', 'url'],
     storeFields: ['url'],
   });
 
@@ -234,17 +220,41 @@ export const SEARCH_RESULTS_ATOM = atom((get) => {
   return results;
 });
 
+function isIncluded(included: Set<number>, d: DisplayConfigElement) {
+  if (d.id !== undefined) {
+    return included.has(d.id);
+  }
+  return true;
+}
+
+function shouldBeIncluded(included: Set<number>, d: DisplayConfigElement) {
+  if (isIncluded(included, d)) return true;
+
+  if (d.display === 'Group' || d.display === 'GroupBox') {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const child of d.children) {
+      if (shouldBeIncluded(included, child)) return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Note that the filtering doesn't filter children of Group and GroupBox elements
+ * So if any of the children of a Group should be included, then the entire Group
+ * is included.
+ */
 export const FILTERED_OPTIONS = atom((get) => {
   const all = get(LOCALIZED_UI_OPTION_ENTRIES_ATOM);
 
   const results = get(SEARCH_RESULTS_ATOM);
   if (results) {
-    const ids = results.map((sr) => sr.id);
+    const ids = new Set(results.map((sr) => sr.id));
 
     ConsoleLogger.info(results);
 
-    // The problem is that entire Group or GroupBox can become filtered even though a direct child is relevant...
-    return all.filter((oe) => oe.id !== undefined && ids.indexOf(oe.id) !== -1);
+    return all.filter((oe) => shouldBeIncluded(ids, oe));
   }
 
   return all;

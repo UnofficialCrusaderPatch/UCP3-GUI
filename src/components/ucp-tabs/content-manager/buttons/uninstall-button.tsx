@@ -7,6 +7,7 @@ import {
 } from '../state/atoms';
 import Logger from '../../../../util/scripts/logging';
 import { uninstallContentButtonCallback } from './callbacks/uninstall-button-callback';
+import Message, { useMessage } from '../../../general/message';
 
 export const LOGGER = new Logger('uninstall-button.tsx');
 
@@ -36,21 +37,18 @@ export function UninstallButton(
       <span className="m-auto">( {selectionCount} )</span>
     );
 
+  const localize = useMessage();
   let enabled = true;
-  /* todo:locale: */
-  let helpText = 'Uninstall selected content';
+  let helpText = localize('store.toolbar.uninstall.selected');
   if (installedCount === 0) {
     enabled = false;
-    /* todo:locale: */
-    helpText = 'Select at least one extension to uninstall';
+    helpText = localize('store.toolbar.uninstall.noselection');
   } else if (onlineOnlyCount > 0) {
     enabled = false;
-    /* todo:locale: */
-    helpText = 'Cannot uninstall online content';
+    helpText = localize('store.toolbar.uninstall.cannot');
   } else if (busyCount > 0) {
     enabled = false;
-    /* todo:locale: */
-    helpText = `Cannot install content that is not idle. Please wait and then restart`;
+    helpText = localize('store.toolbar.uninstall.notidle');
   }
 
   return (
@@ -76,7 +74,9 @@ export function UninstallButton(
           <span className="ps-2">
             <XSquare />
           </span>
-          <span className="ms-auto me-auto">Uninstall</span>
+          <span className="ms-auto me-auto">
+            <Message message="store.content.uninstall" />
+          </span>
           {countElement}
         </div>
       </button>

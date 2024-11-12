@@ -264,6 +264,9 @@ export type BaseDisplayConfigElement = StylableDisplayConfigElement & {
   name: string;
   extension: Extension;
   style: CSSProperties;
+  hidden?: boolean;
+  id?: number;
+  parent?: DisplayConfigElement;
 };
 
 type ColumnableDisplayConfigElement = {

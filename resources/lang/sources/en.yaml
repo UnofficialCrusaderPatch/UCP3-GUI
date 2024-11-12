@@ -183,6 +183,11 @@ select.language: "Select the language for the GUI:"
 store.content.status.change: "This content's status changed. Please restart the GUI to finalize."
 store.filter.condensed: "Full / Condensed list"
 store.filter.installed: "Show / Hide installed content"
+store.element.activated.nouninstall: "Cannot select content as it is an activated extension. Deactivate it before uninstalling: {{name}}"
+store.element.installed.locally: This content is installed but not available online (deprecation)
+store.element.installed.online: This content is already installed and available online
+store.element.install.available: This content is available for installation
+store.element.status.processing: Processing...
 title: "Welcome to Unofficial Crusader Patch 3"
 titlebar.alt.close: "Close"
 titlebar.alt.icon: "Icon"

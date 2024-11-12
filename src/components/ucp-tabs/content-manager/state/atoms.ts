@@ -24,10 +24,12 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
   DEFAULT_CONTENT_INTERFACE_STATE,
 );
 
+export const LAST_CLICKED_CONTENT_ATOM = atom<ContentElement | undefined>();
+
 export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
 
-  if (selected.length < 1) return undefined;
+  if (selected.length < 1) return get(LAST_CLICKED_CONTENT_ATOM);
 
   const d = selected.at(-1);
 

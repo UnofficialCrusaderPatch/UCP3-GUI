@@ -7,6 +7,7 @@ import {
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STORE_ATOM,
   filteredContentElementsAtom,
+  LAST_CLICKED_CONTENT_ATOM,
   SINGLE_CONTENT_SELECTION_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
@@ -83,9 +84,21 @@ export function ContentManager() {
   const elements = useAtomValue(elementsAtom);
 
   const singleSelection = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
-  const selected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
+  // const lastSelected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
+  const lastClicked = useAtomValue(LAST_CLICKED_CONTENT_ATOM);
+  const selected = lastClicked;
   let description = '';
-  if (interfaceState.selected.length === 0) {
+
+  if (selected && !descriptionIsError) {
+    let size;
+    if (selected.contents.package.length > 0) {
+      size = selected.contents.package.at(0)!.size / 1000 / 1000;
+    }
+
+    /* todo:locale: */
+    // eslint-disable-next-line no-unsafe-optional-chaining
+    description = `\`author(s):\` ${selected.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${Math.ceil(size)} MB`}  \n\n${descriptionData}`;
+  } else if (interfaceState.selected.length === 0) {
     /* todo:locale: */
     description = '(select content to install or uninstall on the left)';
   } else if (descriptionIsError && descriptionError !== null) {
@@ -95,15 +108,7 @@ export function ContentManager() {
     /* todo:locale: */
     description = `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(singleSelection)}`;
   } else {
-    let size;
-    if (selected !== undefined) {
-      if (selected.contents.package.length > 0) {
-        size = selected.contents.package.at(0)!.size / 1000 / 1000;
-      }
-    }
-    /* todo:locale: */
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${Math.ceil(size)} MB`}  \n\n${descriptionData}`;
+    description = '(unknown state)';
   }
 
   const completed = useAtomValue(COMPLETED_CONTENT_ELEMENTS_ATOM);

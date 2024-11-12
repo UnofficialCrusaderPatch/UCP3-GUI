@@ -12,12 +12,14 @@ import {
   contentInstallationStatusAtoms,
   filteredContentElementsAtom,
   isContentInUseAtom,
+  LAST_CLICKED_CONTENT_ATOM,
 } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { getStore } from '../../../../hooks/jotai/base';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
+import Message from '../../../general/message';
 
 const shiftSelectionStartAtom = atom<string>('');
 
@@ -115,8 +117,9 @@ export function ContentElementView(props: ContentElementViewProps) {
                 verticalAlign: 'middle',
               }}
             >
-              {/* todo:locale: */}
-              <span className="visually-hidden">Processing...</span>
+              <span className="visually-hidden">
+                <Message message="store.element.status.processing" />
+              </span>
             </div>
           );
         } else if (installationStatus.action === 'error') {
@@ -141,10 +144,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 color: 'blue',
               }}
               onMouseEnter={() => {
-                /* todo:locale: */
-                setStatusBarMessage(
-                  `This content is available for installation`,
-                );
+                setStatusBarMessage(`store.element.install.available`);
               }}
               onMouseLeave={() => {
                 setStatusBarMessage(undefined);
@@ -163,10 +163,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 opacity: isInUse ? '50%' : '100%',
               }}
               onMouseEnter={() => {
-                /* todo:locale: */
-                setStatusBarMessage(
-                  `This content is already installed and available online`,
-                );
+                setStatusBarMessage(`store.element.installed.online`);
               }}
               onMouseLeave={() => {
                 setStatusBarMessage(undefined);
@@ -184,10 +181,7 @@ export function ContentElementView(props: ContentElementViewProps) {
                 color: 'darkgreen',
               }}
               onMouseEnter={() => {
-                /* todo:locale: */
-                setStatusBarMessage(
-                  `This content is installed but not available online (deprecation)`,
-                );
+                setStatusBarMessage(`store.element.installed.locally`);
               }}
               onMouseLeave={() => {
                 setStatusBarMessage(undefined);
@@ -278,6 +272,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       style={
         isInUse
           ? {
+              cursor: 'pointer',
               position: 'relative',
               ...selectedStyle,
             }
@@ -289,17 +284,23 @@ export function ContentElementView(props: ContentElementViewProps) {
       }
       onMouseEnter={() => {
         if (isInUse) {
-          /* todo:locale: */
-          setStatusBarMessage(
-            `Cannot select content as it is an activated extension. Deactivate it before uninstalling: ${name}`,
-          );
+          setStatusBarMessage({
+            key: 'store.element.activated.nouninstall',
+            args: {
+              name,
+            },
+          });
         }
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
       }}
       onClick={(e) => {
-        if (isInUse) return;
+        getStore().set(LAST_CLICKED_CONTENT_ATOM, data);
+
+        if (isInUse) {
+          return;
+        }
         let newSelection = [...contentInterfaceState.selected];
 
         const sssa = getStore().get(shiftSelectionStartAtom);
@@ -360,7 +361,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       <div className="extension-name-box">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span
-          className={`extension-name-box__name ${isInUse ? 'disabled text-muted' : ''}`}
+          className={`extension-name-box__name ${isInUse ? ' text-muted' : ''}`}
         >
           {displayName || name}
         </span>

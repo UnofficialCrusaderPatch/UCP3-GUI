@@ -27,17 +27,20 @@ export function NewsList(props: OverlayContentProps) {
 
   const newsList =
     isFetched && !isError && !isPending
-      ? data.map((ne) => (
-          <NewsItemWrapper
-            ref={
-              scrollToNewsID.length > 0 && scrollToNewsID === newsID(ne)
-                ? wrapperRef
-                : undefined
-            }
-            key={`${newsID(ne)}-wrapper`}
-            item={ne}
-          />
-        ))
+      ? data
+          // @ts-expect-error Typescript complains about subtracting Date
+          .sort((a, b) => b.meta.timestamp - a.meta.timestamp)
+          .map((ne) => (
+            <NewsItemWrapper
+              ref={
+                scrollToNewsID.length > 0 && scrollToNewsID === newsID(ne)
+                  ? wrapperRef
+                  : undefined
+              }
+              key={`${newsID(ne)}-wrapper`}
+              item={ne}
+            />
+          ))
       : null;
 
   useEffect(() => {

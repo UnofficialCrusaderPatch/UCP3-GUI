@@ -2,6 +2,7 @@ import {
   ConfigurationSuggestion,
   ConfigurationLock,
 } from '../../../../../function/configuration/state';
+import { SimpleMessageType } from '../../../../../localization/localization';
 
 const createStatusBarMessage = (
   disabledByParent: boolean,
@@ -11,24 +12,39 @@ const createStatusBarMessage = (
   lockInformation?: ConfigurationLock,
   hasSuggestion?: boolean,
   suggestionInformation?: ConfigurationSuggestion,
-) => {
-  let statusBarMessage: string | undefined;
+): SimpleMessageType | undefined => {
   if (disabledByParent) {
-    statusBarMessage = `Can't change value because of a parent element`;
-  } else if (disabledByValue) {
-    statusBarMessage = `Can't change value because it is disabled. Reason: '${valueStatement}' evaluates to 'false'`;
-  } else if (disabledByRequired && lockInformation !== undefined) {
-    statusBarMessage = `Can't change value because extension '${
-      lockInformation.lockedBy
-    }' requires value ${JSON.stringify(lockInformation.lockedValue)}`;
-  } else if (hasSuggestion && suggestionInformation !== undefined) {
-    statusBarMessage = `'${
-      suggestionInformation.suggestedBy
-    }' suggests value '${JSON.stringify(
-      suggestionInformation.suggestedValue,
-    )}'`;
+    return {
+      key: 'config.option.change.parent',
+    };
   }
-  return statusBarMessage;
+  if (disabledByValue) {
+    return {
+      key: 'config.option.disabled',
+      args: {
+        valueStatement,
+      },
+    } as SimpleMessageType;
+  }
+  if (disabledByRequired && lockInformation !== undefined) {
+    return {
+      key: 'config.option.change.required',
+      args: {
+        lockedBy: lockInformation.lockedBy,
+        lockedValue: JSON.stringify(lockInformation.lockedValue),
+      },
+    };
+  }
+  if (hasSuggestion && suggestionInformation !== undefined) {
+    return {
+      key: 'config.option.suggestion',
+      args: {
+        suggestedBy: suggestionInformation.suggestedBy,
+        suggestedValue: suggestionInformation.suggestedValue,
+      },
+    };
+  }
+  return undefined;
 };
 
 // eslint-disable-next-line import/prefer-default-export

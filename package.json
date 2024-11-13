@@ -65,6 +65,7 @@
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.26.2",
+    "react-search-autocomplete": "^8.5.2",
     "rehype-highlight": "^7.0.0",
     "semver": "^7.6.3",
     "tauri-plugin-upload-api": "github:tauri-apps/tauri-plugin-upload#v1",

@@ -22,7 +22,7 @@ function collectTextFromOptionEntries(
   const addToCollection = (obj: URLTextObject) => {
     const id = collect.length + 1;
     // eslint-disable-next-line no-param-reassign
-    collect.push({ ...obj, id });
+    collect.push({ url: obj.url, text: obj.text.replace('undefined', ''), id });
 
     return id;
   };
@@ -175,10 +175,10 @@ export const SEARCH_RESULTS_ATOM = atom((get) => {
   }
 
   const ms = get(MINISEARCH_ATOM);
-  const results = ms.search(query, { 
-    fuzzy: 0.1, 
-    prefix: true, 
-    combineWith: 'AND',
+  const results = ms.search(query, {
+    prefix: (term) => term.length >= 3,
+    fuzzy: (term) => (term.length >= 5 ? 0.1 : false),
+    // combineWith: 'AND',
   });
 
   return results;

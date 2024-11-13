@@ -30,6 +30,22 @@ function shouldBeIncluded(included: Set<number>, d: DisplayConfigElement) {
   return false;
 }
 
+function sumScore(
+  scores: { [id: number]: number },
+  d: DisplayConfigElement,
+): number {
+  if (d.id === undefined) return 0;
+  if (d.display === 'Group' || d.display === 'GroupBox') {
+    return (
+      scores[d.id] +
+      d.children
+        .map((c) => sumScore(scores, c))
+        .reduce((total, value) => total + value)
+    );
+  }
+  return scores[d.id];
+}
+
 /**
  * Note that the filtering doesn't filter children of Group and GroupBox elements
  * So if any of the children of a Group should be included, then the entire Group
@@ -41,10 +57,22 @@ export const FILTERED_OPTIONS = atom((get) => {
   const results = get(SEARCH_RESULTS_ATOM);
   if (results) {
     const ids = new Set(results.map((sr) => sr.id));
+    const idScoreMap: { [id: number]: number } = Object.fromEntries(
+      results.map((r) => [r.id, r.score]),
+    );
 
-    ConsoleLogger.info(results);
+    ConsoleLogger.info('results', results);
 
-    return all.filter((oe) => shouldBeIncluded(ids, oe));
+    return all
+      .filter((oe) => shouldBeIncluded(ids, oe))
+      .sort((a, b) => {
+        if (a.id !== undefined && b.id !== undefined) {
+          const scoreA = sumScore(idScoreMap, a);
+          const scoreB = sumScore(idScoreMap, b);
+          return scoreB - scoreA;
+        }
+        return 0;
+      });
   }
 
   return all;

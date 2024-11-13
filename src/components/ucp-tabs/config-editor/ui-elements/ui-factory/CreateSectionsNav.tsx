@@ -1,13 +1,12 @@
 import { Search } from 'react-bootstrap-icons';
 import { useState } from 'react';
-import { useAtom } from 'jotai';
 
 import { SectionDescription } from '../../../../../config/ucp/common';
 import NavSection from './navigation/NavSection';
 
 import sanitizeID from '../sanitize-id';
-import Message, { useMessage } from '../../../../general/message';
-import { SEARCH_QUERY_ATOM } from './sections/search';
+import Message from '../../../../general/message';
+import { SearchBox } from './sections/SearchBox';
 
 function CreateSectionsNav(args: { spec: SectionDescription }) {
   const { spec } = args;
@@ -27,11 +26,6 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
 
   const [searchToggle, setSearchToggle] = useState(true);
 
-  const localize = useMessage();
-  const searchWord = localize('search');
-
-  const [searchQuery, setSearchQuery] = useAtom(SEARCH_QUERY_ATOM);
-
   return (
     <div className="config-navbar ui-element">
       <div className="config-navbar__header d-flex justify-content-start w-100">
@@ -44,17 +38,7 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
           <Search onClick={() => setSearchToggle(!searchToggle)} />
         </div>
       </div>
-      {searchToggle ? (
-        <div className="d-flex justify-content-start w-100 py-1">
-          <input
-            className="flex-grow-1"
-            type="search"
-            placeholder={searchWord}
-            defaultValue={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      ) : null}
+      {searchToggle ? <SearchBox /> : null}
       <nav className="outline-border config-navbar__nav">
         {level1.length > 0 ? (
           <>

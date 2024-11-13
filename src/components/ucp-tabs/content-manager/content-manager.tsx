@@ -7,6 +7,7 @@ import {
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STORE_ATOM,
   filteredContentElementsAtom,
+  LAST_CLICKED_CONTENT_ATOM,
   SINGLE_CONTENT_SELECTION_ATOM,
 } from './state/atoms';
 import { SaferMarkdown } from '../../markdown/safer-markdown';
@@ -17,7 +18,7 @@ import {
 } from './description/fetching';
 import { ContentFilterButton } from './buttons/filter-button';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
-import Message from '../../general/message';
+import Message, { useMessage } from '../../general/message';
 import { ExtensionFilterButton } from './buttons/extension-filter-button';
 
 const LOGGER = new Logger('content-manager.tsx');
@@ -61,17 +62,22 @@ export function ContentManager() {
     /* todo:locale: */
     msg = (
       <StatusElement>
-        Fetching online content... Do you have an internet connection?
+        <Message message="store.fetching.connection" />
       </StatusElement>
     );
-    /* todo:locale: */
-  } else if (isPending) msg = <StatusElement>Loading...</StatusElement>;
-
-  if (isError && error !== null) {
-    /* todo:locale: */
+  } else if (isPending)
     msg = (
       <StatusElement>
-        <strong>Failed to fetch online content:</strong>
+        <Message message="store.loading" />
+      </StatusElement>
+    );
+
+  if (isError && error !== null) {
+    msg = (
+      <StatusElement>
+        <strong>
+          <Message message="store.fetching.failed" />
+        </strong>
         <br />
         <br />
         {error.toString()}
@@ -83,27 +89,47 @@ export function ContentManager() {
   const elements = useAtomValue(elementsAtom);
 
   const singleSelection = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
-  const selected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
+  // const lastSelected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
+  const lastClicked = useAtomValue(LAST_CLICKED_CONTENT_ATOM);
+  const selected = lastClicked;
   let description = '';
-  if (interfaceState.selected.length === 0) {
-    /* todo:locale: */
-    description = '(select content to install or uninstall on the left)';
+
+  const localize = useMessage();
+
+  if (selected && !descriptionIsError) {
+    let size;
+    if (selected.contents.package.length > 0) {
+      size = selected.contents.package.at(0)!.size / 1000 / 1000;
+    }
+
+    // eslint-disable-next-line no-unsafe-optional-chaining
+    const { author } = selected.definition;
+    const headerSize =
+      size === undefined || size === 0 || size === null
+        ? '?'
+        : `${Math.ceil(size)} MB`;
+    const header = localize({
+      key: 'store.selection.description.authorsize',
+      args: {
+        author,
+        size: headerSize,
+      },
+    });
+    description = `${header}  \n\n${descriptionData}`;
+  } else if (interfaceState.selected.length === 0) {
+    description = localize('store.selection.instruction');
   } else if (descriptionIsError && descriptionError !== null) {
     LOGGER.msg(
       (descriptionError === null ? '' : descriptionError).toString(),
     ).error();
-    /* todo:locale: */
-    description = `*(failed to fetch online description, displaying a short inline description below if available)*  \n\n${distillInlineDescription(singleSelection)}`;
+    description = localize({
+      key: 'store.selection.fetch.failed',
+      args: {
+        inline: distillInlineDescription(singleSelection),
+      },
+    });
   } else {
-    let size;
-    if (selected !== undefined) {
-      if (selected.contents.package.length > 0) {
-        size = selected.contents.package.at(0)!.size / 1000 / 1000;
-      }
-    }
-    /* todo:locale: */
-    // eslint-disable-next-line no-unsafe-optional-chaining
-    description = `\`author(s):\` ${selected?.definition.author} \`size:\` ${size === undefined || size === 0 || size === null ? '?' : `${Math.ceil(size)} MB`}  \n\n${descriptionData}`;
+    description = '(unknown state)';
   }
 
   const completed = useAtomValue(COMPLETED_CONTENT_ELEMENTS_ATOM);
@@ -130,8 +156,7 @@ export function ContentManager() {
         <div className="extension-manager-control__header-container">
           <div className="extension-manager-control__header">
             <h4 className="extension-manager-control__box__header__headline">
-              {/* todo:locale: */}
-              Online Content
+              <Message message="store.content.online" />
             </h4>
             <div className="extension-manager-control__box__header__buttons">
               {restartElement}
@@ -141,8 +166,7 @@ export function ContentManager() {
           </div>
           <div className="extension-manager-control__header">
             <h4 className="extension-manager-control__box__header__headline">
-              {/* todo:locale: */}
-              Description
+              <Message message="store.content.description" />
             </h4>
           </div>
         </div>

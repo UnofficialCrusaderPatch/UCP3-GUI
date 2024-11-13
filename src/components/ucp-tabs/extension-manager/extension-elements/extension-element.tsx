@@ -401,7 +401,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
   return (
     <ExtensionElement
       ext={ext}
-      fixedVersion={false}
+      fixedVersion={availableVersions.length <= 1}
       active={false}
       movability={{ up: false, down: false }}
       buttonText="activate"

@@ -11,6 +11,7 @@ import { HIDDEN_NEWS_HIGHLIGHTS_ATOM } from '../../../function/gui-settings/sett
 import { getStore } from '../../../hooks/jotai/base';
 import { NewsList } from '../../news/news-list';
 import { setOverlayContent } from '../../overlay/overlay';
+import Message from '../../general/message';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function camelCase(s: string) {
@@ -92,7 +93,11 @@ export function NewsHighlights(props: object) {
   const hiddenHighlights = useAtomValue(HIDDEN_NEWS_HIGHLIGHTS_ATOM);
 
   if (highlights.length === 0) {
-    return <div>No news today</div>;
+    return (
+      <div>
+        <Message message="news.none" />
+      </div>
+    );
   }
   return (
     <div
@@ -106,7 +111,7 @@ export function NewsHighlights(props: object) {
       }}
     >
       <h3 className="border-bottom pb-2" style={{ marginBottom: '1.25rem' }}>
-        News
+        <Message message="news.title" />
       </h3>
       <div className="h-100 px-3 pb-3" style={{ overflowY: 'scroll' }}>
         {highlights

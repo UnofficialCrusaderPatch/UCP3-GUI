@@ -54,6 +54,8 @@ extensions.config.view: 'View config file'
 extensions.customisations: Customisations
 extensions.activated: "Activated extensions"
 extensions.available: "Available extensions"
+extensions.dependencies.missing.title: "Error: missing dependencies"
+extensions.dependencies.missing.message: "Please be aware of the following missing dependencies:\n\n{{messages}}\n\nTry installing them by visiting the Store"
 extensions.extension.customisations.clear: Clear customisations
 extensions.extension.customisations.saveCurrent.title: Save current config?
 extensions.extension.customisations.saveCurrent.message: Customizing an extension will drop current unsaved changes to your config. Save your current config and changes?
@@ -132,6 +134,7 @@ messages: "{{count}} messages"
 modal.create.plugin.modpack: "Also create a modpack"
 news.title: "News"
 news.button: "News"
+news.none: "No news today"
 no: "No"
 ok: "Ok"
 old.folders: "Use one of the recently used folders:"
@@ -180,9 +183,34 @@ save: "Save"
 select.folder: "Browse to a Stronghold Crusader installation folder to get started:"
 select.folder.browse: "Browse..."
 select.language: "Select the language for the GUI:"
+store.content.online: "Online Content"
+store.content.description: "Description"
 store.content.status.change: "This content's status changed. Please restart the GUI to finalize."
+store.content.uninstall: Uninstall
 store.filter.condensed: "Full / Condensed list"
 store.filter.installed: "Show / Hide installed content"
+store.element.activated.nouninstall: "Cannot select content as it is an activated extension. Deactivate it before uninstalling: {{name}}"
+store.element.installed.locally: This content is installed but not available online (deprecation)
+store.element.installed.online: This content is already installed and available online
+store.element.install.available: This content is available for installation
+store.element.status.processing: Processing...
+store.fetching.connection: Fetching online content... Do you have an internet connection?
+store.fetching.failed: "Failed to fetch online content:"
+store.loading: "Loading..."
+store.selection.instruction: "(select content to install or uninstall on the left)"
+store.selection.fetch.failed: "*(failed to fetch online description, displaying a short inline description below if available)*  \n\n{{inline}}"
+store.selection.description.authorsize: "\\`author(s):\\` {{author}} \\`size:\\` {{size}}"
+store.tab: "Store"
+store.tab.processing: "Some content is still processing, please wait until finished. Waiting for ... {{lock}}"
+store.toolbar.install: "Install"
+store.toolbar.install.selected: "Install selected content"
+store.toolbar.install.cannot: "Selection includes already installed content"
+store.toolbar.install.noselection: "Select at least one content element"
+store.toolbar.install.notidle: Cannot install content when other content is processing. Please wait first
+store.toolbar.uninstall.cannot: "Cannot uninstall online content"
+store.toolbar.uninstall.notidle: "Cannot install content that is not idle. Please wait and then restart"
+store.toolbar.uninstall.selected: "Uninstall selected content"
+store.toolbar.uninstall.noselection: Select at least one extension to uninstall
 title: "Welcome to Unofficial Crusader Patch 3"
 titlebar.alt.close: "Close"
 titlebar.alt.icon: "Icon"

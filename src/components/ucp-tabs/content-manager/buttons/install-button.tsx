@@ -8,6 +8,7 @@ import {
 } from '../state/atoms';
 import { CONTENT_TREE_ATOM } from './callbacks/dependency-management';
 import { installContentButtonCallback } from './callbacks/install-button-callback';
+import Message, { useMessage } from '../../../general/message';
 
 // eslint-disable-next-line import/prefer-default-export
 export function InstallButton(
@@ -36,22 +37,22 @@ export function InstallButton(
   ).length;
   const busyCount = useAtomValue(BUSY_CONTENT_ELEMENTS_ATOM).length;
 
+  const localize = useMessage();
   let enabled = true;
   /* todo:locale: */
-  let helpText = 'Install selected content';
+  let helpText = localize('store.toolbar.install.selected');
   if (installedCount > 0) {
     enabled = false;
     /* todo:locale: */
-    helpText = 'Selection includes already installed content';
+    helpText = localize('store.toolbar.install.cannot');
   } else if (onlineOnlyCount === 0) {
     enabled = false;
     /* todo:locale: */
-    helpText = 'Select at least one content element';
+    helpText = localize('store.toolbar.install.noselection');
   } else if (busyCount > 0) {
     enabled = false;
     /* todo:locale: */
-    helpText =
-      'Cannot install content when other content is processing. Please wait first';
+    helpText = localize('store.toolbar.install.notidle');
   }
 
   const tree = useAtomValue(CONTENT_TREE_ATOM);
@@ -79,7 +80,9 @@ export function InstallButton(
           <span className="ps-2">
             <Download />
           </span>
-          <span className="ms-auto me-auto">Install</span>
+          <span className="ms-auto me-auto">
+            <Message message="store.toolbar.install" />
+          </span>
           {countElement}
         </div>
       </button>

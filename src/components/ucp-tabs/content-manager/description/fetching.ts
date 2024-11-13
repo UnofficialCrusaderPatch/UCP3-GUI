@@ -4,7 +4,7 @@ import {
   InlineDescriptionContent,
   OnlineDescriptionContent,
 } from '../../../../function/content/store/fetch';
-import { SINGLE_CONTENT_SELECTION_ATOM } from '../state/atoms';
+import { LAST_CLICKED_CONTENT_ATOM } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 
 export function distillInlineDescription(e?: ContentElement) {
@@ -66,7 +66,7 @@ async function resolveDescription({
 }
 
 export const SELECTED_CONTENT_DESCRIPTION_ATOM = atomWithQuery((get) => ({
-  queryKey: ['description', get(SINGLE_CONTENT_SELECTION_ATOM)] as [
+  queryKey: ['description', get(LAST_CLICKED_CONTENT_ATOM)] as [
     string,
     ContentElement?,
   ],
@@ -74,5 +74,5 @@ export const SELECTED_CONTENT_DESCRIPTION_ATOM = atomWithQuery((get) => ({
   retry: false,
   staleTime: Infinity,
   placeholderData: () =>
-    distillInlineDescription(get(SINGLE_CONTENT_SELECTION_ATOM)),
+    distillInlineDescription(get(LAST_CLICKED_CONTENT_ATOM)),
 }));

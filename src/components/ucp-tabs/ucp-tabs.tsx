@@ -43,7 +43,7 @@ import {
 } from './content-manager/state/atoms';
 import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
-import Message from '../general/message';
+import Message, { useMessage } from '../general/message';
 import { reloadCurrentGameFolder } from '../../function/game-folder/modifications/reload-current-game-folder';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
@@ -115,6 +115,8 @@ export default function UcpTabs() {
     EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
   );
 
+  const localize = useMessage();
+
   return (
     <div
       className="ucp-tabs fs-7"
@@ -143,7 +145,12 @@ export default function UcpTabs() {
             onMouseEnter={() => {
               if (contentTabLock > 0) {
                 setStatusBarMessage(
-                  `Some content is still processing, please wait until finished. Waiting for ... ${contentTabLock}`,
+                  localize({
+                    key: 'store.tab.processing',
+                    args: {
+                      lock: `${contentTabLock}`,
+                    },
+                  }),
                 );
               }
             }}
@@ -182,8 +189,11 @@ export default function UcpTabs() {
                   if (messages.length === 0) return;
 
                   await showModalOk({
-                    title: 'Error: missing dependencies',
-                    message: `Please be aware of the following missing dependencies:\n\n${messages.join('\n')}\n\nTry installing them by visiting the Store`,
+                    title: 'extensions.dependencies.missing.title',
+                    message: {
+                      key: `extensions.dependencies.missing.message`,
+                      args: { message: messages.join('\n') },
+                    },
                     handleAction: () => setShowErrorsWarning(false),
                   });
 
@@ -221,7 +231,7 @@ export default function UcpTabs() {
               disabled={currentFolder === ''}
               hidden={currentFolder === ''}
             >
-              Store
+              <Message message="store.tab" />
             </Nav.Link>
           </Nav.Item>
           <Nav.Item>

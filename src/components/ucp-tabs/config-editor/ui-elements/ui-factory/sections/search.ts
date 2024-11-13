@@ -159,6 +159,7 @@ export const MINISEARCH_ATOM = atom<MiniSearch>((get) => {
   const ms = new MiniSearch({
     fields: ['text', 'url'],
     storeFields: ['url'],
+    combineWith: 'AND',
   });
 
   ms.addAll(get(OPTIONS_TEXT_ATOM));

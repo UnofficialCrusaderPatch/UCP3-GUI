@@ -159,7 +159,6 @@ export const MINISEARCH_ATOM = atom<MiniSearch>((get) => {
   const ms = new MiniSearch({
     fields: ['text', 'url'],
     storeFields: ['url'],
-    combineWith: 'AND',
   });
 
   ms.addAll(get(OPTIONS_TEXT_ATOM));
@@ -176,7 +175,11 @@ export const SEARCH_RESULTS_ATOM = atom((get) => {
   }
 
   const ms = get(MINISEARCH_ATOM);
-  const results = ms.search(query, { fuzzy: 0.1, prefix: true });
+  const results = ms.search(query, { 
+    fuzzy: 0.1, 
+    prefix: true, 
+    combineWith: 'AND',
+  });
 
   return results;
 });

@@ -29,6 +29,7 @@ export type ToastProps = ToastConfig & {
   body: MessageType;
   alternativeMessageSource?: MessageResolverAtom;
   type?: ToastType;
+  onClick?: () => void;
 };
 
 type ToastState = ToastProps;
@@ -91,6 +92,7 @@ function TheToast(props: { id: string; state: ToastState }) {
     customDelay,
     customCSSClass,
     alternativeMessageSource,
+    onClick,
   } = state;
   return (
     <Toast
@@ -111,7 +113,20 @@ function TheToast(props: { id: string; state: ToastState }) {
         </strong>
       </Toast.Header>
       <Toast.Body className="text-dark">
-        <Message message={body} alternativeSource={alternativeMessageSource} />
+        {onClick ? (
+          // eslint-disable-next-line jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+          <a onClick={onClick} href="#">
+            <Message
+              message={body}
+              alternativeSource={alternativeMessageSource}
+            />
+          </a>
+        ) : (
+          <Message
+            message={body}
+            alternativeSource={alternativeMessageSource}
+          />
+        )}
       </Toast.Body>
     </Toast>
   );

@@ -72,6 +72,8 @@
     "bootstrap"
   ],
   "ignoreUnimported": [
+    "C:/Users/Frank/Projects/sourcehold/UnofficialCrusaderPatch/UCP3-GUI-rust/src/function/game-folder/modifications/activate-first-time-use-extensions.ts",
+    "C:\\Users\\Frank\\Projects\\sourcehold\\UnofficialCrusaderPatch\\UCP3-GUI-rust\\src\\function\\game-folder\\modifications\\activate-first-time-use-extensions.ts",
     "src/components/sandbox-menu/sandbox-frame-base.js",
     "src/components/ucp-tabs/common/buttons/customize-button.tsx",
     "src/components/ucp-tabs/common/create-pack-button-callback.tsx",

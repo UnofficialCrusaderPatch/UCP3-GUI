@@ -276,6 +276,9 @@ export class ExtensionDependencyTree extends DependencyTree {
   }
 
   reverseExtensionDependenciesFor(ext: Extension) {
+    if (ext === null || ext === undefined) {
+      throw Error(`extension is null`);
+    }
     return this.reverseDependenciesFor(`${ext.name}@${ext.version}`).map(
       (p) => this.extensionsById[p.id],
     );

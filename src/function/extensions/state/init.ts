@@ -4,7 +4,10 @@ import { clearConfiguration } from '../../configuration/clearConfiguration';
 import { createEmptyConfigurationState } from '../../configuration/state';
 import { ExtensionDependencyTree } from '../dependency-management/dependency-resolution';
 import { ExtensionsState } from '../extensions-state';
-import { EXTENSION_STATE_REDUCER_ATOM } from './state';
+import {
+  EXTENSION_STATE_REDUCER_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
+} from './state';
 
 // eslint-disable-next-line import/prefer-default-export
 export function createBasicExtensionsState(
@@ -31,7 +34,7 @@ export function clearConfigurationAndSetNewExtensionsState(
   newExtensionsState: ExtensionsState,
 ) {
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
-
+  getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, {});
   // This clear needs to be after the new extension state is set
   // Otherwise the GUI tries to use default values that have been wiped
   clearConfiguration();

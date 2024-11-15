@@ -372,7 +372,11 @@ export function GhostElement(props: { ext: Extension }) {
 export function InactiveExtensionsElement(props: { exts: Extension[] }) {
   const { exts } = props;
 
-  const { name } = exts[0];
+  if (exts.length === 0) {
+    throw Error(`no extensions`);
+  }
+
+  const { name } = exts.at(0)!;
 
   const versions: AvailableExtensionVersionsDictionary = useAtomValue(
     AVAILABLE_EXTENSION_VERSIONS_ATOM,
@@ -387,7 +391,14 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
       ? availableVersions[0]
       : preferredVersions[name];
 
-  const ext = exts.filter((e) => e.version === preferredVersion)[0];
+  const ext = exts.filter((e) => e.version === preferredVersion).at(0);
+
+  if (ext === undefined) {
+    throw Error(
+      'InactiveExtensionElement has no version that is the preferred version',
+    );
+    return null;
+  }
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 

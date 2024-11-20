@@ -2,11 +2,15 @@
 
 // gynt: I tried putting this in the test files themselves (and use beforeAll).
 // That did not work as the mock is (somehow) called too late.
-import { mockIPC, mockWindows } from '@tauri-apps/api/mocks';
+import { clearMocks, mockIPC, mockWindows } from '@tauri-apps/api/mocks';
 
 if (process && process.env && process.env.VITEST) {
-  mockWindows('main');
-  mockIPC(() => {});
+  clearMocks();
+
+  if (process && process.env && process.env.VITEST) {
+    mockWindows('main');
+    mockIPC(() => {});
+  }
 }
 
 // used to globally store hooks tauri hooks

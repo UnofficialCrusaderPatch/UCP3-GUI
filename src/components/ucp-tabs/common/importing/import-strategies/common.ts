@@ -25,7 +25,7 @@ export type GenericFailure = {
 export type MissingDependenciesFailure = {
   status: 'error';
   messages: string[];
-  code: 'MISSING_DEPENDENCIES';
+  code: 'MISSING_DEPENDENCIES' | 'MISSING_DEPENDENCIES_OR_WRONG_ORDER';
   dependencies: string[];
 };
 

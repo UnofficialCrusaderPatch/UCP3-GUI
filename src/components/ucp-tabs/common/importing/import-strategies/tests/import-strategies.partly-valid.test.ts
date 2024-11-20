@@ -1,6 +1,8 @@
 /**
- * Tests whether a simple situation of a valid config of 3 explicitly
+ * Tests whether a simple situation of a partly valid config of 3 explicitly
  * activated extensions with 1 interdependency (extreme-is-the-new-normal depends on graphicsApiReplacer).
+ * The invalid part is the load order in the full part of the config.
+ *
  * Can be solved deterministically by the import strategies.
  *
  * To generate the data for a test like this, pause in the Webview2 Debugger and use the Console
@@ -10,12 +12,12 @@
 /* eslint-disable import/first */
 import { describe, expect, test } from 'vitest';
 
-import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
-import { attemptStrategies } from '../import-button-callback';
-import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../../testing/dump-extensions-state';
-import { extensionToID } from '../../../../../function/extensions/dependency-management/dependency-resolution';
-import { fullStrategy } from './full-strategy';
-import { sparseStrategy } from './sparse-strategy';
+import { ExtensionsState } from '../../../../../../function/extensions/extensions-state';
+import { attemptStrategies } from '../../import-button-callback';
+import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../../../testing/dump-extensions-state';
+import { extensionToID } from '../../../../../../function/extensions/dependency-management/dependency-resolution';
+import { fullStrategy } from '../full-strategy';
+import { sparseStrategy } from '../sparse-strategy';
 
 const configFileJSON = `{
   "meta": {
@@ -758,14 +760,6 @@ const configFileJSON = `{
               "version": "2.15.1"
           },
           {
-              "extension": "winProcHandler",
-              "version": "0.2.0"
-          },
-          {
-              "extension": "graphicsApiReplacer",
-              "version": "1.2.0"
-          },
-          {
               "extension": "files",
               "version": "1.1.0"
           },
@@ -776,6 +770,14 @@ const configFileJSON = `{
           {
               "extension": "extreme-is-the-new-normal",
               "version": "1.0.0"
+          },
+          {
+              "extension": "winProcHandler",
+              "version": "0.2.0"
+          },
+          {
+              "extension": "graphicsApiReplacer",
+              "version": "1.2.0"
           },
           {
               "extension": "aicloader",
@@ -968,7 +970,7 @@ const extensionsJson = `
 // temp2.map((ext) => ({name: ext.name, version: ext.version, type: ext.type, definition: {...ext.definition, dependencies: Object.fromEntries(Object.entries(ext.definition.dependencies).map((v) => [v[0], v[1].raw]))}, configEntries: ext.configEntries}))
 
 describe('attemptStrategies', () => {
-  test('attemptStrategies on valid state', async () => {
+  test('attemptStrategies on partly valid state', async () => {
     const extensionsState: ExtensionsState =
       deserializeSimplifiedSerializedExtensionsStateFromExtensions(
         JSON.parse(extensionsJson),
@@ -989,20 +991,21 @@ describe('attemptStrategies', () => {
         (ext) => extensionToID(ext),
       );
 
+      // Because we did fall back to sparse strategy we expect to see that result
       expect(ids).toStrictEqual([
-        'running-units@1.0.1',
-        'aicloader@1.1.1',
         'extreme-is-the-new-normal@1.0.0',
         'maploader@1.0.0',
         'files@1.1.0',
+        'ucp2-legacy@2.15.1',
         'graphicsApiReplacer@1.2.0',
         'winProcHandler@0.2.0',
-        'ucp2-legacy@2.15.1',
+        'running-units@1.0.1',
+        'aicloader@1.1.1',
       ]);
     }
   });
 
-  test('fullStrategy on valid state', async () => {
+  test('fullStrategy on partly valid state', async () => {
     const extensionsState: ExtensionsState =
       deserializeSimplifiedSerializedExtensionsStateFromExtensions(
         JSON.parse(extensionsJson),
@@ -1015,27 +1018,15 @@ describe('attemptStrategies', () => {
       () => {},
     );
 
-    expect(strategyResult.status === 'ok').toBe(true);
+    expect(strategyResult.status === 'ok').toBe(false);
 
-    if (strategyResult.status === 'ok') {
-      const ids = strategyResult.newExtensionsState.activeExtensions.map(
-        (ext) => extensionToID(ext),
-      );
-
-      expect(ids).toStrictEqual([
-        'running-units@1.0.1',
-        'aicloader@1.1.1',
-        'extreme-is-the-new-normal@1.0.0',
-        'maploader@1.0.0',
-        'files@1.1.0',
-        'graphicsApiReplacer@1.2.0',
-        'winProcHandler@0.2.0',
-        'ucp2-legacy@2.15.1',
-      ]);
+    if (strategyResult.status === 'error') {
+      expect(strategyResult.code).toBe('MISSING_DEPENDENCIES_OR_WRONG_ORDER');
+      expect(strategyResult.messages.join('\n')).toBe('');
     }
   });
 
-  test('sparseStrategy on valid state', async () => {
+  test('sparseStrategy on partly valid state', async () => {
     const extensionsState: ExtensionsState =
       deserializeSimplifiedSerializedExtensionsStateFromExtensions(
         JSON.parse(extensionsJson),

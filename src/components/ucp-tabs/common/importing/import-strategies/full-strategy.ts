@@ -141,7 +141,7 @@ export async function fullStrategy(
             return {
               status: 'error',
               messages: [],
-              code: 'MISSING_DEPENDENCIES',
+              code: 'MISSING_DEPENDENCIES_OR_WRONG_ORDER',
               dependencies: [msg2],
             } as MissingDependenciesFailure;
           }

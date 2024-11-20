@@ -122,28 +122,27 @@ export async function attemptStrategies(
       LOGGER.msg(fullStrategyResult.messages.join('\n')).error();
       return fullStrategyResult;
     }
+    LOGGER.msg(fullStrategyResult.messages.join('\n')).error();
 
-    if (fullStrategyResult.code === 'MISSING_DEPENDENCIES') {
-      // Continue with sparse mode
-      LOGGER.msg('Attempting sparse strategy').debug();
-      const sparseStrategyResult = await sparseStrategy(
-        newExtensionsState,
-        config,
-        setConfigStatus,
-      );
+    // Continue with sparse mode
+    LOGGER.msg('Attempting sparse strategy').debug();
+    const sparseStrategyResult = await sparseStrategy(
+      newExtensionsState,
+      config,
+      setConfigStatus,
+    );
 
-      if (sparseStrategyResult.status === 'error') {
-        // Attempt the full strategy
-        LOGGER.msg(sparseStrategyResult.messages.join('\n')).error();
+    if (sparseStrategyResult.status === 'error') {
+      // Attempt the full strategy
+      LOGGER.msg(sparseStrategyResult.messages.join('\n')).error();
 
-        await showModalOk({
-          title: 'Failed to import config',
-          message: `Import failed. Reason:\n\n${sparseStrategyResult.messages.join('\n')}`,
-        });
-        return sparseStrategyResult;
-      }
-      strategyResult = sparseStrategyResult;
+      await showModalOk({
+        title: 'Failed to import config',
+        message: `Import failed. Reason:\n\n${sparseStrategyResult.messages.join('\n')}`,
+      });
+      return sparseStrategyResult;
     }
+    strategyResult = sparseStrategyResult;
   }
 
   if (strategyResult.status !== 'ok') {

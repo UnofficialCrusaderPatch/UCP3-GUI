@@ -6,6 +6,7 @@ import { clearConfigurationAndSetNewExtensionsState } from '../../extensions/sta
 import { UCP_CONFIG_YML } from '../../global/constants/file-constants';
 import { FIRST_TIME_USE_ATOM } from '../../gui-settings/settings';
 import { LOGGER } from '../logger';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -18,7 +19,7 @@ export async function loadExtensionsState(
 
   clearConfigurationAndSetNewExtensionsState(newExtensionsState);
 
-  let newerExtensionState = newExtensionsState;
+  const newerExtensionState = newExtensionsState;
 
   if (await exists(file)) {
     getStore().set(FIRST_TIME_USE_ATOM, false);
@@ -38,7 +39,7 @@ export async function loadExtensionsState(
     if (getStore().get(FIRST_TIME_USE_ATOM)) {
       LOGGER.msg('first time use!').info();
 
-      newerExtensionState = activateFirstTimeUseExtensions(newExtensionsState);
+      // newerExtensionState = activateFirstTimeUseExtensions(newExtensionsState);
       // getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
 
       // getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);

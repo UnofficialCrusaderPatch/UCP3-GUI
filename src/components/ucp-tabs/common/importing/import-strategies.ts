@@ -349,7 +349,8 @@ export async function fullStrategy(
                     semver.satisfies(e.definition.version, range),
                 ).length === 0,
             )
-            .map(([name]) => name);
+            .map(([name]) => name)
+            .filter((name) => ['frontend', 'framework'].indexOf(name) === -1);
 
           if (missingExtensionNames.length > 0) {
             const msg2 = missingExtensionNames.join(' ');
@@ -394,7 +395,7 @@ export async function fullStrategy(
       status: 'error',
       code: 'GENERIC',
       messages: ['no sparse "load-order" found in config file'],
-    };
+    } as GenericFailure;
   }
 
   return {

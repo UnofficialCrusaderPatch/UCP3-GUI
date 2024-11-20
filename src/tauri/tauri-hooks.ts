@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-// gynt: I tried putting this in the test files themselves.
+// gynt: I tried putting this in the test files themselves (and use beforeAll).
 // That did not work as the mock is (somehow) called too late.
 import { mockIPC, mockWindows } from '@tauri-apps/api/mocks';
 

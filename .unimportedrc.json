@@ -81,6 +81,7 @@
     "src/function/global/array-reducer.ts",
     "src/function/window-actions.ts",
     "src/hooks/general/util.ts",
-    "src/tauri/tauri-misc.ts"
+    "src/tauri/tauri-misc.ts",
+    "src/testing/dump-extensions-state.ts"
   ]
 }

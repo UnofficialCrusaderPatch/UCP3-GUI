@@ -32,13 +32,6 @@ import { MessageType } from '../../../../localization/localization';
 
 const LOGGER = new Logger('import-button-callback.tsx');
 
-export function sanitizeVersionRange(rangeString: string) {
-  if (rangeString.indexOf('==') !== -1) {
-    return rangeString.replaceAll('==', '');
-  }
-  return rangeString;
-}
-
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
 
@@ -96,82 +89,19 @@ export function constructUserConfigObjects(config: ConfigFile) {
   };
 }
 
-async function importButtonCallback(
-  gameFolder: string,
+export async function attemptStrategies(
+  config: ConfigFile,
+  extensionsState: ExtensionsState,
   setConfigStatus: (message: MessageType) => void,
-  localizeString: (message: string) => string,
-  file: string | undefined,
 ) {
-  // Get the current extension state
-  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
-
-  // ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
-
-  // Get which elements have been touched
-  const configurationTouched = getStore().get(
-    CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  );
-
-  let path = file;
-
-  // If source file hasn't been specified, open up a dialog to specify it.
-  if (file === undefined || file.length === 0) {
-    const pathResult = await openFileDialog(gameFolder, [
-      {
-        name: localizeString('file.config'),
-        extensions: ['yml', 'yaml'],
-      },
-      { name: localizeString('file.all'), extensions: ['*'] },
-    ]);
-    if (pathResult.isEmpty()) {
-      setConfigStatus('config.status.no.file');
-      return;
-    }
-
-    path = pathResult.get();
-  }
-
-  // The user cancelled the action
-  if (path === undefined) return;
-
-  // Warn clearing of configuration because of touched configuration values
-  // Before importing was initialized.
-  const clearingConfirmation =
-    await warnClearingOfConfiguration(configurationTouched);
-  if (!clearingConfirmation) return;
-
   // Create a new extension state by setting the active Extensions and explicitly active extensions to empty arrays
   // Also wipe the current configuration and rebuild it from scratch
-  let newExtensionsState = {
+  const newExtensionsState = {
     ...extensionsState,
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
     configuration: createEmptyConfigurationState(),
   } as ExtensionsState;
-
-  // Parse the config file
-  const parsingResult: {
-    status: string;
-    message: string;
-    result: ConfigFile;
-  } = await loadConfigFromFile(path);
-
-  // ConsoleLogger.debug(`Parsing result: `, parsingResult);
-
-  if (parsingResult.status !== 'OK') {
-    setConfigStatus(
-      (localize) =>
-        `${parsingResult.status}: ${localize(parsingResult.message)}`,
-    );
-    return;
-  }
-
-  if (parsingResult.result === undefined) {
-    setConfigStatus('config.status.failed.unknown');
-    return;
-  }
-
-  const config = parsingResult.result;
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
   // Get the load order from the sparse part of the config file
@@ -188,7 +118,7 @@ async function importButtonCallback(
   if (fullStrategyResult.status === 'error') {
     if (fullStrategyResult.code === 'GENERIC') {
       LOGGER.msg(fullStrategyResult.messages.join('\n')).error();
-      return;
+      return fullStrategyResult;
     }
 
     if (fullStrategyResult.code === 'MISSING_DEPENDENCIES') {
@@ -208,7 +138,7 @@ async function importButtonCallback(
           title: 'Failed to import config',
           message: `Import failed. Reason:\n\n${sparseStrategyResult.messages.join('\n')}`,
         });
-        return;
+        return sparseStrategyResult;
       }
       strategyResult = sparseStrategyResult;
     }
@@ -217,13 +147,34 @@ async function importButtonCallback(
   if (strategyResult.status !== 'ok') {
     await showModalOk({
       title: 'unexpected exception',
-      message:
-        'occurred when importing config. Error code import-button-callback-1.',
+      message: `occurred when importing config. Error code import-button-callback-1.`,
     });
-    return;
   }
 
-  newExtensionsState = (strategyResult as Success).newExtensionsState;
+  return strategyResult;
+}
+
+export async function importUcpConfig(
+  config: ConfigFile,
+  setConfigStatus: (message: MessageType) => void,
+) {
+  // Get the current extension state
+  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+
+  ConsoleLogger.debug(
+    'import-button-callback.tsx: old extension state',
+    extensionsState,
+  );
+
+  ConsoleLogger.debug('import-button-callback.tsx: config', config);
+
+  const strategyResult = await attemptStrategies(
+    config,
+    extensionsState,
+    setConfigStatus,
+  );
+
+  const { newExtensionsState } = strategyResult as Success;
 
   /* Remember the active extensions as on disk (ucp-config.yml file) */
   getStore().set(CONFIGURATION_DISK_STATE_ATOM, [
@@ -255,6 +206,80 @@ async function importButtonCallback(
   );
   // Set the new extension state, which fires an update of the full config
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
+}
+
+export async function importUcpConfigFile(
+  path: string,
+  setConfigStatus: (message: MessageType) => void,
+) {
+  // Parse the config file
+  const parsingResult: {
+    status: string;
+    message: string;
+    result: ConfigFile;
+  } = await loadConfigFromFile(path);
+
+  // ConsoleLogger.debug(`Parsing result: `, parsingResult);
+
+  if (parsingResult.status !== 'OK') {
+    setConfigStatus(
+      (localize) =>
+        `${parsingResult.status}: ${localize(parsingResult.message)}`,
+    );
+    return;
+  }
+
+  if (parsingResult.result === undefined) {
+    setConfigStatus('config.status.failed.unknown');
+    return;
+  }
+
+  const config = parsingResult.result;
+
+  await importUcpConfig(config, setConfigStatus);
+}
+
+async function importButtonCallback(
+  gameFolder: string,
+  setConfigStatus: (message: MessageType) => void,
+  localizeString: (message: string) => string,
+  file: string | undefined,
+) {
+  // Get which elements have been touched
+  const configurationTouched = getStore().get(
+    CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  );
+
+  // Warn clearing of configuration because of touched configuration values
+  // Before importing was initialized.
+  const clearingConfirmation =
+    await warnClearingOfConfiguration(configurationTouched);
+  if (!clearingConfirmation) return;
+
+  // ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
+  let path = file;
+
+  // If source file hasn't been specified, open up a dialog to specify it.
+  if (file === undefined || file.length === 0) {
+    const pathResult = await openFileDialog(gameFolder, [
+      {
+        name: localizeString('file.config'),
+        extensions: ['yml', 'yaml'],
+      },
+      { name: localizeString('file.all'), extensions: ['*'] },
+    ]);
+    if (pathResult.isEmpty()) {
+      setConfigStatus('config.status.no.file');
+      return;
+    }
+
+    path = pathResult.get();
+  }
+
+  // The user cancelled the action
+  if (path === undefined) return;
+
+  await importUcpConfigFile(path, setConfigStatus);
 }
 
 export default importButtonCallback;

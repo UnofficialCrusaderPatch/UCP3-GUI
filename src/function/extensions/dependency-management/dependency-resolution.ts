@@ -6,7 +6,7 @@ import { rcompare } from 'semver';
 import { Extension } from '../../../config/ucp/common';
 import { ConsoleLogger } from '../../../util/scripts/logging';
 
-function extensionToID(ext: Extension) {
+export function extensionToID(ext: Extension) {
   return `${ext.name}@${ext.version}`;
 }
 

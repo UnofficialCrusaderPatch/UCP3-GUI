@@ -46,10 +46,14 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
-          
+
       - name: install app dependencies
         run: |
           npm ci
+      - name: Test
+        shell: pwsh
+        run: |
+          npm run test
       - name: Create changelog URL
         run: |
           $m = "${{ inputs.release_message }}"

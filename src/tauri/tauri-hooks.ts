@@ -4,7 +4,7 @@
 // That did not work as the mock is (somehow) called too late.
 import { mockIPC, mockWindows } from '@tauri-apps/api/mocks';
 
-if (process.env.VITEST) {
+if (process && process.env && process.env.VITEST) {
   mockWindows('main');
   mockIPC(() => {});
 }

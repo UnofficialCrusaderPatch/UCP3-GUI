@@ -44,6 +44,11 @@ const viteConfig = defineViteConfig({
       }
     })],
 
+    // define process is here such that the code in tauri-hooks.ts doesn't fail
+    // when tauri/vite runs the server instead of a node process
+    define: {
+      process : import.meta
+    }
 })
 
 const vitestConfig = defineVitestConfig({

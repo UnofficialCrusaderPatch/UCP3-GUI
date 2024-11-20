@@ -1,8 +1,12 @@
+import { Search } from 'react-bootstrap-icons';
+import { useState } from 'react';
+
 import { SectionDescription } from '../../../../../config/ucp/common';
 import NavSection from './navigation/NavSection';
 
 import sanitizeID from '../sanitize-id';
 import Message from '../../../../general/message';
+import { SearchBox } from './sections/SearchBox';
 
 function CreateSectionsNav(args: { spec: SectionDescription }) {
   const { spec } = args;
@@ -20,13 +24,21 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
     );
   });
 
+  const [searchToggle, setSearchToggle] = useState(true);
+
   return (
-    <nav className="config-navbar ui-element">
-      <a className="config-navbar__header" href="#config-general">
-        <h6>
-          <Message message="config.table.of.contents" />
-        </h6>
-      </a>
+    <div className="config-navbar ui-element">
+      <div className="config-navbar__header d-flex justify-content-start w-100">
+        <div className="flex-grow-1">
+          <h6>
+            <Message message="config.table.of.contents" />
+          </h6>
+        </div>
+        <div>
+          <Search onClick={() => setSearchToggle(!searchToggle)} />
+        </div>
+      </div>
+      {searchToggle ? <SearchBox /> : null}
       <nav className="outline-border config-navbar__nav">
         {level1.length > 0 ? (
           <>
@@ -37,7 +49,7 @@ function CreateSectionsNav(args: { spec: SectionDescription }) {
           </>
         ) : null}
       </nav>
-    </nav>
+    </div>
   );
 }
 

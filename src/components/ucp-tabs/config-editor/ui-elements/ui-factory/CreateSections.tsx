@@ -1,55 +1,16 @@
 import { ReactElement } from 'react';
-import { atom, useAtomValue } from 'jotai';
-import { selectAtom } from 'jotai/utils';
-import {
-  optionEntriesToHierarchical,
-  applyCategoryBasedSort,
-} from '../../../../../config/ucp/extension-util';
+import { useAtomValue } from 'jotai';
 import {
   DisplayConfigElement,
-  OptionEntry,
   UrlableDisplayConfigElement,
 } from '../../../../../config/ucp/common';
-import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../../function/extensions/state/state';
-import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
-import { applyLocale } from '../../../../../function/extensions/discovery/translation';
 import CreateUIElement from './CreateUIElement';
 import CreateSection from './CreateSection';
 import sanitizeID from '../sanitize-id';
-import CreateSectionsNav from './CreateSectionsNav';
 import Message from '../../../../general/message';
-
-const ACTIVE_EXTENSIONS_ATOM = selectAtom(
-  EXTENSION_STATE_REDUCER_ATOM,
-  (state) => state.activeExtensions,
-);
-
-const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom((get) => {
-  const extensions = get(ACTIVE_EXTENSIONS_ATOM);
-  const language = get(LANGUAGE_ATOM);
-
-  const euis = extensions.map((e) => {
-    const locale = e.locales[language] ?? e.locales.en;
-    if (locale === undefined) {
-      return e.ui;
-    }
-    const localized = applyLocale(e, locale);
-    return localized;
-  });
-
-  const uiCollection: unknown[] = [];
-  euis.forEach((eui) => {
-    uiCollection.push(...eui);
-  });
-
-  return applyCategoryBasedSort(uiCollection).filter(
-    (o: OptionEntry) => o.hidden === undefined || o.hidden === false,
-  );
-});
-
-const LOCALIZED_UI_HIERARCHICAL_ATOM = atom((get) =>
-  optionEntriesToHierarchical(get(LOCALIZED_UI_OPTION_ENTRIES_ATOM)),
-);
+import CreateSectionsNav from './CreateSectionsNav';
+import { LOCALIZED_UI_HIERARCHICAL_ATOM } from './sections/filter';
+import { LOCALIZED_UI_OPTION_ENTRIES_ATOM } from './sections/localized-options';
 
 function CreateSections(args: { readonly: boolean }): {
   nav: ReactElement | null;

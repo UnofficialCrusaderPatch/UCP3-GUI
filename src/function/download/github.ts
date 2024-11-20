@@ -38,6 +38,8 @@ export class UCP3Updater {
     this.date = buildDate;
   }
 
+  static DUMMY = new UCP3Updater('0.0.0', '', new Date(0));
+
   async fetchMeta() {
     const response = await fetch(UCP3_REPO_GIST_URL, {
       method: 'GET',

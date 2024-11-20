@@ -1,15 +1,12 @@
 import { exists } from '@tauri-apps/api/fs';
-import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../components/ucp-tabs/common/buttons/config-serialized-state';
 import importButtonCallback from '../../../components/ucp-tabs/common/importing/import-button-callback';
-import { saveCurrentConfig } from '../../../components/ucp-tabs/common/save-config';
 import { getStore } from '../../../hooks/jotai/base';
-import { ConsoleLogger } from '../../../util/scripts/logging';
 import { ExtensionsState } from '../../extensions/extensions-state';
 import { clearConfigurationAndSetNewExtensionsState } from '../../extensions/state/init';
-import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
 import { UCP_CONFIG_YML } from '../../global/constants/file-constants';
 import { FIRST_TIME_USE_ATOM } from '../../gui-settings/settings';
 import { LOGGER } from '../logger';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -22,7 +19,7 @@ export async function loadExtensionsState(
 
   clearConfigurationAndSetNewExtensionsState(newExtensionsState);
 
-  let newerExtensionState = newExtensionsState;
+  const newerExtensionState = newExtensionsState;
 
   if (await exists(file)) {
     getStore().set(FIRST_TIME_USE_ATOM, false);
@@ -42,16 +39,16 @@ export async function loadExtensionsState(
     if (getStore().get(FIRST_TIME_USE_ATOM)) {
       LOGGER.msg('first time use!').info();
 
-      newerExtensionState = activateFirstTimeUseExtensions(newExtensionsState);
-      getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
+      // newerExtensionState = activateFirstTimeUseExtensions(newExtensionsState);
+      // getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
 
-      getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+      // getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
-      ConsoleLogger.debug(
-        await saveCurrentConfig({
-          file,
-        }),
-      );
+      // ConsoleLogger.debug(
+      //   await saveCurrentConfig({
+      //     file,
+      //   }),
+      // );
     }
 
     clearConfigurationAndSetNewExtensionsState(newerExtensionState);

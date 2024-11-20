@@ -1,0 +1,26 @@
+.ucp-customisations-searchbox > div {
+  height: 35px;
+}
+
+.ucp-customisations-searchbox > div > .wrapper {
+  border-radius: unset !important;
+  font-size: 14px;
+}
+
+.ucp-customisations-searchbox > div > .wrapper > div {
+  min-height: 30px;
+  margin: unset !important;
+}
+
+.ucp-customisations-searchbox > div > .wrapper > div > .search-icon {
+  margin: unset !important;
+}
+
+.ucp-customisations-searchbox > div > .wrapper > div > ul > li > .search-icon {
+  margin: unset !important;
+  display: none;
+}
+
+.ucp-customisations-searchbox > div > .wrapper > div > .clear-icon {
+  margin: unset !important;
+}

@@ -1,12 +1,9 @@
 import './overview.css';
 
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { useState } from 'react';
 
 import { installUCPFromZip } from '../../../function/installation/install-ucp-from-zip';
-import { UCP_VERSION_ATOM } from '../../../function/ucp-files/ucp-version';
-import { UCP3Updater } from '../../../function/download/github';
-import { getStore } from '../../../hooks/jotai/base';
 import { removeDir, removeFile, resolvePath } from '../../../tauri/tauri-files';
 import {
   LOADABLE_UCP_STATE_ATOM,
@@ -34,15 +31,14 @@ import {
   UCP_FOLDER,
   UCP_LOG,
 } from '../../../function/global/constants/file-constants';
-import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 import Logger from '../../../util/scripts/logging';
 import { hintThatGameMayBeRunning } from '../../../function/game-folder/locks/file-locks';
-import { asPercentage } from '../../../tauri/tauri-http';
 import { useMessage } from '../../general/message';
-import { GAME_FOLDER_ATOM } from '../../../function/game-folder/interface';
 import { NewsHighlights } from './news-highlights';
 import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
+import { InstallationButton } from './installation/InstallationButton';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LOGGER = new Logger('overview.tsx');
 
 export default function Overview() {
@@ -54,7 +50,6 @@ export default function Overview() {
   // needed for file interaction at the moment
   const localize = useMessage();
 
-  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const ucpStatePresent = loadableUcpState.state === 'hasData';
   const ucpState = ucpStatePresent
     ? loadableUcpState.data
@@ -93,151 +88,7 @@ export default function Overview() {
     <div className="flex-default overview">
       <RecentFolders />
 
-      <OverviewButton
-        buttonActive={overviewButtonActive && currentFolder !== ''}
-        buttonText="overview.update.idle"
-        buttonVariant="ucp-button overview__text-button"
-        funcBefore={() => setOverviewButtonActive(false)}
-        funcAfter={() => setOverviewButtonActive(true)}
-        func={async (createStatusToast) => {
-          if (await hintThatGameMayBeRunning()) {
-            createStatusToast(ToastType.ERROR, 'locked.files');
-            return;
-          }
-
-          try {
-            LOGGER.msg('check for updates and install').info();
-
-            const gameFolder = getStore().get(GAME_FOLDER_ATOM);
-            if (gameFolder === '') {
-              createStatusToast(
-                ToastType.ERROR,
-                'Game folder in bad state. Cannot save update to disk.', // TODO: needs localization
-              );
-              return;
-            }
-
-            createStatusToast(ToastType.INFO, 'ucp.version.check');
-
-            const vr = getStore().get(UCP_VERSION_ATOM);
-            let version = '0.0.0';
-            let sha = '';
-            let type: 'Release' | 'Developer' = 'Release';
-            if (vr.status === 'ok') {
-              version = `${vr.version.getMajorAsString()}.${vr.version.getMinorAsString()}.${vr.version.getPatchAsString()}`;
-              sha = vr.version!.sha.getOrElse('!');
-              type =
-                vr.version.getBuildRepresentation() === 'Developer'
-                  ? 'Developer'
-                  : type;
-            }
-
-            const updater = new UCP3Updater(version, sha, new Date(0));
-
-            if (await updater.doesUpdateExist()) {
-              createStatusToast(ToastType.INFO, 'ucp.version.available');
-            } else {
-              createStatusToast(ToastType.WARN, 'ucp.version.not.available');
-              return;
-            }
-
-            const dialogResult = await showModalOkCancel({
-              title: 'confirm',
-              message: {
-                key: 'ucp.download.request',
-                args: {
-                  version: updater.meta!.version,
-                },
-              },
-            });
-
-            if (dialogResult !== true) {
-              createStatusToast(ToastType.WARN, 'ucp.download.cancelled');
-              return;
-            }
-
-            createStatusToast(ToastType.INFO, 'ucp.download.download');
-
-            const downloadStart = new Date();
-            let previousFire = downloadStart;
-            const updateInterval = 500; // milliseconds
-
-            const update = await updater.fetchUpdateToGamefolder(
-              type,
-              (
-                chunkSize: number,
-                currentSize: number,
-                totalSize: number,
-                currentPercent: number,
-              ) => {
-                const tt = new Date();
-                if (tt.getTime() - previousFire.getTime() > updateInterval) {
-                  previousFire = tt;
-                  setStatusBarMessage(
-                    `Downloading... ${asPercentage(currentPercent)} (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
-                  );
-                }
-              },
-            );
-
-            setStatusBarMessage(undefined);
-
-            createStatusToast(ToastType.INFO, {
-              key: `ucp.download.downloaded`,
-              args: { version: `${update.name}` },
-            });
-
-            createStatusToast(ToastType.INFO, 'ucp.installing');
-            const installResult = await installUCPFromZip(
-              update.path,
-              gameFolder,
-              createStatusToast,
-            );
-
-            if (installResult.isErr()) {
-              installResult.err().ifPresent((error) => {
-                createStatusToast(ToastType.ERROR, {
-                  key: 'ucp.install.failed',
-                  args: { error },
-                });
-              });
-              return;
-            }
-
-            // TODO: in the future, use a cache?
-            const removeResult = await removeFile(update.path);
-            if (removeResult.isErr()) {
-              await showModalOk({
-                message: {
-                  key: 'ucp.install.zip.remove.failed',
-                  args: {
-                    error: removeResult.err().get(),
-                  },
-                },
-                title: 'Could not remove file',
-              });
-            }
-
-            await showModalOk({
-              title: 'Reload required',
-              message: 'The GUI will now reload.',
-            });
-
-            reloadCurrentGameFolder();
-
-            createStatusToast(ToastType.SUCCESS, 'overview.update.success');
-          } catch (e: unknown) {
-            createStatusToast(ToastType.ERROR, {
-              key: 'overview.install.failed.unknown.reason',
-              args: {
-                error: String(e),
-                url: 'https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3/releases',
-              },
-            });
-          }
-        }}
-        toastTitle="overview.update.toast.title"
-      />
+      <InstallationButton />
       <OverviewButton
         buttonActive={overviewButtonActive && currentFolder !== ''}
         buttonText="overview.zip.idle"
@@ -434,6 +285,8 @@ export default function Overview() {
               )
             ).throwIfErr();
             createStatusToast(ToastType.SUCCESS, 'overview.uninstall.success');
+
+            reloadCurrentGameFolder();
           } catch (e: unknown) {
             createStatusToast(ToastType.ERROR, String(e));
           }

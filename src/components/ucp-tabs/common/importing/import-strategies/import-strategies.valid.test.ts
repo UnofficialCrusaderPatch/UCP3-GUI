@@ -2,16 +2,20 @@
  * Tests whether a simple situation of a valid config of 3 explicitly
  * activated extensions with 1 interdependency (extreme-is-the-new-normal depends on graphicsApiReplacer).
  * Can be solved deterministically by the import strategies.
+ *
+ * To generate the data for a test like this, pause in the Webview2 Debugger and use the Console
+ * to export the necessary parts using utility functions
  */
 
 /* eslint-disable import/first */
 import { describe, expect, test } from 'vitest';
 
-import { ExtensionsState } from '../../../../function/extensions/extensions-state';
-import { attemptStrategies } from './import-button-callback';
-import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../testing/dump-extensions-state';
-import { extensionToID } from '../../../../function/extensions/dependency-management/dependency-resolution';
-import { fullStrategy, sparseStrategy } from './import-strategies';
+import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
+import { attemptStrategies } from '../import-button-callback';
+import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../../testing/dump-extensions-state';
+import { extensionToID } from '../../../../../function/extensions/dependency-management/dependency-resolution';
+import { fullStrategy } from './full-strategy';
+import { sparseStrategy } from './sparse-strategy';
 
 const configFileJSON = `{
   "meta": {

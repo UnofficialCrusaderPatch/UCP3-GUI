@@ -1,4 +1,4 @@
-import { fullStrategy, sparseStrategy, Success } from './import-strategies';
+import { Success } from './import-strategies/common';
 import { collectConfigEntries } from '../../../../function/extensions/discovery/collect-config-entries';
 import {
   ConfigurationQualifier,
@@ -29,6 +29,8 @@ import { buildConfigMetaContentDBForUser } from '../../extension-manager/extensi
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import { MessageType } from '../../../../localization/localization';
+import { fullStrategy } from './import-strategies/full-strategy';
+import { sparseStrategy } from './import-strategies/sparse-strategy';
 
 const LOGGER = new Logger('import-button-callback.tsx');
 

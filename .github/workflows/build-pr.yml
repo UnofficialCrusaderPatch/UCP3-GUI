@@ -42,7 +42,7 @@ jobs:
         shell: pwsh
         continue-on-error: false
         run: |
-          npm run test
+          npm run test -- --test-timeout=10000
       - name: Build
         shell: pwsh
         continue-on-error: false

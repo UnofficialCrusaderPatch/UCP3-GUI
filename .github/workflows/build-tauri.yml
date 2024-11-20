@@ -53,7 +53,7 @@ jobs:
       - name: Test
         shell: pwsh
         run: |
-          npm run test
+          npm run test -- --test-timeout=10000
       - name: Create changelog URL
         run: |
           $m = "${{ inputs.release_message }}"

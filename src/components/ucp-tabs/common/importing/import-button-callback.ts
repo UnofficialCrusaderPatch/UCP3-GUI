@@ -1,13 +1,10 @@
-import { Success } from './import-strategies/common';
 import { collectConfigEntries } from '../../../../function/extensions/discovery/collect-config-entries';
 import {
   ConfigurationQualifier,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
-  createEmptyConfigurationState,
 } from '../../../../function/configuration/state';
-import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { openFileDialog } from '../../../../tauri/tauri-dialog';
 import { getStore } from '../../../../hooks/jotai/base';
 
@@ -23,16 +20,13 @@ import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
-import { showModalOk } from '../../../modals/modal-ok';
-import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
+import { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildConfigMetaContentDBForUser } from '../../extension-manager/extension-configuration';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import { MessageType } from '../../../../localization/localization';
-import { fullStrategy } from './import-strategies/full-strategy';
-import { sparseStrategy } from './import-strategies/sparse-strategy';
-
-const LOGGER = new Logger('import-button-callback.tsx');
+import { ImportButtonCallbackResult, makeErrorReport } from './result';
+import { attemptStrategies } from './import-strategies/attempt-strategies';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -91,74 +85,10 @@ export function constructUserConfigObjects(config: ConfigFile) {
   };
 }
 
-export async function attemptStrategies(
-  config: ConfigFile,
-  extensionsState: ExtensionsState,
-  setConfigStatus: (message: MessageType) => void,
-) {
-  // Create a new extension state by setting the active Extensions and explicitly active extensions to empty arrays
-  // Also wipe the current configuration and rebuild it from scratch
-  const newExtensionsState = {
-    ...extensionsState,
-    activeExtensions: [],
-    explicitlyActivatedExtensions: [],
-    configuration: createEmptyConfigurationState(),
-  } as ExtensionsState;
-
-  // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
-  // Get the load order from the sparse part of the config file
-
-  LOGGER.msg('Attempting full strategy').debug();
-  const fullStrategyResult = await fullStrategy(
-    newExtensionsState,
-    config,
-    setConfigStatus,
-  );
-
-  let strategyResult = fullStrategyResult;
-
-  if (fullStrategyResult.status === 'error') {
-    if (fullStrategyResult.code === 'GENERIC') {
-      LOGGER.msg(fullStrategyResult.messages.join('\n')).error();
-      return fullStrategyResult;
-    }
-    LOGGER.msg(fullStrategyResult.messages.join('\n')).error();
-
-    // Continue with sparse mode
-    LOGGER.msg('Attempting sparse strategy').debug();
-    const sparseStrategyResult = await sparseStrategy(
-      newExtensionsState,
-      config,
-      setConfigStatus,
-    );
-
-    if (sparseStrategyResult.status === 'error') {
-      // Attempt the full strategy
-      LOGGER.msg(sparseStrategyResult.messages.join('\n')).error();
-
-      await showModalOk({
-        title: 'Failed to import config',
-        message: `Import failed. Reason:\n\n${sparseStrategyResult.messages.join('\n')}`,
-      });
-      return sparseStrategyResult;
-    }
-    strategyResult = sparseStrategyResult;
-  }
-
-  if (strategyResult.status !== 'ok') {
-    await showModalOk({
-      title: 'unexpected exception',
-      message: `occurred when importing config. Error code import-button-callback-1.`,
-    });
-  }
-
-  return strategyResult;
-}
-
 export async function importUcpConfig(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-) {
+): Promise<ImportButtonCallbackResult> {
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -169,13 +99,24 @@ export async function importUcpConfig(
 
   ConsoleLogger.debug('import-button-callback.tsx: config', config);
 
-  const strategyResult = await attemptStrategies(
+  const strategyResultReport = await attemptStrategies(
     config,
     extensionsState,
     setConfigStatus,
   );
 
-  const { newExtensionsState } = strategyResult as Success;
+  const { result } = strategyResultReport;
+
+  if (result === undefined || result.status !== 'ok') {
+    return {
+      status: 'fail',
+      reason: 'strategy',
+      report: strategyResultReport,
+      message: makeErrorReport(strategyResultReport),
+    } as ImportButtonCallbackResult;
+  }
+
+  const { newExtensionsState } = result;
 
   /* Remember the active extensions as on disk (ucp-config.yml file) */
   getStore().set(CONFIGURATION_DISK_STATE_ATOM, [
@@ -207,12 +148,16 @@ export async function importUcpConfig(
   );
   // Set the new extension state, which fires an update of the full config
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
+
+  return {
+    status: 'success',
+  } as ImportButtonCallbackResult;
 }
 
 export async function importUcpConfigFile(
   path: string,
   setConfigStatus: (message: MessageType) => void,
-) {
+): Promise<ImportButtonCallbackResult> {
   // Parse the config file
   const parsingResult: {
     status: string;
@@ -227,17 +172,25 @@ export async function importUcpConfigFile(
       (localize) =>
         `${parsingResult.status}: ${localize(parsingResult.message)}`,
     );
-    return;
+    return {
+      status: 'fail',
+      reason: 'file',
+      report: `${parsingResult.status}: ${parsingResult.message}`,
+    } as ImportButtonCallbackResult;
   }
 
   if (parsingResult.result === undefined) {
     setConfigStatus('config.status.failed.unknown');
-    return;
+    return {
+      status: 'fail',
+      reason: 'file',
+      report: `undefined result object`,
+    } as ImportButtonCallbackResult;
   }
 
   const config = parsingResult.result;
 
-  await importUcpConfig(config, setConfigStatus);
+  return importUcpConfig(config, setConfigStatus);
 }
 
 async function importButtonCallback(
@@ -245,7 +198,7 @@ async function importButtonCallback(
   setConfigStatus: (message: MessageType) => void,
   localizeString: (message: string) => string,
   file: string | undefined,
-) {
+): Promise<ImportButtonCallbackResult> {
   // Get which elements have been touched
   const configurationTouched = getStore().get(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -255,7 +208,10 @@ async function importButtonCallback(
   // Before importing was initialized.
   const clearingConfirmation =
     await warnClearingOfConfiguration(configurationTouched);
-  if (!clearingConfirmation) return;
+  if (!clearingConfirmation)
+    return {
+      status: 'aborted',
+    } as ImportButtonCallbackResult;
 
   // ConsoleLogger.debug('state before importbuttoncallback', extensionsState);
   let path = file;
@@ -271,16 +227,21 @@ async function importButtonCallback(
     ]);
     if (pathResult.isEmpty()) {
       setConfigStatus('config.status.no.file');
-      return;
+      return {
+        status: 'aborted',
+      } as ImportButtonCallbackResult;
     }
 
     path = pathResult.get();
   }
 
   // The user cancelled the action
-  if (path === undefined) return;
+  if (path === undefined)
+    return {
+      status: 'aborted',
+    } as ImportButtonCallbackResult;
 
-  await importUcpConfigFile(path, setConfigStatus);
+  return importUcpConfigFile(path, setConfigStatus);
 }
 
 export default importButtonCallback;

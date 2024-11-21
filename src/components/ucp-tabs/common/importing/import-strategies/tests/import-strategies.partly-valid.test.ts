@@ -13,7 +13,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { ExtensionsState } from '../../../../../../function/extensions/extensions-state';
-import { attemptStrategies } from '../../import-button-callback';
+import { attemptStrategies } from '../attempt-strategies';
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../../../testing/dump-extensions-state';
 import { extensionToID } from '../../../../../../function/extensions/dependency-management/dependency-resolution';
 import { fullStrategy } from '../full-strategy';
@@ -978,11 +978,18 @@ describe('attemptStrategies', () => {
 
     const config = JSON.parse(configFileJSON);
 
-    const strategyResult = await attemptStrategies(
+    const strategyResultReport = await attemptStrategies(
       config,
       extensionsState,
       () => {},
     );
+
+    if (strategyResultReport.result === undefined) {
+      expect(strategyResultReport.result !== undefined).toBe(true);
+      return;
+    }
+
+    const { result: strategyResult } = strategyResultReport;
 
     expect(strategyResult.status === 'ok').toBe(true);
 

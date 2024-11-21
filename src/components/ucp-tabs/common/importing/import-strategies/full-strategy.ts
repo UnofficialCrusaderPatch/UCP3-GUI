@@ -9,6 +9,7 @@ import {
   LOGGER,
   MissingDependenciesFailure,
   sanitizeVersionRange,
+  StrategyResult,
   Success,
 } from './common';
 
@@ -29,7 +30,7 @@ export async function fullStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-) {
+): Promise<StrategyResult> {
   const { extensions } = newExtensionsState;
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.

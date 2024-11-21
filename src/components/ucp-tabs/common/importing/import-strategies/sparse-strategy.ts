@@ -13,7 +13,6 @@ import {
 import { getStore } from '../../../../../hooks/jotai/base';
 import { MessageType } from '../../../../../localization/localization';
 import { ConsoleLogger } from '../../../../../util/scripts/logging';
-import { showModalOk } from '../../../../modals/modal-ok';
 import { buildExtensionConfigurationDB } from '../../../extension-manager/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../../../extension-manager/extensions-state-manipulation';
 import {
@@ -21,6 +20,7 @@ import {
   MissingDependenciesFailure,
   GenericFailure,
   Success,
+  StrategyResult,
 } from './common';
 
 function updatePreferredExtensionVersions(extensions: Extension[]) {
@@ -48,7 +48,7 @@ export async function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-) {
+): Promise<StrategyResult> {
   const { extensions } = newExtensionsState;
 
   // Get the current available versions database
@@ -81,12 +81,13 @@ export async function sparseStrategy(
         const availableVersions =
           availableVersionsDatabase[dependencyStatement.extension];
         if (availableVersions === undefined || availableVersions.length === 0) {
-          // eslint-disable-next-line no-await-in-loop
-          await showModalOk({
-            message: `hmmm, how did we get here?`,
-            title: `Illegal dependency statement`,
-          });
-          throw Error(`hmmm, how did we get here?`);
+          return {
+            status: 'error',
+            code: 'GENERIC',
+            messages: [
+              `No version available for statement: ${dependencyStatement}`,
+            ],
+          };
         }
         dependencyStatement.operator = '==';
         // Choose the firstmost version (the highest version)
@@ -122,17 +123,6 @@ export async function sparseStrategy(
             },
           });
 
-          // eslint-disable-next-line no-await-in-loop
-          await showModalOk({
-            message: {
-              key: 'config.status.missing.extension',
-              args: {
-                extension: dependencyStatementStringSerialized,
-              },
-            },
-            title: `Missing extension`,
-          });
-
           // Abort the import
           return {
             status: 'error',
@@ -144,12 +134,6 @@ export async function sparseStrategy(
       } catch (err: unknown) {
         // Couldn't be parsed by semver
         const errorMsg = `Unimplemented operator in dependency statement: ${dependencyStatementStringSerialized}`;
-
-        // eslint-disable-next-line no-await-in-loop
-        await showModalOk({
-          message: errorMsg,
-          title: `Illegal dependency statement`,
-        });
 
         return {
           status: 'error',
@@ -177,12 +161,6 @@ export async function sparseStrategy(
           ext,
         );
       } catch (de: unknown) {
-        // eslint-disable-next-line no-await-in-loop
-        await showModalOk({
-          message: String(de),
-          title: 'Error in dependencies',
-        });
-
         ConsoleLogger.error(de);
 
         return {

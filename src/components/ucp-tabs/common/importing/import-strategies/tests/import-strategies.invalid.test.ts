@@ -1063,6 +1063,17 @@ describe('attemptStrategies', () => {
         'running-units@1.0.1',
         'aicloader@1.1.1',
       ]);
+
+      
+      const eids = strategyResult.newExtensionsState.explicitlyActivatedExtensions.map(
+        (ext) => extensionToID(ext),
+      );
+      
+      expect(eids).toStrictEqual([
+        'extreme-is-the-new-normal@1.0.0',
+        'graphicsApiReplacer@1.2.0',
+        'running-units@1.0.1',
+      ]);
     }
   });
 });

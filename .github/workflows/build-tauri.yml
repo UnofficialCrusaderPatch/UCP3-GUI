@@ -29,9 +29,9 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v2
       - name: setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: install Rust stable
         uses: actions-rs/toolchain@v1
         with:

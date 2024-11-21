@@ -13,10 +13,11 @@ module.exports = {
     'plugin:promise/recommended',
     // "plugin:compat/recommended",
     'plugin:@typescript-eslint/recommended',
-    // "plugin:prettier/recommended",
+    "plugin:prettier/recommended",
     // This disables the formatting rules in ESLint that Prettier is going to be responsible for handling.
     // Make sure it's always the last config, so it gets the chance to override other configs.
     'eslint-config-prettier',
+    'prettier',
   ],
   env: {
     browser: true,

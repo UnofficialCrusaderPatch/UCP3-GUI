@@ -48,6 +48,7 @@ export async function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
+  repair?: boolean,
 ): Promise<StrategyResult> {
   const { extensions } = newExtensionsState;
 
@@ -159,6 +160,7 @@ export async function sparseStrategy(
         newExtensionsState = await addExtensionToExplicityActivatedExtensions(
           newExtensionsState,
           ext,
+          repair,
         );
       } catch (de: unknown) {
         ConsoleLogger.error(de);

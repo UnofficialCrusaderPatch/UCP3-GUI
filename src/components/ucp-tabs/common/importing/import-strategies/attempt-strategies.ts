@@ -14,6 +14,7 @@ export async function attemptStrategies(
   config: ConfigFile,
   extensionsState: ExtensionsState,
   setConfigStatus: (message: MessageType) => void,
+  repair?: boolean,
 ): Promise<StrategyResultReport> {
   const report: StrategyResultReport = {
     reports: [],
@@ -62,6 +63,7 @@ export async function attemptStrategies(
       newExtensionsState,
       config,
       setConfigStatus,
+      repair,
     );
 
     report.reports.push({

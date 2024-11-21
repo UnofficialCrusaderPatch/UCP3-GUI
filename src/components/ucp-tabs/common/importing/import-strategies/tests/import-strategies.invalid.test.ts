@@ -970,7 +970,7 @@ const extensionsJson = `
 // temp2.map((ext) => ({name: ext.name, version: ext.version, type: ext.type, definition: {...ext.definition, dependencies: Object.fromEntries(Object.entries(ext.definition.dependencies).map((v) => [v[0], v[1].raw]))}, configEntries: ext.configEntries}))
 
 describe('attemptStrategies', () => {
-  test('attemptStrategies on invalid state', async () => {
+  test('attemptStrategies on invalid state without repair', async () => {
     const extensionsState: ExtensionsState =
       deserializeSimplifiedSerializedExtensionsStateFromExtensions(
         JSON.parse(extensionsJson),
@@ -982,6 +982,24 @@ describe('attemptStrategies', () => {
       config,
       extensionsState,
       () => {},
+    );
+
+    expect(strategyResultReport.result === undefined).toBe(true);
+
+  })
+  test('attemptStrategies on invalid state with repair', async () => {
+    const extensionsState: ExtensionsState =
+      deserializeSimplifiedSerializedExtensionsStateFromExtensions(
+        JSON.parse(extensionsJson),
+      );
+
+    const config = JSON.parse(configFileJSON);
+
+    const strategyResultReport = await attemptStrategies(
+      config,
+      extensionsState,
+      () => {},
+      true,
     );
 
     if (strategyResultReport.result === undefined) {
@@ -1033,7 +1051,7 @@ describe('attemptStrategies', () => {
     }
   });
 
-  test('sparseStrategy on invalid state', async () => {
+  test('sparseStrategy on invalid state with repair', async () => {
     const extensionsState: ExtensionsState =
       deserializeSimplifiedSerializedExtensionsStateFromExtensions(
         JSON.parse(extensionsJson),
@@ -1044,6 +1062,7 @@ describe('attemptStrategies', () => {
       extensionsState,
       config,
       () => {},
+      true,
     );
 
     expect(strategyResult.status === 'ok').toBe(true);
@@ -1069,6 +1088,8 @@ describe('attemptStrategies', () => {
         (ext) => extensionToID(ext),
       );
       
+      // Note this differs from what is given as the sparse load order
+      // This outcome is repaired
       expect(eids).toStrictEqual([
         'extreme-is-the-new-normal@1.0.0',
         'graphicsApiReplacer@1.2.0',

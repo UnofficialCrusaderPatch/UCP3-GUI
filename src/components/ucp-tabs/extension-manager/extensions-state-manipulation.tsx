@@ -5,6 +5,7 @@ import { Extension } from '../../../config/ucp/common';
 
 import { showModalOk } from '../../modals/modal-ok';
 import Logger from '../../../util/scripts/logging';
+import { createExtensionID } from '../../../function/global/constants/extension-id';
 
 const LOGGER = new Logger('extension-state.ts');
 
@@ -23,6 +24,7 @@ function setDisplayOrder(
 function addExtensionToExplicityActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
+  repair?: boolean,
 ): ExtensionsState {
   const { tree } = extensionsState;
 
@@ -59,9 +61,28 @@ function addExtensionToExplicityActivatedExtensions(
   const installedExtensionsFilteredList =
     extensionsState.installedExtensions.filter((e) => !depNames.has(e.name));
 
+  const eaeInDisplayOrder = allDependenciesInDisplayOrder.filter(
+    (ae) => newEAE.indexOf(ae) !== -1,
+  );
+
+  const misordered = newEAE.filter(
+    (e, index) => eaeInDisplayOrder.indexOf(e) !== index,
+  );
+  if (misordered.length > 0) {
+    if (repair === true) {
+      LOGGER.msg(
+        `repairing invalid sparse extension order: ${misordered.map((e) => createExtensionID(e))}`,
+      ).error();
+    } else {
+      const err = `sparse extension order is invalid: ${misordered.map((e) => createExtensionID(e))}`;
+      LOGGER.msg(err).error();
+      throw new DependencyError(err);
+    }
+  }
+
   return {
     ...extensionsState,
-    explicitlyActivatedExtensions: newEAE,
+    explicitlyActivatedExtensions: eaeInDisplayOrder,
     activeExtensions: allDependenciesInDisplayOrder,
     installedExtensions: installedExtensionsFilteredList,
   };

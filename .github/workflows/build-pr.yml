@@ -17,9 +17,9 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v2
       - name: setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - name: install Rust stable
         uses: actions-rs/toolchain@v1
         with:
@@ -34,15 +34,23 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
-          
+
       - name: install app dependencies
         run: |
           npm ci
+      - name: Test
+        shell: pwsh
+        continue-on-error: false
+        run: |
+          npm run test -- --test-timeout=10000
       - name: Build
         shell: pwsh
-        continue-on-error: true
+        continue-on-error: false
         run: |
           npm run tauri build
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
       - name: Upload
         uses: actions/upload-artifact@v4
         with:

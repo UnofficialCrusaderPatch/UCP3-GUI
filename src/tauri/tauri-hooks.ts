@@ -1,8 +1,22 @@
 /* eslint-disable max-classes-per-file */
 
-// used to globally store hooks tauri hooks
+// gynt: I tried putting this in the test files themselves (and use beforeAll).
+// That did not work as the mock is (somehow) called too late.
+import { clearMocks, mockIPC, mockWindows } from '@tauri-apps/api/mocks';
 
+if (process && process.env && process.env.VITEST) {
+  clearMocks();
+
+  if (process && process.env && process.env.VITEST) {
+    mockWindows('main');
+    mockIPC(() => {});
+  }
+}
+
+// used to globally store hooks tauri hooks
+// eslint-disable-next-line import/first
 import { TauriEvent } from '@tauri-apps/api/event';
+// eslint-disable-next-line import/first
 import { appWindow } from '@tauri-apps/api/window';
 
 class TauriEventHandler {

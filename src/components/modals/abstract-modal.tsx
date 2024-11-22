@@ -54,6 +54,7 @@ export function registerModal<
   C,
   P extends AbstractModalWindowProperties<R, C>,
 >(modalFunc: (props: P) => ReactNode, properties: P) {
+  LOGGER.msg(`registerModal: ${modalFunc.name}`).debug();
   return (
     new Promise<R | C>((resolve) => {
       const finalProperties = {

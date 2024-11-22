@@ -23,7 +23,25 @@ function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
       type="button"
       onClick={async () => {
         try {
-          await importButtonCallback(gameFolder, setConfigStatus, localize, '');
+          const report = await importButtonCallback(
+            gameFolder,
+            setConfigStatus,
+            localize,
+            '',
+          );
+          if (report.status === 'fail') {
+            if (report.reason === 'strategy') {
+              await showModalOk({
+                title: 'ERROR',
+                message: `${report.message.title}\n${report.message.shortDescription}\n${report.message.report}`,
+              });
+            } else {
+              await showModalOk({
+                title: 'ERROR',
+                message: report.report,
+              });
+            }
+          }
         } catch (e: unknown) {
           await showModalOk({
             title: 'ERROR',

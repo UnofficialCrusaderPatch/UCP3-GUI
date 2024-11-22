@@ -99,7 +99,12 @@ To develope and build the application, you need to fullfil some requirements.
     - The Rust dependencies should be installed by the run and build commands of the application.
 
 4. Setup your favorite IDEs and install plugins for the parts you want to work on.
-    - For the frontend, in case of [Visual Studio Code](https://code.visualstudio.com/) for example, at least the ESLint plugin is recommended. You can even set it up to format your code when the files are saved!
+    - For the frontend, we recommend [Visual Studio Code](https://code.visualstudio.com/). Set it up with the following settings:
+      - Install the ESLint plugin and the Prettier plugin
+      - Set the default formatter to Prettier.
+      - Enable formatting on save. Formatting rules should be applied when you save the file.
+      - If it is not working right, try restarting visual studio code.
+      - Set the preferred path style for typescript auto imports to `relative` (setting is currently called importModuleSpecifier). The reason is that `unimported`, the unused code tracker, works only with relative imports due to the setup of the folders.
     - For the backend, also for [Visual Studio Code](https://code.visualstudio.com/) as example, the `rust-analyzer` is heavily recommended (it also is a bit heavy on the system) to get proper code validation und suggestions.
     - Feel free to install and use other plugins!
 

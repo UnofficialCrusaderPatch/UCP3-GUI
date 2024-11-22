@@ -105,6 +105,7 @@ To develope and build the application, you need to fullfil some requirements.
       - Enable formatting on save. Formatting rules should be applied when you save the file.
       - If it is not working right, try restarting visual studio code.
       - Set the preferred path style for typescript auto imports to `relative` (setting is currently called importModuleSpecifier). The reason is that `unimported`, the unused code tracker, works only with relative imports due to the setup of the folders.
+      - Set the default line ending to `\n` (LF): setting is called `files.eol`
     - For the backend, also for [Visual Studio Code](https://code.visualstudio.com/) as example, the `rust-analyzer` is heavily recommended (it also is a bit heavy on the system) to get proper code validation und suggestions.
     - Feel free to install and use other plugins!
 

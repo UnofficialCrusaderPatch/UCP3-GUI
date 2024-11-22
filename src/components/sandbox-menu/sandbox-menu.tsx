@@ -6,7 +6,6 @@ import Sandbox from '@jetbrains/websandbox';
 import { OverlayContentProps } from '../overlay/overlay';
 import { getStore } from '../../hooks/jotai/base';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -29,6 +28,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import { ConsoleLogger } from '../../util/scripts/logging';
 import Message from '../general/message';
+import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../function/configuration/derived-state';
 
 export interface SandboxSource {
   html: string;

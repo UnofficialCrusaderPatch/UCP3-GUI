@@ -16,7 +16,7 @@ export function createBasicExtensionsState(
   frameworkVersion: string | undefined,
 ): ExtensionsState {
   return {
-    extensions,
+    extensions: [...extensions],
     tree: new ExtensionDependencyTree(
       [...extensions],
       frontendVersion,

@@ -7,6 +7,8 @@ import {
 } from '../../../config/ucp/config-merge/objects';
 import Logger from '../../../util/scripts/logging';
 import { Override } from '../../../function/configuration/overrides';
+import { buildExtensionsDefinedConfig } from './extension-configuration/extensions-defined-config';
+import { ConfigurationState } from '../../../function/configuration/state';
 
 const LOGGER = new Logger('extension-configuration.ts');
 
@@ -254,7 +256,8 @@ function buildExtensionConfigurationDBFromActiveExtensions(
     overrides,
     errors,
     statusCode,
-  };
+    ...buildExtensionsDefinedConfig(db, activeExtensions),
+  } as ConfigurationState;
 }
 
 // TODO: also do range checks in this function? Better in a separate function I guess

@@ -15,7 +15,6 @@ import {
 } from '../../../../sandbox-menu/sandbox-menu';
 import { setOverlayContent } from '../../../../overlay/overlay';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
@@ -27,6 +26,7 @@ import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';
 import Message from '../../../../general/message';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
+import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../../../../function/configuration/derived-state';
 
 const LOGGER = new Logger('CreateCustomMenu.tsx');
 

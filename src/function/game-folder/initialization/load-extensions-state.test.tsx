@@ -1,4 +1,4 @@
-import { createStore, Provider } from 'jotai';
+import { Provider } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { parse } from 'yaml';
 import { expect, test } from 'vitest';
@@ -8,12 +8,14 @@ import { UCP2SliderChoiceDisplayConfigElement } from '../../../config/ucp/common
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
+import { clearConfigurationAndSetNewExtensionsState } from '../../extensions/state/init';
+import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../configuration/derived-state';
 
 // "path": "C:.*/(ucp/.*)" => "path": "$1"
 import TEST_DATA from './tests/load-extensions-state.test.data.json';
-import { clearConfigurationAndSetNewExtensionsState } from '../../extensions/state/init';
+import { getStore } from '../../../hooks/jotai/base';
 
-const TEST_STORE = createStore();
+const TEST_STORE = getStore();
 
 // @ts-expect-error 7031
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,7 +28,7 @@ function HydrateAtoms({ initialValues, children }): any {
 // eslint-disable-next-line react/prop-types
 function TestProvider({ initialValues, children }) {
   return (
-    <Provider store={TEST_STORE}>
+    <Provider store={getStore()}>
       <HydrateAtoms initialValues={initialValues}>{children}</HydrateAtoms>
     </Provider>
   );
@@ -106,6 +108,16 @@ test('load-extensions-state breaking render', () => {
   const renderResult = render(gui);
 
   const result = activateFirstTimeUseExtensions(state1);
+
+  expect(
+    result.getOrThrow().configuration.defined['ucp2-legacy.ai_addattack'],
+  ).toBe(false);
+
+  expect(
+    TEST_STORE.get(CONFIGURATION_DEFAULTS_REDUCER_ATOM)[
+      'ucp2-legacy.ai_addattack'
+    ],
+  ).toBe(false);
 
   const state2 = result.getOrThrow();
   TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state2);

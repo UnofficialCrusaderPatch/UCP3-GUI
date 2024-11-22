@@ -6,15 +6,17 @@ import { Button, Overlay } from 'react-bootstrap';
 
 import { TrashFill } from 'react-bootstrap-icons';
 import {
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
 } from '../../../../../../function/configuration/state';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../../footer/footer';
+import {
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+} from '../../../../../../function/configuration/derived-state';
 
 /** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
 

@@ -14,9 +14,6 @@ import {
 } from '../../../../../config/ucp/common';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
-  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -27,6 +24,11 @@ import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
+} from '../../../../../function/configuration/derived-state';
 
 const LOGGER = new Logger('CreateUCP2SliderChoice.tsx');
 
@@ -100,11 +102,13 @@ function CreateUCP2SliderChoice(args: {
     LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
 
     if (defaultValue === undefined) {
-      LOGGER.msg(`default value not defined for: ${url}`).error();
+      const err = `value and default value not defined for: ${url}`;
+      LOGGER.msg(err).error();
+      throw Error(err);
+    } else {
+      LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
+      value = defaultValue;
     }
-
-    LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
-    value = defaultValue;
   }
 
   const statusBarMessage = createStatusBarMessage(

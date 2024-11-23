@@ -8,7 +8,7 @@ import { UCP2SliderChoiceDisplayConfigElement } from '../../../config/ucp/common
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
-import { clearConfigurationAndSetNewExtensionsState } from '../../extensions/state/init';
+import { setExtensionsStateAndClearConfiguration } from '../../extensions/state/init';
 import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../configuration/derived-state';
 
 // "path": "C:.*/(ucp/.*)" => "path": "$1"
@@ -140,7 +140,7 @@ test('load-extensions-state breaking render 2', () => {
   const result = activateFirstTimeUseExtensions(state1);
 
   const state2 = result.getOrThrow();
-  clearConfigurationAndSetNewExtensionsState(state2);
+  setExtensionsStateAndClearConfiguration(state2);
 
   expect(renderResult.baseElement.textContent).toBeTruthy();
 

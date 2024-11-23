@@ -11,10 +11,10 @@ import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
 import { LOGGER } from '../logger';
 import { UCP_CONFIG_YML } from '../../global/constants/file-constants';
 import {
-  clearConfigurationAndSetNewExtensionsState,
+  setExtensionsStateAndClearConfiguration,
   createBasicExtensionsState,
 } from '../../extensions/state/init';
-import { loadExtensionsState } from './load-extensions-state';
+import { setupExtensionsStateConfiguration } from './load-extensions-state';
 
 /**
  * Initialize the game folder
@@ -69,16 +69,16 @@ export async function initializeGameFolder(
     ? getStore().get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString()
     : undefined;
 
-  const newExtensionsState = createBasicExtensionsState(
+  const inactiveExtensionsState = createBasicExtensionsState(
     extensions,
     frontendVersion,
     frameworkVersion,
   );
 
   LOGGER.msg('Finished extension discovery').info();
-  ConsoleLogger.debug(`Extensions state: `, newExtensionsState);
+  ConsoleLogger.debug(`Basic extensions state: `, inactiveExtensionsState);
 
-  const is = newExtensionsState.tree.tryResolveAllDependencies();
+  const is = inactiveExtensionsState.tree.tryResolveAllDependencies();
   if (is.status !== 'ok') {
     ConsoleLogger.warn(
       `Not all dependencies for all extensions could be resolved:\n${is.messages.join('\n')}`,
@@ -89,12 +89,16 @@ export async function initializeGameFolder(
 
   const noInitErrors = getStore().get(INIT_ERROR) === false;
   if (noInitErrors) {
-    await loadExtensionsState(newExtensionsState, folder, file);
+    await setupExtensionsStateConfiguration(
+      inactiveExtensionsState,
+      folder,
+      file,
+    );
   } else {
     LOGGER.msg(
       `Not loading ${UCP_CONFIG_YML} as there were errors during init`,
     ).warn();
-    clearConfigurationAndSetNewExtensionsState(newExtensionsState);
+    setExtensionsStateAndClearConfiguration(inactiveExtensionsState);
   }
 
   getStore().set(INIT_DONE, true);

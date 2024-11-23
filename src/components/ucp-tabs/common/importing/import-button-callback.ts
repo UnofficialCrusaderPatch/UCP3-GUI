@@ -193,6 +193,14 @@ export async function importUcpConfigFile(
   return importUcpConfig(config, setConfigStatus);
 }
 
+/**
+ * Sets the extensions state and all other atoms to state improted by the config file
+ * @param gameFolder The game folder to load the file from
+ * @param setConfigStatus The reporting function for progress toasts
+ * @param localizeString The localisation function for messages
+ * @param file The file name
+ * @returns A promise of the succesfulness of the impor
+ */
 async function importButtonCallback(
   gameFolder: string,
   setConfigStatus: (message: MessageType) => void,

@@ -1,15 +1,16 @@
 import { Search } from 'react-bootstrap-icons';
 import { useState } from 'react';
 
-import { SectionDescription } from '../../../../../config/ucp/common';
+import { useAtomValue } from 'jotai';
 import NavSection from './navigation/NavSection';
 
 import sanitizeID from '../sanitize-id';
 import Message from '../../../../general/message';
 import { SearchBox } from './sections/SearchBox';
+import { LOCALIZED_UI_HIERARCHICAL_ATOM } from './sections/filter';
 
-function CreateSectionsNav(args: { spec: SectionDescription }) {
-  const { spec } = args;
+function CreateSectionsNav() {
+  const spec = useAtomValue(LOCALIZED_UI_HIERARCHICAL_ATOM);
 
   const level1 = Object.keys(spec.sections).map((key) => {
     const id = sanitizeID(`#config-${key}`);

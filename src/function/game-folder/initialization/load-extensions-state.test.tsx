@@ -1,21 +1,25 @@
-import { Provider } from 'jotai';
+import { createStore, Provider } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { parse } from 'yaml';
-import { expect, test } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, expect, test } from 'vitest';
+import {
+  cleanup,
+  render,
+  RenderResult,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import CreateUCP2SliderChoice from '../../../components/ucp-tabs/config-editor/ui-elements/ui-factory/CreateUCP2SliderChoice';
 import { UCP2SliderChoiceDisplayConfigElement } from '../../../config/ucp/common';
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
-import { setExtensionsStateAndClearConfiguration } from '../../extensions/state/init';
-import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../configuration/derived-state';
+import CreateSections from '../../../components/ucp-tabs/config-editor/ui-elements/ui-factory/CreateSections';
+import { getStore } from '../../../hooks/jotai/base';
+import { createBasicExtensionsState } from '../../extensions/state/init';
 
 // "path": "C:.*/(ucp/.*)" => "path": "$1"
 import TEST_DATA from './tests/load-extensions-state.test.data.json';
-import { getStore } from '../../../hooks/jotai/base';
-
-const TEST_STORE = getStore();
 
 // @ts-expect-error 7031
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,11 +28,11 @@ function HydrateAtoms({ initialValues, children }): any {
   return children;
 }
 
-// @ts-expect-error 7031
+// @ts-expect-error no typing
 // eslint-disable-next-line react/prop-types
-function TestProvider({ initialValues, children }) {
+function TestProvider({ store, initialValues, children }) {
   return (
-    <Provider store={getStore()}>
+    <Provider store={store}>
       <HydrateAtoms initialValues={initialValues}>{children}</HydrateAtoms>
     </Provider>
   );
@@ -70,26 +74,48 @@ function generateInitialState() {
   );
 }
 
-function GUI() {
+function GUI(props: { store: any }) {
+  const { store } = props;
   return (
-    <TestProvider initialValues={[]}>
-      {CreateUCP2SliderChoice({
-        spec: parse(optionsYML)[0] as UCP2SliderChoiceDisplayConfigElement,
-        className: '',
-        disabled: false,
-      })}
+    <TestProvider store={store} initialValues={[]}>
+      <CreateUCP2SliderChoice
+        spec={parse(optionsYML)[0] as UCP2SliderChoiceDisplayConfigElement}
+        className=""
+        disabled={false}
+      />
     </TestProvider>
   );
 }
 
-test('load-extensions-state basic render', () => {
+function FullGUI() {
+  return (
+    <TestProvider store={getStore()} initialValues={[]}>
+      <CreateSections readonly={false} />
+    </TestProvider>
+  );
+}
+
+// Import line to ensure idempotency
+afterEach(cleanup);
+
+test('load-extensions-state working render', () => {
+  const TEST_STORE = createStore();
+
   const state1 = generateInitialState();
   const result = activateFirstTimeUseExtensions(state1);
 
   const state2 = result.getOrThrow();
   TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state2);
 
-  const gui = <GUI />;
+  const gui = (
+    <TestProvider store={TEST_STORE} initialValues={[]}>
+      <CreateUCP2SliderChoice
+        spec={parse(optionsYML)[0] as UCP2SliderChoiceDisplayConfigElement}
+        className=""
+        disabled={false}
+      />
+    </TestProvider>
+  );
   const renderResult = render(gui);
 
   expect(renderResult.baseElement.textContent).toBeTruthy();
@@ -100,100 +126,34 @@ test('load-extensions-state basic render', () => {
 });
 
 test('load-extensions-state breaking render', () => {
-  const state1 = generateInitialState();
-
-  TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state1);
-
-  const gui = <GUI />;
-  const renderResult = render(gui);
-
-  const result = activateFirstTimeUseExtensions(state1);
-
-  expect(
-    result.getOrThrow().configuration.defined['ucp2-legacy.ai_addattack'],
-  ).toBe(false);
-
-  expect(
-    TEST_STORE.get(CONFIGURATION_DEFAULTS_REDUCER_ATOM)[
-      'ucp2-legacy.ai_addattack'
-    ],
-  ).toBe(false);
-
-  const state2 = result.getOrThrow();
-  TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state2);
-
-  expect(renderResult.baseElement.textContent).toBeTruthy();
-
-  const obj = screen.getAllByTitle('key: ucp2-legacy.ai_addattack');
-
-  expect(obj.length > 0).toBe(true);
+  expect(() => {
+    const TEST_STORE = createStore();
+    const state1 = generateInitialState();
+    TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state1);
+    const gui = <GUI store={TEST_STORE} />;
+    render(gui);
+  }).toThrowError(
+    'value and default value not defined for: ucp2-legacy.ai_addattack',
+  );
 });
 
-test('load-extensions-state breaking render 2', () => {
+test('load-extensions-state full render using getStore()', async () => {
   const state1 = generateInitialState();
+  const state2 = activateFirstTimeUseExtensions(state1).getOrThrow();
 
-  TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state1);
+  getStore().set(EXTENSION_STATE_REDUCER_ATOM, state2);
 
-  const gui = <GUI />;
-  const renderResult = render(gui);
+  const renderResult: RenderResult = render(<FullGUI />);
+  await waitFor(() => {
+    expect(renderResult!.baseElement.textContent).toBeTruthy();
 
-  const result = activateFirstTimeUseExtensions(state1);
+    const obj = screen.getAllByTitle('key: ucp2-legacy.ai_addattack');
 
-  const state2 = result.getOrThrow();
-  setExtensionsStateAndClearConfiguration(state2);
+    expect(obj.length > 0).toBe(true);
+  });
 
-  expect(renderResult.baseElement.textContent).toBeTruthy();
-
-  const obj = screen.getAllByTitle('key: ucp2-legacy.ai_addattack');
-
-  expect(obj.length > 0).toBe(true);
+  getStore().set(
+    EXTENSION_STATE_REDUCER_ATOM,
+    createBasicExtensionsState([], '', ''),
+  );
 });
-
-// function FullGUI() {
-//   return (
-//     <TestProvider initialValues={[]}>
-//       {UIFactory.CreateSections({ readonly: false }).content}
-//     </TestProvider>
-//   );
-// }
-
-// test('load-extensions-state full render', () => {
-//   const state1 = generateInitialState();
-
-//   TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state1);
-
-//   const gui = <FullGUI />;
-//   const renderResult = render(gui);
-
-//   const result = activateFirstTimeUseExtensions(state1);
-
-//   const state2 = result.getOrThrow();
-//   TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state2);
-
-//   expect(renderResult.baseElement.textContent).toBeTruthy();
-
-//   const obj = screen.getAllByTitle('key: ucp2-legacy.ai_addattack');
-
-//   expect(obj.length > 0).toBe(true);
-// });
-
-// test('load-extensions-state succesfull full render', () => {
-//   const state1 = generateInitialState();
-
-//   TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state1);
-
-//   const gui = <FullGUI />;
-//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//   const renderResult = render(gui);
-
-//   const result = activateFirstTimeUseExtensions(state1);
-
-//   const state2 = result.getOrThrow();
-//   TEST_STORE.set(EXTENSION_STATE_REDUCER_ATOM, state2);
-
-//   expect(TEST_STORE.get(LOCALIZED_UI_OPTION_ENTRIES_ATOM).length).toBe(58);
-
-//   const obj = screen.getAllByTitle('key: ucp2-legacy.ai_addattack');
-
-//   expect(obj.length > 0).toBe(true);
-// });

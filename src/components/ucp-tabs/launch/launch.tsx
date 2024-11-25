@@ -43,6 +43,7 @@ import { LAUNCH_OPTION_ENVIRONMENT_VARIABLES_ATOM } from './launch-options/optio
 import Logger from '../../../util/scripts/logging';
 import { getStore } from '../../../hooks/jotai/base';
 import { LAUNCH_OPTION_COMMAND_LINE_ARGUMENTS_TOKENS_ATOM } from './launch-options/option-command-line-arguments';
+import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
 
 const LOGGER = new Logger('launch.tsx');
 
@@ -191,6 +192,15 @@ export default function Launch() {
             <div
               className="launch__options__box--ucp-checkbox"
               onClick={() => setConsoleShow(!consoleShow)}
+              onMouseEnter={() => {
+                getStore().set(
+                  STATUS_BAR_MESSAGE_ATOM,
+                  'launch.options.console.show.help',
+                );
+              }}
+              onMouseLeave={() => {
+                getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
+              }}
             >
               <h5>
                 <Message message="launch.options.console.show" />
@@ -204,6 +214,15 @@ export default function Launch() {
             <div
               className="launch__options__box--ucp-checkbox"
               onClick={() => setNoSecurity(!noSecurity)}
+              onMouseEnter={() => {
+                getStore().set(
+                  STATUS_BAR_MESSAGE_ATOM,
+                  'launch.options.disable.security.help',
+                );
+              }}
+              onMouseLeave={() => {
+                getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
+              }}
             >
               <h5>
                 <Message message="launch.options.disable.security" />

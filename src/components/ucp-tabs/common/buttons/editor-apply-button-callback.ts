@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { exists, writeTextFile } from '@tauri-apps/api/fs';
+import { writeTextFile } from '@tauri-apps/api/fs';
 import {
   ConfigFile,
   Definition,
@@ -129,26 +129,6 @@ export async function editorApplyButtonCallback(
   // Save the new files
   await extension.io.handle(async (eh) => {
     const pluginDir = eh.path;
-
-    if (
-      !(await exists(`${pluginDir}/definition.original.yml`)) &&
-      (await eh.doesEntryExist('definition.yml'))
-    ) {
-      await writeTextFile(
-        `${pluginDir}/definition.original.yml`,
-        await eh.getTextContents(`definition.yml`),
-      );
-    }
-
-    if (
-      !(await exists(`${pluginDir}/config.original.yml`)) &&
-      (await eh.doesEntryExist('config.yml'))
-    ) {
-      await writeTextFile(
-        `${pluginDir}/config.original.yml`,
-        await eh.getTextContents(`config.yml`),
-      );
-    }
 
     const serializedDefinition = serializeDefinition(newDefinition);
 

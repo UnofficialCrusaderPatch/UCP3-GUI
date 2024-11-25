@@ -48,7 +48,7 @@ export async function setupExtensionsStateConfiguration(
 
       const newerExtensionState =
         activateFirstTimeUseExtensions(newExtensionsState).getOrThrow();
-      getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);
+      getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
 
       getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
@@ -57,8 +57,6 @@ export async function setupExtensionsStateConfiguration(
           file,
         }),
       );
-
-      setExtensionsStateAndClearConfiguration(newerExtensionState);
     }
   }
 

@@ -9,9 +9,6 @@ import {
 } from '../../../../../config/ucp/common';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
-  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -19,6 +16,14 @@ import {
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
+} from '../../../../../function/configuration/derived-state';
+import Logger from '../../../../../util/scripts/logging';
+
+const LOGGER = new Logger('CreateSlider.tsx');
 
 function CreateSlider(args: {
   spec: SliderDisplayConfigElement;
@@ -45,9 +50,25 @@ function CreateSlider(args: {
   const { url, enabled } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
-  const { [url]: value } = configuration as {
+  let { [url]: value } = configuration as {
     [url: string]: { enabled: boolean; sliderValue: number };
   };
+  const { [url]: defaultValue } = configurationDefaults as {
+    [url: string]: { enabled: boolean; sliderValue: number };
+  };
+
+  if (value === undefined) {
+    LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
+
+    if (defaultValue === undefined) {
+      const err = `value and default value not defined for: ${url}`;
+      LOGGER.msg(err).error();
+      throw Error(err);
+    } else {
+      LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
+      value = defaultValue;
+    }
+  }
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,

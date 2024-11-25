@@ -2,7 +2,7 @@ import { atomWithReducer } from 'jotai/utils';
 import { atom } from 'jotai';
 import { ExtensionDependencyTree } from '../dependency-management/dependency-resolution';
 import { ExtensionsState } from '../extensions-state';
-import { propagateActiveExtensionsChange } from './change';
+import { generateAndSetFullConfig } from './change';
 import { createEmptyConfigurationState } from '../../configuration/state';
 
 // eslint-disable-next-line func-style
@@ -30,7 +30,7 @@ export const EXTENSION_STATE_INTERNAL_ATOM = atomWithReducer(
 export const EXTENSION_STATE_INTERFACE_ATOM = atom(
   (get) => get(EXTENSION_STATE_INTERNAL_ATOM),
   (get, set, newValue: ExtensionsState) => {
-    propagateActiveExtensionsChange(newValue);
+    generateAndSetFullConfig(get, set, newValue);
     set(EXTENSION_STATE_INTERNAL_ATOM, newValue);
   },
 );

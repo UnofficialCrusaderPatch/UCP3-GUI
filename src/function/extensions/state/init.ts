@@ -9,6 +9,13 @@ import {
   PREFERRED_EXTENSION_VERSION_ATOM,
 } from './state';
 
+/**
+ * Note this function returns a state with all extensions inactive
+ * @param extensions list of extensions to include in the state, no extensions are active
+ * @param frontendVersion the frontend version to support
+ * @param frameworkVersion the framework version to support
+ * @returns extensions state object
+ */
 // eslint-disable-next-line import/prefer-default-export
 export function createBasicExtensionsState(
   extensions: Extension[],
@@ -16,7 +23,7 @@ export function createBasicExtensionsState(
   frameworkVersion: string | undefined,
 ): ExtensionsState {
   return {
-    extensions,
+    extensions: [...extensions],
     tree: new ExtensionDependencyTree(
       [...extensions],
       frontendVersion,
@@ -30,7 +37,7 @@ export function createBasicExtensionsState(
   } as ExtensionsState;
 }
 
-export function clearConfigurationAndSetNewExtensionsState(
+export function setExtensionsStateAndClearConfiguration(
   newExtensionsState: ExtensionsState,
 ) {
   getStore().set(EXTENSION_STATE_REDUCER_ATOM, newExtensionsState);

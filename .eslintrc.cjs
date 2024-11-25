@@ -54,6 +54,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'error',
     'no-console': 'error',
     '@typescript-eslint/no-explicit-any': 'warn',
+    'react/no-unstable-nested-components': 'error',
   },
   plugins: ['prettier'],
 };

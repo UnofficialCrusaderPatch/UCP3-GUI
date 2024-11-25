@@ -61,7 +61,9 @@ export function applyCategoryBasedSort(uiCollection: any[]) {
 export function extensionsToOptionEntries(exts: Extension[]) {
   const uiCollection: any[] = [];
   exts.forEach((ext) => {
-    uiCollection.push(...ext.ui);
+    if (ext.ui) {
+      uiCollection.push(...ext.ui);
+    }
   });
 
   return applyCategoryBasedSort(uiCollection);

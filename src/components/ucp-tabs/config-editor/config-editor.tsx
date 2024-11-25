@@ -42,7 +42,8 @@ export default function ConfigEditor(args: { readonly: boolean }) {
     // );
   }, [activeExtensions]);
 
-  const { nav, content } = UIFactory.CreateSections({ readonly });
+  const content = <UIFactory.CreateSections readonly={readonly} />;
+  const nav = <UIFactory.CreateSectionsNav />;
 
   const guiCreatorMode = useAtomValue(CREATOR_MODE_ATOM);
 

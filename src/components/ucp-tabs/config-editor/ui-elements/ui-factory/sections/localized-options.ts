@@ -18,6 +18,8 @@ export const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom<DisplayConfigElement[]>(
     const language = get(LANGUAGE_ATOM);
 
     const euis = extensions.map((e) => {
+      if (e.locales === undefined) return e.ui;
+
       const locale = e.locales[language] ?? e.locales.en;
       if (locale === undefined) {
         return e.ui;

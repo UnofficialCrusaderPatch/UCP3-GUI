@@ -5,9 +5,6 @@ import { UCP2SwitchDisplayConfigElement } from '../../../../../config/ucp/common
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
-  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -15,6 +12,14 @@ import {
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+  CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
+} from '../../../../../function/configuration/derived-state';
+import Logger from '../../../../../util/scripts/logging';
+
+const LOGGER = new Logger('CreateUCP2Switch.tsx');
 
 function CreateUCP2Switch(args: {
   spec: UCP2SwitchDisplayConfigElement;
@@ -38,7 +43,22 @@ function CreateUCP2Switch(args: {
 
   const { spec, disabled } = args;
   const { url, text, enabled, header } = spec;
-  const { [url]: value } = configuration;
+  let { [url]: value } = configuration;
+  const { [url]: defaultValue } = configurationDefaults;
+
+  if (value === undefined) {
+    LOGGER.msg(`value not defined (no default specified?) for: ${url}`).error();
+
+    if (defaultValue === undefined) {
+      const err = `value and default value not defined for: ${url}`;
+      LOGGER.msg(err).error();
+      throw Error(err);
+    } else {
+      LOGGER.msg(`default value for ${url}: {}`, defaultValue).debug();
+      value = defaultValue;
+    }
+  }
+
   const isEnabled = parseEnabledLogic(
     enabled,
     configuration,

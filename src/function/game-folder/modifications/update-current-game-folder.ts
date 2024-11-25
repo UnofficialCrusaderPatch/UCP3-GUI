@@ -3,6 +3,7 @@ import {
   BlankOverlayContent,
   forceClearOverlayContent,
 } from '../../../components/overlay/overlay';
+import { EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM } from '../../../components/ucp-tabs/content-manager/state/atoms';
 import { getStore } from '../../../hooks/jotai/base';
 import {
   GAME_FOLDER_ATOM,
@@ -49,6 +50,7 @@ export async function updateCurrentGameFolder(
     }
     await waitForNewFolderSet(oldSetTime);
   } finally {
+    getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, false);
     forceClearOverlayContent();
   }
 }

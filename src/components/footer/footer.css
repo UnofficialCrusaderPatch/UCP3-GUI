@@ -13,6 +13,12 @@
   font-family: sans-serif;
 }
 
+.footer span {
+  overflow: hidden;
+  /* white-space: nowrap; */
+  overflow-x: hidden;
+}
+
 .footer__version-and-state {
   text-wrap: nowrap;
   padding: 0 0.5rem 0 0.5rem;

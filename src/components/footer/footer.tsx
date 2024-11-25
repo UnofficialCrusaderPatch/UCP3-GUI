@@ -149,15 +149,15 @@ export default function Footer() {
 
   return (
     <div className="ornament-border fs-8 footer">
-      <span
+      <div
         className="px-2 me-auto"
         data-toggle="tooltip"
         data-placement="top"
         title={currentFolder}
-        style={isDisplayingCurrentFolder ? overflowPreventionStyle : {}}
+        style={overflowPreventionStyle}
       >
         <span className="fst-italic">{statusBarMessage}</span>
-      </span>
+      </div>
       {/* <span className="px-2">{t('gui-general:messages', { count: 0 })}</span>
         <span className="px-2">
           {t('gui-general:warnings', { count: warningCount })}
@@ -165,9 +165,11 @@ export default function Footer() {
         <span className="px-2">
           {t('gui-general:errors', { count: errorCount })}
         </span> */}
-      <Suspense>
-        <VersionAndState />
-      </Suspense>
+      <div>
+        <Suspense>
+          <VersionAndState />
+        </Suspense>
+      </div>
     </div>
   );
 }

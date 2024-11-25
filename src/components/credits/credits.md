@@ -1,4 +1,10 @@
-## The team behind the UCP [![UCP_Official](https://discordapp.com/api/guilds/426318193603117057/widget.png?style=shield)](https://discord.gg/N4UVjZBRXU)
+## Visit our website and discord! [![UCP_Official](https://discordapp.com/api/guilds/426318193603117057/widget.png?style=shield)](https://discord.gg/N4UVjZBRXU)
+
+[GitHub](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch)
+
+[Website](https://unofficialcrusaderpatch.github.io/)
+
+## The team behind the UCP
 
 ### Creators of the UCP 3 framework
 

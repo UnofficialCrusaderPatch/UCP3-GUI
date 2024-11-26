@@ -82,6 +82,7 @@
     "src/function/window-actions.ts",
     "src/hooks/general/util.ts",
     "src/tauri/tauri-misc.ts",
-    "src/testing/dump-extensions-state.ts"
+    "src/testing/dump-extensions-state.ts",
+    "src/testing/mocks.ts"
   ]
 }

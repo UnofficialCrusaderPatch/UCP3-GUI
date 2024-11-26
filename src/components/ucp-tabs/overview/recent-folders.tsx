@@ -33,7 +33,8 @@ export default function RecentFolders() {
   const localize = useMessage();
 
   // needs better loading site
-  if (recentFolders.length === 0) {
+  // fixme: does this ever happen?
+  if (recentFolders === undefined) {
     return (
       <p>
         <Message message="loading" />

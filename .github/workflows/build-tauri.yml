@@ -127,6 +127,8 @@ jobs:
         id: latest-json
         with:
           script: |
+            const fs = require('fs');
+            
             const release = await github.rest.repos.getReleaseByTag({
               owner: 'UnofficialCrusaderPatch',
               repo: 'UCP3-GUI',
@@ -150,7 +152,7 @@ jobs:
               },
             });
 
-            writeFileSync('latest.json', Buffer.from(contents.data));
+            fs.writeFileSync('latest.json', Buffer.from(contents.data));
 
             return JSON.parse(new TextDecoder("utf-8").decode(new Uint8Array(contents.data)));
       - name: Push release to Tauri auto updater

@@ -92,7 +92,9 @@
       "shortDescription": "",
       "targets": [
         "nsis",
-        "updater"
+        "updater",
+        "appimage",
+        "deb"
       ],
       "windows": {
         "certificateThumbprint": null,

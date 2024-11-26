@@ -6,3 +6,4 @@ public/
 .eslintrc.js
 env.d.ts
 vite.config.ts
+/tools/

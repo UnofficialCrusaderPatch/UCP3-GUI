@@ -73,6 +73,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@octokit/rest": "^21.0.2",
+    "@octokit/types": "^13.6.2",
     "@tauri-apps/cli": "^1.6.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.1",
@@ -101,6 +103,7 @@
     "husky": "^9.1.6",
     "jsdom": "^25.0.1",
     "lint-staged": "^15.2.10",
+    "octokit": "^4.0.2",
     "prettier": "^3.3.3",
     "sharp": "^0.33.5",
     "svgo": "^3.3.2",

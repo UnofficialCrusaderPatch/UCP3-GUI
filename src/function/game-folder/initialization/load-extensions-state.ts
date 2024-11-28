@@ -35,10 +35,14 @@ export async function setupExtensionsStateConfiguration(
       );
 
       if (result.status === 'fail') {
-        throw Error(`${result.reason} ${result.report}`);
+        if (result.reason === 'file') {
+          throw Error(`${result.reason} ${result.report}`);
+        } else {
+          throw Error(`${result.reason} ${result.message.report}`);
+        }
       }
     } catch (err: unknown) {
-      LOGGER.msg(String(err)).error();
+      LOGGER.msg(`${err}`).error();
     }
   } else {
     LOGGER.msg(`no ${file} file found`).info();

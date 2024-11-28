@@ -173,7 +173,7 @@ export async function fullStrategy(
     return {
       status: 'error',
       code: 'GENERIC',
-      messages: ['no sparse "load-order" found in config file'],
+      messages: ['no full "load-order" found in config file'],
     } as GenericFailure;
   }
 

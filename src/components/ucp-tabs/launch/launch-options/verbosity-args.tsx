@@ -9,8 +9,8 @@ import { LAUNCH_OPTION_LOG_LEVEL_FILE_ATOM } from './option-log-level-file';
 function LogLevelSetting(props: { label: string }) {
   const { label } = props;
 
-  const fileLogLevel = useAtom(LAUNCH_OPTION_LOG_LEVEL_CONSOLE_ATOM);
-  const consoleLogLevel = useAtom(LAUNCH_OPTION_LOG_LEVEL_FILE_ATOM);
+  const fileLogLevel = useAtom(LAUNCH_OPTION_LOG_LEVEL_FILE_ATOM);
+  const consoleLogLevel = useAtom(LAUNCH_OPTION_LOG_LEVEL_CONSOLE_ATOM);
   const [logLevel, setLogLevel] =
     label === 'ucp.log.level' ? fileLogLevel : consoleLogLevel;
 

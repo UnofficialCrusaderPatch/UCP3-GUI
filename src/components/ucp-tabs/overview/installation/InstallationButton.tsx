@@ -19,7 +19,7 @@ import {
   FRAMEWORK_UPDATER_ATOM,
   FrameworkUpdateStatus,
   HAS_UPDATE_ATOM,
-  HAS_UPDATE_QUERY_ATOM,
+  HAS_UPDATE_OVERRIDE_ATOM,
 } from './atoms';
 
 const LOGGER = new Logger('InstallationButton.tsx');
@@ -45,25 +45,30 @@ export function InstallationButton() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const updateOverrideStatus = useAtomValue(HAS_UPDATE_OVERRIDE_ATOM);
+
   const updateStatus = useAtomValue(HAS_UPDATE_ATOM);
 
   const buttonLabel = labelForUpdateStatus(updateStatus);
-
-  useAtomValue(HAS_UPDATE_QUERY_ATOM);
 
   return (
     <OverviewButton
       buttonActive={
         overviewButtonActive &&
         currentFolder !== '' &&
-        updateStatus.status !== 'no_update'
+        updateOverrideStatus.status !== 'no_update'
       }
       buttonText={buttonLabel}
       buttonVariant="ucp-button overview__text-button"
       funcBefore={() => setOverviewButtonActive(false)}
       funcAfter={() => setOverviewButtonActive(true)}
       func={async (createStatusToast) => {
-        if (updateStatus.status === 'no_update') {
+        const { version } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
+
+        if (
+          updateOverrideStatus.status === 'no_update' &&
+          version === updateOverrideStatus.version
+        ) {
           return;
         }
 
@@ -174,7 +179,10 @@ export function InstallationButton() {
 
           createStatusToast(ToastType.SUCCESS, 'overview.update.success');
 
-          getStore().set(HAS_UPDATE_ATOM, { status: 'no_update' });
+          getStore().set(HAS_UPDATE_OVERRIDE_ATOM, {
+            status: 'no_update',
+            version,
+          });
 
           await showModalOk({
             title: 'Reload required',

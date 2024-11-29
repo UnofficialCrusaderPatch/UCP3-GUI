@@ -8,6 +8,9 @@ import { UCP_SIMPLIFIED_VERSION_ATOM } from '../../../../function/ucp-files/ucp-
 import { getStore } from '../../../../hooks/jotai/base';
 import { makeToast, ToastType } from '../../../toasts/toasts-display';
 import { CURRENT_DISPLAYED_TAB } from '../../tabs-state';
+import Logger from '../../../../util/scripts/logging';
+
+const LOGGER = new Logger('framework-updater-atom.ts');
 
 export const FRAMEWORK_UPDATER_ATOM = atom<UCP3Updater>((get) => {
   const v = get(UCP_SIMPLIFIED_VERSION_ATOM);
@@ -22,24 +25,50 @@ export const FRAMEWORK_UPDATER_ATOM = atom<UCP3Updater>((get) => {
 });
 
 export type FrameworkUpdateStatus = {
-  status: 'update' | 'not_installed' | 'no_update' | 'installed';
+  status: 'update' | 'not_installed' | 'no_update' | 'installed' | 'fetching';
+  version: string;
 };
 
-export const HAS_UPDATE_ATOM = atom<FrameworkUpdateStatus>({
+export const HAS_UPDATE_OVERRIDE_ATOM = atom<FrameworkUpdateStatus>({
   status: 'not_installed',
+  version: '',
 });
 
 async function fetchFrameworkStatus() {
+  LOGGER.msg(`fetchFrameworkStatus`).debug();
+
   const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);
 
   const meta = await updater.fetchMeta();
+  return meta;
+}
+
+// eslint-disable-next-line import/prefer-default-export
+export const HAS_UPDATE_QUERY_ATOM = atomWithQuery<UCP3ReleaseMeta>((get) => ({
+  queryKey: ['framework', get(FRAMEWORK_UPDATER_ATOM).version],
+  queryFn: fetchFrameworkStatus,
+  retry: false,
+  staleTime: 1000 * 60 * 60,
+  placeholderData: () => undefined,
+}));
+
+export const HAS_UPDATE_ATOM = atom(async (get) => {
+  const { version } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
+
+  const { isSuccess } = get(HAS_UPDATE_QUERY_ATOM);
+  if (!isSuccess) {
+    return { status: 'fetching', version } as FrameworkUpdateStatus;
+  }
+  const updater = get(FRAMEWORK_UPDATER_ATOM);
 
   const updateExists = await updater.doesUpdateExist();
-  const isInstalled =
-    getStore().get(UCP_SIMPLIFIED_VERSION_ATOM).version !== '0.0.0';
+
+  const isInstalled = version !== '0.0.0';
+
+  let result = { status: 'not_installed', version };
 
   if (isInstalled && updateExists) {
-    getStore().set(HAS_UPDATE_ATOM, { status: 'update' });
+    result = { status: 'update', version };
     setTimeout(() => {
       makeToast({
         title: 'framework.version.update.available.toast.title',
@@ -51,26 +80,12 @@ async function fetchFrameworkStatus() {
       });
     }, 3000);
   } else if (isInstalled && !updateExists) {
-    getStore().set(HAS_UPDATE_ATOM, { status: 'no_update' });
+    result = { status: 'no_update', version };
   } else if (!isInstalled) {
-    getStore().set(HAS_UPDATE_ATOM, { status: 'not_installed' });
+    result = { status: 'not_installed', version };
   } else if (isInstalled) {
-    getStore().set(HAS_UPDATE_ATOM, { status: 'installed' });
+    result = { status: 'installed', version };
   }
 
-  return meta;
-}
-
-// eslint-disable-next-line import/prefer-default-export
-export const HAS_UPDATE_QUERY_ATOM = atomWithQuery<UCP3ReleaseMeta>((get) => ({
-  queryKey: [
-    'framework',
-    get(FRAMEWORK_UPDATER_ATOM) !== undefined
-      ? get(FRAMEWORK_UPDATER_ATOM)?.version
-      : '',
-  ],
-  queryFn: fetchFrameworkStatus,
-  retry: false,
-  staleTime: 1000 * 60 * 60,
-  placeholderData: () => undefined,
-}));
+  return result as FrameworkUpdateStatus;
+});

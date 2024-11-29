@@ -59,9 +59,20 @@ export class UCP3Updater {
     return this.meta;
   }
 
-  async doesUpdateExist() {
+  cachedMeta() {
+    return this.meta;
+  }
+
+  /**
+   * Important: assumes fetchMeta() has been called
+   * @returns boolean
+   */
+  hasUpdate() {
     if (this.meta === undefined) {
-      this.meta = await this.fetchMeta();
+      LOGGER.msg(
+        `updater meta is undefined, pretending there isn't an update`,
+      ).warn();
+      return false;
     }
 
     const currentVersion = new SemVer(this.version);
@@ -81,6 +92,14 @@ export class UCP3Updater {
     }
 
     return false;
+  }
+
+  async doesUpdateExist() {
+    if (this.meta === undefined) {
+      this.meta = await this.fetchMeta();
+    }
+
+    return this.hasUpdate();
   }
 
   async fetchUpdateToGamefolder(

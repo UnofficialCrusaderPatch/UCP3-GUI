@@ -90,7 +90,11 @@ export default function Overview() {
 
       <InstallationButton />
       <OverviewButton
-        buttonActive={overviewButtonActive && currentFolder !== ''}
+        buttonActive={
+          overviewButtonActive &&
+          currentFolder !== '' &&
+          ucpState !== UCPFilesState.WRONG_FOLDER
+        }
         buttonText="overview.zip.idle"
         buttonVariant="zip-icon icon-button"
         funcBefore={() => setOverviewButtonActive(false)}

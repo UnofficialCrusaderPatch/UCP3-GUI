@@ -1,9 +1,6 @@
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { atom } from 'jotai';
-import {
-  UCP3ReleaseMeta,
-  UCP3Updater,
-} from '../../../../function/download/github';
+import { UCP3Updater } from '../../../../function/download/github';
 import { UCP_SIMPLIFIED_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
 import { getStore } from '../../../../hooks/jotai/base';
 import { makeToast, ToastType } from '../../../toasts/toasts-display';
@@ -12,80 +9,93 @@ import Logger from '../../../../util/scripts/logging';
 
 const LOGGER = new Logger('framework-updater-atom.ts');
 
-export const FRAMEWORK_UPDATER_ATOM = atom<UCP3Updater>((get) => {
-  const v = get(UCP_SIMPLIFIED_VERSION_ATOM);
+type ErrorFrameworkUpdateStatus = {
+  status: 'error';
+  message: string;
+};
 
-  if (v.version !== '0.0.0') {
-    const { version, sha } = v;
-    return new UCP3Updater(version, sha, new Date(0));
-  }
+type IdleFrameworkUpdateStatus = {
+  status: 'idle';
+};
 
-  // Fallback
-  return UCP3Updater.DUMMY;
-});
-
-export type FrameworkUpdateStatus = {
-  status: 'update' | 'not_installed' | 'no_update' | 'installed' | 'fetching';
+type FetchingFrameworkUpdateStatus = {
+  status: 'fetching';
   version: string;
 };
 
-export const HAS_UPDATE_OVERRIDE_ATOM = atom<FrameworkUpdateStatus>({
-  status: 'not_installed',
-  version: '',
-});
+type ResolvedFrameworkUpdateStatus = {
+  status: 'update' | 'not_installed' | 'no_update';
+  version: string;
+};
 
-async function fetchFrameworkStatus() {
+export type FrameworkUpdateStatus =
+  | ErrorFrameworkUpdateStatus
+  | IdleFrameworkUpdateStatus
+  | FetchingFrameworkUpdateStatus
+  | ResolvedFrameworkUpdateStatus;
+
+export const FRAMEWORK_UPDATER_ATOM = atom<UCP3Updater>();
+
+async function fetchFrameworkStatus(): Promise<FrameworkUpdateStatus> {
   LOGGER.msg(`fetchFrameworkStatus`).debug();
 
-  const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);
+  const { version, sha } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
 
-  const meta = await updater.fetchMeta();
-  return meta;
-}
+  const updater = new UCP3Updater(version, sha, new Date(0));
 
-// eslint-disable-next-line import/prefer-default-export
-export const HAS_UPDATE_QUERY_ATOM = atomWithQuery<UCP3ReleaseMeta>((get) => ({
-  queryKey: ['framework', get(FRAMEWORK_UPDATER_ATOM).version],
-  queryFn: fetchFrameworkStatus,
-  retry: false,
-  staleTime: 1000 * 60 * 60,
-  placeholderData: () => undefined,
-}));
+  getStore().set(FRAMEWORK_UPDATER_ATOM, updater);
 
-export const HAS_UPDATE_ATOM = atom(async (get) => {
-  const { version } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
-
-  const { isSuccess } = get(HAS_UPDATE_QUERY_ATOM);
-  if (!isSuccess) {
-    return { status: 'fetching', version } as FrameworkUpdateStatus;
-  }
-  const updater = get(FRAMEWORK_UPDATER_ATOM);
-
+  // Does the actual fetch
   const updateExists = await updater.doesUpdateExist();
 
   const isInstalled = version !== '0.0.0';
 
-  let result = { status: 'not_installed', version };
-
-  if (isInstalled && updateExists) {
-    result = { status: 'update', version };
-    setTimeout(() => {
-      makeToast({
-        title: 'framework.version.update.available.toast.title',
-        body: 'framework.version.update.available.toast.body',
-        type: ToastType.SUCCESS,
-        onClick: () => {
-          getStore().set(CURRENT_DISPLAYED_TAB, 'overview');
-        },
-      });
-    }, 3000);
-  } else if (isInstalled && !updateExists) {
-    result = { status: 'no_update', version };
-  } else if (!isInstalled) {
-    result = { status: 'not_installed', version };
-  } else if (isInstalled) {
-    result = { status: 'installed', version };
+  if (!isInstalled) {
+    return { status: 'not_installed', version };
   }
 
-  return result as FrameworkUpdateStatus;
+  if (!updateExists) {
+    return { status: 'no_update', version };
+  }
+
+  setTimeout(() => {
+    makeToast({
+      title: 'framework.version.update.available.toast.title',
+      body: 'framework.version.update.available.toast.body',
+      type: ToastType.SUCCESS,
+      onClick: () => {
+        getStore().set(CURRENT_DISPLAYED_TAB, 'overview');
+      },
+    });
+  }, 3000);
+
+  return { status: 'update', version };
+}
+
+// eslint-disable-next-line import/prefer-default-export
+export const HAS_UPDATE_QUERY_ATOM = atomWithQuery<FrameworkUpdateStatus>(
+  (get) => {
+    const { version } = get(UCP_SIMPLIFIED_VERSION_ATOM);
+    return {
+      queryKey: ['framework', version],
+      queryFn: fetchFrameworkStatus,
+      retry: false,
+      staleTime: 1000 * 60 * 60,
+      placeholderData: () => ({ status: 'fetching', version }),
+    };
+  },
+);
+
+export const HAS_UPDATE_ATOM = atom<FrameworkUpdateStatus>((get) => {
+  const { version } = get(UCP_SIMPLIFIED_VERSION_ATOM);
+
+  const { isSuccess, isError, error, data } = get(HAS_UPDATE_QUERY_ATOM);
+  if (!isSuccess) {
+    if (isError) {
+      return { status: 'error', message: `${error}` };
+    }
+    return { status: 'fetching', version };
+  }
+
+  return data;
 });

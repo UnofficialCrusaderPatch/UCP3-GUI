@@ -56,8 +56,8 @@ export async function handleFileDrop(event: Event<unknown>) {
 
       if (anythingInstalled) {
         await showModalOk({
-          title: 'Reload required',
-          message: 'The GUI will now reload.',
+          title: 'require.reload.title',
+          message: 'require.reload.message',
         });
 
         reloadCurrentGameFolder();

@@ -103,8 +103,8 @@ export function InstallExtensionButton() {
           await installExtensionsButtonCallback(gameFolder);
 
           await showModalOk({
-            title: 'Reload required',
-            message: 'The GUI will now reload.',
+            title: 'require.reload.title',
+            message: 'require.reload.message',
           });
 
           reloadCurrentGameFolder();

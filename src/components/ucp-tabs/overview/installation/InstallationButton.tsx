@@ -19,23 +19,45 @@ import {
   FRAMEWORK_UPDATER_ATOM,
   FrameworkUpdateStatus,
   HAS_UPDATE_ATOM,
-  HAS_UPDATE_OVERRIDE_ATOM,
+  HAS_UPDATE_QUERY_ATOM,
 } from './atoms';
+import {
+  UCP_FILES_STATE_ATOM,
+  UCPFilesState,
+} from '../../../../function/ucp-files/ucp-state';
 
 const LOGGER = new Logger('InstallationButton.tsx');
 
-function labelForUpdateStatus(updateStatus: FrameworkUpdateStatus | undefined) {
-  if (updateStatus === undefined || updateStatus.status === 'installed') {
-    return 'overview.framework.update.idle';
+function labelForUpdateStatus(
+  updateStatus: FrameworkUpdateStatus | undefined,
+  isError: boolean,
+  isSettled: boolean,
+  isWrongFolder: boolean,
+) {
+  if (isWrongFolder) return 'overview.folder.invalid';
+  if (isError) return 'overview.framework.update.error';
+  if (!isSettled) return 'overview.framework.update.fetching';
+  // Now we know update Status must exist
+  switch (updateStatus!.status) {
+    case 'idle': {
+      return 'overview.framework.update.idle';
+    }
+    case 'update': {
+      return 'overview.framework.update.available';
+    }
+    case 'no_update': {
+      return 'overview.framework.update.uptodate';
+    }
+    case 'not_installed': {
+      return 'overview.framework.install';
+    }
+    case 'fetching': {
+      return 'overview.framework.update.fetching';
+    }
+    default: {
+      return 'overview.framework.update.error';
+    }
   }
-  if (updateStatus.status === 'update') {
-    return 'overview.framework.update.available';
-  }
-  if (updateStatus.status === 'no_update') {
-    return 'overview.framework.update.uptodate';
-  }
-
-  return 'overview.framework.install';
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -45,18 +67,29 @@ export function InstallationButton() {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const updateOverrideStatus = useAtomValue(HAS_UPDATE_OVERRIDE_ATOM);
-
   const updateStatus = useAtomValue(HAS_UPDATE_ATOM);
 
-  const buttonLabel = labelForUpdateStatus(updateStatus);
+  const state = useAtomValue(UCP_FILES_STATE_ATOM);
+
+  const isWrongFolder = state === UCPFilesState.WRONG_FOLDER;
+
+  const { isError, isSuccess, data } = useAtomValue(HAS_UPDATE_QUERY_ATOM);
+
+  const buttonLabel = labelForUpdateStatus(
+    data,
+    isError,
+    isSuccess,
+    isWrongFolder,
+  );
 
   return (
     <OverviewButton
       buttonActive={
+        !isWrongFolder &&
+        isSuccess &&
         overviewButtonActive &&
         currentFolder !== '' &&
-        updateOverrideStatus.status !== 'no_update'
+        updateStatus.status !== 'no_update'
       }
       buttonText={buttonLabel}
       buttonVariant="ucp-button overview__text-button"
@@ -65,9 +98,14 @@ export function InstallationButton() {
       func={async (createStatusToast) => {
         const { version } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
 
+        const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);
+
+        if (updater === undefined) return;
+
         if (
-          updateOverrideStatus.status === 'no_update' &&
-          version === updateOverrideStatus.version
+          (updateStatus.status === 'no_update' &&
+            version === updateStatus.version) ||
+          updateStatus.status === 'fetching'
         ) {
           return;
         }
@@ -90,8 +128,6 @@ export function InstallationButton() {
           }
 
           const { type } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
-
-          const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);
 
           if (await updater.doesUpdateExist()) {
             // createStatusToast(ToastType.INFO, 'ucp.version.available');
@@ -132,9 +168,14 @@ export function InstallationButton() {
               const tt = new Date();
               if (tt.getTime() - previousFire.getTime() > updateInterval) {
                 previousFire = tt;
-                setStatusBarMessage(
-                  `Downloading... ${asPercentage(currentPercent)} (${Math.ceil(currentSize / 1000 / 1000)} MB/${Math.ceil(totalSize / 1000 / 1000)} MB)`,
-                );
+                setStatusBarMessage({
+                  key: 'overview.framework.update.downloading',
+                  args: {
+                    currentPercent: asPercentage(currentPercent),
+                    currentSize: Math.ceil(currentSize / 1000 / 1000),
+                    totalSize: Math.ceil(totalSize / 1000 / 1000),
+                  },
+                });
               }
             },
           );
@@ -179,14 +220,9 @@ export function InstallationButton() {
 
           createStatusToast(ToastType.SUCCESS, 'overview.update.success');
 
-          getStore().set(HAS_UPDATE_OVERRIDE_ATOM, {
-            status: 'no_update',
-            version,
-          });
-
           await showModalOk({
-            title: 'Reload required',
-            message: 'The GUI will now reload.',
+            title: 'require.reload.title',
+            message: 'require.reload.message',
           });
 
           reloadCurrentGameFolder();

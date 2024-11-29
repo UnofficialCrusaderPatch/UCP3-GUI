@@ -77,7 +77,13 @@ export function registerModal<
         throw e;
       })
       // update to next modal stage after a short wait, no matter if the previous modal worked or not
-      .finally(() => sleep(500).then(nextModalWindow))
+      .finally(() => {
+        sleep(500)
+          .then(nextModalWindow)
+          .catch((e) => {
+            LOGGER.msg(`${e}`).error();
+          });
+      })
   );
 }
 

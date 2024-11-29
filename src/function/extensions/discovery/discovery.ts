@@ -205,7 +205,7 @@ export async function discoverExtensions(
     });
 
   if (extensionsWithErrors.length > 0) {
-    await showModalOk({
+    showModalOk({
       title: 'Errors while discovering extensions',
       message: `These extensions were skipped because they contain errors or incompatiblities:\n\n ${extensionsWithErrors.join(
         '\n\n',

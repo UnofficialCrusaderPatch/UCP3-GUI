@@ -31,7 +31,7 @@ export function activateFirstTimeUseExtensions(
 
   if (extensions.length !== 2) {
     const msg = `Not all first time use extensions are available. Unavailable: ${unavailable.join(', ')}`;
-    LOGGER.msg(msg).error();
+    LOGGER.msg(msg).warn();
     return Result.err(msg);
   }
 

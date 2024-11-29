@@ -21,7 +21,7 @@ export async function setupExtensionsStateConfiguration(
   LOGGER.msg(`Trying to load ${file}`).info();
 
   // This is here so the import button callback uses the correct state
-  // Unnecessary?
+  // The first time use logic can not set anything so that is why the state is set here
   setExtensionsStateAndClearConfiguration(newExtensionsState);
 
   if (await exists(file)) {
@@ -50,17 +50,20 @@ export async function setupExtensionsStateConfiguration(
     if (getStore().get(FIRST_TIME_USE_ATOM)) {
       LOGGER.msg('first time use!').info();
 
-      const newerExtensionState =
-        activateFirstTimeUseExtensions(newExtensionsState).getOrThrow();
-      getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
+      try {
+        const newerExtensionState =
+          activateFirstTimeUseExtensions(newExtensionsState).getOrThrow();
+        getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
+        getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
-      getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
-
-      ConsoleLogger.debug(
-        await saveCurrentConfig({
-          file,
-        }),
-      );
+        ConsoleLogger.debug(
+          await saveCurrentConfig({
+            file,
+          }),
+        );
+      } catch (err: unknown) {
+        LOGGER.msg(`Not setting first-time-use state because: ${err}`).warn();
+      }
     }
   }
 

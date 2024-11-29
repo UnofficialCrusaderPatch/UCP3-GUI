@@ -50,12 +50,13 @@ export async function initializeGameFolder(
     LOGGER.obj(e).error();
     await showModalOk({
       message: (e as object).toString(),
-      title: 'Error in extension initialization',
+      title: 'Error in extension discovery and loading',
     });
 
     getStore().set(INIT_ERROR, true);
   }
 
+  LOGGER.msg('Finished extension discovery').info();
   ConsoleLogger.debug('Discovered extensions: ', extensions);
   ConsoleLogger.debug('pre extensionsState: ', extensionsState);
 
@@ -75,7 +76,6 @@ export async function initializeGameFolder(
     frameworkVersion,
   );
 
-  LOGGER.msg('Finished extension discovery').info();
   ConsoleLogger.debug(`Basic extensions state: `, inactiveExtensionsState);
 
   const is = inactiveExtensionsState.tree.tryResolveAllDependencies();

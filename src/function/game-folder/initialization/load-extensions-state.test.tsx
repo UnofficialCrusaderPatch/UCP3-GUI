@@ -1,4 +1,4 @@
-import { createStore, Provider } from 'jotai';
+import { createStore, Provider, useAtomValue } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { parse } from 'yaml';
 import { afterEach, expect, test } from 'vitest';
@@ -9,6 +9,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { useEffect } from 'react';
 import CreateUCP2SliderChoice from '../../../components/ucp-tabs/config-editor/ui-elements/ui-factory/CreateUCP2SliderChoice';
 import { UCP2SliderChoiceDisplayConfigElement } from '../../../config/ucp/common';
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
@@ -20,6 +21,9 @@ import { createBasicExtensionsState } from '../../extensions/state/init';
 
 // "path": "C:.*/(ucp/.*)" => "path": "$1"
 import TEST_DATA from './tests/load-extensions-state.test.data.json';
+import { setupExtensionsStateConfiguration } from './load-extensions-state';
+import { createExtensionID } from '../../global/constants/extension-id';
+import { ExtensionsState } from '../../extensions/extensions-state';
 
 // @ts-expect-error 7031
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -156,4 +160,92 @@ test('load-extensions-state full render using getStore()', async () => {
     EXTENSION_STATE_REDUCER_ATOM,
     createBasicExtensionsState([], '', ''),
   );
+});
+
+test('setupExtensionsStateConfiguration with empty state does not throw an error', async () => {
+  await setupExtensionsStateConfiguration(
+    createBasicExtensionsState([], '1.0.7', '3.0.5'),
+    '',
+    '',
+  );
+});
+
+function DummyFunction({ state: initialState }: { state: ExtensionsState }) {
+  useEffect(() => {
+    setupExtensionsStateConfiguration(initialState, '', '');
+  }, [initialState]);
+
+  const trackedState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
+
+  return (
+    <div role="document">
+      {trackedState.activeExtensions
+        .map((ext) => createExtensionID(ext))
+        .join('\n')}
+    </div>
+  );
+}
+
+function DummyGUI({ store, state }: { store: any; state: ExtensionsState }) {
+  return (
+    <TestProvider store={store} initialValues={[]}>
+      <DummyFunction state={state} />
+    </TestProvider>
+  );
+}
+
+test('setupExtensionsStateConfiguration with proper state creates first time use data', async () => {
+  const TEST_STORE = getStore();
+
+  const state1 = generateInitialState();
+
+  const gui = <DummyGUI store={TEST_STORE} state={state1} />;
+
+  render(gui);
+
+  await waitFor(() => {
+    expect(
+      screen
+        .getByRole('document')
+        .textContent?.replaceAll('\n', '')
+        .replaceAll(' ', ''),
+    ).toEqual(
+      `graphicsApiReplacer@1.2.0
+                winProcHandler@0.2.0
+                ucp2-legacy-defaults@2.15.1
+                ucp2-vanilla-fixed-aiv@2.15.1
+                ucp2-aic-patch@2.15.1
+                ucp2-ai-files@2.15.1
+                aiSwapper@1.1.0
+                aivloader@1.0.0
+                files@1.1.0
+                aicloader@1.1.0
+                textResourceModifier@0.3.0
+                gmResourceModifier@0.2.0
+                ucp2-legacy@2.15.1`
+        .replaceAll('\n', '')
+        .replaceAll(' ', ''),
+    );
+    expect(
+      TEST_STORE.get(EXTENSION_STATE_REDUCER_ATOM)
+        .activeExtensions.map((ext) => createExtensionID(ext))
+        .join(''),
+    ).toEqual(
+      `graphicsApiReplacer@1.2.0
+       winProcHandler@0.2.0
+       ucp2-legacy-defaults@2.15.1
+       ucp2-vanilla-fixed-aiv@2.15.1
+       ucp2-aic-patch@2.15.1
+       ucp2-ai-files@2.15.1
+       aiSwapper@1.1.0
+       aivloader@1.0.0
+       files@1.1.0
+       aicloader@1.1.0
+       textResourceModifier@0.3.0
+       gmResourceModifier@0.2.0
+       ucp2-legacy@2.15.1`
+        .replaceAll('\n', '')
+        .replaceAll(' ', ''),
+    );
+  });
 });

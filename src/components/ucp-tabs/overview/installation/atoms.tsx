@@ -34,29 +34,35 @@ export type FrameworkUpdateStatus =
   | FetchingFrameworkUpdateStatus
   | ResolvedFrameworkUpdateStatus;
 
-export const FRAMEWORK_UPDATER_ATOM = atom<UCP3Updater>();
+export const FRAMEWORK_UPDATER_ATOM = atom<UCP3Updater>((get) => {
+  const { version, sha } = get(UCP_SIMPLIFIED_VERSION_ATOM);
+  return UCP3Updater.DUMMY.setVersionInfo(version, sha, new Date(0));
+});
 
 async function fetchFrameworkStatus(): Promise<FrameworkUpdateStatus> {
-  LOGGER.msg(`fetchFrameworkStatus`).debug();
-
   const { version, sha } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
-
-  const updater = new UCP3Updater(version, sha, new Date(0));
-
-  getStore().set(FRAMEWORK_UPDATER_ATOM, updater);
-
-  // Does the actual fetch
-  const updateExists = await updater.doesUpdateExist();
 
   const isInstalled = version !== '0.0.0';
 
   if (!isInstalled) {
+    LOGGER.msg(`fetch: fetching...`).debug();
     return { status: 'not_installed', version };
   }
 
+  LOGGER.msg(`fetch: fetching for ${version}-${sha}`).debug();
+
+  const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);
+
+  // Does the actual fetch
+  LOGGER.msg(`fetch: fetching...`).debug();
+  const updateExists = await updater.doesUpdateExist();
+
   if (!updateExists) {
+    LOGGER.msg(`fetch: fetching... no update`).debug();
     return { status: 'no_update', version };
   }
+
+  LOGGER.msg(`fetch: fetching... update!`).debug();
 
   setTimeout(() => {
     makeToast({
@@ -75,9 +81,9 @@ async function fetchFrameworkStatus(): Promise<FrameworkUpdateStatus> {
 // eslint-disable-next-line import/prefer-default-export
 export const HAS_UPDATE_QUERY_ATOM = atomWithQuery<FrameworkUpdateStatus>(
   (get) => {
-    const { version } = get(UCP_SIMPLIFIED_VERSION_ATOM);
+    const { version, sha } = get(UCP_SIMPLIFIED_VERSION_ATOM);
     return {
-      queryKey: ['framework', version],
+      queryKey: ['framework', version, sha],
       queryFn: fetchFrameworkStatus,
       retry: false,
       staleTime: 1000 * 60 * 60,
@@ -89,13 +95,20 @@ export const HAS_UPDATE_QUERY_ATOM = atomWithQuery<FrameworkUpdateStatus>(
 export const HAS_UPDATE_ATOM = atom<FrameworkUpdateStatus>((get) => {
   const { version } = get(UCP_SIMPLIFIED_VERSION_ATOM);
 
+  LOGGER.msg(`has-update-atom: version: ${version}`).debug();
+
   const { isSuccess, isError, error, data } = get(HAS_UPDATE_QUERY_ATOM);
+
   if (!isSuccess) {
     if (isError) {
+      LOGGER.msg(`has-update-atom: error: ${error}`).debug();
       return { status: 'error', message: `${error}` };
     }
+    LOGGER.msg(`has-update-atom: fetching for: ${version}`).debug();
     return { status: 'fetching', version };
   }
+
+  LOGGER.msg(`has-update-atom: data: ${JSON.stringify(data)}`).debug();
 
   return data;
 });

@@ -82,6 +82,8 @@ export function InstallationButton() {
     isWrongFolder,
   );
 
+  LOGGER.msg(updateStatus.status).debug();
+
   return (
     <OverviewButton
       buttonActive={
@@ -97,6 +99,8 @@ export function InstallationButton() {
       funcBefore={() => setOverviewButtonActive(false)}
       funcAfter={() => setOverviewButtonActive(true)}
       func={async (createStatusToast) => {
+        LOGGER.msg(`Click()`).debug();
+
         const { version } = getStore().get(UCP_SIMPLIFIED_VERSION_ATOM);
 
         const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);

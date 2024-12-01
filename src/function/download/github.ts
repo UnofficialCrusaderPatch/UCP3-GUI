@@ -38,6 +38,28 @@ export class UCP3Updater {
     this.date = buildDate;
   }
 
+  #setVersion(version: string) {
+    this.version = version;
+  }
+
+  #setSHA(sha: string) {
+    this.sha = sha;
+  }
+
+  #setDate(date: Date) {
+    this.date = date;
+  }
+
+  setVersionInfo(version: string, sha: string, date: Date) {
+    this.meta = undefined;
+
+    this.#setVersion(version);
+    this.#setSHA(sha);
+    this.#setDate(date);
+
+    return this;
+  }
+
   static DUMMY = new UCP3Updater('0.0.0', '', new Date(0));
 
   async fetchMeta() {

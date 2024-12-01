@@ -53,9 +53,14 @@ export async function attemptStrategies(
 
       return report;
     }
-    LOGGER.msg(
-      `${fullStrategyResult.code}: ${fullStrategyResult.dependencies.join('\n')}`,
-    ).error();
+
+    if (fullStrategyResult.code === 'MISSING_LOAD_ORDER') {
+      LOGGER.msg(`Missing load order specification`).warn();
+    } else {
+      LOGGER.msg(
+        `${fullStrategyResult.code}: ${fullStrategyResult.dependencies.join('\n')}`,
+      ).warn();
+    }
 
     // Continue with sparse mode
     LOGGER.msg('Attempting sparse strategy').debug();
@@ -76,6 +81,8 @@ export async function attemptStrategies(
         LOGGER.msg(
           `${fullStrategyResult.code}: ${sparseStrategyResult.messages.join('\n')}`,
         ).error();
+      } else if (sparseStrategyResult.code === 'MISSING_LOAD_ORDER') {
+        LOGGER.msg(`Missing load order specification`).warn();
       } else {
         LOGGER.msg(
           `${fullStrategyResult.code}: ${sparseStrategyResult.dependencies.join('\n')}`,

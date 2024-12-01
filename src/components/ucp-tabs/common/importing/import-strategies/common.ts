@@ -30,10 +30,15 @@ export type MissingDependenciesFailure = Failure & {
   dependencies: string[];
 };
 
+export type MissingLoadOrderFailure = Failure & {
+  code: 'MISSING_LOAD_ORDER';
+};
+
 export type StrategyResult =
   | Success
   | GenericFailure
-  | MissingDependenciesFailure;
+  | MissingDependenciesFailure
+  | MissingLoadOrderFailure;
 
 export type Strategy = (
   newExtensionsState: ExtensionsState,

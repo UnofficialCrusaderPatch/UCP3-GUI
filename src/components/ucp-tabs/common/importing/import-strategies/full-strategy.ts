@@ -8,6 +8,7 @@ import {
   GenericFailure,
   LOGGER,
   MissingDependenciesFailure,
+  MissingLoadOrderFailure,
   sanitizeVersionRange,
   StrategyResult,
   Success,
@@ -172,9 +173,9 @@ export async function fullStrategy(
   } else {
     return {
       status: 'error',
-      code: 'GENERIC',
+      code: 'MISSING_LOAD_ORDER',
       messages: ['no full "load-order" found in config file'],
-    } as GenericFailure;
+    } as MissingLoadOrderFailure;
   }
 
   return {

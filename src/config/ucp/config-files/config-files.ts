@@ -260,5 +260,5 @@ export async function saveUCPConfig(
 
   result.throwIfErr();
 
-  return `Saved!`;
+  return `editor.saved`;
 }

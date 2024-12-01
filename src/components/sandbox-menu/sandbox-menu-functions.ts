@@ -14,6 +14,7 @@ import {
 } from '../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 import { LANGUAGE_ATOM } from '../../function/gui-settings/settings';
+import { ACTIVE_EXTENSIONS_FULL_ATOM } from '../../function/extensions/state/focus';
 
 export async function getLanguage(): Promise<string> {
   return getStore().get(LANGUAGE_ATOM);
@@ -39,7 +40,7 @@ export function createGetAssetUrlFunction(currentFolder: string) {
 }
 
 export function createReceivePluginPathsFunction(currentFolder: string) {
-  const { activeExtensions } = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const activeExtensions = getStore().get(ACTIVE_EXTENSIONS_FULL_ATOM);
 
   let gameFolder: string | null = null;
   return async (basePath: string, pathPattern: string) => {

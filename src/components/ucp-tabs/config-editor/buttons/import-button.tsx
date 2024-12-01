@@ -33,12 +33,12 @@ function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
             if (report.reason === 'strategy') {
               await showModalOk({
                 title: 'ERROR',
-                message: `${report.message.title}\n${report.message.shortDescription}\n${report.message.report}`,
+                message: `${report.message}`,
               });
             } else {
               await showModalOk({
                 title: 'ERROR',
-                message: report.report,
+                message: report.message,
               });
             }
           }

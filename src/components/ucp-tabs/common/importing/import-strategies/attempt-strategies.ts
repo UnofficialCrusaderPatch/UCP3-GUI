@@ -54,7 +54,7 @@ export async function attemptStrategies(
       return report;
     }
     LOGGER.msg(
-      `${fullStrategyResult.code}: ${fullStrategyResult.messages.join('\n')}`,
+      `${fullStrategyResult.code}: ${fullStrategyResult.dependencies.join('\n')}`,
     ).error();
 
     // Continue with sparse mode
@@ -72,10 +72,15 @@ export async function attemptStrategies(
     });
 
     if (sparseStrategyResult.status === 'error') {
-      // Attempt the full strategy
-      LOGGER.msg(
-        `${fullStrategyResult.code}: ${sparseStrategyResult.messages.join('\n')}`,
-      ).error();
+      if (sparseStrategyResult.code === 'GENERIC') {
+        LOGGER.msg(
+          `${fullStrategyResult.code}: ${sparseStrategyResult.messages.join('\n')}`,
+        ).error();
+      } else {
+        LOGGER.msg(
+          `${fullStrategyResult.code}: ${sparseStrategyResult.dependencies.join('\n')}`,
+        ).error();
+      }
 
       return report;
     }

@@ -16,22 +16,24 @@ export type Success = {
   newExtensionsState: ExtensionsState;
 };
 
-export type GenericFailure = {
+export type Failure = {
   status: 'error';
-  messages: string[];
-  code: 'GENERIC';
 };
 
-export type MissingDependenciesFailure = {
-  status: 'error';
+export type GenericFailure = Failure & {
+  code: 'GENERIC';
   messages: string[];
+};
+
+export type MissingDependenciesFailure = Failure & {
   code: 'MISSING_DEPENDENCIES' | 'MISSING_DEPENDENCIES_OR_WRONG_ORDER';
   dependencies: string[];
 };
 
 export type StrategyResult =
   | Success
-  | (GenericFailure | MissingDependenciesFailure);
+  | GenericFailure
+  | MissingDependenciesFailure;
 
 export type Strategy = (
   newExtensionsState: ExtensionsState,

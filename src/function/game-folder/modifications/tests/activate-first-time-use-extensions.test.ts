@@ -67,7 +67,8 @@ describe('activateFirstTimeUseExtensions', () => {
     const extensionsState =
       createBasicExtensionsState([], '1.0.7', '3.0.5');
 
-    await setupExtensionsStateConfiguration(extensionsState, '', '');
+    const setupResult = await setupExtensionsStateConfiguration(extensionsState, '', '');
+    expect(setupResult.isErr()).toBe(true)
 
     expect(activateFirstTimeUseExtensions(extensionsState).isErr()).toBe(true);
   });

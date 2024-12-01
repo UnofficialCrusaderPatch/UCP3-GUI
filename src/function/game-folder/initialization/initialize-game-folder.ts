@@ -89,16 +89,35 @@ export async function initializeGameFolder(
 
   const noInitErrors = getStore().get(INIT_ERROR) === false;
   if (noInitErrors) {
-    await setupExtensionsStateConfiguration(
+    const setupResult = await setupExtensionsStateConfiguration(
       inactiveExtensionsState,
       folder,
       file,
     );
+
+    if (setupResult.isErr()) {
+      showModalOk({
+        title: 'config.load.fail.title',
+        message: {
+          key: 'config.load.fail.message',
+          args: {
+            err: setupResult.err().getOrElse('unknown error'),
+          },
+        },
+      });
+    }
   } else {
     LOGGER.msg(
       `Not loading ${UCP_CONFIG_YML} as there were errors during init`,
     ).warn();
     setExtensionsStateAndClearConfiguration(inactiveExtensionsState);
+
+    showModalOk({
+      title: 'config.load.skip.title',
+      message: {
+        key: 'config.load.skip.message',
+      },
+    });
   }
 
   getStore().set(INIT_DONE, true);

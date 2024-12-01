@@ -108,11 +108,13 @@ export async function importUcpConfig(
   const { result } = strategyResultReport;
 
   if (result === undefined || result.status !== 'ok') {
+    const elab = makeErrorReport(strategyResultReport);
     return {
       status: 'fail',
       reason: 'strategy',
       report: strategyResultReport,
-      message: makeErrorReport(strategyResultReport),
+      elaborateMessage: elab,
+      message: `${elab.title}\n${elab.shortDescription}\n${elab.report}`,
     } as ImportButtonCallbackResult;
   }
 
@@ -175,7 +177,7 @@ export async function importUcpConfigFile(
     return {
       status: 'fail',
       reason: 'file',
-      report: `${parsingResult.status}: ${parsingResult.message}`,
+      message: `${parsingResult.status}: ${parsingResult.message}`,
     } as ImportButtonCallbackResult;
   }
 
@@ -184,7 +186,7 @@ export async function importUcpConfigFile(
     return {
       status: 'fail',
       reason: 'file',
-      report: `undefined result object`,
+      message: `undefined result object`,
     } as ImportButtonCallbackResult;
   }
 

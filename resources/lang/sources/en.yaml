@@ -18,6 +18,8 @@ close: "Close"
 config.allow.override: "Allow user override"
 config.customize: "Customise"
 config.element.unsupported.type: "Element {{url}} not created because of unsupported type: {{type}}"
+config.load.fail.title: "Configuration not loaded"
+config.load.fail.message: "There were errors in the loading process: \n\n{{err}}"
 config.option.change.parent: Can't change value because of a parent element
 config.option.disabled: "Can't change value because it is disabled. Reason: '{{valueStatement}}' evaluates to 'false'"
 config.option.change.required: "Can't change value because extension '{{lockedBy}}' requires value {{lockedValue}}"

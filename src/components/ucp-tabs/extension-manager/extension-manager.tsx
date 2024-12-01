@@ -33,9 +33,6 @@ const HAS_CUSTOMISATIONS = atom(
 export default function ExtensionManager() {
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const extensionEditorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
-
   const showAllExtensions = useAtomValue(GuiSettings.SHOW_ALL_EXTENSIONS_ATOM);
 
   const displayedActiveExtensions = showAllExtensions

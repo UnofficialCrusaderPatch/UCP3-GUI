@@ -89,7 +89,8 @@ export function InstallationButton() {
         isSuccess &&
         overviewButtonActive &&
         currentFolder !== '' &&
-        updateStatus.status !== 'no_update'
+        (updateStatus.status === 'update' ||
+          updateStatus.status === 'not_installed')
       }
       buttonText={buttonLabel}
       buttonVariant="ucp-button overview__text-button"
@@ -100,7 +101,11 @@ export function InstallationButton() {
 
         const updater = getStore().get(FRAMEWORK_UPDATER_ATOM);
 
-        if (updater === undefined) return;
+        if (updater === undefined) {
+          LOGGER.msg(`No updater object`).warn();
+
+          return;
+        }
 
         if (
           (updateStatus.status === 'no_update' &&

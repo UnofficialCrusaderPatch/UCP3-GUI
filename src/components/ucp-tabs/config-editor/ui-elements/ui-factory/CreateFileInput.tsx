@@ -24,7 +24,6 @@ import { useCurrentGameFolder } from '../../../../../function/game-folder/utils'
 import Logger from '../../../../../util/scripts/logging';
 import { showModalOkCancel } from '../../../../modals/modal-ok-cancel';
 import { getStore } from '../../../../../hooks/jotai/base';
-import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../../function/extensions/state/state';
 import { parseEnabledLogic } from '../enabled-logic';
 import { formatToolTip } from '../tooltips';
 import ConfigWarning from './ConfigWarning';
@@ -35,6 +34,7 @@ import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
+import { ACTIVE_EXTENSIONS_FULL_ATOM } from '../../../../../function/extensions/state/focus';
 
 const LOGGER = new Logger('CreateFileInput.tsx');
 
@@ -169,8 +169,8 @@ function CreateFileInput(args: {
 
           const isNotListed =
             getStore()
-              .get(EXTENSION_STATE_REDUCER_ATOM)
-              .activeExtensions.map((ex) => ex.name)
+              .get(ACTIVE_EXTENSIONS_FULL_ATOM)
+              .map((ex) => ex.name)
               .indexOf(extensionName) === -1;
           if (isNotListed) {
             if (

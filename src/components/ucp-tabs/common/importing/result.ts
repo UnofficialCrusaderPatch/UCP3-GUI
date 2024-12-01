@@ -55,6 +55,9 @@ export function makeErrorReport(report: StrategyResultReport) {
           const messages = `Messages: ${r.result.messages.join('\n')}`;
           return [name, status, code, messages].join('\n');
         }
+        if (r.result.code === 'MISSING_LOAD_ORDER') {
+          return [name, status, code].join('\n');
+        }
         const messages = `Messages: ${r.result.dependencies.join('\n')}`;
         return [name, status, code, messages].join('\n');
       }

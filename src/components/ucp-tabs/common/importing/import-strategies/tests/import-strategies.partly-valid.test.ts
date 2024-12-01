@@ -1029,7 +1029,9 @@ describe('attemptStrategies', () => {
 
     if (strategyResult.status === 'error') {
       expect(strategyResult.code).toBe('MISSING_DEPENDENCIES_OR_WRONG_ORDER');
-      expect(strategyResult.messages.join('\n')).toBe('');
+      if (strategyResult.code === 'MISSING_DEPENDENCIES_OR_WRONG_ORDER') {
+        expect(strategyResult.dependencies.join('\n')).toBe('');
+      }
     }
   });
 

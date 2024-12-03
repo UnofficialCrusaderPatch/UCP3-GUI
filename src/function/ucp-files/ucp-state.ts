@@ -79,7 +79,7 @@ export const UCP_FILES_STATE_ATOM = atomWithRefresh(async (get) => {
   }
 
   if (!!binkRealSha && !REAL_BINK_HASHS.has(binkRealSha)) {
-    await showModalOk({
+    showModalOk({
       title: 'warning',
       message: 'bink.real.unknown',
     });
@@ -98,7 +98,7 @@ export const UCP_FILES_STATE_ATOM = atomWithRefresh(async (get) => {
     if (REAL_BINK_HASHS.has(binkSha)) {
       return UCPFilesState.BINK_REAL_COPY_MISSING;
     }
-    await showModalOk({
+    showModalOk({
       title: 'warning',
       message: 'bink.real.invalid.missing',
     });
@@ -111,7 +111,7 @@ export const UCP_FILES_STATE_ATOM = atomWithRefresh(async (get) => {
     if (binkSha !== binkUcpSha) {
       return UCPFilesState.INACTIVE;
     }
-    await showModalOk({
+    showModalOk({
       title: 'warning',
       message: 'bink.all.same',
     });
@@ -124,7 +124,7 @@ export const UCP_FILES_STATE_ATOM = atomWithRefresh(async (get) => {
   if (REAL_BINK_HASHS.has(binkRealSha)) {
     return UCPFilesState.BINK_VERSION_DIFFERENCE; // valid, since we still have a real one
   }
-  await showModalOk({
+  showModalOk({
     title: 'warning',
     message: 'bink.mixed.real.unknown',
   });

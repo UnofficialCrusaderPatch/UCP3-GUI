@@ -1,0 +1,440 @@
+meta:
+  version: 1.0.0
+active: true
+config-sparse:
+  modules:
+    graphicsApiReplacer:
+      config: {}
+    running-units:
+      config: {}
+  plugins:
+    extreme-is-the-new-normal:
+      config: {}
+  load-order:
+    - extension: extreme-is-the-new-normal
+      version: 1.0.0
+    - extension: graphicsApiReplacer
+      version: 1.2.0
+    - extension: running-units
+      version: 1.0.1
+config-full:
+  modules:
+    ucp2-legacy:
+      config:
+        ai_access:
+          enabled:
+            contents:
+              value: false
+        ai_assaultswitch:
+          enabled:
+            contents:
+              value: false
+        ai_buywood:
+          enabled:
+            contents:
+              value: false
+        ai_defense:
+          enabled:
+            contents:
+              value: false
+        ai_fix_crusader_archers_pitch:
+          enabled:
+            contents:
+              value: false
+        ai_fix_laddermen_with_enclosed_keep:
+          enabled:
+            contents:
+              value: false
+        ai_nosleep:
+          enabled:
+            contents:
+              value: false
+        ai_rebuild:
+          enabled:
+            contents:
+              value: false
+        ai_tethers:
+          enabled:
+            contents:
+              value: false
+        ai_towerengines:
+          enabled:
+            contents:
+              value: false
+        ai_housing:
+          build_housing:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 5
+          campfire_housing:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 8
+          delete_housing:
+            enabled:
+              contents:
+                value: false
+        ai_resources_rebuy:
+          flour:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 36
+          iron:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 36
+          wood:
+            contents:
+              value:
+                enabled: false
+                sliderValue: 36
+        ai_demolish:
+          ai_demolish_walls:
+            enabled:
+              contents:
+                value: false
+          ai_demolish_trapped:
+            enabled:
+              contents:
+                value: false
+          ai_demolish_eco:
+            enabled:
+              contents:
+                value: false
+        ai_addattack:
+          contents:
+            value:
+              enabled: false
+              choice: absolute
+              choices:
+                absolute:
+                  slider: 5
+                relative:
+                  slider: 0.3
+        ai_attacklimit:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 500
+        ai_attacktarget:
+          contents:
+            value:
+              enabled: false
+              choice: ''
+        ai_attackwave:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 7
+        ai_recruitinterval:
+          enabled:
+            contents:
+              value: false
+        ai_recruitstate_initialtimer:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 0
+        fix_apple_orchard_build_size:
+          enabled:
+            contents:
+              value: false
+        o_firecooldown:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 2000
+        o_freetrader:
+          enabled:
+            contents:
+              value: false
+        o_healer:
+          enabled:
+            contents:
+              value: false
+        o_responsivegates:
+          enabled:
+            contents:
+              value: false
+        o_shfy:
+          o_shfy_beer:
+            enabled:
+              contents:
+                value: false
+          o_shfy_religion:
+            enabled:
+              contents:
+                value: false
+          o_shfy_peasantspawnrate:
+            enabled:
+              contents:
+                value: false
+          o_shfy_resourcequantity:
+            enabled:
+              contents:
+                value: false
+        u_arabwall:
+          enabled:
+            contents:
+              value: false
+        u_arabxbow:
+          enabled:
+            contents:
+              value: false
+        u_laddermen:
+          enabled:
+            contents:
+              value: false
+        u_spearmen:
+          enabled:
+            contents:
+              value: false
+        u_spearmen_run:
+          enabled:
+            contents:
+              value: false
+        o_fix_map_sending:
+          enabled:
+            contents:
+              value: false
+        o_fix_rapid_deletion_bug:
+          enabled:
+            contents:
+              value: false
+        o_fix_baker_disappear:
+          enabled:
+            contents:
+              value: false
+        o_fix_fletcher_bug:
+          enabled:
+            contents:
+              value: false
+        o_fix_ladderclimb:
+          enabled:
+            contents:
+              value: false
+        o_fix_moat_digging_unit_disappearing:
+          enabled:
+            contents:
+              value: false
+        o_restore_arabian_engineer_speech:
+          enabled:
+            contents:
+              value: false
+        u_fireballistafix:
+          enabled:
+            contents:
+              value: false
+        u_fix_applefarm_blocking:
+          enabled:
+            contents:
+              value: false
+        u_fix_lord_animation_stuck_movement:
+          enabled:
+            contents:
+              value: false
+        u_tanner_fix:
+          enabled:
+            contents:
+              value: false
+        o_change_siege_engine_spawn_position_catapult:
+          enabled:
+            contents:
+              value: false
+        o_increase_path_update_tick_rate:
+          enabled:
+            contents:
+              value: false
+        o_onlyai:
+          enabled:
+            contents:
+              value: false
+        o_override_identity_menu:
+          enabled:
+            contents:
+              value: false
+        o_playercolor:
+          contents:
+            value:
+              enabled: false
+              choice: red
+        o_stop_player_keep_rotation:
+          enabled:
+            contents:
+              value: false
+        o_xtreme:
+          enabled:
+            contents:
+              value: false
+        o_armory_marketplace_weapon_order_fix:
+          enabled:
+            contents:
+              value: false
+        o_fast_placing:
+          enabled:
+            contents:
+              value: false
+        o_default_multiplayer_speed:
+          contents:
+            value:
+              enabled: false
+              sliderValue: 50
+        o_engineertent:
+          enabled:
+            contents:
+              value: false
+        o_gamespeed:
+          enabled:
+            contents:
+              value: false
+        o_keys:
+          enabled:
+            contents:
+              value: false
+        o_moatvisibility:
+          enabled:
+            contents:
+              value: false
+    aicloader:
+      config:
+        failureHandling:
+          contents:
+            value: ERROR_LOG
+    graphicsApiReplacer:
+      config:
+        window:
+          type:
+            contents:
+              value: borderlessFullscreen
+          width:
+            contents:
+              value: 1280
+          height:
+            contents:
+              value: 720
+          pos:
+            contents:
+              value: middle
+          continueOutOfFocus:
+            contents:
+              value: pause
+        graphic:
+          api:
+            contents:
+              value: DirectX
+          filterLinear:
+            contents:
+              value: true
+          vsync:
+            contents:
+              value: true
+          waitWithGLFinish:
+            contents:
+              value: false
+          pixFormat:
+            contents:
+              value: argb1555
+          debug:
+            contents:
+              value: none
+        control:
+          clipCursor:
+            contents:
+              value: true
+          scrollActive:
+            contents:
+              value: true
+          margin:
+            contents:
+              value: 0
+          padding:
+            contents:
+              value: 0
+    running-units:
+      config:
+        macemen:
+          running:
+            general:
+              contents:
+                value: false
+            ai:
+              contents:
+                value: aic_run_if_not_defined
+        slingers:
+          running:
+            general:
+              contents:
+                value: false
+            ai:
+              contents:
+                value: aic_run_if_not_defined
+        slaves:
+          running:
+            general:
+              contents:
+                value: false
+            ai:
+              contents:
+                value: aic_run_if_not_defined
+        spearmen:
+          running:
+            general:
+              contents:
+                value: false
+            ai:
+              contents:
+                value: aic_run_if_not_defined
+    maploader:
+      config:
+        disable-game-maps:
+          contents:
+            value: false
+        disable-user-maps:
+          contents:
+            value: false
+        disable-user-savs:
+          contents:
+            value: false
+        disable-game-maps-extreme:
+          contents:
+            value: true
+        disable-user-maps-extreme:
+          contents:
+            value: true
+        disable-user-savs-extreme:
+          contents:
+            value: false
+        extra-map-directory:
+          contents:
+            value: ''
+        extra-map-extreme-directory:
+          contents:
+            value: maps
+    winProcHandler:
+      config: {}
+    files:
+      config: {}
+  plugins:
+    extreme-is-the-new-normal:
+      config: {}
+  load-order:
+    - extension: ucp2-legacy
+      version: 2.15.1
+    - extension: files
+      version: 1.1.0
+    - extension: maploader
+      version: 1.0.0
+    - extension: extreme-is-the-new-normal
+      version: 1.0.0
+    - extension: winProcHandler
+      version: 0.2.0
+    - extension: graphicsApiReplacer
+      version: 1.2.0
+    - extension: aicloader
+      version: 1.1.1
+    - extension: running-units
+      version: 1.0.1

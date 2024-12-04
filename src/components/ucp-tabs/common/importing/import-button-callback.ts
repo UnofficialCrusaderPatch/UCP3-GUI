@@ -85,10 +85,10 @@ export function constructUserConfigObjects(config: ConfigFile) {
   };
 }
 
-export async function importUcpConfig(
+export function importUcpConfig(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-): Promise<ImportButtonCallbackResult> {
+): ImportButtonCallbackResult {
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -99,7 +99,7 @@ export async function importUcpConfig(
 
   ConsoleLogger.debug('import-button-callback.tsx: config', config);
 
-  const strategyResultReport = await attemptStrategies(
+  const strategyResultReport = attemptStrategies(
     config,
     extensionsState,
     setConfigStatus,

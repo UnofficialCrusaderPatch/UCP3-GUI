@@ -1,0 +1,173 @@
+[
+    {
+        "name": "aicloader",
+        "version": "1.1.1",
+        "type": "module",
+        "definition": {
+            "name": "aicloader",
+            "display-name": "AIC Loader",
+            "version": "1.1.1",
+            "author": "gynt, TheRedDaemon",
+            "meta": {
+                "version": "1.0.0"
+            },
+            "type": "module",
+            "dependencies": {}
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "files",
+        "version": "1.1.0",
+        "type": "module",
+        "definition": {
+            "name": "files",
+            "version": "1.1.0",
+            "author": [
+                "gynt",
+                "TheRedDaemon"
+            ],
+            "dependencies": {
+                "frontend": ">=1.0.2",
+                "framework": ">=3.0.4"
+            },
+            "meta": {
+                "version": "1.0.0"
+            },
+            "type": "module",
+            "display-name": "files"
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "graphicsApiReplacer",
+        "version": "1.2.0",
+        "type": "module",
+        "definition": {
+            "name": "graphicsApiReplacer",
+            "display-name": "Graphics API Replacer",
+            "version": "1.2.0",
+            "author": "TheRedDaemon",
+            "meta": {
+                "version": "1.0.0"
+            },
+            "type": "module",
+            "dependencies": {
+                "winProcHandler": ">= 0.1.0"
+            }
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "maploader",
+        "version": "1.0.0",
+        "type": "module",
+        "definition": {
+            "name": "maploader",
+            "version": "1.0.0",
+            "author": "gynt",
+            "game": [
+                "SHC==1.41"
+            ],
+            "dependencies": {
+                "files": ">= 0.2.0"
+            },
+            "meta": {
+                "version": "1.0.0"
+            },
+            "type": "module",
+            "display-name": "maploader"
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "running-units",
+        "version": "1.0.1",
+        "type": "module",
+        "definition": {
+            "name": "running-units",
+            "display-name": "Running Units",
+            "version": "1.0.1",
+            "author": "gynt",
+            "dependencies": {
+                "frontend": ">=1.0.5",
+                "framework": ">=3.0.4",
+                "aicloader": ">=1.1.0"
+            },
+            "type": "module"
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "ucp2-legacy",
+        "version": "2.15.1",
+        "type": "module",
+        "definition": {
+            "name": "ucp2-legacy",
+            "display-name": "UCP2-Legacy",
+            "version": "2.15.1",
+            "default": true,
+            "game": [
+                "SHC==1.41",
+                "SHCE==1.41"
+            ],
+            "meta": {
+                "version": "1.0.0"
+            },
+            "dependencies": {},
+            "type": "module"
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "winProcHandler",
+        "version": "0.2.0",
+        "type": "module",
+        "definition": {
+            "name": "winProcHandler",
+            "display-name": "WinProc Handler",
+            "version": "0.2.0",
+            "author": "TheRedDaemon",
+            "meta": {
+                "version": "1.0.0"
+            },
+            "type": "module",
+            "dependencies": {}
+        },
+        "configEntries": {}
+    },
+    {
+        "name": "extreme-is-the-new-normal",
+        "version": "1.0.0",
+        "type": "plugin",
+        "definition": {
+            "name": "extreme-is-the-new-normal",
+            "author": "gynt",
+            "version": "1.0.0",
+            "dependencies": {
+                "maploader": "^1.0.0",
+                "graphicsApiReplacer": "^1.2.0",
+                "ucp2-legacy": "^2.15.1"
+            },
+            "type": "plugin",
+            "display-name": "extreme-is-the-new-normal"
+        },
+        "configEntries": {
+            "maploader.disable-game-maps-extreme": {
+                "contents": {
+                    "suggested-value": true
+                }
+            },
+            "maploader.disable-user-maps-extreme": {
+                "contents": {
+                    "suggested-value": true
+                }
+            },
+            "maploader.extra-map-extreme-directory": {
+                "contents": {
+                    "suggested-value": "maps"
+                }
+            }
+        }
+    }
+]

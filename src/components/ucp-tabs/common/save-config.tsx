@@ -13,12 +13,24 @@ import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state
 import { getStore } from '../../../hooks/jotai/base';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
 
+/**
+ * Note: reverses both lists of extensions to match what the export order expects.
+ *
+ *
+ * @param configuration The full configuration
+ * @param userConfiguration The user configuration
+ * @param filePath The file path to save to
+ * @param explicitlyActivatedExtensions The explicitly activated extensions
+ * @param activeExtensions All active extensions
+ * @param configurationQualifier Dictionary of qualifiers
+ * @returns Message
+ */
 function saveConfig(
   configuration: { [key: string]: unknown },
   userConfiguration: { [key: string]: unknown },
   filePath: string,
-  sparseExtensions: Extension[],
-  allExtensions: Extension[],
+  explicitlyActivatedExtensions: Extension[],
+  activeExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
   // ConsoleLogger.debug(`Saving config: `, configuration);
@@ -26,8 +38,8 @@ function saveConfig(
   return saveUCPConfig(
     { ...userConfiguration },
     { ...configuration },
-    [...sparseExtensions].reverse(),
-    [...allExtensions].reverse(),
+    [...explicitlyActivatedExtensions].reverse(),
+    [...activeExtensions].reverse(),
     filePath,
     configurationQualifier,
   ).then((value) => {
@@ -40,7 +52,7 @@ function saveConfig(
 
     /* Remember the active extensions that are now on disk */
     getStore().set(CONFIGURATION_DISK_STATE_ACTIVE_EXTENSIONS, [
-      ...allExtensions,
+      ...activeExtensions,
     ]);
 
     return value;

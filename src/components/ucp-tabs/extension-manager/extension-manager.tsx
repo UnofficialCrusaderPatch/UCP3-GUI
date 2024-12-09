@@ -8,13 +8,6 @@ import { useEffect } from 'react';
 import { FileDropEvent } from '@tauri-apps/api/window';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
-import {
-  ActiveExtensionElement,
-  CustomisationsExtensionElement,
-  ExtensionNameList,
-  GhostElement,
-  InactiveExtensionsElement,
-} from './extension-elements/extension-element';
 import { FilterButton } from './buttons/filter-button';
 import { InstallExtensionButton } from './buttons/install-extensions-button';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extension-editor-state';
@@ -25,6 +18,11 @@ import { ConsoleLogger } from '../../../util/scripts/logging';
 import { IS_FILE_DRAGGING, handleFileDrop } from './drag-drop/drop-handling';
 import { CURRENT_DISPLAYED_TAB } from '../tabs-state';
 import Message from '../../general/message';
+import { ActiveExtensionElement } from './extension-elements/extension-element/active-extension-element';
+import { CustomisationsExtensionElement } from './extension-elements/extension-element/customisations-element';
+import { GhostElement } from './extension-elements/extension-element/ghost-element';
+import { InactiveExtensionsElement } from './extension-elements/extension-element/inactive-extension-element';
+import { ExtensionNameList } from './extension-elements/extension-element/types';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,

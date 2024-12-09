@@ -121,7 +121,7 @@ class ExtensionPack {
 
         return renameFile(entry.path, destination).catch(async (reason) => {
           LOGGER.obj(reason).error();
-          await showModalOk({
+          showModalOk({
             title: 'An error occurred',
             message: `An error occurred trying to install ${entry.name}. Not all files could be placed.`,
           });

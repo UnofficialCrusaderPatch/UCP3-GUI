@@ -48,7 +48,7 @@ export async function initializeGameFolder(
     extensions = await discoverExtensions(folder, mode);
   } catch (e) {
     LOGGER.obj(e).error();
-    await showModalOk({
+    showModalOk({
       message: (e as object).toString(),
       title: 'Error in extension discovery and loading',
     });

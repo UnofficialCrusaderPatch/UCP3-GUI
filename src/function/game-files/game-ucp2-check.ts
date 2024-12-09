@@ -38,7 +38,7 @@ async function checkIfUCP2Installed(path: string) {
   }
   const ucp2Present = result.ok().get().isPresent();
   if (ucp2Present) {
-    await showModalOk({
+    showModalOk({
       title: 'launch.ucp2.check.title',
       message: {
         key: 'launch.ucp2.check.message',

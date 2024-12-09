@@ -143,7 +143,7 @@ export const initializeUCPVersion = async (gameFolder: string) => {
 
         if (!getStore().get(INIT_ERROR)) getStore().set(INIT_ERROR, true);
         // No point in showing this, the user is probably aware since the most likely cause is that UCP isn't installed
-        // await showModalOk({
+        // showModalOk({
         //   title: 'File read error',
         //   message: msg,
         // });

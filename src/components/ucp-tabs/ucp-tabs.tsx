@@ -188,7 +188,7 @@ export default function UcpTabs() {
 
                   if (messages.length === 0) return;
 
-                  await showModalOk({
+                  showModalOk({
                     title: 'extensions.dependencies.missing.title',
                     message: {
                       key: `extensions.dependencies.missing.message`,
@@ -201,7 +201,7 @@ export default function UcpTabs() {
                     `Missing dependencies: ${messages.join('\n')}`,
                   ).error();
                 } catch (e: unknown) {
-                  await showModalOk({
+                  showModalOk({
                     title: 'ERROR',
                     message: String(e),
                   });

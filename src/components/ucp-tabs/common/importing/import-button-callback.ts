@@ -27,6 +27,7 @@ import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/s
 import { MessageType } from '../../../../localization/localization';
 import { ImportButtonCallbackResult, makeErrorReport } from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
+import { showModalOk } from '../../../modals/modal-ok';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -119,6 +120,23 @@ export function importUcpConfig(
   }
 
   const { newExtensionsState } = result;
+
+  /**
+   * Make sure to apply the current loaded configuration exactly as is (version specific)
+   * to the configuration tree.
+   */
+  newExtensionsState.tree.reset();
+  const solution = newExtensionsState.tree.extensionDependenciesForExtensions(
+    newExtensionsState.activeExtensions,
+  );
+
+  if (solution.status !== 'OK') {
+    showModalOk({
+      title: 'Unknown error',
+      message:
+        'An uncaught error occurred while importing your config from disk. Error code: invalid tree',
+    });
+  }
 
   /* Remember the active extensions as on disk (ucp-config.yml file) */
   getStore().set(CONFIGURATION_DISK_STATE_ATOM, [

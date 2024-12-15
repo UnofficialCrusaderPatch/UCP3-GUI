@@ -1,4 +1,4 @@
-# UCP3 GUI
+# UCP3 GUI ![Github All Releases](https://img.shields.io/github/downloads/UnofficialCrusaderPatch/UCP3-GUI/total.svg) [![UCP_Official](https://discordapp.com/api/guilds/426318193603117057/widget.png?style=shield)](https://discord.gg/P9dkF38Q2t)
 
 This repository contains the source code for the UCP3-GUI.
 This software provides a GUI to configure and manage installations of the [UnofficialCrusaderPatch3](https://github.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch3), a modification utility for the game **Stronghold Crusader**.

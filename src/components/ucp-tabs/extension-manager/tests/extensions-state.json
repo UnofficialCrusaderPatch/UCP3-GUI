@@ -1,0 +1,172 @@
+{
+  "extensions": [
+    {
+      "name": "A",
+      "version": "0.0.1",
+      "type": "plugin",
+      "definition": {
+        "name": "A",
+        "version": "0.0.1",
+        "type": "plugin",
+        "dependencies": {},
+        "display-name": "A"
+      },
+      "io": {
+        "isZip": false,
+        "isDirectory": true,
+        "path": "ucp/plugins/A-0.0.1"
+      },
+      "ui": [
+        {
+          "url": "A.feature",
+          "name": "A-feature",
+          "text": "A",
+          "display": "Switch",
+          "contents": {
+            "type": "boolean",
+            "value": false
+          },
+          "extension": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "definition": {
+              "name": "A",
+              "version": "0.0.1",
+              "type": "plugin",
+              "dependencies": {},
+              "display-name": "A"
+            },
+            "io": {
+              "isZip": false,
+              "isDirectory": true,
+              "path": "ucp/plugins/A-0.0.1"
+            },
+            "locales": {},
+            "config": {
+              "meta": {
+                "version": "1.0.0"
+              },
+              "config-sparse": {
+                "modules": {},
+                "plugins": {},
+                "load-order": []
+              }
+            },
+            "configEntries": {},
+            "ui": []
+          },
+          "id": 1
+        }
+      ],
+      "locales": {},
+      "config": {
+        "meta": {
+          "version": "1.0.0"
+        },
+        "config-sparse": {
+          "modules": {},
+          "plugins": {},
+          "load-order": []
+        }
+      },
+      "configEntries": {}
+    },
+    {
+      "name": "B",
+      "version": "0.0.1",
+      "type": "plugin",
+      "definition": {
+        "name": "B",
+        "version": "0.0.1",
+        "type": "plugin",
+        "dependencies": {
+          "A": "=0.0.1"
+        },
+        "display-name": "B"
+      },
+      "io": {
+        "isZip": false,
+        "isDirectory": true,
+        "path": "ucp/plugins/B-0.0.1"
+      },
+      "ui": [],
+      "locales": {},
+      "config": {
+        "config-sparse": {
+          "modules": {},
+          "plugins": {
+            "A": {
+              "config": {
+                "feature": {
+                  "contents": {
+                    "required-value": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "version": "1.0.0"
+        }
+      },
+      "configEntries": {
+        "A.feature": {
+          "contents": {
+            "required-value": false
+          }
+        }
+      }
+    },
+    {
+      "name": "C",
+      "version": "0.0.1",
+      "type": "plugin",
+      "definition": {
+        "name": "C",
+        "version": "0.0.1",
+        "type": "plugin",
+        "dependencies": {
+          "A": "=0.0.1"
+        },
+        "display-name": "C"
+      },
+      "io": {
+        "isZip": false,
+        "isDirectory": true,
+        "path": "ucp/plugins/C-0.0.1"
+      },
+      "ui": [],
+      "locales": {},
+      "config": {
+        "config-sparse": {
+          "modules": {},
+          "plugins": {
+            "A": {
+              "config": {
+                "feature": {
+                  "contents": {
+                    "suggested-value": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "meta": {
+          "version": "1.0.0"
+        }
+      },
+      "configEntries": {
+        "A.feature": {
+          "contents": {
+            "suggested-value": true
+          }
+        }
+      }
+    }
+  ],
+  "onlineAvailableExtensions": [],
+  "installedExtensions": []
+}

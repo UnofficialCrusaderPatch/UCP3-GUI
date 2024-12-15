@@ -138,7 +138,8 @@ function buildExtensionConfigurationDBFromActiveExtensions(
       // build ConfigMetaContentDB
       const m = buildConfigMetaContentDB(ext, configEntryData);
 
-      // For each entry in the ConfigMetaContentDB
+      // For each property in the ConfigMetaContentDB
+      // e.g. property "value"
       Object.entries(m).forEach(([key, cmc]) => {
         // e.g., for the key named "value", we do the following:
         // Get the currentModifications for this key
@@ -161,6 +162,10 @@ function buildExtensionConfigurationDBFromActiveExtensions(
             overrides
               .get(n)!
               .push(createOverride(cmc, currentModifications, url));
+
+            // As this should be overridden by something else we delete the key.
+            // We could also set the m[key] value to the currentModifications object. Same effect.
+            delete m[key];
 
             return;
           }
@@ -214,6 +219,10 @@ function buildExtensionConfigurationDBFromActiveExtensions(
               const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both require different values for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
+
+              // As this should be overridden by something else we delete the key.
+              // We could also set the m[key] value to the currentModifications object. Same effect.
+              delete m[key];
             }
 
             return;
@@ -236,6 +245,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
         ...currentCMO,
         modifications: {
           ...currentCMO.modifications,
+          // TODO: BUG: m shouldn't always be added, it depends on the required/suggested situation
           ...m,
         },
       };

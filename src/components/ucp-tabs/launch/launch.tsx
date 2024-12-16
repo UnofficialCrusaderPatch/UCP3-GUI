@@ -44,6 +44,7 @@ import Logger from '../../../util/scripts/logging';
 import { getStore } from '../../../hooks/jotai/base';
 import { LAUNCH_OPTION_COMMAND_LINE_ARGUMENTS_TOKENS_ATOM } from './launch-options/option-command-line-arguments';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
+import { IS_ACTIVE } from '../display-logic';
 
 const LOGGER = new Logger('launch.tsx');
 
@@ -101,6 +102,8 @@ export default function Launch() {
   };
   const receiveEnvs = () => envVars;
 
+  const active = useAtomValue(IS_ACTIVE);
+
   return (
     <div className="launch__container flex-default">
       <div className="launch__boxes">
@@ -133,117 +136,122 @@ export default function Launch() {
           }}
         />
       </div>
-      <div
-        className={`d-flex align-self-start ps-4 ${
-          configurationDirtyState && !autoSave ? '' : 'd-none'
-        }`}
-        style={{
-          lineHeight: '1.5rem',
-        }}
-      >
-        <ExclamationCircleFill color="yellow" size={20} />
-        <span className="ps-3">
-          <em>
-            <Message message="launch.unsaved" />
-          </em>
-        </span>
-      </div>
-      <div className="d-flex align-self-start">
-        <Form.Switch
-          variant="link"
-          checked={displayAdvancedLaunchOptions}
-          id="display-launch-options-switch"
-          onChange={() => {
-            setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions);
-          }}
-          onClick={() =>
-            setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions)
-          }
-          className="ps-5"
-          label={<Message message="launch.options.view" />}
-        />
-        <Form.Switch
-          label={<Message message="launch.options.autoSave" />}
-          checked={autoSave}
-          id="save-config-before-launch-switch"
-          onClick={() => setAutoSave(!autoSave)}
-          onChange={() => {
-            setAutoSave(!autoSave);
-          }}
-          className="ps-5"
-        />
-      </div>
-      <div className="d-flex align-self-start" />
-      <div
-        className={
-          displayAdvancedLaunchOptions
-            ? 'flex-default launch__options'
-            : 'd-none'
-        }
-      >
-        <h4>
-          <Message message="launch.options" />
-        </h4>
-        <div className="parchment-box launch__options__box">
-          <div className="launch__options__box__row">
-            <GameDataPath />
+      {/* eslint-disable-next-line react/jsx-no-useless-fragment */}
+      {active ? (
+        <>
+          <div
+            className={`d-flex align-self-start ps-4 ${
+              configurationDirtyState && !autoSave ? '' : 'd-none'
+            }`}
+            style={{
+              lineHeight: '1.5rem',
+            }}
+          >
+            <ExclamationCircleFill color="yellow" size={20} />
+            <span className="ps-3">
+              <em>
+                <Message message="launch.unsaved" />
+              </em>
+            </span>
           </div>
-          <div className="launch__options__box__row">
-            <div
-              className="launch__options__box--ucp-checkbox"
-              onClick={() => setConsoleShow(!consoleShow)}
-              onMouseEnter={() => {
-                getStore().set(
-                  STATUS_BAR_MESSAGE_ATOM,
-                  'launch.options.console.show.help',
-                );
+          <div className="d-flex align-self-start">
+            <Form.Switch
+              variant="link"
+              checked={displayAdvancedLaunchOptions}
+              id="display-launch-options-switch"
+              onChange={() => {
+                setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions);
               }}
-              onMouseLeave={() => {
-                getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
+              onClick={() =>
+                setDisplayAdvancedLaunchOptions(!displayAdvancedLaunchOptions)
+              }
+              className="ps-5"
+              label={<Message message="launch.options.view" />}
+            />
+            <Form.Switch
+              label={<Message message="launch.options.autoSave" />}
+              checked={autoSave}
+              id="save-config-before-launch-switch"
+              onClick={() => setAutoSave(!autoSave)}
+              onChange={() => {
+                setAutoSave(!autoSave);
               }}
-            >
-              <h5>
-                <Message message="launch.options.console.show" />
-              </h5>
-              <input
-                type="checkbox"
-                checked={consoleShow}
-                onChange={() => setConsoleShow(!consoleShow)}
-              />
+              className="ps-5"
+            />
+          </div>
+          <div className="d-flex align-self-start" />
+          <div
+            className={
+              displayAdvancedLaunchOptions
+                ? 'flex-default launch__options'
+                : 'd-none'
+            }
+          >
+            <h4>
+              <Message message="launch.options" />
+            </h4>
+            <div className="parchment-box launch__options__box">
+              <div className="launch__options__box__row">
+                <GameDataPath />
+              </div>
+              <div className="launch__options__box__row">
+                <div
+                  className="launch__options__box--ucp-checkbox"
+                  onClick={() => setConsoleShow(!consoleShow)}
+                  onMouseEnter={() => {
+                    getStore().set(
+                      STATUS_BAR_MESSAGE_ATOM,
+                      'launch.options.console.show.help',
+                    );
+                  }}
+                  onMouseLeave={() => {
+                    getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
+                  }}
+                >
+                  <h5>
+                    <Message message="launch.options.console.show" />
+                  </h5>
+                  <input
+                    type="checkbox"
+                    checked={consoleShow}
+                    onChange={() => setConsoleShow(!consoleShow)}
+                  />
+                </div>
+                <div
+                  className="launch__options__box--ucp-checkbox"
+                  onClick={() => setNoSecurity(!noSecurity)}
+                  onMouseEnter={() => {
+                    getStore().set(
+                      STATUS_BAR_MESSAGE_ATOM,
+                      'launch.options.disable.security.help',
+                    );
+                  }}
+                  onMouseLeave={() => {
+                    getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
+                  }}
+                >
+                  <h5>
+                    <Message message="launch.options.disable.security" />
+                  </h5>
+                  <input
+                    type="checkbox"
+                    checked={noSecurity}
+                    onChange={() => setNoSecurity(!noSecurity)}
+                  />
+                </div>
+              </div>
+              <div className="launch__options__box__row">
+                <UcpFileLogLevel />
+                <UcpConsoleLogLevel />
+              </div>
+              <div className="launch__options__box__row">
+                <FreeArgs />
+                <FreeEnvs />
+              </div>
             </div>
-            <div
-              className="launch__options__box--ucp-checkbox"
-              onClick={() => setNoSecurity(!noSecurity)}
-              onMouseEnter={() => {
-                getStore().set(
-                  STATUS_BAR_MESSAGE_ATOM,
-                  'launch.options.disable.security.help',
-                );
-              }}
-              onMouseLeave={() => {
-                getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
-              }}
-            >
-              <h5>
-                <Message message="launch.options.disable.security" />
-              </h5>
-              <input
-                type="checkbox"
-                checked={noSecurity}
-                onChange={() => setNoSecurity(!noSecurity)}
-              />
-            </div>
           </div>
-          <div className="launch__options__box__row">
-            <UcpFileLogLevel />
-            <UcpConsoleLogLevel />
-          </div>
-          <div className="launch__options__box__row">
-            <FreeArgs />
-            <FreeEnvs />
-          </div>
-        </div>
-      </div>
+        </>
+      ) : null}
     </div>
   );
 }

@@ -57,7 +57,7 @@ export function buildExtensionConfigurationDBFromActiveExtensions(
             currentModifications.qualifier === 'required' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Value for '${url}' suggested by higher priority extension ('${ext.name}') overridden by a required value from a lower priority extension ('${currentModifications.entityName}')`;
+            const w = `value for '${url}' suggested by higher priority extension ('${ext.name}') overridden by a required value from a lower priority extension ('${currentModifications.entityName}')`;
             // LOGGER.msg(w).warn();
             warnings.push(w);
 
@@ -83,7 +83,7 @@ export function buildExtensionConfigurationDBFromActiveExtensions(
             currentModifications.qualifier === 'suggested' &&
             cmc.qualifier === 'suggested'
           ) {
-            const w = `Value for '${url}' suggested by lower priority extension ('${currentModifications.entityName}') overridden by suggested value from a higher priority extension ('${ext.name}')`;
+            const w = `value for '${url}' suggested by lower priority extension ('${currentModifications.entityName}') overridden by suggested value from a higher priority extension ('${ext.name}')`;
             // LOGGER.msg(w).warn();
             warnings.push(w);
 
@@ -105,7 +105,7 @@ export function buildExtensionConfigurationDBFromActiveExtensions(
             currentModifications.qualifier === 'suggested' &&
             cmc.qualifier === 'required'
           ) {
-            const w = `Value for '${url}' suggested by lower priority extension ('${currentModifications.entityName}') overridden by required value from a higher priority extension ('${ext.name}')`;
+            const w = `value for '${url}' suggested by lower priority extension ('${currentModifications.entityName}') overridden by required value from a higher priority extension ('${ext.name}')`;
             // LOGGER.msg(w).warn();
             warnings.push(w);
 
@@ -128,7 +128,7 @@ export function buildExtensionConfigurationDBFromActiveExtensions(
             cmc.qualifier === 'required'
           ) {
             if (!compareObjects(currentModifications.content, cmc.content)) {
-              const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both require different values for feature '${url}'`;
+              const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both require different value for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
 

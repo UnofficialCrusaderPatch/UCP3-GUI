@@ -11,8 +11,8 @@ function state(): ExtensionsState {
   return deserializeSimplifiedSerializedExtensionsStateFromExtensions(JSON.parse(JSON.stringify(STATE.extensions)));
 }
 
-describe('state loading', () => {
-  test('comparison', () => {
+describe('compare new version configuration building', () => {
+  test('required override', () => {
     let s = state();
 
     s = addExtensionToExplicityActivatedExtensions(s, s.extensions.filter((ext) => ext.name === "B").at(0)!, false);
@@ -20,6 +20,22 @@ describe('state loading', () => {
 
 
     s = addExtensionToExplicityActivatedExtensions(s, s.extensions.filter((ext) => ext.name === "C").at(0)!, false);
+
+    s = buildExtensionConfigurationDB(s);
+
+    const s2 = v2(s);
+
+    expect(s.configuration).toStrictEqual(s2.configuration);
+  })
+
+  test('suggested override', () => {
+    let s = state();
+
+    s = addExtensionToExplicityActivatedExtensions(s, s.extensions.filter((ext) => ext.name === "C").at(0)!, false);
+
+
+
+    s = addExtensionToExplicityActivatedExtensions(s, s.extensions.filter((ext) => ext.name === "B").at(0)!, false);
 
     s = buildExtensionConfigurationDB(s);
 

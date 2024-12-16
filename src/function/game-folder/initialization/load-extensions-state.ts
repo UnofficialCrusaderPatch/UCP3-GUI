@@ -58,23 +58,36 @@ export async function setupExtensionsStateConfiguration(
     if (getStore().get(FIRST_TIME_USE_ATOM)) {
       LOGGER.msg('first time use!').info();
 
-      try {
-        const newerExtensionState =
-          activateFirstTimeUseExtensions(newExtensionsState).getOrThrow();
-        getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
-        getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+      if (newExtensionsState.extensions.length > 0) {
+        LOGGER.msg('first time use: framework active').info();
+        try {
+          const ar = activateFirstTimeUseExtensions(newExtensionsState);
 
-        ConsoleLogger.debug(
-          await saveCurrentConfig({
-            file,
-          }),
-        );
+          if (ar.isOk()) {
+            const newerExtensionState = ar.getOrThrow();
+            getStore().set(EXTENSION_STATE_REDUCER_ATOM, newerExtensionState);
+            getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
+            ConsoleLogger.debug(
+              await saveCurrentConfig({
+                file,
+              }),
+            );
+          } else {
+            LOGGER.msg(
+              `There was an error trying to set first time use extensions: ${ar.err()}`,
+            ).error();
+          }
+
+          endResult = Result.emptyOk();
+        } catch (err: unknown) {
+          LOGGER.msg(`Not setting first-time-use state because: ${err}`).warn();
+
+          endResult = Result.err(`${err}`);
+        }
+      } else {
+        LOGGER.msg('first time use: framework not active').info();
         endResult = Result.emptyOk();
-      } catch (err: unknown) {
-        LOGGER.msg(`Not setting first-time-use state because: ${err}`).warn();
-
-        endResult = Result.err(`${err}`);
       }
     } else {
       endResult = Result.emptyOk();

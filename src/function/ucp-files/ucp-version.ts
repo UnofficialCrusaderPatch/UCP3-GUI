@@ -100,24 +100,32 @@ export type UCPVersionFileProcessResult = {
 
 export const UCP_VERSION_ATOM = atom<UCPVersionFileProcessResult>({
   version: new UCPVersion(),
+  status: 'error',
 } as UCPVersionFileProcessResult);
 
-export const initializeUCPVersion = async (gameFolder: string) => {
+export const initializeUCPVersion = async (
+  gameFolder: string,
+): Promise<UCPVersionFileProcessResult> => {
   if (!gameFolder) {
-    getStore().set(UCP_VERSION_ATOM, {
+    const v = {
       version: new UCPVersion(),
       status: 'error',
       errorCode: 2,
       messages: ['path is not defined'],
-    } as UCPVersionFileProcessResult);
+    } as UCPVersionFileProcessResult;
+    getStore().set(UCP_VERSION_ATOM, v);
+
+    return v;
   }
   const path = `${gameFolder}/${UCP_VERSION_FILE}`;
-  (await loadYaml(path)).consider(
+  return (await loadYaml(path)).consider(
     async (yaml) => {
-      getStore().set(UCP_VERSION_ATOM, {
+      const v = {
         version: new UCPVersion(yaml),
         status: 'ok',
-      } as UCPVersionFileProcessResult);
+      } as UCPVersionFileProcessResult;
+      getStore().set(UCP_VERSION_ATOM, v);
+      return v;
     },
 
     async (err) => {
@@ -148,12 +156,14 @@ export const initializeUCPVersion = async (gameFolder: string) => {
         //   message: msg,
         // });
       }
-      getStore().set(UCP_VERSION_ATOM, {
+      const v = {
         version: new UCPVersion(),
         status: 'error',
         errorCode,
         messages,
-      } as UCPVersionFileProcessResult);
+      } as UCPVersionFileProcessResult;
+      getStore().set(UCP_VERSION_ATOM, v);
+      return v;
     },
   );
 };

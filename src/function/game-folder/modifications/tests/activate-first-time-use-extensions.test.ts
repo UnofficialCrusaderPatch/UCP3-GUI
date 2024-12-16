@@ -63,12 +63,12 @@ describe('activateFirstTimeUseExtensions', () => {
     expect(activateFirstTimeUseExtensions(extensionsState).isErr()).toBe(true);
   });
 
-  test('expect empty state to fail', async () => {
+  test('expect empty state to silently fail', async () => {
     const extensionsState =
       createBasicExtensionsState([], '1.0.7', '3.0.5');
 
     const setupResult = await setupExtensionsStateConfiguration(extensionsState, '', '');
-    expect(setupResult.isErr()).toBe(true)
+    expect(setupResult.isErr()).toBe(false)
 
     expect(activateFirstTimeUseExtensions(extensionsState).isErr()).toBe(true);
   });

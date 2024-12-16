@@ -6,7 +6,10 @@ import { ConsoleLogger } from '../../../util/scripts/logging';
 import { UCP_CONFIG_FILE_ATOM } from '../../configuration/state';
 import { discoverExtensions } from '../../extensions/discovery/discovery';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
-import { UCP_VERSION_ATOM } from '../../ucp-files/ucp-version';
+import {
+  UCP_VERSION_ATOM,
+  UCPVersionFileProcessResult,
+} from '../../ucp-files/ucp-version';
 import { INIT_DONE, INIT_ERROR, INIT_RUNNING } from './initialization-states';
 import { LOGGER } from '../logger';
 import { UCP_CONFIG_YML } from '../../global/constants/file-constants';
@@ -26,12 +29,17 @@ import { setupExtensionsStateConfiguration } from './load-extensions-state';
 // eslint-disable-next-line import/prefer-default-export
 export async function initializeGameFolder(
   folder: string,
-  mode?: 'Release' | 'Developer',
+  versionResult: UCPVersionFileProcessResult,
 ) {
-  if (folder.length === 0) {
+  if (!folder || folder.length === 0) {
     LOGGER.msg('No folder active.').info();
     return;
   }
+
+  const mode =
+    versionResult.version.getBuildRepresentation() === 'Developer'
+      ? 'Developer'
+      : 'Release';
 
   getStore().set(INIT_RUNNING, true);
   getStore().set(INIT_DONE, false);

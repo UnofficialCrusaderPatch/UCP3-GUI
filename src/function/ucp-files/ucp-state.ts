@@ -133,6 +133,14 @@ export const UCP_FILES_STATE_ATOM = atomWithRefresh(async (get) => {
 
 export const LOADABLE_UCP_STATE_ATOM = loadable(UCP_FILES_STATE_ATOM);
 
+export const UCP_FRAMEWORK_IS_ACTIVE = atom((get) => {
+  const r = get(LOADABLE_UCP_STATE_ATOM);
+
+  if (r.state !== 'hasData') return false;
+
+  return r.data === UCPFilesState.ACTIVE;
+});
+
 export async function createRealBink(): Promise<Result<void, MessageType>> {
   const binkPaths = await getStore().get(BINK_PATHS_ATOM);
   switch (await getStore().get(UCP_FILES_STATE_ATOM)) {

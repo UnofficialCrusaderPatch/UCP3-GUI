@@ -104,7 +104,7 @@ export function NewsHighlights(props: object) {
       className="text-center p-2 mt-3 pb-5"
       style={{
         minHeight: '0px',
-        width: '40%',
+        width: '60%',
         // backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backgroundImage:
           'linear-gradient(to top, rgba(0,0,0,0), rgba(25,25,25,0.75))',

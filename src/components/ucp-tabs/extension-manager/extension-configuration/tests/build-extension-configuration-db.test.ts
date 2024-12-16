@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
 
 import STATE from './extensions-state.json'
-import { ExtensionsState } from "../../../../function/extensions/extensions-state";
+import { ExtensionsState } from "../../../../../function/extensions/extensions-state";
 import { buildExtensionConfigurationDB } from "../extension-configuration";
-import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from "../../../../testing/dump-extensions-state";
-import { addExtensionToExplicityActivatedExtensions } from "../extensions-state-manipulation";
+import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from "../../../../../testing/dump-extensions-state";
+import { addExtensionToExplicityActivatedExtensions } from "../../extensions-state-manipulation";
 
 function state(): ExtensionsState {
   return deserializeSimplifiedSerializedExtensionsStateFromExtensions(JSON.parse(JSON.stringify(STATE.extensions)));

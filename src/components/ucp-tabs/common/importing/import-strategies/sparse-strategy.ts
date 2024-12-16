@@ -13,7 +13,7 @@ import {
 import { getStore } from '../../../../../hooks/jotai/base';
 import { MessageType } from '../../../../../localization/localization';
 import { ConsoleLogger } from '../../../../../util/scripts/logging';
-import { buildExtensionConfigurationDB } from '../../../extension-manager/extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../extension-manager/extension-configuration/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../../../extension-manager/extensions-state-manipulation';
 import {
   sanitizeVersionRange,

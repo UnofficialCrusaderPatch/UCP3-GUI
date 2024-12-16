@@ -1,14 +1,14 @@
-import { ExtensionsState } from '../../../function/extensions/extensions-state';
-import { ConfigEntry, Extension } from '../../../config/ucp/common';
+import { Extension, ConfigEntry } from '../../../../config/ucp/common';
 import {
   ConfigMetaContent,
   ConfigMetaContentDB,
   ConfigMetaObjectDB,
-} from '../../../config/ucp/config-merge/objects';
-import Logger from '../../../util/scripts/logging';
-import { Override } from '../../../function/configuration/overrides';
-import { buildExtensionsDefinedConfig } from './extension-configuration/extensions-defined-config';
-import { ConfigurationState } from '../../../function/configuration/state';
+} from '../../../../config/ucp/config-merge/objects';
+import { Override } from '../../../../function/configuration/overrides';
+import { ConfigurationState } from '../../../../function/configuration/state';
+import { ExtensionsState } from '../../../../function/extensions/extensions-state';
+import Logger from '../../../../util/scripts/logging';
+import { buildExtensionsDefinedConfig } from './extensions-defined-config';
 
 const LOGGER = new Logger('extension-configuration.ts');
 

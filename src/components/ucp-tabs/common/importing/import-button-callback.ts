@@ -21,7 +21,7 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
-import { buildConfigMetaContentDBForUser } from '../../extension-manager/extension-configuration/extension-configuration';
+import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/extension-configuration';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import { MessageType } from '../../../../localization/localization';

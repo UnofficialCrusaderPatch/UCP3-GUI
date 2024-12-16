@@ -1,4 +1,4 @@
-import { buildExtensionConfigurationDB } from '../../../components/ucp-tabs/extension-manager/extension-configuration/extension-configuration';
+import { buildExtensionConfigurationDB } from '../../configuration/extension-configuration/extension-configuration';
 import { addExtensionToExplicityActivatedExtensions } from '../../../components/ucp-tabs/extension-manager/extensions-state-manipulation';
 import { Extension } from '../../../config/ucp/common';
 import Logger from '../../../util/scripts/logging';

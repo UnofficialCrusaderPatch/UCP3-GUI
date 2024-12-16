@@ -2,7 +2,7 @@ import { getStore } from '../../../../hooks/jotai/base';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { moveExtension } from '../extensions-state-manipulation';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
-import { buildExtensionConfigurationDB } from '../extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import reportAndConfirmBuildResult from './reporting';
 import Logger from '../../../../util/scripts/logging';
 

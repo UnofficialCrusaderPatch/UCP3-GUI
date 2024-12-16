@@ -1,16 +1,13 @@
-import { Extension } from '../../../../config/ucp/common';
+import { Extension } from '../../../config/ucp/common';
 import {
   ConfigMetaObject,
   ConfigMetaObjectDB,
-} from '../../../../config/ucp/config-merge/objects';
+} from '../../../config/ucp/config-merge/objects';
 import {
   extensionsToOptionEntries,
   getConfigDefaults,
-} from '../../../../config/ucp/extension-util';
-import {
-  ConfigurationLock,
-  ConfigurationSuggestion,
-} from '../../../../function/configuration/state';
+} from '../../../config/ucp/extension-util';
+import { ConfigurationLock, ConfigurationSuggestion } from '../state';
 
 // eslint-disable-next-line import/prefer-default-export
 export function buildExtensionsDefinedConfig(

@@ -88,6 +88,6 @@ export function deserializeSimplifiedSerializedExtensionsStateFromExtensions(
     explicitlyActivatedExtensions: [],
     onlineAvailableExtensions: [],
     configuration: createEmptyConfigurationState(),
-    tree: new ExtensionDependencyTree(extensions, '1.0.6', '3.0.4'),
+    tree: new ExtensionDependencyTree(extensions, '1.0.9', '3.0.5'),
   } as ExtensionsState;
 }

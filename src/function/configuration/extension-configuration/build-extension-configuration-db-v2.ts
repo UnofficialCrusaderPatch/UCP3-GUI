@@ -30,6 +30,7 @@ type Fail = {
   error: string;
   action: Action;
   override: Override;
+  warning: string;
 };
 
 type PotentialOverrideResult = Success | Fail;
@@ -46,17 +47,16 @@ function processPotentialOverride(
     status: 'error',
     action: 'DROP',
     error: `unhandled combination of qualifiers detected: '${existingCMC.qualifier}' and '${cmc.qualifier}'`,
+    warning: `unhandled combination of qualifiers detected: '${existingCMC.qualifier}' and '${cmc.qualifier}'`,
     override: createOverride(cmc, existingCMC, url),
   };
 
   if (existingCMC.qualifier === 'required' && cmc.qualifier === 'suggested') {
-    const warning = `${key} for '${url}' ${cmc.qualifier} by higher priority extension ('${ext.name}') overridden by a ${existingCMC.qualifier} value from a lower priority extension ('${existingCMC.entityName}')`;
-
-    const override = createOverride(cmc, existingCMC, url);
-
     // As this should be overridden by something else we don't add this key.
     // Thus, cmc is dropped
     const action = 'DROP';
+    const override = createOverride(cmc, existingCMC, url);
+    const warning = `${key} for '${url}' ${cmc.qualifier} by higher priority extension ('${ext.name}') overridden by a ${existingCMC.qualifier} value from a lower priority extension ('${existingCMC.entityName}')`;
 
     result = {
       status: 'ok',
@@ -72,11 +72,9 @@ function processPotentialOverride(
     existingCMC.qualifier === 'suggested' &&
     cmc.qualifier === 'suggested'
   ) {
-    const warning = `${key} for '${url}' ${existingCMC.qualifier} by lower priority extension ('${existingCMC.entityName}') overridden by ${cmc.qualifier} value from a higher priority extension ('${ext.name}')`;
-
-    const override = createOverride(existingCMC, cmc, url);
-
     const action = 'OVERRIDE';
+    const override = createOverride(existingCMC, cmc, url);
+    const warning = `${key} for '${url}' ${existingCMC.qualifier} by lower priority extension ('${existingCMC.entityName}') overridden by ${cmc.qualifier} value from a higher priority extension ('${ext.name}')`;
 
     result = {
       status: 'ok',
@@ -92,11 +90,9 @@ function processPotentialOverride(
     existingCMC.qualifier === 'suggested' &&
     cmc.qualifier === 'required'
   ) {
-    const warning = `${key} for '${url}' ${existingCMC.qualifier} by lower priority extension ('${existingCMC.entityName}') overridden by ${cmc.qualifier} value from a higher priority extension ('${ext.name}')`;
-
-    const override = createOverride(existingCMC, cmc, url);
-
     const action = 'OVERRIDE';
+    const override = createOverride(existingCMC, cmc, url);
+    const warning = `${key} for '${url}' ${existingCMC.qualifier} by lower priority extension ('${existingCMC.entityName}') overridden by ${cmc.qualifier} value from a higher priority extension ('${ext.name}')`;
 
     result = {
       status: 'ok',
@@ -113,13 +109,10 @@ function processPotentialOverride(
     cmc.qualifier === 'required'
   ) {
     if (compareObjects(existingCMC.content, cmc.content)) {
+      // We assume the latter required came later in time and is more authorative than the former
+      const action = 'OVERRIDE';
+      const override = createOverride(existingCMC, cmc, url);
       const warning = `${key} for '${url}' ${cmc.qualifier} by higher priority extension ('${ext.name}') overridden by the same ${existingCMC.qualifier} value from a lower priority extension ('${existingCMC.entityName}')`;
-
-      const override = createOverride(cmc, existingCMC, url);
-
-      // As this should be overridden by something else we don't add this key.
-      // Thus, cmc is dropped
-      const action = 'DROP';
 
       result = {
         status: 'ok',
@@ -128,20 +121,21 @@ function processPotentialOverride(
         override,
       };
     } else {
+      // TODO: Should we assume the latter required came later in time and is more authorative than the former
+      // and therefore override? or drop?
+      const action = 'DROP';
+      const override = createOverride(cmc, existingCMC, url);
+      const warning = `${key} for '${url}' ${cmc.qualifier} by higher priority extension ('${ext.name}') overridden by a different ${existingCMC.qualifier} value from a lower priority extension ('${existingCMC.entityName}')`;
+
       const e = `Incompatible extension ('${ext.name}') and ('${existingCMC.entityName}') because they both have different ${key} ${existingCMC.qualifier} for feature '${url}'`;
 
       LOGGER.msg(e).error();
-
-      const override = createOverride(cmc, existingCMC, url);
-
-      // As this should be overridden by something else we don't add this key.
-      // Regardless of equality...
-      const action = 'DROP';
 
       result = {
         status: 'error',
         action,
         override,
+        warning,
         error: e,
       };
     }
@@ -233,15 +227,10 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
           errors.push(result.error);
 
-          const n = ext.name;
-
-          if (!overrides.has(n)) {
-            overrides.set(n, [result.override]);
-          } else {
-            overrides.get(n)!.push(result.override);
-          }
           // status === 'ok'
-        } else if (result.action === 'DROP') {
+        }
+
+        if (result.action === 'DROP') {
           LOGGER.msg(
             `${url} from ${ext.name} was dropped because of override`,
           ).debug();

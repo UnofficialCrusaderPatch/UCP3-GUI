@@ -128,13 +128,39 @@ export function buildExtensionConfigurationDBFromActiveExtensions(
             cmc.qualifier === 'required'
           ) {
             if (!compareObjects(currentModifications.content, cmc.content)) {
-              const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both require different value for feature '${url}'`;
+              const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both have different value required for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
+
+              const w = `value for '${url}' required by higher priority extension ('${ext.name}') overridden by a different required value from a lower priority extension ('${currentModifications.entityName}')`;
+              // LOGGER.msg(w).warn();
+              warnings.push(w);
+
+              const n = ext.name;
+              if (!overrides.has(n)) {
+                overrides.set(n, []);
+              }
+
+              overrides
+                .get(n)!
+                .push(createOverride(cmc, currentModifications, url));
 
               // As this should be overridden by something else we delete the key.
               // We could also set the m[key] value to the currentModifications object. Same effect.
               delete m[key];
+            } else {
+              const w = `value for '${url}' required by lower priority extension ('${currentModifications.entityName}') overridden by required equal value from a higher priority extension ('${ext.name}')`;
+              // LOGGER.msg(w).warn();
+              warnings.push(w);
+
+              const n = currentModifications.entityName;
+              if (!overrides.has(n)) {
+                overrides.set(n, []);
+              }
+
+              overrides
+                .get(n)!
+                .push(createOverride(currentModifications, cmc, url));
             }
 
             return;

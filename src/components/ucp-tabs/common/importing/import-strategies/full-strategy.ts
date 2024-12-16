@@ -3,7 +3,7 @@ import { ConfigFile, Extension } from '../../../../../config/ucp/common';
 import { deserializeLoadOrder } from '../../../../../config/ucp/config-files/load-order';
 import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
 import { MessageType } from '../../../../../localization/localization';
-import { buildExtensionConfigurationDB } from '../../../../../function/configuration/extension-configuration/extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import {
   GenericFailure,
   LOGGER,

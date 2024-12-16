@@ -21,13 +21,13 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
-import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/extension-configuration';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import { MessageType } from '../../../../localization/localization';
 import { ImportButtonCallbackResult, makeErrorReport } from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
 import { showModalOk } from '../../../modals/modal-ok';
+import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};

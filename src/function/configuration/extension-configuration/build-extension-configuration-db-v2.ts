@@ -1,7 +1,6 @@
-import { Extension, ConfigEntry } from '../../../config/ucp/common';
+import { Extension } from '../../../config/ucp/common';
 import {
   ConfigMetaContent,
-  ConfigMetaContentDB,
   ConfigMetaObjectDB,
 } from '../../../config/ucp/config-merge/objects';
 import { Override } from '../overrides';
@@ -9,110 +8,13 @@ import { ConfigurationState } from '../state';
 import { ExtensionsState } from '../../extensions/extensions-state';
 import Logger from '../../../util/scripts/logging';
 import { buildExtensionsDefinedConfig } from './extensions-defined-config';
+import { buildConfigMetaContentDB } from './build-config-meta-content-db';
+import { createOverride } from './create-override';
+import { compareObjects } from '../../../util/scripts/objectCompare';
 
 const LOGGER = new Logger('extension-configuration.ts');
 
-type ConfigurationDBBuildingResult = {
-  status: number;
-  state: ExtensionsState;
-};
-
-function buildConfigMetaContent(
-  ext: Extension | undefined,
-  k: string,
-  v: unknown,
-) {
-  let truekey = k;
-  let qualifier = 'unspecified';
-  if (k.startsWith('required-')) {
-    // eslint-disable-next-line prefer-destructuring
-    truekey = k.split('required-', 2)[1];
-    qualifier = 'required';
-  } else if (k.startsWith('suggested-')) {
-    // eslint-disable-next-line prefer-destructuring
-    truekey = k.split('suggested-', 2)[1];
-    qualifier = 'suggested';
-  }
-
-  return {
-    truekey,
-    configMetaContent:
-      ext === undefined
-        ? ({
-            type: 'user',
-            entityName: 'user',
-            content: v,
-            qualifier,
-          } as ConfigMetaContent)
-        : ({
-            type: 'extension',
-            entity: ext,
-            entityName: ext.name,
-            content: v,
-            qualifier,
-          } as ConfigMetaContent),
-  };
-}
-
-function buildConfigMetaContentDB(ext: Extension | undefined, ce: ConfigEntry) {
-  const m: ConfigMetaContentDB = {};
-
-  Object.entries(ce.contents)
-    .map(([k, v]) => buildConfigMetaContent(ext, k, v))
-    .forEach(({ truekey, configMetaContent }) => {
-      m[truekey] = configMetaContent;
-    });
-
-  return m;
-}
-
-export function buildConfigMetaContentDBForUser(ce: ConfigEntry) {
-  return buildConfigMetaContentDB(undefined, ce);
-}
-
-const createOverride = (
-  overridden: ConfigMetaContent,
-  overriding: ConfigMetaContent,
-  url: string,
-) =>
-  ({
-    overridden:
-      overridden.type === 'user'
-        ? {
-            type: 'user',
-            qualifier: overridden.qualifier,
-            url,
-            value: overridden.content,
-            name: overridden.entityName,
-          }
-        : {
-            type: 'extension',
-            entity: overridden.entity,
-            qualifier: overridden.qualifier,
-            url,
-            value: overridden.content,
-            name: overridden.entityName,
-          },
-    overriding:
-      overriding.type === 'user'
-        ? {
-            type: 'user',
-            qualifier: overriding.qualifier,
-            url,
-            value: overriding.content,
-            name: overriding.entityName,
-          }
-        : {
-            type: 'extension',
-            entity: overriding.entity,
-            qualifier: overriding.qualifier,
-            url,
-            value: overriding.content,
-            name: overriding.entityName,
-          },
-  }) as Override;
-
-function buildExtensionConfigurationDBFromActiveExtensions(
+export function buildExtensionConfigurationDBFromActiveExtensions(
   activeExtensions: Extension[],
 ) {
   // ae has the order that the highest is the last added.
@@ -146,6 +48,9 @@ function buildExtensionConfigurationDBFromActiveExtensions(
         const currentModifications = currentCMO.modifications[key];
         if (currentModifications !== undefined) {
           // Process the four different types of overriding behavior and set warnings and overrides
+
+          // If extension set key to required
+          // and a later extension wants a suggested value
           if (
             currentModifications.qualifier === 'required' &&
             cmc.qualifier === 'suggested'
@@ -169,6 +74,9 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
             return;
           }
+
+          // If extension set key to suggested
+          // and a later extension wants a suggested value
           if (
             currentModifications.qualifier === 'suggested' &&
             cmc.qualifier === 'suggested'
@@ -188,6 +96,9 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
             return;
           }
+
+          // If extension set key to suggested
+          // and a later extension wants a required value
           if (
             currentModifications.qualifier === 'suggested' &&
             cmc.qualifier === 'required'
@@ -207,15 +118,14 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
             return;
           }
+
+          // If extension set key to required
+          // and a later extension wants a required value
           if (
             currentModifications.qualifier === 'required' &&
             cmc.qualifier === 'required'
           ) {
-            // TODO: remove this hack and replace it with a proper equality check
-            if (
-              JSON.stringify(currentModifications.content) !==
-              JSON.stringify(cmc.content)
-            ) {
+            if (!compareObjects(currentModifications.content, cmc.content)) {
               const e = `Incompatible extension ('${ext.name}') and ('${currentModifications.entityName}') because they both require different values for feature '${url}'`;
               LOGGER.msg(e).warn();
               errors.push(e);
@@ -272,7 +182,10 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 
 // TODO: also do range checks in this function? Better in a separate function I guess
 // Or perhaps better to do range checks on discovery of extension
-function buildExtensionConfigurationDB(extensionsState: ExtensionsState) {
+// eslint-disable-next-line import/prefer-default-export
+export function buildExtensionConfigurationDB(
+  extensionsState: ExtensionsState,
+) {
   return {
     ...extensionsState,
     configuration: buildExtensionConfigurationDBFromActiveExtensions(
@@ -280,10 +193,3 @@ function buildExtensionConfigurationDB(extensionsState: ExtensionsState) {
     ),
   } as ExtensionsState;
 }
-
-export {
-  buildExtensionConfigurationDB,
-  buildConfigMetaContentDB,
-  buildConfigMetaContent,
-};
-export type { ConfigurationDBBuildingResult };

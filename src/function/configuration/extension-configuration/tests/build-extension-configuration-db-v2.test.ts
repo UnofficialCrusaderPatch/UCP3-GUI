@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import EXTENSIONS from './extensions-state.json'
 import { ExtensionsState } from "../../../extensions/extensions-state";
-import { buildExtensionConfigurationDB } from "../build-extension-configuration-db";
-import { buildExtensionConfigurationDB as v2 } from "../build-extension-configuration-db-v2";
+import { buildExtensionConfigurationDB } from "./build-extension-configuration-db-v1-code.test";
+import { buildExtensionConfigurationDB as v2 } from "../build-extension-configuration-db";
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from "../../../../testing/dump-extensions-state";
 import { addExtensionToExplicityActivatedExtensions } from "../../../../components/ucp-tabs/extension-manager/extensions-state-manipulation";
 

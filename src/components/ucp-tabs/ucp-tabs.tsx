@@ -14,10 +14,6 @@ import Logger from '../../util/scripts/logging';
 import { showModalOk } from '../modals/modal-ok';
 // import * as GuiSettings from '../../function/gui-settings/settings';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
-import {
-  LOADABLE_UCP_STATE_ATOM,
-  UCPFilesState,
-} from '../../function/ucp-files/ucp-state';
 import { OVERLAY_ACTIVE_ATOM } from '../overlay/overlay';
 import ConfigEditor from './config-editor/config-editor';
 import Overview from './overview/overview';
@@ -45,6 +41,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../footer/footer';
 import { showModalOkCancel } from '../modals/modal-ok-cancel';
 import Message, { useMessage } from '../general/message';
 import { reloadCurrentGameFolder } from '../../function/game-folder/modifications/reload-current-game-folder';
+import { IS_GAME_FOLDER, UCP_FOLDER_EXISTS_ATOM } from './display-logic';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -89,15 +86,8 @@ export default function UcpTabs() {
 
   // const [advancedMode] = useAtom(GuiSettings.ADVANCED_MODE_ATOM);
 
-  const state = useAtomValue(LOADABLE_UCP_STATE_ATOM);
-  const ucpFolderExists =
-    state.state === 'hasData'
-      ? state.data === UCPFilesState.ACTIVE ||
-        state.data === UCPFilesState.INACTIVE ||
-        state.data === UCPFilesState.BINK_VERSION_DIFFERENCE ||
-        state.data === UCPFilesState.BINK_UCP_MISSING ||
-        state.data === UCPFilesState.BINK_REAL_COPY_MISSING
-      : false;
+  const ucpFolderExists = useAtomValue(UCP_FOLDER_EXISTS_ATOM);
+  const isGameFolder = useAtomValue(IS_GAME_FOLDER);
 
   const [currentTab, setCurrentTab] = useAtom(CURRENT_DISPLAYED_TAB);
 
@@ -161,8 +151,12 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="extensions"
               className="ornament-border-button tab-link"
-              disabled={!initIsDoneAndWithoutErrors || contentTabLock > 0}
-              hidden={!ucpFolderExists}
+              disabled={
+                currentFolder === '' ||
+                !initIsDoneAndWithoutErrors ||
+                contentTabLock > 0 ||
+                !ucpFolderExists
+              }
               onClick={async () => {
                 try {
                   if (!showErrorsWarning) {
@@ -215,9 +209,9 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="config"
               className="ornament-border-button tab-link"
-              disabled={!initIsDoneAndWithoutErrors}
-              hidden={
-                // !advancedMode ||
+              disabled={
+                currentFolder === '' ||
+                !initIsDoneAndWithoutErrors ||
                 !ucpFolderExists
               }
             >
@@ -228,8 +222,11 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="content-manager"
               className="ornament-border-button tab-link"
-              disabled={currentFolder === ''}
-              hidden={currentFolder === ''}
+              disabled={
+                currentFolder === '' ||
+                !initIsDoneAndWithoutErrors ||
+                !ucpFolderExists
+              }
             >
               <Message message="store.tab" />
             </Nav.Link>
@@ -238,8 +235,7 @@ export default function UcpTabs() {
             <Nav.Link
               eventKey="launch"
               className="ornament-border-button tab-link"
-              disabled={currentFolder === ''}
-              hidden={currentFolder === ''}
+              disabled={currentFolder === '' || !isGameFolder}
             >
               <Message message="launch" />
             </Nav.Link>

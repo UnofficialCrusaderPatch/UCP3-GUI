@@ -2,9 +2,8 @@
 /* eslint-disable no-new-wrappers */
 import { atom } from 'jotai';
 import { loadable } from 'jotai/utils';
-import { copyFile, resolvePath } from '../../tauri/tauri-files';
-import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
-import Result from '../../util/structs/result';
+import { resolvePath } from '../../tauri/tauri-files';
+import { atomWithRefresh } from '../../hooks/jotai/base';
 import { getHexHashOfFile } from '../../util/scripts/hash';
 import Logger from '../../util/scripts/logging';
 import {
@@ -13,7 +12,6 @@ import {
   UCP_BINK_FILENAME,
 } from '../global/constants/file-constants';
 import { showModalOk } from '../../components/modals/modal-ok';
-import { MessageType } from '../../localization/localization';
 import { ASYNC_GAME_FOLDER_ATOM } from '../game-folder/interface';
 
 const LOGGER = new Logger('ucp-state.ts').shouldPrettyJson(true);
@@ -42,7 +40,7 @@ async function getBinkPath(gameFolder: string, binkName: string) {
   return resolvePath(gameFolder, binkName);
 }
 
-const BINK_PATHS_ATOM = atom(async (get) => {
+export const BINK_PATHS_ATOM = atom(async (get) => {
   const gameFolder = await get(ASYNC_GAME_FOLDER_ATOM);
   return {
     base: await getBinkPath(gameFolder, BINK_FILENAME),
@@ -132,146 +130,3 @@ export const UCP_FILES_STATE_ATOM = atomWithRefresh(async (get) => {
 });
 
 export const LOADABLE_UCP_STATE_ATOM = loadable(UCP_FILES_STATE_ATOM);
-
-export const UCP_FRAMEWORK_IS_ACTIVE = atom((get) => {
-  const r = get(LOADABLE_UCP_STATE_ATOM);
-
-  if (r.state !== 'hasData') return false;
-
-  return r.data === UCPFilesState.ACTIVE;
-});
-
-export async function createRealBink(): Promise<Result<void, MessageType>> {
-  const binkPaths = await getStore().get(BINK_PATHS_ATOM);
-  switch (await getStore().get(UCP_FILES_STATE_ATOM)) {
-    case UCPFilesState.WRONG_FOLDER:
-      return Result.err('bink.missing');
-    case UCPFilesState.BINK_REAL_COPY_MISSING: // safe, since verified
-    case UCPFilesState.NOT_INSTALLED: {
-      const copyResult = (
-        await copyFile(binkPaths.base, binkPaths.real)
-      ).mapErr((error) => ({ key: 'bink.copy.error', args: { error } }));
-      getStore().set(UCP_FILES_STATE_ATOM);
-      return copyResult;
-    }
-    case UCPFilesState.UNKNOWN:
-      return Result.err('bink.unknown.state');
-    case UCPFilesState.INVALID:
-      return Result.err('bink.invalid.state');
-    default:
-      return Result.emptyOk();
-  }
-}
-
-export async function activateUCP(): Promise<Result<void, MessageType>> {
-  const binkPaths = await getStore().get(BINK_PATHS_ATOM);
-  const ucpState = await getStore().get(UCP_FILES_STATE_ATOM);
-  switch (ucpState) {
-    case UCPFilesState.WRONG_FOLDER:
-      return Result.err('bink.missing');
-    case UCPFilesState.NOT_INSTALLED:
-    case UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK:
-      return Result.err('bink.not.installed');
-    case UCPFilesState.UNKNOWN:
-      return Result.err('bink.unknown.state');
-    case UCPFilesState.INVALID:
-      return Result.err('bink.invalid.state');
-    case UCPFilesState.ACTIVE:
-      return Result.emptyOk();
-    case UCPFilesState.INACTIVE:
-    case UCPFilesState.BINK_VERSION_DIFFERENCE:
-    case UCPFilesState.BINK_REAL_COPY_MISSING: {
-      if (ucpState === UCPFilesState.BINK_REAL_COPY_MISSING) {
-        // copy bink to missing real bink, assuming this case installed manually
-        const ucpBinkCopyResult = (
-          await copyFile(binkPaths.base, binkPaths.real)
-        ).mapErr((error) => ({
-          key: 'bink.copy.error',
-          args: { error },
-        }));
-        if (ucpBinkCopyResult.isErr()) {
-          return ucpBinkCopyResult;
-        }
-      }
-
-      const copyResult = (await copyFile(binkPaths.ucp, binkPaths.base)).mapErr(
-        (error) => ({
-          key: 'bink.copy.ucp.error',
-          args: { error },
-        }),
-      );
-      getStore().set(UCP_FILES_STATE_ATOM);
-      return copyResult;
-    }
-    case UCPFilesState.BINK_UCP_MISSING: {
-      // copy bink to missing ucp bink, assuming this case installed manually
-      const copyResult = (await copyFile(binkPaths.base, binkPaths.ucp)).mapErr(
-        (error) => ({
-          key: 'bink.copy.error',
-          args: { error },
-        }),
-      );
-      getStore().set(UCP_FILES_STATE_ATOM);
-      return copyResult;
-    }
-    default:
-      return Result.err('Received unknown UCP state. This should not happen.');
-  }
-}
-
-export async function deactivateUCP(): Promise<Result<void, MessageType>> {
-  const binkPaths = await getStore().get(BINK_PATHS_ATOM);
-  const ucpState = await getStore().get(UCP_FILES_STATE_ATOM);
-  switch (ucpState) {
-    case UCPFilesState.WRONG_FOLDER:
-      return Result.err('bink.missing');
-    case UCPFilesState.NOT_INSTALLED:
-    case UCPFilesState.NOT_INSTALLED_WITH_REAL_BINK:
-      return Result.err('bink.not.installed');
-    case UCPFilesState.UNKNOWN:
-      return Result.err('bink.unknown.state');
-    case UCPFilesState.INVALID:
-      return Result.err('bink.invalid.state');
-    case UCPFilesState.INACTIVE:
-      return Result.emptyOk();
-    case UCPFilesState.ACTIVE:
-    case UCPFilesState.BINK_VERSION_DIFFERENCE:
-    case UCPFilesState.BINK_UCP_MISSING: {
-      if (ucpState === UCPFilesState.BINK_UCP_MISSING) {
-        // copy bink to missing ucp bink, assuming this case installed manually
-        const ucpBinkCopyResult = (
-          await copyFile(binkPaths.base, binkPaths.ucp)
-        ).mapErr((error) => ({
-          key: 'bink.copy.error',
-          args: { error },
-        }));
-        if (ucpBinkCopyResult.isErr()) {
-          return ucpBinkCopyResult;
-        }
-      }
-
-      const copyResult = (
-        await copyFile(binkPaths.real, binkPaths.base)
-      ).mapErr((error) => ({
-        key: 'bink.copy.real.error',
-        args: { error },
-      }));
-      getStore().set(UCP_FILES_STATE_ATOM);
-      return copyResult;
-    }
-    case UCPFilesState.BINK_REAL_COPY_MISSING: {
-      // copy bink to missing real bink, assuming this case installed manually
-      const copyResult = (
-        await copyFile(binkPaths.base, binkPaths.real)
-      ).mapErr((error) => ({
-        key: 'bink.copy.error',
-        args: { error },
-      }));
-      getStore().set(UCP_FILES_STATE_ATOM);
-      return copyResult;
-    }
-
-    default:
-      return Result.err('Received unknown UCP state. This should not happen.');
-  }
-}

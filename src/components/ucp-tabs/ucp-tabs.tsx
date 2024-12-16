@@ -186,7 +186,7 @@ export default function UcpTabs() {
                     title: 'extensions.dependencies.missing.title',
                     message: {
                       key: `extensions.dependencies.missing.message`,
-                      args: { message: messages.join('\n') },
+                      args: { messages: messages.join('\n') },
                     },
                     handleAction: () => setShowErrorsWarning(false),
                   });

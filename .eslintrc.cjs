@@ -1,23 +1,19 @@
 // Tutorial: https://dev.to/drunckj/setting-up-code-formatting-with-eslint-typescript-and-prettier-in-visual-studio-code-44an
 module.exports = {
   extends: [
-    // These are taken from https://github.com/electron-react-boilerplate/eslint-config-erb
-    'airbnb',
-    'airbnb-typescript',
-    'airbnb/hooks',
-    // By extending from a plugin config, we can get recommended rules without having to add them manually.
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:import/recommended',
-    'plugin:jsx-a11y/recommended',
-    'plugin:promise/recommended',
-    // "plugin:compat/recommended",
-    'plugin:@typescript-eslint/recommended',
+    "airbnb",
+    "airbnb-typescript",
+    "airbnb/hooks",
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:import/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:promise/recommended",
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
-    // This disables the formatting rules in ESLint that Prettier is going to be responsible for handling.
-    // Make sure it's always the last config, so it gets the chance to override other configs.
-    'eslint-config-prettier',
-    'prettier',
+    "eslint-config-prettier",
+    "prettier",
+    "plugin:storybook/recommended"
   ],
   env: {
     browser: true,

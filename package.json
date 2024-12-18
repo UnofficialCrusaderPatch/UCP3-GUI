@@ -43,9 +43,12 @@
     "build": "tauri build",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@alexgorbatchev/storybook-addon-jotai": "^3.0.6",
     "@jetbrains/websandbox": "^1.0.11",
     "@tanstack/query-core": "^5.56.2",
     "@tanstack/react-query": "^5.56.2",
@@ -72,9 +75,17 @@
     "yaml": "^2.5.1"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^3.2.2",
     "@eslint/js": "^9.15.0",
     "@octokit/rest": "^21.0.2",
     "@octokit/types": "^13.6.2",
+    "@storybook/addon-essentials": "^8.4.7",
+    "@storybook/addon-interactions": "^8.4.7",
+    "@storybook/addon-onboarding": "^8.4.7",
+    "@storybook/blocks": "^8.4.7",
+    "@storybook/react": "^8.4.7",
+    "@storybook/react-vite": "^8.4.7",
+    "@storybook/test": "^8.4.7",
     "@tauri-apps/cli": "^1.6.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.1",
@@ -99,6 +110,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-promise": "^7.1.0",
     "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-storybook": "^0.11.1",
     "globals": "^15.12.0",
     "husky": "^9.1.6",
     "jsdom": "^25.0.1",
@@ -106,6 +118,7 @@
     "octokit": "^4.0.2",
     "prettier": "^3.3.3",
     "sharp": "^0.33.5",
+    "storybook": "^8.4.7",
     "svgo": "^3.3.2",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.15.0",

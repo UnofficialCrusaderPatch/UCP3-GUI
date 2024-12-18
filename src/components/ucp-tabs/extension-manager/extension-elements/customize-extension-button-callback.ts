@@ -117,6 +117,9 @@ export async function customizeExtensionButtonCallback(ext: Extension) {
       value: newConfigurationQualifier,
     });
 
+    /**
+     * Here the extension is set
+     */
     getStore().set(EXTENSION_EDITOR_STATE_ATOM, {
       extension: ext,
       state: 'active',

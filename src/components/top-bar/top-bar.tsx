@@ -6,6 +6,7 @@ import CreditsButton from './credits/credits-button';
 import { ReloadButton } from './restart/reload-button';
 import LanguageSelect from './language-select/language-select';
 import { NewsButton } from './news/news-button';
+import { TroubleShootingButton } from './troubleshooting/troubleshooting-button';
 
 // eslint-disable-next-line import/prefer-default-export
 export function TopBar() {
@@ -19,7 +20,11 @@ export function TopBar() {
       <span className="mx-1" />
       <CreditsButton />
       <span className="mx-1" />
+      <TroubleShootingButton />
+      <span className="mx-1" />
+
       <ReloadButton />
+
       <LanguageSelect />
     </div>
   );

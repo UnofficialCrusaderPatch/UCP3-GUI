@@ -21,3 +21,5 @@ export const BACKGROUNDS_MAPPING_FILE = 'mapping.yaml';
 export const UCP_MODULES_FOLDER = 'ucp/modules/';
 export const UCP_PLUGINS_FOLDER = 'ucp/plugins/';
 export const UCP_CACHE_FOLDER = 'ucp/.cache/';
+export const APPDATA_BASE_FOLDER = 'UnofficialCrusaderPatch3';
+export const APPDATA_FOLDER_LOGS = 'logs';

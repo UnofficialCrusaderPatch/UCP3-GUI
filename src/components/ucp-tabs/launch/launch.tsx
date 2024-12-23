@@ -44,7 +44,7 @@ import Logger from '../../../util/scripts/logging';
 import { getStore } from '../../../hooks/jotai/base';
 import { LAUNCH_OPTION_COMMAND_LINE_ARGUMENTS_TOKENS_ATOM } from './launch-options/option-command-line-arguments';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../footer/footer';
-import { IS_ACTIVE } from '../display-logic';
+import { NOT_INSTALLED_ATOM } from '../display-logic';
 
 const LOGGER = new Logger('launch.tsx');
 
@@ -102,7 +102,7 @@ export default function Launch() {
   };
   const receiveEnvs = () => envVars;
 
-  const active = useAtomValue(IS_ACTIVE);
+  const active = !useAtomValue(NOT_INSTALLED_ATOM);
 
   return (
     <div className="launch__container flex-default">

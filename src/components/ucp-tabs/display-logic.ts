@@ -42,3 +42,14 @@ export const IS_ACTIVE = atom((get) => {
 
   return result;
 });
+
+export const NOT_INSTALLED_ATOM = atom((get) => {
+  const state = get(LOADABLE_UCP_STATE_ATOM);
+  const result =
+    state.state === 'hasData'
+      ? state.data === UCPFilesState.WRONG_FOLDER ||
+        state.data === UCPFilesState.NOT_INSTALLED
+      : false;
+
+  return result;
+});

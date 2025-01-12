@@ -37,7 +37,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: install dependencies (ubuntu only)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -55,7 +55,7 @@ jobs:
         run: |
           npm run test -- --test-timeout=10000
       - name: Create changelog URL (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           m="[Changelog](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/wiki/Changelog#)"
           echo "RELEASE_BODY=$m" >> $GITHUB_ENV

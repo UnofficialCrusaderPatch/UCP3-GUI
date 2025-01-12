@@ -19,17 +19,21 @@
       },
       "fs": {
         "all": true,
-        "scope": [
-          "$TEMP/**/*",
-          "$DATA/**/*",
-          "$DOWNLOAD/*",
-          "$LOCALDATA/**/*",
-          "$APP/**/*",
-          "$RESOURCE/gameinfo/**/*.yaml",
-          "$RESOURCE/lang/**/*.yaml",
-          "$RESOURCE/lang/sources/**/*.yaml",
-          "$RESOURCE/backgrounds/*"
-        ]
+        "scope": {
+          "allow": [
+            "$TEMP/**/*",
+            "$DATA/**/*",
+            "$DOWNLOAD/*",
+            "$LOCALDATA/**/*",
+            "$APP/**/*",
+            "$RESOURCE/gameinfo/**/*.yaml",
+            "$RESOURCE/lang/**/*.yaml",
+            "$RESOURCE/lang/sources/**/*.yaml",
+            "$RESOURCE/backgrounds/*"
+          ],
+          "deny": [],
+          "requireLiteralLeadingDot": false
+        }
       },
       "path": {
         "all": true

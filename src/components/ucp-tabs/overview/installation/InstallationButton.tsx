@@ -17,7 +17,6 @@ import { removeFile } from '../../../../tauri/tauri-files';
 import Logger from '../../../../util/scripts/logging';
 import {
   FRAMEWORK_UPDATER_ATOM,
-  FrameworkUpdateStatus,
   HAS_UPDATE_ATOM,
   HAS_UPDATE_QUERY_ATOM,
 } from './atoms';
@@ -25,40 +24,10 @@ import {
   UCP_FILES_STATE_ATOM,
   UCPFilesState,
 } from '../../../../function/ucp-files/ucp-state';
+import { labelForUpdateStatus } from './label-for-update-status';
+import { shouldBeActive } from './button-should-be-active';
 
 const LOGGER = new Logger('InstallationButton.tsx');
-
-function labelForUpdateStatus(
-  updateStatus: FrameworkUpdateStatus | undefined,
-  isError: boolean,
-  isSettled: boolean,
-  isWrongFolder: boolean,
-) {
-  if (isWrongFolder) return 'overview.folder.invalid';
-  if (isError) return 'overview.framework.update.error';
-  if (!isSettled) return 'overview.framework.update.fetching';
-  // Now we know update Status must exist
-  switch (updateStatus!.status) {
-    case 'idle': {
-      return 'overview.framework.update.idle';
-    }
-    case 'update': {
-      return 'overview.framework.update.available';
-    }
-    case 'no_update': {
-      return 'overview.framework.update.uptodate';
-    }
-    case 'not_installed': {
-      return 'overview.framework.install';
-    }
-    case 'fetching': {
-      return 'overview.framework.update.fetching';
-    }
-    default: {
-      return 'overview.framework.update.error';
-    }
-  }
-}
 
 // eslint-disable-next-line import/prefer-default-export
 export function InstallationButton() {
@@ -87,12 +56,14 @@ export function InstallationButton() {
   return (
     <OverviewButton
       buttonActive={
-        !isWrongFolder &&
-        isSuccess &&
         overviewButtonActive &&
-        currentFolder !== '' &&
-        (updateStatus.status === 'update' ||
-          updateStatus.status === 'not_installed')
+        shouldBeActive({
+          filesState: state,
+          isGameFolder: !isWrongFolder,
+          isUpdateQueryResolved: isSuccess && data !== undefined,
+          isFolder: currentFolder !== '',
+          updateStatus,
+        })
       }
       buttonText={buttonLabel}
       buttonVariant="ucp-button overview__text-button"

@@ -2,11 +2,9 @@ import { ToastType } from '../../components/toasts/toasts-display';
 import { Error as FileUtilError } from '../../tauri/tauri-files';
 import { extractZipToPath } from '../../tauri/tauri-invoke';
 import Result from '../../util/structs/result';
-import {
-  UCP_FILES_STATE_ATOM,
-  activateUCP,
-  createRealBink,
-} from '../ucp-files/ucp-state';
+import { UCP_FILES_STATE_ATOM } from '../ucp-files/ucp-state';
+import { createRealBink } from '../ucp-files/create-real-bink';
+import { activateUCP } from '../ucp-files/activate-ucp';
 import { getStore } from '../../hooks/jotai/base';
 import { initializeUCPVersion } from '../ucp-files/ucp-version';
 import { MessageType } from '../../localization/localization';

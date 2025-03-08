@@ -21,12 +21,13 @@ import {
   EXTENSION_STATE_REDUCER_ATOM,
 } from '../../../../function/extensions/state/state';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
-import { buildConfigMetaContentDBForUser } from '../../extension-manager/extension-configuration';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import { MessageType } from '../../../../localization/localization';
 import { ImportButtonCallbackResult, makeErrorReport } from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
+import { showModalOk } from '../../../modals/modal-ok';
+import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -85,10 +86,10 @@ export function constructUserConfigObjects(config: ConfigFile) {
   };
 }
 
-export async function importUcpConfig(
+export function importUcpConfig(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-): Promise<ImportButtonCallbackResult> {
+): ImportButtonCallbackResult {
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -99,7 +100,7 @@ export async function importUcpConfig(
 
   ConsoleLogger.debug('import-button-callback.tsx: config', config);
 
-  const strategyResultReport = await attemptStrategies(
+  const strategyResultReport = attemptStrategies(
     config,
     extensionsState,
     setConfigStatus,
@@ -119,6 +120,23 @@ export async function importUcpConfig(
   }
 
   const { newExtensionsState } = result;
+
+  /**
+   * Make sure to apply the current loaded configuration exactly as is (version specific)
+   * to the configuration tree.
+   */
+  newExtensionsState.tree.reset();
+  const solution = newExtensionsState.tree.extensionDependenciesForExtensions(
+    newExtensionsState.activeExtensions,
+  );
+
+  if (solution.status !== 'OK') {
+    showModalOk({
+      title: 'Unknown error',
+      message:
+        'An uncaught error occurred while importing your config from disk. Error code: invalid tree',
+    });
+  }
 
   /* Remember the active extensions as on disk (ucp-config.yml file) */
   getStore().set(CONFIGURATION_DISK_STATE_ATOM, [

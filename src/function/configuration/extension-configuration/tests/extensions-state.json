@@ -1,0 +1,595 @@
+[
+  {
+    "name": "A",
+    "version": "0.0.1",
+    "type": "plugin",
+    "definition": {
+      "name": "A",
+      "version": "0.0.1",
+      "type": "plugin",
+      "dependencies": {},
+      "display-name": "A"
+    },
+    "io": {
+      "isZip": false,
+      "isDirectory": true,
+      "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+    },
+    "ui": [
+      {
+        "url": "A.feature1",
+        "name": "A-feature1",
+        "text": "A1",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 1
+      },
+      {
+        "url": "A.feature2",
+        "name": "A-feature2",
+        "text": "A2",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 2
+      },
+      {
+        "url": "A.feature3",
+        "name": "A-feature3",
+        "text": "A3",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 3
+      },
+      {
+        "url": "A.feature4",
+        "name": "A-feature4",
+        "text": "A4",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 4
+      },
+      {
+        "url": "A.feature5",
+        "name": "A-feature5",
+        "text": "A5",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 5
+      },
+      {
+        "url": "A.feature6",
+        "name": "A-feature6",
+        "text": "A6",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 6
+      },
+      {
+        "url": "A.feature7",
+        "name": "A-feature7",
+        "text": "A7",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 7
+      },
+      {
+        "url": "A.feature8",
+        "name": "A-feature8",
+        "text": "A8",
+        "display": "Switch",
+        "contents": {
+          "type": "boolean",
+          "value": false
+        },
+        "extension": {
+          "name": "A",
+          "version": "0.0.1",
+          "type": "plugin",
+          "definition": {
+            "name": "A",
+            "version": "0.0.1",
+            "type": "plugin",
+            "dependencies": {},
+            "display-name": "A"
+          },
+          "io": {
+            "isZip": false,
+            "isDirectory": true,
+            "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/A-0.0.1"
+          },
+          "locales": {},
+          "config": {
+            "meta": {
+              "version": "1.0.0"
+            },
+            "config-sparse": {
+              "modules": {},
+              "plugins": {},
+              "load-order": []
+            }
+          },
+          "configEntries": {},
+          "ui": []
+        },
+        "id": 8
+      }
+    ],
+    "locales": {},
+    "config": {
+      "meta": {
+        "version": "1.0.0"
+      },
+      "config-sparse": {
+        "modules": {},
+        "plugins": {},
+        "load-order": []
+      }
+    },
+    "configEntries": {}
+  },
+  {
+    "name": "B",
+    "version": "0.0.1",
+    "type": "plugin",
+    "definition": {
+      "name": "B",
+      "version": "0.0.1",
+      "type": "plugin",
+      "dependencies": {
+        "A": "=0.0.1"
+      },
+      "display-name": "B"
+    },
+    "io": {
+      "isZip": false,
+      "isDirectory": true,
+      "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/B-0.0.1"
+    },
+    "ui": [],
+    "locales": {},
+    "config": {
+      "config-sparse": {
+        "modules": {},
+        "plugins": {
+          "A": {
+            "config": {
+              "feature1": {
+                "contents": {
+                  "required-value": false
+                }
+              },
+              "feature2": {
+                "contents": {
+                  "required-value": true
+                }
+              },
+              "feature3": {
+                "contents": {
+                  "suggested-value": false
+                }
+              },
+              "feature4": {
+                "contents": {
+                  "suggested-value": true
+                }
+              },
+              "feature5": {
+                "contents": {
+                  "required-value": false
+                }
+              },
+              "feature6": {
+                "contents": {
+                  "required-value": true
+                }
+              },
+              "feature7": {
+                "contents": {
+                  "suggested-value": false
+                }
+              },
+              "feature8": {
+                "contents": {
+                  "suggested-value": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "meta": {
+        "version": "1.0.0"
+      }
+    },
+    "configEntries": {
+      "A.feature1": {
+        "contents": {
+          "required-value": false
+        }
+      },
+      "A.feature2": {
+        "contents": {
+          "required-value": true
+        }
+      },
+      "A.feature3": {
+        "contents": {
+          "suggested-value": false
+        }
+      },
+      "A.feature4": {
+        "contents": {
+          "suggested-value": true
+        }
+      },
+      "A.feature5": {
+        "contents": {
+          "required-value": false
+        }
+      },
+      "A.feature6": {
+        "contents": {
+          "required-value": true
+        }
+      },
+      "A.feature7": {
+        "contents": {
+          "suggested-value": false
+        }
+      },
+      "A.feature8": {
+        "contents": {
+          "suggested-value": true
+        }
+      }
+    }
+  },
+  {
+    "name": "C",
+    "version": "0.0.1",
+    "type": "plugin",
+    "definition": {
+      "name": "C",
+      "version": "0.0.1",
+      "type": "plugin",
+      "dependencies": {
+        "A": "=0.0.1"
+      },
+      "display-name": "C"
+    },
+    "io": {
+      "isZip": false,
+      "isDirectory": true,
+      "path": "C:/Users/Frank/Software/Stronghold/Stronghold Crusader Extreme/ucp/plugins/C-0.0.1"
+    },
+    "ui": [],
+    "locales": {},
+    "config": {
+      "config-sparse": {
+        "modules": {},
+        "plugins": {
+          "A": {
+            "config": {
+              "feature1": {
+                "contents": {
+                  "suggested-value": true
+                }
+              },
+              "feature2": {
+                "contents": {
+                  "required-value": false
+                }
+              },
+              "feature3": {
+                "contents": {
+                  "suggested-value": true
+                }
+              },
+              "feature4": {
+                "contents": {
+                  "suggested-value": false
+                }
+              },
+              "feature5": {
+                "contents": {
+                  "suggested-value": false
+                }
+              },
+              "feature6": {
+                "contents": {
+                  "suggested-value": true
+                }
+              },
+              "feature7": {
+                "contents": {
+                  "suggested-value": false
+                }
+              },
+              "feature8": {
+                "contents": {
+                  "suggested-value": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "meta": {
+        "version": "1.0.0"
+      }
+    },
+    "configEntries": {
+      "A.feature1": {
+        "contents": {
+          "suggested-value": true
+        }
+      },
+      "A.feature2": {
+        "contents": {
+          "required-value": false
+        }
+      },
+      "A.feature3": {
+        "contents": {
+          "suggested-value": true
+        }
+      },
+      "A.feature4": {
+        "contents": {
+          "suggested-value": false
+        }
+      },
+      "A.feature5": {
+        "contents": {
+          "suggested-value": false
+        }
+      },
+      "A.feature6": {
+        "contents": {
+          "suggested-value": true
+        }
+      },
+      "A.feature7": {
+        "contents": {
+          "suggested-value": false
+        }
+      },
+      "A.feature8": {
+        "contents": {
+          "suggested-value": true
+        }
+      }
+    }
+  }
+]

@@ -29,7 +29,7 @@ export class Solution {
 }
 
 export class ExtensionSolution {
-  status: string;
+  status: 'OK' | 'ERROR';
 
   extensions: Extension[] | undefined;
 

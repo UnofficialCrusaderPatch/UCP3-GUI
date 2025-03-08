@@ -20,7 +20,7 @@ import { CONFIG_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-
 import { EXTENSION_EDITOR_STATE_ATOM } from '../../common/extension-editor/extension-editor-state';
 import { constructUserConfigObjects } from '../../common/importing/import-button-callback';
 import saveConfig from '../../common/save-config';
-import { buildExtensionConfigurationDB } from '../extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -117,6 +117,9 @@ export async function customizeExtensionButtonCallback(ext: Extension) {
       value: newConfigurationQualifier,
     });
 
+    /**
+     * Here the extension is set
+     */
     getStore().set(EXTENSION_EDITOR_STATE_ATOM, {
       extension: ext,
       state: 'active',

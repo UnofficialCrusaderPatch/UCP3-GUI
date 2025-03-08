@@ -8,9 +8,9 @@ import { removeDir, removeFile, resolvePath } from '../../../tauri/tauri-files';
 import {
   LOADABLE_UCP_STATE_ATOM,
   UCPFilesState,
-  activateUCP,
-  deactivateUCP,
 } from '../../../function/ucp-files/ucp-state';
+import { activateUCP } from '../../../function/ucp-files/activate-ucp';
+import { deactivateUCP } from '../../../function/ucp-files/deactivate-ucp';
 
 import { openFileDialog } from '../../../tauri/tauri-dialog';
 import Result from '../../../util/structs/result';

@@ -77,6 +77,9 @@ export async function downloadAndInstallContent(
           // If we don't know the binary size, display no progress
           percentage = 0;
         }
+      } else {
+        // eslint-disable-next-line operator-assignment
+        percentage = 100 * percentage;
       }
 
       setStatus({

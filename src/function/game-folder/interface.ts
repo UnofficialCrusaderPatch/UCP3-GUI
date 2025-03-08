@@ -1,10 +1,7 @@
 import { unwrap } from 'jotai/utils';
 import { atom } from 'jotai';
 import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
-import {
-  UCP_VERSION_ATOM,
-  initializeUCPVersion,
-} from '../ucp-files/ucp-version';
+import { initializeUCPVersion } from '../ucp-files/ucp-version';
 import { MOST_RECENT_FOLDER_ATOM } from '../gui-settings/gui-file-config';
 import { GAME_FOLDER_EMPTY_STRING } from './constants';
 import { LOGGER } from './logger';
@@ -39,17 +36,11 @@ export const ASYNC_GAME_FOLDER_ATOM = atomWithRefresh(async (get) => {
   }
 
   LOGGER.msg('Initializing ucp version information').debug();
-  await initializeUCPVersion(newFolder);
+  const version = await initializeUCPVersion(newFolder);
   LOGGER.msg('Initializing ucp version information finished').debug();
 
   LOGGER.msg('Initializing game folder').debug();
-  await initializeGameFolder(
-    newFolder,
-    getStore().get(UCP_VERSION_ATOM).version.getBuildRepresentation() ===
-      'Developer'
-      ? 'Developer'
-      : 'Release',
-  );
+  await initializeGameFolder(newFolder, version);
   LOGGER.msg('Initializing game folder finished').debug();
 
   // This setting is slightly delayed to allow the GUI to render

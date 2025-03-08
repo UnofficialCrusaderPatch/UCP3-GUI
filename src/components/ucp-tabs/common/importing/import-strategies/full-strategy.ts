@@ -3,7 +3,7 @@ import { ConfigFile, Extension } from '../../../../../config/ucp/common';
 import { deserializeLoadOrder } from '../../../../../config/ucp/config-files/load-order';
 import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
 import { MessageType } from '../../../../../localization/localization';
-import { buildExtensionConfigurationDB } from '../../../extension-manager/extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import {
   GenericFailure,
   LOGGER,
@@ -27,11 +27,11 @@ import {
  * @returns A StrategyResult object
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function fullStrategy(
+export function fullStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-): Promise<StrategyResult> {
+): StrategyResult {
   const { extensions } = newExtensionsState;
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
@@ -46,7 +46,7 @@ export async function fullStrategy(
 
   const loadOrder = deserializeLoadOrder(config['config-full']['load-order']);
   if (loadOrder !== undefined && loadOrder.length > 0) {
-    const activeExtensions: Extension[] = [];
+    const loadOrderActiveExtensions: Extension[] = [];
 
     // eslint-disable-next-line no-restricted-syntax
     for (const dependencyStatementString of loadOrder) {
@@ -92,7 +92,7 @@ export async function fullStrategy(
 
       // A suitable version can be found and is pushed to the activated extensions
       // This is a bit silly because options will always be of length 1 or 0 in this strategy...
-      activeExtensions.push(options[0]);
+      loadOrderActiveExtensions.push(options[0]);
     }
 
     // Now we use the sparse order to set the explicitly active extensions
@@ -100,14 +100,13 @@ export async function fullStrategy(
       config['config-sparse']['load-order'],
     );
 
-    const ie = newExtensionsState.installedExtensions.slice();
-    const ae: Extension[] = [];
-    const eae: Extension[] = [];
+    const installedExtensionsCopy =
+      newExtensionsState.installedExtensions.slice();
+    const bottomUpActiveExtensions: Extension[] = [];
+    const bottomUpExplicitlyActiveExtensions: Extension[] = [];
 
-    // Reverse the array of explicitly Active Extensions such that we deal it from the ground up (lowest dependency first)
-    const bottomUpOrdered = activeExtensions.slice();
     // eslint-disable-next-line no-restricted-syntax
-    for (const ext of bottomUpOrdered) {
+    for (const ext of loadOrderActiveExtensions) {
       try {
         if (
           sparseLoadOrder
@@ -115,7 +114,7 @@ export async function fullStrategy(
             .indexOf(ext.name) !== -1
         ) {
           // Is an explicitly activated extension
-          eae.push(ext);
+          bottomUpExplicitlyActiveExtensions.push(ext);
 
           // Check if all its dependencies have been loaded
           const missingExtensionNames = Object.entries(
@@ -123,7 +122,7 @@ export async function fullStrategy(
           )
             .filter(
               ([name, range]) =>
-                ae.filter(
+                bottomUpActiveExtensions.filter(
                   (e) =>
                     name === e.name &&
                     semver.satisfies(e.definition.version, range),
@@ -148,8 +147,8 @@ export async function fullStrategy(
             } as MissingDependenciesFailure;
           }
         }
-        ae.push(ext);
-        ie.splice(ie.indexOf(ext), 1);
+        bottomUpActiveExtensions.push(ext);
+        installedExtensionsCopy.splice(installedExtensionsCopy.indexOf(ext), 1);
       } catch (de: unknown) {
         LOGGER.msg(String(de)).error();
 
@@ -160,15 +159,15 @@ export async function fullStrategy(
       }
     }
 
-    const topdownOrdered = ae.slice().reverse();
-
     // Complete the new extension state by building the configuration DB
     // eslint-disable-next-line no-param-reassign
     newExtensionsState = buildExtensionConfigurationDB({
       ...newExtensionsState,
-      activeExtensions: topdownOrdered,
-      installedExtensions: ie,
-      explicitlyActivatedExtensions: eae,
+      activeExtensions: bottomUpActiveExtensions.slice().reverse(),
+      installedExtensions: installedExtensionsCopy,
+      explicitlyActivatedExtensions: bottomUpExplicitlyActiveExtensions
+        .slice()
+        .reverse(),
     });
   } else {
     return {

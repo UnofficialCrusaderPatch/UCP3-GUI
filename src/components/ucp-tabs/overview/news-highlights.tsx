@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai';
+import { atom, useAtomValue } from 'jotai';
 import { XCircleFill } from 'react-bootstrap-icons';
 import { useState } from 'react';
 import {
@@ -86,25 +86,47 @@ function Headline(props: { news: NewsElement }) {
   );
 }
 
-// eslint-disable-next-line import/prefer-default-export, @typescript-eslint/no-unused-vars
-export function NewsHighlights(props: object) {
-  const highlights = useAtomValue(NEWS_HIGHLIGHT_ATOM);
+const highlightsToDisplay = atom((get) => {
+  const highlights = get(NEWS_HIGHLIGHT_ATOM);
 
-  const hiddenHighlights = useAtomValue(HIDDEN_NEWS_HIGHLIGHTS_ATOM);
+  const hiddenHighlights = get(HIDDEN_NEWS_HIGHLIGHTS_ATOM);
+
+  return highlights.filter(
+    (h) => hiddenHighlights.indexOf(h.meta.timestamp.toISOString()) === -1,
+  );
+});
+
+function Headlines() {
+  const highlights = useAtomValue(highlightsToDisplay);
 
   if (highlights.length === 0) {
     return (
-      <div>
+      <div className="h-100 px-3 pb-3" style={{ overflowY: 'scroll' }}>
         <Message message="news.none" />
       </div>
     );
   }
+
+  return (
+    <div className="h-100 px-3 pb-3" style={{ overflowY: 'scroll' }}>
+      {highlights.map((h) => (
+        <Headline
+          key={`news-highlight-${h.meta.timestamp}`}
+          news={h as NewsElement}
+        />
+      ))}
+    </div>
+  );
+}
+
+// eslint-disable-next-line import/prefer-default-export, @typescript-eslint/no-unused-vars
+export function NewsHighlights(props: object) {
   return (
     <div
       className="text-center p-2 mt-3 pb-5"
       style={{
         minHeight: '0px',
-        width: '40%',
+        width: '60%',
         // backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backgroundImage:
           'linear-gradient(to top, rgba(0,0,0,0), rgba(25,25,25,0.75))',
@@ -113,19 +135,7 @@ export function NewsHighlights(props: object) {
       <h3 className="border-bottom pb-2" style={{ marginBottom: '1.25rem' }}>
         <Message message="news.title" />
       </h3>
-      <div className="h-100 px-3 pb-3" style={{ overflowY: 'scroll' }}>
-        {highlights
-          .filter(
-            (h) =>
-              hiddenHighlights.indexOf(h.meta.timestamp.toISOString()) === -1,
-          )
-          .map((h) => (
-            <Headline
-              key={`news-highlight-${h.meta.timestamp}`}
-              news={h as NewsElement}
-            />
-          ))}
-      </div>
+      <Headlines />
     </div>
   );
 }

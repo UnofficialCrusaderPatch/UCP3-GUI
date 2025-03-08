@@ -115,7 +115,7 @@
     "vite-tsconfig-paths": "^5.0.1",
     "vitest": "^1.6.0"
   },
-  "devEngines": {
+  "engines": {
     "node": ">=14.x",
     "npm": ">=7.x"
   },

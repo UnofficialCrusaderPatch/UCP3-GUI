@@ -10,7 +10,7 @@ import {
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
-import { buildExtensionConfigurationDB } from '../extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
 import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';

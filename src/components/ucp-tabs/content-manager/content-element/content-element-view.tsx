@@ -188,6 +188,14 @@ export function ContentElementView(props: ContentElementViewProps) {
               }}
             />
           );
+        } else {
+          statusElement = (
+            <CheckCircle
+              style={{
+                color: 'red',
+              }}
+            />
+          );
         }
         return statusElement;
       }),

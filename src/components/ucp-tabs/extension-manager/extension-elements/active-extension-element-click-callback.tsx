@@ -14,7 +14,7 @@ import {
 } from '../../../../function/extensions/state/state';
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import { removeExtensionFromExplicitlyActivatedExtensions } from '../extensions-state-manipulation';
-import { buildExtensionConfigurationDB } from '../extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { filterOutExtensions as filterExtensions } from './filter-out-extensions';
 import reportAndConfirmBuildResult from './reporting';

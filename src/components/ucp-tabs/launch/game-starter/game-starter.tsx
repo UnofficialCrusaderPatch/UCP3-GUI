@@ -17,6 +17,7 @@ import { FIRST_TIME_USE_ATOM } from '../../../../function/gui-settings/settings'
 import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
 import Message, { useMessage } from '../../../general/message';
 import { GameDataWrapper } from '../../../../function/game-files/game-data';
+import { pidFileCheck } from './pid-file-check';
 
 const LOGGER = new Logger('game-starter.tsx');
 
@@ -150,6 +151,8 @@ function GameStarterButton(props: GameStarterProps) {
       await osOpenProgram(p, args, envs);
       // the game start takes a while, but we not observe it, so we simulate loading a bit instead
       await sleep(2000);
+
+      pidFileCheck();
     } catch (e) {
       const msg = `Error while trying to launch "${path}": ${e}`;
       LOGGER.msg(msg).error();

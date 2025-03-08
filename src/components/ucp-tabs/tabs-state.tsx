@@ -1,4 +1,4 @@
-import { atom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
 
 export type UITabs =
   | 'overview'
@@ -7,4 +7,7 @@ export type UITabs =
   | 'launch'
   | 'content-manager';
 
-export const CURRENT_DISPLAYED_TAB = atom<UITabs>('overview');
+export const CURRENT_DISPLAYED_TAB = atomWithStorage<UITabs>(
+  'guiTab',
+  'overview',
+);

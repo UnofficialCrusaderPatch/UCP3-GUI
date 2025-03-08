@@ -10,12 +10,12 @@ import { sparseStrategy } from './sparse-strategy';
 const LOGGER = new Logger('attempt-strategies.ts');
 
 // eslint-disable-next-line import/prefer-default-export
-export async function attemptStrategies(
+export function attemptStrategies(
   config: ConfigFile,
   extensionsState: ExtensionsState,
   setConfigStatus: (message: MessageType) => void,
   repair?: boolean,
-): Promise<StrategyResultReport> {
+): StrategyResultReport {
   const report: StrategyResultReport = {
     reports: [],
   };
@@ -32,7 +32,7 @@ export async function attemptStrategies(
   // Get the load order from the sparse part of the config file
 
   LOGGER.msg('Attempting full strategy').debug();
-  const fullStrategyResult = await fullStrategy(
+  const fullStrategyResult = fullStrategy(
     newExtensionsState,
     config,
     setConfigStatus,
@@ -64,7 +64,7 @@ export async function attemptStrategies(
 
     // Continue with sparse mode
     LOGGER.msg('Attempting sparse strategy').debug();
-    const sparseStrategyResult = await sparseStrategy(
+    const sparseStrategyResult = sparseStrategy(
       newExtensionsState,
       config,
       setConfigStatus,

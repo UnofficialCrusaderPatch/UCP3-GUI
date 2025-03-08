@@ -1,76 +1,36 @@
 {
-  "extensions": [
-    ".js",
-    ".jsx",
-    ".ts",
-    ".d.ts",
-    ".tsx"
-  ],
+  "extensions": [".js", ".jsx", ".ts", ".d.ts", ".tsx"],
   "ignoreUnresolved": [
-    [
-      "./credits.md?raw",
-      [
-        "src\\components\\credits\\credits.tsx"
-      ]
-    ],
+    ["./credits.md?raw", ["src/components/credits/credits.tsx"]],
     [
       "./sandbox-frame-base.css?inline",
-      [
-        "src\\components\\sandbox-menu\\sandbox-menu.tsx"
-      ]
+      ["src/components/sandbox-menu/sandbox-menu.tsx"]
     ],
     [
       "./sandbox-frame-base.js?raw",
-      [
-        "src\\components\\sandbox-menu\\sandbox-menu.tsx"
-      ]
+      ["src/components/sandbox-menu/sandbox-menu.tsx"]
     ],
     [
       "assets/misc/chevron-compact-down.svg",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
+      ["src/components/titlebar/titlebar.tsx"]
     ],
     [
       "assets/misc/fullscreen-exit.svg",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
+      ["src/components/titlebar/titlebar.tsx"]
     ],
-    [
-      "assets/misc/fullscreen.svg",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
+    ["assets/misc/fullscreen.svg", ["src/components/titlebar/titlebar.tsx"]],
     [
       "assets/misc/translate.svg",
-      [
-        "src\\components\\top-bar\\language-select\\language-select.tsx"
-      ]
+      ["src/components/top-bar/language-select/language-select.tsx"]
     ],
-    [
-      "assets/misc/x-lg.svg",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
-    [
-      "assets/ucp3.png",
-      [
-        "src\\components\\titlebar\\titlebar.tsx"
-      ]
-    ],
+    ["assets/misc/x-lg.svg", ["src/components/titlebar/titlebar.tsx"]],
+    ["assets/ucp3.png", ["src/components/titlebar/titlebar.tsx"]],
     [
       "components/ucp-tabs/common/importing/import-strategies",
-      [
-        "src\\components\\ucp-tabs\\common\\importing\\import-button-callback.tsx"
-      ]
+      ["src/components/ucp-tabs/common/importing/import-button-callback.tsx"]
     ]
   ],
-  "ignoreUnused": [
-    "bootstrap"
-  ],
+  "ignoreUnused": ["bootstrap"],
   "ignoreUnimported": [
     "src/function/game-folder/modifications/activate-first-time-use-extensions.ts",
     "src/components/sandbox-menu/sandbox-frame-base.js",

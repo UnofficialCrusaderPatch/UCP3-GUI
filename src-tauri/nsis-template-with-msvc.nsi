@@ -504,10 +504,35 @@ Section MSVC
   ; Check if MSVC is already installed and skip this section
   ${If} ${RunningX64}
     ReadRegDWORD $4 HKLM "SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
+    ${If} $4 = 1
+      ReadRegDWORD $4 HKLM "SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Major"
+      ${If} $4 = 14
+        ReadRegDWORD $4 HKLM "SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Minor"
+        ${If} $4 = 42
+          ReadRegDWORD $4 HKLM "SOFTWARE\Wow6432Node\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Bld"
+          ${If} $4 = 34433
+            Goto MSVC_done
+          ${EndIf}
+        ${EndIf}
+      ${EndIf}
+    ${EndIf}
   ${Else}
     ReadRegDWORD $4 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Installed"
+    ${If} $4 = 1
+      ReadRegDWORD $4 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Major"
+      ${If} $4 = 14
+        ReadRegDWORD $4 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Minor"
+        ${If} $4 = 42
+          ReadRegDWORD $4 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86" "Bld"
+          ${If} $4 = 34433
+            Goto MSVC_done
+          ${EndIf}
+        ${EndIf}
+      ${EndIf}
+    ${EndIf}
   ${EndIf}
 
+  ; IntCmp val1 val2 if(val1 == val2) goto if (val1 < val2) goto if (val1 > val2) goto
   IntCmp $4 1 MSVC_done 0
 
   ; Webview2 install modes

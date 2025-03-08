@@ -13,7 +13,7 @@ import {
 import { getStore } from '../../../../../hooks/jotai/base';
 import { MessageType } from '../../../../../localization/localization';
 import { ConsoleLogger } from '../../../../../util/scripts/logging';
-import { buildExtensionConfigurationDB } from '../../../extension-manager/extension-configuration';
+import { buildExtensionConfigurationDB } from '../../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { addExtensionToExplicityActivatedExtensions } from '../../../extension-manager/extensions-state-manipulation';
 import {
   sanitizeVersionRange,
@@ -44,12 +44,12 @@ function updatePreferredExtensionVersions(extensions: Extension[]) {
  * @returns A StrategyResult object
  */
 // eslint-disable-next-line import/prefer-default-export
-export async function sparseStrategy(
+export function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
   repair?: boolean,
-): Promise<StrategyResult> {
+): StrategyResult {
   const { extensions } = newExtensionsState;
 
   // Get the current available versions database
@@ -63,13 +63,18 @@ export async function sparseStrategy(
   // Get the load order from the sparse part of the config file
 
   // BUG: this should be done on the config-full order to retain reproducibility between GUI refreshes...
-  const loadOrder = deserializeLoadOrder(config['config-sparse']['load-order']);
-  if (loadOrder !== undefined && loadOrder.length > 0) {
-    const explicitActiveExtensions: Extension[] = [];
+  const bottomUpSparseLoadOrder = deserializeLoadOrder(
+    config['config-sparse']['load-order'],
+  );
+  if (
+    bottomUpSparseLoadOrder !== undefined &&
+    bottomUpSparseLoadOrder.length > 0
+  ) {
+    const bottomUpExplicitActiveExtensions: Extension[] = [];
 
     // TODO: use tree for this part
     // eslint-disable-next-line no-restricted-syntax
-    for (const dependencyStatementString of loadOrder) {
+    for (const dependencyStatementString of bottomUpSparseLoadOrder) {
       // Get the dependency
       const dependencyStatement = new DependencyStatement(
         dependencyStatementString.extension,
@@ -144,20 +149,19 @@ export async function sparseStrategy(
 
       // A suitable version can be found and is pushed to the explicitly activated
       // (since we are dealing with the sparse load order here!)
-      explicitActiveExtensions.push(
+      bottomUpExplicitActiveExtensions.push(
         options.sort((a, b) => semver.compare(b.version, a.version))[0],
       );
     }
 
-    updatePreferredExtensionVersions(explicitActiveExtensions);
+    updatePreferredExtensionVersions(bottomUpExplicitActiveExtensions);
 
-    // Reverse the array of explicitly Active Extensions such that we deal it from the ground up (lowest dependency first)
     // eslint-disable-next-line no-restricted-syntax
-    for (const ext of explicitActiveExtensions.slice().reverse()) {
+    for (const ext of bottomUpExplicitActiveExtensions) {
       try {
         // Add each dependency iteratively, recomputing the dependency tree as we go
-        // eslint-disable-next-line no-await-in-loop, no-param-reassign
-        newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+        // eslint-disable-next-line no-param-reassign
+        newExtensionsState = addExtensionToExplicityActivatedExtensions(
           newExtensionsState,
           ext,
           repair,

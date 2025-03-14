@@ -53,7 +53,7 @@ function addExtensionToExplicityActivatedExtensions(
   // ];
   const allDependenciesInDisplayOrder = setDisplayOrder(
     extensionsState.activeExtensions,
-    solution.extensions.toReversed(),
+    solution.extensions.slice().reverse(), // toReversed is not available on Win < 10
   );
 
   // Filter out extensions with a different version than those that are now going to be activated

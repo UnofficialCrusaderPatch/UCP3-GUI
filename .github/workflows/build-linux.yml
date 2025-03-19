@@ -44,7 +44,8 @@ jobs:
       - name: Build
         run: |
           export WEBKIT_DISABLE_COMPOSITING_MODE=1
-          npm run tauri build
+          export NO_STRIP=true
+          WEBKIT_DISABLE_COMPOSITING_MODE=1 NO_STRIP=true npm run tauri build
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}

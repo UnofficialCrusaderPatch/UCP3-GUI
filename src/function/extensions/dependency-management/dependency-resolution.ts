@@ -194,10 +194,11 @@ export class DependencyTree {
 
     const und = node.edgesOut.filter((e) => e.to === undefined);
     if (und.length > 0) {
-      ConsoleLogger.error('undefined edges for: ', id, node, und);
+      ConsoleLogger.error(`directDependenciesFor(${id}): undefined edges for: `, id, node, und);
     }
 
     return node.edgesOut
+      .filter((e) => e.to !== undefined) // TODO: fixme: Should we report an error here?
       .map((e) => e.to!)
       .filter((e) => e.spec.name !== 'frontend')
       .filter((e) => e.spec.name !== 'framework')

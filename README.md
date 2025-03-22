@@ -34,6 +34,18 @@ This section will be restructured and extended once the first version is ready f
 
 Contributions and help are always welcome!
 
+### Translation
+**Instructions**
+1. Download a text editor that supports yml files like Notepad++ or Visual Studio Code.
+2. Translate this file into your language: https://github.com/UnofficialCrusaderPatch/UCP3-GUI/blob/main/resources/lang/sources/en.yaml
+  Make sure to add your language to this file to make it selectable in the GUI: https://github.com/UnofficialCrusaderPatch/UCP3-GUI/blob/main/resources/lang/languages.yaml
+  These files live in the GUI install directory.
+3. Submit the translated yml file here as a issue, or to one of the devs or create a Github Pull Request
+
+**Detailed translation instructions**
+- Make sure to translate terms similarly across lines.
+- Retain the key name exactly like it is (the part before `:`).
+- Don't translate the part between `{{` and `}}`.
 
 ### Basics
 

@@ -182,7 +182,7 @@ export const UCP_SIMPLIFIED_VERSION_ATOM = atom<SimplifiedFrameworkVersion>(
     let type: 'Release' | 'Developer' = 'Release';
     if (vr.status === 'ok') {
       version = `${vr.version.getMajorAsString()}.${vr.version.getMinorAsString()}.${vr.version.getPatchAsString()}`;
-      sha = vr.version!.sha.getOrElse('!');
+      sha = vr.version.sha.getOrElse('!');
       type =
         vr.version.getBuildRepresentation() === 'Developer'
           ? 'Developer'

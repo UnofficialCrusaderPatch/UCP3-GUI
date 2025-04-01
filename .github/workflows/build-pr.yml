@@ -14,12 +14,16 @@ jobs:
         include:
           - platform: 'macos-latest' # for Arm based macs (M1 and above).
             args: '--target aarch64-apple-darwin'
+            zipname: 'macos-latest-aarch64'
           - platform: 'macos-latest' # for Intel based macs.
             args: '--target x86_64-apple-darwin'
+            zipname: 'macos-latest-x86_64'
           - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ''
+            zipname: 'ubuntu-22.04'
           - platform: 'windows-latest'
             args: ''
+            zipname: 'windows-latest'
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout git repo
@@ -58,7 +62,7 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: UCP3-GUI-${{matrix.platform}}.zip
+          name: UCP3-GUI-${{matrix.zipname}}.zip
           path: |
             src-tauri/target/release/UCP3-GUI.exe
             src-tauri/target/release/bundle/nsis/UCP3-GUI*-setup.exe

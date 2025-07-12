@@ -26,6 +26,31 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
 
 export const LAST_CLICKED_CONTENT_ATOM = atom<ContentElement | undefined>();
 
+export const CONTENT_TAGS_ATOM = atom<string[]>([
+  'AI',
+  'AIV',
+  'AIC',
+  'AIA',
+  'BALANCE',
+  'BUGFIXES',
+  'CODE',
+  'CONFIG',
+  'MAPS',
+  'MODPACK',
+  'SCENARIOS',
+  'SOUNDS',
+  'TEXTURES',
+  'TOOLS',
+]);
+
+export const CONTENT_FILTERS_ATOM = atom<{
+  search: string;
+  tags: string[];
+}>({
+  search: '',
+  tags: [],
+});
+
 export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
 
@@ -177,6 +202,18 @@ export const filteredContentElementsAtom = atom((get) =>
         get(STORE_SHOW_ALL_EXTENSION_TYPES_ATOM).indexOf(ce.definition.type) !==
         -1,
     )
+    .filter((ce) => {
+      const { search } = get(CONTENT_FILTERS_ATOM);
+      return search
+        ? ce.definition['display-name']?.toLowerCase().includes(search)
+        : ce;
+    })
+    .filter((ce) => {
+      const { tags } = get(CONTENT_FILTERS_ATOM);
+      return tags && tags.length
+        ? ce.definition?.tags?.some((tag: string) => tags?.includes(tag))
+        : ce;
+    })
     .sort((a, b) => a.definition.name.localeCompare(b.definition.name)),
 );
 

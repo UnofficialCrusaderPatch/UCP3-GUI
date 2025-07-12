@@ -20,10 +20,20 @@ export const LOCALIZED_UI_OPTION_ENTRIES_ATOM = atom<DisplayConfigElement[]>(
     const euis = extensions.map((e) => {
       if (e.locales === undefined) return e.ui;
 
-      const locale = e.locales[language] ?? e.locales.en;
+      const fallbackLocale = e.locales.en;
+      const locale = e.locales[language] ?? fallbackLocale;
       if (locale === undefined) {
         return e.ui;
       }
+
+      const fallbackKeys = Object.keys(fallbackLocale);
+      const keys = Object.keys(locale);
+
+      const missingKeys = fallbackKeys.filter((k) => keys.indexOf(k) === -1);
+      missingKeys.forEach((k) => {
+        locale[k] = fallbackLocale[k];
+      });
+
       const localized = applyLocale(e, locale);
       return localized;
     });

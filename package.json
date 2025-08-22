@@ -52,6 +52,7 @@
     "@tauri-apps/api": "^1.6.0",
     "bootstrap": "^5.3.3",
     "deep-equal": "^2.2.3",
+    "fast-xml-parser": "^5.2.5",
     "highlight.js": "^11.10.0",
     "jotai": "^2.10.0",
     "jotai-optics": "^0.4.0",

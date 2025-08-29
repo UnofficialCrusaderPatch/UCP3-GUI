@@ -1,45 +1,41 @@
 import { atomWithQuery } from 'jotai-tanstack-query';
-import { ResponseType } from '@tauri-apps/api/http';
+import { ResponseType, Response } from '@tauri-apps/api/http';
 import { fetch } from '../../tauri/tauri-http';
-import { LANGUAGE_ATOM } from '../gui-settings/settings'; // 1. Import LANGUAGE_ATOM
+import { LANGUAGE_ATOM } from '../gui-settings/settings';
 
 // https://raw.githubusercontent.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch/refs/heads/main/TROUBLESHOOTING.md
 // eslint-disable-next-line import/prefer-default-export
-export const TROUBLESHOOTING_MD_CONTENT_ATOM = atomWithQuery((get) => {
-  const lang = get(LANGUAGE_ATOM); // Get the current language
+export const TROUBLESHOOTING_MD_CONTENT_ATOM = atomWithQuery((get) => ({
+  queryKey: ['troubleshooting', get(LANGUAGE_ATOM)],
+  queryFn: async () => {
+    const lang = get(LANGUAGE_ATOM);
+    const urls = [
+      `https://raw.githubusercontent.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch/refs/heads/main/locale/TROUBLESHOOTING-${lang}.md`,
+      `https://raw.githubusercontent.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch/refs/heads/main/TROUBLESHOOTING/TROUBLESHOOTING-${lang}.md`,
+      `https://raw.githubusercontent.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch/refs/heads/main/TROUBLESHOOTING.md`,
+    ];
 
-  return {
-    queryKey: ['troubleshooting', lang], // Add lang to queryKey to trigger refetch on change
-    queryFn: async () => {
-      const baseUrl =
-        'https://raw.githubusercontent.com/UnofficialCrusaderPatch/UnofficialCrusaderPatch/refs/heads/main';
-      const fallbackUrl = `${baseUrl}/TROUBLESHOOTING.md`;
+    const requests: { [url: string]: Response<string> } = {};
 
-      // If 'en' is selected, no need to try a localized version first.
-      if (lang !== 'en') {
-        const localizedUrl = `${baseUrl}/TROUBLESHOOTING/TROUBLESHOOTING-${lang}.md`;
-        const request = await fetch<string>(localizedUrl, {
-          responseType: ResponseType.Text,
-          method: 'GET',
-        });
-
-        if (request.ok) {
-          return request.data; // 5. If localized version is found, return it.
-        }
-      }
-
-      // 6. Fetch the fallback if the localized version wasn't found or lang is 'en'
-      const fallbackRequest = await fetch<string>(fallbackUrl, {
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < urls.length; i++) {
+      const url = urls[i];
+      // eslint-disable-next-line no-await-in-loop
+      const request = await fetch<string>(url, {
         responseType: ResponseType.Text,
         method: 'GET',
       });
 
-      if (!fallbackRequest.ok) {
-        return 'Failed to fetch Troubleshooting document';
-      }
+      requests[url] = request;
 
-      return fallbackRequest.data;
-    },
-    staleTime: Infinity,
-  };
-});
+      if (request.ok) {
+        return request.data;
+      }
+    }
+
+    throw Error(
+      `Failed to retrieve Troubleshooting. Reasons: ${Object.entries(requests).map(([url, req]) => `${url}: ${req.status}`)}`,
+    );
+  },
+  staleTime: Infinity,
+}));

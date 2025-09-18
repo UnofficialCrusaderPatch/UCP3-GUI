@@ -1,3 +1,5 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 
@@ -29,6 +31,7 @@ import Message from '../../../../general/message';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
 import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../../../../function/configuration/derived-state';
 import { createTouchedStyle } from './touched/TouchedStyle';
+import { touchedCustomMenu } from './helpers/touchedCustomMenu';
 
 const LOGGER = new Logger('CreateCustomMenu.tsx');
 
@@ -101,7 +104,9 @@ function CreateCustomMenu(args: {
   };
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
-  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+  const touchedStyle = createTouchedStyle(
+    touchedCustomMenu(configurationTouched, url),
+  );
 
   return (
     <div

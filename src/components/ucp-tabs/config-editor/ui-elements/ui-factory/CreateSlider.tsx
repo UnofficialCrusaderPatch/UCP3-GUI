@@ -1,3 +1,4 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 

@@ -1,3 +1,5 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+
 import { Accordion } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';

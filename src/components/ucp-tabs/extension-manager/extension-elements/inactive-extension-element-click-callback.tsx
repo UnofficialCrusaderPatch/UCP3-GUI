@@ -71,7 +71,7 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 
   if (lostConfig.length > 0) {
     const answer = await showModalOkCancel({
-      title: 'Losing customisations',
+      title: 'extensions.activate.warning.title',
       message: {
         key: 'extensions.activate.warning',
         args: {

@@ -41,7 +41,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   if (disappearingEntries.length > 0) {
     const confirmed = await showModalOkCancel({
-      title: 'Warning',
+      title: 'extensions.deactivate.warning.title',
       message: {
         key: 'extensions.deactivate.warning',
         args: {

@@ -216,8 +216,10 @@ function CreateFileInput(args: {
     <Form.Group
       className={`ui-element ${(spec.style || {}).className} ${className} ${touchedStyle}`}
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);

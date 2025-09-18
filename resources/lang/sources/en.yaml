@@ -78,6 +78,7 @@ extensions.priority.note: "Note: extensions listed higher can override lower ext
 extensions.reload.required.title: "GUI reload required"
 extensions.reload.required.message: "The GUI needs to reload as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel"
 extensions.deactivate.warning: "Deactivating extensions {{name}} will lead you to lose your settings for the options below, proceed?\n\n{{entries}}"
+extensions.activate.warning: "You will lose {{n}} customisations. Do you want to proceed?\n\nLosing customisations:\n{{losses}}"
 failed: "Failed"
 file.all: "All files"
 file.config: "Config files"

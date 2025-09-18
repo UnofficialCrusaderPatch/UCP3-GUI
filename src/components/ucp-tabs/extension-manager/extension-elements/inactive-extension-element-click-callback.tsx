@@ -72,11 +72,13 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   if (lostConfig.length > 0) {
     const answer = await showModalOkCancel({
       title: 'Losing customisations',
-      message: `You will lose ${
-        lostConfig.length
-      } customisations. Do you want to proceed?\n\nLosing customisations:\n${lostConfig
-        .map(([url]) => url)
-        .sort()}`,
+      message: {
+        key: 'extensions.activate.warning',
+        args: {
+          n: lostConfig.length,
+          losses: lostConfig.map(([url]) => url).sort(),
+        },
+      },
     });
 
     if (!answer) {

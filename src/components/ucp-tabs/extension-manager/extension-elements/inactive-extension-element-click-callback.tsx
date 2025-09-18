@@ -32,7 +32,7 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
-    newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+    newExtensionsState = addExtensionToExplicityActivatedExtensions(
       currentExtensionsState,
       ext,
     );

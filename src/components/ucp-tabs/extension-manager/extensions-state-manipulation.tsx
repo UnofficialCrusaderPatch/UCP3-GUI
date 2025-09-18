@@ -5,7 +5,7 @@ import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { Extension } from '../../../config/ucp/common';
 
 import { showModalOk } from '../../modals/modal-ok';
-import Logger from '../../../util/scripts/logging';
+import Logger, { ConsoleLogger } from '../../../util/scripts/logging';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 
 const LOGGER = new Logger('extension-state.ts');
@@ -140,9 +140,9 @@ function mimickStepByStepActivation(
 
   const { tree } = extensionsState;
 
-  LOGGER.obj('generating final order using: ', activationOrderToCheck).error();
+  ConsoleLogger.debug('generating final order using: ', activationOrderToCheck);
   activationOrderToCheck.forEach((ext) => {
-    LOGGER.obj('checkTree', [...finalOrder, ext].slice().reverse()).error();
+    ConsoleLogger.debug('checkTree', [...finalOrder, ext].slice().reverse());
     const solution = checkTree(tree, [...finalOrder, ext].slice().reverse());
     if (solution.status !== 'OK') {
       throw Error();

@@ -28,6 +28,7 @@ import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
+import { createTouchedStyle } from './touched/TouchedStyle';
 
 const LOGGER = new Logger('CreateUCP2Slider.tsx');
 
@@ -155,10 +156,13 @@ function CreateUCP2Slider(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className={`sword-checkbox ${(spec.style || {}).className}`}
+      className={`sword-checkbox ${(spec.style || {}).className} ${touchedStyle}`}
       style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         setShowPopover(true);

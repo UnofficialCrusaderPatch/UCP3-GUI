@@ -24,6 +24,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
+import { createTouchedStyle } from './touched/TouchedStyle';
 
 const LOGGER = new Logger('CreateNumberInput.tsx');
 
@@ -94,9 +95,12 @@ function CreateNumberInput(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className} ${touchedStyle}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

@@ -18,6 +18,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
+import { createTouchedStyle } from './touched/TouchedStyle';
 
 const LOGGER = new Logger('CreateUCP2Switch.tsx');
 
@@ -116,10 +117,13 @@ function CreateUCP2Switch(args: {
 
   const noText = text === null || text === undefined;
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className={`col sword-checkbox ${(spec.style || {}).className}`}
+      className={`col sword-checkbox ${(spec.style || {}).className} ${touchedStyle}`}
       style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         setShowPopover(true);

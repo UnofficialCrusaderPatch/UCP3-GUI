@@ -47,6 +47,7 @@ export async function createPluginConfigFromCurrentState() {
       'config-sparse': {
         modules: result['config-sparse'].modules,
         plugins: result['config-sparse'].plugins,
+        'load-order': result['config-sparse']['load-order'].slice().reverse(),
       },
       meta: result.meta,
     } as UCP3SerializedPluginConfig,
@@ -111,6 +112,9 @@ function ExportAsPluginButton(
           await writeTextFile(
             `${pluginDir}/definition.yml`,
             toYaml({
+              meta: {
+                version: '1.0.0',
+              },
               name: r.pluginName,
               author: r.pluginAuthor,
               version: r.pluginVersion,

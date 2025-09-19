@@ -1,4 +1,4 @@
-import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
 
 import { Button, Form } from 'react-bootstrap';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -37,7 +37,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import { ACTIVE_EXTENSIONS_FULL_ATOM } from '../../../../../function/extensions/state/focus';
-import { createTouchedStyle } from './touched/TouchedStyle';
+import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
 const LOGGER = new Logger('CreateFileInput.tsx');
 
@@ -210,11 +210,16 @@ function CreateFileInput(args: {
   const ref = useRef(null);
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
-  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
+  const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
+    userConfiguration,
+    configurationTouched,
+    url,
+  );
 
   return (
     <Form.Group
-      className={`ui-element ${(spec.style || {}).className} ${className} ${touchedStyle}`}
+      className={`ui-element ${(spec.style || {}).className} ${className} ${specifiedStyle}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

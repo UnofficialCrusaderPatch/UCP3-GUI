@@ -1,4 +1,4 @@
-import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Form } from 'react-bootstrap';
@@ -23,7 +23,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
-import { createTouchedStyle } from './touched/TouchedStyle';
+import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
 // TODO is this deprecated?
 
@@ -137,11 +137,16 @@ function CreateRadioGroup(args: {
   const ref = useRef(null);
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
-  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
+  const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
+    userConfiguration,
+    configurationTouched,
+    url,
+  );
 
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || { className: '' }).className} ${className} ${touchedStyle}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || { className: '' }).className} ${className} ${specifiedStyle}`}
       onMouseEnter={() => {
         setShowPopover(true);
         setStatusBarMessage(statusBarMessage);

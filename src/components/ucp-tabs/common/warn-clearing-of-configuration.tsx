@@ -14,9 +14,8 @@ async function warnClearingOfConfiguration(configurationTouched: {
   );
   if (touchedOptions.length > 0) {
     const confirmed = await showModalOkCancel({
-      title: 'Warning',
-      message:
-        'Changing the active extensions will reset your configuration. Proceed anyway?',
+      title: 'extensions.change.warning.title',
+      message: 'extensions.change.warning.message',
       ok: 'yes',
       cancel: 'no',
     });

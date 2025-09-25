@@ -90,7 +90,7 @@ function ExportAsPluginButton(
           const { plugin } = await createPluginConfigFromCurrentState();
 
           const r = await showModalCreatePlugin({
-            title: 'Create plugin',
+            title: 'plugin.create',
             message: '',
           });
 
@@ -100,8 +100,13 @@ function ExportAsPluginButton(
 
           if (await exists(pluginDir)) {
             await showModalOkCancel({
-              title: 'Plugin already exists',
-              message: `The plugin already exists, cannot proceed:\n${pluginDir}`,
+              title: 'plugin.create.exists.title',
+              message: {
+                key: 'plugin.create.exists.message',
+                args: {
+                  pluginDir,
+                },
+              },
             });
 
             return;
@@ -134,7 +139,7 @@ function ExportAsPluginButton(
           }
         } catch (e: unknown) {
           await showModalOk({
-            title: 'ERROR',
+            title: 'error.capitalized',
             message: String(e),
           });
         }

@@ -16,7 +16,7 @@ export default async function reportAndConfirmBuildResult(
       )}`;
       LOGGER.msg(msg).error();
       const confirmed1 = await showModalOkCancel({
-        title: 'Error',
+        title: 'error.capitalized',
         message: msg,
       });
       if (!confirmed1) return false;

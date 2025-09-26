@@ -81,7 +81,7 @@ extensions.activation.customisations.loss.message: "You will lose {{n}} customis
 extensions.available: "Available extensions"
 extensions.deactivate.dependencies.error.title: "Deactivating extension: Error in dependencies"
 extensions.deactivate.config.loss.warning.title: "Config loss warning"
-extensions.deactivate.config.loss.warning.message: "Deactivating extensions {{extensions}} will lead you to lose your settings for the options below, proceed?\n\n{{entries}}`
+extensions.deactivate.config.loss.warning.message: "Deactivating extensions {{extensions}} will lead you to lose your settings for the options below, proceed?\n\n{{entries}}`"
 extensions.dependencies.missing.title: "Error: missing dependencies"
 extensions.dependencies.missing.message: "Please be aware of the following missing dependencies:\n\n{{messages}}\n\nTry installing them by visiting the Store"
 extensions.discovery.error.title: "Errors while discovering extensions"

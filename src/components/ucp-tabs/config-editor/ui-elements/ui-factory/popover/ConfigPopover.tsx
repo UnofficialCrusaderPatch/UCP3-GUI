@@ -17,6 +17,7 @@ import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
 } from '../../../../../../function/configuration/derived-state';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../../common/buttons/config-serialized-state';
 
 /** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
 
@@ -37,6 +38,8 @@ export function ConfigPopover(props: {
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
+  // TODO: improve
+  const setDirty = useSetAtom(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM);
   const configurationDefaults = useAtomValue(
     CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   );
@@ -177,6 +180,7 @@ export function ConfigPopover(props: {
                 type: 'set-multiple',
                 value: { [url]: 'suggested' },
               });
+              setDirty(true);
             }}
             onMouseEnter={() => {
               setStatusBarMessage('config.popover.reset');

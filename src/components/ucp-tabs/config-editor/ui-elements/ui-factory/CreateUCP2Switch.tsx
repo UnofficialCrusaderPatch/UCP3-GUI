@@ -1,4 +1,4 @@
-import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
 
 import { Accordion } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
@@ -20,7 +20,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
-import { createTouchedStyle } from './touched/TouchedStyle';
+import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
 const LOGGER = new Logger('CreateUCP2Switch.tsx');
 
@@ -120,12 +120,17 @@ function CreateUCP2Switch(args: {
   const noText = text === null || text === undefined;
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
-  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
+  const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
+    userConfiguration,
+    configurationTouched,
+    url,
+  );
 
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className={`col sword-checkbox ${(spec.style || {}).className} ${touchedStyle}`}
+      className={`col sword-checkbox ${(spec.style || {}).className} ${specifiedStyle}`}
       style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         if (isEnabled) {

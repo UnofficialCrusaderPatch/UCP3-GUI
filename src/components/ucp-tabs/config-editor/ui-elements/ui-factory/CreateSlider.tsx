@@ -1,3 +1,4 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
@@ -22,6 +23,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
+import { createTouchedStyle } from './touched/TouchedStyle';
 
 const LOGGER = new Logger('CreateSlider.tsx');
 
@@ -103,18 +105,23 @@ function CreateSlider(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+
   return (
     <div
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);
         setStatusBarMessage(undefined);
       }}
       ref={ref}
-      className={`ui-element ${(spec.style || {}).className}`}
+      className={`ui-element ${(spec.style || {}).className} ${touchedStyle}`}
       style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />

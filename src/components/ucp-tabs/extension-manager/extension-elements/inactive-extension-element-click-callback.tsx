@@ -32,14 +32,19 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
-    newExtensionsState = await addExtensionToExplicityActivatedExtensions(
+    newExtensionsState = addExtensionToExplicityActivatedExtensions(
       currentExtensionsState,
       ext,
     );
   } catch (err: any) {
     await showModalOk({
-      title: 'Could not activate extension',
-      message: `Could not activate extension due to missing extensions or dependency conflicts.\n\nLog:\n\n${err.toString()}`,
+      title: 'extensions.activation.dependency.conflicts.error.title',
+      message: {
+        key: 'extensions.activation.dependency.conflicts.error.message',
+        args: {
+          log: err.toString(),
+        },
+      },
     });
 
     return;
@@ -71,12 +76,14 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 
   if (lostConfig.length > 0) {
     const answer = await showModalOkCancel({
-      title: 'Losing customisations',
-      message: `You will lose ${
-        lostConfig.length
-      } customisations. Do you want to proceed?\n\nLosing customisations:\n${lostConfig
-        .map(([url]) => url)
-        .sort()}`,
+      title: 'extensions.activation.customisations.loss.title',
+      message: {
+        key: 'extensions.activation.customisations.loss.message',
+        args: {
+          n: lostConfig.length,
+          entries: lostConfig.map(([url]) => url).sort(),
+        },
+      },
     });
 
     if (!answer) {

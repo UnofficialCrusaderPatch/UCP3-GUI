@@ -1,3 +1,5 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+
 import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 
@@ -16,6 +18,7 @@ import {
 import { setOverlayContent } from '../../../../overlay/overlay';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
@@ -27,6 +30,8 @@ import ConfigWarning from './ConfigWarning';
 import Message from '../../../../general/message';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
 import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../../../../function/configuration/derived-state';
+import { createTouchedStyle } from './touched/TouchedStyle';
+import { touchedCustomMenu } from './helpers/touchedCustomMenu';
 
 const LOGGER = new Logger('CreateCustomMenu.tsx');
 
@@ -98,10 +103,15 @@ function CreateCustomMenu(args: {
     hasHeader: boolean;
   };
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(
+    touchedCustomMenu(configurationTouched, url),
+  );
+
   return (
     <div
       style={(spec.style || {}).css}
-      className={`${(spec.style || {}).className}`}
+      className={`${(spec.style || {}).className} ${touchedStyle}`}
     >
       {hasWarning ? (
         <ConfigWarning

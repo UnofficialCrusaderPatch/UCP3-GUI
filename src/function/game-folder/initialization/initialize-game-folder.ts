@@ -57,8 +57,13 @@ export async function initializeGameFolder(
   } catch (e) {
     LOGGER.obj(e).error();
     showModalOk({
-      message: (e as object).toString(),
-      title: 'Error in extension discovery and loading',
+      message: {
+        key: 'error.reason',
+        args: {
+          reason: (e as object).toString(),
+        },
+      },
+      title: 'extensions.discovery.error.title',
     });
 
     getStore().set(INIT_ERROR, true);

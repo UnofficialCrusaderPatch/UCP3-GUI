@@ -145,7 +145,10 @@ export default function Overview() {
                 (err) => createStatusToast(ToastType.ERROR, err),
               );
           } catch (e: unknown) {
-            await showModalOk({ message: String(e), title: 'ERROR' });
+            await showModalOk({
+              message: String(e),
+              title: 'error.capitalized',
+            });
           }
         }}
         toastTitle="overview.zip.toast.title"
@@ -188,7 +191,10 @@ export default function Overview() {
               .map(String)
               .ifPresent((err) => createStatusToast(ToastType.ERROR, err));
           } catch (e: unknown) {
-            await showModalOk({ message: String(e), title: 'ERROR' });
+            await showModalOk({
+              message: String(e),
+              title: 'error.capitalized',
+            });
           }
         }}
         tooltip="overview.activate.tooltip"

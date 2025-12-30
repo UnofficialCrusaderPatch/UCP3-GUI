@@ -1,3 +1,5 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
+
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Form } from 'react-bootstrap';
 import { useState, useRef } from 'react';
@@ -21,6 +23,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
+import { createTouchedStyle } from './touched/TouchedStyle';
 
 // TODO is this deprecated?
 
@@ -133,12 +136,17 @@ function CreateRadioGroup(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || { className: '' }).className} ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || { className: '' }).className} ${className} ${touchedStyle}`}
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);

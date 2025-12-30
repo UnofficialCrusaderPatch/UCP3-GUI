@@ -100,8 +100,13 @@ export async function editorApplyButtonCallback(
   if (solution.status !== 'ok') {
     ConsoleLogger.debug(`errors in dependencies`);
     const answer = await showModalOkCancel({
-      title: 'Dependency errors',
-      message: `The new extension contains dependency errors. Do you want to proceed anyway?\n\n${solution.messages.join('\n')}`,
+      title: 'extensions.editor.dependencies.warning.title',
+      message: {
+        key: 'extensions.editor.dependencies.warning.message',
+        args: {
+          messages: `${solution.messages.join('\n')}`,
+        },
+      },
     });
 
     if (!answer) {

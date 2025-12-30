@@ -157,8 +157,13 @@ function GameStarterButton(props: GameStarterProps) {
       const msg = `Error while trying to launch "${path}": ${e}`;
       LOGGER.msg(msg).error();
       await showModalOk({
-        title: 'ERROR',
-        message: msg,
+        title: 'launch.error.title',
+        message: {
+          key: 'error.reason',
+          args: {
+            reason: `"${path}": ${e}`,
+          },
+        },
       });
     } finally {
       setStarting(false);

@@ -3,17 +3,23 @@ import { atom } from 'jotai';
 import { UCP_VERSION_ATOM } from '../ucp-files/ucp-version';
 import { fetchNews } from './fetching';
 import { News, NewsElement } from './types';
+import { LANGUAGE_ATOM } from '../gui-settings/settings'; // 1. Import LANGUAGE_ATOM
 
 // eslint-disable-next-line import/prefer-default-export
-export const NEWS_ATOM = atomWithQuery((get) => ({
-  queryKey: [
-    'news',
-    get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString(),
-  ] as [string, string],
-  queryFn: fetchNews,
-  retry: false,
-  // staleTime: Infinity,
-}));
+export const NEWS_ATOM = atomWithQuery((get) => {
+  const lang = get(LANGUAGE_ATOM); // Get the current language
+
+  return {
+    queryKey: [
+      'news',
+      lang, // 4. Add lang to the queryKey
+      get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString(),
+    ] as [string, string, string], // Update type for the queryKey
+    queryFn: fetchNews,
+    retry: false,
+    // staleTime: Infinity,
+  };
+});
 
 export const NEWS_HIGHLIGHT_ATOM = atom((get) => {
   const { data, isError, isLoading, isPending, error } = get(NEWS_ATOM);

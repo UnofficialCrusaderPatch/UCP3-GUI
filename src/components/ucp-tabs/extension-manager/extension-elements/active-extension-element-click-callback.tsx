@@ -41,12 +41,14 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   if (disappearingEntries.length > 0) {
     const confirmed = await showModalOkCancel({
-      title: 'Warning',
-      message: `Deactivating extensions ${
-        ext.name
-      } will lead you to lose your settings for the options below, proceed?\n\n${disappearingEntries.join(
-        '\n',
-      )}`,
+      title: 'extensions.deactivate.config.loss.warning.title',
+      message: {
+        key: 'extensions.deactivate.config.loss.warning.message',
+        args: {
+          extensions: ext.name,
+          entries: disappearingEntries.join('\n'),
+        },
+      },
     });
 
     if (!confirmed) {

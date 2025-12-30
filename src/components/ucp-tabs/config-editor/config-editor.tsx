@@ -51,7 +51,10 @@ export default function ConfigEditor(args: { readonly: boolean }) {
     <div className="config-editor">
       {nav}
       <div className="flex-default config-container">
-        <div className="parchment-box config-container__content" tabIndex={0}>
+        <div
+          className="parchment-box parchment-box-bg-light config-container__content"
+          tabIndex={0}
+        >
           {content}
         </div>
         {!readonly ? (

@@ -38,8 +38,13 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
     );
   } catch (err: any) {
     await showModalOk({
-      title: 'Could not activate extension',
-      message: `Could not activate extension due to missing extensions or dependency conflicts.\n\nLog:\n\n${err.toString()}`,
+      title: 'extensions.activation.dependency.conflicts.error.title',
+      message: {
+        key: 'extensions.activation.dependency.conflicts.error.message',
+        args: {
+          log: err.toString(),
+        },
+      },
     });
 
     return;
@@ -71,12 +76,12 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 
   if (lostConfig.length > 0) {
     const answer = await showModalOkCancel({
-      title: 'extensions.activate.warning.title',
+      title: 'extensions.activation.customisations.loss.title',
       message: {
-        key: 'extensions.activate.warning',
+        key: 'extensions.activation.customisations.loss.message',
         args: {
           n: lostConfig.length,
-          losses: lostConfig.map(([url]) => url).sort(),
+          entries: lostConfig.map(([url]) => url).sort(),
         },
       },
     });

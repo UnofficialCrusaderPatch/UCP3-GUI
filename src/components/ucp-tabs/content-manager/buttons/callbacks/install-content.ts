@@ -232,8 +232,15 @@ export async function installOnlineContent(
   if (contentElementsWithoutPackageSource.length > 0) {
     /* todo:locale: */
     await showModalOk({
-      title: 'Failed to install content',
-      message: `Some content doesn't have a download source: ${contentElementsWithoutPackageSource.map((ce) => ce.definition.name).join(', ')}`,
+      title: 'content.installation.download.source.missing.title',
+      message: {
+        key: 'content.installation.download.source.missing.message',
+        args: {
+          lst: contentElementsWithoutPackageSource
+            .map((ce) => ce.definition.name)
+            .join(', '),
+        },
+      },
     });
 
     return contentElementsWithoutPackageSource.map((ce) => {

@@ -38,10 +38,15 @@ export async function installContentButtonCallback(
     if (solution.status !== 'OK') {
       await showModalOk({
         /* todo:locale: */
-        title: 'Cannot install',
+        title: 'extensions.install.fail.title',
 
         /* todo:locale: */
-        message: solution.message,
+        message: {
+          key: 'extensions.install.fail.message',
+          args: {
+            reason: solution.message,
+          },
+        },
       });
       return;
     }
@@ -74,17 +79,27 @@ export async function installContentButtonCallback(
     if (report.length > 0) {
       await showModalOk({
         /* todo:locale: */
-        title: 'Installation errors',
+        title: 'extensions.install.errors.title',
         /* todo:locale: */
-        message: `There were one or more extensions which failed to install:\n\n${report}`,
+        message: {
+          key: 'extensions.install.errors.message',
+          args: {
+            report,
+          },
+        },
       });
     }
   } catch (err: any) {
     await showModalOk({
       /* todo:locale: */
-      title: 'Uncaught exception',
+      title: 'extensions.install.uncaught.title',
       /* todo:locale: */
-      message: `${err.toString()}`,
+      message: {
+        key: 'error.reason',
+        args: {
+          reason: `${err.toString()}`,
+        },
+      },
     });
   } finally {
     getStore().set(BUSY_CONTENT_COUNT, 0);

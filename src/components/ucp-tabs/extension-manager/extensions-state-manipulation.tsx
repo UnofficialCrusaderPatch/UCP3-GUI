@@ -263,8 +263,13 @@ async function removeExtensionFromExplicitlyActivatedExtensions(
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     LOGGER.msg(solution.message).error();
     showModalOk({
-      message: solution.message,
-      title: 'Deactivating extension: Error in dependencies',
+      message: {
+        key: 'error.reason',
+        args: {
+          reason: solution.message,
+        },
+      },
+      title: 'extensions.deactivate.dependencies.error.title',
     });
 
     return extensionsState;

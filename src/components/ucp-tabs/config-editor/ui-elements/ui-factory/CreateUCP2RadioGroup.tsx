@@ -1,3 +1,4 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/touched/touched.css';
 import { Accordion } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';
@@ -21,6 +22,7 @@ import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
+import { createTouchedStyle } from './touched/TouchedStyle';
 
 const LOGGER = new Logger('CreateUCP2RadioGroup.tsx');
 
@@ -151,10 +153,13 @@ function CreateUCP2RadioGroup(args: {
     configuration[url] = newValue;
   };
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const touchedStyle = createTouchedStyle(configurationTouched[url]);
+
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className={`col sword-checkbox ${(spec.style || {}).className}`}
+      className={`col sword-checkbox ${(spec.style || {}).className} ${touchedStyle}`}
       style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         setShowPopover(true);

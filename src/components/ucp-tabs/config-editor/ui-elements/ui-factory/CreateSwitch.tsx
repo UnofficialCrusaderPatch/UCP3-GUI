@@ -99,8 +99,10 @@ function CreateSwitch(args: {
     <div
       className={`d-flex align-items-baseline lh-sm sword-checkbox ui-element ${(spec.style || {}).className} ${className} ${touchedStyle}`}
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);

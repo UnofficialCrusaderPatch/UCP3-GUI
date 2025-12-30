@@ -369,8 +369,10 @@ function CreateUCP2SliderChoice(args: {
       bsPrefix="ucp-accordion ui-element"
       className={`sword-checkbox  ${(spec.style || {}).className} ${touchedStyle}`}
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);

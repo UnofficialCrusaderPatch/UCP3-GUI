@@ -76,6 +76,12 @@ export function ConfigPopover(props: {
               tetherOffset: 0, // 0
             },
           },
+          {
+            name: 'offset',
+            options: {
+              offset: [0, 13],
+            },
+          },
         ],
       }}
     >
@@ -88,13 +94,14 @@ export function ConfigPopover(props: {
         ...prps
       }) => (
         <div
-          className={`ucp-popover ${locked ? 'disabled' : ''}`}
+          className={`ucp-popover sword-checkbox ${locked ? 'disabled' : ''}`}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...prps}
           style={{
             position: 'absolute',
-            // backgroundColor: '#ab712d',
-            backgroundColor: 'white',
+            backgroundColor: '#c7a464',
+            borderRadius: '5px',
+            // backgroundColor: 'white',
             ...prps.style,
           }}
         >

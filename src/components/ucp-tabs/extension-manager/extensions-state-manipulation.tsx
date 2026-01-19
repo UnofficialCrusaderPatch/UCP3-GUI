@@ -51,6 +51,10 @@ function checkOrder(activationOrder: Extension[]) {
     if (fails.length > 0) {
       LOGGER.obj('checkOrder execution: fail at: ', fails).error();
       success = false;
+      const report = fails.map(([name, v]) => `${name} ${v.raw}`).join(', ');
+      throw Error(
+        `some extensions ${ext.name}@${ext.version} are activated earlier than their dependencies: ${report}`,
+      );
     }
   });
 
@@ -135,7 +139,12 @@ function mimickStepByStepActivation(
 
   if (!checkOrder(finalOrder)) {
     LOGGER.obj('checkOrder fail: ', finalOrder).error();
-    throw Error();
+    const report = finalOrder
+      .map((ext) => `${ext.definition.name}@${ext.definition.version}`)
+      .join(', ');
+    throw Error(
+      `some extension are activated earlier than their dependencies: ${report}`,
+    );
   }
 
   const { tree } = extensionsState;
@@ -145,7 +154,7 @@ function mimickStepByStepActivation(
     ConsoleLogger.debug('checkTree', [...finalOrder, ext].slice().reverse());
     const solution = checkTree(tree, [...finalOrder, ext].slice().reverse());
     if (solution.status !== 'OK') {
-      throw Error();
+      throw Error(solution.messages.join('\n'));
     }
 
     const novel = solution.extensions!.filter(
@@ -156,7 +165,12 @@ function mimickStepByStepActivation(
 
     if (!checkOrder(finalOrder)) {
       LOGGER.obj('checkOrder fail: ', finalOrder).error();
-      throw Error();
+      const report = finalOrder
+        .map((e) => `${e.definition.name} ${e.definition.version}`)
+        .join(', ');
+      throw Error(
+        `some extensions ${ext.name}@${ext.version} are activated earlier than their dependencies: ${report}`,
+      );
     }
   });
 

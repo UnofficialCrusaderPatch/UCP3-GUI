@@ -8,13 +8,23 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: true
       matrix:
-        os: [windows-latest, ubuntu-22.04]
-
+        include:
+          - platform: 'macos-latest' # for Arm based macs (M1 and above).
+            args: '--target aarch64-apple-darwin'
+            zipname: 'macos-latest-aarch64'
+          - platform: 'macos-latest' # for Intel based macs.
+            args: '--target x86_64-apple-darwin'
+            zipname: 'macos-latest-x86_64'
+          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
+            args: ''
+            zipname: 'ubuntu-22.04'
+          - platform: 'windows-latest'
+            args: ''
+            zipname: 'windows-latest'
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v4
@@ -24,9 +34,11 @@ jobs:
           node-version: 20
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        
+        with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
       - name: install dependencies (ubuntu only)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
@@ -50,11 +62,13 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: UCP3-GUI-${{matrix.os}}.zip
+          name: UCP3-GUI-${{matrix.zipname}}.zip
           path: |
             src-tauri/target/release/UCP3-GUI.exe
             src-tauri/target/release/bundle/nsis/UCP3-GUI*-setup.exe
             src-tauri/target/release/bundle/appimage/ucp3-gui*.AppImage
             src-tauri/target/release/bundle/deb/ucp3-gui*.deb
             src-tauri/target/release/bundle/appimage/ucp3-gui*.AppImage.tar.gz
+            src-tauri/target/release/**/*.dmg
+            src-tauri/target/release/**/*.app
 

@@ -1,6 +1,9 @@
 import './extension-manager.css';
 
-import { ExtensionDependencyTree } from '../../../function/extensions/dependency-management/dependency-resolution';
+import {
+  ExtensionDependencyTree,
+  ExtensionSolution,
+} from '../../../function/extensions/dependency-management/dependency-resolution';
 import { ExtensionsState } from '../../../function/extensions/extensions-state';
 import { Extension } from '../../../config/ucp/common';
 
@@ -22,34 +25,51 @@ export class DependencyError extends Error {}
 //   return [...extra, ...ordering];
 // }
 
-function checkTree(
+/**
+ * This function solves the dependency tree for the given extensions using a copy of the tree
+ *
+ * @param tree the tree to operate on
+ * @param extensions a list of extensions to check
+ * @returns the solution of the tree operations
+ */
+function solveTree(
   tree: ExtensionDependencyTree,
-  extensionsInReverseOrder: Extension[],
-) {
+  extensions: Extension[],
+): ExtensionSolution {
   const tempTree = tree.copy();
 
-  const tempSolution = tempTree.extensionDependenciesForExtensions(
-    extensionsInReverseOrder,
-  );
+  const tempSolution = tempTree.extensionDependenciesForExtensions(extensions);
 
   return tempSolution;
 }
 
-function checkOrder(activationOrder: Extension[]) {
+/**
+ * This function checks whether dependencies are actually listed earlier than the respective extension
+ * @param activationOrder the extensions in activation order
+ * @returns whether the order of extensions is valid
+ */
+function checkDependencyOrder(activationOrder: Extension[]) {
+  // Assume it is valid
   let success = true;
+  // Get the display order of extensions
   const displayOrder = activationOrder.slice().reverse();
   displayOrder.forEach((ext, index, arr) => {
+    // For each extension check if dependencies are actually listed where they should be
     if (!success) return;
 
+    // All extensions below the displayed one
     const next = arr.slice(index + 1);
+    // Their names
     const nextNames = next.map((e) => e.name);
+    // For each dependency check if it is not-listed
     const fails = Object.entries(ext.definition.dependencies)
       .filter(([name]) => ['framework', 'frontend'].indexOf(name) === -1)
       .filter(([name]) => {
         return nextNames.indexOf(name) === -1;
       });
+    // If not listed, raise an error
     if (fails.length > 0) {
-      LOGGER.obj('checkOrder execution: fail at: ', fails).error();
+      LOGGER.obj('checkDependencyOrder execution: fail at: ', fails).error();
       success = false;
       const report = fails.map(([name, v]) => `${name} ${v.raw}`).join(', ');
       throw Error(
@@ -61,6 +81,15 @@ function checkOrder(activationOrder: Extension[]) {
   return success;
 }
 
+/**
+ * This function mimicks a user activating extensions one by one, without setting explicitly active extensions,
+ * and including several sanity checks. Throws an error in case of failure.
+ *
+ * @param extensionsState the current extension state
+ * @param activeExtensionsInDisplayOrder the already active extensions in display order
+ * @param extensionsToActivateInDisplayOrder the extensions to be activated in display order
+ * @returns new extensions state
+ */
 function mimickStepByStepActivation(
   extensionsState: ExtensionsState,
   activeExtensionsInDisplayOrder: Extension[],
@@ -137,13 +166,13 @@ function mimickStepByStepActivation(
   //   finalOrder.push(ext);
   // });
 
-  if (!checkOrder(finalOrder)) {
-    LOGGER.obj('checkOrder fail: ', finalOrder).error();
+  if (!checkDependencyOrder(finalOrder)) {
+    LOGGER.obj('checkDependencyOrder fail: ', finalOrder).error();
     const report = finalOrder
       .map((ext) => `${ext.definition.name}@${ext.definition.version}`)
       .join(', ');
     throw Error(
-      `some extension are activated earlier than their dependencies: ${report}`,
+      `some extensions are activated earlier than their dependencies:\n${report}`,
     );
   }
 
@@ -151,8 +180,8 @@ function mimickStepByStepActivation(
 
   ConsoleLogger.debug('generating final order using: ', activationOrderToCheck);
   activationOrderToCheck.forEach((ext) => {
-    ConsoleLogger.debug('checkTree', [...finalOrder, ext].slice().reverse());
-    const solution = checkTree(tree, [...finalOrder, ext].slice().reverse());
+    ConsoleLogger.debug('solveTree', [...finalOrder, ext].slice().reverse());
+    const solution = solveTree(tree, [...finalOrder, ext].slice().reverse());
     if (solution.status !== 'OK') {
       throw Error(solution.messages.join('\n'));
     }
@@ -163,8 +192,8 @@ function mimickStepByStepActivation(
 
     finalOrder.push(...novel);
 
-    if (!checkOrder(finalOrder)) {
-      LOGGER.obj('checkOrder fail: ', finalOrder).error();
+    if (!checkDependencyOrder(finalOrder)) {
+      LOGGER.obj('checkDependencyOrder fail: ', finalOrder).error();
       const report = finalOrder
         .map((e) => `${e.definition.name} ${e.definition.version}`)
         .join(', ');
@@ -180,6 +209,17 @@ function mimickStepByStepActivation(
   // }
 }
 
+/**
+ * This function adds an extension to the list of expliticly activated extensions, activating dependencies.
+ *
+ * The function aims to retain the version numbers of already activated extensions.
+ * If it cannot, a dependency error will be returned.
+ *
+ * @param extensionsState the current extensions state
+ * @param ext the extension to explicitly add
+ * @param repair whether to aim to repair the setup or not
+ * @returns the new extensions state
+ */
 function addExtensionToExplicityActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
@@ -189,7 +229,7 @@ function addExtensionToExplicityActivatedExtensions(
 
   const newEAE = [ext, ...extensionsState.explicitlyActivatedExtensions];
 
-  const tempSolution = checkTree(tree, newEAE);
+  const tempSolution = solveTree(tree, newEAE);
 
   if (tempSolution.status !== 'OK' || tempSolution.extensions === undefined) {
     LOGGER.msg(tempSolution.message).error();
@@ -203,18 +243,16 @@ function addExtensionToExplicityActivatedExtensions(
     throw new DependencyError(solution.message);
   }
 
-  // Yoink ext to the top in extensions state here!
-  // const allDependenciesInLoadOrder = [
-  //   ext,
-  //   ...solution.extensions.filter((e) => e !== ext).reverse(),
-  // ];
   const aeNames = extensionsState.activeExtensions.map(
     (ae: Extension) => ae.name,
+  );
+  const novelExtensions = solution.extensions.filter(
+    (e) => aeNames.indexOf(e.name) === -1,
   );
   const allDependenciesInLoadOrder = mimickStepByStepActivation(
     extensionsState,
     extensionsState.activeExtensions,
-    solution.extensions.filter((e) => aeNames.indexOf(e.name) === -1),
+    novelExtensions,
   );
 
   const allDependenciesInDisplayOrder = allDependenciesInLoadOrder
@@ -253,10 +291,10 @@ function addExtensionToExplicityActivatedExtensions(
   };
 }
 
-async function removeExtensionFromExplicitlyActivatedExtensions(
+function removeExtensionFromExplicitlyActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
-): Promise<ExtensionsState> {
+): ExtensionsState {
   const { tree } = extensionsState;
 
   const newEAE = extensionsState.explicitlyActivatedExtensions.filter(
@@ -319,24 +357,43 @@ async function removeExtensionFromExplicitlyActivatedExtensions(
   };
 }
 
+/**
+ * Move the extension up or down in the activate extensions list
+ * @param extensionsState the current extension state
+ * @param event whether to move the extension with the given name up or down
+ * @returns the new extension state
+ */
 function moveExtension(
   extensionsState: ExtensionsState,
   event: { name: string; type: 'up' | 'down' },
 ) {
+  // Name of the extension
   const { name, type } = event;
 
+  // Copy of the active extensions list
   const ae = [...extensionsState.activeExtensions];
+
+  // The current position of the extension in the active extensions list
   const aei = ae.map((e) => e.name).indexOf(name);
+
+  // The active extension itself
   const element = ae[aei];
+
+  // New index defined based on event
   let newIndex = type === 'up' ? aei - 1 : aei + 1;
   newIndex = newIndex < 0 ? 0 : newIndex;
   newIndex = newIndex > ae.length - 1 ? ae.length - 1 : newIndex;
+
+  // Remove the extension from the active extensions list
   ae.splice(aei, 1);
+  // Insert the element back in at the right place
   ae.splice(newIndex, 0, element);
 
+  // The names of explicitly active extensions
   const eaeNames = extensionsState.explicitlyActivatedExtensions.map(
     (extension) => extension.name,
   );
+  // Redefine the list of explicitly active extensions based on the new order
   const eae = ae.filter((extension) => eaeNames.indexOf(extension.name) !== -1);
 
   return {

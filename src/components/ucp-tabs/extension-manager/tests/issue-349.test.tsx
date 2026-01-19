@@ -7,6 +7,7 @@ import { ExtensionDependencyTree } from "function/extensions/dependency-manageme
 import { addExtensionToExplicityActivatedExtensions } from "../extensions-state-manipulation";
 
 import STATE from './issue-349-data.json'
+import STATE_WINPROCHANDLER_UPGRADE from './issue-349-data-winprochandler-upgrade.json'
 
 
 /** Apply this in the browser window console, and then JSON.stringify() */
@@ -31,8 +32,8 @@ import STATE from './issue-349-data.json'
 //   state.explicitlyActivatedExtensions = state.explicitlyActivatedExtensions.map((ext) => `${ext.name}@${ext.version}`);
 // }
 
-const deserialize = () => {
-  const state2 = JSON.parse(JSON.stringify(STATE));
+const deserialize = (state: unknown) => {
+  const state2 = JSON.parse(JSON.stringify(state));
   state2.extensions.forEach((ext: Extension) => {
     Object.entries(ext.definition.dependencies).forEach((e) => {
       ext.definition.dependencies[e[0]] = new Range(e[1]);
@@ -52,7 +53,7 @@ describe('solution to issue 349', () => {
   test('whether adding LOTO works', () => {
     // const TEST_STORE = createStore();
 
-    const state1 = deserialize();
+    const state1 = deserialize(STATE);
     expect(state1.activeExtensions.map((ext) => `${ext.name}@${ext.version}`)).toEqual([
       "graphicsApiReplacer@1.3.0",
       "winProcHandler@0.2.0",
@@ -94,6 +95,36 @@ describe('solution to issue 349', () => {
       "gmResourceModifier@0.2.0",
       "ucp2-legacy@2.15.1",
     ]);
+  })
+
+});
+
+
+describe('invalid case without user invention', () => {
+  test('adding aiSwapper should break', () => {
+    // const TEST_STORE = createStore();
+
+    const state1 = deserialize(STATE_WINPROCHANDLER_UPGRADE);
+    expect(state1.activeExtensions.map((ext) => `${ext.name}@${ext.version}`)).toEqual([
+      "graphicsApiReplacer@1.3.0",
+      "winProcHandler@0.2.0",
+      "ucp2-legacy-defaults@2.15.1",
+      "ucp2-vanilla-fixed-aiv@2.15.1",
+      "ucp2-aic-patch@2.15.1",
+      "ucp2-ai-files@2.15.1",
+      "aiSwapper@1.1.0",
+      "aivloader@1.0.0",
+      "files@1.3.0",
+      "aicloader@1.1.2",
+      "textResourceModifier@0.3.0",
+      "gmResourceModifier@0.2.0",
+      "ucp2-legacy@2.15.1",
+    ]);
+    
+    const target = state1.installedExtensions.filter((ext: Extension) => ext.name === 'Legends-Of-The-Orient').at(0)!;
+    
+    expect(() => addExtensionToExplicityActivatedExtensions(state1, target)).toThrow();
+
   })
 
 });

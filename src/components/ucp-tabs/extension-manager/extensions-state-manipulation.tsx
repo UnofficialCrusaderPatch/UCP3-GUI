@@ -1,5 +1,6 @@
 import './extension-manager.css';
 
+import { SemVer } from 'semver';
 import {
   ExtensionDependencyTree,
   ExtensionSolution,
@@ -373,6 +374,25 @@ function removeExtensionFromExplicitlyActivatedExtensions(
 }
 
 /**
+ * Removes all explicitly activated extensions one by one from the state
+ * @param extensionsState the current state
+ * @returns the new state (empty)
+ */
+function popAllExplicitlyActivatedExtensions(extensionsState: ExtensionsState) {
+  let state = extensionsState;
+  extensionsState.explicitlyActivatedExtensions.forEach((ext) => {
+    state = removeExtensionFromExplicitlyActivatedExtensions(state, ext);
+  });
+  if (state.activeExtensions.length > 0) {
+    const active = state.activeExtensions.map(
+      (ext) => `${ext.name}@${ext.version}`,
+    );
+    throw new Error(`list of extensions not empty after clearing: ${active}`);
+  }
+  return state;
+}
+
+/**
  * Move the extension up or down in the activate extensions list
  * @param extensionsState the current extension state
  * @param event whether to move the extension with the given name up or down
@@ -418,8 +438,32 @@ function moveExtension(
   } as ExtensionsState;
 }
 
+function upgradeAllExtensions(extensionsState: ExtensionsState) {
+  const extensionNamesInLoadOrder =
+    extensionsState.explicitlyActivatedExtensions
+      .slice()
+      .reverse()
+      .map((ext) => ext.name);
+  let newState = popAllExplicitlyActivatedExtensions(extensionsState);
+
+  const highestExtensions = extensionNamesInLoadOrder.map(
+    (n) =>
+      extensionsState.extensions
+        .filter((ext) => ext.name === n)
+        .sort((a, b) => new SemVer(b.version).compare(a.version))[0]!, // We can be sure it exists
+  );
+
+  highestExtensions.forEach((ext) => {
+    newState = addExtensionToExplicityActivatedExtensions(newState, ext);
+  });
+
+  return newState;
+}
+
 export {
   addExtensionToExplicityActivatedExtensions,
   removeExtensionFromExplicitlyActivatedExtensions,
   moveExtension,
+  popAllExplicitlyActivatedExtensions,
+  upgradeAllExtensions,
 };

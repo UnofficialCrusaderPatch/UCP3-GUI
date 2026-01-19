@@ -1,3 +1,4 @@
+import { ExtensionsState } from 'function/extensions/extensions-state';
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
@@ -19,6 +20,32 @@ import { showModalOk } from '../../../modals/modal-ok';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 
 const LOGGER = new Logger('inactive-extension-element-click-callback.tsx');
+
+function computeConfigLoss(state: ExtensionsState) {
+  // TODO: insert logic to integrate existing customisations with the new thing.
+  const userConfig = Object.entries(
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+  );
+
+  const newRequiredValues = Object.fromEntries(
+    Object.entries(state.configuration.state).filter(
+      ([, cmo]: [string, ConfigMetaObject]) =>
+        cmo.modifications.value.qualifier === 'required',
+    ),
+  );
+
+  const lostConfig = userConfig.filter(
+    ([url]) => newRequiredValues[url] !== undefined,
+  );
+
+  const retainedConfig = Object.fromEntries(
+    userConfig.filter(([url]) => newRequiredValues[url] === undefined),
+  );
+  return {
+    lostConfig,
+    retainedConfig,
+  };
+}
 
 async function inactiveExtensionElementClickCallback(ext: Extension) {
   // TODO: include a check where it checks whether the right version of an extension is available and selected (version dropdown box)
@@ -54,25 +81,7 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 
   if (!(await reportAndConfirmBuildResult(res))) return;
 
-  // TODO: insert logic to integrate existing customisations with the new thing.
-  const userConfig = Object.entries(
-    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
-  );
-
-  const newRequiredValues = Object.fromEntries(
-    Object.entries(res.configuration.state).filter(
-      ([, cmo]: [string, ConfigMetaObject]) =>
-        cmo.modifications.value.qualifier === 'required',
-    ),
-  );
-
-  const lostConfig = userConfig.filter(
-    ([url]) => newRequiredValues[url] !== undefined,
-  );
-
-  const retainedConfig = Object.fromEntries(
-    userConfig.filter(([url]) => newRequiredValues[url] === undefined),
-  );
+  const { retainedConfig, lostConfig } = computeConfigLoss(res);
 
   if (lostConfig.length > 0) {
     const answer = await showModalOkCancel({
@@ -119,3 +128,4 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 }
 
 export default inactiveExtensionElementClickCallback;
+export { computeConfigLoss };

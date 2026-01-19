@@ -56,7 +56,19 @@
         ]
       },
       "shell": {
-        "open": "^((mailto:\\w+)|(tel:\\w+)|(https?://\\w+)|([A-Z]:)).+"
+        "open": "^((mailto:\\w+)|(tel:\\w+)|(https?://\\w+)|([A-Z]:)).+",
+        "execute": true,
+        "scope": [
+          {
+            "name": "wevtutil",
+            "cmd": "wevtutil",
+            "args": [
+              "qe",
+              "Application",
+              "/Q:*[System[(EventID=1000 or EventID=1001)]]"
+            ]
+          }
+        ]
       },
       "protocol": {
         "asset": true,

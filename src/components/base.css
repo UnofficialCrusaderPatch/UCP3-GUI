@@ -120,6 +120,14 @@ body {
   font-family: 'River Avenue';
 }
 
+.parchment-box-bg-default {
+  background-image: url('/src/assets/ucp3/parchment_bg.png');
+}
+
+.parchment-box-bg-light {
+  background-image: url('/src/assets/ucp3/parchment_bg_light.png');
+}
+
 .parchment-box-dark {
   background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
   overflow-y: scroll;

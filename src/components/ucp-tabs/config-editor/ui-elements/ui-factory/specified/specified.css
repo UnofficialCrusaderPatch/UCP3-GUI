@@ -1,0 +1,19 @@
+.ucp-specified {
+  position: relative;
+}
+
+.ucp-specified:after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--bs-secondary);
+  margin-left: -6px;
+}
+
+.ucp-touched.ucp-specified:after {
+  background-color: var(--bs-primary);
+}

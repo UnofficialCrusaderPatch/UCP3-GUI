@@ -120,9 +120,9 @@ describe('attemptStrategies', () => {
         'running-units@1.0.1',
         'aicloader@1.1.1',
         'extreme-is-the-new-normal@1.0.0',
+        'ucp2-legacy@2.15.1',
         'maploader@1.0.0',
         'files@1.1.0',
-        'ucp2-legacy@2.15.1',
         'graphicsApiReplacer@1.2.0',
         'winProcHandler@0.2.0',
       ]);

@@ -100,6 +100,7 @@ type PluginConfigPart = {
   plugins: {
     [key: string]: ConfigExtensionPart;
   };
+  'load-order'?: LoadOrder;
 };
 
 export type UCP3SerializedPluginConfig = {

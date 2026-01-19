@@ -37,10 +37,15 @@ export async function uninstallContentButtonCallback(
     if (deprecated.length > 0) {
       const deprecationAnswer = await showModalOkCancel({
         /* todo:locale: */
-        title: 'Permanent removal warning',
+        title: 'content.uninstallation.permanent.warning.title',
 
         /* todo:locale: */
-        message: `The following content has been removed from the online store, removal will be permanent, are you sure you want to continue?\n\n${deprecated.map((ce) => ce.definition.name).join('\n')}`,
+        message: {
+          key: 'content.uninstallation.permanent.warning.message',
+          args: {
+            lst: `${deprecated.map((ce) => ce.definition.name).join('\n')}`,
+          },
+        },
       });
 
       if (!deprecationAnswer) {
@@ -77,9 +82,14 @@ export async function uninstallContentButtonCallback(
         .flat();
       await showModalOk({
         /* todo:locale: */
-        title: 'Removal of dependencies',
+        title: 'content.uninstallation.dependencies.error.title',
         /* todo:locale: */
-        message: `Cannot deinstall the selected extensions. Deinstallation of the selected content will lead to unresolved dependencies for the following extensions:\n${reqs.join('\n')}`,
+        message: {
+          key: 'content.uninstallation.dependencies.error.message',
+          args: {
+            lst: `${reqs.join('\n')}`,
+          },
+        },
       });
       return;
     }
@@ -103,9 +113,14 @@ export async function uninstallContentButtonCallback(
     if (report.length > 0) {
       await showModalOk({
         /* todo:locale: */
-        title: 'Deinstallation errors',
+        title: 'content.uninstallation.errors.title',
         /* todo:locale: */
-        message: `There were one or more extensions which failed to uninstall:\n\n${report}`,
+        message: {
+          key: 'content.uninstallation.errors.message',
+          args: {
+            report,
+          },
+        },
       });
     }
   } catch (err: any) {

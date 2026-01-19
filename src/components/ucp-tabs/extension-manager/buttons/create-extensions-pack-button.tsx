@@ -68,8 +68,13 @@ export function CreateExtensionsPackButton() {
                 if (!touch) {
                   // eslint-disable-next-line no-await-in-loop
                   await showModalOk({
-                    title: 'Error',
-                    message: `Path does not exist: ${originalPath}`,
+                    title: 'extensions.pack.create.path.error.title',
+                    message: {
+                      key: 'extensions.pack.create.path.error.message',
+                      args: {
+                        path: originalPath,
+                      },
+                    },
                   });
                   return;
                 }
@@ -110,8 +115,13 @@ export function CreateExtensionsPackButton() {
                 if (!touch) {
                   // eslint-disable-next-line no-await-in-loop
                   await showModalOk({
-                    title: 'Error',
-                    message: `Path does not exist: ${originalPath}`,
+                    title: 'extensions.pack.create.path.error.title',
+                    message: {
+                      key: 'extensions.pack.create.path.error.message',
+                      args: {
+                        path: originalPath,
+                      },
+                    },
                   });
                   return;
                 }
@@ -125,16 +135,26 @@ export function CreateExtensionsPackButton() {
           } catch (e) {
             LOGGER.obj(e).error();
             await showModalOk({
-              title: 'Error',
-              message: (e as Error).toString(),
+              title: 'error.capitalized',
+              message: {
+                key: 'error.reason',
+                args: {
+                  reason: (e as Error).toString(),
+                },
+              },
             });
           } finally {
             zw.close();
           }
         } catch (e: unknown) {
           await showModalOk({
-            title: 'ERROR',
-            message: String(e),
+            title: 'error.capitalized',
+            message: {
+              key: 'error.reason',
+              args: {
+                reason: String(e),
+              },
+            },
           });
         }
 

@@ -27,7 +27,7 @@ function ExportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
           exportButtonCallback(gameFolder, setConfigStatus, localize);
         } catch (e: unknown) {
           await showModalOk({
-            title: 'ERROR',
+            title: 'error.capitalized',
             message: String(e),
           });
         }

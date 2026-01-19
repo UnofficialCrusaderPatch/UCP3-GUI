@@ -206,10 +206,13 @@ export async function discoverExtensions(
 
   if (extensionsWithErrors.length > 0) {
     showModalOk({
-      title: 'Errors while discovering extensions',
-      message: `These extensions were skipped because they contain errors or incompatiblities:\n\n ${extensionsWithErrors.join(
-        '\n\n',
-      )}`,
+      title: 'extensions.discovery.error.title',
+      message: {
+        key: 'extensions.discovery.error.message',
+        args: {
+          errors: extensionsWithErrors.join('\n\n'),
+        },
+      },
     });
   }
 

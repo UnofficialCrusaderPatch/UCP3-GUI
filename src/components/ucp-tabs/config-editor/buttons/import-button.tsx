@@ -32,19 +32,19 @@ function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
           if (report.status === 'fail') {
             if (report.reason === 'strategy') {
               await showModalOk({
-                title: 'ERROR',
+                title: 'error.capitalized',
                 message: `${report.message}`,
               });
             } else {
               await showModalOk({
-                title: 'ERROR',
+                title: 'error.capitalized',
                 message: report.message,
               });
             }
           }
         } catch (e: unknown) {
           await showModalOk({
-            title: 'ERROR',
+            title: 'error.capitalized',
             message: String(e),
           });
         }

@@ -194,7 +194,12 @@ export class DependencyTree {
 
     const und = node.edgesOut.filter((e) => e.to === undefined);
     if (und.length > 0) {
-      ConsoleLogger.error(`directDependenciesFor(${id}): undefined edges for: `, id, node, und);
+      ConsoleLogger.error(
+        `directDependenciesFor(${id}): undefined edges for: `,
+        id,
+        node,
+        und,
+      );
     }
 
     return node.edgesOut

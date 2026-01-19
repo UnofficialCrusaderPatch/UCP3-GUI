@@ -1,3 +1,4 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
 import { Form } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useState, useRef } from 'react';
@@ -21,6 +22,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
+import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
 const LOGGER = new Logger('CreateSwitch.tsx');
 
@@ -90,12 +92,22 @@ function CreateSwitch(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
+  const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
+    userConfiguration,
+    configurationTouched,
+    url,
+  );
+
   return (
     <div
-      className={`d-flex align-items-baseline lh-sm sword-checkbox ui-element ${(spec.style || {}).className} ${className}`}
+      className={`d-flex align-items-baseline lh-sm sword-checkbox ui-element ${(spec.style || {}).className} ${className} ${specifiedStyle}`}
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);

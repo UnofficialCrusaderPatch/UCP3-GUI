@@ -122,8 +122,13 @@ class ExtensionPack {
         return renameFile(entry.path, destination).catch(async (reason) => {
           LOGGER.obj(reason).error();
           showModalOk({
-            title: 'An error occurred',
-            message: `An error occurred trying to install ${entry.name}. Not all files could be placed.`,
+            title: 'extensions.pack.install.naming.error.title',
+            message: {
+              key: 'extensions.pack.install.naming.error.message',
+              args: {
+                entry: entry.name,
+              },
+            },
           });
         });
       });

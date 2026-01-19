@@ -1,3 +1,5 @@
+import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
+
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Form } from 'react-bootstrap';
 import { useState, useRef } from 'react';
@@ -26,6 +28,7 @@ import {
   CONFIGURATION_SUGGESTIONS_REDUCER_ATOM,
 } from '../../../../../function/configuration/derived-state';
 import Logger from '../../../../../util/scripts/logging';
+import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
 const LOGGER = new Logger('CreateChoice.tsx');
 
@@ -37,6 +40,7 @@ function CreateChoice(args: {
   const [configuration, setConfiguration] = useAtom(
     CONFIGURATION_FULL_REDUCER_ATOM,
   );
+
   const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const configurationWarnings = useAtomValue(
     CONFIGURATION_WARNINGS_REDUCER_ATOM,
@@ -44,6 +48,7 @@ function CreateChoice(args: {
   const setConfigurationTouched = useSetAtom(
     CONFIGURATION_TOUCHED_REDUCER_ATOM,
   );
+
   const configurationDefaults = useAtomValue(
     CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   );
@@ -97,12 +102,22 @@ function CreateChoice(args: {
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
 
+  const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
+  const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
+    userConfiguration,
+    configurationTouched,
+    url,
+  );
+
   return (
     <Form.Group
-      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className}`}
+      className={`d-flex align-items-baseline lh-sm config-number-group my-1 ui-element ${(spec.style || {}).className} ${className} ${specifiedStyle}`}
       onMouseEnter={() => {
-        setShowPopover(true);
-        setStatusBarMessage(statusBarMessage);
+        if (isEnabled) {
+          setShowPopover(true);
+          setStatusBarMessage(statusBarMessage);
+        }
       }}
       onMouseLeave={() => {
         setShowPopover(false);

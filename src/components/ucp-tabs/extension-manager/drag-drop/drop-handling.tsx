@@ -30,15 +30,20 @@ export async function handleFileDrop(event: Event<unknown>) {
       for (const path of event.payload as string[]) {
         // eslint-disable-next-line no-await-in-loop
         const answer = await showModalOkCancel({
-          title: 'Install extension?',
-          message: `Install extensions? ${path}`,
+          title: 'extensions.install.dragdrop.confirmation.title',
+          message: {
+            key: 'extensions.install.dragdrop.confirmation.message',
+            args: {
+              path,
+            },
+          },
         });
         // eslint-disable-next-line no-continue
         if (!answer) continue;
 
         makeToast({
-          title: `Installing extension...`,
-          body: `Installing in the background`,
+          title: `extensions.install.dragdrop.installing.toast.title`,
+          body: `extensions.install.dragdrop.installing.toast.message`,
         });
 
         // eslint-disable-next-line no-await-in-loop

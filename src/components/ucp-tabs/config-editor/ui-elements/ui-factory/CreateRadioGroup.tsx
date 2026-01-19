@@ -118,9 +118,12 @@ function CreateRadioGroup(args: {
         disabled={isDisabled}
         className="form-check-input"
         checked={choice.name === selectedValue}
-        onClick={() => {
+        onChange={() => {
           onRadioClick(choice.name);
         }}
+        // onClick={() => {
+        //   onRadioClick(choice.name);
+        // }}
         id={`${url}-radio-${choice.name}`}
       />
       {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}

@@ -283,6 +283,15 @@ function addExtensionToExplicityActivatedExtensions(
     }
   }
 
+  const finalSolution = tree.extensionDependenciesForExtensions(
+    allDependenciesInDisplayOrder,
+  );
+  if (finalSolution.status !== 'OK' || finalSolution.extensions === undefined) {
+    // We should never get here
+    LOGGER.msg(solution.message).error();
+    throw new DependencyError(`Unexpected error:\n${solution.message}`);
+  }
+
   return {
     ...extensionsState,
     explicitlyActivatedExtensions: eaeInDisplayOrder,
@@ -298,7 +307,7 @@ function removeExtensionFromExplicitlyActivatedExtensions(
   const { tree } = extensionsState;
 
   const newEAE = extensionsState.explicitlyActivatedExtensions.filter(
-    (e) => e !== ext,
+    (e) => e.name !== ext.name,
   );
 
   const tempTree = tree.copy();
@@ -311,7 +320,7 @@ function removeExtensionFromExplicitlyActivatedExtensions(
   }
 
   // All needed extensions without ext being active
-  const solution = tree.extensionDependenciesForExtensions(newEAE);
+  const solution = tree.copy().extensionDependenciesForExtensions(newEAE);
 
   if (solution.status !== 'OK' || solution.extensions === undefined) {
     LOGGER.msg(solution.message).error();
@@ -329,28 +338,34 @@ function removeExtensionFromExplicitlyActivatedExtensions(
   }
 
   const stillRelevantExtensions = solution.extensions;
-
-  // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
-  const ae = extensionsState.activeExtensions.filter(
-    (e) => stillRelevantExtensions.indexOf(e) !== -1,
-  );
-
-  // Remove ext from the explicitly installed extensions list
-  const eae = extensionsState.explicitlyActivatedExtensions.filter(
-    (e) => e !== ext,
-  );
-
   // Only one version of each extension can be activated.
   const relevantExtensionNames = new Set(
     stillRelevantExtensions.map((e) => e.name),
   );
+
+  // extensionsState.activeExtensions.filter((e: Extension) => relevantExtensions.has(e));
+  const ae = extensionsState.activeExtensions.filter((e) =>
+    relevantExtensionNames.has(e.name),
+  );
+
+  // Remove ext from the explicitly installed extensions list
+  const eae = extensionsState.explicitlyActivatedExtensions.filter(
+    (e) => e.name !== ext.name,
+  );
+
   const ie = extensionsState.extensions
     .filter((e: Extension) => !relevantExtensionNames.has(e.name))
     .sort((a: Extension, b: Extension) => a.name.localeCompare(b.name));
 
+  const finalSolution = tree.extensionDependenciesForExtensions(ae);
+  if (finalSolution.status !== 'OK' || finalSolution.extensions === undefined) {
+    // We should never get here
+    LOGGER.msg(solution.message).error();
+    throw new DependencyError(`Unexpected error:\n${solution.message}`);
+  }
+
   return {
     ...extensionsState,
-    extensions: extensionsState.extensions,
     explicitlyActivatedExtensions: eae,
     activeExtensions: ae,
     installedExtensions: ie,

@@ -26,11 +26,10 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
-  const newExtensionState =
-    await removeExtensionFromExplicitlyActivatedExtensions(
-      getStore().get(EXTENSION_STATE_REDUCER_ATOM),
-      ext,
-    );
+  const newExtensionState = removeExtensionFromExplicitlyActivatedExtensions(
+    getStore().get(EXTENSION_STATE_REDUCER_ATOM),
+    ext,
+  );
 
   const disappearingEntries = Object.keys(userConfiguration).filter(
     (url) =>

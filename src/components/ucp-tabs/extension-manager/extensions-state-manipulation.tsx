@@ -208,12 +208,13 @@ function addExtensionToExplicityActivatedExtensions(
   //   ext,
   //   ...solution.extensions.filter((e) => e !== ext).reverse(),
   // ];
+  const aeNames = extensionsState.activeExtensions.map(
+    (ae: Extension) => ae.name,
+  );
   const allDependenciesInLoadOrder = mimickStepByStepActivation(
     extensionsState,
     extensionsState.activeExtensions,
-    solution.extensions.filter(
-      (e) => extensionsState.activeExtensions.indexOf(e) === -1,
-    ),
+    solution.extensions.filter((e) => aeNames.indexOf(e.name) === -1),
   );
 
   const allDependenciesInDisplayOrder = allDependenciesInLoadOrder

@@ -19,16 +19,9 @@ The first version of the GUI as well as the UCP3 itself are heavy work in progre
 
 ## Installation and Usage
 
-The GUI is currently work in progress, so there is no release at the moment.
+The support will include **at least** Windows 10/11, however, it should go down to Windows 8 and if possible even Windows 7.
 
-The first version will likely come in the form of an installer that takes care of the necessities.
-
-The support will include **at least** Windows 10/11, however, it should go down to Windows 8 and if possible even Windows 7. Linux and Mac will be considered after that and are in the realm of possibilities.
-
-This section will be restructured and extended once the first version is ready for release.
-(If we forget, please inform us :upside_down_face:.)
-
-
+Linux is supported too, see [here](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/blob/main/LINUX.md).
 
 ## Contributing
 

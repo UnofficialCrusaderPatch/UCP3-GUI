@@ -78,7 +78,7 @@
     "@eslint/js": "^9.15.0",
     "@octokit/rest": "^21.0.2",
     "@octokit/types": "^13.6.2",
-    "@tauri-apps/cli": "^1.6.1",
+    "@tauri-apps/cli": "^1.6.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.1",
     "@types/bootstrap": "^5.2.10",

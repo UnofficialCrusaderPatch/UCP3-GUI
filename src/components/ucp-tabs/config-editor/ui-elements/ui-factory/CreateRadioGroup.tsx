@@ -234,8 +234,8 @@ function CreateRadioGroup(args: {
         }
       >
         {radios}
-        {presentation?.note && (
-          <span className="config-table-value-note">{presentation.note}</span>
+        {presentation?.text && (
+          <span className="config-table-value-note">{presentation.text}</span>
         )}
       </div>
     </Form.Group>

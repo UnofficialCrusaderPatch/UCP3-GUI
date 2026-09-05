@@ -144,6 +144,7 @@ function setup(
     {
       unit: 'Troop',
       role: 'Starting role',
+      native_note: 'Varies by AI',
     },
     input,
   ) as GroupDisplayConfigElement;
@@ -172,7 +173,7 @@ describe('configuration table', () => {
       valuePresentation: { native: { choice: 'dig' } },
     });
     Object.assign(second.children[0], {
-      valuePresentation: { native: { note: 'Varies by AI' } },
+      valuePresentation: { native: { text: '{{native_note}}' } },
     });
     const { store } = setup(false, false, input);
     const choice = screen.getByRole('radio', {

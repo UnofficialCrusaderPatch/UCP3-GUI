@@ -8,7 +8,7 @@ changing configuration. Disabled/locked parent switches disable child controls.
 Choice/RadioGroup table cells can describe automatic values with
 `valuePresentation: {native: {choice: defend}}`. This marks a choice without
 writing an override; clicking the marked choice makes it explicit. For an
-automatic value with no single choice, use `{native: {note: 'Varies by AI'}}`.
+automatic value with no single choice, use `{native: {text: 'Varies by AI'}}`.
 Presentation is applied after `inheritFrom` resolution, and only in tables.
 Choice aliases must name a choice present in both the cell and column.
 

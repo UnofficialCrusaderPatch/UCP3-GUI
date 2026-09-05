@@ -40,8 +40,17 @@
 /* The outer setting row owns the existing specified/touched marker, including
    its qualifier column. Suppress only the immediate inner duplicate so nested
    settings retain their own markers. Normal mode retains the original styling. */
-.qualifier-value > .ucp-specified::after {
+.qualifier-value > .ucp-specified::after,
+.qualifier-value
+  > .ucp-accordion
+  > .ucp-switch-options
+  > .ucp-specified::after {
   display: none;
+}
+
+/* Keep the reset control inside the parchment's scroll clipping boundary. */
+.config-container__content:has(.qualifier-row) {
+  padding-left: calc(10px + 1.25rem);
 }
 
 .qualifier-controls {

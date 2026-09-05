@@ -31,6 +31,8 @@ export default function Titlebar() {
   const currentWindow = getCurrentWindow();
   return (
     <div data-tauri-drag-region className="titlebar">
+      {/* Leave edge events to Tauri's native resize handler, not titlebar dragging. */}
+      {!isMax && <div className="titlebar-resize-edge" aria-hidden="true" />}
       <div className="titlebar-icon" id="titlebar-icon">
         <img src={mainIcon} alt={localize('titlebar.alt.icon')} />
       </div>

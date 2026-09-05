@@ -1,3 +1,13 @@
+.titlebar-resize-edge {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Keep the native resize area narrow even when GUI scaling is enabled. */
+  height: calc(5px / var(--gui-scale, 1));
+  z-index: 1100;
+}
+
 .titlebar {
   height: 100%;
   background: var(--ucp-main-brown);

@@ -1,0 +1,106 @@
+.qualifier-control.minimal-button {
+  width: 1rem;
+  height: 1.25rem;
+  min-width: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #000;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  vertical-align: middle;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.qualifier-control:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.qualifier-row {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  column-gap: 0.125rem;
+  align-items: start;
+}
+.qualifier-row > .qualifier-controls {
+  margin-top: 0.1rem;
+}
+.qualifier-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+.qualifier-heading > .accordion-header {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The outer setting row owns the existing specified/touched marker, including
+   its qualifier column. Suppress only the immediate inner duplicate so nested
+   settings retain their own markers. Normal mode retains the original styling. */
+.qualifier-value > .ucp-specified::after {
+  display: none;
+}
+
+.qualifier-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 1rem;
+  flex-shrink: 0;
+}
+.qualifier-control svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* Reset shares the specified/touched rail; it never takes a grid column. */
+.qualifier-row > .qualifier-reset {
+  position: absolute;
+  z-index: 1;
+  left: -1.25rem;
+  top: 0;
+  width: 1.125rem;
+  height: 100%;
+  min-height: 1.25rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.qualifier-reset svg {
+  width: 0.75rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0;
+}
+.qualifier-row:hover > .qualifier-reset svg,
+.qualifier-reset:focus-visible svg {
+  opacity: 1;
+}
+.qualifier-row > .qualifier-reset:hover,
+.qualifier-row > .qualifier-reset:focus-visible {
+  color: #000;
+  background: transparent;
+}
+
+.qualifier-control img {
+  height: 1rem;
+  width: auto;
+  max-width: 1rem;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.qualifier-heading .qualifier-control img {
+  transform: translateY(-0.125rem);
+}

@@ -11,9 +11,13 @@ import { Extension } from '../../config/ucp/common';
 import {
   CONFIGURATION_USER_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from '../../function/configuration/state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
-import { LANGUAGE_ATOM } from '../../function/gui-settings/settings';
+import {
+  CREATOR_MODE_ATOM,
+  LANGUAGE_ATOM,
+} from '../../function/gui-settings/settings';
 import { ACTIVE_EXTENSIONS_FULL_ATOM } from '../../function/extensions/state/focus';
 
 export async function getLanguage(): Promise<string> {
@@ -104,6 +108,12 @@ export function createGetCurrentConfigFunction(baseUrl: string) {
       userConfig,
     );
     return {
+      qualifierEditing: true,
+      creatorMode: getStore().get(CREATOR_MODE_ATOM),
+      qualifiers: transformConfigsForCustomMenu(
+        urlPrefix,
+        getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM),
+      ),
       baseline: transformedBaseline,
       user: transformedUserConfig,
     };

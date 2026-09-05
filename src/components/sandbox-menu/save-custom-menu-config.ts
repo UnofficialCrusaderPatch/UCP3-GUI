@@ -1,25 +1,34 @@
 import { getStore } from '../../hooks/jotai/base';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../function/configuration/state';
-import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../function/configuration/derived-state';
+import { CREATOR_MODE_ATOM } from '../../function/gui-settings/settings';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+} from '../../function/configuration/derived-state';
 import { ConsoleLogger } from '../../util/scripts/logging';
 
 export default function saveConfig(
   baseUrl: string,
   config: Record<string, unknown>,
+  qualifiers: Record<string, unknown> = {},
 ) {
   // Log what was returned from the custom menu
   ConsoleLogger.debug(`sandbox-menu: saveConfig: ${baseUrl}`, config);
 
   // Prepend the baseUrl to the entries returned from the config menu
+  const locks = getStore().get(CONFIGURATION_LOCKS_REDUCER_ATOM);
   const prependedConfig = Object.fromEntries(
-    Object.entries(config).map(([subUrl, newConfigValue]) => [
-      `${baseUrl}.${subUrl}`,
-      newConfigValue,
-    ]),
+    Object.entries(config)
+      .filter(([key]) => !locks[`${baseUrl}.${key}`])
+      .map(([subUrl, newConfigValue]) => [
+        `${baseUrl}.${subUrl}`,
+        newConfigValue,
+      ]),
   );
 
   // Gather the keys that were set to value `undefined`
@@ -57,7 +66,7 @@ export default function saveConfig(
   });
 
   // Compute full config based on defaults and user values
-  // TODO: currently no support for setting required/suggested
+
   const baseline = getStore().get(CONFIGURATION_DEFAULTS_REDUCER_ATOM);
   const urlPrefix = `${baseUrl}.`;
   const baselineEntries = Object.fromEntries(
@@ -86,4 +95,32 @@ export default function saveConfig(
     type: 'set-multiple',
     value: fullConfigEntries,
   });
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
+    type: 'clear-keys',
+    keys: toBeCleared,
+  });
+  if (getStore().get(CREATOR_MODE_ATOM)) {
+    const local = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
+    const changes = Object.fromEntries(
+      Object.entries(qualifiers)
+        .filter(
+          ([key, value]) =>
+            (value === 'required' || value === 'suggested') &&
+            !locks[`${baseUrl}.${key}`] &&
+            local[`${baseUrl}.${key}`] !== undefined,
+        )
+        .map(([key, value]) => [
+          `${baseUrl}.${key}`,
+          value as 'required' | 'suggested',
+        ]),
+    );
+    getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: changes,
+    });
+    getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: Object.fromEntries(Object.keys(changes).map((key) => [key, true])),
+    });
+  }
 }

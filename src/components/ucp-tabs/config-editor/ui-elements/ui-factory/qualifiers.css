@@ -25,7 +25,7 @@
   align-items: start;
 }
 .qualifier-row > .qualifier-controls {
-  margin-top: 0.3rem;
+  margin-top: 0.1rem;
 }
 .qualifier-heading {
   display: flex;
@@ -99,4 +99,8 @@
   object-fit: contain;
   image-rendering: pixelated;
   flex-shrink: 0;
+}
+
+.qualifier-heading .qualifier-control img {
+  transform: translateY(-0.125rem);
 }

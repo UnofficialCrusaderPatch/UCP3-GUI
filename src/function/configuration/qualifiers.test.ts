@@ -46,3 +46,36 @@ it('shows a mixed parent for a required child with untouched siblings', () => {
   ).toBe('required');
   expect(qualifierState([], qualifiers, scope)).toBe('suggested');
 });
+
+it('selects every editable suboption for a whole-group change, preserving values', () => {
+  const full = {
+    'group.one': true,
+    'group.child.two': false,
+    'group.child.zero': 0,
+    'group.locked': 7,
+    'group.menu': {},
+    'other.one': true,
+  };
+  const keys = configuredKeys(['group'], full, { 'group.locked': {} });
+  expect(keys).toEqual(['group.one', 'group.child.two', 'group.child.zero']);
+  const values = Object.fromEntries(
+    keys.map((key) => [key, full[key as keyof typeof full]]),
+  );
+  expect(values).toEqual({
+    'group.one': true,
+    'group.child.two': false,
+    'group.child.zero': 0,
+  });
+  expect(
+    qualifierState(
+      keys,
+      Object.fromEntries(keys.map((key) => [key, 'required'])),
+    ),
+  ).toBe('required');
+  expect(
+    qualifierState(
+      keys,
+      Object.fromEntries(keys.map((key) => [key, 'suggested'])),
+    ),
+  ).toBe('suggested');
+});

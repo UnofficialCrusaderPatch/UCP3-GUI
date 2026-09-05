@@ -30,3 +30,19 @@ it('collects nested category and group scopes without unrelated metadata', () =>
     }),
   ).toEqual(['a.one', 'a.two']);
 });
+
+it('shows a mixed parent for a required child with untouched siblings', () => {
+  const roots = ['category'];
+  const full = { 'category.one': true, 'category.two': false };
+  const user = { 'category.one': true };
+  const qualifiers = { 'category.one': 'required' } as const;
+  const editable = configuredKeys(roots, user, {});
+  const scope = configuredKeys(roots, full, {});
+  expect(qualifierState(editable, qualifiers, scope)).toBe('mixed');
+  expect(qualifierState(editable, qualifiers)).toBe('required');
+  expect(editable).toEqual(['category.one']);
+  expect(
+    qualifierState(scope, { ...qualifiers, 'category.two': 'required' }, scope),
+  ).toBe('required');
+  expect(qualifierState([], qualifiers, scope)).toBe('suggested');
+});

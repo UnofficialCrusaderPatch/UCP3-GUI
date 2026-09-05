@@ -3,13 +3,18 @@ import { ConfigurationQualifier } from './state';
 export function qualifierState(
   keys: string[],
   qualifiers: Record<string, ConfigurationQualifier>,
+  scope: string[] = keys,
 ) {
   const states = new Set(
     keys.map((key) =>
       qualifiers[key] === 'required' ? 'required' : 'suggested',
     ),
   );
-  if (states.size > 1) return 'mixed';
+  if (
+    states.size > 1 ||
+    (states.has('required') && scope.some((key) => !keys.includes(key)))
+  )
+    return 'mixed';
   return states.has('required') ? 'required' : 'suggested';
 }
 

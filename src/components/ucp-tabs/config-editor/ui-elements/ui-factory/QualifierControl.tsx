@@ -41,7 +41,14 @@ export default function QualifierControl({
   const keys = single
     ? roots.filter((key) => !locks[key] && full[key] !== undefined)
     : configuredKeys(roots, user, locks);
-  const state = qualifierState(keys, qualifiers);
+  const state = qualifierState(
+    keys,
+    qualifiers,
+    single ? keys : configuredKeys(roots, full, locks),
+  );
+  // Group actions still change local overrides only, even when the parent
+  // displays Mixed because untouched siblings remain outside that selection.
+  const actionState = qualifierState(keys, qualifiers);
   const title = `${localize(`config.qualifier.${state}`)} - ${localize(single ? 'config.qualifier.single' : 'config.qualifier.group')}${keys.length ? '' : ` - ${localize('config.qualifier.empty')}`}`;
   return (
     <span className="qualifier-controls">
@@ -54,7 +61,7 @@ export default function QualifierControl({
         disabled={disabled || !keys.length}
         onClick={(event) => {
           event.stopPropagation();
-          const next = state === 'required' ? 'suggested' : 'required';
+          const next = actionState === 'required' ? 'suggested' : 'required';
           if (single)
             setUser({
               type: 'set-multiple',

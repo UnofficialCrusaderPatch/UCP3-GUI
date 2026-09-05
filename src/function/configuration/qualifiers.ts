@@ -18,7 +18,8 @@ export function qualifierState(
   return states.has('required') ? 'required' : 'suggested';
 }
 
-// Groups use only explicit local values, never copy inherited defaults.
+// Select editable keys from the supplied layer: local values for the displayed
+// state, effective values for whole-group actions.
 export function configuredKeys(
   roots: string[],
   values: Record<string, unknown>,

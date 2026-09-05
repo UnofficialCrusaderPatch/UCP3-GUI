@@ -23,6 +23,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import Message from '../general/message';
 import saveConfig from './save-custom-menu-config';
+import { createGetTextureCatalogInputsFunction } from './texture-catalog-service';
 
 export interface SandboxSource {
   html: string;
@@ -58,6 +59,8 @@ function createSandboxHostApi(
     getTextFile: createGetTextFileFunction(currentFolder),
     getAssetUrl: createGetAssetUrlFunction(currentFolder),
     getBinaryFileBase64: createGetBinaryFileFunction(currentFolder),
+    getTextureCatalogInputs:
+      createGetTextureCatalogInputsFunction(currentFolder),
     receivePluginPaths: createReceivePluginPathsFunction(currentFolder),
     getCurrentConfig: createGetCurrentConfigFunction(baseUrl),
     getConfigState: createGetConfigStateFunction(),

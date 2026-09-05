@@ -11,6 +11,7 @@ mod logging;
 mod run_program;
 mod utils;
 mod zip_support;
+mod texture_metadata;
 
 fn main() {
     let tauri_app = tauri::Builder::default()
@@ -24,7 +25,8 @@ fn main() {
             file_support::slashify,
             file_support::canonicalize,
             file_support::read_and_filter_dir,
-            file_support::scan_file_for_bytes
+            file_support::scan_file_for_bytes,
+            texture_metadata::read_gm1_metadata
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application");

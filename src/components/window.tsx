@@ -5,6 +5,7 @@ import './window.css';
 import { Suspense } from 'react';
 import Titlebar from './titlebar/titlebar';
 import Main from './main-page';
+import TextureCatalogPreloader from './sandbox-menu/texture-catalog-preloader';
 
 // // adds dev object to globalThis, allowing to use some functions in the web console
 if (import.meta.env.DEV) {
@@ -14,6 +15,9 @@ if (import.meta.env.DEV) {
 function WindowContent() {
   return (
     <>
+      <Suspense>
+        <TextureCatalogPreloader />
+      </Suspense>
       <div className="page-titlebar">
         <Titlebar />
       </div>

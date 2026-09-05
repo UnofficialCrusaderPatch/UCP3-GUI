@@ -34,3 +34,10 @@
   flex: 1;
   min-width: 0;
 }
+
+/* The outer setting row owns the existing specified/touched marker, including
+   its qualifier column. Suppress only the immediate inner duplicate so nested
+   settings retain their own markers. Normal mode retains the original styling. */
+.qualifier-value > .ucp-specified::after {
+  display: none;
+}

@@ -139,7 +139,7 @@ function CreateUCP2Switch(args: {
   return (
     <Accordion
       bsPrefix="ucp-accordion ui-element"
-      className={`col sword-checkbox ${(spec.style || {}).className} ${specifiedStyle}`}
+      className={`col sword-checkbox ${(spec.style || {}).className} ${hasChildren ? '' : specifiedStyle}`}
       style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
       onMouseEnter={() => {
         if (isEnabled) {
@@ -161,7 +161,7 @@ function CreateUCP2Switch(args: {
           bsPrefix="ucp-accordion"
         >
           <Accordion.Item eventKey="options" bsPrefix="ucp-switch-options">
-            <div className="d-flex align-items-center">
+            <div className={`d-flex align-items-center ${specifiedStyle}`}>
               <Accordion.Button
                 className="w-auto flex-shrink-0 p-0 me-2"
                 aria-label={header}

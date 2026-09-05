@@ -57,8 +57,12 @@ vi.mock('./ConfigWarning', () => ({
   default: ({ text }: { text: string }) => <span role="alert">{text}</span>,
 }));
 vi.mock('./StatusBarMessage', () => ({ createStatusBarMessage: () => '' }));
-vi.mock('./specified/SpecifiedStyle', () => ({
-  createSpecifiedStyleIfSpecifiedAndTouched: () => '',
+// Use the real specified/touched styling; isolate its unrelated creator setting.
+vi.mock('function/gui-settings/settings', async () => ({
+  CREATOR_MODE_ATOM: (await import('jotai')).atom(false),
+}));
+vi.mock('hooks/jotai/base', async () => ({
+  getStore: (await import('jotai')).createStore,
 }));
 vi.mock('../../../../../util/scripts/logging', () => ({
   default: class {
@@ -165,6 +169,51 @@ function setup(
   return { store, view, spec, defaults };
 }
 describe('configuration table', () => {
+  test('saved and touched markers belong to their own controls, not nested options', () => {
+    const spec = {
+      name: 'troop-settings',
+      display: 'UCP2Switch',
+      header: 'Troop settings',
+      url: 'troops.enabled',
+      contents: { value: true },
+      children: [fixture()],
+    } as unknown as UCP2SwitchDisplayConfigElement;
+    const store = createStore();
+    store.set(
+      CONFIGURATION_DEFAULTS_REDUCER_ATOM as never,
+      getConfigDefaults([spec] as never) as never,
+    );
+    store.set(CONFIGURATION_USER_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: { 'troops.enabled': true },
+    });
+    render(
+      <Provider store={store}>
+        <CreateUCP2Switch spec={spec} disabled={false} className="" />
+      </Provider>,
+    );
+    const parent = screen.getByRole('checkbox', { name: 'Troop settings' });
+    const count = screen.getByRole('spinbutton', { name: 'Archer: Count' });
+    const marker = parent.closest('.ucp-specified')!;
+    expect(marker).not.toBeNull();
+    expect(marker.classList.contains('ucp-touched')).toBe(false);
+    expect(marker.contains(count)).toBe(false);
+    expect(count.closest('.ucp-specified')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Troop settings' }));
+    expect(
+      store.get(CONFIGURATION_TOUCHED_REDUCER_ATOM)['troops.enabled'],
+    ).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: 'Troop settings' }));
+    fireEvent.change(count, { target: { value: '8' } });
+    expect(
+      count.closest('.ucp-specified')?.classList.contains('ucp-touched'),
+    ).toBe(true);
+    expect(marker.classList.contains('ucp-touched')).toBe(false);
+    fireEvent.click(parent);
+    expect(marker.classList.contains('ucp-touched')).toBe(true);
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.count']).toBe(8);
+  });
+
   test('automatic states show a choice or note without writing an override', () => {
     const input = fixture();
     const first = input.children[0] as GroupDisplayConfigElement;

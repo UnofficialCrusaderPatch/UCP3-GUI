@@ -1,6 +1,6 @@
 # Configuration tables
 
-Frontend 1.0.17 also supports `children` on `UCP2Switch`. The children and
+Frontend 1.0.16 also supports `children` on `UCP2Switch`. The children and
 description share one collapsible body. The switch opens it when enabled and
 closes it when disabled; its separate arrow can toggle visibility without
 changing configuration. Disabled/locked parent switches disable child controls.

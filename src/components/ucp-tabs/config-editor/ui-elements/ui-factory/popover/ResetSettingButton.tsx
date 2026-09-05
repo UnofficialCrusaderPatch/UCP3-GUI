@@ -16,6 +16,7 @@ import {
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../../common/buttons/config-serialized-state';
 
 import { useMessage } from '../../../../../general/message';
+import CompactResetOverlay from './CompactResetOverlay';
 
 /* eslint-disable react/require-default-props */
 export default function ResetSettingButton({
@@ -52,7 +53,7 @@ export default function ResetSettingButton({
   const touched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
   if (compact && (user[url] === undefined || touched[url] !== true))
     return null;
-  return (
+  const button = (
     <Button
       disabled={locked || disabled || (compact && user[url] === undefined)}
       role="button"
@@ -90,4 +91,5 @@ export default function ResetSettingButton({
       <TrashFill aria-hidden="true" />
     </Button>
   );
+  return compact ? <CompactResetOverlay>{button}</CompactResetOverlay> : button;
 }

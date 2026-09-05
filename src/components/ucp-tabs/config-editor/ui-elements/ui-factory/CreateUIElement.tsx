@@ -1,3 +1,13 @@
+import { useAtomValue } from 'jotai';
+import {
+  CONFIGURATION_USER_REDUCER_ATOM,
+  CONFIGURATION_TOUCHED_REDUCER_ATOM,
+} from '../../../../../function/configuration/state';
+import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
+import { CREATOR_MODE_ATOM } from '../../../../../function/gui-settings/settings';
+import QualifierControl from './QualifierControl';
+import ResetSettingButton from './popover/ResetSettingButton';
+import { settingRoots } from '../../../../../function/configuration/qualifiers';
 import './common.css';
 import './UCPAccordion.css';
 
@@ -23,7 +33,7 @@ import { useMessage } from '../../../../general/message';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
-function CreateUIElement(args: {
+function CreateUIElementContent(args: {
   spec: DisplayConfigElement;
   disabled: boolean;
   className: string;
@@ -138,4 +148,37 @@ function CreateUIElement(args: {
   }
 }
 
+function CreateUIElement(args: Parameters<typeof CreateUIElementContent>[0]) {
+  const creator = useAtomValue(CREATOR_MODE_ATOM);
+  const user = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
+  const touched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const { spec, disabled, className } = args;
+  const roots = settingRoots(spec);
+  const group = ['Group', 'GroupBox', 'CustomMenu'].includes(spec.display);
+  if (!creator || !roots.length || ['Group', 'GroupBox'].includes(spec.display))
+    return (
+      <CreateUIElementContent
+        spec={spec}
+        disabled={disabled}
+        className={className}
+      />
+    );
+  return (
+    <div
+      className={`qualifier-row ${createSpecifiedStyleIfSpecifiedAndTouched(user, touched, roots[0])}`}
+    >
+      {!group && (
+        <ResetSettingButton url={roots[0]} compact disabled={disabled} />
+      )}
+      <QualifierControl roots={roots} single={!group} disabled={disabled} />
+      <div className="qualifier-value">
+        <CreateUIElementContent
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      </div>
+    </div>
+  );
+}
 export default CreateUIElement;

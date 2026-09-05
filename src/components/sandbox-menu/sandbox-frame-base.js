@@ -7,7 +7,12 @@
 const DONE_EVENT_NAME = 'INIT_DONE';
 
 // need to be provided in this object by the script provider
-const SANDBOX_FUNCTIONS = { getConfig: () => {} };
+// Publish optional method names before asynchronous module initialization.
+// Websandbox snapshots these names when setLocalApi is called.
+const SANDBOX_FUNCTIONS = {
+  getConfig: () => {},
+  getConfigQualifiers: () => ({}),
+};
 
 const HOST_FUNCTIONS = {};
 

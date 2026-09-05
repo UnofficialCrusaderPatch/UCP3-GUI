@@ -66,23 +66,28 @@
   width: 0.75rem;
   height: 100%;
   min-height: 1.25rem;
-  padding: 0.2rem 0 0;
+  padding: 0;
   margin: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #241b0d;
+  color: #000;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
 }
 .qualifier-reset svg {
   width: 0.75rem;
   height: 0.875rem;
   flex-shrink: 0;
+  opacity: 0;
+}
+.qualifier-row:hover > .qualifier-reset svg,
+.qualifier-reset:focus-visible svg {
+  opacity: 1;
 }
 .qualifier-row > .qualifier-reset:hover,
 .qualifier-row > .qualifier-reset:focus-visible {
-  color: #743314;
-  background: rgba(199, 164, 100, 0.6);
+  color: #000;
+  background: transparent;
 }

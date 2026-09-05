@@ -61,9 +61,9 @@
 .qualifier-row > .qualifier-reset {
   position: absolute;
   z-index: 1;
-  left: -0.625rem;
+  left: -1.25rem;
   top: 0;
-  width: 0.75rem;
+  width: 1.125rem;
   height: 100%;
   min-height: 1.25rem;
   padding: 0;
@@ -74,7 +74,7 @@
   color: #000;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .qualifier-reset svg {
   width: 0.75rem;

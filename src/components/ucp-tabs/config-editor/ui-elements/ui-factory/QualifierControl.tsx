@@ -1,6 +1,8 @@
 /* eslint-disable react/require-default-props */
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { LockFill, Unlock, Dash } from 'react-bootstrap-icons';
+import { Dash } from 'react-bootstrap-icons';
+import requiredIcon from '../../../../../assets/ucp3/qualifier-required.png';
+import suggestedIcon from '../../../../../assets/ucp3/qualifier-suggested.png';
 import { CREATOR_MODE_ATOM } from '../../../../../function/gui-settings/settings';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
@@ -78,8 +80,12 @@ export default function QualifierControl({
           setDirty(true);
         }}
       >
-        {state === 'required' && <LockFill aria-hidden="true" />}
-        {state === 'suggested' && <Unlock aria-hidden="true" />}
+        {state === 'required' && (
+          <img src={requiredIcon} alt="" aria-hidden="true" />
+        )}
+        {state === 'suggested' && (
+          <img src={suggestedIcon} alt="" aria-hidden="true" />
+        )}
         {state === 'mixed' && <Dash aria-hidden="true" />}
       </button>
     </span>

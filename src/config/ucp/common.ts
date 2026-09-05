@@ -338,7 +338,21 @@ export type GroupDisplayConfigElement = BaseDisplayConfigElement &
   ChildrenableDisplayConfigElement & {
     description: string;
     display: 'Group';
+    /** Optional table presentation; children remain ordinary config elements. */
+    table?: ConfigTableLayout;
   };
+
+export type ConfigTableColumn = {
+  name: string;
+  header: string;
+  /** Align a Choice/RadioGroup cell to these choices; absent choices stay empty. */
+  choices?: { name: string; text: string }[];
+};
+
+export type ConfigTableLayout = {
+  rowHeader: string;
+  columns: ConfigTableColumn[];
+};
 
 export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
   ColumnableDisplayConfigElement &

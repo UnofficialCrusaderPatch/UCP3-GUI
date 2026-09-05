@@ -2,7 +2,8 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Form } from 'react-bootstrap';
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
+import ConfigTableCellContext from './ConfigTableCellContext';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
@@ -50,6 +51,7 @@ function CreateRadioGroup(args: {
   );
 
   const { spec, disabled, className } = args;
+  const tableCell = useContext(ConfigTableCellContext);
   const { url, text, enabled } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
@@ -110,31 +112,58 @@ function CreateRadioGroup(args: {
     configuration[url] = newValue;
   };
 
-  const radios = choices.map((choice) => (
-    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-    <div key={choice.name} className="form-check">
-      <input
-        type="radio"
-        disabled={isDisabled}
-        className="form-check-input"
-        checked={choice.name === selectedValue}
-        onChange={() => {
-          onRadioClick(choice.name);
-        }}
-        // onClick={() => {
-        //   onRadioClick(choice.name);
-        // }}
-        id={`${url}-radio-${choice.name}`}
-      />
-      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-      <label
-        className="form-check-label"
-        htmlFor={`${url}-radio-${choice.name}`}
+  const radios = (tableCell?.choices || choices).map((columnChoice) => {
+    const choice = choices.find((item) => item.name === columnChoice.name);
+    if (!choice)
+      return (
+        <span
+          key={columnChoice.name}
+          className="config-table-unavailable"
+          aria-hidden="true"
+        >
+          —
+        </span>
+      );
+    return (
+      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+      <div
+        key={choice.name}
+        className={`form-check ${tableCell ? 'sword-checkbox' : ''}`}
       >
-        {choice.text}
-      </label>
-    </div>
-  ));
+        <input
+          type="radio"
+          name={url}
+          aria-label={
+            tableCell ? `${tableCell.label}: ${columnChoice.text}` : undefined
+          }
+          title={
+            tableCell ? `${tableCell.label}: ${columnChoice.text}` : undefined
+          }
+          disabled={isDisabled}
+          className="form-check-input"
+          checked={choice.name === selectedValue}
+          onChange={() => {
+            onRadioClick(choice.name);
+          }}
+          // onClick={() => {
+          //   onRadioClick(choice.name);
+          // }}
+          id={`${url}-radio-${choice.name}`}
+        />
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label
+          className="form-check-label"
+          htmlFor={`${url}-radio-${choice.name}`}
+        >
+          {tableCell ? (
+            <span className="visually-hidden">{columnChoice.text}</span>
+          ) : (
+            choice.text
+          )}
+        </label>
+      </div>
+    );
+  });
 
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
@@ -164,8 +193,21 @@ function CreateRadioGroup(args: {
       style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      <p>{text}</p>
-      <div className={isDisabled ? 'disabled' : ''}>{radios}</div>
+      {!tableCell && <p>{text}</p>}
+      <div
+        role="radiogroup"
+        aria-label={tableCell?.label || text}
+        className={`${isDisabled ? 'disabled' : ''} ${tableCell ? 'config-table-radios' : ''}`}
+        style={
+          tableCell
+            ? {
+                gridTemplateColumns: `repeat(${(tableCell.choices || choices).length}, minmax(0, 1fr))`,
+              }
+            : undefined
+        }
+      >
+        {radios}
+      </div>
     </Form.Group>
   );
 }

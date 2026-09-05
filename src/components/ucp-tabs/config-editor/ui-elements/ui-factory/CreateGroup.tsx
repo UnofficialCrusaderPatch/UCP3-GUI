@@ -2,6 +2,8 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
+// eslint-disable-next-line import/no-cycle
+import CreateConfigTable from './CreateConfigTable';
 import {
   GroupDisplayConfigElement,
   UrlableDisplayConfigElement,
@@ -13,6 +15,15 @@ function CreateGroup(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
+  if (spec.table) {
+    return (
+      <CreateConfigTable
+        spec={spec}
+        disabled={disabled}
+        className={className}
+      />
+    );
+  }
   // TODO: header property is not used, is this expected?
   const { name, description, children, text } = spec;
 

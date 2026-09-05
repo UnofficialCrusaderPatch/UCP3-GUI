@@ -2,7 +2,8 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 
 import { Form } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
+import ConfigTableCellContext from './ConfigTableCellContext';
 import {
   NumberContents,
   NumberInputDisplayConfigElement,
@@ -54,6 +55,7 @@ function CreateNumberInput(args: {
   );
 
   const { spec, disabled, className } = args;
+  const tableCell = useContext(ConfigTableCellContext);
   const { url, text, tooltip, enabled, contents } = spec;
   const { min, max } = contents as NumberContents;
   let { [url]: value } = configuration;
@@ -147,6 +149,7 @@ function CreateNumberInput(args: {
           key={`${url}-input`}
           style={{ backgroundColor: '#ab712d' }}
           type="number"
+          aria-label={tableCell?.label}
           min={min as number}
           max={max as number}
           id={`${url}-input`}

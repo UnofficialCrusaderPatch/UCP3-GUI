@@ -4,6 +4,7 @@ import { MutableRefObject } from 'react';
 import { Overlay } from 'react-bootstrap';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 import ResetSettingButton from './ResetSettingButton';
+import useResetAvailable from './useResetAvailable';
 
 /** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
 
@@ -16,7 +17,8 @@ export function ConfigPopover(props: {
   const { url, show, theRef } = props;
 
   const creator = useAtomValue(CREATOR_MODE_ATOM);
-  if (creator) return null;
+  const resetAvailable = useResetAvailable(url);
+  if (creator || !resetAvailable) return null;
 
   return (
     <Overlay

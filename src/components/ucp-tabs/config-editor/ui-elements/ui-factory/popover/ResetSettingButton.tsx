@@ -17,6 +17,7 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../../common/buttons/c
 
 import { useMessage } from '../../../../../general/message';
 import CompactResetOverlay from './CompactResetOverlay';
+import useResetAvailable from './useResetAvailable';
 
 /* eslint-disable react/require-default-props */
 export default function ResetSettingButton({
@@ -48,14 +49,12 @@ export default function ResetSettingButton({
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const user = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
   const localize = useMessage();
-  const touched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
-  if (compact && (user[url] === undefined || touched[url] !== true))
-    return null;
+  const resetAvailable = useResetAvailable(url);
+  if (!resetAvailable) return null;
   const button = (
     <Button
-      disabled={locked || disabled || (compact && user[url] === undefined)}
+      disabled={locked || disabled}
       role="button"
       className={compact ? 'qualifier-reset' : 'ms-2 me-2'}
       id={`${url}-${compact ? 'inline' : 'popover'}-reset-button`}

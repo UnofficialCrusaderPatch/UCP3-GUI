@@ -86,6 +86,7 @@ function CreateUCP2Switch(args: {
 
   const hasChildren = children.length > 0;
   const [expanded, setExpanded] = useState(value === true);
+  const expandedKey = expanded ? 'options' : null;
   useEffect(() => {
     setExpanded(value === true);
   }, [value]);
@@ -154,7 +155,7 @@ function CreateUCP2Switch(args: {
 
   return (
     <Accordion
-      activeKey={hasChildren ? (expanded ? 'options' : null) : undefined}
+      activeKey={hasChildren ? expandedKey : undefined}
       onSelect={
         hasChildren ? (key) => setExpanded(key === 'options') : undefined
       }

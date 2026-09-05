@@ -18,6 +18,8 @@ import { buildExtensionConfigurationDB } from '../../../../function/configuratio
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import { filterOutExtensions as filterExtensions } from './filter-out-extensions';
 import reportAndConfirmBuildResult from './reporting';
+import { removeProviderAiOverrides } from './remove-provider-ai-overrides';
+import { compareObjects } from '../../../../util/scripts/objectCompare';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
 
@@ -26,16 +28,25 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
+  const oldExtensionState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
   const newExtensionState = removeExtensionFromExplicitlyActivatedExtensions(
-    getStore().get(EXTENSION_STATE_REDUCER_ATOM),
+    oldExtensionState,
     ext,
   );
 
+  const removedProviders = oldExtensionState.activeExtensions.filter(
+    (provider) =>
+      !newExtensionState.activeExtensions.some(
+        (active) =>
+          active.name === provider.name && active.version === provider.version,
+      ),
+  );
+  const newUserConfiguration = removeProviderAiOverrides(
+    filterExtensions(userConfiguration, newExtensionState.installedExtensions),
+    removedProviders,
+  );
   const disappearingEntries = Object.keys(userConfiguration).filter(
-    (url) =>
-      newExtensionState.installedExtensions
-        .map((e) => e.name)
-        .filter((name) => url.startsWith(`${name}.`)).length > 0,
+    (url) => !compareObjects(userConfiguration[url], newUserConfiguration[url]),
   );
 
   if (disappearingEntries.length > 0) {
@@ -54,11 +65,6 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
       return;
     }
   }
-
-  const newUserConfiguration = filterExtensions(
-    userConfiguration,
-    newExtensionState.installedExtensions,
-  );
 
   const res = buildExtensionConfigurationDB(newExtensionState);
   if (!(await reportAndConfirmBuildResult(res))) return;

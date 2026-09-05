@@ -2,7 +2,8 @@ import './variables.css';
 import './base.css';
 import './window.css';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { installGuiScaling } from '../util/scripts/gui-scaling';
 import Titlebar from './titlebar/titlebar';
 import Main from './main-page';
 
@@ -25,6 +26,8 @@ function WindowContent() {
 }
 
 export default function Window() {
+  useEffect(installGuiScaling, []);
+
   return (
     <Suspense>
       <WindowContent />

@@ -1,6 +1,17 @@
+:root {
+  --gui-scale: 1;
+  zoom: var(--gui-scale);
+}
+
+body {
+  overflow: auto;
+}
+
 #root {
   user-select: none;
-  height: 100vh;
+  /* Preserve the GUI's minimum layout and allow scrolling on small windows. */
+  min-width: 800px;
+  height: max(630px, calc(100vh / var(--gui-scale)));
 }
 
 .titlebar-container {
@@ -9,5 +20,5 @@
 
 .page-main {
   position: relative;
-  height: calc(100vh - 30px);
+  height: calc(100% - 30px);
 }

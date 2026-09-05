@@ -23,6 +23,12 @@ The support will include **at least** Windows 10/11, however, it should go down 
 
 Linux is supported too, see [here](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/blob/main/LINUX.md).
 
+Hold **Ctrl** and scroll up/down to enlarge/shrink the entire GUI, including
+custom menus. Scaling ranges from **100% to 200%** in 10% steps (including 150%).
+**Ctrl + Plus/Minus** also adjusts scaling; **Ctrl + 0** resets it to 100%.
+The chosen scale is remembered across restarts. At larger scales, maximize the
+window or use the outer scrollbars to reach content that no longer fits.
+
 ## Contributing
 
 Contributions and help are always welcome!

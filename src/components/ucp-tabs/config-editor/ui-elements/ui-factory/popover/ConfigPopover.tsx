@@ -11,7 +11,6 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../../../../../function/configuration/state';
-import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../../footer/footer';
 import {
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -32,7 +31,6 @@ export function ConfigPopover(props: {
   const locks = useAtomValue(CONFIGURATION_LOCKS_REDUCER_ATOM);
   const { [url]: lock } = locks;
   const locked = lock !== undefined;
-  const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
   const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
   const setConfiguration = useSetAtom(CONFIGURATION_FULL_REDUCER_ATOM);
   const setConfigurationTouched = useSetAtom(
@@ -44,15 +42,9 @@ export function ConfigPopover(props: {
     CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   );
 
-  const [qualifiers, setQualifier] = useAtom(
-    CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  );
+  const [, setQualifier] = useAtom(CONFIGURATION_QUALIFIER_REDUCER_ATOM);
 
   const { [url]: defaultValue } = configurationDefaults;
-
-  const qualifier = qualifiers[url];
-
-  const creatorMode = useAtomValue(CREATOR_MODE_ATOM);
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
@@ -108,54 +100,6 @@ export function ConfigPopover(props: {
             ...prps.style,
           }}
         >
-          {creatorMode ? (
-            <>
-              <input
-                type="checkbox"
-                onChange={() => {
-                  setQualifier({
-                    type: 'set-multiple',
-                    value: {
-                      [url]:
-                        qualifier === 'required' ? 'suggested' : 'required',
-                    },
-                  });
-                  setConfigurationTouched({
-                    type: 'set-multiple',
-                    value: {
-                      [url]: true,
-                    },
-                  });
-                  setUserConfiguration({
-                    type: 'set-multiple',
-                    value: {
-                      [url]: configuration[url],
-                    },
-                  });
-                }}
-                checked={qualifier === 'required'}
-                id={`${url}-popover-qualifier-switch`}
-                disabled={locked}
-              />
-              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-              <label
-                className="ms-2 fs-6"
-                htmlFor={`${url}-popover-qualifier-switch`}
-                onMouseEnter={() => {
-                  setStatusBarMessage(
-                    qualifier === 'required'
-                      ? 'config.popover.required'
-                      : 'config.popover.suggested',
-                  );
-                }}
-                onMouseLeave={() => {
-                  setStatusBarMessage(undefined);
-                }}
-              />
-              <span className=""> |</span>
-            </>
-          ) : undefined}
-
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,
       jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
           <Button

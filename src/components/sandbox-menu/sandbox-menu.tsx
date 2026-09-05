@@ -128,7 +128,13 @@ function SandboxInternal(
         disabled={!initDone}
         onClick={async () =>
           // we will see, if this works, or just closes the sandbox
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
+          saveConfig(
+            baseUrl,
+            await sandbox.connection?.remote.getConfig(),
+            typeof sandbox.connection?.remote.getConfigQualifiers === 'function'
+              ? await sandbox.connection.remote.getConfigQualifiers()
+              : {},
+          )
         }
       >
         <Message message="sandbox.save" />
@@ -138,7 +144,13 @@ function SandboxInternal(
         className="ucp-button sandbox-control-button"
         disabled={!initDone}
         onClick={async () => {
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig());
+          saveConfig(
+            baseUrl,
+            await sandbox.connection?.remote.getConfig(),
+            typeof sandbox.connection?.remote.getConfigQualifiers === 'function'
+              ? await sandbox.connection.remote.getConfigQualifiers()
+              : {},
+          );
           closeFunc();
         }}
       >

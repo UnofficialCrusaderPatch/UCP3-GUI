@@ -22,6 +22,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import Message from '../general/message';
 import saveConfig from './save-custom-menu-config';
+import { adjustGuiScale } from '../../util/scripts/gui-scaling';
 
 export interface SandboxSource {
   html: string;
@@ -49,6 +50,7 @@ function createSandboxHostApi(
 ) {
   return {
     confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
+    adjustGuiScale,
     getLanguage,
     getLocalizedString: createGetLocalizedStringFunction(
       localization,

@@ -59,6 +59,28 @@ addEventListener(
     await Websandbox.connection.remoteMethodsWaitPromise;
     Object.assign(HOST_FUNCTIONS, Websandbox.connection.remote);
 
+    // Input inside the sandbox does not bubble to the GUI window.
+    window.addEventListener(
+      'wheel',
+      (event) => {
+        if (!event.ctrlKey || event.deltaY === 0) return;
+        event.preventDefault();
+        HOST_FUNCTIONS.adjustGuiScale(event.deltaY < 0 ? 1 : -1);
+      },
+      { passive: false, capture: true },
+    );
+    window.addEventListener(
+      'keydown',
+      (event) => {
+        if (!event.ctrlKey || !['+', '=', '-', '0'].includes(event.key)) return;
+        event.preventDefault();
+        HOST_FUNCTIONS.adjustGuiScale(
+          event.key === '0' ? 0 : event.key === '-' ? -1 : 1,
+        );
+      },
+      true,
+    );
+
     await replaceAllLocalizeTextMarkers(document);
     await replaceAllAssetUrlMarkers(document);
 

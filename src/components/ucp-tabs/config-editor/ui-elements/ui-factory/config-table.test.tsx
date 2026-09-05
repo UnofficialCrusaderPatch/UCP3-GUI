@@ -12,6 +12,7 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
@@ -48,7 +49,9 @@ vi.mock('../../../../footer/footer', async () => ({
   STATUS_BAR_MESSAGE_ATOM: (await import('jotai')).atom(undefined),
 }));
 vi.mock('./popover/ConfigPopover', () => ({ ConfigPopover: () => null }));
-vi.mock('./ConfigWarning', () => ({ default: () => null }));
+vi.mock('./ConfigWarning', () => ({
+  default: ({ text }: { text: string }) => <span role="alert">{text}</span>,
+}));
 vi.mock('./StatusBarMessage', () => ({ createStatusBarMessage: () => '' }));
 vi.mock('./specified/SpecifiedStyle', () => ({
   createSpecifiedStyleIfSpecifiedAndTouched: () => '',
@@ -127,7 +130,12 @@ function fixture() {
     })),
   } as unknown as GroupDisplayConfigElement;
 }
-function setup(disabled = false, locked = false, input = fixture()) {
+function setup(
+  disabled = false,
+  locked = false,
+  input = fixture(),
+  warnings = {},
+) {
   const spec = changeLocale(
     {
       unit: 'Troop',
@@ -136,6 +144,7 @@ function setup(disabled = false, locked = false, input = fixture()) {
     input,
   ) as GroupDisplayConfigElement;
   const store = createStore();
+  store.set(CONFIGURATION_WARNINGS_REDUCER_ATOM as never, warnings as never);
   const defaults = getConfigDefaults([spec] as never);
   store.set(CONFIGURATION_DEFAULTS_REDUCER_ATOM as never, defaults as never);
   if (locked)
@@ -262,5 +271,20 @@ describe('configuration table', () => {
         }) as HTMLInputElement
       ).disabled,
     ).toBe(true);
+  });
+  test('choice warnings and tooltips survive the radio presentation', () => {
+    const spec = fixture();
+    const cell = (spec.children[0] as GroupDisplayConfigElement).children[0];
+    (cell as unknown as { tooltip: string }).tooltip =
+      'Initial scenario troops only';
+    setup(false, false, spec, {
+      'Archer.role': { text: 'Scenario warning', level: 'warning' },
+    });
+    expect(screen.getByRole('alert').textContent).toBe('Scenario warning');
+    expect(
+      screen
+        .getByRole('radio', { name: 'Archer: Starting role: Dig' })
+        .getAttribute('title'),
+    ).toContain('Initial scenario troops only');
   });
 });

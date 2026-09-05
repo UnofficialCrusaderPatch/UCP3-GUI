@@ -9,6 +9,7 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
 import {
@@ -18,6 +19,7 @@ import {
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
+import ConfigWarning from './ConfigWarning';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -52,6 +54,7 @@ function CreateRadioGroup(args: {
 
   const { spec, disabled, className } = args;
   const tableCell = useContext(ConfigTableCellContext);
+  const warnings = useAtomValue(CONFIGURATION_WARNINGS_REDUCER_ATOM);
   const { url, text, enabled } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
@@ -137,7 +140,12 @@ function CreateRadioGroup(args: {
             tableCell ? `${tableCell.label}: ${columnChoice.text}` : undefined
           }
           title={
-            tableCell ? `${tableCell.label}: ${columnChoice.text}` : undefined
+            [
+              tableCell ? `${tableCell.label}: ${columnChoice.text}` : '',
+              spec.tooltip,
+            ]
+              .filter(Boolean)
+              .join('\n') || undefined
           }
           disabled={isDisabled}
           className="form-check-input"
@@ -193,6 +201,9 @@ function CreateRadioGroup(args: {
       style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
+      {warnings[url] && (
+        <ConfigWarning text={warnings[url].text} level={warnings[url].level} />
+      )}
       {!tableCell && <p>{text}</p>}
       <div
         role="radiogroup"

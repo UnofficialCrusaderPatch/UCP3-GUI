@@ -385,6 +385,7 @@ export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
   EnableableDisplayConfigElement & {
     contents: ChoiceContents;
     display: 'RadioGroup';
+    tooltip?: string;
   };
 
 export type SliderDisplayConfigElement = BaseDisplayConfigElement &

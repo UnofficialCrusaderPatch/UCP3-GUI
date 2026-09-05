@@ -136,8 +136,28 @@ function CreateUCP2Switch(args: {
     url,
   );
 
+  const body = (
+    <Accordion.Body>
+      {text && <div>{text}</div>}
+      {children.map((child) => (
+        <CreateUIElement
+          key={
+            child.name || ('url' in child ? child.url : JSON.stringify(child))
+          }
+          spec={child}
+          disabled={isDisabled || value !== true}
+          className=""
+        />
+      ))}
+    </Accordion.Body>
+  );
+
   return (
     <Accordion
+      activeKey={hasChildren ? (expanded ? 'options' : null) : undefined}
+      onSelect={
+        hasChildren ? (key) => setExpanded(key === 'options') : undefined
+      }
       bsPrefix="ucp-accordion ui-element"
       className={`col sword-checkbox ${(spec.style || {}).className} ${hasChildren ? '' : specifiedStyle}`}
       style={{ marginLeft: 0, marginBottom: 0, ...(spec.style || {}).css }}
@@ -155,35 +175,18 @@ function CreateUCP2Switch(args: {
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
       {hasChildren ? (
-        <Accordion
-          activeKey={expanded ? 'options' : null}
-          onSelect={(key) => setExpanded(key === 'options')}
-          bsPrefix="ucp-accordion"
-        >
-          <Accordion.Item eventKey="options" bsPrefix="ucp-switch-options">
-            <div className={`d-flex align-items-center ${specifiedStyle}`}>
-              <Accordion.Button
-                className="w-auto flex-shrink-0 p-0 me-2"
-                aria-label={header}
-              />
-              {headerElement}
-            </div>
-            <Accordion.Body>
-              {text && <div>{text}</div>}
-              {children.map((child) => (
-                <CreateUIElement
-                  key={
-                    child.name ||
-                    ('url' in child ? child.url : JSON.stringify(child))
-                  }
-                  spec={child}
-                  disabled={isDisabled || value !== true}
-                  className=""
-                />
-              ))}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+        <Accordion.Item eventKey="options" bsPrefix="ucp-switch-options">
+          <div
+            className={`ucp-accordion-header ucp-accordion-header-left-button d-flex align-items-center ${specifiedStyle}`}
+          >
+            <Accordion.Button
+              className="w-auto flex-shrink-0 p-0"
+              aria-label={header}
+            />
+            {headerElement}
+          </div>
+          {body}
+        </Accordion.Item>
       ) : (
         <>
           <Accordion.Header
@@ -192,7 +195,7 @@ function CreateUCP2Switch(args: {
           >
             {headerElement}
           </Accordion.Header>
-          <Accordion.Body>{text}</Accordion.Body>
+          {body}
         </>
       )}
     </Accordion>

@@ -55,8 +55,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.config-table .config-table-radios .form-check {
   position: relative;
 }
 /* Keep native radios focusable while the existing sword label draws the control. */

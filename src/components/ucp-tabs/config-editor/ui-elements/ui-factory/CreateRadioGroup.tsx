@@ -2,12 +2,14 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Form } from 'react-bootstrap';
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
+import ConfigTableCellContext from './ConfigTableCellContext';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
+  CONFIGURATION_WARNINGS_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 
 import {
@@ -17,6 +19,7 @@ import {
 import { parseEnabledLogic } from '../enabled-logic';
 import { createStatusBarMessage } from './StatusBarMessage';
 import { ConfigPopover } from './popover/ConfigPopover';
+import ConfigWarning from './ConfigWarning';
 import {
   CONFIGURATION_DEFAULTS_REDUCER_ATOM,
   CONFIGURATION_LOCKS_REDUCER_ATOM,
@@ -50,6 +53,8 @@ function CreateRadioGroup(args: {
   );
 
   const { spec, disabled, className } = args;
+  const tableCell = useContext(ConfigTableCellContext);
+  const warnings = useAtomValue(CONFIGURATION_WARNINGS_REDUCER_ATOM);
   const { url, text, enabled } = spec;
   const { contents } = spec;
   const { choices } = contents as ChoiceContents;
@@ -91,7 +96,19 @@ function CreateRadioGroup(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const selectedValue = value === undefined ? defaultChoice : (value as string);
+  const isInherited =
+    !!tableCell && !!spec.inheritFrom && value === spec.inheritFrom.value;
+  let selectedValue =
+    value === undefined ? defaultChoice.name : (value as string);
+  if (isInherited) {
+    selectedValue = (configuration[spec.inheritFrom!.url] ??
+      configurationDefaults[spec.inheritFrom!.url]) as string;
+  }
+  // Presentation describes an automatic value without changing stored settings.
+  const presentation = tableCell
+    ? spec.valuePresentation?.[selectedValue]
+    : undefined;
+  if (presentation?.choice) selectedValue = presentation.choice;
 
   // eslint-disable-next-line func-style
   const onRadioClick = (newValue: string) => {
@@ -107,34 +124,70 @@ function CreateRadioGroup(args: {
       type: 'set-multiple',
       value: Object.fromEntries([[url, true]]),
     });
-    configuration[url] = newValue;
   };
 
-  const radios = choices.map((choice) => (
-    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-    <div key={choice.name} className="form-check">
-      <input
-        type="radio"
-        disabled={isDisabled}
-        className="form-check-input"
-        checked={choice.name === selectedValue}
-        onChange={() => {
-          onRadioClick(choice.name);
-        }}
-        // onClick={() => {
-        //   onRadioClick(choice.name);
-        // }}
-        id={`${url}-radio-${choice.name}`}
-      />
-      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-      <label
-        className="form-check-label"
-        htmlFor={`${url}-radio-${choice.name}`}
+  const radios = (tableCell?.choices || choices).map((columnChoice) => {
+    const choice = choices.find((item) => item.name === columnChoice.name);
+    if (!choice)
+      return (
+        <span
+          key={columnChoice.name}
+          className="config-table-unavailable"
+          aria-hidden="true"
+        >
+          —
+        </span>
+      );
+    return (
+      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+      <div
+        key={choice.name}
+        className={`form-check ${tableCell ? 'sword-checkbox' : ''}`}
       >
-        {choice.text}
-      </label>
-    </div>
-  ));
+        <input
+          type="radio"
+          name={url}
+          aria-label={
+            tableCell ? `${tableCell.label}: ${columnChoice.text}` : undefined
+          }
+          title={
+            [
+              tableCell ? `${tableCell.label}: ${columnChoice.text}` : '',
+              spec.tooltip,
+            ]
+              .filter(Boolean)
+              .join('\n') || undefined
+          }
+          disabled={isDisabled}
+          className="form-check-input"
+          checked={choice.name === selectedValue}
+          onChange={() => {
+            onRadioClick(choice.name);
+          }}
+          // Clicking the already-selected inherited value makes it explicit too.
+          onClick={() => {
+            if (
+              (isInherited || presentation?.choice) &&
+              choice.name === selectedValue
+            )
+              onRadioClick(choice.name);
+          }}
+          id={`${url}-radio-${choice.name}`}
+        />
+        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+        <label
+          className="form-check-label"
+          htmlFor={`${url}-radio-${choice.name}`}
+        >
+          {tableCell ? (
+            <span className="visually-hidden">{columnChoice.text}</span>
+          ) : (
+            choice.text
+          )}
+        </label>
+      </div>
+    );
+  });
 
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
@@ -164,8 +217,27 @@ function CreateRadioGroup(args: {
       style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      <p>{text}</p>
-      <div className={isDisabled ? 'disabled' : ''}>{radios}</div>
+      {warnings[url] && (
+        <ConfigWarning text={warnings[url].text} level={warnings[url].level} />
+      )}
+      {!tableCell && <p>{text}</p>}
+      <div
+        role="radiogroup"
+        aria-label={tableCell?.label || text}
+        className={`${isDisabled ? 'disabled' : ''} ${tableCell ? 'config-table-radios' : ''}`}
+        style={
+          tableCell
+            ? {
+                gridTemplateColumns: `repeat(${(tableCell.choices || choices).length}, minmax(0, 1fr))`,
+              }
+            : undefined
+        }
+      >
+        {radios}
+        {presentation?.text && (
+          <span className="config-table-value-note">{presentation.text}</span>
+        )}
+      </div>
     </Form.Group>
   );
 }

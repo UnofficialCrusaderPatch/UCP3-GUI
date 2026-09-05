@@ -1,0 +1,90 @@
+.config-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.config-table {
+  table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+.config-table caption {
+  caption-side: top;
+  color: inherit;
+  font-weight: bold;
+}
+.config-table th,
+.config-table td {
+  padding: 0.2rem 0.35rem;
+  vertical-align: middle;
+}
+.config-table thead th {
+  text-align: center;
+  border-bottom: 1px solid #806238;
+  overflow-wrap: normal;
+}
+.config-table tbody th,
+.config-table thead tr:first-child th:first-child {
+  text-align: start;
+}
+.config-table tbody th {
+  font-weight: normal;
+}
+.config-table tbody tr:nth-child(odd) {
+  background: rgb(110 76 31 / 8%);
+}
+.config-table tbody tr:hover {
+  background: rgb(110 76 31 / 15%);
+}
+.config-table td {
+  border-inline-start: 1px solid rgb(110 76 31 / 20%);
+}
+.config-table .config-table-control {
+  margin: 0 !important;
+}
+.config-table .config-table-radios {
+  display: grid;
+  width: 100%;
+  align-items: center;
+  text-align: center;
+}
+.config-table .config-table-radios .form-check {
+  padding: 0;
+  margin: 0;
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+/* Keep native radios focusable while the existing sword label draws the control. */
+.config-table .config-table-radios .form-check-input {
+  display: block;
+  position: absolute;
+  width: 19px;
+  height: 19px;
+  opacity: 0;
+  margin: 0;
+}
+.config-table .config-table-radios .form-check-input:focus-visible + label {
+  outline: 2px solid #684018;
+  outline-offset: 2px;
+}
+.config-table .config-table-unavailable {
+  opacity: 0.45;
+}
+.config-table .config-table-value-note {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+.config-table .config-number-group > .flex-grow-1:has(label) {
+  display: none;
+}
+.config-table .config-number-group > .flex-grow-1:has(input) {
+  min-width: 100% !important;
+  max-width: 100% !important;
+}
+.config-table .form-control {
+  padding: 0.2rem 0.4rem;
+}

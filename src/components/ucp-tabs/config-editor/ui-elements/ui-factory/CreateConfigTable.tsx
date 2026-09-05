@@ -9,6 +9,10 @@ import CreateUIElement from './CreateUIElement';
 import ConfigTableCellContext from './ConfigTableCellContext';
 import './config-table.css';
 
+function columnWidth(column: ConfigTableColumn) {
+  return column.width || (column.choices?.length ? '4.25rem' : '7rem');
+}
+
 function ConfigTableCell({
   cell,
   column,
@@ -65,14 +69,17 @@ function CreateConfigTable({
         'children' in row &&
         row.children.length === layout.columns.length &&
         row.children.every((cell, index) => {
-          const { choices } = layout.columns[index];
+          const { choices, unselectedValues } = layout.columns[index];
           return (
             !choices ||
             ((cell.display === 'Choice' || cell.display === 'RadioGroup') &&
-              cell.contents.choices.every((choice) =>
-                choices.some(
-                  (columnChoice) => columnChoice.name === choice.name,
-                ),
+              cell.contents.choices.every(
+                (choice) =>
+                  choice.name === cell.inheritFrom?.value ||
+                  unselectedValues?.includes(choice.name) ||
+                  choices.some(
+                    (columnChoice) => columnChoice.name === choice.name,
+                  ),
               ))
           );
         }),
@@ -86,6 +93,13 @@ function CreateConfigTable({
       />
     );
   }
+  const rowWidth = layout.rowWidth || '10rem';
+  const minimumWidth = [
+    rowWidth,
+    ...layout.columns.map(
+      (column) => `${column.choices?.length || 1} * ${columnWidth(column)}`,
+    ),
+  ].join(' + ');
   return (
     <div
       className={`config-table-scroll ui-element ${spec.style?.className || ''} ${className}`}
@@ -99,12 +113,12 @@ function CreateConfigTable({
       <table
         className="config-table"
         style={{
-          minWidth: `${11 + layout.columns.reduce((width, column) => width + (column.choices?.length ? column.choices.length * 5 : 7), 0)}rem`,
+          minWidth: `calc(${minimumWidth})`,
         }}
       >
         {spec.text && <caption>{spec.text}</caption>}
         <colgroup>
-          <col className="config-table-row-name" />
+          <col style={{ width: rowWidth }} />
           {layout.columns.flatMap((column) =>
             (column.choices?.length
               ? column.choices
@@ -112,11 +126,7 @@ function CreateConfigTable({
             ).map((choice) => (
               <col
                 key={`${column.name}-${choice.name}`}
-                className={
-                  column.choices?.length
-                    ? 'config-table-choice-column'
-                    : 'config-table-value-column'
-                }
+                style={{ width: columnWidth(column) }}
               />
             )),
           )}

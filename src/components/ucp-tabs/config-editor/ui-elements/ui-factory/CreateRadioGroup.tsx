@@ -96,7 +96,14 @@ function CreateRadioGroup(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
-  const selectedValue = value === undefined ? defaultChoice : (value as string);
+  const isInherited =
+    !!tableCell && !!spec.inheritFrom && value === spec.inheritFrom.value;
+  let selectedValue =
+    value === undefined ? defaultChoice.name : (value as string);
+  if (isInherited) {
+    selectedValue = (configuration[spec.inheritFrom!.url] ??
+      configurationDefaults[spec.inheritFrom!.url]) as string;
+  }
 
   // eslint-disable-next-line func-style
   const onRadioClick = (newValue: string) => {
@@ -112,7 +119,6 @@ function CreateRadioGroup(args: {
       type: 'set-multiple',
       value: Object.fromEntries([[url, true]]),
     });
-    configuration[url] = newValue;
   };
 
   const radios = (tableCell?.choices || choices).map((columnChoice) => {
@@ -153,9 +159,11 @@ function CreateRadioGroup(args: {
           onChange={() => {
             onRadioClick(choice.name);
           }}
-          // onClick={() => {
-          //   onRadioClick(choice.name);
-          // }}
+          // Clicking the already-selected inherited value makes it explicit too.
+          onClick={() => {
+            if (isInherited && choice.name === selectedValue)
+              onRadioClick(choice.name);
+          }}
           id={`${url}-radio-${choice.name}`}
         />
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}

@@ -13,15 +13,6 @@
   color: inherit;
   font-weight: bold;
 }
-.config-table-row-name {
-  width: 11rem;
-}
-.config-table-choice-column {
-  width: 5rem;
-}
-.config-table-value-column {
-  width: 7rem;
-}
 .config-table th,
 .config-table td {
   padding: 0.2rem 0.35rem;

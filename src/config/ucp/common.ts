@@ -310,6 +310,8 @@ export type ChoiceDisplayConfigElement = BaseDisplayConfigElement &
   TextableDisplayConfigElement & {
     contents: ChoiceContents;
     display: 'Choice';
+    /** Display an inherited value through another scalar choice in a table. */
+    inheritFrom?: { url: string; value: string };
   };
 
 export type CustomMenuDisplayConfigElement = BaseDisplayConfigElement &
@@ -345,12 +347,17 @@ export type GroupDisplayConfigElement = BaseDisplayConfigElement &
 export type ConfigTableColumn = {
   name: string;
   header: string;
+  /** Width of one value/choice column, as a CSS length (e.g. 4rem). */
+  width?: string;
   /** Align a Choice/RadioGroup cell to these choices; absent choices stay empty. */
   choices?: { name: string; text: string }[];
+  /** Valid automatic states that deliberately have no selected radio. */
+  unselectedValues?: string[];
 };
 
 export type ConfigTableLayout = {
   rowHeader: string;
+  rowWidth?: string;
   columns: ConfigTableColumn[];
 };
 
@@ -386,6 +393,7 @@ export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
     contents: ChoiceContents;
     display: 'RadioGroup';
     tooltip?: string;
+    inheritFrom?: { url: string; value: string };
   };
 
 export type SliderDisplayConfigElement = BaseDisplayConfigElement &

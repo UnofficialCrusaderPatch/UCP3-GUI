@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading, class-methods-use-this */
 import { describe, test, expect, vi } from 'vitest';
-import { render, fireEvent, screen, within } from '@testing-library/react';
+import { render, fireEvent, screen, within, act } from '@testing-library/react';
 import { Provider, createStore } from 'jotai';
 import CreateGroup from './CreateGroup';
 import CreateRadioGroup from './CreateRadioGroup';
@@ -286,5 +286,69 @@ describe('configuration table', () => {
         .getByRole('radio', { name: 'Archer: Starting role: Dig' })
         .getAttribute('title'),
     ).toContain('Initial scenario troops only');
+  });
+  test('implicit inheritance follows its parent, supports explicit same-value clicks and reset', () => {
+    const spec = fixture();
+    const archer = (spec.children[0] as GroupDisplayConfigElement)
+      .children[0] as unknown as {
+      contents: { value: string; choices: { name: string; text: string }[] };
+      inheritFrom: { url: string; value: string };
+    };
+    const sword = (spec.children[1] as GroupDisplayConfigElement)
+      .children[0] as unknown as typeof archer;
+    archer.contents.value = 'inherit';
+    archer.contents.choices.unshift({ name: 'inherit', text: 'Default' });
+    archer.inheritFrom = { url: 'Swordsman.role', value: 'inherit' };
+    sword.contents.choices.push({ name: 'dig', text: 'Dig' });
+    const { store } = setup(false, false, spec);
+    const original = screen.getByRole('radio', {
+      name: 'Archer: Starting role: Original',
+    }) as HTMLInputElement;
+    const dig = screen.getByRole('radio', {
+      name: 'Archer: Starting role: Dig',
+    }) as HTMLInputElement;
+    expect(original.checked).toBe(true);
+    expect(screen.queryByRole('radio', { name: /Default/ })).toBeNull();
+    fireEvent.click(
+      screen.getByRole('radio', { name: 'Swordsman: Starting role: Dig' }),
+    );
+    expect(dig.checked).toBe(true);
+    expect(
+      store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.role'],
+    ).toBeUndefined();
+    // Lock in the currently inherited selection by clicking it.
+    fireEvent.click(dig);
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.role']).toBe(
+      'dig',
+    );
+    fireEvent.click(
+      screen.getByRole('radio', { name: 'Swordsman: Starting role: Original' }),
+    );
+    expect(dig.checked).toBe(true);
+    act(() =>
+      store.set(CONFIGURATION_FULL_REDUCER_ATOM, {
+        type: 'set-multiple',
+        value: { 'Archer.role': 'inherit' },
+      }),
+    );
+    expect(original.checked).toBe(true);
+  });
+  test('automatic values remain valid without a separate radio column', () => {
+    const spec = fixture();
+    spec.table!.columns[0].choices = [{ name: 'dig', text: 'Dig' }];
+    spec.table!.columns[0].unselectedValues = ['native'];
+    const { store } = setup(false, false, spec);
+    expect(screen.getByRole('table')).toBeTruthy();
+    expect(
+      screen
+        .getAllByRole('radio')
+        .filter((radio) => (radio as HTMLInputElement).checked),
+    ).toHaveLength(0);
+    fireEvent.click(
+      screen.getByRole('radio', { name: 'Archer: Starting role: Dig' }),
+    );
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.role']).toBe(
+      'dig',
+    );
   });
 });

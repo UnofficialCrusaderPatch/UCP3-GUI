@@ -5,6 +5,9 @@ rows with shared column headings. Configuration storage, defaults, requirements,
 locks, suggestions and import/export still use each control's existing `url` and
 `contents`. No new value format or module runtime code is needed.
 
+Requires frontend 1.0.16. Modules using this layout should declare
+`dependencies.frontend: '>=1.0.16 <2.0.0'` in `definition.yml`.
+
 Each child is a row (`Group` or `GroupBox`). Its `header`, then `text`, then `name`
 supplies the row label. Its children are the cells, in column order. Keep meaningful
 labels on those controls: older frontends ignore `table` and render the ordinary
@@ -58,10 +61,29 @@ Use unique row and column names. All rows must have one child per column.
 Hidden rows remain hidden; a hidden cell keeps its space. The table only changes
 presentation and does not add an enable switch to its groups.
 
+`table.rowWidth` and each column's `width` accept CSS lengths such as `10rem` or
+`64px`. A choice column's width applies to each radio position. Defaults are
+10rem for row labels, 4.25rem per radio choice, and 7rem for other controls.
+
+To omit a redundant inheritance radio, add
+`inheritFrom: {url: my-module.common.role, value: inherit}` to the child Choice.
+When its stored value is `inherit`, the selected radio follows the referenced
+configuration field (or that field's default). Clicking any radio, including
+the already-selected inherited choice, sets an explicit override. The normal
+reset action restores the child's `contents.value`; set that to `inherit` to
+resume following the common value. The referenced field must be a scalar choice
+whose concrete values are valid for the child; inheritance resolves one level.
+
+A column's `unselectedValues: [native]` allows a valid automatic state to have
+no selected radio. Its value stays in the child control's choices for schema and
+saved-configuration compatibility. Explain this once above the table. This is
+useful when the game's native behaviour varies by AI and no single fixed radio
+selection would accurately describe it.
+
 `rowHeader`, `header` and choice `text` accept the usual `{{locale_key}}` syntax.
 Tables scroll horizontally at narrow widths. Native radios remain keyboard
 focusable and use arrow-key selection within each configuration URL. Their
 associated labels use the standard sword checkbox artwork.
 
-The troop-behaviour module uses two groups of four radio columns. The starting
+The troop-behaviour module uses Defend/Dig and Hold/Patrol columns. The starting
 resources module demonstrates numeric tables for game modes and Human/AI gold.

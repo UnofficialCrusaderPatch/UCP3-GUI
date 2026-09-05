@@ -1,4 +1,6 @@
+import { gt } from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
+import Logger from '../../util/scripts/logging';
 import { installOnlineContent } from '../../components/ucp-tabs/content-manager/buttons/callbacks/install-content';
 import { fetchStore } from '../content/store/fetch';
 import { discoverExtensions } from '../extensions/discovery/discovery';
@@ -58,4 +60,42 @@ export async function updateBundledExtensions(
     }
     throw error;
   }
+
+  // Only prune the original bundle after the entire resolved update succeeded.
+  // Never roll back new packages once deletion of old packages has begun.
+  const superseded = bundled.filter(
+    (old) =>
+      /^[a-zA-Z0-9_-]+$/.test(old.name) &&
+      plan.some(
+        ({ definition: next }) =>
+          next.name === old.name &&
+          next.type === old.type &&
+          gt(next.version, old.version),
+      ),
+  );
+  await Promise.all(
+    superseded.map(async (old) => {
+      try {
+        if (old.type === 'module') {
+          const path = `${folder}/ucp/modules/${old.name}-${old.version}.zip`;
+          (await removeFile(path, true)).getOrThrow();
+          (await removeFile(`${path}.sig`, true)).getOrThrow();
+        } else {
+          (
+            await removeDir(
+              `${folder}/ucp/plugins/${old.name}-${old.version}`,
+              true,
+              true,
+            )
+          ).getOrThrow();
+        }
+      } catch (error) {
+        new Logger('update-bundled-extensions.ts')
+          .msg(
+            `Updated ${old.name}, but could not remove bundled ${old.version}: ${error}`,
+          )
+          .warn();
+      }
+    }),
+  );
 }

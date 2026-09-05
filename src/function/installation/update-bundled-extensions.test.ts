@@ -70,3 +70,28 @@ it('reports rollback failures instead of claiming a working offline fallback', a
     'Could not restore bundled extensions',
   );
 });
+
+it('removes superseded bundles only after all updates succeed', async () => {
+  mocks.discover.mockResolvedValue([
+    { name: 'aiSwapper', version: '1.1.0', type: 'module' },
+    { name: 'files', version: '1.3.0', type: 'module' },
+  ]);
+  await updateBundledExtensions('D:/game', version);
+  expect(mocks.removeFile.mock.calls).toEqual([
+    ['D:/game/ucp/modules/aiSwapper-1.1.0.zip', true],
+    ['D:/game/ucp/modules/aiSwapper-1.1.0.zip.sig', true],
+  ]);
+  expect(mocks.install.mock.invocationCallOrder[0]).toBeLessThan(
+    mocks.removeFile.mock.invocationCallOrder[0],
+  );
+});
+it('keeps old bundles when a replacement fails', async () => {
+  mocks.discover.mockResolvedValue([
+    { name: 'aiSwapper', version: '1.1.0', type: 'module' },
+  ]);
+  mocks.install.mockResolvedValue([{ status: 'error' }]);
+  await expect(updateBundledExtensions('D:/game', version)).rejects.toThrow();
+  expect(
+    mocks.removeFile.mock.calls.every(([path]) => !path.includes('1.1.0')),
+  ).toBe(true);
+});

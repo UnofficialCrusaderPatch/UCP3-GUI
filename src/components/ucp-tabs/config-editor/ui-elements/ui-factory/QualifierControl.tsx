@@ -15,6 +15,7 @@ import {
 } from '../../../../../function/configuration/qualifiers';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../common/buttons/config-serialized-state';
 import { useMessage } from '../../../../general/message';
+import '../../../../common/minimal.css';
 import './qualifiers.css';
 
 export default function QualifierControl({
@@ -46,7 +47,7 @@ export default function QualifierControl({
     <span className="qualifier-controls">
       <button
         type="button"
-        className={`ucp-button qualifier-control qualifier-${state}`}
+        className={`minimal-button qualifier-control qualifier-${state}`}
         title={title}
         aria-label={title}
         aria-pressed={state === 'mixed' ? 'mixed' : state === 'required'}

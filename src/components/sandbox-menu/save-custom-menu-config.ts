@@ -4,7 +4,10 @@ import {
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../function/configuration/state';
-import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../function/configuration/derived-state';
+import {
+  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
+  CONFIGURATION_LOCKS_REDUCER_ATOM,
+} from '../../function/configuration/derived-state';
 import { ConsoleLogger } from '../../util/scripts/logging';
 
 export default function saveConfig(
@@ -15,11 +18,14 @@ export default function saveConfig(
   ConsoleLogger.debug(`sandbox-menu: saveConfig: ${baseUrl}`, config);
 
   // Prepend the baseUrl to the entries returned from the config menu
+  const locks = getStore().get(CONFIGURATION_LOCKS_REDUCER_ATOM);
   const prependedConfig = Object.fromEntries(
-    Object.entries(config).map(([subUrl, newConfigValue]) => [
-      `${baseUrl}.${subUrl}`,
-      newConfigValue,
-    ]),
+    Object.entries(config)
+      .filter(([subUrl]) => locks[`${baseUrl}.${subUrl}`] === undefined)
+      .map(([subUrl, newConfigValue]) => [
+        `${baseUrl}.${subUrl}`,
+        newConfigValue,
+      ]),
   );
 
   // Gather the keys that were set to value `undefined`
@@ -79,6 +85,11 @@ export default function saveConfig(
   const fullConfigEntries: Record<string, unknown> = {
     ...baselineEntries,
     ...remainingUserEntries,
+    ...Object.fromEntries(
+      Object.entries(locks)
+        .filter(([url]) => url.startsWith(urlPrefix))
+        .map(([url, lock]) => [url, lock.lockedValue]),
+    ),
   };
 
   // Update the full config

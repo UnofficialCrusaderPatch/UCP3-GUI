@@ -14,6 +14,7 @@ import {
   createGetConfigStateFunction,
   createGetCurrentConfigFunction,
   createReceivePluginPathsFunction,
+  createGetBinaryFileFunction,
 } from './sandbox-menu-functions';
 
 // eslint-disable-next-line import/no-unresolved
@@ -22,6 +23,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import Message from '../general/message';
 import saveConfig from './save-custom-menu-config';
+import { createGetTextureCatalogInputsFunction } from './texture-catalog-service';
 
 export interface SandboxSource {
   html: string;
@@ -56,6 +58,9 @@ function createSandboxHostApi(
     ),
     getTextFile: createGetTextFileFunction(currentFolder),
     getAssetUrl: createGetAssetUrlFunction(currentFolder),
+    getBinaryFileBase64: createGetBinaryFileFunction(currentFolder),
+    getTextureCatalogInputs:
+      createGetTextureCatalogInputsFunction(currentFolder),
     receivePluginPaths: createReceivePluginPathsFunction(currentFolder),
     getCurrentConfig: createGetCurrentConfigFunction(baseUrl),
     getConfigState: createGetConfigStateFunction(),
@@ -90,8 +95,29 @@ function SandboxInternal(
   const [sandbox, setSandbox] = useState<null | Sandbox>(null);
 
   const [initDone, setInitDone] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const save = async (closeAfterSave: boolean) => {
+    try {
+      const config = await sandbox?.connection?.remote.getConfig();
+      if (!config || typeof config !== 'object') {
+        throw new Error('The menu did not return a configuration.');
+      }
+      saveConfig(baseUrl, config);
+      setSaveError(null);
+      if (closeAfterSave) closeFunc();
+    } catch (error) {
+      setSaveError(
+        typeof error === 'object' && error !== null && 'message' in error
+          ? String(error.message)
+          : String(error),
+      );
+    }
+  };
 
   useEffect(() => {
+    setInitDone(false);
+    setSaveError(null);
     // TODO?: Sandbox currently executes css and js using inline script and style tags
     // the CSP currently allows this only for the sandbox
     // However, it seems to currently simply be needed due to the used lib.
@@ -120,14 +146,12 @@ function SandboxInternal(
 
   return !sandbox ? null : (
     <div className="sandbox-control-menu">
+      {saveError && <span role="alert">{saveError}</span>}
       <button
         type="button"
         className="ucp-button sandbox-control-button"
         disabled={!initDone}
-        onClick={async () =>
-          // we will see, if this works, or just closes the sandbox
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
-        }
+        onClick={() => save(false)}
       >
         <Message message="sandbox.save" />
       </button>
@@ -135,10 +159,7 @@ function SandboxInternal(
         type="button"
         className="ucp-button sandbox-control-button"
         disabled={!initDone}
-        onClick={async () => {
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig());
-          closeFunc();
-        }}
+        onClick={() => save(true)}
       >
         <Message message="sandbox.save.close" />
       </button>

@@ -2,7 +2,7 @@ use glob::MatchOptions;
 
 // General
 
-pub const BASE_FOLDER: &str = "UnofficialCrusaderPatch3";
+pub const BASE_FOLDER: &str = "UnofficialCrusaderPatch3-ScalingResizeTest";
 
 pub const PATH_MATCH_OPTIONS: MatchOptions = MatchOptions {
     case_sensitive: true,

@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [windows-latest, ubuntu-22.04]
+        os: [windows-latest]
 
     steps:
       - name: Checkout git repo
@@ -43,17 +43,20 @@ jobs:
           npm run test -- --test-timeout=10000
       - name: Build
         run: |
-          npm run tauri build
+          npm run tauri build -- --bundles none
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+      - name: Package combined preview
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path preview
+          Copy-Item src-tauri/target/release/UCP3-GUI.exe preview/
+          Copy-Item resources/* preview/ -Recurse
+          Copy-Item TEST-SCALING-RESIZE.md preview/README-TEST.md
+          git rev-parse HEAD | Set-Content preview/SOURCE-COMMIT.txt
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: UCP3-GUI-${{matrix.os}}.zip
-          path: |
-            src-tauri/target/release/UCP3-GUI.exe
-            src-tauri/target/release/bundle/nsis/UCP3-GUI*-setup.exe
-            src-tauri/target/release/bundle/appimage/ucp3-gui*.AppImage
-            src-tauri/target/release/bundle/deb/ucp3-gui*.deb
-            src-tauri/target/release/bundle/appimage/ucp3-gui*.AppImage.tar.gz
+          name: UCP3-GUI-PR366-367-test
+          path: preview/

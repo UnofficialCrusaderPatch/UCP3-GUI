@@ -95,7 +95,7 @@
       "resources": {
         "../resources/": "."
       },
-      "identifier": "ucp.gui.tauri",
+      "identifier": "ucp.gui.tauri.scaling-resize-test",
       "publisher": "ucp-team",
       "longDescription": "",
       "macOS": {
@@ -142,7 +142,7 @@
       ]
     },
     "updater": {
-      "active": true,
+      "active": false,
       "endpoints": [
         "https://gist.githubusercontent.com/ucp3-machine/2a179c892f49448c85dfcc9e5f9a3c6b/raw/"
       ],
@@ -158,7 +158,7 @@
         "height": 768,
         "minHeight": 630,
         "resizable": true,
-        "title": "Unofficial Crusader Patch 3 - GUI",
+        "title": "UCP3 GUI TEST - Scaling + Top Resize (PR 366 + 367)",
         "width": 1024,
         "minWidth": 800,
         "decorations": false

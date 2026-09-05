@@ -75,6 +75,11 @@
 .config-table .config-table-unavailable {
   opacity: 0.45;
 }
+.config-table .config-table-value-note {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  font-style: italic;
+}
 .config-table .config-number-group > .flex-grow-1:has(label) {
   display: none;
 }

@@ -312,6 +312,7 @@ export type ChoiceDisplayConfigElement = BaseDisplayConfigElement &
     display: 'Choice';
     /** Display an inherited value through another scalar choice in a table. */
     inheritFrom?: { url: string; value: string };
+    valuePresentation?: Record<string, { choice?: string; note?: string }>;
   };
 
 export type CustomMenuDisplayConfigElement = BaseDisplayConfigElement &
@@ -394,6 +395,7 @@ export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
     display: 'RadioGroup';
     tooltip?: string;
     inheritFrom?: { url: string; value: string };
+    valuePresentation?: Record<string, { choice?: string; note?: string }>;
   };
 
 export type SliderDisplayConfigElement = BaseDisplayConfigElement &
@@ -446,6 +448,8 @@ export type UCP2SwitchDisplayConfigElement = BaseDisplayConfigElement &
   HeaderableDisplayConfigElement &
   EnableableDisplayConfigElement & {
     display: 'UCP2Switch';
+    /** Optional controls inside the switch's collapsible description. */
+    children?: Array<DisplayConfigElement>;
   };
 
 type DisplayConfigElement =

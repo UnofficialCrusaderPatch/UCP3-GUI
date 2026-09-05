@@ -2,7 +2,9 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 
 import { Accordion } from 'react-bootstrap';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+// eslint-disable-next-line import/no-cycle
+import CreateUIElement from './CreateUIElement';
 import { UCP2SwitchDisplayConfigElement } from '../../../../../config/ucp/common';
 
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
@@ -45,7 +47,7 @@ function CreateUCP2Switch(args: {
   );
 
   const { spec, disabled } = args;
-  const { url, text, enabled, header } = spec;
+  const { url, text, enabled, header, children = [] } = spec;
   let { [url]: value } = configuration;
   const { [url]: defaultValue } = configurationDefaults;
 
@@ -82,6 +84,12 @@ function CreateUCP2Switch(args: {
 
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
+  const hasChildren = children.length > 0;
+  const [expanded, setExpanded] = useState(value === true);
+  useEffect(() => {
+    setExpanded(value === true);
+  }, [value]);
+
   // const hasWarning = configurationWarnings[url] !== undefined;
 
   const headerElement = (
@@ -105,6 +113,7 @@ function CreateUCP2Switch(args: {
             type: 'set-multiple',
             value: Object.fromEntries([[url, true]]),
           });
+          if (hasChildren) setExpanded(event.target.checked);
         }}
         disabled={isDisabled}
       />
@@ -145,22 +154,47 @@ function CreateUCP2Switch(args: {
       ref={ref}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
-      {noText ? (
-        <Accordion.Header
-          bsPrefix="ucp-accordion-header ucp-accordion-header-no-button"
-          as="div"
+      {hasChildren ? (
+        <Accordion
+          activeKey={expanded ? 'options' : null}
+          onSelect={(key) => setExpanded(key === 'options')}
+          bsPrefix="ucp-accordion"
         >
-          {headerElement}
-        </Accordion.Header>
+          <Accordion.Item eventKey="options" bsPrefix="ucp-switch-options">
+            <div className="d-flex align-items-center">
+              <Accordion.Button
+                className="w-auto flex-shrink-0 p-0 me-2"
+                aria-label={header}
+              />
+              {headerElement}
+            </div>
+            <Accordion.Body>
+              {text && <div>{text}</div>}
+              {children.map((child) => (
+                <CreateUIElement
+                  key={
+                    child.name ||
+                    ('url' in child ? child.url : JSON.stringify(child))
+                  }
+                  spec={child}
+                  disabled={isDisabled || value !== true}
+                  className=""
+                />
+              ))}
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       ) : (
-        <Accordion.Header
-          bsPrefix="ucp-accordion-header ucp-accordion-header-left-button"
-          as="div"
-        >
-          {headerElement}
-        </Accordion.Header>
+        <>
+          <Accordion.Header
+            bsPrefix={`ucp-accordion-header ucp-accordion-header-${noText ? 'no-button' : 'left-button'}`}
+            as="div"
+          >
+            {headerElement}
+          </Accordion.Header>
+          <Accordion.Body>{text}</Accordion.Body>
+        </>
       )}
-      <Accordion.Body>{text}</Accordion.Body>
     </Accordion>
   );
 }

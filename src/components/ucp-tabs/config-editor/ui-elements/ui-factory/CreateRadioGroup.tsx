@@ -104,6 +104,11 @@ function CreateRadioGroup(args: {
     selectedValue = (configuration[spec.inheritFrom!.url] ??
       configurationDefaults[spec.inheritFrom!.url]) as string;
   }
+  // Presentation describes an automatic value without changing stored settings.
+  const presentation = tableCell
+    ? spec.valuePresentation?.[selectedValue]
+    : undefined;
+  if (presentation?.choice) selectedValue = presentation.choice;
 
   // eslint-disable-next-line func-style
   const onRadioClick = (newValue: string) => {
@@ -161,7 +166,10 @@ function CreateRadioGroup(args: {
           }}
           // Clicking the already-selected inherited value makes it explicit too.
           onClick={() => {
-            if (isInherited && choice.name === selectedValue)
+            if (
+              (isInherited || presentation?.choice) &&
+              choice.name === selectedValue
+            )
               onRadioClick(choice.name);
           }}
           id={`${url}-radio-${choice.name}`}
@@ -226,6 +234,9 @@ function CreateRadioGroup(args: {
         }
       >
         {radios}
+        {presentation?.note && (
+          <span className="config-table-value-note">{presentation.note}</span>
+        )}
       </div>
     </Form.Group>
   );

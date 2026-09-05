@@ -5,7 +5,11 @@ import { Provider, createStore } from 'jotai';
 import CreateGroup from './CreateGroup';
 import CreateRadioGroup from './CreateRadioGroup';
 import CreateNumberInput from './CreateNumberInput';
-import { GroupDisplayConfigElement } from '../../../../../config/ucp/common';
+import CreateUCP2Switch from './CreateUCP2Switch';
+import {
+  GroupDisplayConfigElement,
+  UCP2SwitchDisplayConfigElement,
+} from '../../../../../config/ucp/common';
 import { getConfigDefaults } from '../../../../../config/ucp/extension-util';
 import { changeLocale } from '../../../../../function/extensions/locale/locale';
 import {
@@ -160,6 +164,121 @@ function setup(
   return { store, view, spec, defaults };
 }
 describe('configuration table', () => {
+  test('automatic states show a choice or note without writing an override', () => {
+    const input = fixture();
+    const first = input.children[0] as GroupDisplayConfigElement;
+    const second = input.children[1] as GroupDisplayConfigElement;
+    Object.assign(first.children[0], {
+      valuePresentation: { native: { choice: 'dig' } },
+    });
+    Object.assign(second.children[0], {
+      valuePresentation: { native: { note: 'Varies by AI' } },
+    });
+    const { store } = setup(false, false, input);
+    const choice = screen.getByRole('radio', {
+      name: 'Archer: Starting role: Dig',
+    });
+    expect((choice as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText('Varies by AI')).toBeTruthy();
+    expect(
+      store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.role'],
+    ).toBeUndefined();
+    fireEvent.click(choice);
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.role']).toBe(
+      'dig',
+    );
+    act(() =>
+      store.set(CONFIGURATION_FULL_REDUCER_ATOM, {
+        type: 'set-multiple',
+        value: { 'Archer.role': 'native' },
+      }),
+    );
+    expect((choice as HTMLInputElement).checked).toBe(true);
+  });
+
+  test('a switch collapses its controls, keeps values and supports independent expansion', () => {
+    const spec = {
+      name: 'troop-settings',
+      display: 'UCP2Switch',
+      header: 'Troop settings',
+      url: 'troops.enabled',
+      contents: { value: false },
+      children: [fixture()],
+    } as unknown as UCP2SwitchDisplayConfigElement;
+    const store = createStore();
+    const defaults = getConfigDefaults([spec] as never);
+    store.set(CONFIGURATION_DEFAULTS_REDUCER_ATOM as never, defaults as never);
+    render(
+      <Provider store={store}>
+        <CreateUCP2Switch spec={spec} disabled={false} className="" />
+      </Provider>,
+    );
+    const toggle = screen.getByRole('checkbox', { name: 'Troop settings' });
+    const expand = screen.getByRole('button', { name: 'Troop settings' });
+    const count = screen.getByRole('spinbutton', { name: 'Archer: Count' });
+    expect(expand.getAttribute('aria-expanded')).toBe('false');
+    expect((count as HTMLInputElement).disabled).toBe(true);
+    fireEvent.click(toggle);
+    expect(expand.getAttribute('aria-expanded')).toBe('true');
+    expect((count as HTMLInputElement).disabled).toBe(false);
+    fireEvent.change(count, { target: { value: '9' } });
+    fireEvent.click(expand);
+    expect(expand.getAttribute('aria-expanded')).toBe('false');
+    expect((toggle as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(expand);
+    fireEvent.click(toggle);
+    expect(expand.getAttribute('aria-expanded')).toBe('false');
+    expect((count as HTMLInputElement).disabled).toBe(true);
+    fireEvent.click(expand);
+    expect(expand.getAttribute('aria-expanded')).toBe('true');
+    expect((toggle as HTMLInputElement).checked).toBe(false);
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)['Archer.count']).toBe(9);
+  });
+
+  test('enabled switch children start expanded and respect the parent lock', () => {
+    const spec = {
+      name: 'troop-settings',
+      display: 'UCP2Switch',
+      header: 'Troop settings',
+      url: 'troops.enabled',
+      contents: { value: true },
+      children: [fixture()],
+    } as unknown as UCP2SwitchDisplayConfigElement;
+    const store = createStore();
+    store.set(
+      CONFIGURATION_DEFAULTS_REDUCER_ATOM as never,
+      getConfigDefaults([spec] as never) as never,
+    );
+    store.set(
+      CONFIGURATION_LOCKS_REDUCER_ATOM as never,
+      { 'troops.enabled': {} } as never,
+    );
+    render(
+      <Provider store={store}>
+        <CreateUCP2Switch spec={spec} disabled={false} className="" />
+      </Provider>,
+    );
+    expect(
+      screen
+        .getByRole('button', { name: 'Troop settings' })
+        .getAttribute('aria-expanded'),
+    ).toBe('true');
+    expect(
+      (
+        screen.getByRole('checkbox', {
+          name: 'Troop settings',
+        }) as HTMLInputElement
+      ).disabled,
+    ).toBe(true);
+    expect(
+      (
+        screen.getByRole('spinbutton', {
+          name: 'Archer: Count',
+        }) as HTMLInputElement
+      ).disabled,
+    ).toBe(true);
+  });
+
   test('localizes shared headings and keeps unavailable choices aligned', () => {
     setup();
     expect(screen.getByRole('columnheader', { name: 'Troop' })).toBeTruthy();

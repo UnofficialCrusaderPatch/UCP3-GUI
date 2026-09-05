@@ -16,6 +16,7 @@ import CreateSwitch from './CreateSwitch';
 import CreateUCP2RadioGroup from './CreateUCP2RadioGroup';
 import CreateUCP2Slider from './CreateUCP2Slider';
 import CreateUCP2SliderChoice from './CreateUCP2SliderChoice';
+// eslint-disable-next-line import/no-cycle
 import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput from './CreateFileInput';

@@ -67,9 +67,26 @@ function CreateConfigTable({
     rows.every(
       (row) =>
         'children' in row &&
+        row.children !== undefined &&
         row.children.length === layout.columns.length &&
         row.children.every((cell, index) => {
           const { choices, unselectedValues } = layout.columns[index];
+          if (
+            choices &&
+            (cell.display === 'Choice' || cell.display === 'RadioGroup')
+          ) {
+            const validPresentation = Object.values(
+              cell.valuePresentation || {},
+            ).every(
+              (entry) =>
+                !entry.choice ||
+                (choices.some((choice) => choice.name === entry.choice) &&
+                  cell.contents.choices.some(
+                    (choice) => choice.name === entry.choice,
+                  )),
+            );
+            if (!validPresentation) return false;
+          }
           return (
             !choices ||
             ((cell.display === 'Choice' || cell.display === 'RadioGroup') &&

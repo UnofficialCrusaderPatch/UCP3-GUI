@@ -18,7 +18,7 @@ vi.mock('../../util/scripts/logging', () => ({
 }));
 vi.mock('../../function/configuration/derived-state', async () => {
   const { atom } = await import('jotai');
-  return { CONFIGURATION_DEFAULTS_REDUCER_ATOM: atom(() => fixtures.baseline) };
+  return { CONFIGURATION_DEFAULTS_REDUCER_ATOM: atom(() => fixtures.baseline), CONFIGURATION_LOCKS_REDUCER_ATOM: atom({}) };
 });
 
 const aiKey = 'aiSwapper.ai.rat.aic';

@@ -65,6 +65,8 @@ addEventListener(
     dispatchEvent(new Event(DONE_EVENT_NAME));
     Websandbox.connection.setLocalApi(SANDBOX_FUNCTIONS);
 
+    // Custom menus may need asynchronous asset discovery before Save is valid.
+    await SANDBOX_FUNCTIONS.whenReady?.();
     await HOST_FUNCTIONS.confirmInit();
   },
   { once: true },

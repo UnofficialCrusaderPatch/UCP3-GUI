@@ -1,6 +1,7 @@
 import { FileEntry } from '@tauri-apps/api/fs';
 import {
   readTextFile,
+  readBinaryFile,
   receiveAssetUrl,
   resolvePath,
 } from '../../tauri/tauri-files';
@@ -37,6 +38,32 @@ export function createGetTextFileFunction(currentFolder: string) {
 
 export function createGetAssetUrlFunction(currentFolder: string) {
   return async (path: string) => receiveAssetUrl([currentFolder, path]);
+}
+
+// Binary assets travel through the same game-folder IO as text assets. Base64
+// avoids expanding every byte into a JSON number across the sandbox connection.
+export function createGetBinaryFileFunction(currentFolder: string) {
+  return async (path: string) => {
+    const relative = path.replaceAll('\\', '/');
+    if (
+      relative.startsWith('/') ||
+      relative.includes(':') ||
+      relative.split('/').includes('..')
+    ) {
+      throw new Error('Binary asset must be inside the game folder');
+    }
+    const result = await readBinaryFile(
+      await resolvePath(currentFolder, relative),
+    );
+    if (!result.isOk())
+      throw new Error(`Cannot read binary asset: ${relative}`);
+    const bytes = result.ok().get();
+    let binary = '';
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    }
+    return btoa(binary);
+  };
 }
 
 export function createReceivePluginPathsFunction(currentFolder: string) {

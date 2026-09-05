@@ -22,7 +22,7 @@
   column-gap: 0.25rem;
   align-items: start;
 }
-.qualifier-row > .qualifier-control {
+.qualifier-row > .qualifier-controls {
   margin-top: 0.3rem;
 }
 .qualifier-heading {
@@ -40,4 +40,47 @@
    settings retain their own markers. Normal mode retains the original styling. */
 .qualifier-value > .ucp-specified::after {
   display: none;
+}
+
+.qualifier-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 1.25rem;
+  flex-shrink: 0;
+}
+.qualifier-control svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* Reset shares the specified/touched rail; it never takes a grid column. */
+.qualifier-row > .qualifier-reset {
+  position: absolute;
+  z-index: 1;
+  left: -0.625rem;
+  top: 0;
+  width: 0.75rem;
+  height: 100%;
+  min-height: 1.25rem;
+  padding: 0.2rem 0 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #241b0d;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.qualifier-reset svg {
+  width: 0.75rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+.qualifier-row > .qualifier-reset:hover,
+.qualifier-row > .qualifier-reset:focus-visible {
+  color: #743314;
+  background: rgba(199, 164, 100, 0.6);
 }

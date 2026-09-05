@@ -6,6 +6,7 @@ import {
 import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 import { CREATOR_MODE_ATOM } from '../../../../../function/gui-settings/settings';
 import QualifierControl from './QualifierControl';
+import ResetSettingButton from './popover/ResetSettingButton';
 import { settingRoots } from '../../../../../function/configuration/qualifiers';
 import './common.css';
 import './UCPAccordion.css';
@@ -166,6 +167,9 @@ function CreateUIElement(args: Parameters<typeof CreateUIElementContent>[0]) {
     <div
       className={`qualifier-row ${createSpecifiedStyleIfSpecifiedAndTouched(user, touched, roots[0])}`}
     >
+      {!group && (
+        <ResetSettingButton url={roots[0]} compact disabled={disabled} />
+      )}
       <QualifierControl roots={roots} single={!group} disabled={disabled} />
       <div className="qualifier-value">
         <CreateUIElementContent

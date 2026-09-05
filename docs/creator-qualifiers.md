@@ -1,6 +1,6 @@
 # Creator qualifiers
 
-Creator mode shows a persistent compact control beside settings and category/group headings: outline diamond = Suggested, solid diamond = Required, divided square = Mixed. Click Required to suggest; click Suggested or Mixed to require. Keyboard Tab and Enter/Space work without hover. Accessible labels and tooltips are localized.
+Creator mode shows a persistent compact control beside settings and category/group headings: open padlock = Suggested, closed padlock = Required, dash = Mixed. Click Required to suggest; click Suggested or Mixed to require. Keyboard Tab and Enter/Space work without hover. Accessible labels and tooltips are localized.
 
 A single-setting action explicitly copies the current editable value into Customisations. Group actions use only already configured local values, excluding upstream locks and submenu bookkeeping. Groups do not create inherited category rules or copy defaults. They apply existing per-setting qualifiers. Saving and exporting use the normal configuration serializer.
 
@@ -9,3 +9,5 @@ Custom menus receive optional `qualifierEditing`, `creatorMode` and relative `qu
 AI Swapper's companion change adds controls to each overview component, the selected-slot heading and the existing help row (All slots). Slot/all-slot actions include configured AI runtime components only, not inherited values or the menu metadata object. No new row is added. Configure an AI component before changing its qualifier. Upstream requirements remain locked.
 
 Manual review: use the isolated preview setup; enable Creator mode, edit two values, set their category Required, change one back to Suggested and check Mixed. Apply/reopen and export to a disposable plugin; check required-value/suggested-value in YAML. In AI Swapper select components for two slots, use component/slot/All slots controls, check Close discards changes and Save persists them. Load the exported plugin and verify only its required components are locked. Check the smallest supported window size, GUI scaling and long translations. Do not merge before visual review.
+
+Touched local options show a persistent trash icon on their blue marker at the outer left edge. Clicking the marker/icon resets the option using the existing reset behavior. Untouched options have no reset action in Creator mode; normal mode retains the existing hover reset.

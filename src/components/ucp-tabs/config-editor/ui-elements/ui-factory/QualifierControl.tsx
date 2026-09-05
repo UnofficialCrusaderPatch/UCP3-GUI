@@ -1,5 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { LockFill, Unlock, Dash } from 'react-bootstrap-icons';
 import { CREATOR_MODE_ATOM } from '../../../../../function/gui-settings/settings';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
@@ -42,33 +43,37 @@ export default function QualifierControl({
   const state = qualifierState(keys, qualifiers);
   const title = `${localize(`config.qualifier.${state}`)} - ${localize(single ? 'config.qualifier.single' : 'config.qualifier.group')}${keys.length ? '' : ` - ${localize('config.qualifier.empty')}`}`;
   return (
-    <button
-      type="button"
-      className={`ucp-button qualifier-control qualifier-${state}`}
-      title={title}
-      aria-label={title}
-      aria-pressed={state === 'mixed' ? 'mixed' : state === 'required'}
-      disabled={disabled || !keys.length}
-      onClick={(event) => {
-        event.stopPropagation();
-        const next = state === 'required' ? 'suggested' : 'required';
-        if (single)
-          setUser({
+    <span className="qualifier-controls">
+      <button
+        type="button"
+        className={`ucp-button qualifier-control qualifier-${state}`}
+        title={title}
+        aria-label={title}
+        aria-pressed={state === 'mixed' ? 'mixed' : state === 'required'}
+        disabled={disabled || !keys.length}
+        onClick={(event) => {
+          event.stopPropagation();
+          const next = state === 'required' ? 'suggested' : 'required';
+          if (single)
+            setUser({
+              type: 'set-multiple',
+              value: Object.fromEntries(keys.map((key) => [key, full[key]])),
+            });
+          setQualifiers({
             type: 'set-multiple',
-            value: Object.fromEntries(keys.map((key) => [key, full[key]])),
+            value: Object.fromEntries(keys.map((key) => [key, next])),
           });
-        setQualifiers({
-          type: 'set-multiple',
-          value: Object.fromEntries(keys.map((key) => [key, next])),
-        });
-        setTouched({
-          type: 'set-multiple',
-          value: Object.fromEntries(keys.map((key) => [key, true])),
-        });
-        setDirty(true);
-      }}
-    >
-      {{ required: '\u25c6', suggested: '\u25c7', mixed: '\u25e9' }[state]}
-    </button>
+          setTouched({
+            type: 'set-multiple',
+            value: Object.fromEntries(keys.map((key) => [key, true])),
+          });
+          setDirty(true);
+        }}
+      >
+        {state === 'required' && <LockFill aria-hidden="true" />}
+        {state === 'suggested' && <Unlock aria-hidden="true" />}
+        {state === 'mixed' && <Dash aria-hidden="true" />}
+      </button>
+    </span>
   );
 }

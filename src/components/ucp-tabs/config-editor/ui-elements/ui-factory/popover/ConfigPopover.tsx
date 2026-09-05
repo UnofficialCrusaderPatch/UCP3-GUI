@@ -1,22 +1,9 @@
 import './popover.css';
-
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { MutableRefObject } from 'react';
-import { Button, Overlay } from 'react-bootstrap';
-
-import { TrashFill } from 'react-bootstrap-icons';
-import {
-  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
-  CONFIGURATION_FULL_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_USER_REDUCER_ATOM,
-} from '../../../../../../function/configuration/state';
-import { STATUS_BAR_MESSAGE_ATOM } from '../../../../../footer/footer';
-import {
-  CONFIGURATION_LOCKS_REDUCER_ATOM,
-  CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-} from '../../../../../../function/configuration/derived-state';
-import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../../common/buttons/config-serialized-state';
+import { Overlay } from 'react-bootstrap';
+import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
+import ResetSettingButton from './ResetSettingButton';
 
 /** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
 
@@ -28,25 +15,8 @@ export function ConfigPopover(props: {
 }) {
   const { url, show, theRef } = props;
 
-  const locks = useAtomValue(CONFIGURATION_LOCKS_REDUCER_ATOM);
-  const { [url]: lock } = locks;
-  const locked = lock !== undefined;
-  const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
-  const setConfiguration = useSetAtom(CONFIGURATION_FULL_REDUCER_ATOM);
-  const setConfigurationTouched = useSetAtom(
-    CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  );
-  // TODO: improve
-  const setDirty = useSetAtom(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM);
-  const configurationDefaults = useAtomValue(
-    CONFIGURATION_DEFAULTS_REDUCER_ATOM,
-  );
-
-  const [, setQualifier] = useAtom(CONFIGURATION_QUALIFIER_REDUCER_ATOM);
-
-  const { [url]: defaultValue } = configurationDefaults;
-
-  const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
+  const creator = useAtomValue(CREATOR_MODE_ATOM);
+  if (creator) return null;
 
   return (
     <Overlay
@@ -89,7 +59,7 @@ export function ConfigPopover(props: {
         ...prps
       }) => (
         <div
-          className={`ucp-popover sword-checkbox ${locked ? 'disabled' : ''}`}
+          className="ucp-popover sword-checkbox"
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...prps}
           style={{
@@ -102,39 +72,7 @@ export function ConfigPopover(props: {
         >
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,
       jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus */}
-          <Button
-            disabled={locked}
-            role="button"
-            className="ms-2 me-2"
-            id={`${url}-popover-reset-button`}
-            onClick={() => {
-              setUserConfiguration({
-                type: 'clear-key',
-                key: url,
-              });
-              setConfiguration({
-                type: 'set-multiple',
-                value: { [url]: defaultValue },
-              });
-              setConfigurationTouched({
-                type: 'clear-key',
-                key: url,
-              });
-              setQualifier({
-                type: 'set-multiple',
-                value: { [url]: 'suggested' },
-              });
-              setDirty(true);
-            }}
-            onMouseEnter={() => {
-              setStatusBarMessage('config.popover.reset');
-            }}
-            onMouseLeave={() => {
-              setStatusBarMessage(undefined);
-            }}
-          >
-            <TrashFill />
-          </Button>
+          <ResetSettingButton url={url} />
         </div>
       )}
     </Overlay>

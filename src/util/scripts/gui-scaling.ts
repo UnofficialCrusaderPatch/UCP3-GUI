@@ -1,13 +1,16 @@
 const STORAGE_KEY = 'ucp3-gui-scale';
-const MIN_SCALE = 1;
-const MAX_SCALE = 2;
-const STEP = 0.25;
+const MIN_SCALE = 100;
+const MAX_SCALE = 200;
+const STEP = 10;
 
 let scale = MIN_SCALE;
 
 function applyScale(value: number) {
   scale = value;
-  document.documentElement.style.setProperty('--gui-scale', String(scale));
+  document.documentElement.style.setProperty(
+    '--gui-scale',
+    String(scale / 100),
+  );
 }
 
 // Shared with sandbox menus, whose input events do not reach the host document.
@@ -19,7 +22,7 @@ export function adjustGuiScale(direction: number) {
       : Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale + direction * STEP)),
   );
   try {
-    window.localStorage.setItem(STORAGE_KEY, String(scale));
+    window.localStorage.setItem(STORAGE_KEY, String(scale / 100));
   } catch {
     // Scaling should still work when webview storage is unavailable.
   }
@@ -28,7 +31,7 @@ export function adjustGuiScale(direction: number) {
 export function installGuiScaling() {
   let saved = MIN_SCALE;
   try {
-    saved = Number(window.localStorage.getItem(STORAGE_KEY));
+    saved = Number(window.localStorage.getItem(STORAGE_KEY)) * 100;
   } catch {
     // Use the default when webview storage is unavailable.
   }
@@ -36,8 +39,8 @@ export function installGuiScaling() {
     Number.isFinite(saved) &&
       saved >= MIN_SCALE &&
       saved <= MAX_SCALE &&
-      saved % STEP === 0
-      ? saved
+      Math.abs(saved - Math.round(saved / STEP) * STEP) < 1e-8
+      ? Math.round(saved / STEP) * STEP
       : MIN_SCALE,
   );
 

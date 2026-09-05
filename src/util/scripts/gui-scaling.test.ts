@@ -30,7 +30,7 @@ describe('GUI scaling', () => {
     expect(wheel(0).defaultPrevented).toBe(false);
     expect(currentScale()).toBe('1');
     expect(wheel(-100).defaultPrevented).toBe(true);
-    wheel(-100);
+    for (let i = 0; i < 4; i += 1) wheel(-100);
     expect(currentScale()).toBe('1.5');
     for (let i = 0; i < 10; i += 1) wheel(-100);
     expect(currentScale()).toBe('2');
@@ -52,7 +52,7 @@ describe('GUI scaling', () => {
       });
       input.dispatchEvent(event);
       expect(event.defaultPrevented).toBe(true);
-      expect(currentScale()).toBe(['1.25', '1.5', '1.25', '1'][i]);
+      expect(currentScale()).toBe(['1.1', '1.2', '1.1', '1'][i]);
     });
     input.remove();
   });
@@ -62,12 +62,12 @@ describe('GUI scaling', () => {
     cleanup();
     expect(wheel(-100).defaultPrevented).toBe(false);
     cleanup = installGuiScaling();
-    expect(currentScale()).toBe('1.25');
-    wheel(-100);
+    expect(currentScale()).toBe('1.1');
+    for (let i = 0; i < 4; i += 1) wheel(-100);
     expect(currentScale()).toBe('1.5');
   });
 
-  it.each(['NaN', 'Infinity', '0', '3', '1.3'])(
+  it.each(['NaN', 'Infinity', '0', '3', '1.25'])(
     'ignores invalid stored scale %s',
     (value) => {
       cleanup();
@@ -87,10 +87,10 @@ describe('GUI scaling', () => {
     });
     cleanup = installGuiScaling();
     adjustGuiScale(1);
-    expect(currentScale()).toBe('1.25');
+    expect(currentScale()).toBe('1.1');
     adjustGuiScale(Number.NaN);
     adjustGuiScale(100);
-    expect(currentScale()).toBe('1.25');
+    expect(currentScale()).toBe('1.1');
     adjustGuiScale(0);
     expect(currentScale()).toBe('1');
   });

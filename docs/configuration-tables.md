@@ -87,12 +87,7 @@ resume following the common value. The referenced field must be a scalar choice
 whose concrete values are valid for the child; inheritance resolves one level.
 
 A column's `unselectedValues: [native]` allows a valid automatic state to have
-no selected radio. In GUI 1.0.17+, declaring exactly one such value also enables
-clicking the selected radio again to store that automatic value and clear the pair.
-An explicit clear suppresses `valuePresentation` ticks, even after saving/loading;
-the normal reset action removes the override and restores default presentation.
-Multiple automatic values remain display-only because there is no unique clear target.
-Its value stays in the child control's choices for schema and
+no selected radio. Its value stays in the child control's choices for schema and
 saved-configuration compatibility. Explain this once above the table. This is
 useful when the game's native behaviour varies by AI and no single fixed radio
 selection would accurately describe it.

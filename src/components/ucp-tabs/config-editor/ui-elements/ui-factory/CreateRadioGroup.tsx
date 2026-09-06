@@ -54,7 +54,6 @@ function CreateRadioGroup(args: {
 
   const { spec, disabled, className } = args;
   const tableCell = useContext(ConfigTableCellContext);
-  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
   const warnings = useAtomValue(CONFIGURATION_WARNINGS_REDUCER_ATOM);
   const { url, text, enabled } = spec;
   const { contents } = spec;
@@ -105,28 +104,14 @@ function CreateRadioGroup(args: {
     selectedValue = (configuration[spec.inheritFrom!.url] ??
       configurationDefaults[spec.inheritFrom!.url]) as string;
   }
-  // A single hidden automatic value makes this table pair clearable.
-  const clearValue =
-    tableCell?.unselectedValues?.length === 1 &&
-    choices.some((choice) => choice.name === tableCell.unselectedValues![0]) &&
-    !tableCell.choices?.some(
-      (choice) => choice.name === tableCell.unselectedValues![0],
-    )
-      ? tableCell.unselectedValues[0]
-      : undefined;
-  // Untouched game defaults may show a tick; an explicitly cleared pair stays
-  // empty, including after saving/loading. Reset removes that explicit choice.
-  const isCleared =
-    clearValue !== undefined && userConfiguration[url] === clearValue;
-  const presentation =
-    tableCell && !isCleared
-      ? spec.valuePresentation?.[selectedValue]
-      : undefined;
+  // Presentation describes an automatic value without changing stored settings.
+  const presentation = tableCell
+    ? spec.valuePresentation?.[selectedValue]
+    : undefined;
   if (presentation?.choice) selectedValue = presentation.choice;
 
   // eslint-disable-next-line func-style
   const onRadioClick = (newValue: string) => {
-    if (isDisabled) return;
     setUserConfiguration({
       type: 'set-multiple',
       value: Object.fromEntries([[url, newValue]]),
@@ -179,11 +164,12 @@ function CreateRadioGroup(args: {
           onChange={() => {
             onRadioClick(choice.name);
           }}
+          // Clicking the already-selected inherited value makes it explicit too.
           onClick={() => {
-            if (choice.name !== selectedValue) return;
-            if (clearValue !== undefined) onRadioClick(clearValue);
-            // Ordinary inherited radios still make same-value clicks explicit.
-            else if (isInherited || presentation?.choice)
+            if (
+              (isInherited || presentation?.choice) &&
+              choice.name === selectedValue
+            )
               onRadioClick(choice.name);
           }}
           id={`${url}-radio-${choice.name}`}
@@ -207,6 +193,7 @@ function CreateRadioGroup(args: {
   const ref = useRef(null);
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
+  const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
   const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
     userConfiguration,
     configurationTouched,

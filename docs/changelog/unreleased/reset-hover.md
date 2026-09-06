@@ -1,1 +1,0 @@
-- Keep the reset bin visible while moving the pointer from a setting onto it, so it can be clicked reliably.

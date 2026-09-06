@@ -25,7 +25,11 @@ function ConfigTableCell({
   disabled: boolean;
 }) {
   const context = useMemo(
-    () => ({ label: `${rowLabel}: ${column.header}`, choices: column.choices }),
+    () => ({
+      label: `${rowLabel}: ${column.header}`,
+      choices: column.choices,
+      unselectedValues: column.unselectedValues,
+    }),
     [rowLabel, column],
   );
   const control: DisplayConfigElement =

@@ -352,7 +352,7 @@ export type ConfigTableColumn = {
   width?: string;
   /** Align a Choice/RadioGroup cell to these choices; absent choices stay empty. */
   choices?: { name: string; text: string }[];
-  /** Valid automatic states that deliberately have no selected radio. */
+  /** Hidden automatic states. A single value enables click-again to clear a pair. */
   unselectedValues?: string[];
 };
 

@@ -5,6 +5,7 @@ import { Overlay } from 'react-bootstrap';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 import ResetSettingButton from './ResetSettingButton';
 import useResetAvailable from './useResetAvailable';
+import useHoverBridge from './useHoverBridge';
 
 /** If performance becomes an issue: https://github.com/floating-ui/react-popper/issues/419 */
 
@@ -18,11 +19,12 @@ export function ConfigPopover(props: {
 
   const creator = useAtomValue(CREATOR_MODE_ATOM);
   const resetAvailable = useResetAvailable(url);
+  const hover = useHoverBridge(show, !creator && resetAvailable);
   if (creator || !resetAvailable) return null;
 
   return (
     <Overlay
-      show={show}
+      show={hover.visible}
       target={theRef.current}
       placement="left-start"
       container={theRef}
@@ -64,6 +66,8 @@ export function ConfigPopover(props: {
           className="ucp-popover sword-checkbox"
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...prps}
+          onMouseEnter={hover.enter}
+          onMouseLeave={hover.leave}
           style={{
             position: 'absolute',
             backgroundColor: '#c7a464',

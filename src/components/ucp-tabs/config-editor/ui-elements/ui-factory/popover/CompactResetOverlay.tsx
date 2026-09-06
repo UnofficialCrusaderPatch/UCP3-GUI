@@ -1,5 +1,6 @@
 import { ReactElement, useEffect, useRef, useState } from 'react';
 import { Overlay } from 'react-bootstrap';
+import useHoverBridge from './useHoverBridge';
 
 /** Portal the reset control above the parchment without moving its setting. */
 export default function CompactResetOverlay({
@@ -9,6 +10,7 @@ export default function CompactResetOverlay({
 }) {
   const [anchor, setAnchor] = useState<HTMLSpanElement | null>(null);
   const [hovered, setHovered] = useState(false);
+  const hover = useHoverBridge(hovered);
   const update = useRef<(() => void) | undefined>();
 
   useEffect(() => {
@@ -73,7 +75,9 @@ export default function CompactResetOverlay({
               ref={ref}
               style={style}
               className="qualifier-reset-overlay"
-              data-row-hovered={hovered}
+              data-row-hovered={hover.visible}
+              onPointerEnter={hover.enter}
+              onPointerLeave={hover.leave}
             >
               {children}
             </div>

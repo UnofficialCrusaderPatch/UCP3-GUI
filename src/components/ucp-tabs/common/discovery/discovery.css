@@ -95,8 +95,13 @@
   flex: 0 0 26px;
   min-height: 30px;
   padding: 0;
+  color: #4c351b;
+  align-self: flex-start;
 }
 .discovery-family-count {
+  color: #4c351b;
+  align-self: flex-start;
+  padding-top: 7px;
   font-size: 0.75rem;
   padding-inline-end: 4px;
   max-width: 6rem;
@@ -112,6 +117,7 @@
   min-width: 0;
 }
 .discovery-priority {
+  color: #4c351b;
   font-size: 0.75rem;
   width: 1.5rem;
   flex-shrink: 0;
@@ -123,12 +129,15 @@
   padding-inline-start: 3px;
 }
 .discovery-excerpt {
+  color: #382a18;
+  font-weight: normal;
   font-size: 0.8rem;
   line-height: 1.25;
   margin: 0 8px 5px;
   overflow-wrap: anywhere;
 }
 .discovery-empty {
+  color: #382a18;
   padding: 8px;
 }
 .discovery-store-columns {

@@ -22,6 +22,7 @@ import frameBaseStyle from './sandbox-frame-base.css?inline';
 import frameBaseScript from './sandbox-frame-base.js?raw';
 import Message from '../general/message';
 import saveConfig from './save-custom-menu-config';
+import { adjustGuiScale } from '../../util/scripts/gui-scaling';
 
 export interface SandboxSource {
   html: string;
@@ -49,6 +50,7 @@ function createSandboxHostApi(
 ) {
   return {
     confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
+    adjustGuiScale,
     getLanguage,
     getLocalizedString: createGetLocalizedStringFunction(
       localization,
@@ -126,7 +128,13 @@ function SandboxInternal(
         disabled={!initDone}
         onClick={async () =>
           // we will see, if this works, or just closes the sandbox
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
+          saveConfig(
+            baseUrl,
+            await sandbox.connection?.remote.getConfig(),
+            typeof sandbox.connection?.remote.getConfigQualifiers === 'function'
+              ? await sandbox.connection.remote.getConfigQualifiers()
+              : {},
+          )
         }
       >
         <Message message="sandbox.save" />
@@ -136,7 +144,13 @@ function SandboxInternal(
         className="ucp-button sandbox-control-button"
         disabled={!initDone}
         onClick={async () => {
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig());
+          saveConfig(
+            baseUrl,
+            await sandbox.connection?.remote.getConfig(),
+            typeof sandbox.connection?.remote.getConfigQualifiers === 'function'
+              ? await sandbox.connection.remote.getConfigQualifiers()
+              : {},
+          );
           closeFunc();
         }}
       >

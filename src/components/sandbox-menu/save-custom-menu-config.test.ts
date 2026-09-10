@@ -5,7 +5,10 @@ import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
+  CONFIGURATION_QUALIFIER_REDUCER_ATOM,
 } from '../../function/configuration/state';
+import { CREATOR_MODE_ATOM } from '../../function/gui-settings/settings';
+
 import saveConfig from './save-custom-menu-config';
 
 const fixtures = vi.hoisted(() => ({
@@ -18,7 +21,10 @@ vi.mock('../../util/scripts/logging', () => ({
 }));
 vi.mock('../../function/configuration/derived-state', async () => {
   const { atom } = await import('jotai');
-  return { CONFIGURATION_DEFAULTS_REDUCER_ATOM: atom(() => fixtures.baseline) };
+  return {
+    CONFIGURATION_DEFAULTS_REDUCER_ATOM: atom(() => fixtures.baseline),
+    CONFIGURATION_LOCKS_REDUCER_ATOM: atom({}),
+  };
 });
 
 const aiKey = 'aiSwapper.ai.rat.aic';
@@ -112,4 +118,43 @@ describe('saving custom-menu configuration', () => {
       getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
     );
   });
+});
+
+it('saves staged qualifiers only for existing local values in Creator mode', () => {
+  getStore().set(CREATOR_MODE_ATOM, true);
+  saveConfig(
+    'aiSwapper',
+    { 'ai.rat.aic': selectedAi },
+    {
+      'ai.rat.aic': 'required',
+      'ai.rat.speech': 'required',
+      menu: 'invalid',
+    },
+  );
+  expect(getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM)).toEqual({
+    [aiKey]: 'required',
+  });
+  saveConfig(
+    'aiSwapper',
+    { 'ai.rat.aic': undefined },
+    { 'ai.rat.aic': 'required' },
+  );
+  expect(getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM)).toEqual({});
+});
+it('ignores qualifier requests outside Creator mode and preserves legacy-menu qualifiers', () => {
+  getStore().set(CREATOR_MODE_ATOM, false);
+  saveConfig(
+    'aiSwapper',
+    { 'ai.rat.aic': selectedAi },
+    { 'ai.rat.aic': 'required' },
+  );
+  expect(getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM)).toEqual({});
+  getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: { [aiKey]: 'required' },
+  });
+  saveConfig('aiSwapper', { 'ai.rat.aic': selectedAi });
+  expect(getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM)[aiKey]).toBe(
+    'required',
+  );
 });

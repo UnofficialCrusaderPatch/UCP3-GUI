@@ -21,18 +21,30 @@ export function planBundledUpdates(
     throw new Error('Store is incompatible with this installation');
   }
   const localIDs = new Set(bundled.map((e) => `${e.name}@${e.version}`));
-  const online = store.extensions.list.filter(
-    (e) =>
-      !localIDs.has(`${e.definition.name}@${e.definition.version}`) &&
-      prerelease(e.definition.version) === null &&
-      /^[a-zA-Z0-9_-]+$/.test(e.definition.name) &&
-      e.contents.package.some(
-        (p) =>
-          p.method === 'github-binary' &&
-          (e.definition.type !== 'module' ||
-            ('signature' in p && !!p.signature)),
-      ),
-  );
+  // Bind eligibility to the exact source the installer will consume. In
+  // particular, an unsigned mirror must not shadow a later signed module.
+  const online = store.extensions.list
+    .map((e) => ({
+      ...e,
+      contents: {
+        ...e.contents,
+        package: e.contents.package
+          .filter(
+            (p) =>
+              p.method === 'github-binary' &&
+              (e.definition.type !== 'module' ||
+                ('signature' in p && !!p.signature)),
+          )
+          .slice(0, 1),
+      },
+    }))
+    .filter(
+      (e) =>
+        !localIDs.has(`${e.definition.name}@${e.definition.version}`) &&
+        prerelease(e.definition.version) === null &&
+        /^[a-zA-Z0-9_-]+$/.test(e.definition.name) &&
+        e.contents.package.length === 1,
+    );
   const packages = [
     ...online.map(
       (e) =>

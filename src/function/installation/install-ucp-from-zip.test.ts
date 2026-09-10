@@ -1,6 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import { beforeEach, expect, it, vi } from 'vitest';
 import { installUCPFromZip } from './install-ucp-from-zip';
+import { BundledUpdateRollbackError } from './update-bundled-extensions';
 
 const mocks = vi.hoisted(() => ({
   exists: vi.fn(),
@@ -73,4 +74,14 @@ it('completes installation with bundled versions when offline', async () => {
     (await installUCPFromZip('framework.zip', 'D:/game', vi.fn())).isOk(),
   ).toBe(true);
   expect(mocks.activate).toHaveBeenCalled();
+});
+
+it('does not activate an installation whose bundled update could not be rolled back', async () => {
+  mocks.update.mockRejectedValue(
+    new BundledUpdateRollbackError('access denied'),
+  );
+  expect(
+    (await installUCPFromZip('framework.zip', 'D:/game', vi.fn())).isErr(),
+  ).toBe(true);
+  expect(mocks.activate).not.toHaveBeenCalled();
 });

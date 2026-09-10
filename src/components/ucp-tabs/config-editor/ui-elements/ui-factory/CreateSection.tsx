@@ -1,4 +1,6 @@
 import React from 'react';
+import QualifierControl from './QualifierControl';
+import { settingRoots } from '../../../../../function/configuration/qualifiers';
 
 import type {
   DisplayConfigElement,
@@ -57,7 +59,10 @@ function CreateSection(args: {
       id={identifier}
       style={{ marginLeft: `0rem`, paddingTop: `${(10 - level) * 0.1}rem` }}
     >
-      {htmlHeader}
+      <div className="qualifier-heading">
+        <QualifierControl roots={settingRoots(contents)} disabled={readonly} />
+        {htmlHeader}
+      </div>
       <div style={{ marginLeft: '0rem', marginBottom: '0.0rem' }}>
         {elements}
       </div>

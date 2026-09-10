@@ -310,6 +310,9 @@ export type ChoiceDisplayConfigElement = BaseDisplayConfigElement &
   TextableDisplayConfigElement & {
     contents: ChoiceContents;
     display: 'Choice';
+    /** Display an inherited value through another scalar choice in a table. */
+    inheritFrom?: { url: string; value: string };
+    valuePresentation?: Record<string, { choice?: string; text?: string }>;
   };
 
 export type CustomMenuDisplayConfigElement = BaseDisplayConfigElement &
@@ -338,7 +341,26 @@ export type GroupDisplayConfigElement = BaseDisplayConfigElement &
   ChildrenableDisplayConfigElement & {
     description: string;
     display: 'Group';
+    /** Optional table presentation; children remain ordinary config elements. */
+    table?: ConfigTableLayout;
   };
+
+export type ConfigTableColumn = {
+  name: string;
+  header: string;
+  /** Width of one value/choice column, as a CSS length (e.g. 4rem). */
+  width?: string;
+  /** Align a Choice/RadioGroup cell to these choices; absent choices stay empty. */
+  choices?: { name: string; text: string }[];
+  /** Valid automatic states that deliberately have no selected radio. */
+  unselectedValues?: string[];
+};
+
+export type ConfigTableLayout = {
+  rowHeader: string;
+  rowWidth?: string;
+  columns: ConfigTableColumn[];
+};
 
 export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
   ColumnableDisplayConfigElement &
@@ -371,6 +393,9 @@ export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
   EnableableDisplayConfigElement & {
     contents: ChoiceContents;
     display: 'RadioGroup';
+    tooltip?: string;
+    inheritFrom?: { url: string; value: string };
+    valuePresentation?: Record<string, { choice?: string; text?: string }>;
   };
 
 export type SliderDisplayConfigElement = BaseDisplayConfigElement &
@@ -423,6 +448,8 @@ export type UCP2SwitchDisplayConfigElement = BaseDisplayConfigElement &
   HeaderableDisplayConfigElement &
   EnableableDisplayConfigElement & {
     display: 'UCP2Switch';
+    /** Optional controls inside the switch's collapsible description. */
+    children?: Array<DisplayConfigElement>;
   };
 
 type DisplayConfigElement =

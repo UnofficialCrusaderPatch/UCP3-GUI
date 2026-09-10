@@ -1,4 +1,5 @@
 import { beforeEach, expect, it, vi } from 'vitest';
+import { Range } from 'semver';
 import { updateBundledExtensions } from './update-bundled-extensions';
 import { UCPVersion } from '../ucp-files/ucp-version';
 
@@ -29,11 +30,33 @@ const version = {
   getMajorMinorPatchAsString: () => '3.0.7',
 } as UCPVersion;
 const plan = [
-  { definition: { name: 'aiSwapper', version: '1.3.0', type: 'module' } },
+  {
+    definition: {
+      name: 'aiSwapper',
+      version: '1.3.0',
+      type: 'module',
+      dependencies: {},
+    },
+  },
 ];
+const installed = (
+  name: string,
+  extensionVersion: string,
+  dependencies: Record<string, string> = {},
+) => ({
+  name,
+  version: extensionVersion,
+  type: 'module',
+  definition: {
+    dependencies: Object.fromEntries(
+      Object.entries(dependencies).map(([n, range]) => [n, new Range(range)]),
+    ),
+  },
+});
+const replacement = installed('aiSwapper', '1.3.0');
 beforeEach(() => {
   vi.resetAllMocks();
-  mocks.discover.mockResolvedValue([]);
+  mocks.discover.mockResolvedValueOnce([]).mockResolvedValue([replacement]);
   mocks.fetch.mockResolvedValue({});
   mocks.plan.mockReturnValue(plan);
   mocks.install.mockResolvedValue([{ status: 'ok' }]);
@@ -44,6 +67,10 @@ it('uses the installed framework catalog and explicit game folder', async () => 
   expect(mocks.fetch).toHaveBeenCalledWith({ queryKey: ['store', '3.0.7'] });
   expect(mocks.install).toHaveBeenCalledWith(plan, undefined, 'D:/game');
   expect(mocks.removeFile).not.toHaveBeenCalled();
+  expect(mocks.discover.mock.calls).toEqual([
+    ['D:/game', 'Release'],
+    ['D:/game', 'Release'],
+  ]);
 });
 it('leaves bundled files untouched when the Store is offline', async () => {
   mocks.fetch.mockRejectedValue(new Error('offline'));
@@ -72,10 +99,14 @@ it('reports rollback failures instead of claiming a working offline fallback', a
 });
 
 it('removes superseded bundles only after all updates succeed', async () => {
-  mocks.discover.mockResolvedValue([
-    { name: 'aiSwapper', version: '1.1.0', type: 'module' },
-    { name: 'files', version: '1.3.0', type: 'module' },
-  ]);
+  const originals = [
+    installed('aiSwapper', '1.1.0'),
+    installed('files', '1.3.0'),
+  ];
+  mocks.discover
+    .mockReset()
+    .mockResolvedValueOnce(originals)
+    .mockResolvedValue([...originals, replacement]);
   await updateBundledExtensions('D:/game', version);
   expect(mocks.removeFile.mock.calls).toEqual([
     ['D:/game/ucp/modules/aiSwapper-1.1.0.zip', true],
@@ -84,14 +115,68 @@ it('removes superseded bundles only after all updates succeed', async () => {
   expect(mocks.install.mock.invocationCallOrder[0]).toBeLessThan(
     mocks.removeFile.mock.invocationCallOrder[0],
   );
+  expect(mocks.discover.mock.invocationCallOrder[1]).toBeLessThan(
+    mocks.removeFile.mock.invocationCallOrder[0],
+  );
 });
 it('keeps old bundles when a replacement fails', async () => {
-  mocks.discover.mockResolvedValue([
-    { name: 'aiSwapper', version: '1.1.0', type: 'module' },
-  ]);
+  mocks.discover
+    .mockReset()
+    .mockResolvedValue([installed('aiSwapper', '1.1.0')]);
   mocks.install.mockResolvedValue([{ status: 'error' }]);
   await expect(updateBundledExtensions('D:/game', version)).rejects.toThrow();
   expect(
     mocks.removeFile.mock.calls.every(([path]) => !path.includes('1.1.0')),
   ).toBe(true);
+});
+
+it.each([
+  ['malformed or missing definition', []],
+  ['wrong version', [installed('aiSwapper', '1.2.0')]],
+  ['wrong type', [{ ...replacement, type: 'plugin' }]],
+  [
+    'different packaged dependencies',
+    [installed('aiSwapper', '1.3.0', { missing: '^1.0.0' })],
+  ],
+])(
+  'rolls back a successful download with %s before pruning',
+  async (_, replacements) => {
+    const originals = [installed('aiSwapper', '1.1.0')];
+    mocks.discover
+      .mockReset()
+      .mockResolvedValueOnce(originals)
+      .mockResolvedValue([...originals, ...replacements]);
+    await expect(updateBundledExtensions('D:/game', version)).rejects.toThrow(
+      /Installed/,
+    );
+    expect(mocks.removeFile.mock.calls).toEqual([
+      ['D:/game/ucp/modules/aiSwapper-1.3.0.zip', true],
+      ['D:/game/ucp/modules/aiSwapper-1.3.0.zip.sig', true],
+    ]);
+  },
+);
+
+it('validates compatibility with surviving bundled plugins before pruning', async () => {
+  const originals = [
+    installed('aiSwapper', '1.1.0'),
+    installed('preset', '1.0.0', { aiSwapper: '<1.3.0' }),
+  ];
+  mocks.discover
+    .mockReset()
+    .mockResolvedValueOnce(originals)
+    .mockResolvedValue([...originals, replacement]);
+  await expect(updateBundledExtensions('D:/game', version)).rejects.toThrow(
+    'incompatible',
+  );
+  expect(
+    mocks.removeFile.mock.calls.every(([path]) => !path.includes('1.1.0')),
+  ).toBe(true);
+});
+
+it('blocks fallback if cleanup fails after installed-package validation', async () => {
+  mocks.discover.mockReset().mockResolvedValue([]);
+  mocks.removeFile.mockRejectedValue(new Error('access denied'));
+  await expect(updateBundledExtensions('D:/game', version)).rejects.toThrow(
+    'Could not restore',
+  );
 });

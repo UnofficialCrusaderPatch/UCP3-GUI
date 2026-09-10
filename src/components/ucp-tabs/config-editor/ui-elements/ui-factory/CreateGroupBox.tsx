@@ -1,6 +1,8 @@
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { Accordion, AccordionBody, AccordionHeader } from 'react-bootstrap';
+import { settingRoots } from '../../../../../function/configuration/qualifiers';
+import QualifierControl from './QualifierControl';
 import { GroupBoxDisplayConfigElement } from '../../../../../config/ucp/common';
 // eslint-disable-next-line import/no-cycle
 import CreateUIElement from './CreateUIElement';
@@ -60,9 +62,12 @@ function CreateGroupBox(args: {
           ...(spec.style || {}).css,
         }}
       >
-        <AccordionHeader className="">
-          <h5>{header}</h5>
-        </AccordionHeader>
+        <div className="qualifier-heading">
+          <QualifierControl roots={settingRoots(spec)} disabled={disabled} />
+          <AccordionHeader className="">
+            <h5>{header}</h5>
+          </AccordionHeader>
+        </div>
         <AccordionBody className="">
           <div>
             <span>{finalDescription}</span>
@@ -84,7 +89,10 @@ function CreateGroupBox(args: {
       style={(spec.style || {}).css}
     >
       <Row>
-        <h5>{header}</h5>
+        <h5 className="qualifier-heading">
+          <QualifierControl roots={settingRoots(spec)} disabled={disabled} />
+          {header}
+        </h5>
         <div>
           <span>{finalDescription}</span>
         </div>

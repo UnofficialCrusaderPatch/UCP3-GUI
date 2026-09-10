@@ -14,11 +14,18 @@ on:
         default: true
         type: boolean
 
+      publish_existing_only:
+        description: 'Restore updater metadata from the existing release without rebuilding'
+        required: false
+        default: false
+        type: boolean
+
 env:
   RELEASE_BODY: ''
 
 jobs:
   build:
+    if: ${{ !inputs.publish_existing_only }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -104,6 +111,7 @@ jobs:
           prerelease: ${{ inputs.pre_release }}
 
   push_release:
+    if: ${{ always() && (needs.build.result == 'success' || inputs.publish_existing_only) }}
     runs-on: windows-latest
     needs: build
     steps:

@@ -21,6 +21,9 @@ import { getDefaultStore } from 'jotai';
 import yaml from 'yaml';
 
 import { StrictMode } from 'react';
+import Sandbox from '@jetbrains/websandbox';
+import { parseDependencies } from '../../../../function/extensions/discovery/definition-meta-version-1.0.0/parse-definition';
+import { fullStrategy } from '../../common/importing/import-strategies/full-strategy';
 import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { openFileDialog } from '../../../../tauri/tauri-dialog';
 import Option from '../../../../util/structs/option';
@@ -128,11 +131,14 @@ async function fixture(folder: string) {
   } as ExtensionHandle;
 
   const definition = yaml.parse(await handle.getTextContents('definition.yml'));
+  const dependencies = parseDependencies(definition);
+  if (dependencies.status !== 'ok')
+    throw new Error('Invalid fixture dependencies');
 
   const ext = {
     ...definition,
     type: 'plugin',
-    definition: { ...definition, dependencies: {} },
+    definition: { ...definition, dependencies: dependencies.content },
     ui: (await readUISpec(handle)).options,
     locales: await readLocales(handle, definition.name, ['en', 'de']),
     config: await readConfig(handle),
@@ -228,6 +234,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   forceClearOverlayContent();
+  vi.restoreAllMocks();
 });
 
 describe('declarative options.yml modals', () => {
@@ -275,6 +282,10 @@ describe('declarative options.yml modals', () => {
     await expect(readUISpec(handle)).rejects.toThrow(
       'children must be an array',
     );
+
+    handle.getTextContents = async () =>
+      'options: [{name: outer, display: Modal, children: [{name: bad-group, display: Group, children: false}]}]';
+    await expect(readUISpec(handle)).rejects.toThrow('Modal outer');
 
     handle.getTextContents = async () =>
       'options: [{name: empty, display: Modal}]';
@@ -723,22 +734,183 @@ test('searching a modal or group heading reveals its controls instead of an empt
 
 test('table row conditions stay reactive and an open reset popover consumes Escape first', async () => {
   const ext = await fixture('modal-resources-1.0.0');
-  const table = displayChildren(ext.ui[0] as unknown as DisplayConfigElement)[0];
-  Object.assign(displayChildren(table)[0], { enabled: 'modal-resources.editing' });
+  const table = displayChildren(
+    ext.ui[0] as unknown as DisplayConfigElement,
+  )[0];
+  Object.assign(displayChildren(table)[0], {
+    enabled: 'modal-resources.editing',
+  });
   install(ext);
-  store.set(CONFIGURATION_FULL_REDUCER_ATOM, { type: 'set-multiple', value: { 'modal-resources.editing': true } });
-  render(<><CreateSections /><Overlay /></>);
+  store.set(CONFIGURATION_FULL_REDUCER_ATOM, {
+    type: 'set-multiple',
+    value: { 'modal-resources.editing': true },
+  });
+  render(
+    <>
+      <CreateSections />
+      <Overlay />
+    </>,
+  );
   fireEvent.click(screen.getByRole('button', { name: 'Starting resources' }));
   const wood = await screen.findByRole('spinbutton', { name: 'Wood: Normal' });
-  act(() => store.set(CONFIGURATION_FULL_REDUCER_ATOM, { type: 'set-multiple', value: { 'modal-resources.editing': false } }));
+  act(() =>
+    store.set(CONFIGURATION_FULL_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: { 'modal-resources.editing': false },
+    }),
+  );
   expect((wood as HTMLInputElement).disabled).toBe(true);
-  act(() => store.set(CONFIGURATION_FULL_REDUCER_ATOM, { type: 'set-multiple', value: { 'modal-resources.editing': true } }));
+  act(() =>
+    store.set(CONFIGURATION_FULL_REDUCER_ATOM, {
+      type: 'set-multiple',
+      value: { 'modal-resources.editing': true },
+    }),
+  );
   fireEvent.change(wood, { target: { value: '123' } });
   fireEvent.mouseEnter(wood.closest('.config-number-group')!);
   await screen.findByRole('button', { name: 'config.popover.reset' });
   fireEvent.keyDown(wood, { key: 'Escape' });
   expect(screen.getByRole('dialog')).toBeTruthy();
-  await waitFor(() => expect(screen.queryByRole('button', { name: 'config.popover.reset' })).toBeNull());
+  await waitFor(() =>
+    expect(
+      screen.queryByRole('button', { name: 'config.popover.reset' }),
+    ).toBeNull(),
+  );
   fireEvent.keyDown(wood, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).toBeNull();
+});
+
+async function customMenuFixture() {
+  const ext = await fixture('modal-mixed-1.0.0');
+  displayChildren(ext.ui[0] as unknown as DisplayConfigElement).push(
+    yaml.parse(`
+name: sandbox-child
+display: CustomMenu
+header: Compatibility menu
+hasHeader: true
+text: Sandbox child
+url: modal-mixed
+contents:
+  type: object
+  value: {}
+  source:
+    html: compatibility.html
+    css: ''
+    js: ''
+`),
+  );
+  attachExtensionInformationToDisplayConfigElement(ext, ext.ui);
+  return ext;
+}
+
+test('a discovered CustomMenu saves current-host qualifiers and returns to its declarative parent', async () => {
+  const ext = await customMenuFixture();
+  vi.spyOn(ext.io, 'handle').mockImplementation(async (fn) =>
+    fn({
+      getTextContents: async () => '<p>Compatibility content</p>',
+    } as unknown as ExtensionHandle),
+  );
+  const remote = {
+    getConfig: vi.fn(async () => ({ amount: 47 })),
+    getConfigQualifiers: vi.fn(async () => ({ amount: 'required' })),
+  };
+  const destroy = vi.fn();
+  vi.spyOn(Sandbox, 'create').mockImplementation((host, options) => {
+    // Only iframe transport is simulated. Source discovery, host buttons,
+    // saveConfig, qualifiers, overlay cleanup and the parent editor are real.
+    const frame = document.createElement('iframe');
+    if (!(options?.frameContainer instanceof Element)) throw new Error('Missing sandbox container');
+    options.frameContainer.appendChild(frame);
+    (host.confirmInit as () => Promise<void>)();
+    destroy.mockImplementation(() => frame.remove());
+    return { connection: { remote }, destroy } as unknown as ReturnType<
+      typeof Sandbox.create
+    >;
+  });
+  editor(ext);
+  store.set(CREATOR_MODE_ATOM, true);
+  fireEvent.click(screen.getByRole('button', { name: 'Mixed controls' }));
+  const parent = await screen.findByRole('dialog');
+  const search = within(parent).getByRole('searchbox');
+  fireEvent.change(search, { target: { value: 'Sandbox child' } });
+  const opener = screen.getByRole('button', { name: 'Sandbox child' });
+  opener.focus();
+  fireEvent.click(opener);
+  fireEvent.click(
+    await screen.findByRole('button', { name: 'sandbox.save.close' }),
+  );
+  await waitFor(() => expect(screen.getByRole('dialog')).toBe(parent));
+  expect(remote.getConfigQualifiers).toHaveBeenCalledOnce();
+  expect(destroy).toHaveBeenCalledOnce();
+  expect(store.get(CONFIGURATION_FULL_REDUCER_ATOM)['modal-mixed.amount']).toBe(
+    47,
+  );
+  expect(
+    store.get(CONFIGURATION_QUALIFIER_REDUCER_ATOM)['modal-mixed.amount'],
+  ).toBe('required');
+  expect((search as HTMLInputElement).value).toBe('Sandbox child');
+  await waitFor(() => expect(document.activeElement).toBe(opener));
+  fireEvent.change(search, { target: { value: '' } });
+  expect((screen.getByLabelText('Amount') as HTMLInputElement).value).toBe(
+    '47',
+  );
+});
+
+test('a child disabled during asynchronous source loading cannot open later', async () => {
+  const ext = await customMenuFixture();
+  let finish: (source: string[]) => void = () => {};
+  vi.spyOn(ext.io, 'handle').mockImplementationOnce(
+    () =>
+      new Promise<string[]>((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const view = editor(ext);
+  fireEvent.click(screen.getByRole('button', { name: 'Mixed controls' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Sandbox child' }));
+  view.rerender(
+    <>
+      <CreateUIElement spec={localized(ext)[0]} disabled className="" />
+      <Overlay />
+    </>,
+  );
+  await act(async () => finish(['<p>Late content</p>', '', '']));
+  expect(screen.getAllByRole('dialog')).toHaveLength(1);
+  expect(screen.queryByRole('button', { name: 'sandbox.save' })).toBeNull();
+  expect(
+    (screen.getByRole('button', { name: 'Sandbox child' }) as HTMLButtonElement)
+      .disabled,
+  ).toBe(true);
+});
+
+test('example dependency order survives the real full import strategy', async () => {
+  const ext = await fixture('modal-mixed-1.0.0');
+  const preset = await fixture('modal-presets-1.0.0');
+  install(ext);
+  const state = {
+    ...store.get(EXTENSION_STATE_INTERNAL_ATOM),
+    extensions: [ext, preset],
+    installedExtensions: [ext, preset],
+  };
+  // Files use bottom-up load order; Content displays the reverse order.
+  const config = serializeUCPConfig({}, {}, [ext, preset], [ext, preset], {});
+  const restored = await fullStrategy(
+    state,
+    yaml.parse(toYaml(config)),
+    () => {},
+  );
+  expect(restored.status).toBe('ok');
+  if (restored.status !== 'ok') throw new Error(JSON.stringify(restored));
+  expect(
+    restored.newExtensionsState.activeExtensions.map((e) => e.name),
+  ).toEqual(['modal-presets', 'modal-mixed']);
+  expect(
+    restored.newExtensionsState.configuration.locks['modal-mixed.locked']
+      .lockedValue,
+  ).toBe(25);
+  expect(
+    restored.newExtensionsState.configuration.suggestions[
+      'modal-mixed.suggested'
+    ].suggestedValue,
+  ).toBe(30);
 });

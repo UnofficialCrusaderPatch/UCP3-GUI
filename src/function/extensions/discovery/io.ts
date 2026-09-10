@@ -16,16 +16,21 @@ export const DEFINITION_FILE = 'definition.yml';
 export const LOCALE_FOLDER = 'locale';
 export const DESCRIPTION_FILE = 'description.md';
 
-function validateModalChildren(node: unknown): void {
+function validateModalChildren(node: unknown, modalName?: string): void {
   if (!node || typeof node !== 'object') return;
   if (Array.isArray(node)) {
-    node.forEach(validateModalChildren);
+    node.forEach((child) => validateModalChildren(child, modalName));
     return;
   }
   const element = node as Record<string, unknown>;
+  const owner =
+    element.display === 'Modal' ? String(element.name ?? '') : modalName;
+  const requiredChildren = ['Group', 'GroupBox'].includes(
+    String(element.display),
+  );
   if (
-    element.display === 'Modal' &&
-    element.children !== undefined &&
+    owner !== undefined &&
+    (element.children !== undefined || requiredChildren) &&
     (!Array.isArray(element.children) ||
       element.children.some(
         (child) =>
@@ -35,10 +40,11 @@ function validateModalChildren(node: unknown): void {
       ))
   ) {
     throw new Error(
-      `Modal ${element.name ?? ''}: children must be an array of configuration elements`,
+      `Modal ${owner}: children must be an array of configuration elements (${element.name ?? element.display})`,
     );
   }
-  if (Array.isArray(element.children)) validateModalChildren(element.children);
+  if (Array.isArray(element.children))
+    validateModalChildren(element.children, owner);
 }
 
 export async function readUISpec(

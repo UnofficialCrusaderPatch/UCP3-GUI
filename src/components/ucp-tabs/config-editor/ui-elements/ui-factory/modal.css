@@ -6,7 +6,6 @@
   max-height: calc(100% - 2rem);
   display: flex;
   flex-direction: column;
-  border: 2px solid #765028;
   background-color: #dfc28d;
   color: #24180d;
   box-shadow: 0 0.5rem 2rem #0008;
@@ -19,14 +18,30 @@
 .declarative-modal-header h2 {
   font-size: 1.5rem;
   margin: 0 0 0.25rem;
+  overflow-wrap: anywhere;
+  max-height: 3.6em;
+  overflow: auto;
 }
 .declarative-modal-header p,
 .declarative-modal-footer p {
   margin: 0 0 0.25rem;
 }
-.declarative-modal-header input {
-  margin: 0 0.5rem;
-  max-width: 45%;
+.declarative-modal-search {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+}
+.declarative-modal-search input {
+  flex: 1 1 10rem;
+  min-width: 0;
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  font: inherit;
+}
+.declarative-modal :focus-visible {
+  outline: 2px solid #684018;
+  outline-offset: 2px;
 }
 .declarative-modal-body {
   overflow: auto;
@@ -35,6 +50,10 @@
   flex: 1;
   overscroll-behavior: contain;
   container-type: inline-size;
+  scrollbar-gutter: stable;
+}
+.declarative-modal-description {
+  margin: 0 0 0.75rem;
 }
 .declarative-modal-footer {
   display: flex;
@@ -46,6 +65,11 @@
 }
 .declarative-modal-footer button {
   flex-shrink: 0;
+}
+.declarative-modal-footer > div {
+  min-width: 0;
+  max-height: 5em;
+  overflow: auto;
 }
 .config-columns {
   display: grid;

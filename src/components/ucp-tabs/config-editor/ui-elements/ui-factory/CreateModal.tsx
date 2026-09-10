@@ -49,7 +49,7 @@ function ModalEditor({
   );
   return (
     <div
-      className="declarative-modal parchment-box-bg-light"
+      className="declarative-modal ornament-border parchment-box-bg-light"
       role="dialog"
       aria-modal="true"
       aria-labelledby={`${id}-title`}
@@ -57,26 +57,35 @@ function ModalEditor({
     >
       <header className="declarative-modal-header">
         <h2 id={`${id}-title`}>{spec.header || spec.name}</h2>
-        <p>{spec.description ?? spec.text}</p>
-        <label htmlFor={`${id}-search`}>{localize('modal.search')}</label>
-        <input
-          ref={input}
-          id={`${id}-search`}
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-        <button
-          type="button"
-          className="ucp-button"
-          disabled={!query}
-          onClick={() => setQuery('')}
-        >
-          <Message message="modal.show.all" />
-        </button>
-        <QualifierControl roots={settingRoots(spec)} disabled={disabled} />
+        <div className="declarative-modal-search">
+          <label className="visually-hidden" htmlFor={`${id}-search`}>
+            {localize('modal.search')}
+          </label>
+          <input
+            ref={input}
+            id={`${id}-search`}
+            type="search"
+            placeholder={localize('modal.search')}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <button
+            type="button"
+            className="ucp-button"
+            disabled={!query}
+            onClick={() => setQuery('')}
+          >
+            <Message message="modal.show.all" />
+          </button>
+          <QualifierControl roots={settingRoots(spec)} disabled={disabled} />
+        </div>
       </header>
       <div className="declarative-modal-body">
+        {(spec.description ?? spec.text) && (
+          <p className="declarative-modal-description">
+            {spec.description ?? spec.text}
+          </p>
+        )}
         <ModalQueryContext.Provider value={query}>
           <ModalFilterContext.Provider value={matches}>
             {visible.length ? (

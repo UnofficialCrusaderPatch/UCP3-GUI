@@ -142,3 +142,14 @@ configuration store, runtime dependency or window manager is introduced.
 PR #363 remains separate: this contribution does not import its binary-asset,
 sandbox save, or texture-cache work. Existing current-main table, qualifier and
 scaling behavior is the integration baseline.
+
+The current interaction reference is AI Swapper **1.4.0**, source
+[`b840ef0`](https://github.com/UnofficialCrusaderPatch/extension-aiSwapper/commit/b840ef0081b897193e82b19ad27ac15fcd8b176b):
+its compact layout, local search and Creator qualifiers work with GUI 1.0.16.
+The module's old published 1.1.0 archive predates that redesign. GUI and module
+versions are independent. Declarative dialogs reuse the GUI's parchment,
+ornament, buttons and scrolling, with a compact search row and a scrolling
+description so long author text cannot push Close out of reach.
+
+Use Content activation to generate test configurations. Saved `load-order` is
+bottom-up (dependencies first); the Content list displays the reverse order.

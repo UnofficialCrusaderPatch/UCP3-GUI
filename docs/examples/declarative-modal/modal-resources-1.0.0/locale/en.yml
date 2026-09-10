@@ -1,0 +1,26 @@
+resources: Starting resources
+resources.description: Starting goods by game mode. These are the real startResources
+  option URLs and defaults.
+goods: Resource
+normal: Normal
+crusader: Crusader
+deathmatch: Deathmatch
+wood: Wood
+stone: Stone
+iron: Iron
+pitch: Pitch
+wheat: Wheat
+bread: Bread
+cheese: Cheese
+meat: Meat
+fruit: Fruit
+beer: Beer
+flour: Flour
+bows: Bows
+crossbows: Crossbows
+spears: Spears
+pikes: Pikes
+maces: Maces
+swords: Swords
+leatherarmor: Leather armor
+metalarmor: Metal armor

@@ -1,0 +1,197 @@
+meta:
+  version: 1.0.0
+options:
+- name: mixed
+  display: Modal
+  header: '{{mixed}}'
+  description: '{{description}}'
+  category:
+  - Modal examples
+  children:
+  - name: instructions
+    display: Paragraph
+    header: '{{instructions}}'
+    text: '{{instructions.text}}'
+  - name: editing
+    display: Switch
+    url: modal-mixed.editing
+    text: '{{editing}}'
+    contents:
+      type: boolean
+      value: true
+  - name: general
+    display: GroupBox
+    header: '{{general}}'
+    columns: 2
+    enabled: modal-mixed.editing
+    children:
+    - name: amount
+      display: Number
+      url: modal-mixed.amount
+      text: '{{amount}}'
+      contents: &id001
+        type: number
+        value: 10
+        min: 0
+        max: 100
+        step: 1
+      tooltip: '{{amount.tip}}'
+    - name: locked
+      display: Number
+      url: modal-mixed.locked
+      text: '{{locked}}'
+      contents: *id001
+    - name: difficulty
+      display: Choice
+      url: modal-mixed.difficulty
+      text: '{{difficulty}}'
+      contents: &id002
+        type: choice
+        value: normal
+        choices:
+        - name: normal
+          text: '{{normal}}'
+          enabled: 'true'
+        - name: hard
+          text: '{{hard}}'
+          enabled: 'true'
+    - name: stance
+      display: RadioGroup
+      url: modal-mixed.stance
+      text: '{{stance}}'
+      contents: *id002
+  - name: advanced
+    display: GroupBox
+    header: '{{advanced}}'
+    accordion:
+      enabled: true
+    children:
+    - name: suggested
+      display: Number
+      url: modal-mixed.suggested
+      text: '{{suggested}}'
+      contents: *id001
+    - name: nested
+      display: Modal
+      header: '{{nested}}'
+      children:
+      - name: file
+        display: FileInput
+        url: modal-mixed.file
+        text: '{{file}}'
+        contents:
+          type: file
+          value: ''
+          filter: files
+          generalizeExtensionPaths: false
+        generalizeExtensionPaths: false
+      - name: speed
+        display: Slider
+        url: modal-mixed.speed
+        text: '{{speed}}'
+        contents:
+          type: number
+          value:
+            enabled: true
+            sliderValue: 5
+          min: 1
+          max: 10
+          step: 1
+  - name: disabled
+    display: GroupBox
+    header: '{{disabled}}'
+    enabled: 'false'
+    children:
+    - name: disabled-modal
+      display: Modal
+      header: '{{disabled}}'
+      children:
+      - name: disabledValue
+        display: Number
+        url: modal-mixed.disabledValue
+        text: '{{disabledValue}}'
+        contents: *id001
+  - name: empty
+    display: Modal
+    header: '{{empty}}'
+    children: []
+  - name: hidden
+    display: Number
+    url: modal-mixed.hidden
+    text: '{{hidden}}'
+    contents: *id001
+    hidden: true
+  - name: legacy
+    display: Modal
+    header: Legacy controls
+    children:
+    - display: UCP2Slider
+      contents:
+        min: 1
+        max: 100
+        step: 1
+        decimals: 0
+        value:
+          enabled: false
+          sliderValue: 5
+      name: UCP2Slider
+      url: modal-mixed.UCP2Slider
+      header: UCP2Slider
+      text: Synthetic UCP2Slider
+      tooltip: Legacy control with the original value shape
+      hasHeader: true
+    - display: UCP2Switch
+      contents:
+        value: false
+        type: boolean
+      name: UCP2Switch
+      url: modal-mixed.UCP2Switch
+      header: UCP2Switch
+      text: Synthetic UCP2Switch
+      tooltip: Legacy control with the original value shape
+      hasHeader: true
+    - display: UCP2SliderChoice
+      contents:
+        value:
+          enabled: false
+          choice: absolute
+          choices:
+            absolute:
+              slider: 5
+            relative:
+              slider: 0.3
+        choices:
+        - name: absolute
+          min: 0
+          max: 250
+          step: 1
+          text: absolute
+        - name: relative
+          min: 0.0
+          max: 3.0
+          step: 0.1
+          text: relative
+      name: UCP2SliderChoice
+      url: modal-mixed.UCP2SliderChoice
+      header: UCP2SliderChoice
+      text: Synthetic UCP2SliderChoice
+      tooltip: Legacy control with the original value shape
+      hasHeader: true
+    - display: UCP2RadioGroup
+      contents:
+        choices:
+        - name: nearest
+          text: nearest
+        - name: richest
+          text: richest
+        - name: weakest
+          text: weakest
+        value:
+          enabled: false
+          choice: ''
+      name: UCP2RadioGroup
+      url: modal-mixed.UCP2RadioGroup
+      header: UCP2RadioGroup
+      text: Synthetic UCP2RadioGroup
+      tooltip: Legacy control with the original value shape
+      hasHeader: true

@@ -1,0 +1,615 @@
+meta:
+  version: 1.0.0
+options:
+- name: starting-resources
+  display: GroupBox
+  header: '{{resources}}'
+  text: '{{resources.description}}'
+  category:
+  - Modal examples
+  children:
+  - name: goods-table
+    display: Group
+    text: '{{resources}}'
+    table:
+      rowHeader: '{{goods}}'
+      columns:
+      - name: normal
+        header: '{{normal}}'
+        width: 8rem
+      - name: crusader
+        header: '{{crusader}}'
+        width: 8rem
+      - name: deathmatch
+        header: '{{deathmatch}}'
+        width: 8rem
+    children:
+    - name: wood
+      display: Group
+      text: '{{wood}}'
+      children:
+      - url: startResources.startGoods.normal.wood
+        text: '{{wood}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 100
+        name: normal-wood
+      - url: startResources.startGoods.crusader.wood
+        text: '{{wood}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 100
+        name: crusader-wood
+      - url: startResources.startGoods.deathmatch.wood
+        text: '{{wood}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 150
+        name: deathmatch-wood
+    - name: stone
+      display: Group
+      text: '{{stone}}'
+      children:
+      - url: startResources.startGoods.normal.stone
+        text: '{{stone}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 50
+        name: normal-stone
+      - url: startResources.startGoods.crusader.stone
+        text: '{{stone}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 50
+        name: crusader-stone
+      - url: startResources.startGoods.deathmatch.stone
+        text: '{{stone}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 150
+        name: deathmatch-stone
+    - name: iron
+      display: Group
+      text: '{{iron}}'
+      children:
+      - url: startResources.startGoods.normal.iron
+        text: '{{iron}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-iron
+      - url: startResources.startGoods.crusader.iron
+        text: '{{iron}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-iron
+      - url: startResources.startGoods.deathmatch.iron
+        text: '{{iron}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 25
+        name: deathmatch-iron
+    - name: pitch
+      display: Group
+      text: '{{pitch}}'
+      children:
+      - url: startResources.startGoods.normal.pitch
+        text: '{{pitch}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-pitch
+      - url: startResources.startGoods.crusader.pitch
+        text: '{{pitch}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-pitch
+      - url: startResources.startGoods.deathmatch.pitch
+        text: '{{pitch}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 48
+        name: deathmatch-pitch
+    - name: wheat
+      display: Group
+      text: '{{wheat}}'
+      children:
+      - url: startResources.startGoods.normal.wheat
+        text: '{{wheat}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-wheat
+      - url: startResources.startGoods.crusader.wheat
+        text: '{{wheat}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-wheat
+      - url: startResources.startGoods.deathmatch.wheat
+        text: '{{wheat}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 25
+        name: deathmatch-wheat
+    - name: bread
+      display: Group
+      text: '{{bread}}'
+      children:
+      - url: startResources.startGoods.normal.bread
+        text: '{{bread}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 60
+        name: normal-bread
+      - url: startResources.startGoods.crusader.bread
+        text: '{{bread}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 60
+        name: crusader-bread
+      - url: startResources.startGoods.deathmatch.bread
+        text: '{{bread}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 200
+        name: deathmatch-bread
+    - name: cheese
+      display: Group
+      text: '{{cheese}}'
+      children:
+      - url: startResources.startGoods.normal.cheese
+        text: '{{cheese}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-cheese
+      - url: startResources.startGoods.crusader.cheese
+        text: '{{cheese}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-cheese
+      - url: startResources.startGoods.deathmatch.cheese
+        text: '{{cheese}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-cheese
+    - name: meat
+      display: Group
+      text: '{{meat}}'
+      children:
+      - url: startResources.startGoods.normal.meat
+        text: '{{meat}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-meat
+      - url: startResources.startGoods.crusader.meat
+        text: '{{meat}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-meat
+      - url: startResources.startGoods.deathmatch.meat
+        text: '{{meat}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-meat
+    - name: fruit
+      display: Group
+      text: '{{fruit}}'
+      children:
+      - url: startResources.startGoods.normal.fruit
+        text: '{{fruit}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-fruit
+      - url: startResources.startGoods.crusader.fruit
+        text: '{{fruit}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-fruit
+      - url: startResources.startGoods.deathmatch.fruit
+        text: '{{fruit}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-fruit
+    - name: beer
+      display: Group
+      text: '{{beer}}'
+      children:
+      - url: startResources.startGoods.normal.beer
+        text: '{{beer}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-beer
+      - url: startResources.startGoods.crusader.beer
+        text: '{{beer}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-beer
+      - url: startResources.startGoods.deathmatch.beer
+        text: '{{beer}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 10
+        name: deathmatch-beer
+    - name: flour
+      display: Group
+      text: '{{flour}}'
+      children:
+      - url: startResources.startGoods.normal.flour
+        text: '{{flour}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-flour
+      - url: startResources.startGoods.crusader.flour
+        text: '{{flour}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-flour
+      - url: startResources.startGoods.deathmatch.flour
+        text: '{{flour}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-flour
+    - name: bows
+      display: Group
+      text: '{{bows}}'
+      children:
+      - url: startResources.startGoods.normal.bows
+        text: '{{bows}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-bows
+      - url: startResources.startGoods.crusader.bows
+        text: '{{bows}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-bows
+      - url: startResources.startGoods.deathmatch.bows
+        text: '{{bows}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-bows
+    - name: crossbows
+      display: Group
+      text: '{{crossbows}}'
+      children:
+      - url: startResources.startGoods.normal.crossbows
+        text: '{{crossbows}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-crossbows
+      - url: startResources.startGoods.crusader.crossbows
+        text: '{{crossbows}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-crossbows
+      - url: startResources.startGoods.deathmatch.crossbows
+        text: '{{crossbows}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-crossbows
+    - name: spears
+      display: Group
+      text: '{{spears}}'
+      children:
+      - url: startResources.startGoods.normal.spears
+        text: '{{spears}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-spears
+      - url: startResources.startGoods.crusader.spears
+        text: '{{spears}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-spears
+      - url: startResources.startGoods.deathmatch.spears
+        text: '{{spears}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-spears
+    - name: pikes
+      display: Group
+      text: '{{pikes}}'
+      children:
+      - url: startResources.startGoods.normal.pikes
+        text: '{{pikes}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-pikes
+      - url: startResources.startGoods.crusader.pikes
+        text: '{{pikes}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-pikes
+      - url: startResources.startGoods.deathmatch.pikes
+        text: '{{pikes}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-pikes
+    - name: maces
+      display: Group
+      text: '{{maces}}'
+      children:
+      - url: startResources.startGoods.normal.maces
+        text: '{{maces}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-maces
+      - url: startResources.startGoods.crusader.maces
+        text: '{{maces}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-maces
+      - url: startResources.startGoods.deathmatch.maces
+        text: '{{maces}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-maces
+    - name: swords
+      display: Group
+      text: '{{swords}}'
+      children:
+      - url: startResources.startGoods.normal.swords
+        text: '{{swords}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-swords
+      - url: startResources.startGoods.crusader.swords
+        text: '{{swords}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-swords
+      - url: startResources.startGoods.deathmatch.swords
+        text: '{{swords}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-swords
+    - name: leatherarmor
+      display: Group
+      text: '{{leatherarmor}}'
+      children:
+      - url: startResources.startGoods.normal.leatherarmor
+        text: '{{leatherarmor}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-leatherarmor
+      - url: startResources.startGoods.crusader.leatherarmor
+        text: '{{leatherarmor}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-leatherarmor
+      - url: startResources.startGoods.deathmatch.leatherarmor
+        text: '{{leatherarmor}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-leatherarmor
+    - name: metalarmor
+      display: Group
+      text: '{{metalarmor}}'
+      children:
+      - url: startResources.startGoods.normal.metalarmor
+        text: '{{metalarmor}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: normal-metalarmor
+      - url: startResources.startGoods.crusader.metalarmor
+        text: '{{metalarmor}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: crusader-metalarmor
+      - url: startResources.startGoods.deathmatch.metalarmor
+        text: '{{metalarmor}}'
+        display: Number
+        contents:
+          min: 0
+          max: 1000000
+          type: number
+          value: 0
+        name: deathmatch-metalarmor

@@ -91,12 +91,14 @@
   flex: 1;
   min-width: 0;
 }
-.discovery-family-toggle {
+.minimal-button.discovery-family-toggle {
   flex: 0 0 26px;
   min-height: 30px;
   padding: 0;
   color: #4c351b;
   align-self: flex-start;
+  text-align: center;
+  font-family: sans-serif;
 }
 .discovery-family-count {
   color: #4c351b;

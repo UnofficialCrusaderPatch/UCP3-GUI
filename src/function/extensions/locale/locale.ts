@@ -5,6 +5,7 @@ const localeSensitiveFields = [
   'subtext',
   'tooltip',
   'header',
+  'rowHeader',
   'choices',
   'category',
 ];

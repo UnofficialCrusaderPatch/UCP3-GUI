@@ -1,6 +1,6 @@
 import './sandbox-menu.css';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Sandbox from '@jetbrains/websandbox';
 
 import { OverlayContentProps } from '../overlay/overlay';
@@ -24,6 +24,7 @@ import frameBaseScript from './sandbox-frame-base.js?raw';
 import Message from '../general/message';
 import saveConfig from './save-custom-menu-config';
 import { createGetTextureCatalogInputsFunction } from './texture-catalog-service';
+import { adjustGuiScale } from '../../util/scripts/gui-scaling';
 
 export interface SandboxSource {
   html: string;
@@ -44,6 +45,7 @@ export interface SandboxArgs {
 
 function createSandboxHostApi(
   setInitDone: (value: boolean) => void,
+  reportInitError: (message: string) => void,
   currentFolder: string,
   baseUrl: string,
   localization: Record<string, string>,
@@ -51,6 +53,8 @@ function createSandboxHostApi(
 ) {
   return {
     confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
+    reportInitError: async (message: string) => reportInitError(message),
+    adjustGuiScale,
     getLanguage,
     getLocalizedString: createGetLocalizedStringFunction(
       localization,
@@ -96,45 +100,80 @@ function SandboxInternal(
 
   const [initDone, setInitDone] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const session = useRef(0);
 
   const save = async (closeAfterSave: boolean) => {
+    const currentSession = session.current;
+    setSaving(true);
     try {
       const config = await sandbox?.connection?.remote.getConfig();
       if (!config || typeof config !== 'object') {
         throw new Error('The menu did not return a configuration.');
       }
-      saveConfig(baseUrl, config);
+      const qualifiers =
+        typeof sandbox?.connection?.remote.getConfigQualifiers === 'function'
+          ? await sandbox.connection.remote.getConfigQualifiers()
+          : {};
+      // Closing/retrying the menu invalidates outstanding RPC responses.
+      if (session.current !== currentSession) return;
+      saveConfig(baseUrl, config, qualifiers);
       setSaveError(null);
       if (closeAfterSave) closeFunc();
     } catch (error) {
+      if (session.current !== currentSession) return;
       setSaveError(
         typeof error === 'object' && error !== null && 'message' in error
           ? String(error.message)
           : String(error),
       );
+    } finally {
+      if (session.current === currentSession) setSaving(false);
     }
   };
 
   useEffect(() => {
     setInitDone(false);
     setSaveError(null);
+    setInitError(null);
+    setSaving(false);
+    session.current += 1;
+    const currentSession = session.current;
     // TODO?: Sandbox currently executes css and js using inline script and style tags
     // the CSP currently allows this only for the sandbox
     // However, it seems to currently simply be needed due to the used lib.
     // Postponed until idea or bigger rework
-    const sand: Sandbox = Sandbox.create(
-      createSandboxHostApi(
-        setInitDone,
-        currentFolder,
-        baseUrl,
-        localization,
-        fallbackLocalization,
-      ),
-      createSandboxOptions(sandboxDiv, source),
-    );
+    let sand: Sandbox | null = null;
+    try {
+      sand = Sandbox.create(
+        createSandboxHostApi(
+          (value) => {
+            if (session.current === currentSession) setInitDone(value);
+          },
+          (message) => {
+            if (session.current === currentSession) {
+              setInitDone(false);
+              setInitError(message);
+            }
+          },
+          currentFolder,
+          baseUrl,
+          localization,
+          fallbackLocalization,
+        ),
+        createSandboxOptions(sandboxDiv, source),
+      );
+    } catch (error) {
+      setInitError(String(error));
+    }
 
     setSandbox(sand);
-    return () => sand.destroy();
+    return () => {
+      session.current += 1;
+      sand?.destroy();
+    };
   }, [
     baseUrl,
     currentFolder,
@@ -142,15 +181,28 @@ function SandboxInternal(
     source,
     localization,
     fallbackLocalization,
+    attempt,
   ]);
 
-  return !sandbox ? null : (
+  return (
     <div className="sandbox-control-menu">
+      {initError && (
+        <div className="sandbox-error" role="alert">
+          <Message message="sandbox.init.error" /> {initError}
+          <button
+            type="button"
+            className="ucp-button sandbox-control-button"
+            onClick={() => setAttempt((value) => value + 1)}
+          >
+            <Message message="sandbox.retry" />
+          </button>
+        </div>
+      )}
       {saveError && <span role="alert">{saveError}</span>}
       <button
         type="button"
         className="ucp-button sandbox-control-button"
-        disabled={!initDone}
+        disabled={!initDone || saving}
         onClick={() => save(false)}
       >
         <Message message="sandbox.save" />
@@ -158,7 +210,7 @@ function SandboxInternal(
       <button
         type="button"
         className="ucp-button sandbox-control-button"
-        disabled={!initDone}
+        disabled={!initDone || saving}
         onClick={() => save(true)}
       >
         <Message message="sandbox.save.close" />

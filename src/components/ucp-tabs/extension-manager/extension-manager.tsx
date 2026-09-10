@@ -23,7 +23,7 @@ import { CustomisationsExtensionElement } from './extension-elements/extension-e
 import { GhostElement } from './extension-elements/extension-element/ghost-element';
 import { InactiveExtensionsElement } from './extension-elements/extension-element/inactive-extension-element';
 import { ExtensionNameList } from './extension-elements/extension-element/types';
-import { OpenExtensionsFolderButton } from './buttons/open-extensions-folder-button';
+import { OpenExtensionsFolderButton } from './extension-elements/extension-element/shell-open-button';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,

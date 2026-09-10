@@ -6,8 +6,10 @@ import { Extension } from '../../../../config/ucp/common';
 
 import { CREATOR_MODE_ATOM } from '../../../../function/gui-settings/settings';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
-import { OpenExtensionsFolderButton } from './open-extensions-folder-button';
-import { InstalledExtensionFolderButton } from '../extension-elements/extension-element/installed-extension-folder-button';
+import {
+  OpenExtensionsFolderButton,
+  InstalledExtensionFolderButton,
+} from '../extension-elements/extension-element/shell-open-button';
 
 const mocks = vi.hoisted(() => ({
   folder: 'C:/Spiel Ä Test',
@@ -74,28 +76,22 @@ beforeEach(() => {
   mocks.exists = { state: 'hasData', data: true };
 });
 
+async function openFolder(args: Record<string, unknown>) {
+  const button = (await screen.findByRole('button')) as HTMLButtonElement;
+  fireEvent.click(button);
+  await waitFor(() =>
+    expect(mocks.invoke).toHaveBeenLastCalledWith('open_extension_path', args),
+  );
+  await waitFor(() => expect(button.disabled).toBe(false));
+}
+
 describe('extension folder controls', () => {
   it('opens the current installation and follows an installation change', async () => {
     const view = setup(<OpenExtensionsFolderButton />);
-    fireEvent.click(screen.getByRole('button'));
-    await waitFor(() =>
-      expect(mocks.invoke).toHaveBeenCalledWith('open_extension_path', {
-        gameFolder: 'C:/Spiel Ä Test',
-      }),
-    );
-    await waitFor(() =>
-      expect((screen.getByRole('button') as HTMLButtonElement).disabled).toBe(
-        false,
-      ),
-    );
+    await openFolder({ gameFolder: mocks.folder });
     mocks.folder = 'D:/Zweite Installation';
     view.rerender(view.wrap(<OpenExtensionsFolderButton />));
-    fireEvent.click(screen.getByRole('button'));
-    await waitFor(() =>
-      expect(mocks.invoke).toHaveBeenLastCalledWith('open_extension_path', {
-        gameFolder: mocks.folder,
-      }),
-    );
+    await openFolder({ gameFolder: mocks.folder });
   });
 
   it.each(['', 'C:/missing'])(
@@ -119,18 +115,14 @@ describe('extension folder controls', () => {
         'module',
       );
       setup(<InstalledExtensionFolderButton extension={ext} active={active} />);
-      fireEvent.click(
-        await screen.findByRole('button', {
-          name: 'extensions.extension.shell.reveal',
-        }),
-      );
-      await waitFor(() =>
-        expect(mocks.invoke).toHaveBeenCalledWith('open_extension_path', {
-          gameFolder: mocks.folder,
-          path: ext.io.path,
-          openDirectory: false,
-        }),
-      );
+      await screen.findByRole('button', {
+        name: 'extensions.extension.shell.reveal',
+      });
+      await openFolder({
+        gameFolder: mocks.folder,
+        path: ext.io.path,
+        openDirectory: false,
+      });
     },
   );
 
@@ -140,41 +132,24 @@ describe('extension folder controls', () => {
       <InstalledExtensionFolderButton extension={first} active />,
       true,
     );
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: 'extensions.extension.shell.open',
-      }),
-    );
-    await waitFor(() =>
-      expect(mocks.invoke).toHaveBeenLastCalledWith('open_extension_path', {
-        gameFolder: mocks.folder,
-        path: first.io.path,
-        openDirectory: true,
-      }),
-    );
-    await waitFor(() =>
-      expect((screen.getByRole('button') as HTMLButtonElement).disabled).toBe(
-        false,
-      ),
-    );
+    await screen.findByRole('button', { name: 'extensions.extension.shell.open' });
+    await openFolder({
+      gameFolder: mocks.folder,
+      path: first.io.path,
+      openDirectory: true,
+    });
     const second = extension(`${mocks.folder}/ucp/plugins/test-2.0.0`);
     view.rerender(
       view.wrap(
         <InstalledExtensionFolderButton extension={second} active={false} />,
       ),
     );
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: 'extensions.extension.shell.reveal',
-      }),
-    );
-    await waitFor(() =>
-      expect(mocks.invoke).toHaveBeenLastCalledWith('open_extension_path', {
-        gameFolder: mocks.folder,
-        path: second.io.path,
-        openDirectory: false,
-      }),
-    );
+    await screen.findByRole('button', { name: 'extensions.extension.shell.reveal' });
+    await openFolder({
+      gameFolder: mocks.folder,
+      path: second.io.path,
+      openDirectory: false,
+    });
   });
 
   it('reports host failures and provides keyboard focus feedback', async () => {

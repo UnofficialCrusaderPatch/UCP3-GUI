@@ -21,7 +21,7 @@ import { MessageType } from '../../../../../localization/localization';
 import { MoveArrows } from './move-arrows';
 import { ArrowButton } from './arrow-button';
 import { CustomizeButton } from './customize-button';
-import { InstalledExtensionFolderButton } from './installed-extension-folder-button';
+import { InstalledExtensionFolderButton } from './shell-open-button';
 
 // eslint-disable-next-line import/prefer-default-export
 export function ExtensionElement(props: {

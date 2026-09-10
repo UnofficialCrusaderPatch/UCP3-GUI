@@ -28,15 +28,30 @@ export function DiscoveryToolbar(props: {
     if (!open) return undefined;
     const place = () => {
       const rect = trigger.current!.getBoundingClientRect();
-      const below = window.innerHeight - rect.bottom - 12;
-      const above = rect.top - 12;
+      // The application zooms the root. DOM rectangles use physical CSS pixels,
+      // while fixed-position offsets inside that root are scaled again.
+      const scale =
+        Number(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            '--gui-scale',
+          ),
+        ) || 1;
+      const viewportWidth = window.innerWidth / scale;
+      const viewportHeight = window.innerHeight / scale;
+      const bottom = rect.bottom / scale;
+      const top = rect.top / scale;
+      const below = viewportHeight - bottom - 12;
+      const above = top - 12;
       const height = Math.min(380, Math.max(below, above));
       setPosition({
-        left: Math.max(8, Math.min(rect.right - 260, window.innerWidth - 268)),
+        left: Math.max(
+          8,
+          Math.min(rect.right / scale - 260, viewportWidth - 268),
+        ),
         top:
           below >= Math.min(380, above)
-            ? rect.bottom + 4
-            : Math.max(8, rect.top - height - 4),
+            ? bottom + 4
+            : Math.max(8, top - height - 4),
         maxHeight: Math.max(80, height),
       });
     };
@@ -55,14 +70,22 @@ export function DiscoveryToolbar(props: {
       }
     };
     place();
+    const scaling = new MutationObserver(place);
+    scaling.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style'],
+    });
     popup.current?.querySelector<HTMLInputElement>('input')?.focus();
     document.addEventListener('pointerdown', dismiss);
     document.addEventListener('keydown', escape);
     window.addEventListener('resize', place);
+    document.addEventListener('scroll', place, true);
     return () => {
       document.removeEventListener('pointerdown', dismiss);
       document.removeEventListener('keydown', escape);
       window.removeEventListener('resize', place);
+      document.removeEventListener('scroll', place, true);
+      scaling.disconnect();
     };
   }, [open]);
 

@@ -1,5 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { Provider, createStore } from 'jotai';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -19,7 +25,11 @@ vi.mock('../../../general/message', () => ({
         ? message
         : `${message.key}:${message.args.name ?? message.args.count}`,
 }));
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  document.documentElement.style.removeProperty('--gui-scale');
+  vi.restoreAllMocks();
+});
 
 function ToolbarFixture() {
   const [filter, setFilter] = useState(EMPTY_DISCOVERY_FILTER);
@@ -38,6 +48,34 @@ function ToolbarFixture() {
 }
 
 describe('compact discovery controls', () => {
+  it('keeps the popup inside the zoomed viewport and follows scaling changes while open', async () => {
+    document.documentElement.style.setProperty('--gui-scale', '2');
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ToolbarFixture />
+      </QueryClientProvider>,
+    );
+    const trigger = screen.getByRole('button', { name: /discovery.tags/ });
+    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
+      x: 900,
+      y: 540,
+      left: 900,
+      right: 1000,
+      top: 540,
+      bottom: 600,
+      width: 100,
+      height: 60,
+      toJSON: () => ({}),
+    });
+    fireEvent.click(trigger);
+    const popup = screen.getByRole('dialog');
+    expect(popup.style.left).toBe('240px');
+    expect(popup.style.top).toBe('8px');
+    expect(popup.style.maxHeight).toBe('258px');
+    document.documentElement.style.setProperty('--gui-scale', '1');
+    await waitFor(() => expect(popup.style.left).toBe('740px'));
+    expect(popup.style.maxHeight).toBe('380px');
+  });
   it('keeps multiple sword selections open and supports Escape with focus returned to the trigger', () => {
     render(
       <QueryClientProvider client={new QueryClient()}>

@@ -154,6 +154,49 @@ mod folder_tests {
             link
         );
     }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn reports_immediate_opener_failure() {
+        let child = std::process::Command::new("sh")
+            .args(["-c", "exit 3"])
+            .spawn()
+            .unwrap();
+        assert!(wait_for_file_manager(child).unwrap_err().contains('3'));
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn does_not_wait_for_a_long_lived_file_manager() {
+        let child = std::process::Command::new("sleep")
+            .arg("5")
+            .spawn()
+            .unwrap();
+        let start = std::time::Instant::now();
+        wait_for_file_manager(child).unwrap();
+        assert!(start.elapsed() < std::time::Duration::from_secs(4));
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn wait_for_file_manager(mut child: std::process::Child) -> Result<(), String> {
+    // Some desktops keep xdg-open alive for the lifetime of the folder window.
+    // Observe startup failures without waiting for the user to close it.
+    for _ in 0..20 {
+        if let Some(status) = child.try_wait().map_err(|err| err.to_string())? {
+            return if status.success() {
+                Ok(())
+            } else {
+                Err(format!("File manager failed: {}", status))
+            };
+        }
+        std::thread::sleep(std::time::Duration::from_millis(25));
+    }
+    std::thread::spawn(move || match child.wait() {
+        Ok(status) if status.success() => (),
+        result => log::warn!("File manager exited after startup: {:?}", result),
+    });
+    Ok(())
 }
 
 fn open_in_file_manager(path: &Path, reveal: bool) -> Result<(), String> {
@@ -198,24 +241,7 @@ fn open_in_file_manager(path: &Path, reveal: bool) -> Result<(), String> {
                 command.env_remove(key);
             }
         }
-        let mut child = command.spawn().map_err(|err| err.to_string())?;
-        // Some desktops keep xdg-open alive for the lifetime of the folder window.
-        // Observe startup failures without waiting for the user to close it.
-        for _ in 0..20 {
-            if let Some(status) = child.try_wait().map_err(|err| err.to_string())? {
-                return if status.success() {
-                    Ok(())
-                } else {
-                    Err(format!("File manager failed: {}", status))
-                };
-            }
-            std::thread::sleep(std::time::Duration::from_millis(25));
-        }
-        std::thread::spawn(move || match child.wait() {
-            Ok(status) if status.success() => (),
-            result => log::warn!("File manager exited after startup: {:?}", result),
-        });
-        Ok(())
+        wait_for_file_manager(command.spawn().map_err(|err| err.to_string())?)
     }
     #[cfg(not(any(target_os = "windows", target_os = "linux")))]
     {

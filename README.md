@@ -19,16 +19,15 @@ The first version of the GUI as well as the UCP3 itself are heavy work in progre
 
 ## Installation and Usage
 
-The GUI is currently work in progress, so there is no release at the moment.
+The support will include **at least** Windows 10/11, however, it should go down to Windows 8 and if possible even Windows 7.
 
-The first version will likely come in the form of an installer that takes care of the necessities.
+Linux is supported too, see [here](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/blob/main/LINUX.md).
 
-The support will include **at least** Windows 10/11, however, it should go down to Windows 8 and if possible even Windows 7. Linux and Mac will be considered after that and are in the realm of possibilities.
-
-This section will be restructured and extended once the first version is ready for release.
-(If we forget, please inform us :upside_down_face:.)
-
-
+Hold **Ctrl** and scroll up/down to enlarge/shrink the entire GUI, including
+custom menus. Scaling ranges from **100% to 200%** in 10% steps (including 150%).
+**Ctrl + Plus/Minus** also adjusts scaling; **Ctrl + 0** resets it to 100%.
+The chosen scale is remembered across restarts. At larger scales, maximize the
+window or use the outer scrollbars to reach content that no longer fits.
 
 ## Contributing
 

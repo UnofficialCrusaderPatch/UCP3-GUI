@@ -4,12 +4,6 @@ import { Suspense, useEffect, useState } from 'react';
 import Sandbox from '@jetbrains/websandbox';
 
 import { OverlayContentProps } from '../overlay/overlay';
-import { getStore } from '../../hooks/jotai/base';
-import {
-  CONFIGURATION_FULL_REDUCER_ATOM,
-  CONFIGURATION_TOUCHED_REDUCER_ATOM,
-  CONFIGURATION_USER_REDUCER_ATOM,
-} from '../../function/configuration/state';
 import { useCurrentGameFolder } from '../../function/game-folder/utils';
 
 import {
@@ -26,9 +20,9 @@ import {
 import frameBaseStyle from './sandbox-frame-base.css?inline';
 // eslint-disable-next-line import/no-unresolved, import/extensions
 import frameBaseScript from './sandbox-frame-base.js?raw';
-import { ConsoleLogger } from '../../util/scripts/logging';
 import Message from '../general/message';
-import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../function/configuration/derived-state';
+import saveConfig from './save-custom-menu-config';
+import { adjustGuiScale } from '../../util/scripts/gui-scaling';
 
 export interface SandboxSource {
   html: string;
@@ -47,74 +41,6 @@ export interface SandboxArgs {
   title?: string;
 }
 
-function saveConfig(baseUrl: string, config: Record<string, unknown>) {
-  // Log what was returned from the custom menu
-  ConsoleLogger.debug(`sandbox-menu: saveConfig: ${baseUrl}`, config);
-
-  // Prepend the baseUrl to the entries returned from the config menu
-  const prependedConfig = Object.fromEntries(
-    Object.entries(config).map(([subUrl, newConfigValue]) => [
-      `${baseUrl}.${subUrl}`,
-      newConfigValue,
-    ]),
-  );
-
-  // Gather the keys that were set to value `undefined`
-  // These keys will be cleared from the user config
-  // Note they are not cleared from the baseline or defaults config
-  // If that is desired, a special "none" value should be defined that the backend understands too
-  const toBeCleared = Object.entries(prependedConfig)
-    .filter(([, value]) => value === undefined)
-    .map(([url]) => url);
-
-  // Clear from the user config
-  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
-    type: 'clear-keys',
-    keys: toBeCleared,
-  });
-
-  // Gather the new user config entries that should be overridden
-  // in the user config and the full config
-  const userConfigEntries = Object.fromEntries(
-    Object.entries(prependedConfig).filter(([, value]) => value !== undefined),
-  );
-
-  // Overwrite the values in the user config.
-  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
-    type: 'set-multiple',
-    value: userConfigEntries,
-  });
-
-  // Update the touched state with which things were touched
-  // Note we only include things that are not undefined
-  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
-    type: 'set-multiple',
-    value: Object.fromEntries(
-      Object.keys(userConfigEntries).map((key) => [key, true]),
-    ),
-  });
-
-  // Compute full config based on defaults and user values
-  // TODO: currently no support for setting required/suggested
-  const baseline = getStore().get(CONFIGURATION_DEFAULTS_REDUCER_ATOM);
-  const baselineEntries: [string, unknown][] = Object.entries(baseline).filter(
-    ([url]) => url.startsWith(baseUrl),
-  );
-
-  // TODO: not 100% sure if this "recomputation" of the config values is necessary in all cases
-  // but since this is a Custom Menu let's do it this way anyway
-  const fullConfigEntries: Record<string, unknown> = {
-    ...baselineEntries,
-    ...userConfigEntries,
-  };
-
-  // Update the full config
-  getStore().set(CONFIGURATION_FULL_REDUCER_ATOM, {
-    type: 'set-multiple',
-    value: fullConfigEntries,
-  });
-}
-
 function createSandboxHostApi(
   setInitDone: (value: boolean) => void,
   currentFolder: string,
@@ -124,6 +50,7 @@ function createSandboxHostApi(
 ) {
   return {
     confirmInit: async () => setInitDone(true), // could be done to do stuff after init,
+    adjustGuiScale,
     getLanguage,
     getLocalizedString: createGetLocalizedStringFunction(
       localization,
@@ -201,7 +128,13 @@ function SandboxInternal(
         disabled={!initDone}
         onClick={async () =>
           // we will see, if this works, or just closes the sandbox
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig())
+          saveConfig(
+            baseUrl,
+            await sandbox.connection?.remote.getConfig(),
+            typeof sandbox.connection?.remote.getConfigQualifiers === 'function'
+              ? await sandbox.connection.remote.getConfigQualifiers()
+              : {},
+          )
         }
       >
         <Message message="sandbox.save" />
@@ -211,7 +144,13 @@ function SandboxInternal(
         className="ucp-button sandbox-control-button"
         disabled={!initDone}
         onClick={async () => {
-          saveConfig(baseUrl, await sandbox.connection?.remote.getConfig());
+          saveConfig(
+            baseUrl,
+            await sandbox.connection?.remote.getConfig(),
+            typeof sandbox.connection?.remote.getConfigQualifiers === 'function'
+              ? await sandbox.connection.remote.getConfigQualifiers()
+              : {},
+          );
           closeFunc();
         }}
       >

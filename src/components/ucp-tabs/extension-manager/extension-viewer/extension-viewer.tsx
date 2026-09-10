@@ -7,6 +7,7 @@ import { OverlayContentProps } from '../../../overlay/overlay';
 import Message from '../../../general/message';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
 import { extensionToID } from '../../../../function/extensions/dependency-management/dependency-resolution';
+import ExtensionRelations from './extension-relations';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -25,12 +26,6 @@ export function ExtensionViewer(
 
   const content = useAtomValue(contentAtom);
   const { tree, activeExtensions } = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
-  const activeIDs = activeExtensions.map(extensionToID);
-  const dependents = tree.extensionsById[extensionToID(extension)]
-    ? tree
-        .reverseExtensionDependenciesFor(extension)
-        .filter((ext) => activeIDs.includes(extensionToID(ext)))
-    : undefined;
 
   return (
     <div className="credits-container">
@@ -38,29 +33,13 @@ export function ExtensionViewer(
         <Message message="extensions.viewer" />
       </h1>
       <div className="parchment-box credits-text-box">
-        <div className="credits-text">
-          {dependents && dependents.length > 0 ? (
-            <details className="mb-2" style={{ overflowWrap: 'anywhere' }}>
-              <summary>
-                <Message
-                  message={{
-                    key:
-                      dependents.length === 1
-                        ? 'extensions.viewer.required.by.one'
-                        : 'extensions.viewer.required.by',
-                    args: { count: dependents.length },
-                  }}
-                />
-              </summary>
-              <ul className="mb-0">
-                {dependents.map((ext) => (
-                  <li key={extensionToID(ext)}>
-                    {ext.definition['display-name'] || ext.name} ({ext.version})
-                  </li>
-                ))}
-              </ul>
-            </details>
-          ) : null}
+        <div className="credits-text extension-description">
+          <ExtensionRelations
+            key={extensionToID(extension)}
+            extension={extension}
+            tree={tree}
+            activeExtensions={activeExtensions}
+          />
           <SaferMarkdown>
             {content.state === 'hasData' ? content.data : ''}
           </SaferMarkdown>

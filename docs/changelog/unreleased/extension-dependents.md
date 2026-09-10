@@ -1,5 +1,6 @@
-Click an extension name in the Extensions tab to inspect which active extensions
-directly require its selected version. A collapsed line above the description
-shows the count; expand it to see names and versions. It is hidden when there are
-no active dependents. English and German labels are included; other languages use
-the launcher's English fallback.
+Click an extension name in the Extensions tab, then expand the small Dependencies
+control at the top-right of its description. Side-by-side trees show what the
+selected version depends on and which active extensions require it. Expand a
+branch to trace indirect relationships. Unresolved requirements and cycles are
+labeled; empty relationships add no control. English and German labels are
+included, with the existing English fallback for other languages.

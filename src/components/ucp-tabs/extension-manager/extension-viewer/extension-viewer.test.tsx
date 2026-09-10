@@ -33,12 +33,21 @@ function extension(
   return {
     name,
     version,
+    meta: { version: '1.0.0' },
+    description: 'Extension description',
     type: 'plugin',
     ui: [],
-    config: {},
+    config: {
+      meta: { version: '1.0.0' },
+      'config-sparse': { modules: {}, plugins: {}, 'load-order': [] },
+    },
     configEntries: {},
     locales: {},
     definition: {
+      meta: { version: '1.0.0' },
+      author: 'Test fixture',
+      description: 'Extension description',
+      type: 'plugin',
       name,
       version,
       'display-name': `Display ${name}`,
@@ -50,10 +59,15 @@ function extension(
       ),
     },
     io: {
+      isDirectory: true,
+      isZip: false,
+      handle: async () => {
+        throw new Error('Viewer must not access package files');
+      },
       path: `/fixture/ucp/plugins/${name}-${version}`,
       fetchDescription: async () => 'Extension description',
     },
-  } as Extension;
+  };
 }
 
 describe('extension viewer relationships', () => {

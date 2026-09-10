@@ -255,7 +255,7 @@ impl<R: Runtime> GuiConfig<R> {
 }
 
 #[tauri::command]
-fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String> {
+pub(crate) fn get_config_recent_folders<R: Runtime>(app_handle: AppHandle<R>) -> Vec<String> {
     get_state_mutex_from_handle::<R, GuiConfig<R>>(&app_handle)
         .get_recent_folders()
         .iter()

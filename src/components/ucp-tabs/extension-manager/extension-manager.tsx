@@ -37,6 +37,7 @@ import { FamilyList } from '../common/discovery/family-list';
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import { SearchExcerpt } from '../common/discovery/search-excerpt';
+import { OpenExtensionsFolderButton } from './extension-elements/extension-element/shell-open-button';
 
 export const EXTENSION_DISCOVERY_FILTER = atom<DiscoveryFilter>(
   EMPTY_DISCOVERY_FILTER,
@@ -264,6 +265,7 @@ export default function ExtensionManager() {
             <div className="extension-manager-control__box__header__buttons">
               {filterInfoElement}
               <FilterButton />
+              <OpenExtensionsFolderButton />
               <InstallExtensionButton />
             </div>
           </div>

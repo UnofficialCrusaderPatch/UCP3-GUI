@@ -2,7 +2,7 @@ import Row from 'react-bootstrap/Row';
 import { useContext } from 'react';
 import { Accordion, AccordionBody, AccordionHeader } from 'react-bootstrap';
 import { displayChildren } from '../../../../../config/ucp/display-tree';
-import { ModalFilterContext } from './sections/modal-filter';
+import { ModalQueryContext } from './sections/modal-filter';
 import { settingRoots } from '../../../../../function/configuration/qualifiers';
 import QualifierControl from './QualifierControl';
 import { GroupBoxDisplayConfigElement } from '../../../../../config/ucp/common';
@@ -17,7 +17,7 @@ function CreateGroupBox(args: {
   const { spec, disabled, className } = args;
   const { description, header, text, accordion } = spec;
 
-  const matches = useContext(ModalFilterContext);
+  const query = useContext(ModalQueryContext);
   const finalDescription = description ?? text;
   const cs = (
     <ConfigChildren
@@ -31,7 +31,7 @@ function CreateGroupBox(args: {
     return (
       // <Form key={`${name}-groupbox`}>
       <Accordion
-        activeKey={matches ? '0' : undefined}
+        activeKey={query?.trim() ? '0' : undefined}
         bsPrefix="ucp-accordion ui-element"
         className={`${(spec.style || {}).className} ${className}`}
         style={{

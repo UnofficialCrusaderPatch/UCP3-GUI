@@ -40,14 +40,19 @@ function closeOverlay(id: number) {
   const stack = store.get(OVERLAY_CONTENT_ATOM);
   const index = stack.findIndex((entry) => entry.id === id);
   if (index < 0) return;
-  store.set(OVERLAY_CONTENT_ATOM, stack.slice(0, index));
+  const remaining = stack.slice(0, index);
+  store.set(OVERLAY_CONTENT_ATOM, remaining);
   stack
     .slice(index)
     .reverse()
     .forEach((entry) => entry.onClose?.());
   // Wait until the preserved parent is visible again.
   queueMicrotask(() => {
-    if (stack[index].opener?.isConnected) stack[index].opener?.focus();
+    if (
+      store.get(OVERLAY_CONTENT_ATOM) === remaining &&
+      stack[index].opener?.isConnected
+    )
+      stack[index].opener?.focus();
   });
 }
 
@@ -107,14 +112,21 @@ export function OverlayPortal({
   const [mount, setMount] = useState<HTMLDivElement | null>(null);
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
-  useLayoutEffect(
-    () =>
-      setOverlayContent(PortalMount, true, true, setMount, {
-        preserveParent: true,
-        onClose: () => closeRef.current(),
-      }),
-    [],
-  );
+  useLayoutEffect(() => {
+    let mounted = true;
+    const close = setOverlayContent(PortalMount, true, true, setMount, {
+      preserveParent: true,
+      onClose: () => {
+        if (mounted) closeRef.current();
+      },
+    });
+    return () => {
+      // React StrictMode rehearses cleanup while the opener remains mounted.
+      // Removing our registration must not dispatch a user Close to the opener.
+      mounted = false;
+      close();
+    };
+  }, []);
   return mount ? createPortal(children, mount) : null;
 }
 

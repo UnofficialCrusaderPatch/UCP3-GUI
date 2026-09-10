@@ -32,7 +32,10 @@ function ModalEditor({
 }) {
   const initialQuery = useInitialModalQuery();
   const [query, setQuery] = useState(initialQuery);
-  const matches = useModalMatches(query);
+  const results = useModalMatches(query);
+  // A match on this menu's own heading opens the whole subtree.
+  const matches =
+    spec.id !== undefined && results?.has(spec.id) ? undefined : results;
   const localize = useMessage();
   const status = useAtomValue(STATUS_BAR_MESSAGE_ATOM);
   const id = useId();

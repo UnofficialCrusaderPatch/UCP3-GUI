@@ -5,6 +5,8 @@ import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import Message from '../../../general/message';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
+import { extensionToID } from '../../../../function/extensions/dependency-management/dependency-resolution';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -22,6 +24,13 @@ export function ExtensionViewer(
   );
 
   const content = useAtomValue(contentAtom);
+  const { tree, activeExtensions } = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
+  const activeIDs = activeExtensions.map(extensionToID);
+  const dependents = tree.extensionsById[extensionToID(extension)]
+    ? tree
+        .reverseExtensionDependenciesFor(extension)
+        .filter((ext) => activeIDs.includes(extensionToID(ext)))
+    : undefined;
 
   return (
     <div className="credits-container">
@@ -30,6 +39,27 @@ export function ExtensionViewer(
       </h1>
       <div className="parchment-box credits-text-box">
         <div className="credits-text">
+          {dependents !== undefined ? (
+            <section>
+              <h2>
+                <Message message="extensions.viewer.required.by" />
+              </h2>
+              {dependents.length > 0 ? (
+                <ul>
+                  {dependents.map((ext) => (
+                    <li key={extensionToID(ext)}>
+                      {ext.definition['display-name'] || ext.name} (
+                      {ext.version})
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>
+                  <Message message="extensions.viewer.required.by.none" />
+                </p>
+              )}
+            </section>
+          ) : null}
           <SaferMarkdown>
             {content.state === 'hasData' ? content.data : ''}
           </SaferMarkdown>

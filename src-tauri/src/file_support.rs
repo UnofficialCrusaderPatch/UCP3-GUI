@@ -160,16 +160,15 @@ fn open_in_file_manager(path: &Path, reveal: bool) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         use std::os::windows::process::CommandExt;
-        let argument = if reveal {
-            let mut arg = std::ffi::OsString::from("/select,");
-            arg.push(path);
-            arg
-        } else {
-            path.as_os_str().to_owned()
-        };
+        // Discovery uses forward slashes; Explorer requires native separators.
+        let native_path: std::path::PathBuf = path.components().collect();
         // Structured argv: never pass a discovered path through cmd.exe.
-        std::process::Command::new("explorer.exe")
-            .arg(argument)
+        let mut command = std::process::Command::new("explorer.exe");
+        if reveal {
+            command.arg("/select,");
+        }
+        command
+            .arg(native_path)
             .creation_flags(0x08000000)
             .spawn()
             .map_err(|err| err.to_string())?;

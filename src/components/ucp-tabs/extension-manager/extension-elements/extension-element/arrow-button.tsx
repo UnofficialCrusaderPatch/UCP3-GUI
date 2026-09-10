@@ -17,7 +17,9 @@ export function ArrowButton(props: {
     <button
       type="button"
       className={`fs-8 ${className}`}
-      aria-label={localize(buttonText)}
+      aria-label={localize(
+        className === 'enable-arrow' ? 'activate' : 'deactivate',
+      )}
       onClick={clickCallback}
       disabled={disabled}
       onPointerEnter={() => {

@@ -414,6 +414,7 @@ export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
 
 export type SliderDisplayConfigElement = BaseDisplayConfigElement &
   UrlableDisplayConfigElement &
+  Partial<TextableDisplayConfigElement & HeaderableDisplayConfigElement> &
   EnableableDisplayConfigElement & {
     contents: NumberContents;
     display: 'Slider';

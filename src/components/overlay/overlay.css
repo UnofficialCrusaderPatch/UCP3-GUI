@@ -14,3 +14,22 @@
 .overlay-portal {
   display: contents;
 }
+/* The main page deliberately keeps a minimum size when zoomed. Dialogs must
+   instead fit the visible viewport, including a preserved CustomMenu child. */
+.overlay-viewport {
+  position: fixed;
+  top: 30px;
+  left: 0;
+  width: calc(100vw / var(--gui-scale, 1));
+  height: calc(100vh / var(--gui-scale, 1) - 30px);
+}
+body:has(.overlay-viewport) {
+  overflow: hidden;
+}
+.overlay-viewport .sandbox-menu-container {
+  padding: 1rem;
+  min-height: 0;
+}
+.overlay-viewport .sandbox-container {
+  min-height: 0;
+}

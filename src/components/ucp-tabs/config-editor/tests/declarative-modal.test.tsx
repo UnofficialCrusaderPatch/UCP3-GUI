@@ -668,6 +668,27 @@ test('removing the active extension dismisses its menu and outstanding file resu
   ).toBeUndefined();
 });
 
+test('a labeled slider follows edits and subtree reset without closing its modal', async () => {
+  const ext = await fixture('modal-mixed-1.0.0');
+  editor(ext);
+  fireEvent.click(screen.getByRole('button', { name: 'Mixed controls' }));
+  fireEvent.change(await screen.findByRole('searchbox'), {
+    target: { value: 'speed' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Files and speed' }));
+  const slider = await screen.findByRole('slider', { name: 'Speed' });
+  expect((slider as HTMLInputElement).value).toBe('5');
+  fireEvent.change(slider, { target: { value: '8' } });
+  fireEvent.mouseUp(slider);
+  expect(store.get(CONFIGURATION_FULL_REDUCER_ATOM)['modal-mixed.speed'])
+    .toEqual({ enabled: true, sliderValue: 8 });
+  fireEvent.mouseEnter(slider.closest('.ui-element')!);
+  fireEvent.click(await screen.findByRole('button', { name: 'config.popover.reset' }));
+  await waitFor(() => expect((slider as HTMLInputElement).value).toBe('5'));
+  expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)['modal-mixed.speed']).toBeUndefined();
+  expect(screen.getByRole('dialog', { name: 'Files and speed' })).toBeTruthy();
+});
+
 test('legacy switches, radio groups and sliders render through the unchanged factory', async () => {
   const ext = await fixture('modal-mixed-1.0.0');
   editor(ext);

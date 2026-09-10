@@ -133,9 +133,11 @@ export function OverlayPortal({
 function OverlayFrame({
   entry,
   active,
+  viewportBounded,
 }: {
   entry: OverlayEntry;
   active: boolean;
+  viewportBounded: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { Content, allowEsc, allowOutsideClick, args } = entry;
@@ -206,7 +208,12 @@ function OverlayFrame({
     };
   }, [active, allowEsc, allowOutsideClick, entry.id]);
   return (
-    <div ref={ref} className="overlay" hidden={!active} tabIndex={-1}>
+    <div
+      ref={ref}
+      className={`overlay${viewportBounded ? ' overlay-viewport' : ''}`}
+      hidden={!active}
+      tabIndex={-1}
+    >
       <Content closeFunc={() => closeOverlay(entry.id)} args={args} />
     </div>
   );
@@ -214,6 +221,7 @@ function OverlayFrame({
 
 export function Overlay() {
   const stack = useAtomValue(OVERLAY_CONTENT_ATOM);
+  const viewportBounded = stack.some((entry) => entry.preserveParent);
   return (
     <>
       {stack.map((entry, index) => (
@@ -221,6 +229,7 @@ export function Overlay() {
           key={entry.id}
           entry={entry}
           active={index === stack.length - 1}
+          viewportBounded={viewportBounded}
         />
       ))}
     </>

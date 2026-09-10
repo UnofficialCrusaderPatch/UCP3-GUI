@@ -55,6 +55,16 @@
 .declarative-modal-description {
   margin: 0 0 0.75rem;
 }
+.declarative-modal-body .config-table-scroll {
+  /* One scroll owner lets the column headings follow vertical scrolling. */
+  overflow: visible;
+}
+.declarative-modal-body .config-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #dfc28d url('/src/assets/ucp3/parchment_bg_light.png');
+}
 .declarative-modal-footer {
   display: flex;
   align-items: center;

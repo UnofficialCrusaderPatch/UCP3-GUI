@@ -60,39 +60,52 @@ async function replaceAllAssetUrlMarkers(startNode) {
 addEventListener(
   'load',
   async () => {
-    // wait until methods ready
-    await Websandbox.connection.remoteMethodsWaitPromise;
-    Object.assign(HOST_FUNCTIONS, Websandbox.connection.remote);
+    try {
+      // wait until methods ready
+      await Websandbox.connection.remoteMethodsWaitPromise;
+      Object.assign(HOST_FUNCTIONS, Websandbox.connection.remote);
 
-    // Input inside the sandbox does not bubble to the GUI window.
-    window.addEventListener(
-      'wheel',
-      (event) => {
-        if (!event.ctrlKey || event.deltaY === 0) return;
-        event.preventDefault();
-        HOST_FUNCTIONS.adjustGuiScale(event.deltaY < 0 ? 1 : -1);
-      },
-      { passive: false, capture: true },
-    );
-    window.addEventListener(
-      'keydown',
-      (event) => {
-        if (!event.ctrlKey || !['+', '=', '-', '0'].includes(event.key)) return;
-        event.preventDefault();
-        HOST_FUNCTIONS.adjustGuiScale(
-          event.key === '0' ? 0 : event.key === '-' ? -1 : 1,
-        );
-      },
-      true,
-    );
+      // Input inside the sandbox does not bubble to the GUI window.
+      window.addEventListener(
+        'wheel',
+        (event) => {
+          if (!event.ctrlKey || event.deltaY === 0) return;
+          event.preventDefault();
+          HOST_FUNCTIONS.adjustGuiScale(event.deltaY < 0 ? 1 : -1);
+        },
+        { passive: false, capture: true },
+      );
+      window.addEventListener(
+        'keydown',
+        (event) => {
+          if (!event.ctrlKey || !['+', '=', '-', '0'].includes(event.key))
+            return;
+          event.preventDefault();
+          HOST_FUNCTIONS.adjustGuiScale(
+            event.key === '0' ? 0 : event.key === '-' ? -1 : 1,
+          );
+        },
+        true,
+      );
 
-    await replaceAllLocalizeTextMarkers(document);
-    await replaceAllAssetUrlMarkers(document);
+      await replaceAllLocalizeTextMarkers(document);
+      await replaceAllAssetUrlMarkers(document);
 
-    dispatchEvent(new Event(DONE_EVENT_NAME));
-    Websandbox.connection.setLocalApi(SANDBOX_FUNCTIONS);
+      dispatchEvent(new Event(DONE_EVENT_NAME));
+      Websandbox.connection.setLocalApi(SANDBOX_FUNCTIONS);
 
-    await HOST_FUNCTIONS.confirmInit();
+      // Custom menus may need asynchronous asset discovery before Save is valid.
+      await SANDBOX_FUNCTIONS.whenReady?.();
+      await HOST_FUNCTIONS.confirmInit();
+    } catch (error) {
+      // Report failures through the existing connection; Save stays disabled.
+      const message = error instanceof Error ? error.message : String(error);
+      if (HOST_FUNCTIONS.reportInitError) {
+        await HOST_FUNCTIONS.reportInitError(message);
+      } else {
+        console.error('Custom menu initialization failed:', message);
+      }
+    }
   },
   { once: true },
 );

@@ -319,3 +319,5 @@ extensions.folder.error.title: Ordner konnte nicht geöffnet werden
 extensions.folder.error.message: Der Ordner oder die installierte Erweiterung fehlt möglicherweise, ist nicht zugänglich oder gehört zu einer zuvor gewählten Installation. Wähle die Installation erneut aus und prüfe, ob ein Dateimanager verfügbar ist. Einzelheiten stehen im Protokoll.
 extensions.extension.shell.reveal: Installierte Erweiterung im Explorer anzeigen
 extensions.extension.shell.parent: Übergeordneten Ordner der installierten Erweiterung öffnen
+sandbox.init.error: Das benutzerdefinierte Menü konnte nicht initialisiert werden.
+sandbox.retry: Erneut versuchen

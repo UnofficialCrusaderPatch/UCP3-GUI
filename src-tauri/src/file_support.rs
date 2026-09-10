@@ -181,15 +181,41 @@ fn open_in_file_manager(path: &Path, reveal: bool) -> Result<(), String> {
         } else {
             path
         };
-        let status = std::process::Command::new("xdg-open")
-            .arg(directory)
-            .status()
-            .map_err(|err| err.to_string())?;
-        if status.success() {
-            Ok(())
-        } else {
-            Err(format!("File manager failed: {}", status))
+        let mut command = std::process::Command::new("xdg-open");
+        command.arg(directory);
+        if std::env::var_os("APPDIR").is_some() {
+            // AppImage libraries are for this app, not the system file manager.
+            for key in [
+                "LD_LIBRARY_PATH",
+                "LD_PRELOAD",
+                "GTK_PATH",
+                "GTK_EXE_PREFIX",
+                "GTK_DATA_PREFIX",
+                "GDK_PIXBUF_MODULE_FILE",
+                "GIO_EXTRA_MODULES",
+                "GSETTINGS_SCHEMA_DIR",
+            ] {
+                command.env_remove(key);
+            }
         }
+        let mut child = command.spawn().map_err(|err| err.to_string())?;
+        // Some desktops keep xdg-open alive for the lifetime of the folder window.
+        // Observe startup failures without waiting for the user to close it.
+        for _ in 0..20 {
+            if let Some(status) = child.try_wait().map_err(|err| err.to_string())? {
+                return if status.success() {
+                    Ok(())
+                } else {
+                    Err(format!("File manager failed: {}", status))
+                };
+            }
+            std::thread::sleep(std::time::Duration::from_millis(25));
+        }
+        std::thread::spawn(move || match child.wait() {
+            Ok(status) if status.success() => (),
+            result => log::warn!("File manager exited after startup: {:?}", result),
+        });
+        Ok(())
     }
     #[cfg(not(any(target_os = "windows", target_os = "linux")))]
     {

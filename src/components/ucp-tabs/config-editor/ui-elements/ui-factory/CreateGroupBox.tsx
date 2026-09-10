@@ -1,11 +1,13 @@
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { useContext } from 'react';
 import { Accordion, AccordionBody, AccordionHeader } from 'react-bootstrap';
+import { displayChildren } from '../../../../../config/ucp/display-tree';
+import { ModalFilterContext } from './sections/modal-filter';
 import { settingRoots } from '../../../../../function/configuration/qualifiers';
 import QualifierControl from './QualifierControl';
 import { GroupBoxDisplayConfigElement } from '../../../../../config/ucp/common';
 // eslint-disable-next-line import/no-cycle
-import CreateUIElement from './CreateUIElement';
+import ConfigChildren from './ConfigChildren';
 
 function CreateGroupBox(args: {
   spec: GroupBoxDisplayConfigElement;
@@ -13,48 +15,23 @@ function CreateGroupBox(args: {
   className: string;
 }) {
   const { spec, disabled, className } = args;
-  const { name, description, children, header, text, accordion } = spec;
+  const { description, header, text, accordion } = spec;
 
-  let { columns } = spec;
-  if (columns === undefined) columns = 1;
-
-  let finalDescription = description;
-  if (finalDescription === undefined) finalDescription = text;
-  const itemCount = children.length;
-  const rows = Math.ceil(itemCount / columns);
-
-  const cs = [];
-
-  for (let row = 0; row < rows; row += 1) {
-    const rowChildren = [];
-    for (
-      let i = columns * row;
-      i < Math.min(columns * (row + 1), children.length);
-      i += 1
-    ) {
-      rowChildren.push(
-        // TODO: find a fix for this key madness: enforce 'name' ?
-        <Col key={JSON.stringify(children[i])}>
-          <CreateUIElement
-            spec={children[i]}
-            disabled={disabled}
-            className=""
-          />
-        </Col>,
-      );
-    }
-    // Or use key: children[i].url but that fails if no children?
-    cs.push(
-      <Row key={`${name}-${row}`} className="">
-        {rowChildren}
-      </Row>,
-    );
-  }
+  const matches = useContext(ModalFilterContext);
+  const finalDescription = description ?? text;
+  const cs = (
+    <ConfigChildren
+      elements={displayChildren(spec)}
+      columns={spec.columns}
+      disabled={disabled}
+    />
+  );
 
   if ((accordion || {}).enabled) {
     return (
       // <Form key={`${name}-groupbox`}>
       <Accordion
+        activeKey={matches ? '0' : undefined}
         bsPrefix="ucp-accordion ui-element"
         className={`${(spec.style || {}).className} ${className}`}
         style={{
@@ -62,18 +39,20 @@ function CreateGroupBox(args: {
           ...(spec.style || {}).css,
         }}
       >
-        <div className="qualifier-heading">
-          <QualifierControl roots={settingRoots(spec)} disabled={disabled} />
-          <AccordionHeader className="">
-            <h5>{header}</h5>
-          </AccordionHeader>
-        </div>
-        <AccordionBody className="">
-          <div>
-            <span>{finalDescription}</span>
+        <Accordion.Item eventKey="0">
+          <div className="qualifier-heading">
+            <QualifierControl roots={settingRoots(spec)} disabled={disabled} />
+            <AccordionHeader className="">
+              <h5>{header}</h5>
+            </AccordionHeader>
           </div>
-          <div>{cs}</div>
-        </AccordionBody>
+          <AccordionBody className="">
+            <div>
+              <span>{finalDescription}</span>
+            </div>
+            <div>{cs}</div>
+          </AccordionBody>
+        </Accordion.Item>
         {/* <Row>
           <span className="text-muted text-end">module-name-v1.0.0</span>
         </Row> */}

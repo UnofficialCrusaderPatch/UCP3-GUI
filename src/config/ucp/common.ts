@@ -335,6 +335,7 @@ export type FileInputDisplayConfigElement = BaseDisplayConfigElement &
   };
 
 export type GroupDisplayConfigElement = BaseDisplayConfigElement &
+  Partial<EnableableDisplayConfigElement> &
   ColumnableDisplayConfigElement &
   TextableDisplayConfigElement &
   AccordionableDisplayConfigElement &
@@ -363,6 +364,7 @@ export type ConfigTableLayout = {
 };
 
 export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
+  Partial<EnableableDisplayConfigElement> &
   ColumnableDisplayConfigElement &
   HeaderableDisplayConfigElement &
   TextableDisplayConfigElement &
@@ -373,8 +375,14 @@ export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
   };
 
 export type ModalDisplayConfigElement = BaseDisplayConfigElement &
+  Partial<
+    ColumnableDisplayConfigElement &
+      EnableableDisplayConfigElement &
+      TextableDisplayConfigElement
+  > &
   HeaderableDisplayConfigElement &
   ChildrenableDisplayConfigElement & {
+    description?: string;
     display: 'Modal';
   };
 

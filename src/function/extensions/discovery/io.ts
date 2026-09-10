@@ -16,11 +16,38 @@ export const DEFINITION_FILE = 'definition.yml';
 export const LOCALE_FOLDER = 'locale';
 export const DESCRIPTION_FILE = 'description.md';
 
+function validateModalChildren(node: unknown): void {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) {
+    node.forEach(validateModalChildren);
+    return;
+  }
+  const element = node as Record<string, unknown>;
+  if (
+    element.display === 'Modal' &&
+    element.children !== undefined &&
+    (!Array.isArray(element.children) ||
+      element.children.some(
+        (child) =>
+          !child ||
+          typeof child !== 'object' ||
+          typeof child.display !== 'string',
+      ))
+  ) {
+    throw new Error(
+      `Modal ${element.name ?? ''}: children must be an array of configuration elements`,
+    );
+  }
+  if (Array.isArray(element.children)) validateModalChildren(element.children);
+}
+
 export async function readUISpec(
   eh: ExtensionHandle,
 ): Promise<{ options: { [key: string]: unknown }[] }> {
   if (await eh.doesEntryExist(OPTIONS_FILE)) {
-    return yaml.parse(await eh.getTextContents(OPTIONS_FILE));
+    const spec = yaml.parse(await eh.getTextContents(OPTIONS_FILE));
+    validateModalChildren(spec?.options);
+    return spec;
   }
   return { options: [] };
 }

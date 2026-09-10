@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useContext, useId, useMemo } from 'react';
 import {
   GroupDisplayConfigElement,
   DisplayConfigElement,
@@ -8,6 +8,8 @@ import {
 import CreateUIElement from './CreateUIElement';
 import ConfigTableCellContext from './ConfigTableCellContext';
 import './config-table.css';
+import { ModalFilterContext } from './sections/modal-filter';
+import { shouldBeIncluded } from '../../../../../config/ucp/display-tree';
 
 function columnWidth(column: ConfigTableColumn) {
   return column.width || (column.choices?.length ? '4.25rem' : '7rem');
@@ -35,13 +37,15 @@ function ConfigTableCell({
   return (
     <td colSpan={column.choices?.length || 1}>
       {!cell.hidden && (
-        <ConfigTableCellContext.Provider value={context}>
-          <CreateUIElement
-            spec={control}
-            disabled={disabled}
-            className="config-table-control"
-          />
-        </ConfigTableCellContext.Provider>
+        <ModalFilterContext.Provider value={undefined}>
+          <ConfigTableCellContext.Provider value={context}>
+            <CreateUIElement
+              spec={control}
+              disabled={disabled}
+              className="config-table-control"
+            />
+          </ConfigTableCellContext.Provider>
+        </ModalFilterContext.Provider>
       )}
     </td>
   );
@@ -60,7 +64,10 @@ function CreateConfigTable({
   const id = useId();
   const layout = spec.table!;
   const hasChoices = layout.columns.some((column) => column.choices?.length);
-  const rows = spec.children.filter((row) => !row.hidden);
+  const matches = useContext(ModalFilterContext);
+  const rows = spec.children.filter(
+    (row) => !row.hidden && (!matches || shouldBeIncluded(matches, row)),
+  );
   // A malformed layout must not silently drop editable configuration fields.
   const valid =
     layout.columns.length > 0 &&

@@ -1,6 +1,6 @@
 import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 import {
@@ -87,6 +87,13 @@ function CreateCustomMenu(args: {
   const currentLanguage = useAtomValue(LANGUAGE_ATOM);
 
   const [activatingMenu, setActivatingMenu] = useState(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const { spec, disabled } = args;
   const { url, text, enabled, header, extension } = spec;
@@ -135,9 +142,12 @@ function CreateCustomMenu(args: {
           className="ucp-button sandbox-menu-button"
           onClick={async () => {
             setActivatingMenu(true);
+            const source = await receiveSources(extension, sourcePaths);
+            // Loading a child must not resurrect a closed parent/removed extension.
+            if (!mounted.current) return;
             setOverlayContent<SandboxArgs>(SandboxMenu, false, false, {
               baseUrl: url,
-              source: await receiveSources(extension, sourcePaths),
+              source,
               localization: extension.locales[currentLanguage] ?? {},
               fallbackLocalization: extension.locales.en ?? {},
               title: hasHeader ? header : undefined,

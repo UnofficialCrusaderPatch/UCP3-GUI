@@ -62,6 +62,8 @@ jobs:
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+      - name: Test Rust host boundaries
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked --release ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
 
       # Separate uploads make each missing distributable a failure.
       - name: Upload Windows portable executable
@@ -85,6 +87,15 @@ jobs:
           name: UCP3-GUI-linux-deb
           path: ${{ env.RELEASE_DIR }}/bundle/deb/ucp3-gui*.deb
           if-no-files-found: error
+      - name: Install built Debian package in clean Ubuntu 22.04 and smoke startup
+        if: runner.os == 'Linux'
+        run: |
+          package=$(find "$RELEASE_DIR/bundle/deb" -maxdepth 1 -name '*.deb' -print -quit)
+          test -n "$package"
+          docker run --rm \
+            -v "$PWD/$package:/tmp/gui.deb:ro" \
+            -v "$PWD/tools/test-debian-package.sh:/tmp/check.sh:ro" \
+            ubuntu:22.04 bash /tmp/check.sh
       - name: Upload Linux AppImage
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4

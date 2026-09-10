@@ -4,12 +4,25 @@ import { Range } from 'semver';
 import { describe, expect, test, vi } from 'vitest';
 import { Extension } from '../../../../config/ucp/common';
 import { ExtensionDependencyTree } from '../../../../function/extensions/dependency-management/dependency-resolution';
-import { EXTENSION_STATE_INTERNAL_ATOM } from '../../../../function/extensions/state/state';
+import {
+  EXTENSION_STATE_INTERNAL_ATOM,
+  EXTENSION_STATE_REDUCER_ATOM,
+} from '../../../../function/extensions/state/state';
+import { getStore } from '../../../../hooks/jotai/base';
+import activate from '../extension-elements/inactive-extension-element-click-callback';
+import deactivate from '../extension-elements/active-extension-element-click-callback';
+import { createEmptyConfigurationState } from '../../../../function/configuration/state';
 import { ExtensionViewer } from './extension-viewer';
 
 vi.mock('../../../general/message', () => ({
   default: ({ message }: { message: string | { key: string } }) =>
     typeof message === 'string' ? message : message.key,
+}));
+vi.mock('../extension-elements/reporting', () => ({
+  default: async () => true,
+}));
+vi.mock('../../../modals/modal-ok-cancel', () => ({
+  showModalOkCancel: async () => true,
 }));
 
 function extension(
@@ -20,6 +33,11 @@ function extension(
   return {
     name,
     version,
+    type: 'plugin',
+    ui: [],
+    config: {},
+    configEntries: {},
+    locales: {},
     definition: {
       name,
       version,
@@ -31,11 +49,66 @@ function extension(
         ]),
       ),
     },
-    io: { fetchDescription: async () => 'Extension description' },
+    io: {
+      path: `/fixture/ucp/plugins/${name}-${version}`,
+      fetchDescription: async () => 'Extension description',
+    },
   } as Extension;
 }
 
 describe('extension viewer relationships', () => {
+  test('tracks real activation, deactivation and version changes without viewer mutations', async () => {
+    const oldLibrary = extension('library', '1.0.0');
+    const newLibrary = extension('library', '2.0.0');
+    const oldPack = extension('pack', '1.0.0', { library: '=1.0.0' });
+    const newPack = extension('pack', '2.0.0', { library: '=2.0.0' });
+    const extensions = [oldLibrary, newLibrary, oldPack, newPack];
+    const store = getStore();
+    store.set(EXTENSION_STATE_INTERNAL_ATOM, {
+      extensions,
+      installedExtensions: extensions,
+      tree: new ExtensionDependencyTree(extensions),
+      activeExtensions: [],
+      explicitlyActivatedExtensions: [],
+      configuration: createEmptyConfigurationState(),
+    });
+    await act(async () => activate(oldPack));
+    const view = (selected: Extension) => (
+      <Provider store={store}>
+        <ExtensionViewer args={{ extension: selected }} closeFunc={() => {}} />
+      </Provider>
+    );
+    const { rerender } = render(view(oldLibrary));
+    const state = store.get(EXTENSION_STATE_REDUCER_ATOM);
+    const before = state.tree.reverseExtensionDependenciesFor(oldLibrary);
+    const { configuration } = state;
+    fireEvent.click(screen.getByText('extensions.viewer.relations'));
+    expect(await screen.findByText('Display pack (1.0.0)')).toBeTruthy();
+    expect(screen.queryByText('Display pack (2.0.0)')).toBeNull();
+    expect(state.tree.reverseExtensionDependenciesFor(oldLibrary)).toEqual(
+      before,
+    );
+    expect(store.get(EXTENSION_STATE_REDUCER_ATOM).configuration).toBe(
+      configuration,
+    );
+    await act(async () => deactivate(oldPack));
+    expect(screen.queryByText('Display pack (1.0.0)')).toBeNull();
+    await act(async () => activate(newPack));
+    expect(
+      store
+        .get(EXTENSION_STATE_REDUCER_ATOM)
+        .activeExtensions.map((ext) => `${ext.name}@${ext.version}`)
+        .sort(),
+    ).toEqual(['library@2.0.0', 'pack@2.0.0']);
+    rerender(view(newLibrary));
+    fireEvent.click(screen.getByText('extensions.viewer.relations'));
+    expect(await screen.findByText('Display pack (2.0.0)')).toBeTruthy();
+    expect(screen.queryByText('Display pack (1.0.0)')).toBeNull();
+    rerender(view(newPack));
+    fireEvent.click(screen.getByText('extensions.viewer.relations'));
+    expect(await screen.findByText('Display library (2.0.0)')).toBeTruthy();
+    await act(async () => deactivate(newPack));
+  });
   test('expands active reverse branches for the exact version and follows state changes', async () => {
     const library = extension('library', '1.0.0');
     const newerLibrary = extension('library', '2.0.0');

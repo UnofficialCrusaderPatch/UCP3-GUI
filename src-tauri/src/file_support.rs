@@ -60,6 +60,108 @@ fn extension_path(
     Ok(target.to_path_buf())
 }
 
+#[cfg(test)]
+mod extension_path_tests {
+    use super::extension_path;
+    use std::{
+        cell::Cell,
+        fs,
+        path::PathBuf,
+        sync::atomic::{AtomicUsize, Ordering},
+    };
+
+    struct Fixture(PathBuf);
+    impl Fixture {
+        fn new() -> Self {
+            static NEXT: AtomicUsize = AtomicUsize::new(0);
+            let path = std::env::temp_dir().join(format!(
+                "ucp-path-test-{}-{}",
+                std::process::id(),
+                NEXT.fetch_add(1, Ordering::Relaxed)
+            ));
+            fs::create_dir_all(path.join("ucp/plugins/example-1.0.0")).unwrap();
+            fs::create_dir_all(path.join("ucp/modules")).unwrap();
+            fs::write(path.join("ucp/modules/example-1.0.0.zip"), b"fixture").unwrap();
+            Self(dunce::canonicalize(path).unwrap())
+        }
+    }
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn accepts_existing_root_directory_and_zip_without_opening_them() {
+        let fixture = Fixture::new();
+        let root = fixture.0.join("ucp");
+        let directory = root.join("plugins/example-1.0.0");
+        let zip = root.join("modules/example-1.0.0.zip");
+        let allowed = |path: &std::path::Path| path.starts_with(&root);
+        assert_eq!(
+            extension_path(&fixture.0, None, false, allowed).unwrap(),
+            root
+        );
+        assert_eq!(
+            extension_path(&fixture.0, Some(&directory), true, allowed).unwrap(),
+            directory
+        );
+        assert_eq!(
+            extension_path(&fixture.0, Some(&zip), false, allowed).unwrap(),
+            zip
+        );
+        assert!(extension_path(&fixture.0, Some(&zip), true, allowed).is_err());
+    }
+
+    #[test]
+    fn rejects_traversal_stale_missing_executable_and_scope_denials() {
+        let fixture = Fixture::new();
+        for relative in [
+            "other/ucp/plugins/example",
+            "ucp/plugins/../example",
+            "ucp/plugins/missing",
+            "ucp/modules/run.exe",
+        ] {
+            let path = fixture.0.join(relative);
+            if relative.ends_with(".exe") {
+                fs::write(&path, b"fixture").unwrap();
+            }
+            assert!(
+                extension_path(&fixture.0, Some(&path), false, |_| true).is_err(),
+                "{}",
+                relative
+            );
+        }
+        let target = fixture.0.join("ucp/plugins/example-1.0.0");
+        assert!(extension_path(&fixture.0, Some(&target), false, |_| false).is_err());
+        let calls = Cell::new(0);
+        assert!(extension_path(&fixture.0, Some(&target), false, |_| {
+            calls.set(calls.get() + 1);
+            calls.get() == 1
+        })
+        .is_err());
+        assert_eq!(
+            calls.get(),
+            2,
+            "canonical target must be independently scoped"
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn rejects_symlink_resolving_outside_scope() {
+        let fixture = Fixture::new();
+        let root = fixture.0.join("ucp");
+        let outside = fixture.0.join("outside");
+        fs::create_dir(&outside).unwrap();
+        let link = root.join("plugins/linked-1.0.0");
+        std::os::unix::fs::symlink(&outside, &link).unwrap();
+        assert!(extension_path(&fixture.0, Some(&link), false, |path| path
+            .starts_with(&root))
+        .is_err());
+    }
+}
+
 #[cfg(target_os = "linux")]
 fn wait_for_file_manager(mut child: std::process::Child) -> Result<(), String> {
     // Some desktops keep xdg-open alive for the lifetime of the folder window.

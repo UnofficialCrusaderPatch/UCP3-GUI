@@ -4,7 +4,6 @@ on:
   pull_request:
     types: [review_requested, synchronize]
   workflow_dispatch: {}
-  
 
 jobs:
   build:
@@ -24,7 +23,7 @@ jobs:
           node-version: 20
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        
+
       - name: install dependencies (ubuntu only)
         if: matrix.os == 'ubuntu-22.04'
         run: |
@@ -41,6 +40,8 @@ jobs:
       - name: Test
         run: |
           npm run test -- --test-timeout=10000
+      - name: Test native folder validation
+        run: cargo test --manifest-path src-tauri/Cargo.toml folder_tests
       - name: Build
         run: |
           npm run tauri build

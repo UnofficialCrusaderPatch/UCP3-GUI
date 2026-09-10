@@ -2,19 +2,20 @@ import { parse as parseYaml } from 'yaml';
 import { ResponseType } from '@tauri-apps/api/http';
 import { fetch } from '../../../tauri/tauri-http';
 import Logger from '../../../util/scripts/logging';
+import { DiscoveryMetadata } from '../discovery/metadata';
 
 const LOGGER = new Logger('store/fetch.ts');
 
 export type OnlineDescriptionContent = {
   method: 'online';
   url: string;
-  language: 'en' | 'de' | 'default';
+  language: string;
 };
 
 export type InlineDescriptionContent = {
   method: 'inline';
   content: string;
-  language: 'en' | 'de' | 'default';
+  language: string;
 };
 
 export type DescriptionContent =
@@ -40,7 +41,7 @@ export type PluginPackageContent = {
 export type PackageContent = BinaryModulePackageContent | PluginPackageContent;
 
 export type ExtensionContent = {
-  definition: {
+  definition: DiscoveryMetadata & {
     version: string;
     name: string;
     dependencies: { [key: string]: string };
@@ -88,8 +89,10 @@ export async function fetchDescription(url: string): Promise<string> {
   const result = await fetch<string>(url, {
     method: 'GET',
     responseType: ResponseType.Text,
+    timeout: 20,
   });
-
+  if (!result.ok)
+    throw new Error(`Description request failed (${result.status})`);
   return result.data;
 }
 

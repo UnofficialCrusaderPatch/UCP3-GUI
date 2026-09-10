@@ -1,0 +1,62 @@
+[
+  {
+    "name": "ucp2-legacy-defaults",
+    "sha": "5bae25d6d664576037c4dc0e76f19652de3af859",
+    "version": "2.15.1",
+    "repository": "git@github.com:UnofficialCrusaderPatch/extension-ucp2-legacy-defaults.git",
+    "changed": [
+      "definition.yml"
+    ],
+    "files": 4
+  },
+  {
+    "name": "ucp2-ai-files",
+    "sha": "481d745f8960c44e6de16b6200d66af04cc89b20",
+    "version": "2.15.1",
+    "repository": "git@github.com:UnofficialCrusaderPatch/extension-ucp2-ai-files.git",
+    "changed": [
+      "definition.yml"
+    ],
+    "files": 516
+  },
+  {
+    "name": "ucp2-aic-patch",
+    "sha": "3d39204e179bf848896fd59b6efae9b5a959123c",
+    "version": "2.15.1",
+    "repository": "git@github.com:UnofficialCrusaderPatch/extension-ucp2-aic-patch.git",
+    "changed": [
+      "definition.yml"
+    ],
+    "files": 4
+  },
+  {
+    "name": "ucp2-evrey-aiv",
+    "sha": "d1c5007f19103917947682755b7d4bce394c9243",
+    "version": "2.15.1",
+    "repository": "git@github.com:UnofficialCrusaderPatch/extension-ucp2-evrey-aiv.git",
+    "changed": [
+      "definition.yml"
+    ],
+    "files": 4
+  },
+  {
+    "name": "ucp2-tatha-aiv",
+    "sha": "5c9775b6dd90f9be77b50f30183c3c69a2467ee9",
+    "version": "2.15.1",
+    "repository": "git@github.com:UnofficialCrusaderPatch/extension-ucp2-tatha-aiv.git",
+    "changed": [
+      "definition.yml"
+    ],
+    "files": 4
+  },
+  {
+    "name": "ucp2-vanilla-fixed-aiv",
+    "sha": "2aac2f860ed81a0f38212e4ae953d53867f5f396",
+    "version": "2.15.1",
+    "repository": "git@github.com:UnofficialCrusaderPatch/extension-ucp2-vanilla-fixed-aiv.git",
+    "changed": [
+      "definition.yml"
+    ],
+    "files": 4
+  }
+]

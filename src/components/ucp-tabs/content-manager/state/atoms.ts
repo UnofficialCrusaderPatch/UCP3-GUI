@@ -17,6 +17,10 @@ import {
 } from '../../../../function/extensions/state/focus';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
+import {
+  DiscoveryFilter,
+  EMPTY_DISCOVERY_FILTER,
+} from '../../../../function/content/discovery/search';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -26,30 +30,9 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
 
 export const LAST_CLICKED_CONTENT_ATOM = atom<ContentElement | undefined>();
 
-export const CONTENT_TAGS_ATOM = atom<string[]>([
-  'AI',
-  'AIV',
-  'AIC',
-  'AIA',
-  'BALANCE',
-  'BUGFIXES',
-  'CODE',
-  'CONFIG',
-  'MAPS',
-  'MODPACK',
-  'SCENARIOS',
-  'SOUNDS',
-  'TEXTURES',
-  'TOOLS',
-]);
-
-export const CONTENT_FILTERS_ATOM = atom<{
-  search: string;
-  tags: string[];
-}>({
-  search: '',
-  tags: [],
-});
+export const CONTENT_FILTERS_ATOM = atom<DiscoveryFilter>(
+  EMPTY_DISCOVERY_FILTER,
+);
 
 export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
@@ -119,7 +102,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const descriptions = [
       {
         language: 'default',
-        content: e.description || '< not loaded >',
+        content: e.description || '',
         method: 'inline',
       },
       ...(matchingStorePackage !== undefined
@@ -130,6 +113,8 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const p = {
       definition: {
         ...e.definition,
+        tags: e.definition.tags ?? matchingStorePackage?.definition.tags,
+        family: e.definition.family ?? matchingStorePackage?.definition.family,
         url: 'nonsense',
         dependencies: deps,
       },
@@ -202,18 +187,6 @@ export const filteredContentElementsAtom = atom((get) =>
         get(STORE_SHOW_ALL_EXTENSION_TYPES_ATOM).indexOf(ce.definition.type) !==
         -1,
     )
-    .filter((ce) => {
-      const { search } = get(CONTENT_FILTERS_ATOM);
-      return search
-        ? ce.definition['display-name']?.toLowerCase().includes(search)
-        : ce;
-    })
-    .filter((ce) => {
-      const { tags } = get(CONTENT_FILTERS_ATOM);
-      return tags && tags.length
-        ? ce.definition?.tags?.some((tag: string) => tags?.includes(tag))
-        : ce;
-    })
     .sort((a, b) => a.definition.name.localeCompare(b.definition.name)),
 );
 

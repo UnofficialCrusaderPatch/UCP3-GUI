@@ -157,6 +157,14 @@ export async function discoverExtensions(
 
         ext.configEntries = parseConfigEntriesResult.configEntries;
 
+        // Facts describe this installed version, not another member of its family.
+        definition.capabilities = {
+          files: await eh.doesEntryExist('resources/'),
+          code: await eh.doesEntryExist('init.lua'),
+          configuration: Object.keys(ext.configEntries).length > 0,
+          options: ext.ui.length > 0,
+        };
+
         ext.ui.forEach((v) =>
           attachExtensionInformationToDisplayConfigElement(ext, v),
         );

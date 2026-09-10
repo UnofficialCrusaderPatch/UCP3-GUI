@@ -1,0 +1,208 @@
+config-sparse:
+  modules:
+    aiSwapper:
+      config:
+        menu:
+          contents:
+            suggested-value:
+              rat:
+                - name: Fixed-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_VanillaFixed/
+                  control:
+                    aiv: true
+              snake:
+                - name: Fixed-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_VanillaFixed/
+                  control:
+                    aiv: true
+              pig:
+                - name: Fixed-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_VanillaFixed/
+                  control:
+                    aiv: true
+              wolf:
+                - name: Fixed-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_VanillaFixed/
+                  control:
+                    aiv: true
+              saladin:
+                - name: Fixed-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_VanillaFixed/
+                  control:
+                    aiv: true
+              caliph:
+                - name: Fixed-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_VanillaFixed/
+                  control:
+                    aiv: true
+              sultan:
+                - name: Fixed-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_VanillaFixed/
+                  control:
+                    aiv: true
+              richard:
+                - name: Fixed-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_VanillaFixed/
+                  control:
+                    aiv: true
+              frederick:
+                - name: Fixed-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_VanillaFixed/
+                  control:
+                    aiv: true
+              phillip:
+                - name: Fixed-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_VanillaFixed/
+                  control:
+                    aiv: true
+              wazir:
+                - name: Fixed-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_VanillaFixed/
+                  control:
+                    aiv: true
+              emir:
+                - name: Fixed-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_VanillaFixed/
+                  control:
+                    aiv: true
+              nizar:
+                - name: Fixed-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_VanillaFixed/
+                  control:
+                    aiv: true
+              sheriff:
+                - name: Fixed-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_VanillaFixed/
+                  control:
+                    aiv: true
+              marshal:
+                - name: Fixed-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_VanillaFixed/
+                  control:
+                    aiv: true
+              abbot:
+                - name: Fixed-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_VanillaFixed/
+                  control:
+                    aiv: true
+        defaultLanguage:
+          contents:
+            suggested-value: null
+        ai:
+          rat:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_VanillaFixed/
+                  active: true
+          snake:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_VanillaFixed/
+                  active: true
+          pig:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_VanillaFixed/
+                  active: true
+          wolf:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_VanillaFixed/
+                  active: true
+          saladin:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_VanillaFixed/
+                  active: true
+          caliph:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_VanillaFixed/
+                  active: true
+          sultan:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_VanillaFixed/
+                  active: true
+          richard:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_VanillaFixed/
+                  active: true
+          frederick:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_VanillaFixed/
+                  active: true
+          phillip:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_VanillaFixed/
+                  active: true
+          wazir:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_VanillaFixed/
+                  active: true
+          emir:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_VanillaFixed/
+                  active: true
+          nizar:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_VanillaFixed/
+                  active: true
+          sheriff:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_VanillaFixed/
+                  active: true
+          marshal:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_VanillaFixed/
+                  active: true
+          abbot:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Fixed-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_VanillaFixed/
+                  active: true
+  plugins:
+    ucp2-ai-files:
+      config: {}
+meta:
+  version: 1.0.0

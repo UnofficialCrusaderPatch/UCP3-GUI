@@ -1,0 +1,11 @@
+# Isolated UCP2 family example
+
+These manifests demonstrate the existing UCP2 file-provider/Applied pattern as one author-defined family. They are examples, not replacement releases or a migration. `sources.json` pins each original package. Only `definition.yml` gains family and tag metadata; copied `config.yml` files are unchanged.
+
+`ucp2-legacy-defaults` is deliberately the display root. Its ordinary dependencies activate the shared AI files, AIC patch and Vanilla Fixed AIV. Expanding the family exposes Evrey and Tatha alternatives and the file-only member. Selecting the file-only member does not apply Default. Selecting an alternative does not silently remove another member: existing dependencies, required/suggested demands and AI Swapper ordering rules still apply. Existing conflict and priority controls remain the place to resolve conflicting settings.
+
+To prepare a preview installation, copy the exact source packages to an isolated test directory, replace only their definitions with these examples, and retain their original assets, locales and license files. The AI resources stay exclusively in `ucp2-ai-files`; every Applied member keeps its existing resource paths. Install the ordinary `ucp2-legacy` and AI Swapper module dependencies too. Do not overwrite packages in an existing user installation.
+
+The directories can be top-level members of one source repository. Each Store recipe entry retains its existing identity/version and uses `contents.source.location: ucp2-ai-files` (or the respective member directory), with all entries pointing to the same pinned repository revision. Give published examples new versions before distributing them through a real Store. No family-specific package format is needed.
+
+Acceptance: with all members installed, collapse the family and activate Default; inspect ordinary dependency activation. Expand and inspect/activate individual members. In a separate installation without Default, the installed members must remain flat in Content even if Default is available in Store. Search a child's description and verify that the child remains visible under its root context. Check saved configuration identities and shared resource paths, without starting the game.

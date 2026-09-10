@@ -1,0 +1,177 @@
+.discovery-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0;
+  min-width: 0;
+}
+.discovery-search {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.discovery-search input {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 3px 8px;
+  border: 1px solid #6f5a39;
+  border-radius: 3px;
+  background: #eee4c9;
+  color: #21170c;
+  font: inherit;
+}
+.discovery-tags-trigger {
+  min-height: 32px;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+.discovery-index-status {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+}
+.discovery-tag-popup {
+  position: fixed;
+  z-index: 1100;
+  width: 260px;
+  max-width: calc(100vw - 16px);
+  overflow: auto;
+  padding: 8px;
+  color: #21170c;
+  box-shadow: 0 3px 12px #0008;
+}
+.discovery-tag-mode {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 5px;
+}
+.discovery-sword {
+  display: block;
+  position: relative;
+  cursor: pointer;
+}
+.discovery-sword input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.discovery-sword span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  overflow-wrap: anywhere;
+}
+.discovery-sword span::before {
+  content: '';
+  flex: 0 0 19px;
+  width: 19px;
+  height: 19px;
+  background: url('/src/assets/ucp3/checkbox_empty.png') center/contain
+    no-repeat;
+}
+.discovery-sword input:checked + span::before {
+  background-image: url('/src/assets/ucp3/checkbox_full.png');
+}
+.discovery-sword input:focus-visible + span,
+.discovery-toolbar :focus-visible,
+.discovery-family-toggle:focus-visible {
+  outline: 2px solid #845219;
+  outline-offset: 1px;
+}
+.discovery-family-root {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.discovery-family-root-row {
+  flex: 1;
+  min-width: 0;
+}
+.discovery-family-toggle {
+  flex: 0 0 26px;
+  min-height: 30px;
+  padding: 0;
+}
+.discovery-family-count {
+  font-size: 0.75rem;
+  padding-inline-end: 4px;
+  max-width: 6rem;
+  line-height: 1.1;
+}
+.discovery-active-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.discovery-active-row > .extension-element {
+  flex: 1;
+  min-width: 0;
+}
+.discovery-priority {
+  font-size: 0.75rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+  text-align: center;
+}
+.discovery-family-members {
+  margin-inline-start: 20px;
+  border-inline-start: 1px solid #755a3980;
+  padding-inline-start: 3px;
+}
+.discovery-excerpt {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  margin: 0 8px 5px;
+  overflow-wrap: anywhere;
+}
+.discovery-empty {
+  padding: 8px;
+}
+.discovery-store-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+  padding: 0 1rem;
+}
+.discovery-store-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 0;
+  min-width: 0;
+}
+.discovery-store-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.discovery-store-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.35rem;
+}
+.discovery-store-details > .extension-manager-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.discovery-store-details > :last-child {
+  flex-shrink: 0;
+}
+.discovery-selection-label {
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 850px) {
+  .discovery-family-members {
+    margin-inline-start: 12px;
+  }
+}

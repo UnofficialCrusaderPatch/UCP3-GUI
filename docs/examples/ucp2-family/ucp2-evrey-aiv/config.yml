@@ -1,0 +1,208 @@
+config-sparse:
+  modules:
+    aiSwapper:
+      config:
+        menu:
+          contents:
+            suggested-value:
+              rat:
+                - name: Evrey-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_Evrey/
+                  control:
+                    aiv: true
+              snake:
+                - name: Evrey-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_Evrey/
+                  control:
+                    aiv: true
+              pig:
+                - name: Evrey-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_Evrey/
+                  control:
+                    aiv: true
+              wolf:
+                - name: Evrey-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_Evrey/
+                  control:
+                    aiv: true
+              saladin:
+                - name: Evrey-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_Evrey/
+                  control:
+                    aiv: true
+              caliph:
+                - name: Evrey-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_Evrey/
+                  control:
+                    aiv: true
+              sultan:
+                - name: Evrey-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_Evrey/
+                  control:
+                    aiv: true
+              richard:
+                - name: Evrey-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_Evrey/
+                  control:
+                    aiv: true
+              frederick:
+                - name: Evrey-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_Evrey/
+                  control:
+                    aiv: true
+              phillip:
+                - name: Evrey-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_Evrey/
+                  control:
+                    aiv: true
+              wazir:
+                - name: Evrey-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_Evrey/
+                  control:
+                    aiv: true
+              emir:
+                - name: Evrey-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_Evrey/
+                  control:
+                    aiv: true
+              nizar:
+                - name: Evrey-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_Evrey/
+                  control:
+                    aiv: true
+              sheriff:
+                - name: Evrey-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_Evrey/
+                  control:
+                    aiv: true
+              marshal:
+                - name: Evrey-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_Evrey/
+                  control:
+                    aiv: true
+              abbot:
+                - name: Evrey-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_Evrey/
+                  control:
+                    aiv: true
+        defaultLanguage:
+          contents:
+            suggested-value: null
+        ai:
+          rat:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_Evrey/
+                  active: true
+          snake:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_Evrey/
+                  active: true
+          pig:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_Evrey/
+                  active: true
+          wolf:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_Evrey/
+                  active: true
+          saladin:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_Evrey/
+                  active: true
+          caliph:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_Evrey/
+                  active: true
+          sultan:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_Evrey/
+                  active: true
+          richard:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_Evrey/
+                  active: true
+          frederick:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_Evrey/
+                  active: true
+          phillip:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_Evrey/
+                  active: true
+          wazir:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_Evrey/
+                  active: true
+          emir:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_Evrey/
+                  active: true
+          nizar:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_Evrey/
+                  active: true
+          sheriff:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_Evrey/
+                  active: true
+          marshal:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_Evrey/
+                  active: true
+          abbot:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Evrey-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_Evrey/
+                  active: true
+  plugins:
+    ucp2-ai-files:
+      config: {}
+meta:
+  version: 1.0.0

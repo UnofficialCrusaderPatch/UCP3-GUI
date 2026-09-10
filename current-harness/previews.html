@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PR 377 — current dependency previews</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; background: #efede7; color: #332e25; font: 16px/1.4 system-ui, sans-serif; }
+    h1 { margin: 0 0 4px; font-size: 22px; }
+    p { margin: 0 0 16px; font-size: 13px; }
+    main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    h2 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+    .frame { position: relative; overflow: hidden; background: #292722; }
+    iframe { width: 1024px; height: 768px; border: 0; transform-origin: top left; display: block; }
+    a { color: #4c463c; }
+  </style>
+</head>
+<body>
+  <h1>PR #377 · Current dependency information</h1>
+  <p>Revision b9924f3 · Actual GUI component and styles · Mocked extension data and host I/O · Each view renders at 1024 × 768, scaled to fit.</p>
+  <main>
+    <section>
+      <h2>Collapsed by default · top-right metadata</h2>
+      <div class="frame"><iframe title="Collapsed dependency information" src="viewer.html?count=3"></iframe></div>
+      <p><a href="viewer.html?count=3">Open collapsed view at full size</a></p>
+    </section>
+    <section>
+      <h2>Expanded · both directions side by side</h2>
+      <div class="frame"><iframe title="Expanded dependency trees" src="viewer.html?count=3&expanded=1"></iframe></div>
+      <p><a href="viewer.html?count=3&expanded=1">Open expanded view at full size</a></p>
+    </section>
+  </main>
+  <script>
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const scale = entry.contentRect.width / 1024;
+        entry.target.querySelector('iframe').style.transform = `scale(${scale})`;
+        entry.target.style.height = `${768 * scale}px`;
+      }
+    });
+    document.querySelectorAll('.frame').forEach(frame => observer.observe(frame));
+  </script>
+</body>
+</html>

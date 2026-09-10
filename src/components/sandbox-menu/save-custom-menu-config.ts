@@ -88,6 +88,11 @@ export default function saveConfig(
   const fullConfigEntries: Record<string, unknown> = {
     ...baselineEntries,
     ...remainingUserEntries,
+    ...Object.fromEntries(
+      Object.entries(locks)
+        .filter(([url]) => url.startsWith(urlPrefix))
+        .map(([url, lock]) => [url, lock.lockedValue]),
+    ),
   };
 
   // Update the full config

@@ -272,3 +272,5 @@ config.qualifier.single: "Diese Einstellung"
 config.qualifier.group: "Alle bearbeitbaren Optionen dieser Gruppe"
 config.qualifier.all: "Alle Plätze"
 config.qualifier.slot: "Dieser Platz"
+sandbox.init.error: Das benutzerdefinierte Menü konnte nicht initialisiert werden.
+sandbox.retry: Erneut versuchen

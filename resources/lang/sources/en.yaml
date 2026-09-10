@@ -322,3 +322,5 @@ config.qualifier.single: "This setting"
 config.qualifier.group: "All editable options in this group"
 config.qualifier.all: "All slots"
 config.qualifier.slot: "This slot"
+sandbox.init.error: Could not initialize the custom menu.
+sandbox.retry: Retry

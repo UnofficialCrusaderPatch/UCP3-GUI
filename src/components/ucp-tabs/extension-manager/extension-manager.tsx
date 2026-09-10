@@ -23,6 +23,7 @@ import { CustomisationsExtensionElement } from './extension-elements/extension-e
 import { GhostElement } from './extension-elements/extension-element/ghost-element';
 import { InactiveExtensionsElement } from './extension-elements/extension-element/inactive-extension-element';
 import { ExtensionNameList } from './extension-elements/extension-element/types';
+import { OpenExtensionsFolderButton } from './buttons/open-extensions-folder-button';
 
 const HAS_CUSTOMISATIONS = atom(
   (get) => Object.entries(get(CONFIGURATION_USER_REDUCER_ATOM)).length > 0,
@@ -168,6 +169,7 @@ export default function ExtensionManager() {
             <div className="extension-manager-control__box__header__buttons">
               {filterInfoElement}
               <FilterButton />
+              <OpenExtensionsFolderButton />
               <InstallExtensionButton />
             </div>
           </div>

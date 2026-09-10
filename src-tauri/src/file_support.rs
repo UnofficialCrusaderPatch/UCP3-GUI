@@ -15,6 +15,214 @@ use crate::{
     utils::{get_allowed_path, get_allowed_path_with_string_error},
 };
 
+// Validate the discovered storage entry, not an extension name or store URL.
+fn extension_path(
+    game_folder: &Path,
+    path: Option<&Path>,
+    open_directory: bool,
+    is_allowed: impl Fn(&Path) -> bool,
+) -> Result<std::path::PathBuf, String> {
+    use std::path::Component;
+    if !game_folder.is_absolute() {
+        return Err("No absolute game folder selected".into());
+    }
+    let root = game_folder.join("ucp");
+    let target = path.unwrap_or(&root);
+    if let Some(path) = path {
+        let relative = path
+            .strip_prefix(&root)
+            .map_err(|_| "Stale extension path")?;
+        let parts: Vec<_> = relative.components().collect();
+        if parts.len() != 2
+            || !matches!(parts[0], Component::Normal(name) if name == "modules" || name == "plugins")
+            || !matches!(parts[1], Component::Normal(_))
+        {
+            return Err("Invalid extension storage path".into());
+        }
+    }
+    if !is_allowed(target) {
+        return Err("Path outside configured filesystem scope".into());
+    }
+    let canonical = dunce::canonicalize(target).map_err(|err| err.to_string())?;
+    if !is_allowed(&canonical) {
+        return Err("Resolved path outside configured filesystem scope".into());
+    }
+    if path.is_none() || open_directory {
+        if !canonical.is_dir() {
+            return Err("Expected an existing directory".into());
+        }
+    } else if !canonical.is_dir()
+        && !(canonical.is_file() && target.extension().map_or(false, |ext| ext == "zip"))
+    {
+        return Err("Expected an installed extension directory or archive".into());
+    }
+    // Retain the installed location for symlinks: reveal the link, not its target.
+    Ok(target.to_path_buf())
+}
+
+#[cfg(test)]
+mod folder_tests {
+    use super::*;
+    use std::fs;
+    use std::path::PathBuf;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static NEXT: AtomicUsize = AtomicUsize::new(0);
+    struct Fixture(PathBuf);
+    impl Fixture {
+        fn new() -> Self {
+            let path = std::env::temp_dir().join(format!(
+                "ucp-folder-Ä space-{}-{}",
+                std::process::id(),
+                NEXT.fetch_add(1, Ordering::Relaxed)
+            ));
+            fs::create_dir_all(path.join("ucp/plugins/test-1.0.0")).unwrap();
+            fs::create_dir_all(path.join("ucp/modules/developer-1.0.0")).unwrap();
+            fs::write(path.join("ucp/modules/test-1.0.0.zip"), b"fixture").unwrap();
+            fs::write(path.join("ucp/modules/not-an-extension.exe"), b"fixture").unwrap();
+            Self(path)
+        }
+    }
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            fs::remove_dir_all(&self.0).unwrap();
+        }
+    }
+
+    #[test]
+    fn opens_real_root_and_installed_directory_or_archive() {
+        let f = Fixture::new();
+        assert_eq!(
+            extension_path(&f.0, None, false, |_| true).unwrap(),
+            f.0.join("ucp")
+        );
+        for name in [
+            "plugins/test-1.0.0",
+            "modules/developer-1.0.0",
+            "modules/test-1.0.0.zip",
+        ] {
+            let path = f.0.join("ucp").join(name);
+            assert_eq!(
+                extension_path(&f.0, Some(&path), false, |_| true).unwrap(),
+                path
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_unconfigured_missing_stale_and_malformed_paths() {
+        let f = Fixture::new();
+        let other = Fixture::new();
+        for folder in [Path::new(""), Path::new("relative"), &f.0.join("absent")] {
+            assert!(extension_path(folder, None, false, |_| true).is_err());
+        }
+        for path in [
+            other.0.join("ucp/plugins/test-1.0.0"),
+            f.0.join("ucp/modules/missing-1.0.0.zip"),
+            f.0.join("ucp/modules/../plugins/test-1.0.0"),
+            f.0.join("ucp/modules/not-an-extension.exe"),
+            f.0.join("ucp/plugins/test-1.0.0/definition.yml"),
+            PathBuf::from("https://example.com/module.zip"),
+        ] {
+            assert!(
+                extension_path(&f.0, Some(&path), false, |_| true).is_err(),
+                "{:?}",
+                path
+            );
+        }
+        assert!(!f.0.join("absent").exists());
+    }
+
+    #[test]
+    fn rejects_scope_denials_and_opening_an_archive_as_a_directory() {
+        let f = Fixture::new();
+        assert!(extension_path(&f.0, None, false, |_| false).is_err());
+        let archive = f.0.join("ucp/modules/test-1.0.0.zip");
+        assert!(extension_path(&f.0, Some(&archive), true, |_| true).is_err());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn checks_resolved_scope_but_retains_the_installed_symlink() {
+        let f = Fixture::new();
+        let other = Fixture::new();
+        let link = f.0.join("ucp/plugins/link-1.0.0");
+        std::os::unix::fs::symlink(other.0.join("ucp/plugins/test-1.0.0"), &link).unwrap();
+        assert!(extension_path(&f.0, Some(&link), false, |path| path.starts_with(&f.0)).is_err());
+        assert_eq!(
+            extension_path(&f.0, Some(&link), false, |_| true).unwrap(),
+            link
+        );
+    }
+}
+
+fn open_in_file_manager(path: &Path, reveal: bool) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        let argument = if reveal {
+            let mut arg = std::ffi::OsString::from("/select,");
+            arg.push(path);
+            arg
+        } else {
+            path.as_os_str().to_owned()
+        };
+        // Structured argv: never pass a discovered path through cmd.exe.
+        std::process::Command::new("explorer.exe")
+            .arg(argument)
+            .creation_flags(0x08000000)
+            .spawn()
+            .map_err(|err| err.to_string())?;
+        Ok(())
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let directory = if reveal {
+            path.parent().ok_or("Missing containing directory")?
+        } else {
+            path
+        };
+        let status = std::process::Command::new("xdg-open")
+            .arg(directory)
+            .status()
+            .map_err(|err| err.to_string())?;
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("File manager failed: {}", status))
+        }
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "linux")))]
+    {
+        let _ = (path, reveal);
+        Err("File manager action unsupported on this platform".into())
+    }
+}
+
+#[tauri::command]
+pub async fn open_extension_path(
+    app_handle: AppHandle,
+    game_folder: String,
+    path: Option<String>,
+    open_directory: Option<bool>,
+) -> Result<(), String> {
+    // The frontend may still display the previous installation while initializing.
+    let selected = crate::gui_config::get_config_recent_folders(app_handle.clone());
+    if selected.first() != Some(&game_folder) {
+        return Err("Selected installation changed".into());
+    }
+    let reveal = path.is_some() && !open_directory.unwrap_or(false);
+    let target = extension_path(
+        Path::new(&game_folder),
+        path.as_deref().map(Path::new),
+        open_directory.unwrap_or(false),
+        |candidate| app_handle.fs_scope().is_allowed(candidate),
+    )?;
+    tauri::async_runtime::spawn_blocking(move || open_in_file_manager(&target, reveal))
+        .await
+        .map_err(|err| err.to_string())?
+}
+
 fn fill_with_paths_with_slash(
     fs_scope: &FsScope,
     disk_entries: &Vec<DiskEntry>,

@@ -322,3 +322,8 @@ config.qualifier.single: "This setting"
 config.qualifier.group: "All editable options in this group"
 config.qualifier.all: "All slots"
 config.qualifier.slot: "This slot"
+extensions.folder.open: Open extensions folder (ucp — modules and plugins)
+extensions.folder.error.title: Could not open folder
+extensions.folder.error.message: The folder or installed extension may be missing, inaccessible, or belong to a previous installation. Select the installation again and check that a file manager is available. See the log for details.
+extensions.extension.shell.reveal: Show installed extension in File Explorer
+extensions.extension.shell.parent: Open the installed extension’s containing folder

@@ -4,7 +4,7 @@ This branch combines the reviewed GUI contributions for a complete preview build
 
 | Contribution | Included source head |
 | --- | --- |
-| Search, tags, families (#382; retains #322) | `f253ae5` |
+| Search, tags, families (#382; retains #322) | `da10897` |
 | Folder controls (#381) | `f33952242b6e7d2a2286419b5a447c9ecc832652` |
 | Dependency trees (#377) | `b9924f3c78152890877bee8326f31907d17f3e09` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |
@@ -17,5 +17,7 @@ This branch combines the reviewed GUI contributions for a complete preview build
 The #159 row uses `contrib/pr159-declarative-modal`, which contains the completed continuation rather than the old original draft head. Locale additions are combined, both folder and texture-metadata Rust commands are registered, and the Content family rows retain the folder controls and actual load-order movement arguments.
 
 Integration follow-ups add durable Rust path-boundary tests, a dependency-view regression through the actual activation/deactivation callbacks and installed-version changes, localized update notices in all nine catalogs, and clean Ubuntu 22.04 package installation/startup in CI. Native discovery acceptance found and corrected parchment text contrast; resource metadata also handles ZIPs without explicit directory entries. These follow-ups are confined to the preview branch or the feature PR, leaving the other contributors' branches intact.
+
+Native preview checks also found and corrected popup placement under the existing CSS GUI zoom, and gave activation/movement controls explicit dimensions so nested family rows retain usable buttons. Family chevrons override the shared minimal-button reset and use a symbol-capable font. These checks use an isolated local fixture; existing game installations are not modified.
 
 Existing package/profile migration and game testing are outside this preview. UCP2 family manifests are isolated examples; the modder chooses Default, Bare or any other ordinary extension as root. CI tests/builds and runtime acceptance are recorded on the preview PR, distinguishing completed checks from platform-specific limitations.

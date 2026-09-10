@@ -857,9 +857,15 @@ test('a discovered CustomMenu saves current-host qualifiers and returns to its d
   const opener = screen.getByRole('button', { name: 'Sandbox child' });
   opener.focus();
   fireEvent.click(opener);
-  fireEvent.click(
-    await screen.findByRole('button', { name: 'sandbox.save.close' }),
+  const saveAndClose = await screen.findByRole('button', {
+    name: 'sandbox.save.close',
+  });
+  // The integrated sandbox renders its host controls before the iframe's
+  // initialization handshake enables saving. Do not race that handshake.
+  await waitFor(() =>
+    expect((saveAndClose as HTMLButtonElement).disabled).toBe(false),
   );
+  fireEvent.click(saveAndClose);
   await waitFor(() => expect(screen.getByRole('dialog')).toBe(parent));
   expect(remote.getConfigQualifiers).toHaveBeenCalledOnce();
   expect(destroy).toHaveBeenCalledOnce();

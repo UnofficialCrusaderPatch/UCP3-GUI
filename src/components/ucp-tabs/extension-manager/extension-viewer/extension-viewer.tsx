@@ -39,26 +39,27 @@ export function ExtensionViewer(
       </h1>
       <div className="parchment-box credits-text-box">
         <div className="credits-text">
-          {dependents !== undefined ? (
-            <section>
-              <h2>
-                <Message message="extensions.viewer.required.by" />
-              </h2>
-              {dependents.length > 0 ? (
-                <ul>
-                  {dependents.map((ext) => (
-                    <li key={extensionToID(ext)}>
-                      {ext.definition['display-name'] || ext.name} (
-                      {ext.version})
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>
-                  <Message message="extensions.viewer.required.by.none" />
-                </p>
-              )}
-            </section>
+          {dependents && dependents.length > 0 ? (
+            <details className="mb-2" style={{ overflowWrap: 'anywhere' }}>
+              <summary>
+                <Message
+                  message={{
+                    key:
+                      dependents.length === 1
+                        ? 'extensions.viewer.required.by.one'
+                        : 'extensions.viewer.required.by',
+                    args: { count: dependents.length },
+                  }}
+                />
+              </summary>
+              <ul className="mb-0">
+                {dependents.map((ext) => (
+                  <li key={extensionToID(ext)}>
+                    {ext.definition['display-name'] || ext.name} ({ext.version})
+                  </li>
+                ))}
+              </ul>
+            </details>
           ) : null}
           <SaferMarkdown>
             {content.state === 'hasData' ? content.data : ''}

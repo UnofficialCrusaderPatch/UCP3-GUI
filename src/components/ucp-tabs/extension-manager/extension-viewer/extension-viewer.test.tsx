@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createStore, Provider } from 'jotai';
 import { Range } from 'semver';
 import { describe, expect, test, vi } from 'vitest';
@@ -8,7 +8,8 @@ import { EXTENSION_STATE_INTERNAL_ATOM } from '../../../../function/extensions/s
 import { ExtensionViewer } from './extension-viewer';
 
 vi.mock('../../../general/message', () => ({
-  default: ({ message }: { message: string }) => message,
+  default: ({ message }: { message: string | { key: string } }) =>
+    typeof message === 'string' ? message : message.key,
 }));
 
 function extension(
@@ -67,6 +68,10 @@ describe('extension viewer dependents', () => {
     const { rerender } = render(view(library));
 
     expect(await screen.findByText('Extension description')).toBeTruthy();
+    const summary = screen.getByText('extensions.viewer.required.by.one');
+    expect(summary.parentElement?.hasAttribute('open')).toBe(false);
+    fireEvent.click(summary);
+    expect(summary.parentElement?.hasAttribute('open')).toBe(true);
     expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual(
       ['Display pack (1.0.0)'],
     );
@@ -74,14 +79,14 @@ describe('extension viewer dependents', () => {
 
     await act(async () => rerender(view(newerLibrary)));
     expect(screen.queryByRole('listitem')).toBeNull();
-    expect(screen.getByText('extensions.viewer.required.by.none')).toBeTruthy();
+    expect(screen.queryByText('extensions.viewer.required.by.one')).toBeNull();
 
     await act(async () => rerender(view(library)));
     act(() =>
       store.set(EXTENSION_STATE_INTERNAL_ATOM, { activeExtensions: [] }),
     );
     expect(screen.queryByRole('listitem')).toBeNull();
-    expect(screen.getByText('extensions.viewer.required.by.none')).toBeTruthy();
+    expect(screen.queryByText('extensions.viewer.required.by.one')).toBeNull();
   });
 
   test('keeps the description available if the extension is no longer in the tree', async () => {

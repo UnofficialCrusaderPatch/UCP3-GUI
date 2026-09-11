@@ -3,7 +3,6 @@ import { atom, useAtom } from 'jotai';
 import {
   FamilyItem,
   groupFamilies,
-  normalizeFamilies,
 } from '../../../../function/content/discovery/metadata';
 import { useMessage } from '../../../general/message';
 
@@ -45,13 +44,6 @@ export function FamilyList<T extends FamilyItem>(props: {
         const expanded = expansion[key] ?? searching;
         if (!group.members.length)
           return <div key={key}>{render(group.root)}</div>;
-        const activeCount = available.filter(
-          (item) =>
-            item.active &&
-            normalizeFamilies(item.family).some(
-              (family) => family.name === group.id,
-            ),
-        ).length;
         return (
           <div key={key} className="discovery-family">
             <div className="discovery-family-root">
@@ -70,14 +62,6 @@ export function FamilyList<T extends FamilyItem>(props: {
               <div className="discovery-family-root-row">
                 {render(group.root)}
               </div>
-              <span className="discovery-family-count">
-                {localize({
-                  key: activeCount
-                    ? 'discovery.activeMembers'
-                    : 'discovery.members',
-                  args: { count: activeCount || group.members.length },
-                })}
-              </span>
             </div>
             {expanded && (
               <div className="discovery-family-members">

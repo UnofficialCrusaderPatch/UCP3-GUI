@@ -106,15 +106,6 @@
   text-align: center;
   font-family: sans-serif;
 }
-.discovery-family-count {
-  color: #4c351b;
-  align-self: flex-start;
-  padding-top: 7px;
-  font-size: 0.75rem;
-  padding-inline-end: 4px;
-  max-width: 6rem;
-  line-height: 1.1;
-}
 .discovery-active-row {
   display: flex;
   align-items: center;

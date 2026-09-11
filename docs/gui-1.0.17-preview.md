@@ -6,7 +6,7 @@ The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible c
 
 | Contribution | Included source head |
 | --- | --- |
-| Search, tags, families (#382; retains #322) | `ff683b95e1cf844d2b3babcf4382f9d422a4d340` (combined filter, whole-word search, left-column layout, Creator toggle and package-owned translated tags) |
+| Search, tags, families (#382; retains #322) | `26931519b6262358633916009e57d26ed7661fc0` (combined filter, whole-word search, left-column layout, Creator toggle, package-owned translated tags and compact family rows) |
 | Folder controls (#381) | `f33952242b6e7d2a2286419b5a447c9ecc832652` |
 | Dependency trees (#377) | `b9924f3c78152890877bee8326f31907d17f3e09` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |

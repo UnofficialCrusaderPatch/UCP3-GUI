@@ -1,6 +1,6 @@
 # Search, tags and extension families
 
-Store and Content search technical/display names, tag labels and descriptions in the selected GUI language. Prefixes, name substrings, quoted phrases and bounded typo matching are supported. Separate words combine with AND; the compact Tags button offers Any/All sword-checkbox selection. Filtering never activates an extension or changes its preferred version.
+Store and Content search technical/display names, tag labels and descriptions in the selected GUI language. Search sits below the left list. Prefixes, name substrings, quoted phrases and bounded typo matching are supported; the whole-word sword checkbox disables substring, prefix and approximate matches. Chinese uses browser word segmentation when available. Separate search words combine with AND. The existing filter button combines tag selection with a separate Hide modules category. Tag matching defaults to OR, with one-click OR/AND sword radios. Its filled state means tags are selected or modules are hidden. Filtering never activates an extension or changes its preferred version.
 
 Description lookup is shared with the viewer and cached per identity/language/source. Older catalogs with remote descriptions load in the background with at most four concurrent reads. Loading/incomplete status is visible and cached fallback text remains usable. Installed descriptions are read again after extension discovery reload. The existing Markdown parser supplies searchable visible text; the existing MiniSearch dependency supplies approximate matching.
 
@@ -49,7 +49,7 @@ Members can live in separate directories of the same repository. The existing St
 
 ## Tags and automatic metadata
 
-`tags` is an optional list of stable identifiers. IDs are normalized; known labels are localized and unknown IDs remain readable. Current labels include AI/AIC/AIV/AIA, balance, bugfixes, code, config, maps, modpack, scenarios, sounds, textures, tools and behavior.
+`tags` is an optional list of stable identifiers. IDs are normalized; known labels are localized and unknown IDs remain readable. Current labels include AI/AIC/AIV/AIA, balance, bugfixes, code, config, maps, modpack, scenarios, sounds, textures, tools, behavior, economy, interface, multiplayer and replay. Known translations live in the GUI's nine language catalogs, so packages share one vocabulary without maintaining duplicate translated lists. Both IDs and the selected language's labels are searchable. Module/plugin categories remain searchable but are separated from topic tags in the menu.
 
 The GUI automatically derives additional facts for installed extensions: resources directory, init code, parsed configuration demands and editable options. Type and declared family membership are also searchable facets. Facts are per member: a file provider does not become “applies settings” because an Applied sibling exists. Unknown facts remain unknown.
 
@@ -59,6 +59,6 @@ Store definitions can supply optional `capabilities: {files, code, configuration
 
 The existing UCP2 pattern naturally fits: a Defaults/Applied display root can depend on the AI file provider, AIC patch and chosen AIV members using their existing manifests. Alternative castle members remain individually selectable. The existing AI Swapper custom-object consumer determines how their control flags and priorities compose; a family field does not change those rules.
 
-Use isolated example copies for preview, not edits to published packages. Existing single extensions and saved configurations keep their original name/version behavior. No package/profile migration or replacement release is part of this feature.
+Use isolated example copies for preview. Existing single extensions and saved configurations keep their original name/version behavior. Coordinated package metadata updates are separate draft PRs with patch versions; they do not rewrite installed packages or profiles. Applied members can use a clearer display name such as `Apply Vanilla Fixed Castles` while retaining their technical identity.
 
 This follows Gynt's family proposal in GUI #274 and continues the-atlan's search/tag contribution in #322. It also addresses discovery use cases discussed in #273, #310 and #236; it does not close every broader request in those issues.

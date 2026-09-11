@@ -7,7 +7,7 @@
   min-width: 0;
 }
 .discovery-search {
-  flex: 1 1 12rem;
+  flex: 1 1 0;
   min-width: 0;
 }
 .discovery-search input {
@@ -21,9 +21,9 @@
   color: #21170c;
   font: inherit;
 }
-.discovery-tags-trigger {
-  min-height: 32px;
-  padding: 3px 7px;
+.discovery-whole-words {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 .discovery-index-status {
@@ -43,9 +43,14 @@
 .discovery-tag-mode {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   padding-bottom: 5px;
+}
+.discovery-filter-categories {
+  border-block: 1px solid #755a3980;
+  margin-bottom: 4px;
+  padding-block: 3px;
 }
 .discovery-sword {
   display: block;

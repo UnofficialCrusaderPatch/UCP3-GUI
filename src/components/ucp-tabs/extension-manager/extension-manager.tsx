@@ -12,7 +12,7 @@ import {
   PREFERRED_EXTENSION_VERSION_ATOM,
   AVAILABLE_EXTENSION_VERSIONS_ATOM,
 } from '../../../function/extensions/state/state';
-import { FilterButton } from './buttons/filter-button';
+import { CreatorModeButton } from '../config-editor/buttons/creator-mode-button';
 import { InstallExtensionButton } from './buttons/install-extensions-button';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../common/extension-editor/extension-editor-state';
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
@@ -32,7 +32,10 @@ import {
   DiscoveryFilter,
   EMPTY_DISCOVERY_FILTER,
 } from '../../../function/content/discovery/search';
-import { DiscoveryToolbar } from '../common/discovery/discovery-toolbar';
+import {
+  DiscoverySearch,
+  DiscoveryFilterButton,
+} from '../common/discovery/discovery-toolbar';
 import { FamilyList } from '../common/discovery/family-list';
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
@@ -56,22 +59,20 @@ export default function ExtensionManager() {
   const preferredVersions = useAtomValue(PREFERRED_EXTENSION_VERSION_ATOM);
   const availableVersions = useAtomValue(AVAILABLE_EXTENSION_VERSIONS_ATOM);
 
-  const showAllExtensions = useAtomValue(GuiSettings.SHOW_ALL_EXTENSIONS_ATOM);
+  const [showAllExtensions, setShowAllExtensions] = useAtom(
+    GuiSettings.SHOW_ALL_EXTENSIONS_ATOM,
+  );
 
   const displayedActiveExtensions = showAllExtensions
     ? extensionsState.activeExtensions
-    : extensionsState.activeExtensions.filter(
-        (e) => !(e.type === 'module' && e.ui.length === 0),
-      );
+    : extensionsState.activeExtensions.filter((e) => e.type !== 'module');
 
   const activeExtensionNames = displayedActiveExtensions.map((ext) => ext.name);
 
   const extensionsToDisplay = (
     showAllExtensions
       ? extensionsState.extensions
-      : extensionsState.extensions.filter(
-          (e) => !(e.type === 'module' && e.ui.length === 0),
-        )
+      : extensionsState.extensions.filter((e) => e.type !== 'module')
   ).filter((ext) => activeExtensionNames.indexOf(ext.name) === -1);
 
   const preferred = (name: string) =>
@@ -151,7 +152,9 @@ export default function ExtensionManager() {
   const eUI = (
     <FamilyList
       items={visibleInactive.map(item)}
-      available={available.map(item)}
+      available={available
+        .filter((ext) => showAllExtensions || ext.type !== 'module')
+        .map(item)}
       scope="content-inactive"
       searching={searching}
       render={renderExtension}
@@ -164,7 +167,9 @@ export default function ExtensionManager() {
       items={displayedActiveExtensions
         .filter((ext) => discovery.results.has(createExtensionID(ext)))
         .map(item)}
-      available={available.map(item)}
+      available={available
+        .filter((ext) => showAllExtensions || ext.type !== 'module')
+        .map(item)}
       scope="content-active"
       searching={searching}
       render={renderExtension}
@@ -263,7 +268,14 @@ export default function ExtensionManager() {
             </h4>
             <div className="extension-manager-control__box__header__buttons">
               {filterInfoElement}
-              <FilterButton />
+              <DiscoveryFilterButton
+                filter={discoveryFilter}
+                onChange={setDiscoveryFilter}
+                tags={discovery.tags}
+                excludeModules={!showAllExtensions}
+                onExcludeModules={(exclude) => setShowAllExtensions(!exclude)}
+              />
+              <CreatorModeButton />
               <InstallExtensionButton />
             </div>
           </div>
@@ -273,16 +285,15 @@ export default function ExtensionManager() {
             </h4>
           </div>
         </div>
-        <DiscoveryToolbar
-          filter={discoveryFilter}
-          onChange={setDiscoveryFilter}
-          tags={discovery.tags}
-          pending={discovery.pending}
-          incomplete={discovery.incomplete}
-        />
         <div className="extension-manager-control__box-container">
           <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">{eUI}</div>
+            <DiscoverySearch
+              filter={discoveryFilter}
+              onChange={setDiscoveryFilter}
+              pending={discovery.pending}
+              incomplete={discovery.incomplete}
+            />
           </div>
           <div className="extension-manager-control__box">
             <div className="parchment-box extension-manager-list">

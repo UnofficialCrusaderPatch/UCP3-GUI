@@ -51,18 +51,69 @@ export type DiscoveryFilter = {
   search: string;
   tags: string[];
   match: 'any' | 'all';
+  wholeWords?: boolean;
 };
 
 export const EMPTY_DISCOVERY_FILTER: DiscoveryFilter = {
   search: '',
   tags: [],
   match: 'any',
+  wholeWords: false,
+};
+
+/** Unicode boundaries avoid matching e.g. German "KI" inside "attacking". */
+function containsTerm(field: string, term: string, wholeWords = false) {
+  if (!wholeWords) return field.includes(term);
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(
+    `(^|[^\\p{L}\\p{N}])${escaped}($|[^\\p{L}\\p{N}])`,
+    'u',
+  ).test(field);
+}
+
+type WordSegmenter = {
+  segment: (text: string) => Iterable<{ index: number; segment: string }>;
 };
 
 export function createDiscoverySearch(
   documents: SearchDocument[],
   language: string,
 ) {
+  // CJK text has no spaces between words. Use the browser's word segmentation
+  // where available, with the Unicode-boundary rule as the older-engine fallback.
+  const { Segmenter } = Intl as typeof Intl & {
+    Segmenter?: new (
+      locale: string,
+      options: { granularity: 'word' },
+    ) => WordSegmenter;
+  };
+  const segmenter =
+    language === 'ch' && Segmenter
+      ? new Segmenter('zh', { granularity: 'word' })
+      : undefined;
+  const boundaries = new Map<string, Set<number>>();
+  const matches = (
+    field: string,
+    term: string,
+    wholeWords = false,
+  ): boolean => {
+    if (!wholeWords || !segmenter) return containsTerm(field, term, wholeWords);
+    if (!boundaries.has(field)) {
+      const edges = new Set([0, field.length]);
+      Array.from(segmenter.segment(field)).forEach((part) => {
+        edges.add(part.index);
+        edges.add(part.index + part.segment.length);
+      });
+      boundaries.set(field, edges);
+    }
+    const edges = boundaries.get(field)!;
+    let start = field.indexOf(term);
+    while (start >= 0) {
+      if (edges.has(start) && edges.has(start + term.length)) return true;
+      start = field.indexOf(term, start + 1);
+    }
+    return false;
+  };
   const normalized = documents.map((doc) => {
     const plainText = descriptionText(doc.description);
     return {
@@ -90,7 +141,7 @@ export function createDiscoverySearch(
     const fuzzy = tokens.map(
       (token) =>
         new Set(
-          token.phrase
+          token.phrase || filter.wholeWords
             ? []
             : index
                 .search(token.text, {
@@ -115,7 +166,7 @@ export function createDiscoverySearch(
         return;
       const fields = [doc.name, doc.displayName, doc.text, doc.tagText];
       const literal = tokens.map((token) =>
-        fields.some((field) => field.includes(token.text)),
+        fields.some((field) => matches(field, token.text, filter.wholeWords)),
       );
       if (!tokens.every((_, i) => literal[i] || fuzzy[i].has(doc.id))) return;
       const approximate = literal.some((matched) => !matched);
@@ -124,6 +175,10 @@ export function createDiscoverySearch(
         score = 20;
         if (doc.name === query || doc.displayName === query) score = 100;
         else if (
+          tokens.every((token) => matches(doc.tagText, token.text, true))
+        )
+          score = 70;
+        else if (
           doc.name.startsWith(query) ||
           doc.displayName.startsWith(query)
         )
@@ -131,8 +186,8 @@ export function createDiscoverySearch(
         else if (
           tokens.every(
             (token) =>
-              doc.name.includes(token.text) ||
-              doc.displayName.includes(token.text),
+              matches(doc.name, token.text, filter.wholeWords) ||
+              matches(doc.displayName, token.text, filter.wholeWords),
           )
         )
           score = 60;
@@ -140,7 +195,7 @@ export function createDiscoverySearch(
       }
       const original = doc.plainText;
       const descriptionMatch = tokens.find((token) =>
-        doc.text.includes(token.text),
+        matches(doc.text, token.text, filter.wholeWords),
       );
       const start = descriptionMatch
         ? Math.max(0, doc.text.indexOf(descriptionMatch.text) - 35)

@@ -93,6 +93,7 @@ import * as semver from 'semver';
 import { CSSProperties } from 'react';
 import { ExtensionHandle } from '../../function/extensions/handles/extension-handle';
 import { ConfigMeta, DefinitionMeta } from './config/meta';
+import { DiscoveryMetadata } from '../../function/content/discovery/metadata';
 
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required
@@ -176,7 +177,7 @@ type PluginType = 'plugin';
 type ModuleType = 'module';
 type ExtensionType = PluginType | ModuleType;
 
-type Definition = {
+type Definition = DiscoveryMetadata & {
   meta: DefinitionMeta;
   name: string;
   version: string;
@@ -204,7 +205,8 @@ type Extension = {
     isZip: boolean;
     isDirectory: boolean;
     path: string;
-    fetchDescription: () => Promise<string>;
+    fetchDescription: (language?: string) => Promise<string>;
+    descriptionRevision?: number;
     handle: <R>(cb: ExtensionIOCallback<R>) => Promise<R>;
   };
 };
@@ -335,6 +337,7 @@ export type FileInputDisplayConfigElement = BaseDisplayConfigElement &
   };
 
 export type GroupDisplayConfigElement = BaseDisplayConfigElement &
+  Partial<EnableableDisplayConfigElement> &
   ColumnableDisplayConfigElement &
   TextableDisplayConfigElement &
   AccordionableDisplayConfigElement &
@@ -363,6 +366,7 @@ export type ConfigTableLayout = {
 };
 
 export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
+  Partial<EnableableDisplayConfigElement> &
   ColumnableDisplayConfigElement &
   HeaderableDisplayConfigElement &
   TextableDisplayConfigElement &
@@ -370,6 +374,18 @@ export type GroupBoxDisplayConfigElement = BaseDisplayConfigElement &
   ChildrenableDisplayConfigElement & {
     description: string;
     display: 'GroupBox';
+  };
+
+export type ModalDisplayConfigElement = BaseDisplayConfigElement &
+  Partial<
+    ColumnableDisplayConfigElement &
+      EnableableDisplayConfigElement &
+      TextableDisplayConfigElement
+  > &
+  HeaderableDisplayConfigElement &
+  ChildrenableDisplayConfigElement & {
+    description?: string;
+    display: 'Modal';
   };
 
 export type NumberInputDisplayConfigElement = BaseDisplayConfigElement &
@@ -400,6 +416,7 @@ export type RadioGroupDisplayConfigElement = BaseDisplayConfigElement &
 
 export type SliderDisplayConfigElement = BaseDisplayConfigElement &
   UrlableDisplayConfigElement &
+  Partial<TextableDisplayConfigElement & HeaderableDisplayConfigElement> &
   EnableableDisplayConfigElement & {
     contents: NumberContents;
     display: 'Slider';
@@ -466,7 +483,8 @@ type DisplayConfigElement =
   | UCP2RadioGroupDisplayConfigElement
   | UCP2SliderDisplayConfigElement
   | UCP2SliderChoiceDisplayConfigElement
-  | UCP2SwitchDisplayConfigElement;
+  | UCP2SwitchDisplayConfigElement
+  | ModalDisplayConfigElement;
 
 type SectionDescription = {
   elements: DisplayConfigElement[];

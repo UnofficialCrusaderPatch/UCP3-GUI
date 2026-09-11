@@ -1,11 +1,13 @@
-import { atom, useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
 import { ContentManagerToolbar } from './content-manager-toolbar';
 import { ContentElementView } from './content-element/content-element-view';
 import {
   COMPLETED_CONTENT_ELEMENTS_ATOM,
+  CONTENT_FILTERS_ATOM,
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_STORE_ATOM,
+  CONTENT_ELEMENTS_ATOM,
   filteredContentElementsAtom,
   LAST_CLICKED_CONTENT_ATOM,
   SINGLE_CONTENT_SELECTION_ATOM,
@@ -19,15 +21,17 @@ import {
 import { ContentFilterButton } from './buttons/filter-button';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import Message, { useMessage } from '../../general/message';
-import { ExtensionFilterButton } from './buttons/extension-filter-button';
+import { STORE_SHOW_ALL_EXTENSION_TYPES_ATOM } from '../../../function/gui-settings/settings';
+import {
+  DiscoverySearch,
+  DiscoveryFilterButton,
+} from '../common/discovery/discovery-toolbar';
+import { FamilyList } from '../common/discovery/family-list';
+import { useDiscovery } from '../common/discovery/use-discovery';
+import { ContentElement } from '../../../function/content/types/content-element';
+import { SearchExcerpt } from '../common/discovery/search-excerpt';
 
 const LOGGER = new Logger('content-manager.tsx');
-
-const elementsAtom = atom((get) =>
-  get(filteredContentElementsAtom).map((ext) => (
-    <ContentElementView key={createExtensionID(ext)} data={ext} />
-  )),
-);
 
 // eslint-disable-next-line react/prop-types, @typescript-eslint/no-explicit-any
 function StatusElement({ children }: { children: any }) {
@@ -43,9 +47,29 @@ function StatusElement({ children }: { children: any }) {
 
 /* eslint-disable import/prefer-default-export */
 export function ContentManager() {
+  const [shownTypes, setShownTypes] = useAtom(
+    STORE_SHOW_ALL_EXTENSION_TYPES_ATOM,
+  );
+  const [contentFilters, setContentFilters] = useAtom(CONTENT_FILTERS_ATOM);
+  const allElements = useAtomValue(CONTENT_ELEMENTS_ATOM);
+  const filteredElements = useAtomValue(filteredContentElementsAtom);
+  const discovery = useDiscovery(allElements, contentFilters);
+  const item = (content: ContentElement) => ({
+    id: createExtensionID(content),
+    name: content.definition.name,
+    family: content.definition.family,
+    content,
+  });
+  const visible = filteredElements
+    .filter((element) => discovery.results.has(createExtensionID(element)))
+    .sort(
+      (a, b) =>
+        discovery.results.get(createExtensionID(b))!.score -
+        discovery.results.get(createExtensionID(a))!.score,
+    );
   const interfaceState = useAtomValue(CONTENT_INTERFACE_STATE_ATOM);
 
-  const [{ isPending, isError, isSuccess, isPaused, isFetching, error }] =
+  const [{ isPending, isError, isPaused, isFetching, error }] =
     useAtom(CONTENT_STORE_ATOM);
 
   const [
@@ -85,8 +109,31 @@ export function ContentManager() {
     );
   }
 
-  // TODO: implement for modules (signatures and hashes)
-  const elements = useAtomValue(elementsAtom);
+  const elements = (
+    <FamilyList
+      items={visible.map(item)}
+      available={allElements
+        .filter((element) => shownTypes.includes(element.definition.type))
+        .map(item)}
+      scope="store"
+      searching={Boolean(
+        contentFilters.search.trim() || contentFilters.tags.length,
+      )}
+      label={(entry) => entry.content.definition['display-name'] || entry.name}
+      render={(entry) => (
+        <>
+          <ContentElementView data={entry.content} />
+          {discovery.results.get(entry.id)?.excerpt && (
+            <SearchExcerpt
+              text={discovery.results.get(entry.id)!.excerpt}
+              query={contentFilters.search}
+              approximate={discovery.results.get(entry.id)!.approximate}
+            />
+          )}
+        </>
+      )}
+    />
+  );
 
   const singleSelection = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
   // const lastSelected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
@@ -115,7 +162,7 @@ export function ContentManager() {
         size: headerSize,
       },
     });
-    description = `${header}  \n\n${descriptionData}`;
+    description = `${header}  \n\n${descriptionData?.text ?? ''}`;
   } else if (interfaceState.selected.length === 0) {
     description = localize('store.selection.instruction');
   } else if (descriptionIsError && descriptionError !== null) {
@@ -151,32 +198,68 @@ export function ContentManager() {
   }
 
   return (
-    <div className="flex-default extension-manager">
-      <div className="extension-manager-control">
-        <div className="extension-manager-control__header-container">
-          <div className="extension-manager-control__header">
-            <h4 className="extension-manager-control__box__header__headline">
-              <Message message="store.content.online" />
-            </h4>
-            <div className="extension-manager-control__box__header__buttons">
-              {restartElement}
-              <ExtensionFilterButton />
-              <ContentFilterButton />
+    <div className="flex-default extension-manager discovery-store">
+      <div className="discovery-store-columns">
+        <div className="discovery-store-column">
+          <div className="w-100 d-flex flex-column gap-2">
+            <div className="w-100 d-flex flex-row align-items-center">
+              <h4 className="extension-manager-control__box__header__headline">
+                <Message message="store.content.online" />
+              </h4>
+              <div className="extension-manager-control__box__header__buttons">
+                {restartElement}
+                <DiscoveryFilterButton
+                  filter={contentFilters}
+                  onChange={setContentFilters}
+                  tags={discovery.tags}
+                  excludeModules={!shownTypes.includes('module')}
+                  onExcludeModules={(exclude) =>
+                    setShownTypes(exclude ? ['plugin'] : ['module', 'plugin'])
+                  }
+                />
+                <ContentFilterButton />
+              </div>
             </div>
           </div>
-          <div className="extension-manager-control__header">
+          <div className="parchment-box discovery-store-list">
+            {msg}
+            {elements}
+            {!visible.length && !isPending && !discovery.pending && (
+              <div className="discovery-empty">
+                <Message message="discovery.empty" />
+              </div>
+            )}
+          </div>
+          <DiscoverySearch
+            filter={contentFilters}
+            onChange={setContentFilters}
+            pending={discovery.pending}
+            incomplete={discovery.incomplete}
+          />
+        </div>
+        <div className="discovery-store-column">
+          <div className="w-100 d-flex flex-row align-items-center">
             <h4 className="extension-manager-control__box__header__headline">
               <Message message="store.content.description" />
             </h4>
           </div>
-        </div>
-        <div className="extension-manager-control__box-container">
-          <div className="extension-manager-control__box">
-            <div className="parchment-box extension-manager-list">
-              {isSuccess ? elements : msg}
-            </div>
-          </div>
-          <div className="extension-manager-control__box">
+          <div className="discovery-store-details">
+            {selected && (
+              <div className="discovery-selection-label">
+                {selected.definition['display-name'] ||
+                  selected.definition.name}{' '}
+                {selected.definition.version}
+                {!visible.some(
+                  (entry) =>
+                    createExtensionID(entry) === createExtensionID(selected),
+                ) && (
+                  <span role="status">
+                    {' '}
+                    — <Message message="discovery.hiddenSelection" />
+                  </span>
+                )}
+              </div>
+            )}
             <div
               className="parchment-box extension-manager-list text-dark"
               style={{ padding: '10px 10px' }}

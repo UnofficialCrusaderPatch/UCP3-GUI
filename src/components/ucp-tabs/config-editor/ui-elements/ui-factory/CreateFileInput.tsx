@@ -2,7 +2,7 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 
 import { Button, Form } from 'react-bootstrap';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { MouseEvent, useMemo, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   openFileDialog,
   openFolderDialog,
@@ -122,6 +122,20 @@ function CreateFileInput(args: {
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
 
   const gameFolder = useCurrentGameFolder();
+  const current = useRef({ mounted: true, gameFolder, isDisabled });
+  current.current.gameFolder = gameFolder;
+  current.current.isDisabled = isDisabled;
+  useEffect(() => {
+    const state = current.current;
+    state.mounted = true;
+    return () => {
+      state.mounted = false;
+    };
+  }, []);
+  const canCommit = () =>
+    current.current.mounted &&
+    current.current.gameFolder === gameFolder &&
+    !current.current.isDisabled;
 
   const valueAtom = useMemo(() => atom<string>(`${value}`), [value]);
   const [theValue, setTheValue] = useAtom(valueAtom);
@@ -145,7 +159,7 @@ function CreateFileInput(args: {
       ]);
     }
 
-    if (!pathResult.isPresent() || pathResult.isEmpty()) return;
+    if (!canCommit() || !pathResult.isPresent() || pathResult.isEmpty()) return;
 
     const path = pathResult.get().replaceAll(/[\\]+/g, '/');
 
@@ -191,6 +205,7 @@ function CreateFileInput(args: {
 
     LOGGER.msg(finalPath).debug();
 
+    if (!canCommit()) return;
     setTheValue(finalPath);
     setUserConfiguration({
       type: 'set-multiple',

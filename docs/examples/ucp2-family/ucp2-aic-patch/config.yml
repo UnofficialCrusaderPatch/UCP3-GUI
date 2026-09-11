@@ -1,0 +1,432 @@
+config-sparse:
+  modules:
+    aiSwapper:
+      config:
+        menu:
+          contents:
+            suggested-value:
+              rat:
+                - name: UCP-AIC-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              snake:
+                - name: UCP-AIC-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              pig:
+                - name: UCP-AIC-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              wolf:
+                - name: UCP-AIC-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              saladin:
+                - name: UCP-AIC-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              caliph:
+                - name: UCP-AIC-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              sultan:
+                - name: UCP-AIC-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              richard:
+                - name: UCP-AIC-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              frederick:
+                - name: UCP-AIC-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              phillip:
+                - name: UCP-AIC-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              wazir:
+                - name: UCP-AIC-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              emir:
+                - name: UCP-AIC-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              nizar:
+                - name: UCP-AIC-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              sheriff:
+                - name: UCP-AIC-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              marshal:
+                - name: UCP-AIC-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+              abbot:
+                - name: UCP-AIC-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_UCP_AIC/
+                  control:
+                    aic: true
+                    lord: true
+                    startTroops: true
+        defaultLanguage:
+          contents:
+            suggested-value: null
+        ai:
+          rat:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_UCP_AIC/
+                  active: true
+          snake:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_UCP_AIC/
+                  active: true
+          pig:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_UCP_AIC/
+                  active: true
+          wolf:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_UCP_AIC/
+                  active: true
+          saladin:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_UCP_AIC/
+                  active: true
+          caliph:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_UCP_AIC/
+                  active: true
+          sultan:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_UCP_AIC/
+                  active: true
+          richard:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_UCP_AIC/
+                  active: true
+          frederick:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_UCP_AIC/
+                  active: true
+          phillip:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_UCP_AIC/
+                  active: true
+          wazir:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_UCP_AIC/
+                  active: true
+          emir:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_UCP_AIC/
+                  active: true
+          nizar:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_UCP_AIC/
+                  active: true
+          sheriff:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_UCP_AIC/
+                  active: true
+          marshal:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_UCP_AIC/
+                  active: true
+          abbot:
+            aic:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_UCP_AIC/
+                  active: true
+            lord:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_UCP_AIC/
+                  active: true
+            startTroops:
+              contents:
+                suggested-value:
+                  name: UCP-AIC-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_UCP_AIC/
+                  active: true
+  plugins:
+    ucp2-ai-files:
+      config: {}
+meta:
+  version: 1.0.0

@@ -1,0 +1,9 @@
+name: modal-resources
+display-name: modal-resources
+version: 1.0.0
+author: UCP contributors
+meta:
+  version: 1.0.0
+dependencies:
+- startResources >= 1.0.1
+type: plugin

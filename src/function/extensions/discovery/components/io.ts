@@ -8,6 +8,7 @@ import { DESCRIPTION_FILE } from '../io';
 
 // eslint-disable-next-line import/prefer-default-export
 export const createIO = (eh: ExtensionHandle) => ({
+  descriptionRevision: Date.now(),
   handle: async <R>(cb: ExtensionIOCallback<R>) => {
     const neh = await eh.clone();
     try {
@@ -16,21 +17,29 @@ export const createIO = (eh: ExtensionHandle) => ({
       neh.close();
     }
   },
-  fetchDescription: async () => {
-    const lang = getStore().get(LANGUAGE_ATOM);
+  fetchDescription: async (language?: string) => {
+    const lang = language ?? getStore().get(LANGUAGE_ATOM);
     const neh = await eh.clone();
     try {
-      if (await neh.doesEntryExist(`locale/description-${lang}.md`)) {
-        return await neh.getTextContents(`locale/description-${lang}.md`);
-      }
-      if (await neh.doesEntryExist(`locale/${DESCRIPTION_FILE}`)) {
-        return await neh.getTextContents(`locale/${DESCRIPTION_FILE}`);
-      }
-      if (await neh.doesEntryExist(DESCRIPTION_FILE)) {
-        return await neh.getTextContents(DESCRIPTION_FILE);
-      }
-
-      return 'Sorry, no description.md file was found';
+      const paths = [
+        ...new Set([
+          `locale/description-${lang}.md`,
+          `locale/description-${lang.split('-')[0]}.md`,
+          `locale/${DESCRIPTION_FILE}`,
+          DESCRIPTION_FILE,
+          'locale/description-en.md',
+        ]),
+      ];
+      const readPath = async (index: number): Promise<string> => {
+        const path = paths[index];
+        if (!path) return '';
+        if (await neh.doesEntryExist(path)) {
+          const text = await neh.getTextContents(path);
+          if (text.trim()) return text;
+        }
+        return readPath(index + 1);
+      };
+      return await readPath(0);
     } finally {
       neh.close();
     }

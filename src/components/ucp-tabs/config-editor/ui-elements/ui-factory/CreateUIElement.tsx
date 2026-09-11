@@ -1,7 +1,11 @@
+import { useContext } from 'react';
 import { useAtomValue } from 'jotai';
+import { ModalFilterContext } from './sections/modal-filter';
+import ConfigDisabledContext from './ConfigDisabledContext';
 import {
   CONFIGURATION_USER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
+  CONFIGURATION_FULL_REDUCER_ATOM,
 } from '../../../../../function/configuration/state';
 import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 import { CREATOR_MODE_ATOM } from '../../../../../function/gui-settings/settings';
@@ -11,6 +15,9 @@ import { settingRoots } from '../../../../../function/configuration/qualifiers';
 import './common.css';
 import './UCPAccordion.css';
 
+import { isDisplayContainer } from '../../../../../config/ucp/display-tree';
+import { parseEnabledLogic } from '../enabled-logic';
+import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../../../../function/configuration/derived-state';
 import { DisplayConfigElement } from '../../../../../config/ucp/common';
 import Logger from '../../../../../util/scripts/logging';
 import CreateChoice from './CreateChoice';
@@ -31,6 +38,8 @@ import CreateUCP2Switch from './CreateUCP2Switch';
 import CreateCustomMenu from './CreateCustomMenu';
 import CreateFileInput from './CreateFileInput';
 import { useMessage } from '../../../../general/message';
+// eslint-disable-next-line import/no-cycle
+import { CreateModal } from './CreateModal';
 
 const LOGGER = new Logger('CreateUIElement.tsx');
 
@@ -42,8 +51,24 @@ function CreateUIElementContent(args: {
   const { spec, disabled, className } = args;
 
   const localize = useMessage();
+  const matches = useContext(ModalFilterContext);
 
+  if (matches && spec.id !== undefined && matches.has(spec.id)) {
+    return (
+      <ModalFilterContext.Provider value={undefined}>
+        <CreateUIElementContent
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      </ModalFilterContext.Provider>
+    );
+  }
   switch (spec.display) {
+    case 'Modal':
+      return (
+        <CreateModal spec={spec} disabled={disabled} className={className} />
+      );
     case 'UCP2Slider':
       return (
         <CreateUCP2Slider
@@ -153,16 +178,27 @@ function CreateUIElement(args: Parameters<typeof CreateUIElementContent>[0]) {
   const creator = useAtomValue(CREATOR_MODE_ATOM);
   const user = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
   const touched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
-  const { spec, disabled, className } = args;
+  const { spec, disabled: inheritedDisabled, className } = args;
+  const configuration = useAtomValue(CONFIGURATION_FULL_REDUCER_ATOM);
+  const defaults = useAtomValue(CONFIGURATION_DEFAULTS_REDUCER_ATOM);
+  const disabled =
+    inheritedDisabled ||
+    ('enabled' in spec &&
+      !parseEnabledLogic(spec.enabled!, configuration, defaults));
+  if (spec.hidden) return null;
   const roots = settingRoots(spec);
-  const group = ['Group', 'GroupBox', 'CustomMenu'].includes(spec.display);
-  if (!creator || !roots.length || ['Group', 'GroupBox'].includes(spec.display))
+  const group = ['Group', 'GroupBox', 'Modal', 'CustomMenu'].includes(
+    spec.display,
+  );
+  if (!creator || !roots.length || isDisplayContainer(spec))
     return (
-      <CreateUIElementContent
-        spec={spec}
-        disabled={disabled}
-        className={className}
-      />
+      <ConfigDisabledContext.Provider value={disabled}>
+        <CreateUIElementContent
+          spec={spec}
+          disabled={disabled}
+          className={className}
+        />
+      </ConfigDisabledContext.Provider>
     );
   return (
     <div

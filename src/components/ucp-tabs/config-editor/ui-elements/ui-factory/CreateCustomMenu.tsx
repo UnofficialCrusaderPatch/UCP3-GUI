@@ -1,6 +1,6 @@
 import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/specified.css';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAtomValue } from 'jotai';
 
 import {
@@ -30,6 +30,7 @@ import { parseEnabledLogic } from '../enabled-logic';
 import ConfigWarning from './ConfigWarning';
 import Message from '../../../../general/message';
 import { LANGUAGE_ATOM } from '../../../../../function/gui-settings/settings';
+import { GAME_FOLDER_SET_MOMENT_ATOM } from '../../../../../function/game-folder/interface';
 import { CONFIGURATION_DEFAULTS_REDUCER_ATOM } from '../../../../../function/configuration/derived-state';
 import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
@@ -87,6 +88,13 @@ function CreateCustomMenu(args: {
   const currentLanguage = useAtomValue(LANGUAGE_ATOM);
 
   const [activatingMenu, setActivatingMenu] = useState(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const { spec, disabled } = args;
   const { url, text, enabled, header, extension } = spec;
@@ -97,6 +105,17 @@ function CreateCustomMenu(args: {
     configuration,
     configurationDefaults,
   );
+  const folderMoment = useAtomValue(GAME_FOLDER_SET_MOMENT_ATOM);
+  const activation = useRef({
+    extension,
+    folderMoment,
+    disabled: disabled || !isEnabled,
+  });
+  activation.current = {
+    extension,
+    folderMoment,
+    disabled: disabled || !isEnabled,
+  };
 
   const hasWarning = configurationWarnings[url] !== undefined;
   const { hasHeader } = spec as DisplayConfigElement & {
@@ -135,14 +154,24 @@ function CreateCustomMenu(args: {
           className="ucp-button sandbox-menu-button"
           onClick={async () => {
             setActivatingMenu(true);
+            const owner = activation.current;
+            const source = await receiveSources(extension, sourcePaths);
+            // Loading a child must not resurrect a closed parent/removed extension.
+            if (!mounted.current) return;
+            setActivatingMenu(false);
+            if (
+              activation.current.disabled ||
+              activation.current.extension !== owner.extension ||
+              activation.current.folderMoment !== owner.folderMoment
+            )
+              return;
             setOverlayContent<SandboxArgs>(SandboxMenu, false, false, {
               baseUrl: url,
-              source: await receiveSources(extension, sourcePaths),
+              source,
               localization: extension.locales[currentLanguage] ?? {},
               fallbackLocalization: extension.locales.en ?? {},
               title: hasHeader ? header : undefined,
             });
-            setActivatingMenu(false);
           }}
           disabled={!isEnabled || disabled || activatingMenu}
         >

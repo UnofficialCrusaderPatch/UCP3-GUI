@@ -1,5 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import { basename } from '@tauri-apps/api/path';
+import installedCapabilities from '../../content/discovery/installed-metadata';
 import { onFsExists } from '../../../tauri/tauri-files';
 import {
   ConfigEntry,
@@ -156,6 +157,13 @@ export async function discoverExtensions(
         }
 
         ext.configEntries = parseConfigEntriesResult.configEntries;
+
+        // Facts describe this installed version, not another member of its family.
+        definition.capabilities = await installedCapabilities(
+          eh,
+          Object.keys(ext.configEntries).length > 0,
+          ext.ui.length > 0,
+        );
 
         ext.ui.forEach((v) =>
           attachExtensionInformationToDisplayConfigElement(ext, v),

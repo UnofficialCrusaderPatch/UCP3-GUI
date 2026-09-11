@@ -1,0 +1,13 @@
+name: ucp2-tatha-aiv
+display-name: Apply Tatha Castles
+author: Tatha & UCP-Team
+version: 2.15.1
+dependencies:
+  ucp2-ai-files: ^2.15.1
+  framework: ^3.0.0
+  frontend: ^1.0.0
+family:
+  - name: ucp2-example
+tags:
+  - ai
+  - aiv

@@ -1,0 +1,208 @@
+config-sparse:
+  modules:
+    aiSwapper:
+      config:
+        menu:
+          contents:
+            suggested-value:
+              rat:
+                - name: Tatha-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_Tatha/
+                  control:
+                    aiv: true
+              snake:
+                - name: Tatha-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_Tatha/
+                  control:
+                    aiv: true
+              pig:
+                - name: Tatha-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_Tatha/
+                  control:
+                    aiv: true
+              wolf:
+                - name: Tatha-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_Tatha/
+                  control:
+                    aiv: true
+              saladin:
+                - name: Tatha-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_Tatha/
+                  control:
+                    aiv: true
+              caliph:
+                - name: Tatha-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_Tatha/
+                  control:
+                    aiv: true
+              sultan:
+                - name: Tatha-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_Tatha/
+                  control:
+                    aiv: true
+              richard:
+                - name: Tatha-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_Tatha/
+                  control:
+                    aiv: true
+              frederick:
+                - name: Tatha-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_Tatha/
+                  control:
+                    aiv: true
+              phillip:
+                - name: Tatha-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_Tatha/
+                  control:
+                    aiv: true
+              wazir:
+                - name: Tatha-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_Tatha/
+                  control:
+                    aiv: true
+              emir:
+                - name: Tatha-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_Tatha/
+                  control:
+                    aiv: true
+              nizar:
+                - name: Tatha-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_Tatha/
+                  control:
+                    aiv: true
+              sheriff:
+                - name: Tatha-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_Tatha/
+                  control:
+                    aiv: true
+              marshal:
+                - name: Tatha-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_Tatha/
+                  control:
+                    aiv: true
+              abbot:
+                - name: Tatha-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_Tatha/
+                  control:
+                    aiv: true
+        defaultLanguage:
+          contents:
+            suggested-value: null
+        ai:
+          rat:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Rat
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/rat_Tatha/
+                  active: true
+          snake:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Snake
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/snake_Tatha/
+                  active: true
+          pig:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Pig
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/pig_Tatha/
+                  active: true
+          wolf:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Wolf
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wolf_Tatha/
+                  active: true
+          saladin:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Saladin
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/saladin_Tatha/
+                  active: true
+          caliph:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Caliph
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/caliph_Tatha/
+                  active: true
+          sultan:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Sultan
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sultan_Tatha/
+                  active: true
+          richard:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Richard
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/richard_Tatha/
+                  active: true
+          frederick:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Frederick
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/frederick_Tatha/
+                  active: true
+          phillip:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Phillip
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/phillip_Tatha/
+                  active: true
+          wazir:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Wazir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/wazir_Tatha/
+                  active: true
+          emir:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Emir
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/emir_Tatha/
+                  active: true
+          nizar:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Nizar
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/nizar_Tatha/
+                  active: true
+          sheriff:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Sheriff
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/sheriff_Tatha/
+                  active: true
+          marshal:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Marshal
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/marshal_Tatha/
+                  active: true
+          abbot:
+            aiv:
+              contents:
+                suggested-value:
+                  name: Tatha-Abbot
+                  root: ucp/plugins/ucp2-ai-files/resources/ai/abbot_Tatha/
+                  active: true
+  plugins:
+    ucp2-ai-files:
+      config: {}
+meta:
+  version: 1.0.0

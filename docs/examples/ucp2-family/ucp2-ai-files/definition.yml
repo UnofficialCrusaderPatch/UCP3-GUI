@@ -1,0 +1,15 @@
+name: ucp2-ai-files
+display-name: 'UCP2-Legacy: Revised AI Files'
+author: UCP-Team
+version: 2.15.1
+dependencies:
+  aiSwapper: ^1.0.1
+  framework: ^3.0.0
+  frontend: ^1.0.0
+meta:
+  version: 1.0.0
+family:
+  - name: ucp2-example
+tags:
+  - ai
+  - files

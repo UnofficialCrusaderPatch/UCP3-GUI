@@ -17,6 +17,10 @@ import {
 } from '../../../../function/extensions/state/focus';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
+import {
+  DiscoveryFilter,
+  EMPTY_DISCOVERY_FILTER,
+} from '../../../../function/content/discovery/search';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -25,6 +29,10 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
 );
 
 export const LAST_CLICKED_CONTENT_ATOM = atom<ContentElement | undefined>();
+
+export const CONTENT_FILTERS_ATOM = atom<DiscoveryFilter>(
+  EMPTY_DISCOVERY_FILTER,
+);
 
 export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
@@ -94,7 +102,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const descriptions = [
       {
         language: 'default',
-        content: e.description || '< not loaded >',
+        content: e.description || '',
         method: 'inline',
       },
       ...(matchingStorePackage !== undefined
@@ -105,12 +113,15 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const p = {
       definition: {
         ...e.definition,
+        tags: e.definition.tags ?? matchingStorePackage?.definition.tags,
+        family: e.definition.family ?? matchingStorePackage?.definition.family,
         url: 'nonsense',
         dependencies: deps,
       },
       contents: {
         package: pack,
         description: descriptions,
+        'tag-locales': matchingStorePackage?.contents['tag-locales'],
       },
       online: isOnline,
       installed: true,

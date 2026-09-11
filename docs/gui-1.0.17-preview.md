@@ -2,9 +2,11 @@
 
 This branch combines the reviewed GUI contributions for a complete preview build. It is not the withdrawn `v1.0.17` release and does not replace that tag. Numeric package version 1.0.17 is used for compatibility; download artifacts from this branch's exact CI run. Original contributor commits are preserved through merges.
 
+The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible changes in plain language. It remains a preview draft until release preparation is complete.
+
 | Contribution | Included source head |
 | --- | --- |
-| Search, tags, families (#382; retains #322) | `da10897` |
+| Search, tags, families (#382; retains #322) | `6cd5902` (changelog follow-up; runtime unchanged from `da10897`) |
 | Folder controls (#381) | `f33952242b6e7d2a2286419b5a447c9ecc832652` |
 | Dependency trees (#377) | `b9924f3c78152890877bee8326f31907d17f3e09` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |

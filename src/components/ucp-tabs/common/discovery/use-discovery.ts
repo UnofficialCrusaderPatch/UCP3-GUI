@@ -15,6 +15,7 @@ import {
 import { LANGUAGE_ATOM } from '../../../../function/gui-settings/settings';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { useMessage } from '../../../general/message';
+import packageTagLabel from '../../../../function/content/discovery/tag-localization';
 
 export const KNOWN_TAGS = [
   'ai',
@@ -67,6 +68,9 @@ export function useDiscovery(
     () =>
       elements.map((element, i) => {
         const tags = discoveryTags(element.definition, element.definition.type);
+        const tagLabels = Object.fromEntries(
+          tags.map((tag) => [tag, packageTagLabel(element, tag, language)]),
+        );
         return {
           id: createExtensionID(element),
           name: element.definition.name,
@@ -75,10 +79,11 @@ export function useDiscovery(
           description:
             descriptions.data[i]?.text ?? inlineDescription(element, language),
           tags,
+          tagLabels,
           tagText: tags
             .map(
               (tag) =>
-                `${tag} ${KNOWN_TAGS.includes(tag) ? localize(`discovery.tag.${tag}`) : tag}`,
+                `${tag} ${tagLabels[tag] ?? ''} ${KNOWN_TAGS.includes(tag) ? localize(`discovery.tag.${tag}`) : ''}`,
             )
             .join(' '),
         };
@@ -92,13 +97,23 @@ export function useDiscovery(
   const results = useMemo(() => search(filter), [search, filter]);
   const tags = useMemo(
     () =>
-      [...new Set(documents.flatMap((doc) => doc.tags))].sort().map((tag) => ({
-        value: tag,
-        label: KNOWN_TAGS.includes(tag)
-          ? localize(`discovery.tag.${tag}`)
-          : tag,
-      })),
-    [documents, localize],
+      [...new Set(documents.flatMap((doc) => doc.tags))]
+        .map((tag) => ({
+          value: tag,
+          label: KNOWN_TAGS.includes(tag)
+            ? localize(`discovery.tag.${tag}`)
+            : (documents
+                .map((doc) => doc.tagLabels[tag])
+                .filter((label): label is string => !!label)
+                .sort()[0] ?? tag),
+        }))
+        .sort((left, right) =>
+          left.label.localeCompare(
+            right.label,
+            language === 'ch' ? 'zh' : language,
+          ),
+        ),
+    [documents, localize, language],
   );
   return {
     results,

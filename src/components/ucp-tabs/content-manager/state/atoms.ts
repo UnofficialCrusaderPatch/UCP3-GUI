@@ -121,6 +121,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
       contents: {
         package: pack,
         description: descriptions,
+        'tag-locales': matchingStorePackage?.contents['tag-locales'],
       },
       online: isOnline,
       installed: true,

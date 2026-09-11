@@ -18,11 +18,10 @@ import {
 import { customizeExtensionButtonCallback } from '../customize-extension-button-callback';
 import { OverrideViewer, OverrideViewerProps } from '../override-viewer';
 import { MessageType } from '../../../../../localization/localization';
-import { shellOpen } from '../../../../../tauri/tauri-shell';
 import { MoveArrows } from './move-arrows';
 import { ArrowButton } from './arrow-button';
 import { CustomizeButton } from './customize-button';
-import { ShellOpenButton } from './shell-open-button';
+import { InstalledExtensionFolderButton } from './shell-open-button';
 
 // eslint-disable-next-line import/prefer-default-export
 export function ExtensionElement(props: {
@@ -167,11 +166,7 @@ export function ExtensionElement(props: {
         </button>
       ) : null}
       {displayShellOpenButton ? (
-        <ShellOpenButton
-          clickCallback={() => {
-            shellOpen(ext.io.path);
-          }}
-        />
+        <InstalledExtensionFolderButton extension={ext} active={active} />
       ) : null}
       {displayCustomizeButton ? (
         <CustomizeButton

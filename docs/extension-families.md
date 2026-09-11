@@ -49,7 +49,11 @@ Members can live in separate directories of the same repository. The existing St
 
 ## Tags and automatic metadata
 
-`tags` is an optional list of stable identifiers. IDs are normalized; known labels are localized and unknown IDs remain readable. Current labels include AI/AIC/AIV/AIA, balance, bugfixes, code, config, maps, modpack, scenarios, sounds, textures, tools, behavior, economy, interface, multiplayer and replay. Known translations live in the GUI's nine language catalogs, so packages share one vocabulary without maintaining duplicate translated lists. Both IDs and the selected language's labels are searchable. Module/plugin categories remain searchable but are separated from topic tags in the menu.
+`tags` is an optional list of stable identifiers. IDs are normalized. Add translated labels to the package's existing `locale/<language>.yml` files using flat `tags.<id>` keys, for example `tags.castles: Burgen` in `locale/de.yml`. Add descriptions to `locale/description-<language>.md`. The supported language codes are `en`, `de`, `fr`, `ru`, `hu`, `tr`, `ch`, `es` and `fa`.
+
+The GUI searches tag IDs, package labels and descriptions in the selected language. Package labels fall back to the language family and then English. Installed locale files take precedence over exact-version Store labels within each language. The Store extracts these labels from the built archive into `contents.tag-locales`, a language-to-ID-to-label mapping, so custom tags work before installation too. Adding a custom translated tag does not require a GUI release.
+
+The GUI also provides shared translations for established topics such as AI/AIC/AIV/AIA, balance, bugfixes, maps, modpack, scenarios, sounds, textures, tools, behavior, economy, interface, multiplayer and replay. Known IDs keep one consistent menu label; their package labels are searchable aliases. A custom ID uses its package label, or its ID if no label is available. If packages disagree on a custom label, the menu chooses the first label in stable lexical order while searching all supplied labels. Module/plugin categories remain searchable but are separated from topic tags in the menu.
 
 The GUI automatically derives additional facts for installed extensions: resources directory, init code, parsed configuration demands and editable options. Type and declared family membership are also searchable facets. Facts are per member: a file provider does not become “applies settings” because an Applied sibling exists. Unknown facts remain unknown.
 

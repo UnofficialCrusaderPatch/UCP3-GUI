@@ -1,5 +1,8 @@
 export type FamilyMembership = { name: string; root?: boolean };
 
+/** Extracted from the package's ordinary locale/<language>.yml tags.<id> keys. */
+export type TagLocales = Record<string, Record<string, string>>;
+
 export type DiscoveryMetadata = {
   family?: FamilyMembership[];
   tags?: string[];

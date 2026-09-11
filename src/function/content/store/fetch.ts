@@ -2,7 +2,7 @@ import { parse as parseYaml } from 'yaml';
 import { ResponseType } from '@tauri-apps/api/http';
 import { fetch } from '../../../tauri/tauri-http';
 import Logger from '../../../util/scripts/logging';
-import { DiscoveryMetadata } from '../discovery/metadata';
+import { DiscoveryMetadata, TagLocales } from '../discovery/metadata';
 
 const LOGGER = new Logger('store/fetch.ts');
 
@@ -53,6 +53,7 @@ export type ExtensionContent = {
   contents: {
     description: DescriptionContent[];
     package: PackageContent[];
+    'tag-locales'?: TagLocales;
   };
 };
 

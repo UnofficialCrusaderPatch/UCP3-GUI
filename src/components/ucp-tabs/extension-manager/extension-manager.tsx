@@ -178,22 +178,6 @@ export default function ExtensionManager() {
     />
   );
 
-  const a = extensionsState.extensions.length;
-  const b = extensionsToDisplay.length + displayedActiveExtensions.length;
-
-  const filterInfoElement = !showAllExtensions ? (
-    <span className="fs-8">
-      <Message
-        message={{
-          key: 'config.filter',
-          args: { all: a, displayed: b },
-        }}
-      />
-    </span>
-  ) : (
-    <span />
-  );
-
   const hasCustomisations = useAtomValue(HAS_CUSTOMISATIONS);
   const editorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);
   const displayCustomisationsElement =
@@ -268,7 +252,6 @@ export default function ExtensionManager() {
               <Message message="extensions.available" />
             </h4>
             <div className="extension-manager-control__box__header__buttons">
-              {filterInfoElement}
               <DiscoveryFilterButton
                 filter={discoveryFilter}
                 onChange={setDiscoveryFilter}

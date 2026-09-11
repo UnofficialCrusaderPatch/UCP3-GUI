@@ -60,6 +60,91 @@ fn extension_path(
     Ok(target.to_path_buf())
 }
 
+#[cfg(test)]
+mod folder_tests {
+    use super::extension_path;
+    use std::{fs, path::PathBuf, time::SystemTime};
+
+    struct Installation(PathBuf);
+
+    impl Installation {
+        fn new() -> Self {
+            let nonce = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            let path =
+                std::env::temp_dir().join(format!("ucp-folders-{}-{}", std::process::id(), nonce));
+            fs::create_dir_all(path.join("ucp/plugins/Ordner Ä-1.0.0")).unwrap();
+            fs::create_dir_all(path.join("ucp/modules")).unwrap();
+            Self(dunce::canonicalize(path).unwrap())
+        }
+    }
+
+    impl Drop for Installation {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn validates_installed_directories_and_archives() {
+        let game = Installation::new();
+        let other = Installation::new();
+        let root = game.0.join("ucp");
+        let directory = root.join("plugins/Ordner Ä-1.0.0");
+        let archive = root.join("modules/module-1.0.0.zip");
+        fs::write(&archive, b"fixture").unwrap();
+        assert_eq!(
+            extension_path(&game.0, None, false, |_| true),
+            Ok(root.clone())
+        );
+        for (path, direct) in [(&directory, false), (&directory, true), (&archive, false)] {
+            assert_eq!(
+                extension_path(&game.0, Some(path), direct, |_| true),
+                Ok(path.clone())
+            );
+        }
+        let executable = root.join("modules/program.exe");
+        fs::write(&executable, b"fixture").unwrap();
+        for path in [
+            root.join("plugins/../modules"),
+            other.0.join("ucp/plugins/Ordner Ä-1.0.0"),
+            root.join("modules/missing.zip"),
+            directory.join("nested"),
+            executable,
+        ] {
+            assert!(
+                extension_path(&game.0, Some(&path), false, |_| true).is_err(),
+                "{}",
+                path.display()
+            );
+        }
+        assert!(extension_path(&game.0, Some(&archive), true, |_| true).is_err());
+        assert!(extension_path(&game.0, Some(&directory), false, |_| false).is_err());
+        assert!(extension_path(std::path::Path::new("relative"), None, false, |_| true).is_err());
+    }
+
+    // Unix symlinks need no Windows Developer Mode or elevated test process.
+    #[cfg(unix)]
+    #[test]
+    fn checks_canonical_scope_but_reveals_the_installed_link() {
+        let game = Installation::new();
+        let other = Installation::new();
+        let link = game.0.join("ucp/plugins/linked-1.0.0");
+        std::os::unix::fs::symlink(other.0.join("ucp/plugins/Ordner Ä-1.0.0"), &link).unwrap();
+        assert_eq!(
+            extension_path(&game.0, Some(&link), false, |path| path
+                .starts_with(&game.0)),
+            Err("Resolved path outside configured filesystem scope".into())
+        );
+        assert_eq!(
+            extension_path(&game.0, Some(&link), false, |_| true),
+            Ok(link)
+        );
+    }
+}
+
 #[cfg(target_os = "linux")]
 fn wait_for_file_manager(mut child: std::process::Child) -> Result<(), String> {
     // Some desktops keep xdg-open alive for the lifetime of the folder window.

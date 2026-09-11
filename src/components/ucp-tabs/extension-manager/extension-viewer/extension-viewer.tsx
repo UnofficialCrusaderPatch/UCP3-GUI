@@ -5,6 +5,9 @@ import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import Message from '../../../general/message';
+import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';
+import { extensionToID } from '../../../../function/extensions/dependency-management/dependency-resolution';
+import ExtensionRelations from './extension-relations';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -22,6 +25,7 @@ export function ExtensionViewer(
   );
 
   const content = useAtomValue(contentAtom);
+  const { tree, activeExtensions } = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
   return (
     <div className="credits-container">
@@ -29,7 +33,13 @@ export function ExtensionViewer(
         <Message message="extensions.viewer" />
       </h1>
       <div className="parchment-box credits-text-box">
-        <div className="credits-text">
+        <div className="credits-text extension-description">
+          <ExtensionRelations
+            key={extensionToID(extension)}
+            extension={extension}
+            tree={tree}
+            activeExtensions={activeExtensions}
+          />
           <SaferMarkdown>
             {content.state === 'hasData' ? content.data : ''}
           </SaferMarkdown>

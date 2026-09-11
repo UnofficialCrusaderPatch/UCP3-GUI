@@ -187,4 +187,53 @@ describe('localized name and visible-description search', () => {
     expect(text).not.toContain('secret-host');
     expect(text).not.toContain('hiddenWord');
   });
+  it('whole-word mode rejects word fragments and approximate matches while retaining punctuation and phrases', () => {
+    const exact = (query: string) =>
+      search({ ...EMPTY_DISCOVERY_FILTER, search: query, wholeWords: true });
+    expect(exact('archers').has('a')).toBe(true);
+    expect(exact('arch').size).toBe(0);
+    expect(exact('defensve').size).toBe(0);
+    expect(exact('files').has('b')).toBe(true);
+    expect(exact('"careful economy"').has('a')).toBe(true);
+    expect(exact('"careful econ"').size).toBe(0);
+  });
+  it('ranks translated tag matches ahead of unrelated description substrings', () => {
+    const find = createDiscoverySearch(
+      [
+        { ...documents[0], id: 'tagged', tagText: 'ai KI aiv KI-Burgen' },
+        {
+          ...documents[1],
+          id: 'unrelated',
+          description: 'Improved attacking units.',
+          tagText: 'files Dateien',
+        },
+      ],
+      'de',
+    );
+    const result = find({ ...EMPTY_DISCOVERY_FILTER, search: 'KI' });
+    expect(result.get('tagged')!.score).toBeGreaterThan(
+      result.get('unrelated')!.score,
+    );
+    expect(result.get('tagged')!.excerpt).toBe('');
+    expect([
+      ...find({
+        ...EMPTY_DISCOVERY_FILTER,
+        search: 'KI',
+        wholeWords: true,
+      }).keys(),
+    ]).toEqual(['tagged']);
+  });
+  it('uses Chinese word boundaries when whole-word matching text without spaces', () => {
+    const find = createDiscoverySearch(
+      [{ ...documents[0], description: '建造城堡', tagText: '城堡' }],
+      'ch',
+    );
+    expect(
+      find({ ...EMPTY_DISCOVERY_FILTER, search: '城堡', wholeWords: true })
+        .size,
+    ).toBe(1);
+    expect(
+      find({ ...EMPTY_DISCOVERY_FILTER, search: '城', wholeWords: true }).size,
+    ).toBe(0);
+  });
 });

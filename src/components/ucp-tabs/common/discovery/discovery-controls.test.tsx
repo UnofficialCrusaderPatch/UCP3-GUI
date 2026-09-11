@@ -9,7 +9,7 @@ import {
 import { Provider, createStore } from 'jotai';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
-import { DiscoveryToolbar } from './discovery-toolbar';
+import { DiscoverySearch, DiscoveryFilterButton } from './discovery-toolbar';
 import { FamilyList } from './family-list';
 import { EMPTY_DISCOVERY_FILTER } from '../../../../function/content/discovery/search';
 
@@ -33,17 +33,26 @@ afterEach(() => {
 
 function ToolbarFixture() {
   const [filter, setFilter] = useState(EMPTY_DISCOVERY_FILTER);
+  const [excludeModules, setExcludeModules] = useState(false);
   return (
-    <DiscoveryToolbar
-      filter={filter}
-      onChange={setFilter}
-      tags={[
-        { value: 'ai', label: 'AI' },
-        { value: 'files', label: 'Files' },
-      ]}
-      pending={0}
-      incomplete={0}
-    />
+    <>
+      <DiscoveryFilterButton
+        filter={filter}
+        onChange={setFilter}
+        excludeModules={excludeModules}
+        onExcludeModules={setExcludeModules}
+        tags={[
+          { value: 'ai', label: 'AI' },
+          { value: 'files', label: 'Files' },
+        ]}
+      />
+      <DiscoverySearch
+        filter={filter}
+        onChange={setFilter}
+        pending={0}
+        incomplete={0}
+      />
+    </>
   );
 }
 
@@ -55,7 +64,7 @@ describe('compact discovery controls', () => {
         <ToolbarFixture />
       </QueryClientProvider>,
     );
-    const trigger = screen.getByRole('button', { name: /discovery.tags/ });
+    const trigger = screen.getByRole('button', { name: /discovery.filters/ });
     vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({
       x: 900,
       y: 540,
@@ -82,15 +91,17 @@ describe('compact discovery controls', () => {
         <ToolbarFixture />
       </QueryClientProvider>,
     );
-    const trigger = screen.getByRole('button', { name: /discovery.tags/ });
+    const trigger = screen.getByRole('button', { name: /discovery.filters/ });
     fireEvent.click(trigger);
     const ai = screen.getByRole('checkbox', { name: 'AI' }) as HTMLInputElement;
-    expect(document.activeElement).toBe(ai);
+    expect(document.activeElement).toBe(
+      screen.getByRole('radio', { name: 'discovery.any' }),
+    );
     fireEvent.click(ai);
     fireEvent.click(screen.getByRole('checkbox', { name: 'Files' }));
     expect(ai.checked).toBe(true);
     expect(screen.getByRole('dialog')).toBeTruthy();
-    expect(trigger.textContent).toContain('2');
+    expect(trigger.getAttribute('aria-pressed')).toBe('true');
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(document.activeElement).toBe(trigger);
@@ -104,10 +115,10 @@ describe('compact discovery controls', () => {
     );
     const search = screen.getByRole('searchbox') as HTMLInputElement;
     fireEvent.change(search, { target: { value: 'economy' } });
-    fireEvent.click(screen.getByRole('button', { name: /discovery.tags/ }));
+    fireEvent.click(screen.getByRole('button', { name: /discovery.filters/ }));
     fireEvent.click(screen.getByRole('checkbox', { name: 'AI' }));
     fireEvent.click(
-      screen.getByRole('button', { name: 'discovery.clearTags' }),
+      screen.getByRole('button', { name: 'discovery.clearFilters' }),
     );
     expect(search.value).toBe('economy');
     expect(
@@ -116,6 +127,60 @@ describe('compact discovery controls', () => {
     ).toBe(false);
     fireEvent.pointerDown(document.body);
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+  it('combines module exclusion and tags with one active indicator and one-click OR/AND choices', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ToolbarFixture />
+      </QueryClientProvider>,
+    );
+    const trigger = screen.getByRole('button', { name: 'discovery.filters' });
+    expect(trigger.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(trigger);
+    const any = screen.getByRole('radio', {
+      name: 'discovery.any',
+    }) as HTMLInputElement;
+    const all = screen.getByRole('radio', {
+      name: 'discovery.all',
+    }) as HTMLInputElement;
+    expect(any.checked).toBe(true);
+    fireEvent.click(all);
+    expect(all.checked).toBe(true);
+    expect(any.checked).toBe(false);
+    // AND by itself does not narrow an unfiltered list.
+    expect(trigger.getAttribute('aria-pressed')).toBe('false');
+    const modules = screen.getByRole('checkbox', {
+      name: 'discovery.excludeModules',
+    }) as HTMLInputElement;
+    fireEvent.click(modules);
+    expect(trigger.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'AI' }));
+    fireEvent.click(modules);
+    expect(trigger.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(
+      screen.getByRole('button', { name: 'discovery.clearFilters' }),
+    );
+    expect(trigger.getAttribute('aria-pressed')).toBe('false');
+    expect(modules.checked).toBe(false);
+    expect(screen.queryByRole('combobox')).toBeNull();
+  });
+  it('keeps the whole-word search choice separate from filter activation', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ToolbarFixture />
+      </QueryClientProvider>,
+    );
+    const words = screen.getByRole('checkbox', {
+      name: 'discovery.wholeWords',
+    }) as HTMLInputElement;
+    expect(words.checked).toBe(false);
+    fireEvent.click(words);
+    expect(words.checked).toBe(true);
+    expect(
+      screen
+        .getByRole('button', { name: 'discovery.filters' })
+        .getAttribute('aria-pressed'),
+    ).toBe('false');
   });
   it('expands independently of activation and routes root/member actions to their real identity', () => {
     const root = {

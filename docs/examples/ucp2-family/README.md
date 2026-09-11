@@ -1,6 +1,6 @@
 # Isolated UCP2 family example
 
-These manifests demonstrate the existing UCP2 file-provider/Applied pattern as one author-defined family. They are examples, not replacement releases or a migration. `sources.json` pins each original package. Only `definition.yml` gains family and tag metadata; copied `config.yml` files are unchanged.
+These manifests demonstrate the existing UCP2 file-provider/Applied pattern as one author-defined family. They are examples, not replacement releases or a migration. `sources.json` pins each original package. `definition.yml` gains family and tag metadata and clearer `Apply ?` display names; copied `config.yml` files are unchanged.
 
 `ucp2-legacy-defaults` is deliberately the display root. Its ordinary dependencies activate the shared AI files, AIC patch and Vanilla Fixed AIV. Expanding the family exposes Evrey and Tatha alternatives and the file-only member. Selecting the file-only member does not apply Default. Selecting an alternative does not silently remove another member: existing dependencies, required/suggested demands and AI Swapper ordering rules still apply. Existing conflict and priority controls remain the place to resolve conflicting settings.
 

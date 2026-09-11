@@ -6,7 +6,7 @@ The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible c
 
 | Contribution | Included source head |
 | --- | --- |
-| Search, tags, families (#382; retains #322) | `6cd5902` (changelog follow-up; runtime unchanged from `da10897`) |
+| Search, tags, families (#382; retains #322) | `219287a` (combined filter, whole-word search, left-column layout and Creator toggle) |
 | Folder controls (#381) | `f33952242b6e7d2a2286419b5a447c9ecc832652` |
 | Dependency trees (#377) | `b9924f3c78152890877bee8326f31907d17f3e09` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |
@@ -22,4 +22,4 @@ Integration follow-ups add durable Rust path-boundary tests, a dependency-view r
 
 Native preview checks also found and corrected popup placement under the existing CSS GUI zoom, and gave activation/movement controls explicit dimensions so nested family rows retain usable buttons. Family chevrons override the shared minimal-button reset and use a symbol-capable font. These checks use an isolated local fixture; existing game installations are not modified.
 
-Existing package/profile migration and game testing are outside this preview. UCP2 family manifests are isolated examples; the modder chooses Default, Bare or any other ordinary extension as root. CI tests/builds and runtime acceptance are recorded on the preview PR, distinguishing completed checks from platform-specific limitations.
+Package metadata rollout is coordinated through separate draft package and Store PRs. Existing installed packages and profiles are not rewritten; game testing is outside this preview. UCP2 family manifests are isolated examples; the modder chooses Default, Bare or any other ordinary extension as root. CI tests/builds and runtime acceptance are recorded on the preview PR, distinguishing completed checks from platform-specific limitations.

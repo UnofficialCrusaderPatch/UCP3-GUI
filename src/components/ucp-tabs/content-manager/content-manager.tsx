@@ -21,8 +21,11 @@ import {
 import { ContentFilterButton } from './buttons/filter-button';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import Message, { useMessage } from '../../general/message';
-import { ExtensionFilterButton } from './buttons/extension-filter-button';
-import { DiscoveryToolbar } from '../common/discovery/discovery-toolbar';
+import { STORE_SHOW_ALL_EXTENSION_TYPES_ATOM } from '../../../function/gui-settings/settings';
+import {
+  DiscoverySearch,
+  DiscoveryFilterButton,
+} from '../common/discovery/discovery-toolbar';
 import { FamilyList } from '../common/discovery/family-list';
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { ContentElement } from '../../../function/content/types/content-element';
@@ -44,6 +47,9 @@ function StatusElement({ children }: { children: any }) {
 
 /* eslint-disable import/prefer-default-export */
 export function ContentManager() {
+  const [shownTypes, setShownTypes] = useAtom(
+    STORE_SHOW_ALL_EXTENSION_TYPES_ATOM,
+  );
   const [contentFilters, setContentFilters] = useAtom(CONTENT_FILTERS_ATOM);
   const allElements = useAtomValue(CONTENT_ELEMENTS_ATOM);
   const filteredElements = useAtomValue(filteredContentElementsAtom);
@@ -106,7 +112,9 @@ export function ContentManager() {
   const elements = (
     <FamilyList
       items={visible.map(item)}
-      available={allElements.map(item)}
+      available={allElements
+        .filter((element) => shownTypes.includes(element.definition.type))
+        .map(item)}
       scope="store"
       searching={Boolean(
         contentFilters.search.trim() || contentFilters.tags.length,
@@ -200,17 +208,18 @@ export function ContentManager() {
               </h4>
               <div className="extension-manager-control__box__header__buttons">
                 {restartElement}
-                <ExtensionFilterButton />
+                <DiscoveryFilterButton
+                  filter={contentFilters}
+                  onChange={setContentFilters}
+                  tags={discovery.tags}
+                  excludeModules={!shownTypes.includes('module')}
+                  onExcludeModules={(exclude) =>
+                    setShownTypes(exclude ? ['plugin'] : ['module', 'plugin'])
+                  }
+                />
                 <ContentFilterButton />
               </div>
             </div>
-            <DiscoveryToolbar
-              filter={contentFilters}
-              onChange={setContentFilters}
-              tags={discovery.tags}
-              pending={discovery.pending}
-              incomplete={discovery.incomplete}
-            />
           </div>
           <div className="parchment-box discovery-store-list">
             {msg}
@@ -221,6 +230,12 @@ export function ContentManager() {
               </div>
             )}
           </div>
+          <DiscoverySearch
+            filter={contentFilters}
+            onChange={setContentFilters}
+            pending={discovery.pending}
+            incomplete={discovery.incomplete}
+          />
         </div>
         <div className="discovery-store-column">
           <div className="w-100 d-flex flex-row align-items-center">

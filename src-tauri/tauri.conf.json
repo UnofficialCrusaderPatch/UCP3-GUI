@@ -82,7 +82,10 @@
       "category": "DeveloperTool",
       "copyright": "",
       "deb": {
-        "depends": []
+        "depends": [
+          "libc6 (>= 2.34)",
+          "libssl3"
+        ]
       },
       "externalBin": [],
       "icon": [

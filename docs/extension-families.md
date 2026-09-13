@@ -41,11 +41,11 @@ Members can live in separate directories of the same repository. The existing St
 
 ## Root availability and interaction
 
-- Content groups active and available extensions separately. A declared root must belong to the same activation list as its children; otherwise those children stay individually visible with their own controls. An inactive Default root is never inserted into the active list when only Bare is active. If only members are installed and the root is available in Store, Content leaves those members flat; Store can still group the available family.
+- Content groups families only in the available list. Active extensions always appear individually in load order with their own controls. An available family root must be inactive; otherwise its inactive children stay individually visible. If only members are installed and the root is available in Store, Content leaves those members flat; Store can still group the available family.
 - The chevron expands/collapses. Existing activation arrows act on the root or the individual expanded member. Name clicks still open details. No action silently replaces siblings.
 - Multiple memberships produce references to the same extension state, not duplicate installations. Several versions of the same root name are allowed; two different root identities for one family fall back to flat display. Malformed family metadata does not hide an otherwise usable extension.
 - Search matches members independently before grouping. A nonmatching installed root remains context for a matching child. Search expansion is separate from the user's normal expansion state.
-- Grouping/sorting never changes the underlying activation order. Active rows retain their actual priority positions and existing movement controls; a family is not a new atomic load-order item.
+- The active list has no family containers. Active rows retain their actual priority positions and existing movement controls, so moving a member or adding a dependency is immediately reflected in the displayed order.
 
 ## Tags and automatic metadata
 

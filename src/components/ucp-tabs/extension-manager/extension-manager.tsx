@@ -4,7 +4,7 @@ import './extension-manager.css';
 
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { listen } from '@tauri-apps/api/event';
-import { ReactNode, useEffect } from 'react';
+import { Fragment, ReactNode, useEffect } from 'react';
 import { FileDropEvent } from '@tauri-apps/api/window';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import {
@@ -115,7 +115,6 @@ export default function ExtensionManager() {
           <div className="discovery-active-row">
             <span className="discovery-priority">{index + 1}</span>
             <ActiveExtensionElement
-              familyToggle={familyToggle}
               ext={ext}
               index={index}
               arr={extensionsState.activeExtensions}
@@ -168,22 +167,14 @@ export default function ExtensionManager() {
       label={({ ext }) => ext.definition['display-name'] || ext.name}
     />
   );
-  const activated = (
-    <FamilyList
-      key="active-families"
-      items={displayedActiveExtensions
-        .filter((ext) => discovery.results.has(createExtensionID(ext)))
-        .map(item)}
-      available={available
-        .filter((ext) => showAllExtensions || ext.type !== 'module')
-        .map(item)}
-      scope="content-active"
-      activation
-      searching={searching}
-      render={renderExtension}
-      label={({ ext }) => ext.definition['display-name'] || ext.name}
-    />
-  );
+  // Keep the active pane in load order; families only group available choices.
+  const activated = displayedActiveExtensions
+    .filter((ext) => discovery.results.has(createExtensionID(ext)))
+    .map((ext) => (
+      <Fragment key={createExtensionID(ext)}>
+        {renderExtension({ ext })}
+      </Fragment>
+    ));
 
   const hasCustomisations = useAtomValue(HAS_CUSTOMISATIONS);
   const editorState = useAtomValue(EXTENSION_EDITOR_STATE_ATOM);

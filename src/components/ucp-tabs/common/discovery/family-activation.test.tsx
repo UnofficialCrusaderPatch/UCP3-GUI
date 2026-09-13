@@ -53,40 +53,35 @@ function Lists() {
   }));
   return (
     <>
-      {[false, true].map((activation) => (
-        <div
-          key={String(activation)}
-          data-testid={activation ? 'active' : 'available'}
-        >
-          <FamilyList
-            activation={activation}
-            scope={`roundtrip-${activation}`}
-            searching={false}
-            items={available.filter((item) => item.active === activation)}
-            available={available}
-            label={({ ext }) => ext.definition['display-name'] || ext.name}
-            render={({ ext, active }, familyToggle) => (
-              <div data-testid={ext.name}>
-                {active ? (
-                  <ActiveExtensionElement
-                    ext={ext}
-                    arr={state.activeExtensions}
-                    index={state.activeExtensions.findIndex(
-                      (entry) => entry.name === ext.name,
-                    )}
-                    familyToggle={familyToggle}
-                  />
-                ) : (
-                  <InactiveExtensionsElement
-                    exts={[ext]}
-                    familyToggle={familyToggle}
-                  />
-                )}
-              </div>
-            )}
-          />
-        </div>
-      ))}
+      <div data-testid="available">
+        <FamilyList
+          activation={false}
+          scope="roundtrip-available"
+          searching={false}
+          items={available.filter((item) => !item.active)}
+          available={available}
+          label={({ ext }) => ext.definition['display-name'] || ext.name}
+          render={({ ext }, familyToggle) => (
+            <div data-testid={ext.name}>
+              <InactiveExtensionsElement
+                exts={[ext]}
+                familyToggle={familyToggle}
+              />
+            </div>
+          )}
+        />
+      </div>
+      <div data-testid="active">
+        {state.activeExtensions.map((ext, index) => (
+          <div key={ext.name} data-testid={ext.name}>
+            <ActiveExtensionElement
+              ext={ext}
+              arr={state.activeExtensions}
+              index={index}
+            />
+          </div>
+        ))}
+      </div>
     </>
   );
 }

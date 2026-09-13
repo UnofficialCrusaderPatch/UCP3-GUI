@@ -89,20 +89,25 @@
   outline-offset: 1px;
 }
 .discovery-family-root {
+  min-width: 0;
+}
+.extension-name-box--family {
   display: flex;
   align-items: center;
-  min-width: 0;
 }
-.discovery-family-root-row {
-  flex: 1;
+.extension-name-box--family .extension-name-box__name {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.extension-name-box--family .extension-name-box__name::before {
+  content: none;
 }
 .minimal-button.discovery-family-toggle {
-  flex: 0 0 26px;
-  min-height: 30px;
+  flex: 0 0 1.5rem;
+  min-height: 24px;
   padding: 0;
   color: #4c351b;
-  align-self: flex-start;
   text-align: center;
   font-family: sans-serif;
 }

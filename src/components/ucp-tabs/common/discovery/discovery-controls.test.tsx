@@ -198,10 +198,13 @@ describe('compact discovery controls', () => {
           items={[root, files]}
           available={[root, files]}
           label={(item) => item.name}
-          render={(item) => (
-            <button type="button" onClick={() => activate(item.id)}>
-              {item.name}
-            </button>
+          render={(item, familyToggle) => (
+            <div>
+              {familyToggle}
+              <button type="button" onClick={() => activate(item.id)}>
+                {item.name}
+              </button>
+            </div>
           )}
         />
       </Provider>,
@@ -215,5 +218,90 @@ describe('compact discovery controls', () => {
     expect(activate).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Files' }));
     expect(activate).toHaveBeenLastCalledWith('files@1');
+  });
+  it('keeps contextual roots in their own activation pane, including while searching', () => {
+    const root = {
+      id: 'defaults@1',
+      name: 'Default settings',
+      active: false,
+      family: [{ name: 'ucp2', root: true }],
+    };
+    const bare = {
+      id: 'bare@1',
+      name: 'Bare',
+      active: true,
+      family: [{ name: 'ucp2' }],
+    };
+    const { rerender } = render(
+      <FamilyList
+        scope="active"
+        activation
+        items={[bare]}
+        available={[root, bare]}
+        searching
+        label={(item) => item.name}
+        render={(item) => <span>{item.name}</span>}
+      />,
+    );
+    expect(screen.getByText('Bare')).toBeTruthy();
+    expect(screen.queryByText('Default settings')).toBeNull();
+    rerender(
+      <FamilyList
+        scope="inactive"
+        activation={false}
+        items={[{ ...bare, active: false }]}
+        available={[
+          { ...root, active: true },
+          { ...bare, active: false },
+        ]}
+        searching
+        label={(item) => item.name}
+        render={(item) => <span>{item.name}</span>}
+      />,
+    );
+    expect(screen.getByText('Bare')).toBeTruthy();
+    expect(screen.queryByText('Default settings')).toBeNull();
+  });
+  it('keeps same-pane search context and does not select the Store row when expanding', () => {
+    const root = {
+      id: 'root@1',
+      name: 'Root',
+      family: [{ name: 'family', root: true }],
+    };
+    const child = {
+      id: 'child@1',
+      name: 'Child',
+      family: [{ name: 'family' }],
+    };
+    const select = vi.fn();
+    render(
+      <FamilyList
+        scope="store-click"
+        items={[child]}
+        available={[root, child]}
+        searching
+        label={(item) => item.name}
+        render={(item, familyToggle) => (
+          // The Store's selectable row surrounds the toggle, just like this fixture.
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+          <div onClick={select}>
+            {familyToggle}
+            <span>{item.name}</span>
+          </div>
+        )}
+      />,
+    );
+    expect(screen.getByText('Root')).toBeTruthy();
+    expect(screen.getByText('Child')).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'discovery.collapse:Root' }),
+    );
+    expect(select).not.toHaveBeenCalled();
+    expect(screen.queryByText('Child')).toBeNull();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'discovery.expand:Root' }),
+    );
+    expect(screen.getByText('Child')).toBeTruthy();
+    expect(select).not.toHaveBeenCalled();
   });
 });

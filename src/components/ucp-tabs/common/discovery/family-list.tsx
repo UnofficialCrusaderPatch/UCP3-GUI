@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { ReactNode } from 'react';
 import { atom, useAtom } from 'jotai';
 import {
@@ -14,13 +15,22 @@ export function FamilyList<T extends FamilyItem>(props: {
   available: T[];
   scope: string;
   searching: boolean;
-  render: (item: T) => ReactNode;
+  render: (item: T, familyToggle?: ReactNode) => ReactNode;
   label: (item: T) => string;
+  activation?: boolean;
 }) {
-  const { items, available, scope, searching, render, label } = props;
+  const { items, available, scope, searching, render, label, activation } =
+    props;
   const [expansion, setExpansion] = useAtom(EXPANSION);
   const localize = useMessage();
-  const { groups, ungrouped } = groupFamilies(items, available);
+  // A root used as search context must still belong to this activation pane.
+  // Otherwise an inactive preset can masquerade as an active child (and vice versa).
+  const { groups, ungrouped } = groupFamilies(
+    items,
+    available.filter(
+      (item) => activation === undefined || item.active === activation,
+    ),
+  );
   const positions = new Map(items.map((item, index) => [item.id, index]));
   const position = (entry: { root: T; members: T[] }) =>
     Math.min(
@@ -47,21 +57,24 @@ export function FamilyList<T extends FamilyItem>(props: {
         return (
           <div key={key} className="discovery-family">
             <div className="discovery-family-root">
-              <button
-                type="button"
-                className="minimal-button discovery-family-toggle"
-                aria-expanded={expanded}
-                aria-label={localize({
-                  key: expanded ? 'discovery.collapse' : 'discovery.expand',
-                  args: { name: label(group.root) },
-                })}
-                onClick={() => setExpansion({ ...expansion, [key]: !expanded })}
-              >
-                {expanded ? '▾' : '▸'}
-              </button>
-              <div className="discovery-family-root-row">
-                {render(group.root)}
-              </div>
+              {render(
+                group.root,
+                <button
+                  type="button"
+                  className="minimal-button discovery-family-toggle"
+                  aria-expanded={expanded}
+                  aria-label={localize({
+                    key: expanded ? 'discovery.collapse' : 'discovery.expand',
+                    args: { name: label(group.root) },
+                  })}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setExpansion({ ...expansion, [key]: !expanded });
+                  }}
+                >
+                  {expanded ? '▾' : '▸'}
+                </button>,
+              )}
             </div>
             {expanded && (
               <div className="discovery-family-members">

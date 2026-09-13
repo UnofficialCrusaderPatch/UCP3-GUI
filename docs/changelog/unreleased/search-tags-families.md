@@ -3,6 +3,7 @@
 - Use one compact filter menu for tags and hiding modules. Match any selected tag by default, or switch to matching all of them with one click.
 - Browse related extensions together in expandable families. Use the left arrow to show other members while keeping the row clear and readable. Creators decide which member is the main option.
 - Switch Creator mode directly from Content as well as Customisations.
+- Family rows now keep the normal list alignment. Activating a member on its own shows that member in the active list, so you can remove it without accidentally selecting the family's default preset.
 
 Family grouping appears when creators add family information to their extensions. Existing extensions and saved setups keep working as before.
 

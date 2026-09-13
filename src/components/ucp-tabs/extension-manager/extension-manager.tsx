@@ -4,7 +4,7 @@ import './extension-manager.css';
 
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { listen } from '@tauri-apps/api/event';
-import { useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { FileDropEvent } from '@tauri-apps/api/window';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import {
@@ -101,7 +101,10 @@ export default function ExtensionManager() {
         (element) => createExtensionID(element) === createExtensionID(ext),
       )?.definition.family ?? ext.definition.family,
   });
-  const renderExtension = ({ ext }: { ext: Extension }) => {
+  const renderExtension = (
+    { ext }: { ext: Extension },
+    familyToggle?: ReactNode,
+  ) => {
     const index = extensionsState.activeExtensions.findIndex(
       (active) => createExtensionID(active) === createExtensionID(ext),
     );
@@ -112,6 +115,7 @@ export default function ExtensionManager() {
           <div className="discovery-active-row">
             <span className="discovery-priority">{index + 1}</span>
             <ActiveExtensionElement
+              familyToggle={familyToggle}
               ext={ext}
               index={index}
               arr={extensionsState.activeExtensions}
@@ -119,6 +123,7 @@ export default function ExtensionManager() {
           </div>
         ) : (
           <InactiveExtensionsElement
+            familyToggle={familyToggle}
             exts={extensionsState.extensions.filter(
               (entry) => entry.name === ext.name,
             )}
@@ -157,6 +162,7 @@ export default function ExtensionManager() {
         .filter((ext) => showAllExtensions || ext.type !== 'module')
         .map(item)}
       scope="content-inactive"
+      activation={false}
       searching={searching}
       render={renderExtension}
       label={({ ext }) => ext.definition['display-name'] || ext.name}
@@ -172,6 +178,7 @@ export default function ExtensionManager() {
         .filter((ext) => showAllExtensions || ext.type !== 'module')
         .map(item)}
       scope="content-active"
+      activation
       searching={searching}
       render={renderExtension}
       label={({ ext }) => ext.definition['display-name'] || ext.name}

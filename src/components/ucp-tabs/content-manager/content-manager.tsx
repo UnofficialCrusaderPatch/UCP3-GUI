@@ -120,9 +120,12 @@ export function ContentManager() {
         contentFilters.search.trim() || contentFilters.tags.length,
       )}
       label={(entry) => entry.content.definition['display-name'] || entry.name}
-      render={(entry) => (
+      render={(entry, familyToggle) => (
         <>
-          <ContentElementView data={entry.content} />
+          <ContentElementView
+            data={entry.content}
+            familyToggle={familyToggle}
+          />
           {discovery.results.get(entry.id)?.excerpt && (
             <SearchExcerpt
               text={discovery.results.get(entry.id)!.excerpt}

@@ -1,5 +1,6 @@
+/* eslint-disable react/require-default-props */
 import { useAtomValue } from 'jotai';
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import { Extension } from '../../../../../config/ucp/common';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../../function/extensions/state/state';
 import { CREATOR_MODE_ATOM } from '../../../../../function/gui-settings/settings';
@@ -13,8 +14,9 @@ export function ActiveExtensionElement(props: {
   ext: Extension;
   index: number;
   arr: Extension[];
+  familyToggle?: ReactNode;
 }) {
-  const { ext, index, arr } = props;
+  const { ext, index, arr, familyToggle } = props;
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -67,6 +69,7 @@ export function ActiveExtensionElement(props: {
 
   return (
     <ExtensionElement
+      familyToggle={familyToggle}
       ext={ext}
       fixedVersion
       active

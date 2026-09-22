@@ -13,17 +13,23 @@
   background-image: url("/src/assets/ucp3/scroll_bar_middle.png");
   background-repeat: no-repeat repeat;
   background-position: center bottom;
+  /* Native start pieces reach the thumb centre. Leave half the hook clear. */
+  border-bottom: 9px solid transparent;
+  background-origin: padding-box;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:vertical {
   background-color: transparent;
   box-shadow: none;
-  background-image:
-    url("/src/assets/ucp3/scroll_bar_bottom.png"),
-    url("/src/assets/ucp3/scroll_bar_middle.png"),
-    radial-gradient(40% 100% at center bottom, var(--ucp-main-grey) 0%, rgba(0, 0, 0, 0) 100%);
-  background-repeat: no-repeat no-repeat, no-repeat repeat, no-repeat no-repeat;
-  background-position: center bottom, center bottom, center center;
+  /* Paint one hook at the chain end; repeating links here would overlap it. */
+  border: 0;
+  min-height: 18px;
+  background-image: url("/src/assets/ucp3/scroll_bar_bottom_hook.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-origin: border-box;
+  background-clip: border-box;
 }
 
 ::-webkit-scrollbar-track:horizontal {

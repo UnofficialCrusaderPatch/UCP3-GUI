@@ -28,6 +28,13 @@ body {
   font-size: 0.85rem;
 }
 
+/* Split the field's right padding around its native stepper. Keep the number
+   and field width in place, with equal breathing room beside the arrows. */
+input[type='number']::-webkit-inner-spin-button {
+  margin-inline-start: 0.375rem;
+  margin-inline-end: -0.375rem;
+}
+
 .light-shade-item {
   background-color: rgba(245, 245, 227, 0.42);
   border: 2px solid rgba(0, 0, 0, 0);

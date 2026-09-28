@@ -1,0 +1,14 @@
+meta:
+  version: 1.0.0
+config-sparse:
+  modules: {}
+  plugins:
+    modal-mixed:
+      config:
+        locked:
+          contents:
+            required-value: 25
+        suggested:
+          contents:
+            suggested-value: 30
+  load-order: []

@@ -4,29 +4,47 @@ on:
   pull_request:
     types: [review_requested, synchronize]
   workflow_dispatch: {}
-  
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-22.04]
-
+        include:
+          - platform: macos-15
+            target: aarch64-apple-darwin
+            arch: arm64
+            args: --target aarch64-apple-darwin --bundles app,dmg
+            release-dir: src-tauri/target/aarch64-apple-darwin/release
+          - platform: macos-15-intel
+            target: x86_64-apple-darwin
+            arch: x86_64
+            args: --target x86_64-apple-darwin --bundles app,dmg
+            release-dir: src-tauri/target/x86_64-apple-darwin/release
+          - platform: ubuntu-22.04
+            target: ''
+            args: --bundles deb,appimage,updater
+            release-dir: src-tauri/target/release
+          - platform: windows-latest
+            target: ''
+            args: --bundles nsis,updater
+            release-dir: src-tauri/target/release
+    runs-on: ${{ matrix.platform }}
+    env:
+      RELEASE_DIR: ${{ matrix.release-dir }}
     steps:
       - name: Checkout git repo
         uses: actions/checkout@v4
-      - name: setup node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: install Rust stable
+      - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        
-      - name: install dependencies (ubuntu only)
-        if: matrix.os == 'ubuntu-22.04'
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install dependencies (Ubuntu only)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
@@ -34,26 +52,97 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
-
-      - name: install app dependencies
-        run: |
-          npm ci
+          key: ${{ matrix.target }}
+      - name: Install app dependencies
+        run: npm ci
       - name: Test
-        run: |
-          npm run test -- --test-timeout=10000
+        run: npm run test -- --test-timeout=10000
       - name: Build
-        run: |
-          npm run tauri build
+        run: npm run tauri -- build --ci ${{ matrix.args }}
         env:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
-      - name: Upload
+      - name: Test Rust host boundaries
+        run: cargo test --manifest-path src-tauri/Cargo.toml --locked --release ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+
+      # Separate uploads make each missing distributable a failure.
+      - name: Upload Windows portable executable
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: UCP3-GUI-${{matrix.os}}.zip
-          path: |
-            src-tauri/target/release/UCP3-GUI.exe
-            src-tauri/target/release/bundle/nsis/UCP3-GUI*-setup.exe
-            src-tauri/target/release/bundle/appimage/ucp3-gui*.AppImage
-            src-tauri/target/release/bundle/deb/ucp3-gui*.deb
-            src-tauri/target/release/bundle/appimage/ucp3-gui*.AppImage.tar.gz
+          name: UCP3-GUI-windows-portable
+          path: ${{ env.RELEASE_DIR }}/UCP3-GUI.exe
+          if-no-files-found: error
+      - name: Upload Windows installer
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCP3-GUI-windows-installer
+          path: ${{ env.RELEASE_DIR }}/bundle/nsis/UCP3-GUI*-setup.exe
+          if-no-files-found: error
+      - name: Upload Linux deb
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCP3-GUI-linux-deb
+          path: ${{ env.RELEASE_DIR }}/bundle/deb/ucp3-gui*.deb
+          if-no-files-found: error
+      - name: Install built Debian package in clean Ubuntu 22.04 and smoke startup
+        if: runner.os == 'Linux'
+        run: |
+          package=$(find "$RELEASE_DIR/bundle/deb" -maxdepth 1 -name '*.deb' -print -quit)
+          test -n "$package"
+          docker run --rm \
+            -v "$PWD/$package:/tmp/gui.deb:ro" \
+            -v "$PWD/tools/test-debian-package.sh:/tmp/check.sh:ro" \
+            ubuntu:22.04 bash /tmp/check.sh
+      - name: Upload Linux AppImage
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCP3-GUI-linux-AppImage
+          path: ${{ env.RELEASE_DIR }}/bundle/appimage/ucp3-gui*.AppImage
+          if-no-files-found: error
+      - name: Upload Linux updater archive
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCP3-GUI-linux-updater
+          path: ${{ env.RELEASE_DIR }}/bundle/appimage/ucp3-gui*.AppImage.tar.gz
+          if-no-files-found: error
+
+      - name: Archive macOS app preserving permissions and symlinks
+        if: runner.os == 'macOS'
+        env:
+          MAC_ARCH: ${{ matrix.arch }}
+        run: |
+          test -d "$RELEASE_DIR/bundle/macos/UCP3-GUI.app"
+          tar -czf "$RUNNER_TEMP/UCP3-GUI-macos-$MAC_ARCH.app.tar.gz" \
+            -C "$RELEASE_DIR/bundle/macos" UCP3-GUI.app
+      - name: Upload macOS app archive
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCP3-GUI-macos-${{ matrix.arch }}-app
+          path: ${{ runner.temp }}/UCP3-GUI-macos-${{ matrix.arch }}.app.tar.gz
+          if-no-files-found: error
+      - name: Upload macOS DMG
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: UCP3-GUI-macos-${{ matrix.arch }}-dmg
+          path: ${{ env.RELEASE_DIR }}/bundle/dmg/*.dmg
+          if-no-files-found: error
+      - name: Download the uploaded macOS app
+        if: runner.os == 'macOS'
+        uses: actions/download-artifact@v4
+        with:
+          name: UCP3-GUI-macos-${{ matrix.arch }}-app
+          path: ${{ runner.temp }}/downloaded-macos
+      - name: Verify downloaded architecture, resources and native startup
+        if: runner.os == 'macOS'
+        env:
+          MAC_ARCH: ${{ matrix.arch }}
+        run: |
+          python3 tools/smoke-macos-artifact.py \
+            "$RUNNER_TEMP/downloaded-macos/UCP3-GUI-macos-$MAC_ARCH.app.tar.gz" "$MAC_ARCH"

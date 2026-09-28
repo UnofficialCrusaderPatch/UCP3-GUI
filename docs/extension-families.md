@@ -1,0 +1,68 @@
+# Search, tags and extension families
+
+Store and Content search technical/display names, tag labels and descriptions in the selected GUI language. Search sits below the left list. Prefixes, name substrings, quoted phrases and bounded typo matching are supported; the whole-word sword checkbox disables substring, prefix and approximate matches. Chinese uses browser word segmentation when available. Separate search words combine with AND. The existing filter button combines tag selection with a separate Hide modules category. Tag matching defaults to OR, with one-click OR/AND sword radios. Its filled state means tags are selected or modules are hidden. Filtering never activates an extension or changes its preferred version.
+
+Description lookup is shared with the viewer and cached per identity/language/source. Older catalogs with remote descriptions load in the background with at most four concurrent reads. Loading/incomplete status is visible and cached fallback text remains usable. Installed descriptions are read again after extension discovery reload. The existing Markdown parser supplies searchable visible text; the existing MiniSearch dependency supplies approximate matching.
+
+## Author a family using ordinary extensions
+
+Add an optional `family` list to the existing `definition.yml` only for alternative configurations of the same extension. One extension identity declares `root: true`; the modder chooses that root freely. It may be Default/Applied or Bare. Root activation means normal activation of that extension and its declared dependencies. A file provider or other package that can be selected independently is not a family member merely because another extension depends on it.
+
+An Applied display root:
+
+```yaml
+name: example-default
+version: 1.0.0
+type: plugin
+dependencies:
+  example-files: '^1.0.0'
+family:
+  - name: example-family
+    root: true
+tags: [ai, aic]
+```
+
+An alternative Bare configuration:
+
+```yaml
+name: example-bare
+version: 1.0.0
+type: plugin
+family:
+  - name: example-family
+tags: [ai]
+```
+
+Each retains its ordinary `config.yml`, `options.yml`, locales, dependencies and name/version. There is no new configuration ID or qualified dependency syntax. The current preview groups family members for display but does not yet enforce one selected configuration; do not publish an alternative-configuration family until that selection rule is implemented. Bundle behavior is expressed by ordinary dependencies. Required/suggested settings and conflicts remain governed by the existing configuration assembly and override controls.
+
+Put shared assets in one file-providing extension. Applied members may depend on it and reference its existing resource path, for example `ucp/plugins/example-files/resources/ai/...`. The display root does not have to own the files. A dependency does not make the provider another configuration. Do not make a Bare member depend on a preset-applying root and expect that dependency's customizations to disappear.
+
+Members can live in separate directories of the same repository. The existing Store recipe's `contents.source.location` selects each extension directory for packaging. Member packages contain their metadata/configuration; they do not need duplicate copies of shared resources. No nested virtual installation or new filesystem mount is introduced.
+
+## Root availability and interaction
+
+- Content groups families only in the available list. Active extensions always appear individually in load order with their own controls. An available family root must be inactive; otherwise its inactive children stay individually visible. If only members are installed and the root is available in Store, Content leaves those members flat; Store can still group the available family.
+- The chevron expands/collapses. Existing activation arrows act on the root or the individual expanded member. Name clicks still open details. No action silently replaces siblings.
+- Multiple memberships produce references to the same extension state, not duplicate installations. Several versions of the same root name are allowed; two different root identities for one family fall back to flat display. Malformed family metadata does not hide an otherwise usable extension.
+- Search matches members independently before grouping. A nonmatching installed root remains context for a matching child. Search expansion is separate from the user's normal expansion state.
+- The active list has no family containers. Active rows retain their actual priority positions and existing movement controls, so moving a member or adding a dependency is immediately reflected in the displayed order.
+
+## Tags and automatic metadata
+
+`tags` is an optional list of stable identifiers. IDs are normalized. Add translated labels to the package's existing `locale/<language>.yml` files using flat `tags.<id>` keys, for example `tags.castles: Burgen` in `locale/de.yml`. Add descriptions to `locale/description-<language>.md`. The supported language codes are `en`, `de`, `fr`, `ru`, `hu`, `tr`, `ch`, `es` and `fa`.
+
+The GUI searches tag IDs, package labels and descriptions in the selected language. Package labels fall back to the language family and then English. Installed locale files take precedence over exact-version Store labels within each language. The Store extracts these labels from the built archive into `contents.tag-locales`, a language-to-ID-to-label mapping, so custom tags work before installation too. Adding a custom translated tag does not require a GUI release.
+
+The GUI also provides shared translations for established topics such as AI/AIC/AIV/AIA, balance, bugfixes, maps, modpack, scenarios, sounds, textures, tools, behavior, economy, interface, multiplayer and replay. Known IDs keep one consistent menu label; their package labels are searchable aliases. A custom ID uses its package label, or its ID if no label is available. If packages disagree on a custom label, the menu chooses the first label in stable lexical order while searching all supplied labels. Module/plugin categories remain searchable but are separated from topic tags in the menu.
+
+The GUI automatically derives additional facts for installed extensions: resources directory, init code, parsed configuration demands and editable options. Type and declared family membership are also searchable facets. Facts are per member: a file provider does not become “applies settings” because an Applied sibling exists. Unknown facts remain unknown.
+
+Store definitions can supply optional `capabilities: {files, code, configuration, options}` booleans generated from the exact package contents. Old catalogs without these facts still support name/description search and available tags/type/family facets; no archive scanning or heuristic behavioral classification occurs while typing. Installed facts are authoritative for installed files. Exact-version Store metadata fills missing authored tags/family metadata, while explicit empty local lists remain empty.
+
+## UCP2 relationships and compatibility
+
+The current `ucp2-legacy-defaults` package applies UCP module settings and also pulls in AI files, an AIC patch and Vanilla Fixed AIV. It is an all-in-one bundle, not a UCP-only settings alternative to the bare module. Keep its dependencies and meaning intact. A future UCP-only preset can join the `ucp2-legacy` module in a family after exclusive selection is implemented. AI behavior and castle applications remain independent and can depend on the UCP2 module or shared file provider without joining that family. AI Swapper's existing priority rules continue to govern its own settings.
+
+Existing single extensions and saved configurations keep their original name/version behavior. Coordinated package metadata updates are separate draft PRs with patch versions; they do not rewrite installed packages or profiles. Applied members can use a clearer display name such as `Apply Vanilla Fixed Castles` while retaining their technical identity.
+
+This follows Gynt's family proposal in GUI #274 and continues the-atlan's search/tag contribution in #322. It also addresses discovery use cases discussed in #273, #310 and #236; it does not close every broader request in those issues.

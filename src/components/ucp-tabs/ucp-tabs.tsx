@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import './ucp-tabs.css';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Nav, Tab } from 'react-bootstrap';
 import { Atom, atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
@@ -43,7 +43,7 @@ import Message, { useMessage } from '../general/message';
 import { reloadCurrentGameFolder } from '../../function/game-folder/modifications/reload-current-game-folder';
 import { IS_GAME_FOLDER, UCP_FOLDER_EXISTS_ATOM } from './display-logic';
 import { GUI_UPDATE_CHECK } from './overview/gui-update-check';
-import { makeToast } from '../toasts/toasts-display';
+import useGUIUpdateNotification from './overview/use-gui-update-notification';
 
 const LOGGER = new Logger('ucp-tabs.tsx');
 
@@ -112,15 +112,7 @@ export default function UcpTabs() {
   const { isSuccess: isGUIUpdateCheckSuccess, data: hasGUIUpdate } =
     useAtomValue(GUI_UPDATE_CHECK);
 
-  useEffect(() => {
-    if (isGUIUpdateCheckSuccess && hasGUIUpdate) {
-      makeToast({
-        title: 'GUI Update available!',
-        body: 'Restart the GUI to install the update!',
-        customDelay: 60 * 1000,
-      });
-    }
-  });
+  useGUIUpdateNotification(isGUIUpdateCheckSuccess && !!hasGUIUpdate);
 
   return (
     <div

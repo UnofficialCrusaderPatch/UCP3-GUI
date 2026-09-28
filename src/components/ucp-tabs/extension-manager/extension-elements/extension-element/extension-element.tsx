@@ -1,8 +1,10 @@
+/* eslint-disable react/require-default-props */
 import './extension-element.css';
 import '../../buttons/customize-extension-button.css';
 import '../../../../common/minimal.css';
 
 import { useAtom, useAtomValue } from 'jotai';
+import { ReactNode } from 'react';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
 import {
   AvailableExtensionVersionsDictionary,
@@ -36,6 +38,7 @@ export function ExtensionElement(props: {
   displayCustomizeButton: boolean;
   displayShellOpenButton: boolean;
   showExclamationMark: boolean;
+  familyToggle?: ReactNode;
 }) {
   const {
     ext,
@@ -49,6 +52,7 @@ export function ExtensionElement(props: {
     displayCustomizeButton,
     displayShellOpenButton,
     showExclamationMark,
+    familyToggle,
   } = props;
   const { name, version, author } = ext.definition;
   const displayName = ext.definition['display-name'];
@@ -136,7 +140,10 @@ export function ExtensionElement(props: {
   return (
     <div key={`${name}-${version}-${author}`} className="extension-element">
       {disableButton}
-      <div className="extension-name-box">
+      <div
+        className={`extension-name-box ${familyToggle ? 'extension-name-box--family' : ''}`}
+      >
+        {familyToggle}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span
           className="extension-name-box__name"

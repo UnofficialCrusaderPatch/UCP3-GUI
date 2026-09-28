@@ -2,7 +2,7 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   NumberContents,
@@ -48,7 +48,6 @@ function CreateSlider(args: {
   );
 
   const { spec, disabled } = args;
-  // TODO: text property is unused... is that correct?
   const { url, enabled } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
@@ -87,6 +86,10 @@ function CreateSlider(args: {
       ? 0
       : (value.sliderValue as number) * factor,
   );
+  // Resets and imports update the shared configuration while the menu stays open.
+  useEffect(() => {
+    setLocalValue((value.sliderValue ?? 0) * factor);
+  }, [value.sliderValue, factor]);
 
   const statusBarMessage = createStatusBarMessage(
     disabled,
@@ -130,12 +133,18 @@ function CreateSlider(args: {
       style={(spec.style || {}).css}
     >
       <ConfigPopover show={showPopover} url={url} theRef={ref} />
+      {(spec.text ?? spec.header) && (
+        <label className="form-label" htmlFor={`${url}-slider`}>
+          {spec.text ?? spec.header}
+        </label>
+      )}
       <RangeSlider
         className="ucp-slider"
         min={min * factor}
         max={max * factor}
         step={step * factor}
         id={`${url}-slider`}
+        aria-label={spec.text ?? spec.header ?? url}
         size="sm"
         value={localValue}
         tooltipLabel={(currentValue) => (currentValue / factor).toString()}

@@ -1,0 +1,26 @@
+resources: Startressourcen und Vorräte
+resources.description: Anfangsvorräte nach Spielmodus. Echte Einstellungen des Moduls
+  startResources.
+goods: Ressource
+normal: Normales Spiel
+crusader: Kreuzzugsspiel
+deathmatch: Deathmatch-Spiel
+wood: Holz
+stone: Stein
+iron: Eisen
+pitch: Pech
+wheat: Weizen
+bread: Brot
+cheese: Käse
+meat: Fleisch
+fruit: Äpfel
+beer: Bier
+flour: Mehl
+bows: Bögen
+crossbows: Armbrüste
+spears: Speere
+pikes: Piken
+maces: Streitkolben
+swords: Schwerter
+leatherarmor: Lederrüstungen
+metalarmor: Metallrüstungen

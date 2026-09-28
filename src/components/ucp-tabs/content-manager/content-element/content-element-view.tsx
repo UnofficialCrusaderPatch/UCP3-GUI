@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   CheckCircle,
@@ -6,7 +7,7 @@ import {
   ExclamationCircleFill,
   Globe,
 } from 'react-bootstrap-icons';
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import {
   CONTENT_INTERFACE_STATE_ATOM,
   contentInstallationStatusAtoms,
@@ -25,10 +26,11 @@ const shiftSelectionStartAtom = atom<string>('');
 
 export type ContentElementViewProps = {
   data: ContentElement;
+  familyToggle?: ReactNode;
 };
 // eslint-disable-next-line import/prefer-default-export
 export function ContentElementView(props: ContentElementViewProps) {
-  const { data } = props;
+  const { data, familyToggle } = props;
   const { definition, installed, online } = data;
   const { name, version, 'display-name': displayName } = definition;
 
@@ -366,7 +368,10 @@ export function ContentElementView(props: ContentElementViewProps) {
       }}
     >
       {progressOverlayElement}
-      <div className="extension-name-box">
+      <div
+        className={`extension-name-box ${familyToggle ? 'extension-name-box--family' : ''}`}
+      >
+        {familyToggle}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span
           className={`extension-name-box__name ${isInUse ? ' text-muted' : ''}`}

@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { atom } from 'jotai';
 import MiniSearch from 'minisearch';
+import { displayChildren } from '../../../../../../config/ucp/display-tree';
 import { DisplayConfigElement } from '../../../../../../config/ucp/common';
 import { ConsoleLogger } from '../../../../../../util/scripts/logging';
 import { LOCALIZED_UI_OPTION_ENTRIES_ATOM } from './localized-options';
@@ -13,135 +14,30 @@ type TextObject = URLTextObject & {
   id: number;
 };
 
-function collectTextFromOptionEntries(
+export function collectTextFromOptionEntries(
   optionEntries: DisplayConfigElement[],
-  collection?: TextObject[],
+  collection: TextObject[] = [],
 ) {
-  const collect = collection ?? [];
+  optionEntries
+    .filter((oe) => !oe.hidden)
+    .forEach((oe) => {
+      const fields = oe as unknown as Record<string, unknown>;
+      const text = ['text', 'tooltip', 'header', 'description', 'name']
+        .map((key) => fields[key])
+        .filter((value) => typeof value === 'string')
+        .join('\n');
+      oe.id = collection.length + 1;
+      collection.push({ id: oe.id, url: 'url' in oe ? oe.url : oe.name, text });
+      collectTextFromOptionEntries(displayChildren(oe), collection);
+    });
+  return collection;
+}
 
-  const addToCollection = (obj: URLTextObject) => {
-    const id = collect.length + 1;
-    // eslint-disable-next-line no-param-reassign
-    collect.push({ url: obj.url, text: obj.text.replace('undefined', ''), id });
-
-    return id;
-  };
-  optionEntries.forEach((oe) => {
-    if (oe.display === 'Choice') {
-      oe.id = addToCollection({
-        url: oe.url,
-        text: [oe.text, oe.tooltip, oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'CustomMenu') {
-      oe.id = addToCollection({
-        url: oe.url,
-        text: [oe.text, oe.header, oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'FileInput') {
-      oe.id = addToCollection({
-        url: oe.url,
-        text: [oe.text, oe.tooltip, oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'Group') {
-      const url = `${oe.name}.group`;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.text, oe.description, oe.name].join('\n'),
-      });
-
-      collectTextFromOptionEntries(oe.children, collect);
-    }
-    if (oe.display === 'GroupBox') {
-      const url = `${oe.name}.group`;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.text, oe.description, oe.name].join('\n'),
-      });
-
-      collectTextFromOptionEntries(oe.children, collect);
-    }
-    if (oe.display === 'Number') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.text, oe.tooltip, oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'Paragraph') {
-      const url = `${oe.name}.group`;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.text, oe.header, oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'RadioGroup') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.text, oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'Slider') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.name].join('\n'),
-      });
-    }
-    if (oe.display === 'Switch') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.name, oe.text, oe.tooltip].join('\n'),
-      });
-    }
-    if (oe.display === 'UCP2RadioGroup') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.name, oe.text, oe.header].join('\n'),
-      });
-    }
-    if (oe.display === 'UCP2Slider') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.name, oe.text, oe.header].join('\n'),
-      });
-    }
-    if (oe.display === 'UCP2SliderChoice') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.name, oe.text, oe.header].join('\n'),
-      });
-    }
-    if (oe.display === 'UCP2Switch') {
-      const { url } = oe;
-
-      oe.id = addToCollection({
-        url,
-        text: [oe.name, oe.text, oe.header].join('\n'),
-      });
-    }
-
-    return undefined;
+export function searchOptions(ms: MiniSearch, query: string) {
+  return ms.search(query, {
+    prefix: (term) => term.length >= 3,
+    fuzzy: (term) => (term.length >= 5 ? 0.1 : false),
   });
-
-  return collect;
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -175,11 +71,7 @@ export const SEARCH_RESULTS_ATOM = atom((get) => {
   }
 
   const ms = get(MINISEARCH_ATOM);
-  const results = ms.search(query, {
-    prefix: (term) => term.length >= 3,
-    fuzzy: (term) => (term.length >= 5 ? 0.1 : false),
-    // combineWith: 'AND',
-  });
+  const results = searchOptions(ms, query);
 
   return results;
 });

@@ -86,7 +86,7 @@ function Lists() {
   );
 }
 
-it('activates and deactivates the real UCP2 Bare child without activating or applying its Default root', async () => {
+it('activates and deactivates the Aggressive AI Bare root without applying its alternative', async () => {
   const store = createStore();
   vi.mocked(getStore).mockReturnValue(store);
   const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions(
@@ -99,12 +99,16 @@ it('activates and deactivates the real UCP2 Bare child without activating or app
         path: `C:/test/ucp/${ext.type === 'module' ? 'modules' : 'plugins'}/${ext.name}-${ext.version}`,
       },
     });
-    if (['ucp2-legacy', 'ucp2-legacy-defaults'].includes(ext.name))
+    if (
+      ['Aggressive-AI-Behaviour', 'Aggressive-AI-Behaviour-Applied'].includes(
+        ext.name,
+      )
+    )
       Object.assign(ext.definition, {
         family: [
           {
-            name: 'ucp2',
-            ...(ext.name === 'ucp2-legacy-defaults' ? { root: true } : {}),
+            name: 'aggressive-ai-behaviour',
+            ...(ext.name === 'Aggressive-AI-Behaviour' ? { root: true } : {}),
           },
         ],
       });
@@ -117,41 +121,40 @@ it('activates and deactivates the real UCP2 Bare child without activating or app
   );
   const left = within(await screen.findByTestId('available'));
   const right = within(screen.getByTestId('active'));
-  const root = state.extensions.find(
-    (ext) => ext.name === 'ucp2-legacy-defaults',
+  const alternative = state.extensions.find(
+    (ext) => ext.name === 'Aggressive-AI-Behaviour-Applied',
   )!;
   fireEvent.click(
-    left.getByRole('button', {
-      name: `discovery.expand:${root.definition['display-name'] || root.name}`,
-    }),
+    within(await left.findByTestId('Aggressive-AI-Behaviour')).getByRole(
+      'button',
+      {
+        name: 'activate',
+      },
+    ),
   );
-  fireEvent.click(
-    within(await left.findByTestId('ucp2-legacy')).getByRole('button', {
-      name: 'activate',
-    }),
+  await waitFor(() =>
+    expect(right.getByTestId('Aggressive-AI-Behaviour')).toBeTruthy(),
   );
-  await waitFor(() => expect(right.getByTestId('ucp2-legacy')).toBeTruthy());
-  expect(right.queryByTestId('ucp2-legacy-defaults')).toBeNull();
+  expect(right.queryByTestId('Aggressive-AI-Behaviour-Applied')).toBeNull();
   const selected = store.get(EXTENSION_STATE_INTERFACE_ATOM);
   expect(selected.explicitlyActivatedExtensions.map((ext) => ext.name)).toEqual(
-    ['ucp2-legacy'],
+    ['Aggressive-AI-Behaviour'],
   );
   expect(
     serializeLoadOrder(selected.activeExtensions).some(
-      ({ extension }) => extension === root.name,
+      ({ extension }) => extension === alternative.name,
     ),
   ).toBe(false);
   expect(
     Object.values(selected.configuration.state).some((entry) =>
       Object.values(entry.modifications).some(
-        (value) => value.entityName === root.name,
+        (value) => value.entityName === alternative.name,
       ),
     ),
   ).toBe(false);
-  const deactivate = within(right.getByTestId('ucp2-legacy')).getByRole(
-    'button',
-    { name: 'deactivate' },
-  ) as HTMLButtonElement;
+  const deactivate = within(
+    right.getByTestId('Aggressive-AI-Behaviour'),
+  ).getByRole('button', { name: 'deactivate' }) as HTMLButtonElement;
   expect(deactivate.disabled).toBe(false);
   fireEvent.click(deactivate);
   await waitFor(() =>
@@ -159,5 +162,5 @@ it('activates and deactivates the real UCP2 Bare child without activating or app
       [],
     ),
   );
-  expect(right.queryByTestId('ucp2-legacy')).toBeNull();
+  expect(right.queryByTestId('Aggressive-AI-Behaviour')).toBeNull();
 });

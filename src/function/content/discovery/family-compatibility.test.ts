@@ -12,11 +12,16 @@ it('family metadata does not change existing dependency activation, merge result
     JSON.parse(JSON.stringify(TEST_DATA.EXTENSIONS)),
   );
   grouped.extensions.forEach((ext) => {
+    if (
+      ext.name !== 'Aggressive-AI-Behaviour' &&
+      ext.name !== 'Aggressive-AI-Behaviour-Applied'
+    )
+      return;
     const { definition } = ext;
     definition.family = [
       {
-        name: 'ucp2-preview',
-        ...(ext.name === 'ucp2-legacy' ? { root: true } : {}),
+        name: 'aggressive-ai-behaviour',
+        ...(ext.name === 'Aggressive-AI-Behaviour' ? { root: true } : {}),
       },
     ];
   });

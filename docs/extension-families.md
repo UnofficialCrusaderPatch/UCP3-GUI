@@ -6,7 +6,7 @@ Description lookup is shared with the viewer and cached per identity/language/so
 
 ## Author a family using ordinary extensions
 
-Add an optional `family` list to the existing `definition.yml`. One extension identity declares `root: true`; the modder chooses that root freely. It may be Default/Applied, Bare/files or a bundle. Root activation means normal activation of that extension and its declared dependencies.
+Add an optional `family` list to the existing `definition.yml` only for alternative configurations of the same extension. One extension identity declares `root: true`; the modder chooses that root freely. It may be Default/Applied or Bare. Root activation means normal activation of that extension and its declared dependencies. A file provider or other package that can be selected independently is not a family member merely because another extension depends on it.
 
 An Applied display root:
 
@@ -22,10 +22,10 @@ family:
 tags: [ai, aic]
 ```
 
-The shared-file member:
+An alternative Bare configuration:
 
 ```yaml
-name: example-files
+name: example-bare
 version: 1.0.0
 type: plugin
 family:
@@ -33,9 +33,9 @@ family:
 tags: [ai]
 ```
 
-Each retains its ordinary `config.yml`, `options.yml`, locales, dependencies and name/version. There is no new configuration ID or qualified dependency syntax. Family membership does not imply exclusivity, compatibility, inheritance, priority or installation of all members. Bundle behavior is expressed by the root's ordinary dependency list. Required/suggested settings and conflicts remain governed by the existing configuration assembly and override controls.
+Each retains its ordinary `config.yml`, `options.yml`, locales, dependencies and name/version. There is no new configuration ID or qualified dependency syntax. The current preview groups family members for display but does not yet enforce one selected configuration; do not publish an alternative-configuration family until that selection rule is implemented. Bundle behavior is expressed by ordinary dependencies. Required/suggested settings and conflicts remain governed by the existing configuration assembly and override controls.
 
-Put shared assets in one file-providing extension. Applied members depend on it and reference its existing resource path, for example `ucp/plugins/example-files/resources/ai/...`. The display root does not have to own the files. Do not make a Bare member depend on a preset-applying root and expect that dependency's customizations to disappear.
+Put shared assets in one file-providing extension. Applied members may depend on it and reference its existing resource path, for example `ucp/plugins/example-files/resources/ai/...`. The display root does not have to own the files. A dependency does not make the provider another configuration. Do not make a Bare member depend on a preset-applying root and expect that dependency's customizations to disappear.
 
 Members can live in separate directories of the same repository. The existing Store recipe's `contents.source.location` selects each extension directory for packaging. Member packages contain their metadata/configuration; they do not need duplicate copies of shared resources. No nested virtual installation or new filesystem mount is introduced.
 
@@ -59,10 +59,10 @@ The GUI automatically derives additional facts for installed extensions: resourc
 
 Store definitions can supply optional `capabilities: {files, code, configuration, options}` booleans generated from the exact package contents. Old catalogs without these facts still support name/description search and available tags/type/family facets; no archive scanning or heuristic behavioral classification occurs while typing. Installed facts are authoritative for installed files. Exact-version Store metadata fills missing authored tags/family metadata, while explicit empty local lists remain empty.
 
-## UCP2 example and compatibility
+## UCP2 relationships and compatibility
 
-The existing UCP2 pattern naturally fits: a Defaults/Applied display root can depend on the AI file provider, AIC patch and chosen AIV members using their existing manifests. Alternative castle members remain individually selectable. The existing AI Swapper custom-object consumer determines how their control flags and priorities compose; a family field does not change those rules.
+The current `ucp2-legacy-defaults` package applies UCP module settings and also pulls in AI files, an AIC patch and Vanilla Fixed AIV. It is an all-in-one bundle, not a UCP-only settings alternative to the bare module. Keep its dependencies and meaning intact. A future UCP-only preset can join the `ucp2-legacy` module in a family after exclusive selection is implemented. AI behavior and castle applications remain independent and can depend on the UCP2 module or shared file provider without joining that family. AI Swapper's existing priority rules continue to govern its own settings.
 
-Use isolated example copies for preview. Existing single extensions and saved configurations keep their original name/version behavior. Coordinated package metadata updates are separate draft PRs with patch versions; they do not rewrite installed packages or profiles. Applied members can use a clearer display name such as `Apply Vanilla Fixed Castles` while retaining their technical identity.
+Existing single extensions and saved configurations keep their original name/version behavior. Coordinated package metadata updates are separate draft PRs with patch versions; they do not rewrite installed packages or profiles. Applied members can use a clearer display name such as `Apply Vanilla Fixed Castles` while retaining their technical identity.
 
 This follows Gynt's family proposal in GUI #274 and continues the-atlan's search/tag contribution in #322. It also addresses discovery use cases discussed in #273, #310 and #236; it does not close every broader request in those issues.

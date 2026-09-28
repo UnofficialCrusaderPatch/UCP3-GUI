@@ -6,8 +6,8 @@ The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible c
 
 | Contribution | Included source head |
 | --- | --- |
-| Search, tags, families (#382; retains #322) | `02b72d660c888ce0a162cef917360335ab889267` (combined filter, whole-word search, left-column layout, Creator toggle, package-owned translated tags, aligned family controls and a flat active list in load order) |
-| Folder controls (#381) | `f33952242b6e7d2a2286419b5a447c9ecc832652` |
+| Search, tags, families (#382; retains #322) | `23219e3b4aaaf4e4d18f97ba536f4ee211cd44a5` (combined filter, whole-word search, left-column layout, Creator toggle, package-owned translated tags, aligned family controls and a flat active list in load order) |
+| Folder controls (#381) | `bd65b17a3f46e791ec4d41d078f5afd55eb5703d` |
 | Dependency trees (#377) | `b9924f3c78152890877bee8326f31907d17f3e09` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |
 | Game language environment (#376) | `c017880d9b08db56f200e0d47bdc4f6040e4614a` |
@@ -18,7 +18,7 @@ The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible c
 
 The #159 row uses `contrib/pr159-declarative-modal`, which contains the completed continuation rather than the old original draft head. Locale additions are combined, both folder and texture-metadata Rust commands are registered, and the Content family rows retain the folder controls and actual load-order movement arguments.
 
-Integration follow-ups add durable Rust path-boundary tests, a dependency-view regression through the actual activation/deactivation callbacks and installed-version changes, localized update notices in all nine catalogs, and clean Ubuntu 22.04 package installation/startup in CI. Native discovery acceptance found and corrected parchment text contrast; resource metadata also handles ZIPs without explicit directory entries. These follow-ups are confined to the preview branch or the feature PR, leaving the other contributors' branches intact.
+Upstream main now supplies the folder path-boundary tests. Integration follow-ups add a dependency-view regression through the actual activation/deactivation callbacks and installed-version changes, localized update notices in all nine catalogs, and clean Ubuntu 22.04 package installation/startup in CI. Native discovery acceptance found and corrected parchment text contrast; resource metadata also handles ZIPs without explicit directory entries. These follow-ups are confined to the preview branch or the feature PR, leaving the other contributors' branches intact.
 
 Native preview checks also found and corrected popup placement under the existing CSS GUI zoom, and gave activation/movement controls explicit dimensions so nested family rows retain usable buttons. Family chevrons override the shared minimal-button reset and use a symbol-capable font. These checks use an isolated local fixture; existing game installations are not modified.
 

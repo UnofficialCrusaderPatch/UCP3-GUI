@@ -16,7 +16,7 @@ import { ActiveExtensionElement } from '../../extension-manager/extension-elemen
 import { InactiveExtensionsElement } from '../../extension-manager/extension-elements/extension-element/inactive-extension-element';
 import { serializeLoadOrder } from '../../../../config/ucp/config-files/load-order';
 
-// The combined preview also renders native folder controls on each row.
+// Folder controls read native host information on each row.
 vi.mock('@tauri-apps/api/os', () => ({ type: async () => 'Windows_NT' }));
 vi.mock('../../../../tauri/tauri-invoke', async (original) => ({
   ...(await original<typeof import('../../../../tauri/tauri-invoke')>()),
@@ -126,7 +126,7 @@ it('activates and deactivates the real UCP2 Bare child without activating or app
     }),
   );
   fireEvent.click(
-    within(left.getByTestId('ucp2-legacy')).getByRole('button', {
+    within(await left.findByTestId('ucp2-legacy')).getByRole('button', {
       name: 'activate',
     }),
   );

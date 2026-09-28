@@ -61,104 +61,87 @@ fn extension_path(
 }
 
 #[cfg(test)]
-mod extension_path_tests {
+mod folder_tests {
     use super::extension_path;
-    use std::{
-        cell::Cell,
-        fs,
-        path::PathBuf,
-        sync::atomic::{AtomicUsize, Ordering},
-    };
+    use std::{fs, path::PathBuf, time::SystemTime};
 
-    struct Fixture(PathBuf);
-    impl Fixture {
+    struct Installation(PathBuf);
+
+    impl Installation {
         fn new() -> Self {
-            static NEXT: AtomicUsize = AtomicUsize::new(0);
-            let path = std::env::temp_dir().join(format!(
-                "ucp-path-test-{}-{}",
-                std::process::id(),
-                NEXT.fetch_add(1, Ordering::Relaxed)
-            ));
-            fs::create_dir_all(path.join("ucp/plugins/example-1.0.0")).unwrap();
+            let nonce = SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            let path =
+                std::env::temp_dir().join(format!("ucp-folders-{}-{}", std::process::id(), nonce));
+            fs::create_dir_all(path.join("ucp/plugins/Ordner Ä-1.0.0")).unwrap();
             fs::create_dir_all(path.join("ucp/modules")).unwrap();
-            fs::write(path.join("ucp/modules/example-1.0.0.zip"), b"fixture").unwrap();
             Self(dunce::canonicalize(path).unwrap())
         }
     }
-    impl Drop for Fixture {
+
+    impl Drop for Installation {
         fn drop(&mut self) {
             let _ = fs::remove_dir_all(&self.0);
         }
     }
 
     #[test]
-    fn accepts_existing_root_directory_and_zip_without_opening_them() {
-        let fixture = Fixture::new();
-        let root = fixture.0.join("ucp");
-        let directory = root.join("plugins/example-1.0.0");
-        let zip = root.join("modules/example-1.0.0.zip");
-        let allowed = |path: &std::path::Path| path.starts_with(&root);
+    fn validates_installed_directories_and_archives() {
+        let game = Installation::new();
+        let other = Installation::new();
+        let root = game.0.join("ucp");
+        let directory = root.join("plugins/Ordner Ä-1.0.0");
+        let archive = root.join("modules/module-1.0.0.zip");
+        fs::write(&archive, b"fixture").unwrap();
         assert_eq!(
-            extension_path(&fixture.0, None, false, allowed).unwrap(),
-            root
+            extension_path(&game.0, None, false, |_| true),
+            Ok(root.clone())
         );
-        assert_eq!(
-            extension_path(&fixture.0, Some(&directory), true, allowed).unwrap(),
-            directory
-        );
-        assert_eq!(
-            extension_path(&fixture.0, Some(&zip), false, allowed).unwrap(),
-            zip
-        );
-        assert!(extension_path(&fixture.0, Some(&zip), true, allowed).is_err());
-    }
-
-    #[test]
-    fn rejects_traversal_stale_missing_executable_and_scope_denials() {
-        let fixture = Fixture::new();
-        for relative in [
-            "other/ucp/plugins/example",
-            "ucp/plugins/../example",
-            "ucp/plugins/missing",
-            "ucp/modules/run.exe",
-        ] {
-            let path = fixture.0.join(relative);
-            if relative.ends_with(".exe") {
-                fs::write(&path, b"fixture").unwrap();
-            }
-            assert!(
-                extension_path(&fixture.0, Some(&path), false, |_| true).is_err(),
-                "{}",
-                relative
+        for (path, direct) in [(&directory, false), (&directory, true), (&archive, false)] {
+            assert_eq!(
+                extension_path(&game.0, Some(path), direct, |_| true),
+                Ok(path.clone())
             );
         }
-        let target = fixture.0.join("ucp/plugins/example-1.0.0");
-        assert!(extension_path(&fixture.0, Some(&target), false, |_| false).is_err());
-        let calls = Cell::new(0);
-        assert!(extension_path(&fixture.0, Some(&target), false, |_| {
-            calls.set(calls.get() + 1);
-            calls.get() == 1
-        })
-        .is_err());
-        assert_eq!(
-            calls.get(),
-            2,
-            "canonical target must be independently scoped"
-        );
+        let executable = root.join("modules/program.exe");
+        fs::write(&executable, b"fixture").unwrap();
+        for path in [
+            root.join("plugins/../modules"),
+            other.0.join("ucp/plugins/Ordner Ä-1.0.0"),
+            root.join("modules/missing.zip"),
+            directory.join("nested"),
+            executable,
+        ] {
+            assert!(
+                extension_path(&game.0, Some(&path), false, |_| true).is_err(),
+                "{}",
+                path.display()
+            );
+        }
+        assert!(extension_path(&game.0, Some(&archive), true, |_| true).is_err());
+        assert!(extension_path(&game.0, Some(&directory), false, |_| false).is_err());
+        assert!(extension_path(std::path::Path::new("relative"), None, false, |_| true).is_err());
     }
 
+    // Unix symlinks need no Windows Developer Mode or elevated test process.
     #[cfg(unix)]
     #[test]
-    fn rejects_symlink_resolving_outside_scope() {
-        let fixture = Fixture::new();
-        let root = fixture.0.join("ucp");
-        let outside = fixture.0.join("outside");
-        fs::create_dir(&outside).unwrap();
-        let link = root.join("plugins/linked-1.0.0");
-        std::os::unix::fs::symlink(&outside, &link).unwrap();
-        assert!(extension_path(&fixture.0, Some(&link), false, |path| path
-            .starts_with(&root))
-        .is_err());
+    fn checks_canonical_scope_but_reveals_the_installed_link() {
+        let game = Installation::new();
+        let other = Installation::new();
+        let link = game.0.join("ucp/plugins/linked-1.0.0");
+        std::os::unix::fs::symlink(other.0.join("ucp/plugins/Ordner Ä-1.0.0"), &link).unwrap();
+        assert_eq!(
+            extension_path(&game.0, Some(&link), false, |path| path
+                .starts_with(&game.0)),
+            Err("Resolved path outside configured filesystem scope".into())
+        );
+        assert_eq!(
+            extension_path(&game.0, Some(&link), false, |_| true),
+            Ok(link)
+        );
     }
 }
 

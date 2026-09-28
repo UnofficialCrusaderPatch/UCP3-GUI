@@ -12,6 +12,7 @@ export default function CompactResetOverlay({
   const [hovered, setHovered] = useState(false);
   const hover = useHoverBridge(hovered);
   const update = useRef<(() => void) | undefined>();
+  const inModal = !!anchor?.closest('.declarative-modal-body');
 
   useEffect(() => {
     if (!anchor) return undefined;
@@ -37,11 +38,18 @@ export default function CompactResetOverlay({
         className="qualifier-reset-anchor"
         aria-hidden="true"
       />
+      {inModal && (
+        <div
+          className="qualifier-reset-overlay qualifier-reset-inline"
+          data-row-hovered={hover.visible}
+          onPointerEnter={hover.enter}
+          onPointerLeave={hover.leave}
+        >
+          {children}
+        </div>
+      )}
       <Overlay
-        show={!!anchor}
-        container={
-          anchor?.closest<HTMLElement>('.declarative-modal-body') ?? undefined
-        }
+        show={!!anchor && !inModal}
         transition={false}
         target={anchor}
         placement="left-start"

@@ -19,6 +19,7 @@
   cursor: default;
 }
 .qualifier-row {
+  position: relative;
   display: grid;
   grid-template-columns: 1rem minmax(0, 1fr);
   column-gap: 0.125rem;
@@ -72,6 +73,12 @@
 .qualifier-reset-overlay {
   z-index: 1030;
   width: 1.125rem;
+}
+.qualifier-reset-inline {
+  position: absolute;
+  top: 0;
+  left: -1.125rem;
+  height: 1.25rem;
 }
 .qualifier-reset-overlay > .qualifier-reset {
   width: 100%;

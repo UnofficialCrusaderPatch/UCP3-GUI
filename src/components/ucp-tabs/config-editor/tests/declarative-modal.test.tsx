@@ -568,6 +568,10 @@ test('Creator qualifiers, required/suggested presets, reset and YAML plugin roun
   ).toBe(30);
   fireEvent.change(amount, { target: { value: '43' } });
   const row = amount.closest('.qualifier-row')! as HTMLElement;
+  const reset = within(row).getByRole('button', {
+    name: 'config.popover.reset',
+  });
+  expect(reset.closest('.qualifier-reset-inline')?.parentElement).toBe(row);
   fireEvent.click(
     within(row).getByRole('button', { name: /config.qualifier.single/ }),
   );

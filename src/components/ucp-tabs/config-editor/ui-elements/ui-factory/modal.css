@@ -46,7 +46,7 @@
 .declarative-modal-body {
   overflow: auto;
   min-height: 0;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem 0.5rem 2rem;
   flex: 1;
   overscroll-behavior: contain;
   container-type: inline-size;

@@ -41,6 +41,8 @@ import { useDiscovery } from '../common/discovery/use-discovery';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import { SearchExcerpt } from '../common/discovery/search-excerpt';
 
+import { OpenExtensionsFolderButton } from './extension-elements/extension-element/shell-open-button';
+
 export const EXTENSION_DISCOVERY_FILTER = atom<DiscoveryFilter>(
   EMPTY_DISCOVERY_FILTER,
 );
@@ -257,6 +259,7 @@ export default function ExtensionManager() {
                 onExcludeModules={(exclude) => setShowAllExtensions(!exclude)}
               />
               <CreatorModeButton />
+              <OpenExtensionsFolderButton />
               <InstallExtensionButton />
             </div>
           </div>

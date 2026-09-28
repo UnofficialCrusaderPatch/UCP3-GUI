@@ -16,6 +16,13 @@ import { ActiveExtensionElement } from '../../extension-manager/extension-elemen
 import { InactiveExtensionsElement } from '../../extension-manager/extension-elements/extension-element/inactive-extension-element';
 import { serializeLoadOrder } from '../../../../config/ucp/config-files/load-order';
 
+// Folder controls read native host information on each row.
+vi.mock('@tauri-apps/api/os', () => ({ type: async () => 'Windows_NT' }));
+vi.mock('../../../../tauri/tauri-invoke', async (original) => ({
+  ...(await original<typeof import('../../../../tauri/tauri-invoke')>()),
+  getGuiConfigRecentFolders: async () => [],
+}));
+
 vi.mock('../../../../hooks/jotai/base', async (original) => ({
   ...(await original<typeof import('../../../../hooks/jotai/base')>()),
   getStore: vi.fn(),
@@ -108,7 +115,7 @@ it('activates and deactivates the real UCP2 Bare child without activating or app
       <Lists />
     </Provider>,
   );
-  const left = within(screen.getByTestId('available'));
+  const left = within(await screen.findByTestId('available'));
   const right = within(screen.getByTestId('active'));
   const root = state.extensions.find(
     (ext) => ext.name === 'ucp2-legacy-defaults',
@@ -119,7 +126,7 @@ it('activates and deactivates the real UCP2 Bare child without activating or app
     }),
   );
   fireEvent.click(
-    within(left.getByTestId('ucp2-legacy')).getByRole('button', {
+    within(await left.findByTestId('ucp2-legacy')).getByRole('button', {
       name: 'activate',
     }),
   );

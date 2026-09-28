@@ -74,7 +74,7 @@ export function ActiveExtensionElement(props: {
       buttonText="deactivate"
       clickCallback={clickCallback}
       moveCallback={moveCallback}
-      displayShellOpenButton={guiCreatorMode && ext.type === 'plugin'}
+      displayShellOpenButton
       displayCustomizeButton={guiCreatorMode && ext.type === 'plugin'}
       revDeps={theRevDeps}
       showExclamationMark={showExclamationMark}

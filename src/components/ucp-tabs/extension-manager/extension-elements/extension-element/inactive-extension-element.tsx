@@ -73,7 +73,7 @@ export function InactiveExtensionsElement(props: {
             -1,
         )}
       displayCustomizeButton={false}
-      displayShellOpenButton={false}
+      displayShellOpenButton
       showExclamationMark={false}
     />
   );

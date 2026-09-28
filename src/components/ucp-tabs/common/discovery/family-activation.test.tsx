@@ -1,0 +1,166 @@
+import { Provider, createStore, useAtomValue } from 'jotai';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import { expect, it, vi } from 'vitest';
+import { FamilyList } from './family-list';
+import { getStore } from '../../../../hooks/jotai/base';
+import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
+import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../testing/dump-extensions-state';
+import DATA from '../../../../function/game-folder/initialization/tests/load-extensions-state.test.data.json';
+import { ActiveExtensionElement } from '../../extension-manager/extension-elements/extension-element/active-extension-element';
+import { InactiveExtensionsElement } from '../../extension-manager/extension-elements/extension-element/inactive-extension-element';
+import { serializeLoadOrder } from '../../../../config/ucp/config-files/load-order';
+
+// Folder controls read native host information on each row.
+vi.mock('@tauri-apps/api/os', () => ({ type: async () => 'Windows_NT' }));
+vi.mock('../../../../tauri/tauri-invoke', async (original) => ({
+  ...(await original<typeof import('../../../../tauri/tauri-invoke')>()),
+  getGuiConfigRecentFolders: async () => [],
+}));
+
+vi.mock('../../../../hooks/jotai/base', async (original) => ({
+  ...(await original<typeof import('../../../../hooks/jotai/base')>()),
+  getStore: vi.fn(),
+}));
+vi.mock('../../../general/message', () => ({
+  useMessage:
+    () => (message: string | { key: string; args: { name: string } }) =>
+      typeof message === 'string'
+        ? message
+        : `${message.key}:${message.args.name}`,
+}));
+vi.mock('../../../modals/modal-ok-cancel', () => ({
+  showModalOkCancel: vi.fn(async () => true),
+}));
+vi.mock('../../../modals/modal-ok', () => ({ showModalOk: vi.fn() }));
+vi.mock('../../extension-manager/extension-elements/reporting', () => ({
+  default: async () => true,
+}));
+
+function Lists() {
+  const state = useAtomValue(EXTENSION_STATE_INTERFACE_ATOM);
+  const available = state.extensions.map((ext) => ({
+    id: `${ext.name}@${ext.version}`,
+    name: ext.name,
+    ext,
+    family: ext.definition.family,
+    active: state.activeExtensions.some((active) => active.name === ext.name),
+  }));
+  return (
+    <>
+      <div data-testid="available">
+        <FamilyList
+          activation={false}
+          scope="roundtrip-available"
+          searching={false}
+          items={available.filter((item) => !item.active)}
+          available={available}
+          label={({ ext }) => ext.definition['display-name'] || ext.name}
+          render={({ ext }, familyToggle) => (
+            <div data-testid={ext.name}>
+              <InactiveExtensionsElement
+                exts={[ext]}
+                familyToggle={familyToggle}
+              />
+            </div>
+          )}
+        />
+      </div>
+      <div data-testid="active">
+        {state.activeExtensions.map((ext, index) => (
+          <div key={ext.name} data-testid={ext.name}>
+            <ActiveExtensionElement
+              ext={ext}
+              arr={state.activeExtensions}
+              index={index}
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+it('activates and deactivates the Aggressive AI Bare root without applying its alternative', async () => {
+  const store = createStore();
+  vi.mocked(getStore).mockReturnValue(store);
+  const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions(
+    JSON.parse(JSON.stringify(DATA.EXTENSIONS)),
+  );
+  state.extensions.forEach((ext) => {
+    // Serialized dependency fixtures omit the disk handle used by cleanup.
+    Object.assign(ext, {
+      io: {
+        path: `C:/test/ucp/${ext.type === 'module' ? 'modules' : 'plugins'}/${ext.name}-${ext.version}`,
+      },
+    });
+    if (
+      ['Aggressive-AI-Behaviour', 'Aggressive-AI-Behaviour-Applied'].includes(
+        ext.name,
+      )
+    )
+      Object.assign(ext.definition, {
+        family: [
+          {
+            name: 'aggressive-ai-behaviour',
+            ...(ext.name === 'Aggressive-AI-Behaviour' ? { root: true } : {}),
+          },
+        ],
+      });
+  });
+  store.set(EXTENSION_STATE_INTERFACE_ATOM, state);
+  render(
+    <Provider store={store}>
+      <Lists />
+    </Provider>,
+  );
+  const left = within(await screen.findByTestId('available'));
+  const right = within(screen.getByTestId('active'));
+  const alternative = state.extensions.find(
+    (ext) => ext.name === 'Aggressive-AI-Behaviour-Applied',
+  )!;
+  fireEvent.click(
+    within(await left.findByTestId('Aggressive-AI-Behaviour')).getByRole(
+      'button',
+      {
+        name: 'activate',
+      },
+    ),
+  );
+  await waitFor(() =>
+    expect(right.getByTestId('Aggressive-AI-Behaviour')).toBeTruthy(),
+  );
+  expect(right.queryByTestId('Aggressive-AI-Behaviour-Applied')).toBeNull();
+  const selected = store.get(EXTENSION_STATE_INTERFACE_ATOM);
+  expect(selected.explicitlyActivatedExtensions.map((ext) => ext.name)).toEqual(
+    ['Aggressive-AI-Behaviour'],
+  );
+  expect(
+    serializeLoadOrder(selected.activeExtensions).some(
+      ({ extension }) => extension === alternative.name,
+    ),
+  ).toBe(false);
+  expect(
+    Object.values(selected.configuration.state).some((entry) =>
+      Object.values(entry.modifications).some(
+        (value) => value.entityName === alternative.name,
+      ),
+    ),
+  ).toBe(false);
+  const deactivate = within(
+    right.getByTestId('Aggressive-AI-Behaviour'),
+  ).getByRole('button', { name: 'deactivate' }) as HTMLButtonElement;
+  expect(deactivate.disabled).toBe(false);
+  fireEvent.click(deactivate);
+  await waitFor(() =>
+    expect(store.get(EXTENSION_STATE_INTERFACE_ATOM).activeExtensions).toEqual(
+      [],
+    ),
+  );
+  expect(right.queryByTestId('Aggressive-AI-Behaviour')).toBeNull();
+});

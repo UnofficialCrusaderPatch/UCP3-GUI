@@ -8,6 +8,10 @@ import {
 import { DEFINITION_FILE } from '../io';
 import Logger from '../../../../util/scripts/logging';
 import {
+  normalizeFamilies,
+  normalizeTags,
+} from '../../../content/discovery/metadata';
+import {
   checkFrameworkDependency,
   checkFrontendDependency,
 } from '../system-dependencies';
@@ -28,6 +32,20 @@ export const validateDefinition = async (eh: ExtensionHandle) => {
     await eh.getTextContents(`${DEFINITION_FILE}`),
   ) as Definition;
   const { name, version } = definition;
+  if (definition.family !== undefined) {
+    const family = normalizeFamilies(definition.family);
+    if (
+      family.length === 0 &&
+      (!Array.isArray(definition.family) || definition.family.length > 0)
+    ) {
+      warnings.push(
+        'Invalid family metadata; this extension will be displayed without grouping.',
+      );
+    }
+    definition.family = family;
+  }
+  if (definition.tags !== undefined)
+    definition.tags = normalizeTags(definition.tags);
 
   if (name === undefined || name === null) {
     const msg = `'name' missing in definition.yml of ${eh.path}`;

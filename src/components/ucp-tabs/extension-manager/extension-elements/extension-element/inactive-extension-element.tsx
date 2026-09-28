@@ -1,5 +1,6 @@
+/* eslint-disable react/require-default-props */
 import { useAtomValue } from 'jotai';
-import { useCallback } from 'react';
+import { ReactNode, useCallback } from 'react';
 import { Extension } from '../../../../../config/ucp/common';
 import {
   AvailableExtensionVersionsDictionary,
@@ -11,8 +12,11 @@ import inactiveExtensionElementClickCallback from '../inactive-extension-element
 import { ExtensionElement } from './extension-element';
 
 // eslint-disable-next-line import/prefer-default-export
-export function InactiveExtensionsElement(props: { exts: Extension[] }) {
-  const { exts } = props;
+export function InactiveExtensionsElement(props: {
+  exts: Extension[];
+  familyToggle?: ReactNode;
+}) {
+  const { exts, familyToggle } = props;
 
   if (exts.length === 0) {
     throw Error(`no extensions`);
@@ -53,6 +57,7 @@ export function InactiveExtensionsElement(props: { exts: Extension[] }) {
 
   return (
     <ExtensionElement
+      familyToggle={familyToggle}
       ext={ext}
       fixedVersion={availableVersions.length <= 1}
       active={false}

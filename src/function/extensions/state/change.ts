@@ -11,7 +11,7 @@ export function generateAndSetFullConfig(
   set: Setter,
   extensionsState: ExtensionsState,
 ) {
-  const { defined } = extensionsState.configuration;
+  const { defined, locks } = extensionsState.configuration;
   const userDefinedValues = get(CONFIGURATION_USER_REDUCER_ATOM);
 
   const fullConfig = {
@@ -19,6 +19,11 @@ export function generateAndSetFullConfig(
     ...defined,
     ...userDefinedValues,
   };
+
+  // Required extension values also apply when importing or restoring user settings.
+  Object.entries(locks).forEach(([url, { lockedValue }]) => {
+    fullConfig[url] = lockedValue;
+  });
 
   // TODO: make it read only and write only to the user config
   set(CONFIGURATION_FULL_REDUCER_ATOM, {

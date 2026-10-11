@@ -209,7 +209,6 @@ store.content.status.change: "此内容状态已更改。请重启 GUI 以完成
 store.content.uninstall: "卸载"
 store.filter.condensed: "完整 / 精简列表"
 store.filter.installed: "显示 / 隐藏已安装内容"
-store.element.activated.nouninstall: "无法选择, 该内容为已启用扩展。卸载前请停用: {{name}}"
 store.element.installed.locally: "已安装但在线不可用 (已弃用)"
 store.element.installed.online: "已安装且在线可用"
 store.element.install.available: "可安装此内容"
@@ -330,3 +329,10 @@ discovery.preferences.masked.title: 扩展要求的设置
 discovery.preferences.masked.message: '{{n}} 项已保存的偏好将被必需设置暂时覆盖。您的偏好会保留，并在这些要求移除后恢复。是否继续？
 
   {{entries}}'
+store.toolbar.uninstall.dependencies: "无法卸载：其他扩展仍需要此内容。\n{{lst}}"
+store.element.activated.uninstall: "选择以停用并卸载 {{name}}。"
+content.uninstallation.deactivate.title: "停用并卸载"
+content.uninstallation.deactivate.message: "卸载前将保存当前配置，包括尚未应用的更改。以下扩展将被停用并卸载：\n\n{{lst}}\n\n将清除的设置和资源选择：\n{{entries}}\n\n是否继续？"
+content.uninstallation.changed: "卸载期间配置已更改。不会继续卸载其他扩展，请重新选择扩展。"
+content.uninstallation.editor: "请先完成扩展编辑，再卸载内容。"
+content.uninstallation.noconfig: "没有可用的配置文件。卸载已启用的扩展前，请先应用配置。"

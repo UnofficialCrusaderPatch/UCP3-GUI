@@ -1,4 +1,6 @@
 import { Extension } from '../../../../config/ucp/common';
+import { ExtensionsState } from '../../../../function/extensions/extensions-state';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { getStore } from '../../../../hooks/jotai/base';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
@@ -23,31 +25,61 @@ import { compareObjects } from '../../../../util/scripts/objectCompare';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
 
+/** Prepare ordinary deactivation without changing the live setup. */
+export function prepareExtensionDeactivation(
+  oldState: ExtensionsState,
+  extensions: Extension[],
+  userConfiguration: Record<string, unknown>,
+) {
+  let state = { ...oldState, tree: oldState.tree.copy() };
+  extensions.forEach((ext) => {
+    if (
+      state.activeExtensions.some(
+        (active) => createExtensionID(active) === createExtensionID(ext),
+      )
+    ) {
+      state = removeExtensionFromExplicitlyActivatedExtensions(state, ext);
+    }
+  });
+  const removedExtensions = [
+    ...new Set([
+      ...oldState.activeExtensions.filter(
+        (ext) =>
+          !state.activeExtensions.some(
+            (active) => createExtensionID(active) === createExtensionID(ext),
+          ),
+      ),
+      ...extensions.filter(
+        (ext) =>
+          !state.activeExtensions.some((active) => active.name === ext.name),
+      ),
+    ]),
+  ];
+  const user = removeProviderAiOverrides(
+    filterExtensions(userConfiguration, removedExtensions),
+    removedExtensions,
+  );
+  return {
+    state: buildExtensionConfigurationDB(state),
+    user,
+    removedExtensions,
+    disappearingEntries: Object.keys(userConfiguration).filter(
+      (url) => !compareObjects(userConfiguration[url], user[url]),
+    ),
+  };
+}
+
 const activeExtensionElementClickCallback = async (ext: Extension) => {
   LOGGER.msg(`Deactivate ${ext.name}-${ext.version}`).info();
 
   const configuration = getStore().get(CONFIGURATION_FULL_REDUCER_ATOM);
   const userConfiguration = getStore().get(CONFIGURATION_USER_REDUCER_ATOM);
   const oldExtensionState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
-  const newExtensionState = removeExtensionFromExplicitlyActivatedExtensions(
-    oldExtensionState,
-    ext,
-  );
-
-  const removedProviders = oldExtensionState.activeExtensions.filter(
-    (provider) =>
-      !newExtensionState.activeExtensions.some(
-        (active) =>
-          active.name === provider.name && active.version === provider.version,
-      ),
-  );
-  const newUserConfiguration = removeProviderAiOverrides(
-    filterExtensions(userConfiguration, newExtensionState.installedExtensions),
-    removedProviders,
-  );
-  const disappearingEntries = Object.keys(userConfiguration).filter(
-    (url) => !compareObjects(userConfiguration[url], newUserConfiguration[url]),
-  );
+  const {
+    state: newExtensionState,
+    user: newUserConfiguration,
+    disappearingEntries,
+  } = prepareExtensionDeactivation(oldExtensionState, [ext], userConfiguration);
 
   if (disappearingEntries.length > 0) {
     const confirmed = await showModalOkCancel({
@@ -66,7 +98,7 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     }
   }
 
-  const res = buildExtensionConfigurationDB(newExtensionState);
+  const res = newExtensionState;
   if (!(await reportAndConfirmBuildResult(res))) return;
 
   ConsoleLogger.info('New user configuration: ', newUserConfiguration);

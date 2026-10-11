@@ -209,7 +209,6 @@ store.content.status.change: "Le statut de ce contenu a changé. Veuillez redém
 store.content.uninstall: Désinstaller
 store.filter.condensed: "Liste Complète / Abrégée"
 store.filter.installed: "Afficher / Cacher le contenu installé"
-store.element.activated.nouninstall: "Impossible de sélectionner le contenu car c'est une extension activée. Désactivez la avant de désinstaller: {{name}}"
 store.element.installed.locally: Ce contenu est installé mais n'est pas disponible en ligne (dépréciation)
 store.element.installed.online: Ce contenu est déjà installé et disponible en ligne
 store.element.install.available: Ce contenu est disponible pour être installé
@@ -330,3 +329,10 @@ discovery.preferences.masked.title: Paramètres requis par les extensions
 discovery.preferences.masked.message: '{{n}} préférences enregistrées seront temporairement remplacées par des paramètres requis. Elles sont conservées et seront rétablies lorsque ces exigences seront supprimées. Continuer ?
 
   {{entries}}'
+store.toolbar.uninstall.dependencies: "Désinstallation impossible : d’autres extensions ont encore besoin de ce contenu.\n{{lst}}"
+store.element.activated.uninstall: "Sélectionnez pour désactiver et désinstaller {{name}}."
+content.uninstallation.deactivate.title: "Désactiver et désinstaller"
+content.uninstallation.deactivate.message: "Votre configuration actuelle, y compris les modifications en attente, sera enregistrée avant la suppression. Ces extensions seront désactivées et désinstallées :\n\n{{lst}}\n\nParamètres et choix de ressources à effacer :\n{{entries}}\n\nContinuer ?"
+content.uninstallation.changed: "La configuration a changé pendant la suppression. Aucune autre extension ne sera désinstallée ; sélectionnez à nouveau les extensions."
+content.uninstallation.editor: "Terminez la modification de l’extension avant de désinstaller du contenu."
+content.uninstallation.noconfig: "Aucun fichier de configuration disponible. Appliquez votre configuration avant de désinstaller une extension active."

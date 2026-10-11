@@ -10,6 +10,7 @@ import {
   createEmptyConfigurationState,
 } from '../../../../function/configuration/state';
 import deactivate from './active-extension-element-click-callback';
+import { ExtensionDependencyTree } from '../../../../function/extensions/dependency-management/dependency-resolution';
 
 const mocks = vi.hoisted(() => ({ remove: vi.fn(), confirm: vi.fn() }));
 vi.mock('../../../../hooks/jotai/base', () => ({ getStore: vi.fn() }));
@@ -27,11 +28,16 @@ vi.mock(
 
 const provider = {
   name: 'LOTO',
+  definition: { name: 'LOTO', version: '3.1.0' },
   version: '3.1.0',
   type: 'plugin',
   io: { path: 'D:/game/ucp/plugins/LOTO-3.1.0' },
 } as Extension;
-const swapper = { name: 'aiSwapper', version: '1.3.0' } as Extension;
+const swapper = {
+  name: 'aiSwapper',
+  version: '1.3.0',
+  definition: { name: 'aiSwapper', version: '1.3.0' },
+} as Extension;
 const key = 'aiSwapper.ai.rat.speech';
 const baseline = {
   name: 'Rat',
@@ -56,6 +62,7 @@ beforeEach(() => {
     defined: { [key]: baseline },
   };
   const before = {
+    tree: new ExtensionDependencyTree([]),
     extensions: [provider, swapper],
     installedExtensions: [],
     activeExtensions: [provider, swapper],

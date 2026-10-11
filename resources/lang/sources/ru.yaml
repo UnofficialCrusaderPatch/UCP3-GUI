@@ -209,7 +209,6 @@ store.content.status.change: "Статус этого содержимого и�
 store.content.uninstall: Удалить
 store.filter.condensed: "Полный / сокращенный список"
 store.filter.installed: "Показать / скрыть установленный контент"
-store.element.activated.nouninstall: "Невозможно выбрать содержимое, так как это активированное расширение. Деактивируйте его перед удалением: {{name}}"
 store.element.installed.locally: Это содержимое установлено, но недоступно в сети (устаревание)
 store.element.installed.online: Этот контент уже установлен и доступен онлайн
 store.element.install.available: Этот контент доступен для установки
@@ -271,3 +270,17 @@ config.qualifier.single: "Эта настройка"
 config.qualifier.group: "Все изменяемые параметры этой группы"
 config.qualifier.all: "Все слоты"
 config.qualifier.slot: "Этот слот"
+store.toolbar.uninstall.dependencies: "Удаление невозможно: этот контент ещё нужен другим расширениям.\n{{lst}}"
+store.element.activated.uninstall: "Выберите, чтобы отключить и удалить {{name}}."
+content.uninstallation.deactivate.title: "Отключить и удалить"
+content.uninstallation.deactivate.message: "Перед удалением текущая конфигурация будет сохранена, включая неприменённые изменения. Эти расширения будут отключены и удалены:\n\n{{lst}}\n\nНастройки и выбор ресурсов для очистки:\n{{entries}}\n\nПродолжить?"
+content.uninstallation.changed: "Конфигурация изменилась во время удаления. Другие расширения не будут удалены; выберите их заново."
+content.uninstallation.editor: "Завершите редактирование расширения перед удалением контента."
+content.uninstallation.noconfig: "Файл конфигурации недоступен. Примените конфигурацию перед удалением активного расширения."
+content.uninstallation.selected: "Выбранные пакеты"
+content.uninstallation.dependents: "Зависимые пакеты, которые также необходимо удалить"
+content.uninstallation.cleanup: "Также удалить неиспользуемые зависимости"
+content.uninstallation.cleanup.help: "Учитываются только зависимости этих пакетов. Общие зависимости и явно активированные расширения сохраняются."
+content.uninstallation.review.title: "Проверка удаления"
+content.uninstallation.review.message: "Проверьте пакеты ниже. Активные пакеты будут отключены, а текущая конфигурация сохранена до удаления их файлов."
+store.element.uninstall.dependents: "Другие установленные пакеты зависят от этого пакета. При удалении можно проверить их и удалить вместе."

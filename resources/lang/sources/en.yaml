@@ -259,7 +259,6 @@ store.content.status.change: "This content's status changed. Please restart the 
 store.content.uninstall: Uninstall
 store.filter.condensed: "Full / Condensed list"
 store.filter.installed: "Show / Hide installed content"
-store.element.activated.nouninstall: "Cannot select content as it is an activated extension. Deactivate it before uninstalling: {{name}}"
 store.element.installed.locally: This content is installed but not available online (deprecation)
 store.element.installed.online: This content is already installed and available online
 store.element.install.available: This content is available for installation
@@ -327,3 +326,17 @@ extensions.folder.error.title: Could not open folder
 extensions.folder.error.message: The folder or installed extension may be missing, inaccessible, or belong to a previous installation. Select the installation again and check that a file manager is available. See the log for details.
 extensions.extension.shell.reveal: Show installed extension in File Explorer
 extensions.extension.shell.parent: Open the installed extension’s containing folder
+store.toolbar.uninstall.dependencies: "Cannot uninstall: other extensions still need this content.\n{{lst}}"
+store.element.activated.uninstall: "Select to deactivate and uninstall {{name}}."
+content.uninstallation.deactivate.title: "Deactivate and uninstall"
+content.uninstallation.deactivate.message: "Your current setup, including pending changes, will be saved before removal. These extensions will be deactivated and uninstalled:\n\n{{lst}}\n\nSettings and resource choices to clear:\n{{entries}}\n\nContinue?"
+content.uninstallation.changed: "The setup changed during removal. Nothing else will be uninstalled; select the extensions again."
+content.uninstallation.editor: "Finish editing the extension before uninstalling content."
+content.uninstallation.noconfig: "No configuration file is available. Apply your setup before uninstalling an active extension."
+content.uninstallation.selected: "Selected packages"
+content.uninstallation.dependents: "Dependent packages that must also be removed"
+content.uninstallation.cleanup: "Remove unused dependencies too"
+content.uninstallation.cleanup.help: "Only dependencies of these packages are considered. Shared dependencies and explicit active choices are kept."
+content.uninstallation.review.title: "Review uninstall"
+content.uninstallation.review.message: "Review the packages below. Active packages will be deactivated, and the current setup will be saved before their files are removed."
+store.element.uninstall.dependents: "Other installed packages depend on this package. Uninstall lets you review and remove those packages together."

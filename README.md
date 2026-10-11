@@ -3,10 +3,19 @@
 Matched Chromium screenshots for https://github.com/UnofficialCrusaderPatch/UCP3-GUI/pull/384.
 
 - Before: `601e9480740ab5e946ea32f9738f0ae6ccd4fe60`
-- After: `d1eb312e1e63a36fd41c5dd0ec0d98144219201c`
-- The focused fixture loads the exact base CSS, scrollbar CSS, Bootstrap form styles, River Avenue font and chain/hook assets from those sources.
+- After: `6ba339263257ab48cf1b5ff86f70b578888c356f`
+- The focused fixture loads the exact source CSS, Bootstrap form styles, River Avenue font and existing chain, hook and merge-order arrow assets.
 - The plain background, wrapper layout, magnification and persistent native stepper visibility are fixture presentation. These are not full launcher screenshots.
-- Identical input values, field sizes and top/middle/bottom scroll positions in both captures.
-- Fresh check: regular and compact inputs retain their dimensions; keyboard Up/Down changes 3000 -> 3001 -> 3000; a native increment-arrow click produces 3001.
+- Identical values, input dimensions and top/middle/bottom scroll positions in both captures.
 
-The screenshots are hosted on this dedicated evidence branch. No application source was changed.
+Fresh checks:
+
+- Native upper/lower mouse targets and keyboard Up/Down: 3000 -> 3001 -> 3000, with trusted input events.
+- Non-default step: 120 -> 125 -> 120 with step=5.
+- Max/min mouse checks remain at 1000 and 0. Disabled and read-only controls produce no input events.
+- The 240px and 128px input dimensions remain unchanged.
+- CSS formatting, git diff --check and the full npm run vite-build pass.
+
+The automation click API does not send mousemove; each arrow check starts with fresh focus so the native spin button recalculates its upper/lower target. No input handlers were added to the app.
+
+The screenshots live on this dedicated evidence branch.

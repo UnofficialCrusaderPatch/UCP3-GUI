@@ -68,6 +68,9 @@ export function planUninstall(
   const initial = treeFor(state.extensions).tryResolveAllDependencies();
   const pinned = treeFor(state.activeExtensions).tryResolveAllDependencies();
   if (initial.status !== 'ok' || pinned.status !== 'ok') {
+    // Removing the broken packages themselves may repair the graph. Do not expand
+    // this special case into unrelated removals or optional cleanup.
+    if (!uninstallErrors(state, ids).length) return plan;
     if (initial.status !== 'ok') plan.errors = initial.messages;
     else if (pinned.status === 'error') plan.errors = pinned.messages;
     return plan;

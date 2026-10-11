@@ -28,6 +28,24 @@ body {
   font-size: 0.85rem;
 }
 
+/* Repaint the native stepper with the existing merge-order arrows. Removing
+   its themed appearance clears the white background; native stepping remains.
+   Split the right padding around it and keep the value right-aligned. */
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  background-color: transparent;
+  background-image: url('/src/assets/ucp3/move_up.png'),
+    url('/src/assets/ucp3/move_down.png');
+  background-position:
+    center top,
+    center bottom;
+  background-repeat: no-repeat;
+  margin-inline-start: 0.375rem;
+  margin-inline-end: -0.375rem;
+}
+
 .light-shade-item {
   background-color: rgba(245, 245, 227, 0.42);
   border: 2px solid rgba(0, 0, 0, 0);

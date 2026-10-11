@@ -17,7 +17,10 @@ import {
   DiscoveryFilter,
   EMPTY_DISCOVERY_FILTER,
 } from '../../../../function/content/discovery/search';
-import { uninstallErrors } from '../../../../function/extensions/dependency-management/uninstall';
+import {
+  planUninstall,
+  uninstallErrors,
+} from '../../../../function/extensions/dependency-management/uninstall';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -217,6 +220,6 @@ export const SELECTED_UNINSTALL_ERRORS_ATOM = atom((get) => {
     .selected.filter((ce) => ce.installed)
     .map(createExtensionID);
   return ids.length
-    ? uninstallErrors(get(EXTENSION_STATE_INTERFACE_ATOM), ids)
+    ? planUninstall(get(EXTENSION_STATE_INTERFACE_ATOM), ids).errors
     : [];
 });

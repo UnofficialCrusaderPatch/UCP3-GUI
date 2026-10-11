@@ -10,7 +10,7 @@ The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible c
 | Folder controls (#381) | `bd65b17a3f46e791ec4d41d078f5afd55eb5703d` |
 | Dependency trees (#377) | `c9719ca4b21b728de2d659144c1ca746edffd13d` |
 | Required settings after reload (#392) | `eb701a2d6892a8731ad740ca464b6e5882edf900` |
-| Dependency-safe Store removal (#393; fixes #386 and #387) | `84abaf8` (explained removal locks, active-extension confirmation, save before deletion and pinned dependency edges) |
+| Dependency-safe Store removal (#393; fixes #386 and #387) | `9f47417` (dependent-removal review, optional unused-dependency cleanup, saved deactivation and pinned dependency edges) |
 | Scrollbar hook and number-input spacing (#384, merged upstream) | `6ba339263257ab48cf1b5ff86f70b578888c356f` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |
 | Game language environment (#376) | `c017880d9b08db56f200e0d47bdc4f6040e4614a` |

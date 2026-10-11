@@ -30,6 +30,7 @@ import { FamilyList } from '../common/discovery/family-list';
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { ContentElement } from '../../../function/content/types/content-element';
 import { SearchExcerpt } from '../common/discovery/search-excerpt';
+import { githubRepositoryUrl } from '../../../function/content/store/repository';
 
 const LOGGER = new Logger('content-manager.tsx');
 
@@ -142,6 +143,7 @@ export function ContentManager() {
   // const lastSelected = useAtomValue(SINGLE_CONTENT_SELECTION_ATOM);
   const lastClicked = useAtomValue(LAST_CLICKED_CONTENT_ATOM);
   const selected = lastClicked;
+  const selectedRepository = githubRepositoryUrl(selected?.contents.source);
   let description = '';
 
   const localize = useMessage();
@@ -260,6 +262,18 @@ export function ContentManager() {
                     {' '}
                     — <Message message="discovery.hiddenSelection" />
                   </span>
+                )}
+                {selectedRepository && (
+                  <>
+                    {' · '}
+                    <a
+                      href={selectedRepository}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {selectedRepository.slice('https://'.length)}
+                    </a>
+                  </>
                 )}
               </div>
             )}

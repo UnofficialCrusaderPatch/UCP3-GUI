@@ -115,10 +115,11 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
         ...e.definition,
         tags: e.definition.tags ?? matchingStorePackage?.definition.tags,
         family: e.definition.family ?? matchingStorePackage?.definition.family,
-        url: 'nonsense',
+        url: matchingStorePackage?.definition.url ?? '',
         dependencies: deps,
       },
       contents: {
+        source: matchingStorePackage?.contents.source,
         package: pack,
         description: descriptions,
         'tag-locales': matchingStorePackage?.contents['tag-locales'],

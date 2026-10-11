@@ -51,6 +51,7 @@ export type ExtensionContent = {
     type: 'module' | 'plugin';
   };
   contents: {
+    source?: { method: string; url: string };
     description: DescriptionContent[];
     package: PackageContent[];
     'tag-locales'?: TagLocales;

@@ -30,7 +30,7 @@ import { FamilyList } from '../common/discovery/family-list';
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { ContentElement } from '../../../function/content/types/content-element';
 import { SearchExcerpt } from '../common/discovery/search-excerpt';
-import { githubRepositoryUrl } from '../../../function/content/store/repository';
+import githubRepositoryUrl from '../../../function/content/store/repository';
 
 const LOGGER = new Logger('content-manager.tsx');
 

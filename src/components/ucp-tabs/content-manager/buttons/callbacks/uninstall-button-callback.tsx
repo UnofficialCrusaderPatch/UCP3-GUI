@@ -182,6 +182,18 @@ export async function uninstallContentButtonCallback(
         break;
       }
       const [ce] = pending.splice(index, 1);
+      const remaining = expected.extensions.filter(
+        (ext) => createExtensionID(ext) !== createExtensionID(ce),
+      );
+      const tree = new ExtensionDependencyTree(
+        remaining,
+        expected.tree.frontendVersion,
+        expected.tree.frameworkVersion,
+      );
+      const solution = tree.extensionDependenciesForExtensions(
+        expected.activeExtensions,
+      );
+      if (solution.status !== 'OK') throw Error(solution.message);
       store.set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
       // eslint-disable-next-line no-await-in-loop
       const [result] = await uninstallContents([ce]);
@@ -194,20 +206,13 @@ export async function uninstallContentButtonCallback(
         failures.push(`${createExtensionID(ce)}: ${result.message}`);
       } else {
         removed.add(createExtensionID(ce));
-        const remaining = expected.extensions.filter(
-          (ext) => createExtensionID(ext) !== createExtensionID(ce),
-        );
         store.set(EXTENSION_STATE_INTERFACE_ATOM, {
           ...expected,
           extensions: remaining,
           installedExtensions: expected.installedExtensions.filter(
             (ext) => createExtensionID(ext) !== createExtensionID(ce),
           ),
-          tree: new ExtensionDependencyTree(
-            remaining,
-            expected.tree.frontendVersion,
-            expected.tree.frameworkVersion,
-          ),
+          tree,
         });
         expected = store.get(EXTENSION_STATE_INTERFACE_ATOM);
       }

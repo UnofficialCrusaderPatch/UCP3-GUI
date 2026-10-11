@@ -171,6 +171,23 @@ it('protects providers needed by inactive installed extensions', () => {
     [],
   );
 });
+it('keeps the dependency tree on the active pinned version after an unrelated removal', async () => {
+  const other = extension('Files', {}, '1.1.0');
+  const disposable = extension('Disposable');
+  const before = setup(
+    [applied, files, other, disposable],
+    [applied, files],
+    [applied],
+  );
+  before.tree.extensionDependenciesForExtensions(before.activeExtensions);
+  expect(before.tree.directExtensionDependenciesFor(applied)).toEqual([files]);
+  await uninstallContentButtonCallback([content(disposable)], []);
+  expect(mocks.remove).toHaveBeenCalledTimes(1);
+  const after = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+  expect(after.activeExtensions).toEqual([applied, files]);
+  expect(after.tree.directExtensionDependenciesFor(applied)).toEqual([files]);
+  expect(after.tree.extensions).not.toContain(disposable);
+});
 it('allows another installed provider version but protects an active pinned version', () => {
   const other = extension('Files', {}, '1.1.0');
   expect(

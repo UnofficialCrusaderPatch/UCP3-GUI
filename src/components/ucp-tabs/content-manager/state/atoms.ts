@@ -13,7 +13,10 @@ import { UI_FILTER_SETTING_ATOM } from '../buttons/filter-button';
 import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
-import { uninstallErrors } from '../../../../function/extensions/dependency-management/uninstall';
+import {
+  planUninstall,
+  uninstallErrors,
+} from '../../../../function/extensions/dependency-management/uninstall';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -202,6 +205,6 @@ export const SELECTED_UNINSTALL_ERRORS_ATOM = atom((get) => {
     .selected.filter((ce) => ce.installed)
     .map(createExtensionID);
   return ids.length
-    ? uninstallErrors(get(EXTENSION_STATE_INTERFACE_ATOM), ids)
+    ? planUninstall(get(EXTENSION_STATE_INTERFACE_ATOM), ids).errors
     : [];
 });

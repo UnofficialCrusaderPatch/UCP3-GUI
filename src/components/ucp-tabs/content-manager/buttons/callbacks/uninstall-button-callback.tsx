@@ -1,7 +1,10 @@
 import { createStore } from 'jotai';
 import { ContentElement } from '../../../../../function/content/types/content-element';
 import { ExtensionDependencyTree } from '../../../../../function/extensions/dependency-management/dependency-resolution';
-import { uninstallErrors } from '../../../../../function/extensions/dependency-management/uninstall';
+import {
+  planUninstall,
+  uninstallErrors,
+} from '../../../../../function/extensions/dependency-management/uninstall';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../../function/extensions/state/state';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../../function/extensions/state/disk';
 import {
@@ -28,6 +31,7 @@ import {
   EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../../state/atoms';
 import { uninstallContents } from './uninstall-content';
+import { confirmUninstall } from './uninstall-review';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function uninstallContentButtonCallback(
@@ -58,30 +62,54 @@ export async function uninstallContentButtonCallback(
       });
       return;
     }
-    const ids = installed.map(createExtensionID);
-    const extensions = before.extensions.filter((ext) =>
-      ids.includes(createExtensionID(ext)),
-    );
-    if (extensions.length !== new Set(ids).size)
-      throw Error('content.uninstallation.changed');
-    const errors = uninstallErrors(before, ids);
-    if (errors.length) {
+    const selectedIds = installed.map(createExtensionID);
+    const plan = planUninstall(before, selectedIds);
+    if (plan.errors.length) {
       await showModalOk({
         title: 'content.uninstallation.dependencies.error.title',
         message: {
           key: 'content.uninstallation.dependencies.error.message',
-          args: { lst: errors.join('\n') },
+          args: { lst: plan.errors.join('\n') },
         },
       });
       return;
     }
+    const confirmed = await confirmUninstall(
+      plan,
+      planUninstall(before, selectedIds, true),
+    );
+    if (!confirmed) return;
+    if (!unchanged()) throw Error('content.uninstallation.changed');
+    const extensions = [
+      ...confirmed.selected,
+      ...confirmed.dependents,
+      ...confirmed.unused,
+    ];
+    const ids = extensions.map(createExtensionID);
+    const contentBefore = store.get(CONTENT_ELEMENTS_ATOM);
+    const removalContent = extensions.map((ext) => {
+      const ce = [...installed, ...contentBefore].find(
+        (entry) =>
+          entry.installed &&
+          createExtensionID(entry) === createExtensionID(ext),
+      );
+      if (!ce) throw Error('content.uninstallation.changed');
+      return ce;
+    });
+    const offline = removalContent.filter(
+      (ce) =>
+        !ce.online ||
+        deprecated.some(
+          (entry) => createExtensionID(entry) === createExtensionID(ce),
+        ),
+    );
     if (
-      deprecated.length &&
+      offline.length &&
       !(await showModalOkCancel({
         title: 'content.uninstallation.permanent.warning.title',
         message: {
           key: 'content.uninstallation.permanent.warning.message',
-          args: { lst: deprecated.map(createExtensionID).join('\n') },
+          args: { lst: offline.map(createExtensionID).join('\n') },
         },
       }))
     )
@@ -156,7 +184,7 @@ export async function uninstallContentButtonCallback(
     }
 
     let expected = store.get(EXTENSION_STATE_INTERFACE_ATOM);
-    const pending = [...installed];
+    const pending = [...removalContent];
     const failures: string[] = [];
     const removed = new Set<string>();
     // Remove dependents before providers. Rechecking each step also protects providers

@@ -6,7 +6,10 @@ import { parse } from 'yaml';
 import { Extension } from '../../../../../config/ucp/common';
 import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
 import { ExtensionDependencyTree } from '../../../../../function/extensions/dependency-management/dependency-resolution';
-import { uninstallErrors } from '../../../../../function/extensions/dependency-management/uninstall';
+import {
+  planUninstall,
+  uninstallErrors,
+} from '../../../../../function/extensions/dependency-management/uninstall';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../../function/extensions/state/state';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../../function/extensions/state/disk';
 import {
@@ -26,6 +29,7 @@ import { ContentElement } from '../../../../../function/content/types/content-el
 import { ContentElementView } from '../../content-element/content-element-view';
 import { UninstallButton } from '../uninstall-button';
 import { uninstallContentButtonCallback } from './uninstall-button-callback';
+import { OkCancelModalWindowProperties } from '../../../../modals/modal-ok-cancel';
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
@@ -221,7 +225,7 @@ it('caches eligibility and invalidates it when installed packages change', () =>
   store.set(EXTENSION_STATE_INTERFACE_ATOM, state([files]));
   expect(store.get(CONTENT_UNINSTALL_ERRORS_ATOM)['Files@1.0.0']).toEqual([]);
 });
-it('allows selecting active rows and disables uninstall for a protected provider', () => {
+it('allows selecting active rows and reviewing dependent removal for a provider', () => {
   setup();
   const ce = content(files);
   render(
@@ -232,7 +236,9 @@ it('allows selecting active rows and disables uninstall for a protected provider
   );
   fireEvent.click(screen.getByText('Files'));
   expect(getStore().get(CONTENT_INTERFACE_STATE_ATOM).selected).toEqual([ce]);
-  expect((screen.getByRole('button') as HTMLButtonElement).disabled).toBe(true);
+  expect((screen.getByRole('button') as HTMLButtonElement).disabled).toBe(
+    false,
+  );
 });
 it('cancel leaves memory, disk and package files untouched', async () => {
   const before = setup();
@@ -298,8 +304,98 @@ it('saves a disk-only reference before uninstalling an already deactivated packa
   ).toEqual([]);
   expect(mocks.remove).toHaveBeenCalledTimes(1);
 });
-it('rejects a protected dependency before any save or deletion', async () => {
+it('reviews and removes dependent plugins before their selected provider', async () => {
+  setup();
+  await uninstallContentButtonCallback([content(files)], []);
+  expect(mocks.confirm).toHaveBeenCalled();
+  expect(mocks.remove.mock.calls.map(([path]) => path)).toEqual([
+    'C:/fixture/ucp/plugins/Applied-1.0.0',
+    'C:/fixture/ucp/plugins/Files-1.0.0',
+  ]);
+  expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM).extensions).toEqual([
+    independent,
+  ]);
+});
+
+it('expands a transitive installed dependent chain without unrelated packages', () => {
+  const pack = extension('Pack', { Applied: '^1.0.0' });
+  const plan = planUninstall(state([pack, applied, files, independent]), [
+    'Files@1.0.0',
+  ]);
+  expect(plan.dependents.map((ext) => ext.name)).toEqual(['Pack', 'Applied']);
+  expect(plan.errors).toEqual([]);
+});
+
+it('uses alternative installed versions but preserves actual active pins', () => {
+  const other = extension('Files', {}, '1.1.0');
+  expect(
+    planUninstall(state([files, other, applied]), ['Files@1.0.0']).dependents,
+  ).toEqual([]);
+  expect(
+    planUninstall(state([files, other, applied], [applied, files], [applied]), [
+      'Files@1.0.0',
+    ]).dependents,
+  ).toEqual([applied]);
+});
+
+it('optionally removes only unused dependencies of the removal set', () => {
+  const leaf = extension('Leaf');
+  const middle = extension('Middle', { Leaf: '^1.0.0' });
+  const pack = extension('Pack', { Middle: '^1.0.0' });
+  const all = state([leaf, middle, pack, independent]);
+  expect(planUninstall(all, ['Pack@1.0.0']).unused).toEqual([]);
+  const cleanup = planUninstall(all, ['Pack@1.0.0'], true);
+  expect(cleanup.unused.map((ext) => ext.name)).toEqual(['Middle', 'Leaf']);
+  expect(cleanup.errors).toEqual([]);
+});
+
+it('retains dependencies used by an inactive installed package and explicit Bare choices', () => {
+  const another = extension('Another', { Files: '^1.0.0' });
+  expect(
+    planUninstall(state([files, applied, another]), ['Applied@1.0.0'], true)
+      .unused,
+  ).toEqual([]);
+  expect(
+    planUninstall(
+      state([files, applied], [files], [files]),
+      ['Applied@1.0.0'],
+      true,
+    ).unused,
+  ).toEqual([]);
+});
+
+it('does not cascade an unrelated pre-existing invalid package graph', () => {
+  const broken = extension('Broken', { Missing: '^1.0.0' });
+  const plan = planUninstall(state([files, broken]), ['Files@1.0.0']);
+  expect(plan.errors.length).toBeGreaterThan(0);
+  expect(plan.dependents).toEqual([]);
+});
+
+it('lets the cleanup checkbox remove the unused provider after its package', async () => {
+  setup();
+  mocks.confirm.mockImplementation(
+    async (spec: Partial<OkCancelModalWindowProperties>) => {
+      if (spec.children) {
+        const view = render(<div>{spec.children}</div>);
+        fireEvent.click(screen.getByRole('checkbox'));
+        view.unmount();
+      }
+      return true;
+    },
+  );
+  await uninstallContentButtonCallback([content(applied)], []);
+  expect(mocks.remove.mock.calls.map(([path]) => path)).toEqual([
+    'C:/fixture/ucp/plugins/Applied-1.0.0',
+    'C:/fixture/ucp/plugins/Files-1.0.0',
+  ]);
+  expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM).extensions).toEqual([
+    independent,
+  ]);
+});
+
+it('cancels the complete dependent chain without saving or removing anything', async () => {
   const before = setup();
+  mocks.confirm.mockResolvedValue(false);
   await uninstallContentButtonCallback([content(files)], []);
   expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
   expect(mocks.write).not.toHaveBeenCalled();

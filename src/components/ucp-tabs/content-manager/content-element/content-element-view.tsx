@@ -5,7 +5,7 @@ import {
   CircleFill,
   ExclamationCircleFill,
   Globe,
-  LockFill,
+  Link45deg,
 } from 'react-bootstrap-icons';
 import { useMemo } from 'react';
 import {
@@ -89,10 +89,7 @@ export function ContentElementView(props: ContentElementViewProps) {
     ? localize({ key: 'store.element.activated.uninstall', args: { name } })
     : undefined;
   if (removalErrors.length)
-    removalHelp = localize({
-      key: 'store.toolbar.uninstall.dependencies',
-      args: { lst: removalErrors.join('\n') },
-    });
+    removalHelp = localize('store.element.uninstall.dependents');
 
   const statusElementAtom = useMemo(
     () =>
@@ -287,7 +284,7 @@ export function ContentElementView(props: ContentElementViewProps) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       key={`${name}-${version}`}
-      className={`extension-element ${removalErrors.length ? 'disabled' : ''}`}
+      className="extension-element"
       title={removalHelp}
       style={{ cursor: 'pointer', position: 'relative', ...selectedStyle }}
       onMouseEnter={() => {
@@ -362,7 +359,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       <div className="me-auto" style={{ paddingRight: '3px' }}>
         {statusElement}
         {removalErrors.length > 0 && (
-          <LockFill className="ms-1" title={removalHelp} />
+          <Link45deg className="ms-1" title={removalHelp} />
         )}
       </div>
     </div>

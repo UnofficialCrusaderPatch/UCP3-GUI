@@ -46,7 +46,7 @@ export type ExtensionContent = {
     name: string;
     dependencies: { [key: string]: string };
     author: string;
-    url: string;
+    url?: string;
     'display-name': string;
     type: 'module' | 'plugin';
   };

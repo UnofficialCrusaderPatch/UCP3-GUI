@@ -371,6 +371,14 @@ it('does not cascade an unrelated pre-existing invalid package graph', () => {
   expect(plan.dependents).toEqual([]);
 });
 
+it('can remove a broken selected package when that repairs the installed graph', () => {
+  const broken = extension('Broken', { Missing: '^1.0.0' });
+  const plan = planUninstall(state([files, broken]), ['Broken@1.0.0'], true);
+  expect(plan.errors).toEqual([]);
+  expect(plan.dependents).toEqual([]);
+  expect(plan.unused).toEqual([]);
+});
+
 it('lets the cleanup checkbox remove the unused provider after its package', async () => {
   setup();
   mocks.confirm.mockImplementation(

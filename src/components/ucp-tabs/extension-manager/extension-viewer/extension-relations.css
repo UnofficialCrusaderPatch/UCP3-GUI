@@ -2,6 +2,15 @@
   display: flow-root;
 }
 
+.extension-repository {
+  float: right;
+  max-width: 100%;
+  margin-left: 0.5rem;
+  color: #65543d;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
 .extension-relations {
   float: right;
   max-width: 100%;

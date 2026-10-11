@@ -6,9 +6,11 @@ The [user-facing 1.0.17 changelog](changelog/1.0.17.md) summarizes the visible c
 
 | Contribution | Included source head |
 | --- | --- |
-| Search, tags, families (#382; retains #322) | `23219e3b4aaaf4e4d18f97ba536f4ee211cd44a5` (combined filter, whole-word search, left-column layout, Creator toggle, package-owned translated tags, aligned family controls and a flat active list in load order) |
+| Search, tags, families (#382; retains #322) | `f5f8a12dcf343113034a20946b8245e8bfada696` (atomic family switching, translated family/configuration labels, combined filter, whole-word search and a flat active list) |
 | Folder controls (#381) | `bd65b17a3f46e791ec4d41d078f5afd55eb5703d` |
-| Dependency trees (#377) | `b9924f3c78152890877bee8326f31907d17f3e09` |
+| Dependency trees (#377) | `c9719ca4b21b728de2d659144c1ca746edffd13d` |
+| Required settings after reload (#392) | `eb701a2d6892a8731ad740ca464b6e5882edf900` |
+| Scrollbar hook and number-input spacing (#384, merged upstream) | `6ba339263257ab48cf1b5ff86f70b578888c356f` |
 | Update notice/Linux dependencies (#378) | `0a433cac8450ecfbf4dc71f0d3d3d63983fbc849` |
 | Game language environment (#376) | `c017880d9b08db56f200e0d47bdc4f6040e4614a` |
 | Custom menu binary assets/configuration (#363) | `03805054e24eca20ce8c841bc694ab15e93574b1` |
@@ -22,4 +24,4 @@ Upstream main now supplies the folder path-boundary tests. Integration follow-up
 
 Native preview checks also found and corrected popup placement under the existing CSS GUI zoom, and gave activation/movement controls explicit dimensions so nested family rows retain usable buttons. Family chevrons override the shared minimal-button reset and use a symbol-capable font. These checks use an isolated local fixture; existing game installations are not modified.
 
-Package metadata rollout is coordinated through separate draft package and Store PRs. Existing installed packages and profiles are not rewritten; game testing is outside this preview. UCP2 family manifests are isolated examples; the modder chooses Default, Bare or any other ordinary extension as root. CI tests/builds and runtime acceptance are recorded on the preview PR, distinguishing completed checks from platform-specific limitations.
+Package metadata rollout is coordinated through separate draft package and Store PRs. Existing installed packages and profiles are not rewritten; game testing is outside this preview. The modder chooses Default, Bare or any other ordinary extension as root. One explicit configuration is selected per family, with neutral shared providers retained as ordinary dependencies. Indirect competing presets are reported. CI tests/builds and runtime acceptance are recorded on the preview PR, distinguishing completed checks from platform-specific limitations.

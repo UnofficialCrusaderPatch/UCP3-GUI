@@ -7,6 +7,7 @@ import Logger from '../../../util/scripts/logging';
 import { ConfigFile, Extension, ExtensionType, LoadOrder } from '../common';
 import { ConfigMeta, DefinitionMeta } from '../config/meta';
 import { serializeLoadOrder } from './load-order';
+import { assertFamilyChoices } from '../../../function/extensions/dependency-management/families';
 
 const LOGGER = new Logger('config-files.ts');
 
@@ -204,6 +205,10 @@ export function serializeUCPConfig(
   fullExtensions: Extension[],
   configurationQualifier: { [key: string]: ConfigurationQualifier },
 ) {
+  assertFamilyChoices({
+    activeExtensions: fullExtensions,
+    explicitlyActivatedExtensions: sparseExtensions,
+  });
   const finalConfig: UCP3SerializedUserConfig = {
     meta: {
       version: '1.0.0',

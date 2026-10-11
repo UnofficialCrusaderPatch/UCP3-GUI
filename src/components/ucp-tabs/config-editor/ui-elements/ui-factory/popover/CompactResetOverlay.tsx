@@ -39,6 +39,9 @@ export default function CompactResetOverlay({
       />
       <Overlay
         show={!!anchor}
+        container={
+          anchor?.closest<HTMLElement>('.declarative-modal-body') ?? undefined
+        }
         transition={false}
         target={anchor}
         placement="left-start"
@@ -54,7 +57,9 @@ export default function CompactResetOverlay({
               fn: ({ state }) => {
                 const rect = anchor!.getBoundingClientRect();
                 const clip = anchor!
-                  .closest('.config-container__content')
+                  .closest(
+                    '.declarative-modal-body, .config-container__content',
+                  )
                   ?.getBoundingClientRect();
                 // Escape horizontal clipping, but keep the original vertical scroll bounds.
                 Object.assign(state.styles.popper, {

@@ -117,6 +117,12 @@ extensions.upgrade.confirmation.body: "Are you sure you want to upgrade the foll
 extensions.upgrade.toast.success.title: "Upgrade complete"
 extensions.upgrade.toast.success.body: "Extensions succesfully upgraded"
 extensions.viewer: "Extension information"
+extensions.viewer.relations: "Dependencies"
+extensions.viewer.relations.dependencies: "Depends on"
+extensions.viewer.relations.dependents: "Required by (active)"
+extensions.viewer.relations.none: "None"
+extensions.viewer.relations.unresolved: "unresolved"
+extensions.viewer.relations.cycle: "cycle"
 extensions.priority.note: "Note: extensions listed higher can override lower extensions"
 extensions.reload.required.title: "GUI reload required"
 extensions.reload.required.message: "The GUI needs to reload as content needs to be reloaded from disk.\n\nIf you don't want to reload, click cancel"
@@ -259,7 +265,6 @@ store.content.status.change: "This content's status changed. Please restart the 
 store.content.uninstall: Uninstall
 store.filter.condensed: "Full / Condensed list"
 store.filter.installed: "Show / Hide installed content"
-store.element.activated.nouninstall: "Cannot select content as it is an activated extension. Deactivate it before uninstalling: {{name}}"
 store.element.installed.locally: This content is installed but not available online (deprecation)
 store.element.installed.online: This content is already installed and available online
 store.element.install.available: This content is available for installation
@@ -322,8 +327,88 @@ config.qualifier.single: "This setting"
 config.qualifier.group: "All editable options in this group"
 config.qualifier.all: "All slots"
 config.qualifier.slot: "This slot"
+discovery.search: "Search names and descriptions"
+discovery.tags: "Tags"
+discovery.indexing: "Loading descriptions…"
+discovery.incomplete: "Some descriptions are unavailable."
+discovery.retry: "Retry"
+discovery.empty: "No matching extensions."
+discovery.hiddenSelection: "Outside the current filter"
+discovery.collapse: "Collapse {{name}}"
+discovery.expand: "Expand {{name}}"
+discovery.approximate: "Related match"
+discovery.tag.ai: "AI"
+discovery.tag.aiv: "AI castles"
+discovery.tag.aic: "AI behavior"
+discovery.tag.aia: "AI attacks"
+discovery.tag.balance: "Balance"
+discovery.tag.bugfixes: "Bug fixes"
+discovery.tag.code: "Code"
+discovery.tag.config: "Applies settings"
+discovery.tag.maps: "Maps"
+discovery.tag.modpack: "Mod packs"
+discovery.tag.scenarios: "Scenarios"
+discovery.tag.sounds: "Sounds"
+discovery.tag.textures: "Textures"
+discovery.tag.tools: "Tools"
+discovery.tag.behavior: "Behavior"
+discovery.tag.files: "Includes files"
+discovery.tag.options: "Editable options"
+discovery.tag.family: "Family"
+discovery.tag.plugin: "Plugin"
+discovery.tag.module: "Module"
 extensions.folder.open: Open extensions folder (ucp — modules and plugins)
 extensions.folder.error.title: Could not open folder
 extensions.folder.error.message: The folder or installed extension may be missing, inaccessible, or belong to a previous installation. Select the installation again and check that a file manager is available. See the log for details.
 extensions.extension.shell.reveal: Show installed extension in File Explorer
 extensions.extension.shell.parent: Open the installed extension’s containing folder
+sandbox.init.error: Could not initialize the custom menu.
+sandbox.retry: Retry
+
+modal.search: "Search this menu"
+modal.show.all: "Show all"
+modal.empty: "This menu has no options."
+modal.no.results: "No matching options. Clear the search to show all settings."
+modal.live.edit: "Changes stay in your working configuration when you close. Use the main editor to save or export."
+gui.update.available.title: "GUI update available"
+gui.update.available.body: "Download the latest GUI from the releases page."
+
+
+discovery.filters: "Filters"
+discovery.tagFilter: "Tag filter"
+discovery.any: "OR"
+discovery.all: "AND"
+discovery.any.help: "Match any selected tag"
+discovery.all.help: "Match every selected tag"
+discovery.excludeModules: "Exclude modules"
+discovery.clearFilters: "Clear filters"
+discovery.wholeWords: "Words"
+discovery.wholeWords.help: "Match whole words only; ignore partial words and typing mistakes"
+discovery.tag.economy: "Economy"
+discovery.tag.interface: "Interface"
+discovery.tag.multiplayer: "Multiplayer"
+discovery.tag.replay: "Replays"
+discovery.family.conflict.title: Conflicting family configurations
+discovery.family.conflict.message: 'Choose one configuration per family. Resolve these selections or their dependencies before continuing:
+
+  {{details}}'
+discovery.family.switch: Select configuration
+discovery.family.selected: Selected configuration
+discovery.preferences.masked.title: Required extension settings
+discovery.preferences.masked.message: '{{n}} saved preferences will be temporarily overridden by required settings. Your preferences are kept and return when those requirements are removed. Continue?
+
+  {{entries}}'
+store.toolbar.uninstall.dependencies: "Cannot uninstall: other extensions still need this content.\n{{lst}}"
+store.element.activated.uninstall: "Select to deactivate and uninstall {{name}}."
+content.uninstallation.deactivate.title: "Deactivate and uninstall"
+content.uninstallation.deactivate.message: "Your current setup, including pending changes, will be saved before removal. These extensions will be deactivated and uninstalled:\n\n{{lst}}\n\nSettings and resource choices to clear:\n{{entries}}\n\nContinue?"
+content.uninstallation.changed: "The setup changed during removal. Nothing else will be uninstalled; select the extensions again."
+content.uninstallation.editor: "Finish editing the extension before uninstalling content."
+content.uninstallation.noconfig: "No configuration file is available. Apply your setup before uninstalling an active extension."
+content.uninstallation.selected: "Selected packages"
+content.uninstallation.dependents: "Dependent packages that must also be removed"
+content.uninstallation.cleanup: "Remove unused dependencies too"
+content.uninstallation.cleanup.help: "Only dependencies of these packages are considered. Shared dependencies and explicit active choices are kept."
+content.uninstallation.review.title: "Review uninstall"
+content.uninstallation.review.message: "Review the packages below. Active packages will be deactivated, and the current setup will be saved before their files are removed."
+store.element.uninstall.dependents: "Other installed packages depend on this package. Uninstall lets you review and remove those packages together."

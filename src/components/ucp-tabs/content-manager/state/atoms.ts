@@ -10,13 +10,17 @@ import { ContentInstallationStatus } from './downloads/download-progress';
 import { UCP_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
 import { STORE_SHOW_ALL_EXTENSION_TYPES_ATOM } from '../../../../function/gui-settings/settings';
 import { UI_FILTER_SETTING_ATOM } from '../buttons/filter-button';
-import {
-  ACTIVE_EXTENSIONS_ID_ATOM,
-  EXTENSIONS_ATOM,
-  EXTENSIONS_STATE_TREE_ATOM,
-} from '../../../../function/extensions/state/focus';
+import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
+import {
+  DiscoveryFilter,
+  EMPTY_DISCOVERY_FILTER,
+} from '../../../../function/content/discovery/search';
+import {
+  planUninstall,
+  uninstallErrors,
+} from '../../../../function/extensions/dependency-management/uninstall';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -25,6 +29,10 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
 );
 
 export const LAST_CLICKED_CONTENT_ATOM = atom<ContentElement | undefined>();
+
+export const CONTENT_FILTERS_ATOM = atom<DiscoveryFilter>(
+  EMPTY_DISCOVERY_FILTER,
+);
 
 export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
@@ -36,15 +44,19 @@ export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   return d!;
 });
 
-export const CONTENT_STORE_ATOM = atomWithQuery((get) => ({
-  queryKey: [
-    'store',
-    get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString(),
-  ] as [string, string],
-  queryFn: fetchStore,
-  retry: false,
-  // staleTime: Infinity,
-}));
+export const CONTENT_STORE_ATOM = atomWithQuery((get) => {
+  const { version, status } = get(UCP_VERSION_ATOM);
+  return {
+    queryKey: ['store', version.getMajorMinorPatchAsString()] as [
+      string,
+      string,
+    ],
+    queryFn: fetchStore,
+    enabled: status === 'ok' && version.isValidForSemanticVersioning,
+    retry: false,
+    // staleTime: Infinity,
+  };
+});
 
 const storePackagesAtom = atom((get) => {
   const { data } = get(CONTENT_STORE_ATOM);
@@ -94,7 +106,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const descriptions = [
       {
         language: 'default',
-        content: e.description || '< not loaded >',
+        content: e.description || '',
         method: 'inline',
       },
       ...(matchingStorePackage !== undefined
@@ -105,12 +117,15 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const p = {
       definition: {
         ...e.definition,
-        url: 'nonsense',
+        tags: e.definition.tags ?? matchingStorePackage?.definition.tags,
+        family: e.definition.family ?? matchingStorePackage?.definition.family,
         dependencies: deps,
       },
       contents: {
+        source: matchingStorePackage?.contents.source,
         package: pack,
         description: descriptions,
+        'tag-locales': matchingStorePackage?.contents['tag-locales'],
       },
       online: isOnline,
       installed: true,
@@ -190,17 +205,21 @@ export const isContentInUseAtom = atom((get) =>
   ),
 );
 
-export const isTopLevelContentAtom = atom((get) =>
-  get(CONTENT_ELEMENTS_ATOM).filter((ce) => {
-    const tree = get(EXTENSIONS_STATE_TREE_ATOM);
-    const extensions = get(EXTENSIONS_ATOM);
-    const extOpt = extensions.filter(
-      (ext) =>
-        ext.name === ce.definition.name &&
-        ext.version === ce.definition.version,
-    );
-    if (extOpt.length === 0) return true;
+export const CONTENT_UNINSTALL_ERRORS_ATOM = atom((get) => {
+  const state = get(EXTENSION_STATE_INTERFACE_ATOM);
+  return Object.fromEntries(
+    state.extensions.map((ext) => {
+      const id = createExtensionID(ext);
+      return [id, uninstallErrors(state, [id])];
+    }),
+  );
+});
 
-    return tree.reverseExtensionDependenciesFor(extOpt[0]).length === 0;
-  }),
-);
+export const SELECTED_UNINSTALL_ERRORS_ATOM = atom((get) => {
+  const ids = get(CONTENT_INTERFACE_STATE_ATOM)
+    .selected.filter((ce) => ce.installed)
+    .map(createExtensionID);
+  return ids.length
+    ? planUninstall(get(EXTENSION_STATE_INTERFACE_ATOM), ids).errors
+    : [];
+});

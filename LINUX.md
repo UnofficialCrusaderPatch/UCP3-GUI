@@ -1,7 +1,47 @@
 
 # UCP3 on Linux
 ## Running UCP3 on Linux
-It involves using the Linux builds of the UCP3-GUI. If the ones we provided do not work, you might have to compile the GUI from source, see below.
+Download the Linux assets from the [GUI releases](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/releases), expanding **Assets** if necessary. The [1.0.16 release](https://github.com/UnofficialCrusaderPatch/UCP3-GUI/releases/tag/v1.0.16) includes both `ucp3-gui_1.0.16_amd64.AppImage` and `ucp3-gui_1.0.16_amd64.deb`. These builds are for x86-64 (amd64), not ARM.
+
+### AppImage
+
+Download the plain `.AppImage` file; `.AppImage.tar.gz` and `.sig` are for the automatic updater. From the download directory:
+
+```sh
+chmod +x ucp3-gui_1.0.16_amd64.AppImage
+./ucp3-gui_1.0.16_amd64.AppImage
+```
+
+If mounting fails because FUSE is unavailable, try:
+
+```sh
+./ucp3-gui_1.0.16_amd64.AppImage --appimage-extract-and-run
+```
+
+AppImages bundle libraries but still have host requirements (including glibc and graphics drivers); they are not a guarantee of compatibility with every distribution. See [Tauri's Linux bundle guide](https://v1.tauri.app/v1/guides/building/linux/).
+
+### Debian packages and compatibility
+
+Our Linux CI builds on Ubuntu 22.04 using Tauri 1 and WebKitGTK 4.0. The published 1.0.14 and 1.0.16 `.deb` files declare `libwebkit2gtk-4.0-37` and `libgtk-3-0`; their executables also require glibc 2.34 or newer and OpenSSL 3 (`libssl.so.3` and `libcrypto.so.3`, provided by `libssl3`). Future packages explicitly declare those additional requirements.
+
+- **Ubuntu 22.04 and Debian 12 (Bookworm):** their repositories provide the required library generation. This is a dependency compatibility baseline, not a claim that every desktop/driver setup has been tested. See the [Ubuntu package](https://packages.ubuntu.com/jammy/libwebkit2gtk-4.0-37) and [Debian 12 package](https://packages.debian.org/bookworm/libwebkit2gtk-4.0-37).
+- **Debian 13 (Trixie) and Ubuntu 24.04:** their standard repositories provide WebKitGTK 4.1 instead of the required 4.0 runtime, so the current `.deb` cannot be installed using only those repositories. WebKitGTK 4.1 is a different ABI; changing the dependency name does not fix the executable. See [Debian's WebKitGTK packages](https://packages.debian.org/source/webkit2gtk) and [Ubuntu's WebKitGTK packages](https://packages.ubuntu.com/search?keywords=webkit2gtk).
+- **Debian 11:** the published binaries require a newer glibc and OpenSSL than the distribution supplies.
+
+On Debian 12 or Ubuntu 22.04, install from the download directory with APT so it resolves dependencies (including OpenSSL for the older packages):
+
+```sh
+sudo apt update
+sudo apt install ./ucp3-gui_1.0.16_amd64.deb libssl3
+```
+
+On distributions without WebKitGTK 4.0, try the AppImage and report any terminal error. Rebuilding the current Tauri 1 source still requires WebKitGTK 4.0 development libraries; it does not by itself solve that ABI mismatch. Native `.deb` support there needs a WebKitGTK 4.1-compatible GUI port.
+
+Tauri's [Linux automatic updater supports AppImage, not `.deb`](https://v1.tauri.app/v1/guides/distribution/updater/). Update a `.deb` installation by downloading and installing a newer `.deb`; restarting alone cannot install that update.
+
+If installation fails, include the output of `cat /etc/os-release`, `uname -m`, and the complete APT or AppImage terminal error in your report so we can distinguish unavailable dependencies from graphics or runtime failures.
+
+### Install the framework
 
 If it does work, then:
 1. Launch the GUI

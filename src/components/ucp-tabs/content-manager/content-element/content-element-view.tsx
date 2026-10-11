@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   CheckCircle,
@@ -5,32 +6,36 @@ import {
   CircleFill,
   ExclamationCircleFill,
   Globe,
+  Link45deg,
 } from 'react-bootstrap-icons';
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import {
   CONTENT_INTERFACE_STATE_ATOM,
   contentInstallationStatusAtoms,
   filteredContentElementsAtom,
   isContentInUseAtom,
+  CONTENT_UNINSTALL_ERRORS_ATOM,
   LAST_CLICKED_CONTENT_ATOM,
 } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
-import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { getStore } from '../../../../hooks/jotai/base';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
-import Message from '../../../general/message';
+import Message, { useMessage } from '../../../general/message';
 
 const shiftSelectionStartAtom = atom<string>('');
 
 export type ContentElementViewProps = {
   data: ContentElement;
+  familyToggle?: ReactNode;
+  displayName?: string;
 };
 // eslint-disable-next-line import/prefer-default-export
 export function ContentElementView(props: ContentElementViewProps) {
-  const { data } = props;
+  const { data, familyToggle, displayName: displayNameOverride } = props;
   const { definition, installed, online } = data;
-  const { name, version, 'display-name': displayName } = definition;
+  const { name, version } = definition;
+  const displayName = displayNameOverride ?? definition['display-name'];
 
   const id = `${name}@${version}`;
 
@@ -82,6 +87,13 @@ export function ContentElementView(props: ContentElementViewProps) {
     [data],
   );
   const isInUse = useAtomValue(isInUseAtom);
+  const removalErrors = useAtomValue(CONTENT_UNINSTALL_ERRORS_ATOM)[id] ?? [];
+  const localize = useMessage();
+  let removalHelp = isInUse
+    ? localize({ key: 'store.element.activated.uninstall', args: { name } })
+    : undefined;
+  if (removalErrors.length)
+    removalHelp = localize('store.element.uninstall.dependents');
 
   const statusElementAtom = useMemo(
     () =>
@@ -276,29 +288,11 @@ export function ContentElementView(props: ContentElementViewProps) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       key={`${name}-${version}`}
-      className={`extension-element ${isInUse ? 'disabled' : ''}`}
-      style={
-        isInUse
-          ? {
-              cursor: 'pointer',
-              position: 'relative',
-              ...selectedStyle,
-            }
-          : {
-              cursor: 'pointer',
-              position: 'relative',
-              ...selectedStyle,
-            }
-      }
+      className="extension-element"
+      title={removalHelp}
+      style={{ cursor: 'pointer', position: 'relative', ...selectedStyle }}
       onMouseEnter={() => {
-        if (isInUse) {
-          setStatusBarMessage({
-            key: 'store.element.activated.nouninstall',
-            args: {
-              name,
-            },
-          });
-        }
+        if (removalHelp) setStatusBarMessage(removalHelp);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
@@ -306,9 +300,6 @@ export function ContentElementView(props: ContentElementViewProps) {
       onClick={(e) => {
         getStore().set(LAST_CLICKED_CONTENT_ATOM, data);
 
-        if (isInUse) {
-          return;
-        }
         let newSelection = [...contentInterfaceState.selected];
 
         const sssa = getStore().get(shiftSelectionStartAtom);
@@ -326,18 +317,11 @@ export function ContentElementView(props: ContentElementViewProps) {
             const firstIndex = ids.indexOf(
               getStore().get(shiftSelectionStartAtom),
             );
-            newSelection = f
-              .filter((value, index) =>
-                firstIndex < lastIndex
-                  ? index >= firstIndex && index <= lastIndex
-                  : index >= lastIndex && index <= firstIndex,
-              )
-              .filter(
-                (ce) =>
-                  getStore()
-                    .get(ACTIVE_EXTENSIONS_ID_ATOM)
-                    .indexOf(createExtensionID(ce)) === -1,
-              );
+            newSelection = f.filter((value, index) =>
+              firstIndex < lastIndex
+                ? index >= firstIndex && index <= lastIndex
+                : index >= lastIndex && index <= firstIndex,
+            );
             // getStore().set(shiftSelectionStartAtom, '');
           }
         } else {
@@ -366,7 +350,10 @@ export function ContentElementView(props: ContentElementViewProps) {
       }}
     >
       {progressOverlayElement}
-      <div className="extension-name-box">
+      <div
+        className={`extension-name-box ${familyToggle ? 'extension-name-box--family' : ''}`}
+      >
+        {familyToggle}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span
           className={`extension-name-box__name ${isInUse ? ' text-muted' : ''}`}
@@ -378,6 +365,9 @@ export function ContentElementView(props: ContentElementViewProps) {
       <div className="me-2">{progressElement}</div>
       <div className="me-auto" style={{ paddingRight: '3px' }}>
         {statusElement}
+        {removalErrors.length > 0 && (
+          <Link45deg className="ms-1" title={removalHelp} />
+        )}
       </div>
     </div>
   );

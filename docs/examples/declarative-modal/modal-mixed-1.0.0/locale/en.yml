@@ -1,0 +1,22 @@
+mixed: Mixed controls
+description: Synthetic editor fixture; it changes no gameplay.
+instructions: Live configuration editing
+instructions.text: Try search, locks, presets, reset, Creator mode and nested file
+  selection. Close keeps working edits.
+editing: Enable editing
+general: General settings
+amount: Amount
+amount.tip: A number from zero to one hundred.
+locked: Required amount
+difficulty: Difficulty
+stance: Stance
+normal: Normal
+hard: Hard
+advanced: Advanced settings
+suggested: Suggested amount
+nested: Files and speed
+file: File selection
+speed: Speed
+disabled: Disabled submenu
+empty: Empty submenu
+disabledvalue: Disabled value

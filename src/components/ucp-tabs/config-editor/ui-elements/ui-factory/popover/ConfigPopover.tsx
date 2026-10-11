@@ -1,6 +1,6 @@
 import './popover.css';
 import { useAtomValue } from 'jotai';
-import { MutableRefObject } from 'react';
+import { MutableRefObject, useEffect } from 'react';
 import { Overlay } from 'react-bootstrap';
 import { CREATOR_MODE_ATOM } from '../../../../../../function/gui-settings/settings';
 import ResetSettingButton from './ResetSettingButton';
@@ -20,6 +20,20 @@ export function ConfigPopover(props: {
   const creator = useAtomValue(CREATOR_MODE_ATOM);
   const resetAvailable = useResetAvailable(url);
   const hover = useHoverBridge(show, !creator && resetAvailable);
+  const { visible, dismiss: dismissHover } = hover;
+  useEffect(() => {
+    const node = theRef.current as HTMLElement | null;
+    if (!node || !visible) return undefined;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        dismissHover();
+      }
+    };
+    node.addEventListener('keydown', dismiss);
+    return () => node.removeEventListener('keydown', dismiss);
+  }, [theRef, visible, dismissHover]);
   if (creator || !resetAvailable) return null;
 
   return (

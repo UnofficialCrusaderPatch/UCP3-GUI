@@ -1,0 +1,22 @@
+mixed: Gemischte Konfigurationseinstellungen
+description: Synthetisches Beispiel für den Editor ohne Auswirkung auf das Spiel.
+instructions: Live configuration editing
+instructions.text: Try search, locks, presets, reset, Creator mode and nested file
+  selection. Close keeps working edits.
+editing: Bearbeitung aktivieren
+general: Allgemeine Einstellungen
+amount: Anzahl
+amount.tip: A number from zero to one hundred.
+locked: Vorgeschriebene Anzahl
+difficulty: Difficulty
+stance: Stance
+normal: Normal
+hard: Hard
+advanced: Erweiterte Einstellungen
+suggested: Suggested amount
+nested: Dateiauswahl und Geschwindigkeit
+file: Dateiauswahl
+speed: Speed
+disabled: Disabled submenu
+empty: Leeres Untermenü
+disabledvalue: Disabled value

@@ -23,6 +23,7 @@ export function attemptStrategies(
   // Also wipe the current configuration and rebuild it from scratch
   const newExtensionsState = {
     ...extensionsState,
+    tree: extensionsState.tree.copy(),
     activeExtensions: [],
     explicitlyActivatedExtensions: [],
     configuration: createEmptyConfigurationState(),

@@ -37,8 +37,8 @@ export async function createPluginConfigFromCurrentState() {
   const result = await serializeUCPConfig(
     userConfiguration,
     configuration,
-    extensionsState.explicitlyActivatedExtensions,
-    activeExtensions,
+    [...extensionsState.explicitlyActivatedExtensions].reverse(),
+    [...activeExtensions].reverse(),
     configurationQualifier,
   );
 
@@ -47,7 +47,7 @@ export async function createPluginConfigFromCurrentState() {
       'config-sparse': {
         modules: result['config-sparse'].modules,
         plugins: result['config-sparse'].plugins,
-        'load-order': result['config-sparse']['load-order'].slice().reverse(),
+        'load-order': result['config-sparse']['load-order'],
       },
       meta: result.meta,
     } as UCP3SerializedPluginConfig,

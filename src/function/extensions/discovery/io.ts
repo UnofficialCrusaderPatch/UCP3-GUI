@@ -16,11 +16,44 @@ export const DEFINITION_FILE = 'definition.yml';
 export const LOCALE_FOLDER = 'locale';
 export const DESCRIPTION_FILE = 'description.md';
 
+function validateModalChildren(node: unknown, modalName?: string): void {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) {
+    node.forEach((child) => validateModalChildren(child, modalName));
+    return;
+  }
+  const element = node as Record<string, unknown>;
+  const owner =
+    element.display === 'Modal' ? String(element.name ?? '') : modalName;
+  const requiredChildren = ['Group', 'GroupBox'].includes(
+    String(element.display),
+  );
+  if (
+    owner !== undefined &&
+    (element.children !== undefined || requiredChildren) &&
+    (!Array.isArray(element.children) ||
+      element.children.some(
+        (child) =>
+          !child ||
+          typeof child !== 'object' ||
+          typeof child.display !== 'string',
+      ))
+  ) {
+    throw new Error(
+      `Modal ${owner}: children must be an array of configuration elements (${element.name ?? element.display})`,
+    );
+  }
+  if (Array.isArray(element.children))
+    validateModalChildren(element.children, owner);
+}
+
 export async function readUISpec(
   eh: ExtensionHandle,
 ): Promise<{ options: { [key: string]: unknown }[] }> {
   if (await eh.doesEntryExist(OPTIONS_FILE)) {
-    return yaml.parse(await eh.getTextContents(OPTIONS_FILE));
+    const spec = yaml.parse(await eh.getTextContents(OPTIONS_FILE));
+    validateModalChildren(spec?.options);
+    return spec;
   }
   return { options: [] };
 }
@@ -58,7 +91,9 @@ export async function readLocales(
         translations[language] = Object.fromEntries(
           Object.entries(translation).map(([key, value]) => [
             key.toLowerCase(),
-            value.replaceAll('&', ''),
+            key.toLowerCase().startsWith('tags.')
+              ? value
+              : value.replaceAll('&', ''),
           ]),
         );
       } else {

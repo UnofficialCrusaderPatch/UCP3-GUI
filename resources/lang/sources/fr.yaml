@@ -209,7 +209,6 @@ store.content.status.change: "Le statut de ce contenu a changé. Veuillez redém
 store.content.uninstall: Désinstaller
 store.filter.condensed: "Liste Complète / Abrégée"
 store.filter.installed: "Afficher / Cacher le contenu installé"
-store.element.activated.nouninstall: "Impossible de sélectionner le contenu car c'est une extension activée. Désactivez la avant de désinstaller: {{name}}"
 store.element.installed.locally: Ce contenu est installé mais n'est pas disponible en ligne (dépréciation)
 store.element.installed.online: Ce contenu est déjà installé et disponible en ligne
 store.element.install.available: Ce contenu est disponible pour être installé
@@ -272,3 +271,75 @@ config.qualifier.single: "Ce paramètre"
 config.qualifier.group: "Toutes les options modifiables de ce groupe"
 config.qualifier.all: "Tous les emplacements"
 config.qualifier.slot: "Cet emplacement"
+discovery.search: "Rechercher dans les noms et descriptions"
+discovery.tags: "Étiquettes"
+discovery.indexing: "Chargement des descriptions…"
+discovery.incomplete: "Certaines descriptions sont indisponibles."
+discovery.retry: "Réessayer"
+discovery.empty: "Aucune extension correspondante."
+discovery.hiddenSelection: "Hors du filtre actuel"
+discovery.collapse: "Réduire {{name}}"
+discovery.expand: "Développer {{name}}"
+discovery.approximate: "Résultat approchant"
+discovery.tag.ai: "IA"
+discovery.tag.aiv: "Châteaux IA"
+discovery.tag.aic: "Comportement IA"
+discovery.tag.aia: "Attaques IA"
+discovery.tag.balance: "Équilibrage"
+discovery.tag.bugfixes: "Corrections"
+discovery.tag.code: "Code"
+discovery.tag.config: "Applique des paramètres"
+discovery.tag.maps: "Cartes"
+discovery.tag.modpack: "Packs de mods"
+discovery.tag.scenarios: "Scénarios"
+discovery.tag.sounds: "Sons"
+discovery.tag.textures: "Textures"
+discovery.tag.tools: "Outils"
+discovery.tag.behavior: "Comportement"
+discovery.tag.files: "Contient des fichiers"
+discovery.tag.options: "Options modifiables"
+discovery.tag.family: "Famille"
+discovery.tag.plugin: "Plugin"
+discovery.tag.module: "Module"
+gui.update.available.title: "Mise à jour de l’interface disponible"
+gui.update.available.body: "Téléchargez la dernière interface depuis la page des versions."
+
+
+discovery.filters: "Filtres"
+discovery.tagFilter: "Étiquettes"
+discovery.any: "OU"
+discovery.all: "ET"
+discovery.any.help: "Au moins une étiquette choisie"
+discovery.all.help: "Toutes les étiquettes choisies"
+discovery.excludeModules: "Masquer les modules"
+discovery.clearFilters: "Effacer les filtres"
+discovery.wholeWords: "Mots"
+discovery.wholeWords.help: "Rechercher des mots entiers, sans fragments ni fautes de frappe"
+discovery.tag.economy: "Économie"
+discovery.tag.interface: "Interface"
+discovery.tag.multiplayer: "Multijoueur"
+discovery.tag.replay: "Rediffusions"
+discovery.family.conflict.title: Configurations de famille incompatibles
+discovery.family.conflict.message: 'Choisissez une configuration par famille. Résolvez ces sélections ou leurs dépendances avant de continuer :
+
+  {{details}}'
+discovery.family.switch: Choisir la configuration
+discovery.family.selected: Configuration sélectionnée
+discovery.preferences.masked.title: Paramètres requis par les extensions
+discovery.preferences.masked.message: '{{n}} préférences enregistrées seront temporairement remplacées par des paramètres requis. Elles sont conservées et seront rétablies lorsque ces exigences seront supprimées. Continuer ?
+
+  {{entries}}'
+store.toolbar.uninstall.dependencies: "Désinstallation impossible : d’autres extensions ont encore besoin de ce contenu.\n{{lst}}"
+store.element.activated.uninstall: "Sélectionnez pour désactiver et désinstaller {{name}}."
+content.uninstallation.deactivate.title: "Désactiver et désinstaller"
+content.uninstallation.deactivate.message: "Votre configuration actuelle, y compris les modifications en attente, sera enregistrée avant la suppression. Ces extensions seront désactivées et désinstallées :\n\n{{lst}}\n\nParamètres et choix de ressources à effacer :\n{{entries}}\n\nContinuer ?"
+content.uninstallation.changed: "La configuration a changé pendant la suppression. Aucune autre extension ne sera désinstallée ; sélectionnez à nouveau les extensions."
+content.uninstallation.editor: "Terminez la modification de l’extension avant de désinstaller du contenu."
+content.uninstallation.noconfig: "Aucun fichier de configuration disponible. Appliquez votre configuration avant de désinstaller une extension active."
+content.uninstallation.selected: "Paquets sélectionnés"
+content.uninstallation.dependents: "Paquets dépendants à supprimer également"
+content.uninstallation.cleanup: "Supprimer aussi les dépendances inutilisées"
+content.uninstallation.cleanup.help: "Seules les dépendances de ces paquets sont examinées. Les dépendances partagées et les choix explicitement activés sont conservés."
+content.uninstallation.review.title: "Vérifier la désinstallation"
+content.uninstallation.review.message: "Vérifiez les paquets ci-dessous. Les paquets actifs seront désactivés et la configuration actuelle sera enregistrée avant la suppression de leurs fichiers."
+store.element.uninstall.dependents: "D’autres paquets installés dépendent de ce paquet. La désinstallation permet de les vérifier et de les supprimer ensemble."

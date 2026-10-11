@@ -74,6 +74,12 @@ extensions.extension.shell.open: "Im Explorer öffnen"
 extensions.is.dependency: "Kann nicht deaktiviert werden, da Abhängigkeit von {{dependencies}}"
 extensions.title: "Inhalt"
 extensions.viewer: "Erweiterungsinformationen"
+extensions.viewer.relations: "Abhängigkeiten"
+extensions.viewer.relations.dependencies: "Benötigt"
+extensions.viewer.relations.dependents: "Benötigt von (aktiv)"
+extensions.viewer.relations.none: "Keine"
+extensions.viewer.relations.unresolved: "nicht aufgelöst"
+extensions.viewer.relations.cycle: "Zyklus"
 extensions.priority.note: "Hinweis: Höher gelistete Erweiterungen können niedrigere überschreiben"
 extensions.reload.required.title: "GUI-Neuladen erforderlich"
 extensions.reload.required.message: "Die GUI muss neu geladen werden, da Inhalte erneut von der Festplatte eingelesen werden.\n\nWenn du nicht neu laden möchtest, klicke auf Abbrechen"
@@ -209,7 +215,6 @@ store.content.status.change: "Status dieses Inhalts hat sich geändert. GUI neu 
 store.content.uninstall: Deinstallieren
 store.filter.condensed: "Vollständige / komprimierte Liste"
 store.filter.installed: "Installierte Inhalte zeigen / verbergen"
-store.element.activated.nouninstall: "Kann nicht ausgewählt werden - aktive Erweiterung. Erst deaktivieren: {{name}}"
 store.element.installed.locally: "Installiert, aber online nicht verfügbar (veraltet)"
 store.element.installed.online: "Bereits installiert und online verfügbar"
 store.element.install.available: "Zur Installation verfügbar"
@@ -272,8 +277,88 @@ config.qualifier.single: "Diese Einstellung"
 config.qualifier.group: "Alle bearbeitbaren Optionen dieser Gruppe"
 config.qualifier.all: "Alle Plätze"
 config.qualifier.slot: "Dieser Platz"
+discovery.search: "Namen und Beschreibungen durchsuchen"
+discovery.tags: "Tags"
+discovery.indexing: "Beschreibungen werden geladen…"
+discovery.incomplete: "Einige Beschreibungen sind nicht verfügbar."
+discovery.retry: "Erneut versuchen"
+discovery.empty: "Keine passenden Erweiterungen."
+discovery.hiddenSelection: "Außerhalb des aktuellen Filters"
+discovery.collapse: "{{name}} einklappen"
+discovery.expand: "{{name}} ausklappen"
+discovery.approximate: "Ähnlicher Treffer"
+discovery.tag.ai: "KI"
+discovery.tag.aiv: "KI-Burgen"
+discovery.tag.aic: "KI-Verhalten"
+discovery.tag.aia: "KI-Angriffe"
+discovery.tag.balance: "Balance"
+discovery.tag.bugfixes: "Fehlerkorrekturen"
+discovery.tag.code: "Code"
+discovery.tag.config: "Wendet Einstellungen an"
+discovery.tag.maps: "Karten"
+discovery.tag.modpack: "Mod-Pakete"
+discovery.tag.scenarios: "Szenarien"
+discovery.tag.sounds: "Sounds"
+discovery.tag.textures: "Texturen"
+discovery.tag.tools: "Werkzeuge"
+discovery.tag.behavior: "Verhalten"
+discovery.tag.files: "Enthält Dateien"
+discovery.tag.options: "Bearbeitbare Optionen"
+discovery.tag.family: "Familie"
+discovery.tag.plugin: "Plugin"
+discovery.tag.module: "Modul"
 extensions.folder.open: Erweiterungsordner öffnen (ucp — Module und Plugins)
 extensions.folder.error.title: Ordner konnte nicht geöffnet werden
 extensions.folder.error.message: Der Ordner oder die installierte Erweiterung fehlt möglicherweise, ist nicht zugänglich oder gehört zu einer zuvor gewählten Installation. Wähle die Installation erneut aus und prüfe, ob ein Dateimanager verfügbar ist. Einzelheiten stehen im Protokoll.
 extensions.extension.shell.reveal: Installierte Erweiterung im Explorer anzeigen
 extensions.extension.shell.parent: Übergeordneten Ordner der installierten Erweiterung öffnen
+sandbox.init.error: Das benutzerdefinierte Menü konnte nicht initialisiert werden.
+sandbox.retry: Erneut versuchen
+
+modal.search: "In diesem Menü suchen"
+modal.show.all: "Alle anzeigen"
+modal.empty: "Dieses Menü enthält keine Einstellungen."
+modal.no.results: "Keine passenden Einstellungen. Leeren Sie die Suche, um alle Einstellungen anzuzeigen."
+modal.live.edit: "Änderungen bleiben beim Schließen in Ihrer Arbeitskonfiguration. Speichern oder exportieren Sie im Haupteditor."
+gui.update.available.title: "GUI-Update verfügbar"
+gui.update.available.body: "Lade die neueste GUI von der Veröffentlichungsseite herunter."
+
+
+discovery.filters: "Filter"
+discovery.tagFilter: "Tagfilter"
+discovery.any: "ODER"
+discovery.all: "UND"
+discovery.any.help: "Mindestens ein gewählter Tag trifft zu"
+discovery.all.help: "Alle gewählten Tags treffen zu"
+discovery.excludeModules: "Module ausblenden"
+discovery.clearFilters: "Filter löschen"
+discovery.wholeWords: "Ganzwort"
+discovery.wholeWords.help: "Nur ganze Wörter finden; keine Wortteile oder Tippfehler"
+discovery.tag.economy: "Wirtschaft"
+discovery.tag.interface: "Oberfläche"
+discovery.tag.multiplayer: "Mehrspieler"
+discovery.tag.replay: "Wiederholungen"
+discovery.family.conflict.title: Widersprüchliche Familienkonfigurationen
+discovery.family.conflict.message: 'Wähle eine Konfiguration pro Familie. Löse diese Auswahl oder ihre Abhängigkeiten vor dem Fortfahren auf:
+
+  {{details}}'
+discovery.family.switch: Konfiguration auswählen
+discovery.family.selected: Ausgewählte Konfiguration
+discovery.preferences.masked.title: Erforderliche Erweiterungseinstellungen
+discovery.preferences.masked.message: '{{n}} gespeicherte Einstellungen werden vorübergehend durch erforderliche Werte überschrieben. Deine Einstellungen bleiben erhalten und gelten wieder, sobald diese Anforderungen entfallen. Fortfahren?
+
+  {{entries}}'
+store.toolbar.uninstall.dependencies: "Deinstallation nicht möglich: Andere Erweiterungen benötigen diese Inhalte.\n{{lst}}"
+store.element.activated.uninstall: "Auswählen, um {{name}} zu deaktivieren und zu deinstallieren."
+content.uninstallation.deactivate.title: "Deaktivieren und deinstallieren"
+content.uninstallation.deactivate.message: "Deine aktuelle Konfiguration wird vor dem Entfernen gespeichert, einschließlich noch nicht angewendeter Änderungen. Diese Erweiterungen werden deaktiviert und deinstalliert:\n\n{{lst}}\n\nZu löschende Einstellungen und Ressourcenauswahl:\n{{entries}}\n\nFortfahren?"
+content.uninstallation.changed: "Die Konfiguration wurde während des Entfernens geändert. Es wird nichts Weiteres deinstalliert. Wähle die Erweiterungen erneut aus."
+content.uninstallation.editor: "Beende die Bearbeitung der Erweiterung, bevor du Inhalte deinstallierst."
+content.uninstallation.noconfig: "Keine Konfigurationsdatei vorhanden. Wende deine Konfiguration an, bevor du eine aktive Erweiterung deinstallierst."
+content.uninstallation.selected: "Ausgewählte Pakete"
+content.uninstallation.dependents: "Abhängige Pakete, die ebenfalls entfernt werden müssen"
+content.uninstallation.cleanup: "Ungenutzte Abhängigkeiten mit entfernen"
+content.uninstallation.cleanup.help: "Es werden nur Abhängigkeiten dieser Pakete berücksichtigt. Gemeinsam benötigte Abhängigkeiten und ausdrücklich aktivierte Erweiterungen bleiben erhalten."
+content.uninstallation.review.title: "Deinstallation prüfen"
+content.uninstallation.review.message: "Prüfe die folgenden Pakete. Aktive Pakete werden deaktiviert und die aktuelle Konfiguration wird gespeichert, bevor ihre Dateien entfernt werden."
+store.element.uninstall.dependents: "Andere installierte Pakete benötigen dieses Paket. Bei der Deinstallation kannst du diese Pakete prüfen und gemeinsam entfernen."

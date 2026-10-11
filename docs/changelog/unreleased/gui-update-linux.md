@@ -1,0 +1,3 @@
+- Show the GUI update notification only once while the tab interface is mounted, including after switching tabs or retrying update checks.
+- Link the notification to GUI downloads so Debian package users can update manually.
+- Declare the Debian package's OpenSSL 3 and minimum glibc requirements, and document Linux downloads and distribution compatibility.

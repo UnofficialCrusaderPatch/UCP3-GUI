@@ -1,4 +1,5 @@
 import { DisplayConfigElement, Extension } from '../../../../config/ucp/common';
+import { displayChildren } from '../../../../config/ucp/display-tree';
 
 // eslint-disable-next-line import/prefer-default-export
 export const attachExtensionInformationToDisplayConfigElement = (
@@ -31,12 +32,7 @@ export const attachExtensionInformationToDisplayConfigElement = (
 
         dce.extension = ext;
 
-        if (dce.display === 'Group' || dce.display === 'GroupBox') {
-          if (dce.children !== undefined && dce.children instanceof Array) {
-            // Assume it is a DisplayConfigElement
-            dce.children.forEach((v) => todo.push(v));
-          }
-        }
+        displayChildren(dce).forEach((v) => todo.push(v));
       }
     } else {
       // throw Error((obj as any).toString());

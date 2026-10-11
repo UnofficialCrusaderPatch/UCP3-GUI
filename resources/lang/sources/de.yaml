@@ -209,7 +209,6 @@ store.content.status.change: "Status dieses Inhalts hat sich geändert. GUI neu 
 store.content.uninstall: Deinstallieren
 store.filter.condensed: "Vollständige / komprimierte Liste"
 store.filter.installed: "Installierte Inhalte zeigen / verbergen"
-store.element.activated.nouninstall: "Kann nicht ausgewählt werden - aktive Erweiterung. Erst deaktivieren: {{name}}"
 store.element.installed.locally: "Installiert, aber online nicht verfügbar (veraltet)"
 store.element.installed.online: "Bereits installiert und online verfügbar"
 store.element.install.available: "Zur Installation verfügbar"
@@ -277,3 +276,10 @@ extensions.folder.error.title: Ordner konnte nicht geöffnet werden
 extensions.folder.error.message: Der Ordner oder die installierte Erweiterung fehlt möglicherweise, ist nicht zugänglich oder gehört zu einer zuvor gewählten Installation. Wähle die Installation erneut aus und prüfe, ob ein Dateimanager verfügbar ist. Einzelheiten stehen im Protokoll.
 extensions.extension.shell.reveal: Installierte Erweiterung im Explorer anzeigen
 extensions.extension.shell.parent: Übergeordneten Ordner der installierten Erweiterung öffnen
+store.toolbar.uninstall.dependencies: "Deinstallation nicht möglich: Andere Erweiterungen benötigen diese Inhalte.\n{{lst}}"
+store.element.activated.uninstall: "Auswählen, um {{name}} zu deaktivieren und zu deinstallieren."
+content.uninstallation.deactivate.title: "Deaktivieren und deinstallieren"
+content.uninstallation.deactivate.message: "Deine aktuelle Konfiguration wird vor dem Entfernen gespeichert, einschließlich noch nicht angewendeter Änderungen. Diese Erweiterungen werden deaktiviert und deinstalliert:\n\n{{lst}}\n\nZu löschende Einstellungen und Ressourcenauswahl:\n{{entries}}\n\nFortfahren?"
+content.uninstallation.changed: "Die Konfiguration wurde während des Entfernens geändert. Es wird nichts Weiteres deinstalliert. Wähle die Erweiterungen erneut aus."
+content.uninstallation.editor: "Beende die Bearbeitung der Erweiterung, bevor du Inhalte deinstallierst."
+content.uninstallation.noconfig: "Keine Konfigurationsdatei vorhanden. Wende deine Konfiguration an, bevor du eine aktive Erweiterung deinstallierst."

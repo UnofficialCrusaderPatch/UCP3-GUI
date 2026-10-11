@@ -5,6 +5,7 @@ import {
   CircleFill,
   ExclamationCircleFill,
   Globe,
+  LockFill,
 } from 'react-bootstrap-icons';
 import { useMemo } from 'react';
 import {
@@ -12,14 +13,14 @@ import {
   contentInstallationStatusAtoms,
   filteredContentElementsAtom,
   isContentInUseAtom,
+  CONTENT_UNINSTALL_ERRORS_ATOM,
   LAST_CLICKED_CONTENT_ATOM,
 } from '../state/atoms';
 import { ContentElement } from '../../../../function/content/types/content-element';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
-import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { getStore } from '../../../../hooks/jotai/base';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
-import Message from '../../../general/message';
+import Message, { useMessage } from '../../../general/message';
 
 const shiftSelectionStartAtom = atom<string>('');
 
@@ -82,6 +83,16 @@ export function ContentElementView(props: ContentElementViewProps) {
     [data],
   );
   const isInUse = useAtomValue(isInUseAtom);
+  const removalErrors = useAtomValue(CONTENT_UNINSTALL_ERRORS_ATOM)[id] ?? [];
+  const localize = useMessage();
+  let removalHelp = isInUse
+    ? localize({ key: 'store.element.activated.uninstall', args: { name } })
+    : undefined;
+  if (removalErrors.length)
+    removalHelp = localize({
+      key: 'store.toolbar.uninstall.dependencies',
+      args: { lst: removalErrors.join('\n') },
+    });
 
   const statusElementAtom = useMemo(
     () =>
@@ -276,29 +287,11 @@ export function ContentElementView(props: ContentElementViewProps) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       key={`${name}-${version}`}
-      className={`extension-element ${isInUse ? 'disabled' : ''}`}
-      style={
-        isInUse
-          ? {
-              cursor: 'pointer',
-              position: 'relative',
-              ...selectedStyle,
-            }
-          : {
-              cursor: 'pointer',
-              position: 'relative',
-              ...selectedStyle,
-            }
-      }
+      className={`extension-element ${removalErrors.length ? 'disabled' : ''}`}
+      title={removalHelp}
+      style={{ cursor: 'pointer', position: 'relative', ...selectedStyle }}
       onMouseEnter={() => {
-        if (isInUse) {
-          setStatusBarMessage({
-            key: 'store.element.activated.nouninstall',
-            args: {
-              name,
-            },
-          });
-        }
+        if (removalHelp) setStatusBarMessage(removalHelp);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
@@ -306,9 +299,6 @@ export function ContentElementView(props: ContentElementViewProps) {
       onClick={(e) => {
         getStore().set(LAST_CLICKED_CONTENT_ATOM, data);
 
-        if (isInUse) {
-          return;
-        }
         let newSelection = [...contentInterfaceState.selected];
 
         const sssa = getStore().get(shiftSelectionStartAtom);
@@ -326,18 +316,11 @@ export function ContentElementView(props: ContentElementViewProps) {
             const firstIndex = ids.indexOf(
               getStore().get(shiftSelectionStartAtom),
             );
-            newSelection = f
-              .filter((value, index) =>
-                firstIndex < lastIndex
-                  ? index >= firstIndex && index <= lastIndex
-                  : index >= lastIndex && index <= firstIndex,
-              )
-              .filter(
-                (ce) =>
-                  getStore()
-                    .get(ACTIVE_EXTENSIONS_ID_ATOM)
-                    .indexOf(createExtensionID(ce)) === -1,
-              );
+            newSelection = f.filter((value, index) =>
+              firstIndex < lastIndex
+                ? index >= firstIndex && index <= lastIndex
+                : index >= lastIndex && index <= firstIndex,
+            );
             // getStore().set(shiftSelectionStartAtom, '');
           }
         } else {
@@ -378,6 +361,9 @@ export function ContentElementView(props: ContentElementViewProps) {
       <div className="me-2">{progressElement}</div>
       <div className="me-auto" style={{ paddingRight: '3px' }}>
         {statusElement}
+        {removalErrors.length > 0 && (
+          <LockFill className="ms-1" title={removalHelp} />
+        )}
       </div>
     </div>
   );

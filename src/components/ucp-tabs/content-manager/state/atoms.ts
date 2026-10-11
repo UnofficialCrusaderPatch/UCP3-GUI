@@ -10,13 +10,10 @@ import { ContentInstallationStatus } from './downloads/download-progress';
 import { UCP_VERSION_ATOM } from '../../../../function/ucp-files/ucp-version';
 import { STORE_SHOW_ALL_EXTENSION_TYPES_ATOM } from '../../../../function/gui-settings/settings';
 import { UI_FILTER_SETTING_ATOM } from '../buttons/filter-button';
-import {
-  ACTIVE_EXTENSIONS_ID_ATOM,
-  EXTENSIONS_ATOM,
-  EXTENSIONS_STATE_TREE_ATOM,
-} from '../../../../function/extensions/state/focus';
+import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state/focus';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
+import { uninstallErrors } from '../../../../function/extensions/dependency-management/uninstall';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -190,17 +187,21 @@ export const isContentInUseAtom = atom((get) =>
   ),
 );
 
-export const isTopLevelContentAtom = atom((get) =>
-  get(CONTENT_ELEMENTS_ATOM).filter((ce) => {
-    const tree = get(EXTENSIONS_STATE_TREE_ATOM);
-    const extensions = get(EXTENSIONS_ATOM);
-    const extOpt = extensions.filter(
-      (ext) =>
-        ext.name === ce.definition.name &&
-        ext.version === ce.definition.version,
-    );
-    if (extOpt.length === 0) return true;
+export const CONTENT_UNINSTALL_ERRORS_ATOM = atom((get) => {
+  const state = get(EXTENSION_STATE_INTERFACE_ATOM);
+  return Object.fromEntries(
+    state.extensions.map((ext) => {
+      const id = createExtensionID(ext);
+      return [id, uninstallErrors(state, [id])];
+    }),
+  );
+});
 
-    return tree.reverseExtensionDependenciesFor(extOpt[0]).length === 0;
-  }),
-);
+export const SELECTED_UNINSTALL_ERRORS_ATOM = atom((get) => {
+  const ids = get(CONTENT_INTERFACE_STATE_ATOM)
+    .selected.filter((ce) => ce.installed)
+    .map(createExtensionID);
+  return ids.length
+    ? uninstallErrors(get(EXTENSION_STATE_INTERFACE_ATOM), ids)
+    : [];
+});

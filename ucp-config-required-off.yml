@@ -1,0 +1,40 @@
+meta:
+  version: 1.0.0
+active: true
+config-full: &id001
+  modules:
+    ucp2-legacy:
+      config:
+        o_keys:
+          enabled:
+            contents:
+              value: true
+    luajit:
+      config: {}
+    cffi:
+      config: {}
+    winProcHandler:
+      config: {}
+    graphicsApiReplacer:
+      config: {}
+    ui:
+      config: {}
+    custom-hotkeys:
+      config: {}
+  plugins: {}
+  load-order:
+  - extension: ucp2-legacy
+    version: 2.15.1
+  - extension: luajit
+    version: 1.0.0
+  - extension: cffi
+    version: 1.0.0
+  - extension: winProcHandler
+    version: 1.0.0
+  - extension: graphicsApiReplacer
+    version: 1.3.0
+  - extension: ui
+    version: 1.0.1
+  - extension: custom-hotkeys
+    version: 0.2.1
+config-sparse: *id001

@@ -5,6 +5,28 @@ Module PR: https://github.com/Krarilotus/extension-custom-hotkeys/pull/16
 
 Two independent defects were reproduced. The tester reported the WASD option was already off, but their saved configuration was not supplied. These checks establish the defects and fixes, not the exact cause of that person's failure.
 
+## Reproduction configs
+
+These are the exact input files used for the native checks below, including their dependency versions. They contain only extension settings and load order, with no personal paths or player data. Use a test installation with UCP 3.0.7 and the listed extension versions; keep a copy of its existing `ucp-config.yml` before replacing it. The screenshots below already document these checks; adding the files does not imply another native test run or a new release.
+
+### Launcher PR #392: saved WASD-on preference overrides required OFF
+
+Download [ucp-config-required-off.yml](ucp-config-required-off.yml), place it in the test game folder as `ucp-config.yml`, and reload that folder's configuration in the launcher. Leave Save before launch enabled.
+
+- Before the fix: the WASD/quicksave option is checked despite being locked OFF by Custom Hotkeys. Saving writes `config-full.modules.ucp2-legacy.config.o_keys.enabled.contents.value: true`; launching fails with `activation.legacy-hotkeys`.
+- With PR #392: the option is unchecked and saving writes that full value as `false`. The sparse section retains the original preference as `suggested-value: true`; this is intentional and restores the user's preference when Custom Hotkeys is removed. The unchanged store module starts successfully and Options > Custom Hotkeys opens.
+
+The OFF requirement comes from Custom Hotkeys' installed schema, not from an artificial requirement added to this example. This input file has SHA256 `8a726420d3df09a9b690315e949fc14b6e1aa85a1043283054e664d3789b4921`.
+
+### Custom Hotkeys PR #16: omitted WASD setting falsely reports a conflict
+
+Download [ucp-config-omitted-wasd.yml](ucp-config-omitted-wasd.yml) and place it in the test game folder as `ucp-config.yml`. It has Legacy active but no `o_keys` entry in either configuration section. Launch directly, or turn Save before launch OFF for this check so the launcher does not fill in the omitted setting.
+
+- Before the fix: published Custom Hotkeys 0.2.1 reports `activation.legacy-hotkeys`, although Legacy 2.15.1 leaves its WASD changes disabled.
+- With the module built from PR #16: the identical config starts successfully and Options > Custom Hotkeys opens. The saved config does not need to be changed.
+
+The local candidate retained version 0.2.1 only for the isolated test. The PR has not published a replacement store package. This input file has SHA256 `64e501e64b5c0da7e9bbbccdf0c80bd5decf40328de966ab398401fc468c3004`.
+
 ## Launcher precedence
 
 Baseline Windows launcher source `3dc2933f2476e217be76f876c03f6eaf0bd0ba90` (the merged folder-access change; its configuration builder is unchanged on current main `601e9480740ab5e946ea32f9738f0ae6ccd4fe60`). Executable SHA256: `61b8316b413f10f16e38e37a51ac7f76b06ecd18452a3e5e90959de2e5e84200`.

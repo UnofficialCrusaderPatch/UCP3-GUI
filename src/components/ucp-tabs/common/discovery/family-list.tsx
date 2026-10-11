@@ -9,18 +9,33 @@ import { useMessage } from '../../../general/message';
 
 const EXPANSION = atom<Record<string, boolean>>({});
 
+export type FamilyRow = { displayName: string; selected: boolean };
+
 // eslint-disable-next-line import/prefer-default-export
 export function FamilyList<T extends FamilyItem>(props: {
   items: T[];
   available: T[];
   scope: string;
   searching: boolean;
-  render: (item: T, familyToggle?: ReactNode) => ReactNode;
+  render: (item: T, familyToggle?: ReactNode, row?: FamilyRow) => ReactNode;
   label: (item: T) => string;
+  familyLabel?: (family: string, root: T) => string;
+  configurationLabel?: (family: string, item: T) => string;
+  selected?: T[];
   activation?: boolean;
 }) {
-  const { items, available, scope, searching, render, label, activation } =
-    props;
+  const {
+    items,
+    available,
+    scope,
+    searching,
+    render,
+    label,
+    activation,
+    selected,
+    familyLabel,
+    configurationLabel,
+  } = props;
   const [expansion, setExpansion] = useAtom(EXPANSION);
   const localize = useMessage();
   // A root used as search context must still belong to this activation pane.
@@ -28,7 +43,10 @@ export function FamilyList<T extends FamilyItem>(props: {
   const { groups, ungrouped } = groupFamilies(
     items,
     available.filter(
-      (item) => activation === undefined || item.active === activation,
+      (item) =>
+        selected !== undefined ||
+        activation === undefined ||
+        item.active === activation,
     ),
   );
   const positions = new Map(items.map((item, index) => [item.id, index]));
@@ -52,20 +70,44 @@ export function FamilyList<T extends FamilyItem>(props: {
       {entries.map((group) => {
         const key = `${scope}:${searching ? 'search:' : ''}${group.id}`;
         const expanded = expansion[key] ?? searching;
-        if (!group.members.length)
-          return <div key={key}>{render(group.root)}</div>;
+        if (group.id.startsWith('flat:'))
+          return selected && group.root.active ? null : (
+            <div key={key}>{render(group.root)}</div>
+          );
+        if (
+          !available.some(
+            (item) =>
+              item.name !== group.root.name &&
+              item.family?.some((family) => family.name === group.id),
+          )
+        )
+          return selected && group.root.active ? null : (
+            <div key={key}>{render(group.root)}</div>
+          );
+        const choice = selected?.find((item) =>
+          item.family?.some((family) => family.name === group.id),
+        );
+        const shown = choice ?? group.root;
+        const displayName = `${familyLabel?.(group.id, group.root) ?? label(group.root)}: ${configurationLabel?.(group.id, shown) ?? label(shown)}`;
+        const choices = [group.root, ...group.members].filter(
+          (item) => item.id !== shown.id,
+        );
         return (
           <div key={key} className="discovery-family">
             <div className="discovery-family-root">
               {render(
-                group.root,
+                shown,
                 <button
                   type="button"
                   className="minimal-button discovery-family-toggle"
                   aria-expanded={expanded}
                   aria-label={localize({
                     key: expanded ? 'discovery.collapse' : 'discovery.expand',
-                    args: { name: label(group.root) },
+                    args: {
+                      name:
+                        familyLabel?.(group.id, group.root) ??
+                        label(group.root),
+                    },
                   })}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -74,12 +116,19 @@ export function FamilyList<T extends FamilyItem>(props: {
                 >
                   {expanded ? '▾' : '▸'}
                 </button>,
+                { displayName, selected: choice !== undefined },
               )}
             </div>
             {expanded && (
               <div className="discovery-family-members">
-                {group.members.map((item) => (
-                  <div key={item.id}>{render(item)}</div>
+                {choices.map((item) => (
+                  <div key={item.id}>
+                    {render(item, undefined, {
+                      displayName:
+                        configurationLabel?.(group.id, item) ?? label(item),
+                      selected: false,
+                    })}
+                  </div>
                 ))}
               </div>
             )}

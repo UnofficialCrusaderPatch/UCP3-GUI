@@ -39,6 +39,8 @@ export function ExtensionElement(props: {
   displayShellOpenButton: boolean;
   showExclamationMark: boolean;
   familyToggle?: ReactNode;
+  displayName?: string;
+  actionDisabled?: boolean;
 }) {
   const {
     ext,
@@ -53,9 +55,11 @@ export function ExtensionElement(props: {
     displayShellOpenButton,
     showExclamationMark,
     familyToggle,
+    displayName: displayNameOverride,
+    actionDisabled,
   } = props;
   const { name, version, author } = ext.definition;
-  const displayName = ext.definition['display-name'];
+  const displayName = displayNameOverride ?? ext.definition['display-name'];
 
   const arrows = active ? (
     <MoveArrows
@@ -68,17 +72,18 @@ export function ExtensionElement(props: {
     <></>
   );
 
-  const enableButton = !active ? (
-    <ArrowButton
-      className="enable-arrow"
-      clickCallback={clickCallback}
-      buttonText={buttonText}
-      disabled={revDeps.length > 0}
-    />
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
+  const enableButton =
+    !active && !actionDisabled ? (
+      <ArrowButton
+        className="enable-arrow"
+        clickCallback={clickCallback}
+        buttonText={buttonText}
+        disabled={actionDisabled || revDeps.length > 0}
+      />
+    ) : (
+      // eslint-disable-next-line react/jsx-no-useless-fragment
+      <></>
+    );
 
   const disableButton = active ? (
     <ArrowButton
@@ -111,10 +116,9 @@ export function ExtensionElement(props: {
     PREFERRED_EXTENSION_VERSION_ATOM,
   );
 
-  const preferredVersion =
-    preferredVersions[name] === undefined
-      ? availableVersions[0]
-      : preferredVersions[name];
+  const preferredVersion = fixedVersion
+    ? ext.version
+    : (preferredVersions[name] ?? availableVersions[0]);
 
   const versionDropdown = (
     <div>

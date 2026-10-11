@@ -389,3 +389,13 @@ discovery.tag.economy: "Economy"
 discovery.tag.interface: "Interface"
 discovery.tag.multiplayer: "Multiplayer"
 discovery.tag.replay: "Replays"
+discovery.family.conflict.title: Conflicting family configurations
+discovery.family.conflict.message: 'Choose one configuration per family. Resolve these selections or their dependencies before continuing:
+
+  {{details}}'
+discovery.family.switch: Select configuration
+discovery.family.selected: Selected configuration
+discovery.preferences.masked.title: Required extension settings
+discovery.preferences.masked.message: '{{n}} saved preferences will be temporarily overridden by required settings. Your preferences are kept and return when those requirements are removed. Continue?
+
+  {{entries}}'

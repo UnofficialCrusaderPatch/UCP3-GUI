@@ -10,13 +10,16 @@ import {
 } from '../../../../../function/extensions/state/state';
 import inactiveExtensionElementClickCallback from '../inactive-extension-element-click-callback';
 import { ExtensionElement } from './extension-element';
+import { FamilyRow } from '../../../common/discovery/family-list';
 
 // eslint-disable-next-line import/prefer-default-export
 export function InactiveExtensionsElement(props: {
   exts: Extension[];
   familyToggle?: ReactNode;
+  familyRow?: FamilyRow;
+  selectedExtension?: Extension;
 }) {
-  const { exts, familyToggle } = props;
+  const { exts, familyToggle, familyRow, selectedExtension } = props;
 
   if (exts.length === 0) {
     throw Error(`no extensions`);
@@ -37,7 +40,9 @@ export function InactiveExtensionsElement(props: {
       ? availableVersions[0]
       : preferredVersions[name];
 
-  const ext = exts.filter((e) => e.version === preferredVersion).at(0);
+  const ext =
+    selectedExtension ??
+    exts.filter((e) => e.version === preferredVersion).at(0);
 
   if (ext === undefined) {
     throw Error(
@@ -54,24 +59,34 @@ export function InactiveExtensionsElement(props: {
   );
 
   const revDeps = extensionsState.tree.reverseExtensionDependenciesFor(ext);
+  const familyButtonText = familyRow?.selected
+    ? 'discovery.family.selected'
+    : 'discovery.family.switch';
 
   return (
     <ExtensionElement
       familyToggle={familyToggle}
+      displayName={familyRow?.displayName}
+      actionDisabled={familyRow?.selected}
       ext={ext}
-      fixedVersion={availableVersions.length <= 1}
+      fixedVersion={!!selectedExtension || availableVersions.length <= 1}
       active={false}
       movability={{ up: false, down: false }}
-      buttonText="activate"
+      buttonText={familyRow ? familyButtonText : 'activate'}
       clickCallback={clickCallback}
       moveCallback={() => {}}
-      revDeps={revDeps
-        .map((e) => e.name)
-        .filter(
-          (n) =>
-            extensionsState.activeExtensions.map((e) => e.name).indexOf(n) !==
-            -1,
-        )}
+      revDeps={
+        familyRow
+          ? []
+          : revDeps
+              .map((e) => e.name)
+              .filter(
+                (n) =>
+                  extensionsState.activeExtensions
+                    .map((e) => e.name)
+                    .indexOf(n) !== -1,
+              )
+      }
       displayCustomizeButton={false}
       displayShellOpenButton
       showExclamationMark={false}

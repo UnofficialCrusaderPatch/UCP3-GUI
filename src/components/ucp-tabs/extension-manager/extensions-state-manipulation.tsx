@@ -11,6 +11,8 @@ import { Extension } from '../../../config/ucp/common';
 import { showModalOk } from '../../modals/modal-ok';
 import Logger, { ConsoleLogger } from '../../../util/scripts/logging';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
+import { assertFamilyChoices } from '../../../function/extensions/dependency-management/families';
+import { normalizeFamilies } from '../../../function/content/discovery/metadata';
 
 const LOGGER = new Logger('extension-state.ts');
 
@@ -226,7 +228,7 @@ function addExtensionToExplicityActivatedExtensions(
   ext: Extension,
   repair?: boolean,
 ): ExtensionsState {
-  const { tree } = extensionsState;
+  const tree = extensionsState.tree.copy();
 
   const newEAE = [ext, ...extensionsState.explicitlyActivatedExtensions];
 
@@ -251,7 +253,7 @@ function addExtensionToExplicityActivatedExtensions(
     (e) => aeNames.indexOf(e.name) === -1,
   );
   const allDependenciesInLoadOrder = mimickStepByStepActivation(
-    extensionsState,
+    { ...extensionsState, tree },
     extensionsState.activeExtensions,
     novelExtensions,
   );
@@ -293,19 +295,92 @@ function addExtensionToExplicityActivatedExtensions(
     throw new DependencyError(`Unexpected error:\n${solution.message}`);
   }
 
-  return {
+  const result = {
     ...extensionsState,
+    tree,
     explicitlyActivatedExtensions: eaeInDisplayOrder,
     activeExtensions: allDependenciesInDisplayOrder,
     installedExtensions: installedExtensionsFilteredList,
   };
+  assertFamilyChoices(result);
+  return result;
+}
+
+/** Replace only explicit sibling choices; ordinary dependencies remain solver-owned. */
+function selectExtensionFamilyMember(state: ExtensionsState, ext: Extension) {
+  if (
+    state.explicitlyActivatedExtensions.some(
+      (member) => createExtensionID(member) === createExtensionID(ext),
+    )
+  ) {
+    assertFamilyChoices(state);
+    return state;
+  }
+  const families = new Set(
+    normalizeFamilies(ext.definition.family).map((f) => f.name),
+  );
+  const siblings = state.explicitlyActivatedExtensions.filter(
+    (member) =>
+      member.name !== ext.name &&
+      normalizeFamilies(member.definition.family).some((f) =>
+        families.has(f.name),
+      ),
+  );
+  let candidate = { ...state, tree: state.tree.copy() };
+  siblings.forEach((member) => {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    candidate = removeExtensionFromExplicitlyActivatedExtensions(
+      candidate,
+      member,
+    );
+  });
+  candidate = addExtensionToExplicityActivatedExtensions(candidate, ext);
+  if (siblings.length) {
+    const retained = new Map(
+      candidate.activeExtensions.map((member) => [member.name, member]),
+    );
+    const preferredOrder = state.activeExtensions.flatMap((member) => [
+      ...(siblings.some((sibling) => sibling.name === member.name)
+        ? [ext]
+        : []),
+      ...(retained.has(member.name) ? [retained.get(member.name)!] : []),
+    ]);
+    const remaining = [
+      ...new Set([...preferredOrder, ...candidate.activeExtensions]),
+    ];
+    const order: Extension[] = [];
+    // Only order the already resolved closure; preserve priority unless a dependency requires a move.
+    while (remaining.length) {
+      const index = remaining.findIndex(
+        (member) =>
+          !remaining.some(
+            (dependent) => member.name in dependent.definition.dependencies,
+          ),
+      );
+      if (index < 0)
+        throw new DependencyError('Invalid resolved dependency order');
+      order.push(...remaining.splice(index, 1));
+    }
+    checkDependencyOrder(order.slice().reverse());
+    candidate = {
+      ...candidate,
+      activeExtensions: order,
+      explicitlyActivatedExtensions: order.filter((member) =>
+        candidate.explicitlyActivatedExtensions.some(
+          (explicit) => explicit.name === member.name,
+        ),
+      ),
+    };
+  }
+  assertFamilyChoices(candidate);
+  return candidate;
 }
 
 function removeExtensionFromExplicitlyActivatedExtensions(
   extensionsState: ExtensionsState,
   ext: Extension,
 ): ExtensionsState {
-  const { tree } = extensionsState;
+  const tree = extensionsState.tree.copy();
 
   const newEAE = extensionsState.explicitlyActivatedExtensions.filter(
     (e) => e.name !== ext.name,
@@ -367,6 +442,7 @@ function removeExtensionFromExplicitlyActivatedExtensions(
 
   return {
     ...extensionsState,
+    tree,
     explicitlyActivatedExtensions: eae,
     activeExtensions: ae,
     installedExtensions: ie,
@@ -462,6 +538,7 @@ function upgradeAllExtensions(extensionsState: ExtensionsState) {
 
 export {
   addExtensionToExplicityActivatedExtensions,
+  selectExtensionFamilyMember,
   removeExtensionFromExplicitlyActivatedExtensions,
   moveExtension,
   popAllExplicitlyActivatedExtensions,

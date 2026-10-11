@@ -320,3 +320,13 @@ discovery.tag.economy: "经济"
 discovery.tag.interface: "界面"
 discovery.tag.multiplayer: "多人游戏"
 discovery.tag.replay: "录像回放"
+discovery.family.conflict.title: 扩展族配置冲突
+discovery.family.conflict.message: '每个扩展族只能选择一种配置。请先解决以下选择或依赖项的冲突，再继续：
+
+  {{details}}'
+discovery.family.switch: 选择配置
+discovery.family.selected: 已选配置
+discovery.preferences.masked.title: 扩展要求的设置
+discovery.preferences.masked.message: '{{n}} 项已保存的偏好将被必需设置暂时覆盖。您的偏好会保留，并在这些要求移除后恢复。是否继续？
+
+  {{entries}}'

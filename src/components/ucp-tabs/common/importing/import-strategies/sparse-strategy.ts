@@ -154,8 +154,6 @@ export function sparseStrategy(
       );
     }
 
-    updatePreferredExtensionVersions(bottomUpExplicitActiveExtensions);
-
     // eslint-disable-next-line no-restricted-syntax
     for (const ext of bottomUpExplicitActiveExtensions) {
       try {
@@ -180,6 +178,7 @@ export function sparseStrategy(
     // Complete the new extension state by building the configuration DB
     // eslint-disable-next-line no-param-reassign
     newExtensionsState = buildExtensionConfigurationDB(newExtensionsState);
+    updatePreferredExtensionVersions(bottomUpExplicitActiveExtensions);
   }
 
   return {

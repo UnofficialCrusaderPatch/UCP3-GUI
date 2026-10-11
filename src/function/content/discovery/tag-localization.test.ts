@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ContentElement } from '../types/content-element';
-import packageTagLabel from './tag-localization';
+import packageTagLabel, { packageFamilyLabel } from './tag-localization';
 
 const element = (): ContentElement => ({
   definition: {
@@ -45,5 +45,23 @@ describe('package tag localization', () => {
     expect(packageTagLabel(content, 'castles', 'de')).toBe('Castles');
     content.contents['tag-locales']!.en.castles = '  ';
     expect(packageTagLabel(content, 'castles', 'de')).toBeUndefined();
+  });
+  it('resolves family and configuration labels from the same package locale contract', () => {
+    const content = element();
+    content.contents['family-locales'] = {
+      en: { ai: 'AI Behaviour', 'ai.configuration': 'Applied' },
+      de: { ai: 'KI-Verhalten', 'ai.configuration': 'Angewendet' },
+    };
+    expect(packageFamilyLabel(content, 'ai', 'de-AT')).toBe('KI-Verhalten');
+    expect(packageFamilyLabel(content, 'ai.configuration', 'de')).toBe(
+      'Angewendet',
+    );
+    content.extension = {
+      locales: { de: { 'family.ai.configuration': 'Ohne Einstellungen' } },
+    } as unknown as NonNullable<ContentElement['extension']>;
+    expect(packageFamilyLabel(content, 'ai.configuration', 'de')).toBe(
+      'Ohne Einstellungen',
+    );
+    expect(packageFamilyLabel(content, 'ai', 'ru')).toBe('AI Behaviour');
   });
 });

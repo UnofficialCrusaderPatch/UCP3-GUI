@@ -320,3 +320,13 @@ discovery.tag.economy: "Gazdaság"
 discovery.tag.interface: "Kezelőfelület"
 discovery.tag.multiplayer: "Többjátékos"
 discovery.tag.replay: "Visszajátszások"
+discovery.family.conflict.title: Ütköző családkonfigurációk
+discovery.family.conflict.message: 'Családonként egy konfigurációt válassz. A folytatás előtt oldd fel ezeket a választásokat vagy függőségeiket:
+
+  {{details}}'
+discovery.family.switch: Konfiguráció kiválasztása
+discovery.family.selected: Kiválasztott konfiguráció
+discovery.preferences.masked.title: Kötelező bővítménybeállítások
+discovery.preferences.masked.message: '{{n}} mentett beállítást ideiglenesen felülírnak a kötelező értékek. A saját beállításaid megmaradnak, és a követelmények eltávolításakor újra érvényesülnek. Folytatod?
+
+  {{entries}}'

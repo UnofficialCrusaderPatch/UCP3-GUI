@@ -339,3 +339,13 @@ discovery.tag.economy: "Wirtschaft"
 discovery.tag.interface: "Oberfläche"
 discovery.tag.multiplayer: "Mehrspieler"
 discovery.tag.replay: "Wiederholungen"
+discovery.family.conflict.title: Widersprüchliche Familienkonfigurationen
+discovery.family.conflict.message: 'Wähle eine Konfiguration pro Familie. Löse diese Auswahl oder ihre Abhängigkeiten vor dem Fortfahren auf:
+
+  {{details}}'
+discovery.family.switch: Konfiguration auswählen
+discovery.family.selected: Ausgewählte Konfiguration
+discovery.preferences.masked.title: Erforderliche Erweiterungseinstellungen
+discovery.preferences.masked.message: '{{n}} gespeicherte Einstellungen werden vorübergehend durch erforderliche Werte überschrieben. Deine Einstellungen bleiben erhalten und gelten wieder, sobald diese Anforderungen entfallen. Fortfahren?
+
+  {{entries}}'

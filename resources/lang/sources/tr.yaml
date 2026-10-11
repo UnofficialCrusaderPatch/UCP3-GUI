@@ -318,3 +318,13 @@ discovery.tag.economy: "Ekonomi"
 discovery.tag.interface: "Arayüz"
 discovery.tag.multiplayer: "Çok oyunculu"
 discovery.tag.replay: "Tekrarlar"
+discovery.family.conflict.title: Çakışan aile yapılandırmaları
+discovery.family.conflict.message: 'Her aile için bir yapılandırma seçin. Devam etmeden önce bu seçimlerdeki veya bağımlılıklarındaki çakışmaları giderin:
+
+  {{details}}'
+discovery.family.switch: Yapılandırmayı seç
+discovery.family.selected: Seçili yapılandırma
+discovery.preferences.masked.title: Gerekli uzantı ayarları
+discovery.preferences.masked.message: '{{n}} kayıtlı tercih geçici olarak gerekli ayarlarla geçersiz kılınacak. Tercihleriniz korunur ve bu gereksinimler kaldırıldığında yeniden uygulanır. Devam edilsin mi?
+
+  {{entries}}'

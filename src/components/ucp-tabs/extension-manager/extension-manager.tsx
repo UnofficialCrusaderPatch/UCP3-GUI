@@ -36,7 +36,10 @@ import {
   DiscoverySearch,
   DiscoveryFilterButton,
 } from '../common/discovery/discovery-toolbar';
-import { FamilyList } from '../common/discovery/family-list';
+import { FamilyList, FamilyRow } from '../common/discovery/family-list';
+import { familyConfigurationMembers } from '../../../function/extensions/dependency-management/families';
+import { normalizeFamilies } from '../../../function/content/discovery/metadata';
+import { packageFamilyLabel } from '../../../function/content/discovery/tag-localization';
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import { SearchExcerpt } from '../common/discovery/search-excerpt';
@@ -57,6 +60,7 @@ export default function ExtensionManager() {
     EXTENSION_DISCOVERY_FILTER,
   );
   const contentElements = useAtomValue(CONTENT_ELEMENTS_ATOM);
+  const language = useAtomValue(GuiSettings.LANGUAGE_ATOM);
   const discovery = useDiscovery(contentElements, discoveryFilter);
   const preferredVersions = useAtomValue(PREFERRED_EXTENSION_VERSION_ATOM);
   const availableVersions = useAtomValue(AVAILABLE_EXTENSION_VERSIONS_ATOM);
@@ -97,14 +101,31 @@ export default function ExtensionManager() {
     active: extensionsState.activeExtensions.some(
       (active) => createExtensionID(active) === createExtensionID(ext),
     ),
-    family:
-      contentElements.find(
-        (element) => createExtensionID(element) === createExtensionID(ext),
-      )?.definition.family ?? ext.definition.family,
+    family: ext.definition.family,
   });
+  const familyLabel = (
+    family: string,
+    ext: Extension,
+    configuration = false,
+  ) => {
+    const content = contentElements.find(
+      (element) => createExtensionID(element) === createExtensionID(ext),
+    );
+    return (
+      (content &&
+        packageFamilyLabel(
+          content,
+          `${family}${configuration ? '.configuration' : ''}`,
+          language,
+        )) ??
+      ext.definition['display-name'] ??
+      ext.name
+    );
+  };
   const renderExtension = (
     { ext }: { ext: Extension },
     familyToggle?: ReactNode,
+    familyRow?: FamilyRow,
   ) => {
     const index = extensionsState.activeExtensions.findIndex(
       (active) => createExtensionID(active) === createExtensionID(ext),
@@ -112,18 +133,29 @@ export default function ExtensionManager() {
     const hit = discovery.results.get(createExtensionID(ext));
     return (
       <>
-        {index >= 0 ? (
+        {index >= 0 && !familyRow ? (
           <div className="discovery-active-row">
             <span className="discovery-priority">{index + 1}</span>
             <ActiveExtensionElement
               ext={ext}
               index={index}
               arr={extensionsState.activeExtensions}
+              displayName={
+                normalizeFamilies(ext.definition.family).length &&
+                familyConfigurationMembers(extensionsState).some(
+                  (member) =>
+                    createExtensionID(member) === createExtensionID(ext),
+                )
+                  ? `${familyLabel(ext.definition.family![0].name, ext)}: ${familyLabel(ext.definition.family![0].name, ext, true)}`
+                  : undefined
+              }
             />
           </div>
         ) : (
           <InactiveExtensionsElement
             familyToggle={familyToggle}
+            familyRow={familyRow}
+            selectedExtension={familyRow ? ext : undefined}
             exts={extensionsState.extensions.filter(
               (entry) => entry.name === ext.name,
             )}
@@ -146,7 +178,8 @@ export default function ExtensionManager() {
   const visibleInactive = available
     .filter(
       (ext) =>
-        availableNames.has(ext.name) &&
+        (availableNames.has(ext.name) ||
+          normalizeFamilies(ext.definition.family).length > 0) &&
         discovery.results.has(createExtensionID(ext)),
     )
     .sort(
@@ -163,6 +196,9 @@ export default function ExtensionManager() {
         .map(item)}
       scope="content-inactive"
       activation={false}
+      selected={familyConfigurationMembers(extensionsState).map(item)}
+      familyLabel={(family, { ext }) => familyLabel(family, ext)}
+      configurationLabel={(family, { ext }) => familyLabel(family, ext, true)}
       searching={searching}
       render={renderExtension}
       label={({ ext }) => ext.definition['display-name'] || ext.name}

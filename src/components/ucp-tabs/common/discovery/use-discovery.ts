@@ -7,7 +7,10 @@ import {
   inlineDescription,
   ResolvedDescription,
 } from '../../../../function/content/discovery/descriptions';
-import { discoveryTags } from '../../../../function/content/discovery/metadata';
+import {
+  discoveryTags,
+  normalizeFamilies,
+} from '../../../../function/content/discovery/metadata';
 import {
   createDiscoverySearch,
   DiscoveryFilter,
@@ -15,7 +18,9 @@ import {
 import { LANGUAGE_ATOM } from '../../../../function/gui-settings/settings';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { useMessage } from '../../../general/message';
-import packageTagLabel from '../../../../function/content/discovery/tag-localization';
+import packageTagLabel, {
+  packageFamilyLabel,
+} from '../../../../function/content/discovery/tag-localization';
 
 export const KNOWN_TAGS = [
   'ai',
@@ -80,12 +85,18 @@ export function useDiscovery(
             descriptions.data[i]?.text ?? inlineDescription(element, language),
           tags,
           tagLabels,
-          tagText: tags
-            .map(
-              (tag) =>
-                `${tag} ${tagLabels[tag] ?? ''} ${KNOWN_TAGS.includes(tag) ? localize(`discovery.tag.${tag}`) : ''}`,
-            )
-            .join(' '),
+          tagText: [
+            tags
+              .map(
+                (tag) =>
+                  `${tag} ${tagLabels[tag] ?? ''} ${KNOWN_TAGS.includes(tag) ? localize(`discovery.tag.${tag}`) : ''}`,
+              )
+              .join(' '),
+            ...normalizeFamilies(element.definition.family).map(
+              ({ name }) =>
+                `${name} ${packageFamilyLabel(element, name, language) ?? ''} ${packageFamilyLabel(element, `${name}.configuration`, language) ?? ''}`,
+            ),
+          ].join(' '),
         };
       }),
     [elements, descriptions.data, language, localize],

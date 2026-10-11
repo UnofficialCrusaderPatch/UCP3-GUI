@@ -318,3 +318,13 @@ discovery.tag.economy: "اقتصاد"
 discovery.tag.interface: "رابط کاربری"
 discovery.tag.multiplayer: "چندنفره"
 discovery.tag.replay: "بازپخش‌ها"
+discovery.family.conflict.title: پیکربندی‌های ناسازگار خانواده
+discovery.family.conflict.message: 'برای هر خانواده یک پیکربندی انتخاب کنید. پیش از ادامه، ناسازگاری این انتخاب‌ها یا وابستگی‌هایشان را برطرف کنید:
+
+  {{details}}'
+discovery.family.switch: انتخاب پیکربندی
+discovery.family.selected: پیکربندی انتخاب‌شده
+discovery.preferences.masked.title: تنظیمات الزامی افزونه‌ها
+discovery.preferences.masked.message: '{{n}} ترجیح ذخیره‌شده به‌طور موقت با تنظیمات الزامی جایگزین می‌شود. ترجیح‌های شما حفظ می‌شوند و پس از حذف این الزام‌ها دوباره اعمال خواهند شد. ادامه می‌دهید؟
+
+  {{entries}}'

@@ -55,6 +55,7 @@ export type ExtensionContent = {
     description: DescriptionContent[];
     package: PackageContent[];
     'tag-locales'?: TagLocales;
+    'family-locales'?: TagLocales;
   };
 };
 

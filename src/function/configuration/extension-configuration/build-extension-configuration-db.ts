@@ -12,6 +12,7 @@ import Logger from '../../../util/scripts/logging';
 import { buildExtensionsDefinedConfig } from './extensions-defined-config';
 import { buildConfigMetaContentDB } from './build-config-meta-content-db';
 import { processPotentialOverride } from './process-potential-override';
+import { assertFamilyChoices } from '../../extensions/dependency-management/families';
 
 const LOGGER = new Logger('extension-configuration.ts');
 
@@ -187,6 +188,7 @@ function buildExtensionConfigurationDBFromActiveExtensions(
 export function buildExtensionConfigurationDB(
   extensionsState: ExtensionsState,
 ) {
+  assertFamilyChoices(extensionsState);
   return {
     ...extensionsState,
     configuration: buildExtensionConfigurationDBFromActiveExtensions(

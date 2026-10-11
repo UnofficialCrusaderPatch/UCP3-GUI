@@ -318,3 +318,13 @@ discovery.tag.economy: "Economía"
 discovery.tag.interface: "Interfaz"
 discovery.tag.multiplayer: "Multijugador"
 discovery.tag.replay: "Repeticiones"
+discovery.family.conflict.title: Configuraciones de familia incompatibles
+discovery.family.conflict.message: 'Elige una configuración por familia. Resuelve estas selecciones o sus dependencias antes de continuar:
+
+  {{details}}'
+discovery.family.switch: Elegir configuración
+discovery.family.selected: Configuración seleccionada
+discovery.preferences.masked.title: Ajustes obligatorios de las extensiones
+discovery.preferences.masked.message: '{{n}} preferencias guardadas se sustituirán temporalmente por ajustes obligatorios. Se conservarán y volverán a aplicarse cuando se eliminen esos requisitos. ¿Continuar?
+
+  {{entries}}'

@@ -317,3 +317,13 @@ discovery.tag.economy: "Экономика"
 discovery.tag.interface: "Интерфейс"
 discovery.tag.multiplayer: "Сетевая игра"
 discovery.tag.replay: "Повторы"
+discovery.family.conflict.title: Несовместимые конфигурации семейства
+discovery.family.conflict.message: 'Выберите одну конфигурацию для каждого семейства. Устраните конфликт выбора или зависимостей перед продолжением:
+
+  {{details}}'
+discovery.family.switch: Выбрать конфигурацию
+discovery.family.selected: Выбранная конфигурация
+discovery.preferences.masked.title: Обязательные настройки расширений
+discovery.preferences.masked.message: 'Обязательные настройки временно заменят сохранённые предпочтения: {{n}}. Ваши предпочтения сохранятся и снова вступят в силу после удаления этих требований. Продолжить?
+
+  {{entries}}'

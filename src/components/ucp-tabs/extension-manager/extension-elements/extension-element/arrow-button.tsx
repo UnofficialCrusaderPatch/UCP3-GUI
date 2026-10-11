@@ -13,12 +13,14 @@ export function ArrowButton(props: {
   const { clickCallback, disabled, buttonText, className } = props;
   const setStatusBarMessage = useSetAtom(STATUS_BAR_MESSAGE_ATOM);
   const localize = useMessage();
+  const activationLabel =
+    typeof buttonText === 'string' ? buttonText : 'activate';
   return (
     <button
       type="button"
       className={`fs-8 ${className}`}
       aria-label={localize(
-        className === 'enable-arrow' ? 'activate' : 'deactivate',
+        className === 'enable-arrow' ? activationLabel : 'deactivate',
       )}
       onClick={clickCallback}
       disabled={disabled}

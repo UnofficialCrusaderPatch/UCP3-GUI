@@ -10,9 +10,9 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from 'components/ucp-tabs/common/b
 import reportAndConfirmBuildResult from 'components/ucp-tabs/extension-manager/extension-elements/reporting';
 import { buildExtensionConfigurationDB } from 'function/configuration/extension-configuration/build-extension-configuration-db';
 import { showModalOk } from 'components/modals/modal-ok';
-import { computeConfigLoss } from 'components/ucp-tabs/extension-manager/extension-elements/inactive-extension-element-click-callback';
+import { computeMaskedPreferences } from 'components/ucp-tabs/extension-manager/extension-elements/inactive-extension-element-click-callback';
+import { FamilyConflictError } from 'function/extensions/dependency-management/families';
 import { makeToast, ToastType } from 'components/toasts/toasts-display';
-import { CONFIGURATION_USER_REDUCER_ATOM } from 'function/configuration/state';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 
 async function upgradeExtensionsCallback(
@@ -48,11 +48,18 @@ async function upgradeExtensionsCallback(
   } catch (err: any) {
     if (interactive) {
       await showModalOk({
-        title: 'extensions.activation.dependency.conflicts.error.title',
+        title:
+          err instanceof FamilyConflictError
+            ? 'discovery.family.conflict.title'
+            : 'extensions.activation.dependency.conflicts.error.title',
         message: {
-          key: 'extensions.activation.dependency.conflicts.error.message',
+          key:
+            err instanceof FamilyConflictError
+              ? 'discovery.family.conflict.message'
+              : 'extensions.activation.dependency.conflicts.error.message',
           args: {
             log: err.toString(),
+            details: err instanceof FamilyConflictError ? err.details : '',
           },
         },
       });
@@ -65,17 +72,20 @@ async function upgradeExtensionsCallback(
 
   if (!(await reportAndConfirmBuildResult(res))) return;
 
-  const { lostConfig, retainedConfig } = computeConfigLoss(res);
+  const maskedConfig = computeMaskedPreferences(res, oldState);
 
-  if (lostConfig.length > 0) {
+  if (maskedConfig.length > 0) {
     if (interactive) {
       const answer = await showModalOkCancel({
-        title: 'extensions.activation.customisations.loss.title',
+        title: 'discovery.preferences.masked.title',
         message: {
-          key: 'extensions.activation.customisations.loss.message',
+          key: 'discovery.preferences.masked.message',
           args: {
-            n: lostConfig.length,
-            entries: lostConfig.map(([url]) => url).sort(),
+            n: maskedConfig.length,
+            entries: maskedConfig
+              .map(([url]) => url)
+              .sort()
+              .join('\n'),
           },
         },
       });
@@ -86,14 +96,10 @@ async function upgradeExtensionsCallback(
     }
   }
 
-  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
-    type: 'reset',
-    value: retainedConfig,
-  });
-
-  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+  if (getStore().get(EXTENSION_STATE_INTERFACE_ATOM) !== oldState) return;
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
   makeToast({
     title: 'extensions.upgrade.toast.success.title',

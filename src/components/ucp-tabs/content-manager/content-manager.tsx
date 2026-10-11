@@ -21,7 +21,11 @@ import {
 import { ContentFilterButton } from './buttons/filter-button';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import Message, { useMessage } from '../../general/message';
-import { STORE_SHOW_ALL_EXTENSION_TYPES_ATOM } from '../../../function/gui-settings/settings';
+import {
+  LANGUAGE_ATOM,
+  STORE_SHOW_ALL_EXTENSION_TYPES_ATOM,
+} from '../../../function/gui-settings/settings';
+import { packageFamilyLabel } from '../../../function/content/discovery/tag-localization';
 import {
   DiscoverySearch,
   DiscoveryFilterButton,
@@ -53,6 +57,7 @@ export function ContentManager() {
   );
   const [contentFilters, setContentFilters] = useAtom(CONTENT_FILTERS_ATOM);
   const allElements = useAtomValue(CONTENT_ELEMENTS_ATOM);
+  const language = useAtomValue(LANGUAGE_ATOM);
   const filteredElements = useAtomValue(filteredContentElementsAtom);
   const discovery = useDiscovery(allElements, contentFilters);
   const item = (content: ContentElement) => ({
@@ -121,11 +126,26 @@ export function ContentManager() {
         contentFilters.search.trim() || contentFilters.tags.length,
       )}
       label={(entry) => entry.content.definition['display-name'] || entry.name}
-      render={(entry, familyToggle) => (
+      familyLabel={(family, entry) =>
+        packageFamilyLabel(entry.content, family, language) ??
+        entry.content.definition['display-name'] ??
+        family
+      }
+      configurationLabel={(family, entry) =>
+        packageFamilyLabel(
+          entry.content,
+          `${family}.configuration`,
+          language,
+        ) ??
+        entry.content.definition['display-name'] ??
+        entry.name
+      }
+      render={(entry, familyToggle, familyRow) => (
         <>
           <ContentElementView
             data={entry.content}
             familyToggle={familyToggle}
+            displayName={familyRow?.displayName}
           />
           {discovery.results.get(entry.id)?.excerpt && (
             <SearchExcerpt

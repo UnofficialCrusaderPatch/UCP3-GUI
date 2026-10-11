@@ -27,12 +27,14 @@ const shiftSelectionStartAtom = atom<string>('');
 export type ContentElementViewProps = {
   data: ContentElement;
   familyToggle?: ReactNode;
+  displayName?: string;
 };
 // eslint-disable-next-line import/prefer-default-export
 export function ContentElementView(props: ContentElementViewProps) {
-  const { data, familyToggle } = props;
+  const { data, familyToggle, displayName: displayNameOverride } = props;
   const { definition, installed, online } = data;
-  const { name, version, 'display-name': displayName } = definition;
+  const { name, version } = definition;
+  const displayName = displayNameOverride ?? definition['display-name'];
 
   const id = `${name}@${version}`;
 

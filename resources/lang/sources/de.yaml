@@ -323,3 +323,13 @@ extensions.folder.error.title: Ordner konnte nicht geöffnet werden
 extensions.folder.error.message: Der Ordner oder die installierte Erweiterung fehlt möglicherweise, ist nicht zugänglich oder gehört zu einer zuvor gewählten Installation. Wähle die Installation erneut aus und prüfe, ob ein Dateimanager verfügbar ist. Einzelheiten stehen im Protokoll.
 extensions.extension.shell.reveal: Installierte Erweiterung im Explorer anzeigen
 extensions.extension.shell.parent: Übergeordneten Ordner der installierten Erweiterung öffnen
+discovery.family.conflict.title: Widersprüchliche Familienkonfigurationen
+discovery.family.conflict.message: 'Wähle eine Konfiguration pro Familie. Löse diese Auswahl oder ihre Abhängigkeiten vor dem Fortfahren auf:
+
+  {{details}}'
+discovery.family.switch: Konfiguration auswählen
+discovery.family.selected: Ausgewählte Konfiguration
+discovery.preferences.masked.title: Erforderliche Erweiterungseinstellungen
+discovery.preferences.masked.message: '{{n}} gespeicherte Einstellungen werden vorübergehend durch erforderliche Werte überschrieben. Deine Einstellungen bleiben erhalten und gelten wieder, sobald diese Anforderungen entfallen. Fortfahren?
+
+  {{entries}}'

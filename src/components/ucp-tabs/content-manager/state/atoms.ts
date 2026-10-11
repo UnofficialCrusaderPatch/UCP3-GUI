@@ -44,7 +44,7 @@ export const CONTENT_STORE_ATOM = atomWithQuery((get) => {
       string,
     ],
     queryFn: fetchStore,
-    enabled: status === 'ok',
+    enabled: status === 'ok' && version.isValidForSemanticVersioning,
     retry: false,
     // staleTime: Infinity,
   };

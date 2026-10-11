@@ -70,8 +70,10 @@
     "react-router-dom": "^6.26.2",
     "react-search-autocomplete": "^8.5.2",
     "rehype-highlight": "^7.0.0",
+    "remark-parse": "^11.0.0",
     "semver": "^7.6.3",
     "tauri-plugin-upload-api": "github:tauri-apps/tauri-plugin-upload#v1",
+    "unified": "^11.0.4",
     "yaml": "^2.5.1"
   },
   "devDependencies": {

@@ -40,8 +40,9 @@ export function fullStrategy(
   if (config['config-full'] === undefined) {
     return {
       status: 'error',
+      code: 'MISSING_LOAD_ORDER',
       messages: ['no config-full present'],
-    } as GenericFailure;
+    } as MissingLoadOrderFailure;
   }
 
   const loadOrder = deserializeLoadOrder(config['config-full']['load-order']);
@@ -160,15 +161,23 @@ export function fullStrategy(
     }
 
     // Complete the new extension state by building the configuration DB
-    // eslint-disable-next-line no-param-reassign
-    newExtensionsState = buildExtensionConfigurationDB({
-      ...newExtensionsState,
-      activeExtensions: bottomUpActiveExtensions.slice().reverse(),
-      installedExtensions: installedExtensionsCopy,
-      explicitlyActivatedExtensions: bottomUpExplicitlyActiveExtensions
-        .slice()
-        .reverse(),
-    });
+    try {
+      // eslint-disable-next-line no-param-reassign
+      newExtensionsState = buildExtensionConfigurationDB({
+        ...newExtensionsState,
+        activeExtensions: bottomUpActiveExtensions.slice().reverse(),
+        installedExtensions: installedExtensionsCopy,
+        explicitlyActivatedExtensions: bottomUpExplicitlyActiveExtensions
+          .slice()
+          .reverse(),
+      });
+    } catch (err: unknown) {
+      return {
+        status: 'error',
+        code: 'GENERIC',
+        messages: [String(err)],
+      } as GenericFailure;
+    }
   } else {
     return {
       status: 'error',

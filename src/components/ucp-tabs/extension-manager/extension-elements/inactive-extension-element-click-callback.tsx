@@ -1,4 +1,5 @@
 import { ExtensionsState } from 'function/extensions/extensions-state';
+import equal from 'deep-equal';
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
@@ -12,8 +13,8 @@ import {
 } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
-import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
-import { ConfigMetaObject } from '../../../../config/ucp/config-merge/objects';
+import { selectExtensionFamilyMember } from '../extensions-state-manipulation';
+import { FamilyConflictError } from '../../../../function/extensions/dependency-management/families';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import reportAndConfirmBuildResult from './reporting';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -21,30 +22,24 @@ import { createExtensionID } from '../../../../function/global/constants/extensi
 
 const LOGGER = new Logger('inactive-extension-element-click-callback.tsx');
 
-function computeConfigLoss(state: ExtensionsState) {
-  // TODO: insert logic to integrate existing customisations with the new thing.
+function computeMaskedPreferences(
+  state: ExtensionsState,
+  previous: ExtensionsState,
+) {
   const userConfig = Object.entries(
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
 
-  const newRequiredValues = Object.fromEntries(
-    Object.entries(state.configuration.state).filter(
-      ([, cmo]: [string, ConfigMetaObject]) =>
-        cmo.modifications.value.qualifier === 'required',
-    ),
-  );
-
-  const lostConfig = userConfig.filter(
-    ([url]) => newRequiredValues[url] !== undefined,
-  );
-
-  const retainedConfig = Object.fromEntries(
-    userConfig.filter(([url]) => newRequiredValues[url] === undefined),
-  );
-  return {
-    lostConfig,
-    retainedConfig,
-  };
+  return userConfig.filter(([url, value]) => {
+    const lock = state.configuration.locks[url];
+    return (
+      lock !== undefined &&
+      !equal(value, lock.lockedValue, { strict: true }) &&
+      !equal(previous.configuration.locks[url]?.lockedValue, lock.lockedValue, {
+        strict: true,
+      })
+    );
+  });
 }
 
 async function inactiveExtensionElementClickCallback(ext: Extension) {
@@ -59,17 +54,24 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
-    newExtensionsState = addExtensionToExplicityActivatedExtensions(
+    newExtensionsState = selectExtensionFamilyMember(
       currentExtensionsState,
       ext,
     );
   } catch (err: any) {
     await showModalOk({
-      title: 'extensions.activation.dependency.conflicts.error.title',
+      title:
+        err instanceof FamilyConflictError
+          ? 'discovery.family.conflict.title'
+          : 'extensions.activation.dependency.conflicts.error.title',
       message: {
-        key: 'extensions.activation.dependency.conflicts.error.message',
+        key:
+          err instanceof FamilyConflictError
+            ? 'discovery.family.conflict.message'
+            : 'extensions.activation.dependency.conflicts.error.message',
         args: {
           log: err.toString(),
+          details: err instanceof FamilyConflictError ? err.details : '',
         },
       },
     });
@@ -81,16 +83,19 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 
   if (!(await reportAndConfirmBuildResult(res))) return;
 
-  const { retainedConfig, lostConfig } = computeConfigLoss(res);
+  const maskedConfig = computeMaskedPreferences(res, currentExtensionsState);
 
-  if (lostConfig.length > 0) {
+  if (maskedConfig.length > 0) {
     const answer = await showModalOkCancel({
-      title: 'extensions.activation.customisations.loss.title',
+      title: 'discovery.preferences.masked.title',
       message: {
-        key: 'extensions.activation.customisations.loss.message',
+        key: 'discovery.preferences.masked.message',
         args: {
-          n: lostConfig.length,
-          entries: lostConfig.map(([url]) => url).sort(),
+          n: maskedConfig.length,
+          entries: maskedConfig
+            .map(([url]) => url)
+            .sort()
+            .join('\n'),
         },
       },
     });
@@ -110,22 +115,19 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
 
-  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
-    type: 'reset',
-    value: retainedConfig,
-  });
+  if (getStore().get(EXTENSION_STATE_REDUCER_ATOM) !== currentExtensionsState)
+    return;
 
   ConsoleLogger.info(
     'New user config state',
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
 
-  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
-
   ConsoleLogger.info('New extension state', res);
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 }
 
 export default inactiveExtensionElementClickCallback;
-export { computeConfigLoss };
+export { computeMaskedPreferences };

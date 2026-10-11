@@ -1,8 +1,10 @@
+/* eslint-disable react/require-default-props */
 import './extension-element.css';
 import '../../buttons/customize-extension-button.css';
 import '../../../../common/minimal.css';
 
 import { useAtom, useAtomValue } from 'jotai';
+import { ReactNode } from 'react';
 import { ExclamationCircleFill } from 'react-bootstrap-icons';
 import {
   AvailableExtensionVersionsDictionary,
@@ -36,6 +38,9 @@ export function ExtensionElement(props: {
   displayCustomizeButton: boolean;
   displayShellOpenButton: boolean;
   showExclamationMark: boolean;
+  familyToggle?: ReactNode;
+  displayName?: string;
+  actionDisabled?: boolean;
 }) {
   const {
     ext,
@@ -49,9 +54,12 @@ export function ExtensionElement(props: {
     displayCustomizeButton,
     displayShellOpenButton,
     showExclamationMark,
+    familyToggle,
+    displayName: displayNameOverride,
+    actionDisabled,
   } = props;
   const { name, version, author } = ext.definition;
-  const displayName = ext.definition['display-name'];
+  const displayName = displayNameOverride ?? ext.definition['display-name'];
 
   const arrows = active ? (
     <MoveArrows
@@ -64,17 +72,18 @@ export function ExtensionElement(props: {
     <></>
   );
 
-  const enableButton = !active ? (
-    <ArrowButton
-      className="enable-arrow"
-      clickCallback={clickCallback}
-      buttonText={buttonText}
-      disabled={revDeps.length > 0}
-    />
-  ) : (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
-    <></>
-  );
+  const enableButton =
+    !active && !actionDisabled ? (
+      <ArrowButton
+        className="enable-arrow"
+        clickCallback={clickCallback}
+        buttonText={buttonText}
+        disabled={actionDisabled || revDeps.length > 0}
+      />
+    ) : (
+      // eslint-disable-next-line react/jsx-no-useless-fragment
+      <></>
+    );
 
   const disableButton = active ? (
     <ArrowButton
@@ -107,10 +116,9 @@ export function ExtensionElement(props: {
     PREFERRED_EXTENSION_VERSION_ATOM,
   );
 
-  const preferredVersion =
-    preferredVersions[name] === undefined
-      ? availableVersions[0]
-      : preferredVersions[name];
+  const preferredVersion = fixedVersion
+    ? ext.version
+    : (preferredVersions[name] ?? availableVersions[0]);
 
   const versionDropdown = (
     <div>
@@ -136,7 +144,10 @@ export function ExtensionElement(props: {
   return (
     <div key={`${name}-${version}-${author}`} className="extension-element">
       {disableButton}
-      <div className="extension-name-box">
+      <div
+        className={`extension-name-box ${familyToggle ? 'extension-name-box--family' : ''}`}
+      >
+        {familyToggle}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <span
           className="extension-name-box__name"

@@ -36,15 +36,19 @@ export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   return d!;
 });
 
-export const CONTENT_STORE_ATOM = atomWithQuery((get) => ({
-  queryKey: [
-    'store',
-    get(UCP_VERSION_ATOM).version.getMajorMinorPatchAsString(),
-  ] as [string, string],
-  queryFn: fetchStore,
-  retry: false,
-  // staleTime: Infinity,
-}));
+export const CONTENT_STORE_ATOM = atomWithQuery((get) => {
+  const { version, status } = get(UCP_VERSION_ATOM);
+  return {
+    queryKey: ['store', version.getMajorMinorPatchAsString()] as [
+      string,
+      string,
+    ],
+    queryFn: fetchStore,
+    enabled: status === 'ok' && version.isValidForSemanticVersioning,
+    retry: false,
+    // staleTime: Infinity,
+  };
+});
 
 const storePackagesAtom = atom((get) => {
   const { data } = get(CONTENT_STORE_ATOM);

@@ -1,0 +1,46 @@
+{
+  "archive_sha256": "a979816e4475e054b46b2f2793ef6a2109cfd03bf650e58e2b2f764804a8c105",
+  "ucp_dll_sha256": "cc4ca5b7cd61e281a693a94c6f5a404680e34e950b015419218f10dd8a5f91af",
+  "modules": [
+    {
+      "name": "cffi-1.0.0.zip",
+      "sha256": "c48b581bdb93b48944c5ce5b3a22c53f8ecbf733531bc915da0b28c5acb31a08",
+      "signed": true,
+      "signature_existed": false
+    },
+    {
+      "name": "custom-hotkeys-0.2.1.zip",
+      "sha256": "2d32d86a201ee0b53272a4978f026fba304a2de0a199eb06e754301b8706c6f8",
+      "signed": true,
+      "signature_existed": false
+    },
+    {
+      "name": "graphicsApiReplacer-1.3.0.zip",
+      "sha256": "c9431993538b390e44d5713c8715c9c359dcea8890343fadbeb49a342c41a134",
+      "signed": true,
+      "signature_existed": true
+    },
+    {
+      "name": "luajit-1.0.0.zip",
+      "sha256": "59c24e7b6a7e0579c3b2a18e6ad397c7a7421a46a384cd9c6a6c4dd8fecc0b08",
+      "signed": true,
+      "signature_existed": false
+    },
+    {
+      "name": "ucp2-legacy-2.15.1.zip",
+      "existing_signature": true
+    },
+    {
+      "name": "ui-1.0.1.zip",
+      "sha256": "4e23b7e310ee0022f15279d6e3b1aa81d9a3254c15957deac9a6dd69de5e5f07",
+      "signed": true,
+      "signature_existed": false
+    },
+    {
+      "name": "winProcHandler-1.0.0.zip",
+      "sha256": "af09984a65295141cf8a26aec2ba2c350e7bd2540d5dff4478089b7d157a11e6",
+      "signed": true,
+      "signature_existed": false
+    }
+  ]
+}

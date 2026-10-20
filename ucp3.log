@@ -1,0 +1,223 @@
+File verbosity level: 0
+date       time         ( uptime  ) [ thread name/id ]                   file:line     v| 
+2026-10-20 14:28:15.513 (   0.003s) [        EEF6BB47]             loguru.cpp:841   INFO| Logging to 'ucp3.log', mode: 'w', verbosity: 0
+2026-10-20 14:28:15.514 (   0.003s) [        EEF6BB47]             loguru.cpp:841   INFO| Logging to 'ucp3-error-log.log', mode: 'w', verbosity: -1
+2026-10-20 14:28:15.514 (   0.003s) [(main thread)   ]            logging.cpp:52    INFO| Current directory: C:\Projects\UCP\Roadmap\Investigations\Custom-Hotkeys\required-settings-20261011\game
+2026-10-20 14:28:15.531 (   0.020s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: code
+2026-10-20 14:28:15.540 (   0.030s) [(main thread)   ]            logging.cpp:68    INFO| [main]: Using the default UCP_DIR
+2026-10-20 14:28:15.718 (   0.207s) [(main thread)   ]            logging.cpp:102   INFO| Final config (normalized): 
+2026-10-20 14:28:15.719 (   0.209s) [(main thread)   ]            logging.cpp:102   INFO| 
+ui-1.0.1: ~
+ucp2-legacy-2.15.1:
+  o_fix_ladderclimb:
+    enabled: false
+  ai_fix_crusader_archers_pitch:
+    enabled: false
+  ai_fix_laddermen_with_enclosed_keep:
+    enabled: false
+  ai_housing:
+    build_housing:
+      enabled: false
+      sliderValue: 5
+    campfire_housing:
+      enabled: false
+      sliderValue: 8
+    delete_housing:
+      enabled: false
+  u_laddermen:
+    enabled: false
+  u_spearmen:
+    enabled: false
+  ai_defense:
+    enabled: false
+  o_freetrader:
+    enabled: false
+  o_fix_fletcher_bug:
+    enabled: false
+  ai_attackwave:
+    enabled: false
+    sliderValue: 7
+  o_fix_rapid_deletion_bug:
+    enabled: false
+  ai_demolish:
+    ai_demolish_trapped:
+      enabled: false
+    ai_demolish_walls:
+      enabled: false
+    ai_demolish_eco:
+      enabled: false
+  ai_access:
+    enabled: false
+  ai_nosleep:
+    enabled: false
+  o_fix_baker_disappear:
+    enabled: false
+  ai_addattack:
+    enabled: false
+    choice: absolute
+    choices:
+      absolute:
+        slider: 5
+      relative:
+        slider: 0.29999999999999999
+  o_override_identity_menu:
+    enabled: false
+  o_default_multiplayer_speed:
+    enabled: false
+    sliderValue: 50
+  o_gamespeed:
+    enabled: false
+  fix_apple_orchard_build_size:
+    enabled: false
+  ai_attacktarget:
+    enabled: false
+    choice: ""
+  o_moatvisibility:
+    enabled: false
+  o_keys:
+    enabled: false
+  o_engineertent:
+    enabled: false
+  o_stop_player_keep_rotation:
+    enabled: false
+  o_shfy:
+    o_shfy_religion:
+      enabled: false
+    o_shfy_peasantspawnrate:
+      enabled: false
+    o_shfy_resourcequantity:
+      enabled: false
+    o_shfy_beer:
+      enabled: false
+  ai_assaultswitch:
+    enabled: false
+  ai_tethers:
+    enabled: false
+  o_restore_arabian_engineer_speech:
+    enabled: false
+  u_fix_lord_animation_stuck_movement:
+    enabled: false
+  o_fast_placing:
+    enabled: false
+  o_fix_moat_digging_unit_disappearing:
+    enabled: false
+  o_xtreme:
+    enabled: false
+  o_playercolor:
+    enabled: false
+    choice: red
+  o_onlyai:
+    enabled: false
+  o_change_siege_engine_spawn_position_catapult:
+    enabled: false
+  o_firecooldown:
+    enabled: false
+    sliderValue: 2000
+  ai_recruitinterval:
+    enabled: false
+  u_arabwall:
+    enabled: false
+  o_increase_path_update_tick_rate:
+    enabled: false
+  u_fireballistafix:
+    enabled: false
+  ai_buywood:
+    enabled: false
+  u_tanner_fix:
+    enabled: false
+  ai_attacklimit:
+    enabled: false
+    sliderValue: 500
+  o_armory_marketplace_weapon_order_fix:
+    enabled: false
+  ai_rebuild:
+    enabled: false
+  ai_recruitstate_initialtimer:
+    enabled: false
+    sliderValue: 0
+  ai_resources_rebuy:
+    flour:
+      enabled: false
+      sliderValue: 36
+    iron:
+      enabled: false
+      sliderValue: 36
+    wood:
+      enabled: false
+      sliderValue: 36
+  o_responsivegates:
+    enabled: false
+  u_spearmen_run:
+    enabled: false
+  o_healer:
+    enabled: false
+  o_fix_map_sending:
+    enabled: false
+  u_fix_applefarm_blocking:
+    enabled: false
+  u_arabxbow:
+    enabled: false
+  ai_towerengines:
+    enabled: false
+cffi-1.0.0:
+  debugging:
+    logGC:
+      enabled: false
+    tryExceptGC:
+      enabled: true
+graphicsApiReplacer-1.3.0:
+  graphic:
+    api: DirectX
+    vsync: true
+    debug: none
+    waitWithGLFinish: false
+    pixFormat: argb1555
+    filterLinear: true
+  window:
+    continueOutOfFocus: pause
+    minimizeOnLostFocus: false
+    pos: middle
+    width: 1280
+    height: 720
+    type: borderlessFullscreen
+  control:
+    padding: 0
+    margin: 0
+    scrollActive: true
+    clipCursor: true
+custom-hotkeys-0.2.1: ~
+luajit-1.0.0:
+  debugging:
+    lowLevelExceptions:
+      enabled: false
+    jit:
+      disabled: false
+    trace:
+      enabled: false
+winProcHandler-1.0.0: ~
+2026-10-20 14:28:15.722 (   0.211s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: ucp2-legacy version: 2.15.1
+2026-10-20 14:28:15.731 (   0.220s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: ucp2-legacy-2.15.1
+2026-10-20 14:28:15.733 (   0.222s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: luajit version: 1.0.0
+2026-10-20 14:28:15.761 (   0.250s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: luajit-1.0.0
+2026-10-20 14:28:15.796 (   0.286s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: cffi version: 1.0.0
+2026-10-20 14:28:15.811 (   0.301s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: cffi-1.0.0
+2026-10-20 14:28:15.822 (   0.311s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: winProcHandler version: 1.0.0
+2026-10-20 14:28:15.833 (   0.322s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: winProcHandler-1.0.0
+2026-10-20 14:28:15.842 (   0.331s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: graphicsApiReplacer version: 1.3.0
+2026-10-20 14:28:15.853 (   0.342s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: graphicsApiReplacer-1.3.0
+2026-10-20 14:28:15.862 (   0.351s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: ui version: 1.0.1
+2026-10-20 14:28:15.874 (   0.363s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: ui-1.0.1
+2026-10-20 14:28:15.929 (   0.418s) [(main thread)   ]            logging.cpp:102   INFO| [main]: loading extension: custom-hotkeys version: 0.2.1
+2026-10-20 14:28:15.943 (   0.432s) [(main thread)   ]            logging.cpp:52    INFO| verified zip file: custom-hotkeys-0.2.1
+2026-10-20 14:28:16.240 (   0.729s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: ucp2-legacy version: 2.15.1
+2026-10-20 14:28:16.240 (   0.729s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: luajit version: 1.0.0
+2026-10-20 14:28:16.264 (   0.754s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: cffi version: 1.0.0
+2026-10-20 14:28:16.264 (   0.754s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: winProcHandler version: 1.0.0
+2026-10-20 14:28:16.274 (   0.763s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: graphicsApiReplacer version: 1.3.0
+2026-10-20 14:28:16.336 (   0.826s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: ui version: 1.0.1
+2026-10-20 14:28:16.359 (   0.848s) [(main thread)   ]            logging.cpp:102   INFO| [main]: enabling extension: custom-hotkeys version: 0.2.1
+2026-10-20 14:28:16.366 (   0.855s) [(main thread)   ]            logging.cpp:52    INFO| Finished running bootstrap file
+2026-10-20 14:28:16.869 (   1.358s) [(main thread)   ]            logging.cpp:52    INFO| [graphicsApiReplacer]: [DirectX]: Using DirectX feature level: DirectX11.1
+2026-10-20 14:28:16.881 (   1.370s) [(main thread)   ]            logging.cpp:52    INFO| [graphicsApiReplacer]: Window created.
+2026-10-20 14:28:16.884 (   1.373s) [(main thread)   ]            logging.cpp:52    INFO| [graphicsApiReplacer]: Drawing initialized.
+2026-10-20 14:28:26.957 (  11.446s) [(main thread)   ]            logging.cpp:102   INFO| [custom-hotkeys]: Custom Hotkeys initialized: {"installed":true,"modal":2041,"priority":-110000,"profile":"Grid"}

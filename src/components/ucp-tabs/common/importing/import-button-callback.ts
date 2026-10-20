@@ -1,6 +1,7 @@
 import { collectConfigEntries } from '../../../../function/extensions/discovery/collect-config-entries';
 import {
   ConfigurationQualifier,
+  CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_TOUCHED_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -28,6 +29,7 @@ import { ImportButtonCallbackResult, makeErrorReport } from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
 import { showModalOk } from '../../../modals/modal-ok';
 import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
+import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-changes';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -66,7 +68,6 @@ export function constructUserConfigObjects(config: ConfigFile) {
       url,
       modifications: m,
     };
-    // TODO: do checking here if the user part is not conflicting?
 
     let q = m.value.qualifier;
     if (q === 'unspecified') q = 'suggested';
@@ -153,10 +154,6 @@ export function importUcpConfig(
     type: 'reset',
     value: newUserConfiguration,
   });
-  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
-    type: 'reset',
-    value: {},
-  });
   getStore().set(CONFIGURATION_QUALIFIER_REDUCER_ATOM, {
     type: 'reset',
     value: newConfigurationQualifier,
@@ -168,6 +165,23 @@ export function importUcpConfig(
   );
   // Set the new extension state, which fires an update of the full config
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
+
+  const savedFullConfiguration = config['config-full']
+    ? constructUserConfigObjects({
+        ...config,
+        'config-sparse': config['config-full'],
+      }).userConfig
+    : undefined;
+  const changedUrls = warnLoadedConfigurationChanges(
+    newUserConfiguration,
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+    savedFullConfiguration,
+    getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+  );
+  getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+    type: 'reset',
+    value: Object.fromEntries(changedUrls.map((url) => [url, true])),
+  });
 
   return {
     status: 'success',

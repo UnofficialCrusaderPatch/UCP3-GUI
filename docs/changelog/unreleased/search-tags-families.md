@@ -4,7 +4,9 @@
 - Choose one configuration from an expandable extension family, such as Bare or Applied. The family shows your selected configuration and remains available for switching. Creators choose the default member.
 - Switch Creator mode directly from Content as well as Customisations.
 - Active extensions stay individually visible in their actual load order. Shared dependencies remain available, while conflicting family choices are explained before anything changes.
-- Keep your saved settings when an extension requires different values. Removing that requirement restores your preferences.
+- When an extension requires a different value for one of your settings, the launcher shows the change as old → new before applying it, and the Customisations tab always shows what the game will use.
+- A saved setup that selects two configurations of the same family asks you which one to keep instead of failing to load.
+- Families are owned by their root plugin: only plugins can be members, and a plugin joins a family only if the root accepts it.
 
 Family grouping appears when creators add family information to their extensions. Existing extensions and saved setups keep working as before.
 

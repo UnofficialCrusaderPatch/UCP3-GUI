@@ -25,6 +25,10 @@ config.load.changed.preference: "Saved preference"
 config.load.changed.game: "Game setting"
 config.load.changed.unset: "not set"
 config.load.fail.message: "There were errors in the loading process: \n\n{{err}}"
+config.load.family.cancelled: "The saved setup was not loaded because no configuration was chosen for a family."
+config.load.family.legend: "Family: {{family}}"
+config.load.family.message: "This saved setup selects more than one configuration from the same family, but only one can be active. Choose the one to keep for each family. Nothing is loaded until you choose, and the setup file itself only changes when you apply."
+config.load.family.title: "Choose one configuration per family"
 config.load.skip.title: "Extensions not loaded"
 config.load.skip.message: "There were errors in the extension load process"
 config.option.change.parent: Can't change value because of a parent element
@@ -384,10 +388,6 @@ discovery.family.conflict.message: 'Choose one configuration per family. Resolve
   {{details}}'
 discovery.family.switch: Select configuration
 discovery.family.selected: Selected configuration
-discovery.preferences.masked.title: Required extension settings
-discovery.preferences.masked.message: '{{n}} saved preferences will be temporarily overridden by required settings. Your preferences are kept and return when those requirements are removed. Continue?
-
-  {{entries}}'
 store.toolbar.uninstall.dependencies: "Cannot uninstall: other extensions still need this content.\n{{lst}}"
 store.element.activated.uninstall: "Select to deactivate and uninstall {{name}}."
 content.uninstallation.deactivate.title: "Deactivate and uninstall"

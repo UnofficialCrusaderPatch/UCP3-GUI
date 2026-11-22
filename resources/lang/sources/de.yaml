@@ -333,10 +333,6 @@ discovery.family.conflict.message: 'Wähle eine Konfiguration pro Familie. Löse
   {{details}}'
 discovery.family.switch: Konfiguration auswählen
 discovery.family.selected: Ausgewählte Konfiguration
-discovery.preferences.masked.title: Erforderliche Erweiterungseinstellungen
-discovery.preferences.masked.message: '{{n}} gespeicherte Einstellungen werden vorübergehend durch erforderliche Werte überschrieben. Deine Einstellungen bleiben erhalten und gelten wieder, sobald diese Anforderungen entfallen. Fortfahren?
-
-  {{entries}}'
 store.toolbar.uninstall.dependencies: "Deinstallation nicht möglich: Andere Erweiterungen benötigen diese Inhalte.\n{{lst}}"
 store.element.activated.uninstall: "Auswählen, um {{name}} zu deaktivieren und zu deinstallieren."
 content.uninstallation.deactivate.title: "Deaktivieren und deinstallieren"

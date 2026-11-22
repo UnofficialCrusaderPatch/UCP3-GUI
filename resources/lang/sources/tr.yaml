@@ -323,10 +323,6 @@ discovery.family.conflict.message: 'Her aile için bir yapılandırma seçin. De
   {{details}}'
 discovery.family.switch: Yapılandırmayı seç
 discovery.family.selected: Seçili yapılandırma
-discovery.preferences.masked.title: Gerekli uzantı ayarları
-discovery.preferences.masked.message: '{{n}} kayıtlı tercih geçici olarak gerekli ayarlarla geçersiz kılınacak. Tercihleriniz korunur ve bu gereksinimler kaldırıldığında yeniden uygulanır. Devam edilsin mi?
-
-  {{entries}}'
 store.toolbar.uninstall.dependencies: "Kaldırılamaz: diğer uzantılar hâlâ bu içeriğe ihtiyaç duyuyor.\n{{lst}}"
 store.element.activated.uninstall: "{{name}} uzantısını devre dışı bırakıp kaldırmak için seçin."
 content.uninstallation.deactivate.title: "Devre dışı bırak ve kaldır"

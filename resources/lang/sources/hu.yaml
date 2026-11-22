@@ -323,10 +323,6 @@ discovery.family.conflict.message: 'Családonként egy konfigurációt válassz.
   {{details}}'
 discovery.family.switch: Konfiguráció kiválasztása
 discovery.family.selected: Kiválasztott konfiguráció
-discovery.preferences.masked.title: Kötelező bővítménybeállítások
-discovery.preferences.masked.message: '{{n}} mentett beállítást ideiglenesen felülírnak a kötelező értékek. A saját beállításaid megmaradnak, és a követelmények eltávolításakor újra érvényesülnek. Folytatod?
-
-  {{entries}}'
 store.toolbar.uninstall.dependencies: "Nem távolítható el: más bővítményeknek még szükségük van erre a tartalomra.\n{{lst}}"
 store.element.activated.uninstall: "Válaszd ki a(z) {{name}} deaktiválásához és eltávolításához."
 content.uninstallation.deactivate.title: "Deaktiválás és eltávolítás"

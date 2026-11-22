@@ -323,10 +323,6 @@ discovery.family.conflict.message: '每个扩展族只能选择一种配置。�
   {{details}}'
 discovery.family.switch: 选择配置
 discovery.family.selected: 已选配置
-discovery.preferences.masked.title: 扩展要求的设置
-discovery.preferences.masked.message: '{{n}} 项已保存的偏好将被必需设置暂时覆盖。您的偏好会保留，并在这些要求移除后恢复。是否继续？
-
-  {{entries}}'
 store.toolbar.uninstall.dependencies: "无法卸载：其他扩展仍需要此内容。\n{{lst}}"
 store.element.activated.uninstall: "选择以停用并卸载 {{name}}。"
 content.uninstallation.deactivate.title: "停用并卸载"

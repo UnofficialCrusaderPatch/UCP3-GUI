@@ -268,7 +268,7 @@ describe('configuration family transitions', () => {
     expect(legacy.explicitlyActivatedExtensions).toEqual([applied, bare]);
   });
 
-  it('preserves user settings while a family preset temporarily requires other values', () => {
+  it('repairs a user setting that a selected family preset requires, and keeps the repair after switching back', () => {
     const { state, bare, applied } = fixture();
     const entry = Object.entries(applied.configEntries)[0];
     Object.assign(entry[1].contents, { 'required-value': false });
@@ -279,9 +279,12 @@ describe('configuration family transitions', () => {
     });
     const selected = build(select(state, applied));
     store.set(EXTENSION_STATE_INTERFACE_ATOM, selected);
+    // The Customisations tab and config-sparse show what the game uses.
     expect(store.get(CONFIGURATION_FULL_REDUCER_ATOM)[entry[0]]).toBe(false);
-    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)[entry[0]]).toBe(true);
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)[entry[0]]).toBe(false);
     store.set(EXTENSION_STATE_INTERFACE_ATOM, build(select(selected, bare)));
-    expect(store.get(CONFIGURATION_FULL_REDUCER_ATOM)[entry[0]]).toBe(true);
+    // No hidden preference comes back when the requirement goes away.
+    expect(store.get(CONFIGURATION_FULL_REDUCER_ATOM)[entry[0]]).toBe(false);
+    expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)[entry[0]]).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 import yaml from 'yaml';
-import { Definition } from '../../../../config/ucp/common';
+import { Definition, ExtensionType } from '../../../../config/ucp/common';
 import { ExtensionHandle } from '../../handles/extension-handle';
 import {
   DefinitionMeta_1_0_0,
@@ -11,6 +11,7 @@ import {
   checkFrameworkDependency,
   checkFrontendDependency,
 } from '../system-dependencies';
+import { readSaveStateDeclaration } from '../../save-state';
 
 const LOGGER = new Logger('discovery/definitions.ts');
 
@@ -53,7 +54,7 @@ export const validateDefinition = async (eh: ExtensionHandle) => {
 
   const { type } = definition;
 
-  let assumedType = inferredType;
+  let assumedType: ExtensionType = inferredType;
   if (type === undefined) {
     const warning = `"type: " was not found in definition.yml of ${name}-${version}. Extension was inferred to be a ${inferredType}`;
     LOGGER.msg(warning).warn();
@@ -114,6 +115,18 @@ export const validateDefinition = async (eh: ExtensionHandle) => {
   }
 
   definition.dependencies = parsedDependencies.content;
+
+  const saveState = readSaveStateDeclaration(
+    definition['save-state'],
+    assumedType,
+    `${name}-${version}`,
+  );
+  if (saveState.warning !== undefined) {
+    LOGGER.msg(saveState.warning).warn();
+    warnings.push(saveState.warning);
+  }
+  if (saveState.value === undefined) delete definition['save-state'];
+  else definition['save-state'] = saveState.value;
 
   return {
     status: warnings.length === 0 ? 'ok' : 'warning',

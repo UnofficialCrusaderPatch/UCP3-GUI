@@ -22,6 +22,8 @@ import { filterOutExtensions as filterExtensions } from './filter-out-extensions
 import reportAndConfirmBuildResult from './reporting';
 import { removeProviderAiOverrides } from './remove-provider-ai-overrides';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
+import { saveStateChanges } from '../../../../function/extensions/save-state';
+import { confirmSaveStateLoss } from '../../common/save-state-loss-dialog';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
 
@@ -80,6 +82,12 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     user: newUserConfiguration,
     disappearingEntries,
   } = prepareExtensionDeactivation(oldExtensionState, [ext], userConfiguration);
+
+  const { removed: savedGameModules } = saveStateChanges(
+    oldExtensionState.activeExtensions,
+    newExtensionState.activeExtensions,
+  );
+  if (!(await confirmSaveStateLoss(savedGameModules))) return;
 
   if (disappearingEntries.length > 0) {
     const confirmed = await showModalOkCancel({

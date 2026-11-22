@@ -9,17 +9,27 @@ export function UninstallReview({
   plan,
   cleanup,
   onChange,
+  recoverable,
 }: {
   plan: UninstallPlan;
   cleanup: UninstallPlan;
   onChange: (clean: boolean) => void;
+  /** Whether the Store still offers this exact version for reinstalling. */
+  recoverable: (ext: UninstallPlan['selected'][number]) => boolean;
 }) {
   const [clean, setClean] = useState(false);
   const id = useId();
   const list = (extensions: UninstallPlan['selected']) =>
     extensions.map((ext) => (
       <li key={createExtensionID(ext)}>
-        {ext.definition['display-name'] || ext.name} ({ext.version})
+        {ext.definition['display-name'] || ext.name} ({ext.version}) —{' '}
+        <Message
+          message={
+            recoverable(ext)
+              ? 'content.uninstallation.recoverable'
+              : 'content.uninstallation.unrecoverable'
+          }
+        />
       </li>
     ));
   return (
@@ -58,6 +68,9 @@ export function UninstallReview({
           </p>
         </>
       )}
+      <p>
+        <Message message="content.uninstallation.recover.help" />
+      </p>
     </div>
   );
 }
@@ -65,6 +78,8 @@ export function UninstallReview({
 export async function confirmUninstall(
   plan: UninstallPlan,
   cleanup: UninstallPlan,
+  recoverable: (ext: UninstallPlan['selected'][number]) => boolean = () =>
+    false,
 ) {
   let clean = false;
   const confirmed = await showModalOkCancel({
@@ -75,6 +90,7 @@ export async function confirmUninstall(
       <UninstallReview
         plan={plan}
         cleanup={cleanup}
+        recoverable={recoverable}
         onChange={(value) => {
           clean = value;
         }}

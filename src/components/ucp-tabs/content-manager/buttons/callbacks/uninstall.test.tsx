@@ -447,3 +447,28 @@ it('retains a provider if its dependent fails to uninstall', async () => {
     applied,
   ]);
 });
+it('marks which removed exact versions the Store can reinstall', async () => {
+  setup();
+  const offline = { ...content(independent), online: false };
+  mocks.confirm.mockResolvedValueOnce(false);
+  await uninstallContentButtonCallback([content(applied), offline], []);
+  const review = mocks.confirm.mock
+    .calls[0][0] as OkCancelModalWindowProperties;
+  const { recoverable } = (
+    review.children as { props: { recoverable: (ext: Extension) => boolean } }
+  ).props;
+  expect(recoverable(applied)).toBe(true);
+  expect(recoverable(independent)).toBe(false);
+  expect(mocks.remove).not.toHaveBeenCalled();
+});
+it('treats a deprecated Store entry as not reinstallable', async () => {
+  setup();
+  mocks.confirm.mockResolvedValueOnce(false);
+  await uninstallContentButtonCallback([content(applied)], [content(applied)]);
+  const review = mocks.confirm.mock
+    .calls[0][0] as OkCancelModalWindowProperties;
+  const { recoverable } = (
+    review.children as { props: { recoverable: (ext: Extension) => boolean } }
+  ).props;
+  expect(recoverable(applied)).toBe(false);
+});

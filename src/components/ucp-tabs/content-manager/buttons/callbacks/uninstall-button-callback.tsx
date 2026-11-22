@@ -74,9 +74,23 @@ export async function uninstallContentButtonCallback(
       });
       return;
     }
+    // A removed exact version stays recoverable for saved setups while the Store offers it.
+    const isOffline = (ce: ContentElement) =>
+      !ce.online ||
+      deprecated.some(
+        (entry) => createExtensionID(entry) === createExtensionID(ce),
+      );
+    const findInstalled = (id: string) =>
+      [...installed, ...store.get(CONTENT_ELEMENTS_ATOM)].find(
+        (entry) => entry.installed && createExtensionID(entry) === id,
+      );
     const confirmed = await confirmUninstall(
       plan,
       planUninstall(before, selectedIds, true),
+      (ext) => {
+        const ce = findInstalled(createExtensionID(ext));
+        return ce !== undefined && !isOffline(ce);
+      },
     );
     if (!confirmed) return;
     if (!unchanged()) throw Error('content.uninstallation.changed');
@@ -86,23 +100,12 @@ export async function uninstallContentButtonCallback(
       ...confirmed.unused,
     ];
     const ids = extensions.map(createExtensionID);
-    const contentBefore = store.get(CONTENT_ELEMENTS_ATOM);
     const removalContent = extensions.map((ext) => {
-      const ce = [...installed, ...contentBefore].find(
-        (entry) =>
-          entry.installed &&
-          createExtensionID(entry) === createExtensionID(ext),
-      );
+      const ce = findInstalled(createExtensionID(ext));
       if (!ce) throw Error('content.uninstallation.changed');
       return ce;
     });
-    const offline = removalContent.filter(
-      (ce) =>
-        !ce.online ||
-        deprecated.some(
-          (entry) => createExtensionID(entry) === createExtensionID(ce),
-        ),
-    );
+    const offline = removalContent.filter(isOffline);
     if (
       offline.length &&
       !(await showModalOkCancel({

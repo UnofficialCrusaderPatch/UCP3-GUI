@@ -1,7 +1,10 @@
 import { createStore } from 'jotai';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { getStore } from '../../../hooks/jotai/base';
-import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../function/extensions/state/state';
+import {
+  EXTENSION_STATE_INTERFACE_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
+} from '../../../function/extensions/state/state';
 import { buildExtensionConfigurationDB } from '../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
 import { loadConfigFromFile } from '../../../config/ucp/config-files/config-files';
@@ -111,6 +114,7 @@ describe('modules that saved games depend on', () => {
   test('a player-initiated import that drops one asks first, and Cancel keeps the setup', async () => {
     const { other } = presetWithTunnels();
     const before = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, { Preset: '1.0.0' });
     vi.mocked(loadConfigFromFile).mockResolvedValue({
       status: 'OK',
       message: '',
@@ -131,6 +135,9 @@ describe('modules that saved games depend on', () => {
     expect(result.status).toBe('aborted');
     expect(saveStateAsked()).toBe(true);
     expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
+    expect(getStore().get(PREFERRED_EXTENSION_VERSION_ATOM)).toEqual({
+      Preset: '1.0.0',
+    });
   });
 
   test('loading at startup does not ask', async () => {

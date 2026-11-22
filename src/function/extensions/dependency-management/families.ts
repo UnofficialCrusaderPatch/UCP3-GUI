@@ -215,11 +215,11 @@ export function profileActiveExtensions(
   const fullOrder = config['config-full']?.['load-order'];
   // The importer falls back to resolving the explicit selections when an exact
   // version of the saved full order isn't installed; mirror that here.
+  const fullEntries =
+    fullOrder !== undefined ? deserializeLoadOrder(fullOrder as LoadOrder) : [];
   const full =
-    fullOrder !== undefined &&
-    deserializeLoadOrder(fullOrder as LoadOrder).every(
-      (entry) => exact(entry) !== undefined,
-    )
+    fullEntries.length > 0 &&
+    fullEntries.every((entry) => exact(entry) !== undefined)
       ? fullOrder
       : undefined;
   let closure: Extension[] = full ? listed(full) : [];
@@ -232,6 +232,24 @@ export function profileActiveExtensions(
     }
   }
   return [...new Set([...closure, ...explicit])];
+}
+
+/** Installed extensions a saved profile lists by exact version, in either load order. */
+export function profileListedExtensions(
+  config: ConfigFile,
+  installed: Extension[],
+) {
+  return [
+    config['config-full']?.['load-order'],
+    config['config-sparse']?.['load-order'],
+  ]
+    .flatMap((order) => deserializeLoadOrder((order ?? []) as LoadOrder))
+    .map(({ extension, version }) =>
+      installed.find(
+        (ext) => ext.name === extension && ext.version === version,
+      ),
+    )
+    .filter((ext): ext is Extension => ext !== undefined);
 }
 
 /**
@@ -272,34 +290,26 @@ export function findProfileFamilyConflicts(
 
 /**
  * A copy of the profile for a family choice: the dropped members leave the
- * explicit selections, and a kept member that only a dropped one brought in
- * becomes an explicit selection at its resolved version, in the dropped
- * member's place. The saved full load order is dropped, so the import
- * re-resolves the dependency closure from the kept selections; the saved
- * values stay as the baseline for the old -> new warning. Explicit versions
- * and their order are kept. The input is not changed.
+ * explicit selections, and `promoted` members (kept choices that only a dropped
+ * member brought in) are added after the remaining selections, so nothing
+ * listed earlier can depend on them. The saved full load order is dropped, so
+ * the import re-resolves the dependency closure from the kept selections; the
+ * saved values stay as the baseline for the old -> new warning. Explicit
+ * versions and their order are kept. The input is not changed.
  */
 export function withoutProfileMembers(
   config: ConfigFile,
   names: string[],
-  kept: Extension[] = [],
+  promoted: Extension[] = [],
 ) {
-  const saved = deserializeLoadOrder(
+  const order = deserializeLoadOrder(
     (config['config-sparse']['load-order'] ?? []) as LoadOrder,
-  );
-  const order = saved.filter(({ extension }) => !names.includes(extension));
-  const firstDropped = saved.findIndex(({ extension }) =>
-    names.includes(extension),
-  );
-  const at =
-    firstDropped < 0
-      ? order.length
-      : saved.slice(0, firstDropped).filter((e) => !names.includes(e.extension))
-          .length;
-  const promoted = kept
+  ).filter(({ extension }) => !names.includes(extension));
+  promoted
     .filter((ext) => !order.some(({ extension }) => extension === ext.name))
-    .map((ext) => ({ extension: ext.name, version: ext.version }));
-  order.splice(at, 0, ...promoted);
+    .forEach((ext) =>
+      order.push({ extension: ext.name, version: ext.version }),
+    );
   const full = config['config-full'];
   const fullValues = full
     ? (Object.fromEntries(

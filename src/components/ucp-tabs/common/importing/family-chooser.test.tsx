@@ -324,3 +324,46 @@ describe('keeping a preset that a bundle brought in', () => {
     expect(loaded.activeExtensions.map((e) => e.name)).toEqual(['Preset-A']);
   });
 });
+
+describe('keeping a preset that a remaining bundle needs', () => {
+  it('loads it through the bundle without changing the explicit order', async () => {
+    const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
+      synthetic('Preset', {
+        family: [{ name: 'ai', root: true }],
+        configEntries: {
+          'aiSwapper.menu': { contents: { 'suggested-value': 1 } },
+        },
+      }),
+      synthetic('Rival', { family: [{ name: 'ai' }] }),
+      synthetic('Bundle', { dependencies: { Preset: '^1.0.0' } }),
+    ] as never);
+    getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+    const order = (names: string[]) =>
+      names.map((extension) => ({ extension, version: '1.0.0' }));
+    vi.mocked(loadConfigFromFile).mockResolvedValue({
+      status: 'OK',
+      message: '',
+      result: {
+        meta: { version: '1.0.0' },
+        'config-sparse': {
+          modules: {},
+          plugins: {},
+          'load-order': order(['Bundle', 'Rival']),
+        },
+      } as unknown as ConfigFile,
+    } as never);
+    pick('ai', 'Preset');
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('success');
+    const loaded = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    expect(loaded.explicitlyActivatedExtensions.map((e) => e.name)).toEqual([
+      'Bundle',
+    ]);
+    expect(loaded.activeExtensions.map((e) => e.name).sort()).toEqual([
+      'Bundle',
+      'Preset',
+    ]);
+  });
+});

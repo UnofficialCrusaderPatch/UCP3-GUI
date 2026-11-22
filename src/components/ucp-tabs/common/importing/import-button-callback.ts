@@ -38,6 +38,7 @@ import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-chan
 import {
   findProfileFamilyConflicts,
   profileActiveExtensions,
+  profileListedExtensions,
   withoutProfileMembers,
 } from '../../../../function/extensions/dependency-management/families';
 import { chooseProfileFamilyMembers } from './family-chooser';
@@ -297,13 +298,28 @@ export async function importUcpConfigFile(
           .map((ext) => [ext.name, ext]),
       ).values(),
     ];
-    profile = withoutProfileMembers(config, dropped, kept);
+    profile = withoutProfileMembers(config, dropped);
   }
 
   // Staging a sparse profile already records preferred versions; a cancelled
   // import must leave them as they were.
   const preferredVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
-  const staged = stageUcpConfigImport(profile, setConfigStatus);
+  let staged = stageUcpConfigImport(profile, setConfigStatus);
+  // A kept choice that only a dropped member brought in isn't in the resolved
+  // setup yet: add it as an explicit selection and resolve again.
+  const notResolved = (attempt: StagedImport) =>
+    attempt.status === 'ok'
+      ? kept.filter(
+          ({ name }) =>
+            !attempt.newExtensionsState.activeExtensions.some(
+              (ext) => ext.name === name,
+            ),
+        )
+      : [];
+  if (notResolved(staged).length > 0) {
+    profile = withoutProfileMembers(config, dropped, notResolved(staged));
+    staged = stageUcpConfigImport(profile, setConfigStatus);
+  }
   const stagedVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
@@ -332,7 +348,16 @@ export async function importUcpConfigFile(
         : []),
       ...(dropped.length > 0
         ? saveStateChanges(
-            profileActiveExtensions(config, current.extensions, current.tree),
+            [
+              // What the saved setup listed, even if its full order no longer
+              // resolves, plus what it resolves to.
+              ...profileListedExtensions(config, current.extensions),
+              ...profileActiveExtensions(
+                config,
+                current.extensions,
+                current.tree,
+              ),
+            ],
             incoming,
           ).removed
         : []),

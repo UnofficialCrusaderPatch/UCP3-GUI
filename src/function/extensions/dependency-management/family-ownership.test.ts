@@ -220,7 +220,7 @@ describe('saved profiles that select two family members', () => {
     expect(input['config-full']!['load-order']).toHaveLength(3);
   });
 
-  it('makes a kept member that only the dropped one brought in explicit, in its place', () => {
+  it('adds a promoted member after the remaining selections', () => {
     const input = profile(['Other', 'Bundle', 'Last']);
     const kept = ext({ name: 'Applied', version: '1.2.0' });
     expect(
@@ -229,8 +229,8 @@ describe('saved profiles that select two family members', () => {
       ],
     ).toEqual([
       { extension: 'Other', version: '1.0.0' },
-      { extension: 'Applied', version: '1.2.0' },
       { extension: 'Last', version: '1.0.0' },
+      { extension: 'Applied', version: '1.2.0' },
     ]);
   });
 

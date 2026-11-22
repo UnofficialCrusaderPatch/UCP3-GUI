@@ -1,3 +1,4 @@
+import { rcompare } from 'semver';
 import { buildExtensionConfigurationDB } from '../../configuration/extension-configuration/build-extension-configuration-db';
 import { addExtensionToExplicityActivatedExtensions } from '../../../components/ucp-tabs/extension-manager/extensions-state-manipulation';
 import { Extension } from '../../../config/ucp/common';
@@ -21,7 +22,7 @@ export function activateFirstTimeUseExtensions(
     );
     if (options.length > 0) {
       const selection = options
-        .sort((a, b) => a.version.localeCompare(b.version))
+        .sort((a, b) => rcompare(a.version, b.version))
         .at(0)!;
       extensions.push(selection);
     } else {

@@ -353,3 +353,8 @@ config.load.changed.message: "Certains paramètres enregistrés diffèrent de la
 config.load.changed.preference: "Préférence enregistrée"
 config.load.changed.game: "Paramètre du jeu"
 config.load.changed.unset: "non défini"
+
+config.load.family.cancelled: "La configuration enregistrée n'a pas été chargée car aucune configuration n'a été choisie pour une famille."
+config.load.family.legend: "Famille : {{family}}"
+config.load.family.message: "Cette configuration enregistrée sélectionne plus d'une configuration d'une même famille, mais une seule peut être active. Choisissez celle à conserver pour chaque famille. Rien n'est chargé tant que vous n'avez pas choisi, et le fichier de configuration lui-même ne change que lorsque vous cliquez sur Appliquer."
+config.load.family.title: "Choisissez une configuration par famille"

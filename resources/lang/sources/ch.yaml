@@ -353,3 +353,8 @@ config.load.changed.message: "部分已保存的设置与当前启用扩展生�
 config.load.changed.preference: "已保存的偏好设置"
 config.load.changed.game: "游戏设置"
 config.load.changed.unset: "未设置"
+
+config.load.family.cancelled: "由于未为某个扩展族选择配置，已保存的配置方案未加载。"
+config.load.family.legend: "扩展族：{{family}}"
+config.load.family.message: "此已保存的配置方案在同一个扩展族中选择了多种配置，但每个扩展族只能启用一种。请为每个扩展族选择要保留的配置。在您做出选择之前不会加载任何内容，且配置文件本身仅在点击“应用”后才会更改。"
+config.load.family.title: "为每个扩展族选择一种配置"

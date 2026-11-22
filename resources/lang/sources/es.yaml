@@ -353,3 +353,8 @@ config.load.changed.message: "Algunos ajustes guardados difieren de la configura
 config.load.changed.preference: "Preferencia guardada"
 config.load.changed.game: "Ajuste del juego"
 config.load.changed.unset: "sin definir"
+
+config.load.family.cancelled: "No se cargó la configuración guardada porque no se eligió ninguna configuración para una familia."
+config.load.family.legend: "Familia: {{family}}"
+config.load.family.message: "Esta configuración guardada selecciona más de una configuración de la misma familia, pero solo una puede estar activa. Elige cuál conservar para cada familia. No se carga nada hasta que elijas, y el archivo de configuración solo cambia cuando pulses Aplicar."
+config.load.family.title: "Elige una configuración por familia"

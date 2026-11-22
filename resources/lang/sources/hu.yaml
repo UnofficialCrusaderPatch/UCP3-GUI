@@ -353,3 +353,8 @@ config.load.changed.message: "Egyes mentett beállítások eltérnek az aktív b
 config.load.changed.preference: "Mentett beállítás"
 config.load.changed.game: "Játékbeállítás"
 config.load.changed.unset: "nincs megadva"
+
+config.load.family.cancelled: "A mentett összeállítás nem töltődött be, mert egy családhoz nem lett kiválasztva konfiguráció."
+config.load.family.legend: "Család: {{family}}"
+config.load.family.message: "Ez a mentett összeállítás ugyanabból a családból egynél több konfigurációt választ ki, de csak egy lehet aktív. Válaszd ki mindegyik családnál, melyik maradjon meg. Amíg nem választasz, semmi sem töltődik be, és maga a konfigurációs fájl is csak akkor változik meg, amikor alkalmazod."
+config.load.family.title: "Családonként egy konfigurációt válassz"

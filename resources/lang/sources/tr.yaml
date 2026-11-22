@@ -353,3 +353,8 @@ config.load.changed.message: "Bazı kayıtlı ayarlar etkin uzantıların yapıl
 config.load.changed.preference: "Kayıtlı tercih"
 config.load.changed.game: "Oyun ayarı"
 config.load.changed.unset: "ayarlanmamış"
+
+config.load.family.cancelled: "Bir aile için yapılandırma seçilmediğinden kayıtlı yapılandırma yüklenmedi."
+config.load.family.legend: "Aile: {{family}}"
+config.load.family.message: "Bu kayıtlı yapılandırma aynı aileden birden fazla yapılandırma seçiyor, ancak yalnızca biri etkin olabilir. Her aile için hangisinin kalacağını seçin. Siz seçim yapana kadar hiçbir şey yüklenmez ve yapılandırma dosyasının kendisi yalnızca uyguladığınızda değişir."
+config.load.family.title: "Her aile için bir yapılandırma seçin"

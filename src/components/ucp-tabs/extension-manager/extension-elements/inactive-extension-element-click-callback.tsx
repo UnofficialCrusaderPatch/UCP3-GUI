@@ -13,6 +13,8 @@ import { buildExtensionConfigurationDB } from '../../../../function/configuratio
 import { selectExtensionFamilyMember } from '../extensions-state-manipulation';
 import { FamilyConflictError } from '../../../../function/extensions/dependency-management/families';
 import { confirmRequiredValueRepairs } from '../../common/required-value-repairs-dialog';
+import { saveStateChanges } from '../../../../function/extensions/save-state';
+import { confirmSaveStateLoss } from '../../common/save-state-loss-dialog';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import reportAndConfirmBuildResult from './reporting';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -61,6 +63,28 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   const res = buildExtensionConfigurationDB(newExtensionsState);
 
   if (!(await reportAndConfirmBuildResult(res))) return;
+
+  // Family members must not differ in save-state modules. A switch that still
+  // removes one asks first; one that adds one breaks the rule and is logged.
+  const saveState = saveStateChanges(
+    currentExtensionsState.activeExtensions,
+    res.activeExtensions,
+  );
+  const replacedChoice =
+    currentExtensionsState.explicitlyActivatedExtensions.some(
+      (previous) =>
+        !res.explicitlyActivatedExtensions.some(
+          (e) => e.name === previous.name,
+        ),
+    );
+  if (replacedChoice && (saveState.added.length || saveState.removed.length))
+    LOGGER.msg(
+      `Switching to ${createExtensionID(ext)} changes save-state modules: ` +
+        `adds ${saveState.added.map(createExtensionID).join(', ')}, ` +
+        `removes ${saveState.removed.map(createExtensionID).join(', ')}. ` +
+        'Family members should bring in the same save-state modules.',
+    ).warn();
+  if (!(await confirmSaveStateLoss(saveState.removed))) return;
 
   if (!(await confirmRequiredValueRepairs(res))) return;
 

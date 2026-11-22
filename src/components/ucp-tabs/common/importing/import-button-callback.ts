@@ -106,7 +106,11 @@ export function constructUserConfigObjects(config: ConfigFile) {
 }
 
 export type StagedImport =
-  | { status: 'ok'; newExtensionsState: ExtensionsState }
+  | {
+      status: 'ok';
+      newExtensionsState: ExtensionsState;
+      preferredVersions?: Record<string, string>;
+    }
   | { status: 'fail'; result: ImportButtonCallbackResult };
 
 /** Resolves a profile against the installed extensions without changing live state. */
@@ -146,7 +150,11 @@ export function stageUcpConfigImport(
     };
   }
 
-  return { status: 'ok', newExtensionsState: result.newExtensionsState };
+  return {
+    status: 'ok',
+    newExtensionsState: result.newExtensionsState,
+    preferredVersions: result.preferredVersions,
+  };
 }
 
 export function importUcpConfig(
@@ -157,6 +165,13 @@ export function importUcpConfig(
   if (staged.status === 'fail') return staged.result;
 
   const { newExtensionsState } = staged;
+
+  // Staging changes nothing live; remember the explicit versions only now.
+  if (staged.preferredVersions)
+    getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, {
+      ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM),
+      ...staged.preferredVersions,
+    });
 
   /**
    * Make sure to apply the current loaded configuration exactly as is (version specific)
@@ -301,34 +316,32 @@ export async function importUcpConfigFile(
     profile = withoutProfileMembers(config, dropped);
   }
 
-  // Staging a sparse profile already records preferred versions; a cancelled
-  // import must leave them as they were.
-  const preferredVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   let staged = stageUcpConfigImport(profile, setConfigStatus);
-  // A kept choice that only a dropped member brought in isn't in the resolved
-  // setup yet: add it as an explicit selection and resolve again.
+  // A kept choice that the remaining selections don't bring in, or bring in
+  // at another version, becomes an explicit selection at the chosen version.
   const notResolved = (attempt: StagedImport) =>
     attempt.status === 'ok'
       ? kept.filter(
-          ({ name }) =>
+          (choice) =>
             !attempt.newExtensionsState.activeExtensions.some(
-              (ext) => ext.name === name,
+              (ext) => createExtensionID(ext) === createExtensionID(choice),
             ),
         )
       : [];
   if (notResolved(staged).length > 0) {
-    profile = withoutProfileMembers(config, dropped, notResolved(staged));
+    profile = withoutProfileMembers(
+      config,
+      dropped,
+      notResolved(staged),
+      current.extensions,
+    );
     staged = stageUcpConfigImport(profile, setConfigStatus);
   }
-  const stagedVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
     // Never report success for a choice the resolved setup doesn't honour.
-    const missing = kept.filter(
-      ({ name }) => !incoming.some((ext) => ext.name === name),
-    );
+    const missing = notResolved(staged);
     if (missing.length > 0) {
-      getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
       const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
       return {
         status: 'fail',
@@ -362,12 +375,8 @@ export async function importUcpConfigFile(
           ).removed
         : []),
     ];
-    if (!(await confirmSaveStateLoss(removed))) {
-      // Undo only this staging; a newer import may have committed meanwhile.
-      if (getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) === stagedVersions)
-        getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
+    if (!(await confirmSaveStateLoss(removed)))
       return { status: 'aborted' } as ImportButtonCallbackResult;
-    }
   }
   const result = importUcpConfig(profile, setConfigStatus, staged);
   // The loaded setup differs from the file until the player saves it.

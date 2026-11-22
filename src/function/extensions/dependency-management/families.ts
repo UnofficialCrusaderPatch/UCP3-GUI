@@ -310,28 +310,66 @@ export function findProfileFamilyConflicts(
     .sort((a, b) => a.family.localeCompare(b.family));
 }
 
+/** Whether `start` needs a package named `target`, directly or through installed providers. */
+function dependsOnName(
+  start: Extension,
+  target: string,
+  installed: Extension[],
+) {
+  const seen = new Set<string>();
+  const queue = [start];
+  while (queue.length > 0) {
+    const ext = queue.shift()!;
+    const names = Object.keys(ext.definition?.dependencies ?? {});
+    if (names.includes(target)) return true;
+    names
+      .filter((name) => !seen.has(name))
+      .forEach((name) => {
+        seen.add(name);
+        queue.push(...installed.filter((candidate) => candidate.name === name));
+      });
+  }
+  return false;
+}
+
 /**
  * A copy of the profile for a family choice: the dropped members leave the
- * explicit selections, and `promoted` members (kept choices that only a dropped
- * member brought in) are added after the remaining selections, so nothing
- * listed earlier can depend on them. The saved full load order is dropped, so
- * the import re-resolves the dependency closure from the kept selections; the
- * saved values stay as the baseline for the old -> new warning. Explicit
- * versions and their order are kept. The input is not changed.
+ * explicit selections, and `promoted` members (kept choices the remaining
+ * selections don't bring in at the chosen version) become explicit selections.
+ * The sparse load order lists providers before what needs them, so a promoted
+ * member goes just before the first remaining selection that needs it, or at
+ * the end. The saved full load order is dropped, so the import re-resolves the
+ * dependency closure from the kept selections; the saved values stay as the
+ * baseline for the old -> new warning. Explicit versions and their order are
+ * kept. The input is not changed.
  */
 export function withoutProfileMembers(
   config: ConfigFile,
   names: string[],
   promoted: Extension[] = [],
+  installed: Extension[] = [],
 ) {
   const order = deserializeLoadOrder(
     (config['config-sparse']['load-order'] ?? []) as LoadOrder,
   ).filter(({ extension }) => !names.includes(extension));
   promoted
     .filter((ext) => !order.some(({ extension }) => extension === ext.name))
-    .forEach((ext) =>
-      order.push({ extension: ext.name, version: ext.version }),
-    );
+    .forEach((ext) => {
+      const needs = order.findIndex(({ extension, version }) => {
+        const selection = installed.find(
+          (candidate) =>
+            candidate.name === extension && candidate.version === version,
+        );
+        return (
+          selection !== undefined &&
+          dependsOnName(selection, ext.name, installed)
+        );
+      });
+      order.splice(needs < 0 ? order.length : needs, 0, {
+        extension: ext.name,
+        version: ext.version,
+      });
+    });
   const full = config['config-full'];
   const fullValues = full
     ? (Object.fromEntries(

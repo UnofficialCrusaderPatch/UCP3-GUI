@@ -37,6 +37,9 @@ import { useMessage } from '../../general/message';
 import { NewsHighlights } from './news-highlights';
 import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 import { InstallationButton } from './installation/InstallationButton';
+import { confirmSaveStateLoss } from '../common/save-state-loss-dialog';
+import { getStore } from '../../../hooks/jotai/base';
+import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../function/extensions/state/state';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LOGGER = new Logger('overview.tsx');
@@ -237,6 +240,15 @@ export default function Overview() {
               ok: 'yes',
               cancel: 'no',
             }))
+          ) {
+            return;
+          }
+
+          // Removing UCP deletes every installed module, active or not.
+          if (
+            !(await confirmSaveStateLoss(
+              getStore().get(EXTENSION_STATE_INTERFACE_ATOM).extensions,
+            ))
           ) {
             return;
           }

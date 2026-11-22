@@ -39,6 +39,9 @@ import {
 } from '../../../../function/extensions/dependency-management/families';
 import { chooseProfileFamilyMembers } from './family-chooser';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized-state';
+import { ExtensionsState } from '../../../../function/extensions/extensions-state';
+import { saveStateChanges } from '../../../../function/extensions/save-state';
+import { confirmSaveStateLoss } from '../save-state-loss-dialog';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -97,10 +100,15 @@ export function constructUserConfigObjects(config: ConfigFile) {
   };
 }
 
-export function importUcpConfig(
+export type StagedImport =
+  | { status: 'ok'; newExtensionsState: ExtensionsState }
+  | { status: 'fail'; result: ImportButtonCallbackResult };
+
+/** Resolves a profile against the installed extensions without changing live state. */
+export function stageUcpConfigImport(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-): ImportButtonCallbackResult {
+): StagedImport {
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -123,14 +131,27 @@ export function importUcpConfig(
     const elab = makeErrorReport(strategyResultReport);
     return {
       status: 'fail',
-      reason: 'strategy',
-      report: strategyResultReport,
-      elaborateMessage: elab,
-      message: `${elab.title}\n${elab.shortDescription}\n${elab.report}`,
-    } as ImportButtonCallbackResult;
+      result: {
+        status: 'fail',
+        reason: 'strategy',
+        report: strategyResultReport,
+        elaborateMessage: elab,
+        message: `${elab.title}\n${elab.shortDescription}\n${elab.report}`,
+      } as ImportButtonCallbackResult,
+    };
   }
 
-  const { newExtensionsState } = result;
+  return { status: 'ok', newExtensionsState: result.newExtensionsState };
+}
+
+export function importUcpConfig(
+  config: ConfigFile,
+  setConfigStatus: (message: MessageType) => void,
+  staged: StagedImport = stageUcpConfigImport(config, setConfigStatus),
+): ImportButtonCallbackResult {
+  if (staged.status === 'fail') return staged.result;
+
+  const { newExtensionsState } = staged;
 
   /**
    * Make sure to apply the current loaded configuration exactly as is (version specific)
@@ -199,9 +220,15 @@ export function importUcpConfig(
   } as ImportButtonCallbackResult;
 }
 
+export type ImportOptions = {
+  /** Ask before an import drops modules that saved games depend on. */
+  confirmSaveStateLoss?: boolean;
+};
+
 export async function importUcpConfigFile(
   path: string,
   setConfigStatus: (message: MessageType) => void,
+  options: ImportOptions = {},
 ): Promise<ImportButtonCallbackResult> {
   // Parse the config file
   const parsingResult: {
@@ -236,29 +263,40 @@ export async function importUcpConfigFile(
   const config = parsingResult.result;
 
   // A profile that selects two members of one family is not an error: the player
-  // chooses which one to keep, and only then is a filtered copy loaded.
-  const conflicts = findProfileFamilyConflicts(
-    config,
-    getStore().get(EXTENSION_STATE_REDUCER_ATOM).extensions,
-  );
-  if (conflicts.length === 0) return importUcpConfig(config, setConfigStatus);
-
-  const dropped = await chooseProfileFamilyMembers(conflicts);
-  if (dropped === undefined) {
-    const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
-    setConfigStatus('config.load.family.cancelled');
-    return {
-      status: 'fail',
-      reason: 'family',
-      message: localize('config.load.family.cancelled'),
-    } as ImportButtonCallbackResult;
+  // chooses which one to keep, and only then is a filtered copy staged and loaded.
+  const current = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const conflicts = findProfileFamilyConflicts(config, current.extensions);
+  let profile = config;
+  let dropped: string[] = [];
+  if (conflicts.length > 0) {
+    const chosen = await chooseProfileFamilyMembers(conflicts);
+    if (chosen === undefined) {
+      const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+      setConfigStatus('config.load.family.cancelled');
+      return {
+        status: 'fail',
+        reason: 'family',
+        message: localize('config.load.family.cancelled'),
+      } as ImportButtonCallbackResult;
+    }
+    dropped = chosen;
+    profile = withoutProfileMembers(config, dropped);
   }
-  const result = importUcpConfig(
-    withoutProfileMembers(config, dropped),
-    setConfigStatus,
-  );
-  // The loaded setup differs from the file until the player applies it.
-  if (result.status === 'success')
+
+  const staged = stageUcpConfigImport(profile, setConfigStatus);
+  if (staged.status === 'ok') {
+    const incoming = staged.newExtensionsState.activeExtensions;
+    // Importing replaces the whole setup; only a player-initiated import starts
+    // from a live setup (startup and reload start empty).
+    const removed = options.confirmSaveStateLoss
+      ? saveStateChanges(current.activeExtensions, incoming).removed
+      : [];
+    if (!(await confirmSaveStateLoss(removed)))
+      return { status: 'aborted' } as ImportButtonCallbackResult;
+  }
+  const result = importUcpConfig(profile, setConfigStatus, staged);
+  // The loaded setup differs from the file until the player saves it.
+  if (dropped.length > 0 && result.status === 'success')
     getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
   return result;
 }
@@ -276,6 +314,7 @@ async function importButtonCallback(
   setConfigStatus: (message: MessageType) => void,
   localizeString: (message: string) => string,
   file: string | undefined,
+  options: ImportOptions = {},
 ): Promise<ImportButtonCallbackResult> {
   // Get which elements have been touched
   const configurationTouched = getStore().get(
@@ -319,7 +358,7 @@ async function importButtonCallback(
       status: 'aborted',
     } as ImportButtonCallbackResult;
 
-  return importUcpConfigFile(path, setConfigStatus);
+  return importUcpConfigFile(path, setConfigStatus, options);
 }
 
 export default importButtonCallback;

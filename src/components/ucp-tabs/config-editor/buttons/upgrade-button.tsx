@@ -12,6 +12,8 @@ import { buildExtensionConfigurationDB } from 'function/configuration/extension-
 import { showModalOk } from 'components/modals/modal-ok';
 import { confirmRequiredValueRepairs } from 'components/ucp-tabs/common/required-value-repairs-dialog';
 import { FamilyConflictError } from 'function/extensions/dependency-management/families';
+import { confirmSaveStateLoss } from 'components/ucp-tabs/common/save-state-loss-dialog';
+import { saveStateChanges } from 'function/extensions/save-state';
 import { makeToast, ToastType } from 'components/toasts/toasts-display';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 
@@ -77,6 +79,14 @@ async function upgradeExtensionsCallback(
   if (!(await reportAndConfirmBuildResult(res))) return;
 
   if (!(await confirmRequiredValueRepairs(res, interactive))) return;
+
+  if (
+    interactive &&
+    !(await confirmSaveStateLoss(
+      saveStateChanges(oldState.activeExtensions, res.activeExtensions).removed,
+    ))
+  )
+    return;
 
   // A dialog was open; never apply a candidate computed from an older state.
   if (getStore().get(EXTENSION_STATE_INTERFACE_ATOM) !== oldState) return;

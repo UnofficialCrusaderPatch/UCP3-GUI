@@ -700,3 +700,28 @@ it('revalidates after the save-state warning instead of overwriting newer choice
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM)['Independent.option'],
   ).toBe(99);
 });
+it('warns about a save-state module that only drops out of the setup and stays installed', async () => {
+  const tunnelers = saveStateModule('Tunnelers', 'required');
+  const pack = extension('Pack', { Tunnelers: '^1.0.0' });
+  const before = setup(
+    [pack, tunnelers, independent],
+    [pack, tunnelers, independent],
+    [pack, independent],
+  );
+  mocks.confirm.mockImplementation(
+    async (spec: Partial<OkCancelModalWindowProperties>) =>
+      spec.title !== SAVE_STATE_TITLE,
+  );
+  await uninstallContentButtonCallback([content(pack)], []);
+  const dialog = saveStateDialog();
+  if (typeof dialog?.message !== 'function')
+    throw Error('Expected the save-state warning');
+  const localize = ((message: string | { key: string }) =>
+    typeof message === 'string' ? message : message.key) as MessageResolver;
+  const view = render(<div>{dialog.message(localize)}</div>);
+  expect(view.container.textContent).toContain('Tunnelers (1.0.0)');
+  view.unmount();
+  expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
+  expect(mocks.write).not.toHaveBeenCalled();
+  expect(mocks.remove).not.toHaveBeenCalled();
+});

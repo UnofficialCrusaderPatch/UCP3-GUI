@@ -1,39 +1,47 @@
 .sandbox-menu-button {
-    font-size: 16px;
-    padding: 4px 16px;
+  font-size: 16px;
+  padding: 4px 16px;
 }
 
 .sandbox-control-menu {
-    display: inline-flex;
-    width: 100%;
-    justify-content: end;
+  display: inline-flex;
+  width: 100%;
+  justify-content: end;
+  flex-wrap: wrap;
+}
+
+.sandbox-error {
+  flex-basis: 100%;
+  max-height: 25vh;
+  overflow: auto;
+  overflow-wrap: anywhere;
 }
 
 .sandbox-control-button {
-    background-color: black;
-    background-clip: padding-box;
+  background-color: black;
+  background-clip: padding-box;
 }
 
 .sandbox-container {
-    width: 100%;
-    flex-grow: 1;
-    background-color: var(--ucp-main-brown);
+  width: 100%;
+  flex-grow: 1;
+  background-color: var(--ucp-main-brown);
 }
 
 .sandbox-frame {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 .sandbox-menu-container {
-    padding: 50px;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  padding: 50px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sandbox--menu-title {
-    color: white;
+  color: white;
 }

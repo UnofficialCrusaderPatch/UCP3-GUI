@@ -353,3 +353,5 @@ content.uninstallation.cleanup.help: "Es werden nur Abhängigkeiten dieser Paket
 content.uninstallation.review.title: "Deinstallation prüfen"
 content.uninstallation.review.message: "Prüfe die folgenden Pakete. Aktive Pakete werden deaktiviert und die aktuelle Konfiguration wird gespeichert, bevor ihre Dateien entfernt werden."
 store.element.uninstall.dependents: "Andere installierte Pakete benötigen dieses Paket. Bei der Deinstallation kannst du diese Pakete prüfen und gemeinsam entfernen."
+sandbox.init.error: Das benutzerdefinierte Menü konnte nicht initialisiert werden.
+sandbox.retry: Erneut versuchen

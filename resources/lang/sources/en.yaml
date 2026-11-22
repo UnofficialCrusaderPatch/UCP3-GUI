@@ -415,3 +415,5 @@ content.uninstallation.review.title: "Review uninstall"
 content.uninstallation.review.message: "Review the packages below. Active packages will be deactivated, and the current setup will be saved before their files are removed."
 content.uninstallation.unrecoverable: "not in the Store: removal is permanent"
 store.element.uninstall.dependents: "Other installed packages depend on this package. Uninstall lets you review and remove those packages together."
+sandbox.init.error: Could not initialize the custom menu.
+sandbox.retry: Retry

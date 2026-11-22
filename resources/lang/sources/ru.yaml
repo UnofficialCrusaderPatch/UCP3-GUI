@@ -60,6 +60,9 @@ export: "Экспорт"
 extensions.config.view: 'Просмотр файла конфигурации'
 extensions.customisations: Настройки
 extensions.activated: "Активированные расширения"
+extensions.activation.required.repair.by: "требуется расширением {{extension}}"
+extensions.activation.required.repair.message: "Новая конфигурация расширений требует других значений для {{n}} из ваших сохранённых настроек. Если вы продолжите, эти сохранённые настройки будут изменены на обязательные значения и сохранят их даже после удаления требующих их расширений. «Отмена» оставит текущую конфигурацию без изменений."
+extensions.activation.required.repair.title: "Обязательные настройки изменятся"
 extensions.available: "Доступные расширения"
 extensions.dependencies.missing.title: "Ошибка: отсутствующие зависимости"
 extensions.dependencies.missing.message: "Пожалуйста, обратите внимание на следующие отсутствующие зависимости:\n\n{{messages}}\n\nПопробуйте установить их, посетив Магазин"

@@ -10,7 +10,7 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from 'components/ucp-tabs/common/b
 import reportAndConfirmBuildResult from 'components/ucp-tabs/extension-manager/extension-elements/reporting';
 import { buildExtensionConfigurationDB } from 'function/configuration/extension-configuration/build-extension-configuration-db';
 import { showModalOk } from 'components/modals/modal-ok';
-import { computeMaskedPreferences } from 'components/ucp-tabs/extension-manager/extension-elements/inactive-extension-element-click-callback';
+import { confirmRequiredValueRepairs } from 'components/ucp-tabs/common/required-value-repairs-dialog';
 import { FamilyConflictError } from 'function/extensions/dependency-management/families';
 import { makeToast, ToastType } from 'components/toasts/toasts-display';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
@@ -72,30 +72,9 @@ async function upgradeExtensionsCallback(
 
   if (!(await reportAndConfirmBuildResult(res))) return;
 
-  const maskedConfig = computeMaskedPreferences(res, oldState);
+  if (!(await confirmRequiredValueRepairs(res, interactive))) return;
 
-  if (maskedConfig.length > 0) {
-    if (interactive) {
-      const answer = await showModalOkCancel({
-        title: 'discovery.preferences.masked.title',
-        message: {
-          key: 'discovery.preferences.masked.message',
-          args: {
-            n: maskedConfig.length,
-            entries: maskedConfig
-              .map(([url]) => url)
-              .sort()
-              .join('\n'),
-          },
-        },
-      });
-
-      if (!answer) {
-        return;
-      }
-    }
-  }
-
+  // A dialog was open; never apply a candidate computed from an older state.
   if (getStore().get(EXTENSION_STATE_INTERFACE_ATOM) !== oldState) return;
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);

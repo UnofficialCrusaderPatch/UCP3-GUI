@@ -19,6 +19,11 @@ config.allow.override: "Allow user override"
 config.customize: "Customise"
 config.element.unsupported.type: "Element {{url}} not created because of unsupported type: {{type}}"
 config.load.fail.title: "Configuration not loaded"
+config.load.changed.title: "Loaded settings changed"
+config.load.changed.message: "Some saved settings differ from the configuration produced by the active extensions. Conflicting saved preferences have been repaired. Review the changes below; Customisations now shows the settings that will be saved for the game. Apply or save to update the file on disk."
+config.load.changed.preference: "Saved preference"
+config.load.changed.game: "Game setting"
+config.load.changed.unset: "not set"
 config.load.fail.message: "There were errors in the loading process: \n\n{{err}}"
 config.load.skip.title: "Extensions not loaded"
 config.load.skip.message: "There were errors in the extension load process"
@@ -76,8 +81,9 @@ extensions.customisations: Customisations
 extensions.activated: "Activated extensions"
 extensions.activation.dependency.conflicts.error.title: Could not activate extension
 extensions.activation.dependency.conflicts.error.message: "Could not activate extension due to missing extensions or dependency conflicts.\n\nLog:\n\n{{log}}"
-extensions.activation.customisations.loss.title: Losing customisations
-extensions.activation.customisations.loss.message: "You will lose {{n}} customisations. Do you want to proceed?\n\nLosing customisations:\n{{entries}}"
+extensions.activation.required.repair.by: "required by {{extension}}"
+extensions.activation.required.repair.message: "The new extension setup requires different values for {{n}} of your saved settings. If you continue, these saved settings are changed to the required values and keep them after the requiring extensions are removed. Cancel leaves your current setup unchanged."
+extensions.activation.required.repair.title: "Required settings will change"
 extensions.available: "Available extensions"
 extensions.deactivate.dependencies.error.title: "Deactivating extension: Error in dependencies"
 extensions.deactivate.config.loss.warning.title: "Config loss warning"
@@ -259,7 +265,6 @@ store.content.status.change: "This content's status changed. Please restart the 
 store.content.uninstall: Uninstall
 store.filter.condensed: "Full / Condensed list"
 store.filter.installed: "Show / Hide installed content"
-store.element.activated.nouninstall: "Cannot select content as it is an activated extension. Deactivate it before uninstalling: {{name}}"
 store.element.installed.locally: This content is installed but not available online (deprecation)
 store.element.installed.online: This content is already installed and available online
 store.element.install.available: This content is available for installation
@@ -383,3 +388,20 @@ discovery.preferences.masked.title: Required extension settings
 discovery.preferences.masked.message: '{{n}} saved preferences will be temporarily overridden by required settings. Your preferences are kept and return when those requirements are removed. Continue?
 
   {{entries}}'
+store.toolbar.uninstall.dependencies: "Cannot uninstall: other extensions still need this content.\n{{lst}}"
+store.element.activated.uninstall: "Select to deactivate and uninstall {{name}}."
+content.uninstallation.deactivate.title: "Deactivate and uninstall"
+content.uninstallation.deactivate.message: "Your current setup, including pending changes, will be saved before removal. These extensions will be deactivated and uninstalled:\n\n{{lst}}\n\nSettings and resource choices to clear:\n{{entries}}\n\nContinue?"
+content.uninstallation.changed: "The setup changed during removal. Nothing else will be uninstalled; select the extensions again."
+content.uninstallation.editor: "Finish editing the extension before uninstalling content."
+content.uninstallation.noconfig: "No configuration file is available. Apply your setup before uninstalling an active extension."
+content.uninstallation.selected: "Selected packages"
+content.uninstallation.dependents: "Dependent packages that must also be removed"
+content.uninstallation.cleanup: "Remove unused dependencies too"
+content.uninstallation.cleanup.help: "Only dependencies of these packages are considered. Shared dependencies and explicit active choices are kept."
+content.uninstallation.recover.help: "A saved setup that uses one of these exact versions needs it again. Versions marked as available can be reinstalled at that version from the Store."
+content.uninstallation.recoverable: "can be reinstalled from the Store"
+content.uninstallation.review.title: "Review uninstall"
+content.uninstallation.review.message: "Review the packages below. Active packages will be deactivated, and the current setup will be saved before their files are removed."
+content.uninstallation.unrecoverable: "not in the Store: removal is permanent"
+store.element.uninstall.dependents: "Other installed packages depend on this package. Uninstall lets you review and remove those packages together."

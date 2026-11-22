@@ -1,59 +1,15 @@
 import { createStore } from 'jotai';
 import { describe, expect, test } from 'vitest';
 import { serializeUCPConfig } from '../../../config/ucp/config-files/config-files';
-import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
+import { requiredSettingsState } from '../../../testing/required-settings-state';
 import { buildExtensionConfigurationDB } from '../../configuration/extension-configuration/build-extension-configuration-db';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../configuration/state';
-import { parseConfigEntries } from '../discovery/parse-config-entries';
 import { EXTENSION_STATE_INTERFACE_ATOM } from './state';
 
 const LEGACY_HOTKEYS = 'ucp2-legacy.o_keys.enabled';
-
-function requiredSettingsState(requiredValue: unknown = false) {
-  const { configEntries } = parseConfigEntries({
-    meta: { version: '1.0.0' },
-    'config-sparse': {
-      modules: {
-        'ucp2-legacy': {
-          config: {
-            o_keys: {
-              enabled: { contents: { 'required-value': requiredValue } },
-            },
-            unrelated: { contents: { 'suggested-value': 'suggested' } },
-          },
-        },
-      },
-      plugins: {},
-      'load-order': [],
-    },
-  });
-  const extensions = ['ucp2-legacy', 'custom-hotkeys'].map((name) => ({
-    name,
-    version: name === 'ucp2-legacy' ? '2.15.1' : '0.2.1',
-    type: 'module',
-    definition: {
-      meta: { version: '1.0.0' },
-      name,
-      version: name === 'ucp2-legacy' ? '2.15.1' : '0.2.1',
-      author: 'test',
-      dependencies: {},
-      'display-name': name,
-      description: '',
-      type: 'module' as const,
-    },
-    configEntries: name === 'custom-hotkeys' ? configEntries : {},
-  }));
-  const state =
-    deserializeSimplifiedSerializedExtensionsStateFromExtensions(extensions);
-  return buildExtensionConfigurationDB({
-    ...state,
-    activeExtensions: state.extensions,
-    explicitlyActivatedExtensions: state.extensions,
-  });
-}
 
 describe('effective extension configuration', () => {
   test.each([false, true, 0, ''])(
@@ -76,7 +32,10 @@ describe('effective extension configuration', () => {
         ...userValues,
         [LEGACY_HOTKEYS]: requiredValue,
       });
-      expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)).toEqual(userValues);
+      expect(store.get(CONFIGURATION_USER_REDUCER_ATOM)).toEqual({
+        ...userValues,
+        [LEGACY_HOTKEYS]: requiredValue,
+      });
       expect(state.configuration.locks[LEGACY_HOTKEYS]).toEqual({
         lockedBy: 'custom-hotkeys',
         lockedValue: requiredValue,
@@ -84,7 +43,7 @@ describe('effective extension configuration', () => {
     },
   );
 
-  test('saves required-off to the game configuration and restores the preference after deactivation', async () => {
+  test('saves required-off in both sections and retains the repair after deactivation', async () => {
     const store = createStore();
     const state = requiredSettingsState();
     store.set(CONFIGURATION_USER_REDUCER_ATOM, {
@@ -105,7 +64,7 @@ describe('effective extension configuration', () => {
       unrelated: { contents: { value: 'suggested' } },
     });
     expect(saved['config-sparse'].modules['ucp2-legacy'].config).toEqual({
-      o_keys: { enabled: { contents: { 'suggested-value': true } } },
+      o_keys: { enabled: { contents: { 'suggested-value': false } } },
     });
 
     store.set(
@@ -117,7 +76,7 @@ describe('effective extension configuration', () => {
       }),
     );
     expect(store.get(CONFIGURATION_FULL_REDUCER_ATOM)[LEGACY_HOTKEYS]).toBe(
-      true,
+      false,
     );
   });
 });

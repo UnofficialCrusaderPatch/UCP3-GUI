@@ -209,7 +209,6 @@ store.content.status.change: "El estado de este contenido cambió. Reinicia la G
 store.content.uninstall: "Desinstalar"
 store.filter.condensed: "Lista completa / condensada"
 store.filter.installed: "Mostrar / Ocultar instalado"
-store.element.activated.nouninstall: "No se puede seleccionar; extensión activa. Desactívala antes: {{name}}"
 store.element.installed.locally: "Instalado localmente pero no disponible en línea (obsoleto)"
 store.element.installed.online: "Instalado y disponible en línea"
 store.element.install.available: "Disponible para instalar"
@@ -328,3 +327,23 @@ discovery.preferences.masked.title: Ajustes obligatorios de las extensiones
 discovery.preferences.masked.message: '{{n}} preferencias guardadas se sustituirán temporalmente por ajustes obligatorios. Se conservarán y volverán a aplicarse cuando se eliminen esos requisitos. ¿Continuar?
 
   {{entries}}'
+store.toolbar.uninstall.dependencies: "No se puede desinstalar: otras extensiones aún necesitan este contenido.\n{{lst}}"
+store.element.activated.uninstall: "Selecciona para desactivar y desinstalar {{name}}."
+content.uninstallation.deactivate.title: "Desactivar y desinstalar"
+content.uninstallation.deactivate.message: "Antes de eliminar, se guardará tu configuración actual, incluidos los cambios pendientes. Estas extensiones se desactivarán y desinstalarán:\n\n{{lst}}\n\nAjustes y selecciones de recursos que se borrarán:\n{{entries}}\n\n¿Continuar?"
+content.uninstallation.changed: "La configuración cambió durante la eliminación. No se desinstalará nada más; vuelve a seleccionar las extensiones."
+content.uninstallation.editor: "Termina de editar la extensión antes de desinstalar contenido."
+content.uninstallation.noconfig: "No hay ningún archivo de configuración disponible. Aplica tu configuración antes de desinstalar una extensión activa."
+content.uninstallation.selected: "Paquetes seleccionados"
+content.uninstallation.dependents: "Paquetes dependientes que también deben eliminarse"
+content.uninstallation.cleanup: "Eliminar también las dependencias sin uso"
+content.uninstallation.cleanup.help: "Solo se revisan las dependencias de estos paquetes. Se conservan las dependencias compartidas y las extensiones activadas explícitamente."
+content.uninstallation.review.title: "Revisar desinstalación"
+content.uninstallation.review.message: "Revisa los paquetes siguientes. Los paquetes activos se desactivarán y la configuración actual se guardará antes de eliminar sus archivos."
+store.element.uninstall.dependents: "Otros paquetes instalados dependen de este paquete. Al desinstalar puedes revisarlos y eliminarlos juntos."
+
+config.load.changed.title: "Ajustes cargados modificados"
+config.load.changed.message: "Algunos ajustes guardados difieren de la configuración de las extensiones activas. Se han corregido las preferencias incompatibles. Revisa los cambios siguientes; Personalizaciones muestra los ajustes que se guardarán para el juego. Aplica o guarda para actualizar el archivo en disco."
+config.load.changed.preference: "Preferencia guardada"
+config.load.changed.game: "Ajuste del juego"
+config.load.changed.unset: "sin definir"

@@ -20,6 +20,7 @@ import { ConfigMetaObjectDB } from '../../../../config/ucp/config-merge/objects'
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
 } from '../../../../function/extensions/state/state';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
@@ -288,6 +289,9 @@ export async function importUcpConfigFile(
     profile = withoutProfileMembers(config, dropped);
   }
 
+  // Staging a sparse profile already records preferred versions; a cancelled
+  // import must leave them as they were.
+  const preferredVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   const staged = stageUcpConfigImport(profile, setConfigStatus);
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
@@ -305,8 +309,10 @@ export async function importUcpConfigFile(
           ).removed
         : []),
     ];
-    if (!(await confirmSaveStateLoss(removed)))
+    if (!(await confirmSaveStateLoss(removed))) {
+      getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
       return { status: 'aborted' } as ImportButtonCallbackResult;
+    }
   }
   const result = importUcpConfig(profile, setConfigStatus, staged);
   // The loaded setup differs from the file until the player saves it.

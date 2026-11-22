@@ -38,6 +38,7 @@ import { NewsHighlights } from './news-highlights';
 import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 import { InstallationButton } from './installation/InstallationButton';
 import { confirmSaveStateLoss } from '../common/save-state-loss-dialog';
+import { EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM } from '../content-manager/state/atoms';
 import { getStore } from '../../../hooks/jotai/base';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../function/extensions/state/state';
 
@@ -244,7 +245,18 @@ export default function Overview() {
             return;
           }
 
-          // Removing UCP deletes every installed module, active or not.
+          // Removing UCP deletes every installed module, active or not. Packages
+          // installed since the last load aren't in the inventory yet: reload first.
+          if (getStore().get(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM)) {
+            if (
+              await showModalOkCancel({
+                title: 'extensions.reload.required.title',
+                message: 'extensions.reload.required.message',
+              })
+            )
+              reloadCurrentGameFolder();
+            return;
+          }
           if (
             !(await confirmSaveStateLoss(
               getStore().get(EXTENSION_STATE_INTERFACE_ATOM).extensions,

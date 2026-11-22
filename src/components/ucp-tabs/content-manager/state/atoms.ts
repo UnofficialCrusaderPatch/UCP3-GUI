@@ -115,7 +115,9 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
       definition: {
         ...e.definition,
         tags: e.definition.tags ?? matchingStorePackage?.definition.tags,
-        family: e.definition.family ?? matchingStorePackage?.definition.family,
+        // Installed declarations are authoritative; the Store's metadata never adds a
+        // family to an installed version, and the combined list is checked again below.
+        family: e.definition.declaredFamily ?? e.definition.family,
         dependencies: deps,
       },
       contents: {

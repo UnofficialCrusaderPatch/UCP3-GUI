@@ -64,7 +64,16 @@ export async function chooseProfileFamilyMembers(
   const confirmed = await showModalOkCancel({
     title: 'config.load.family.title',
     message: 'config.load.family.message',
-    confirmable: () => conflicts.every(({ family }) => chosen[family]),
+    // Every family needs a choice, and the choices together must keep exactly one
+    // member per family (a member can belong to several families).
+    confirmable: () => {
+      const keep = new Set(Object.values(chosen));
+      return conflicts.every(
+        ({ family, members }) =>
+          chosen[family] !== undefined &&
+          members.filter(({ name }) => keep.has(name)).length === 1,
+      );
+    },
     children: (
       <FamilyChooser
         conflicts={conflicts}

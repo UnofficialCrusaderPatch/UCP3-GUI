@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { Range } from 'semver';
+import { ExtensionDependencyTree } from './dependency-resolution';
 import { ConfigFile, Extension } from '../../../config/ucp/common';
 import {
   acceptFamilyMemberships,
@@ -206,16 +208,105 @@ describe('saved profiles that select two family members', () => {
     ).toEqual([]);
   });
 
-  it('drops the unchosen member from both load orders without changing the input', () => {
+  it('keeps the explicit choices and drops the saved full order so the import re-resolves', () => {
     const input = profile(['Applied', 'Bare'], ['Applied', 'Bare', 'Other']);
     const result = withoutProfileMembers(input, ['Bare']);
     expect(result['config-sparse']['load-order']).toEqual([
       { extension: 'Applied', version: '1.0.0' },
     ]);
-    expect(result['config-full']!['load-order']).toEqual([
-      { extension: 'Applied', version: '1.0.0' },
-      { extension: 'Other', version: '1.0.0' },
-    ]);
+    expect(result['config-full']).toBeUndefined();
     expect(input['config-sparse']['load-order']).toHaveLength(2);
+    expect(input['config-full']).toBeDefined();
+  });
+
+  it('finds a preset a bundle brings in next to an explicit sibling', () => {
+    const bundle = {
+      ...ext({ name: 'Bundle' }),
+      definition: {
+        ...ext({ name: 'Bundle' }).definition,
+        dependencies: { Applied: new Range('^1.0.0') },
+      },
+    } as unknown as Extension;
+    const installed = [bare, applied, bundle];
+    const tree = new ExtensionDependencyTree(installed, '1.0.17', '3.0.7');
+    const conflicts = findProfileFamilyConflicts(
+      profile(['Bundle', 'Bare']),
+      installed,
+      tree,
+    );
+    expect(
+      conflicts.map(({ family, members }) => [
+        family,
+        members.map((m) => m.name).sort(),
+      ]),
+    ).toEqual([['ai', ['Applied', 'Bare']]]);
+  });
+
+  it('ignores an entry whose exact version is not installed', () => {
+    const newer = { ...applied, version: '2.0.0' } as Extension;
+    expect(
+      findProfileFamilyConflicts(
+        {
+          ...profile(['Bare']),
+          'config-sparse': {
+            modules: {},
+            plugins: {},
+            'load-order': [
+              { extension: 'Applied', version: '9.9.9' },
+              { extension: 'Bare', version: '1.0.0' },
+            ],
+          },
+        } as unknown as ConfigFile,
+        [bare, newer],
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe('module root claims', () => {
+  it("can't disable a plugin family", () => {
+    const items = [
+      ext({ name: 'Bare', family: [{ name: 'ai', root: true }] }),
+      ext({ name: 'Applied', family: [{ name: 'ai' }] }),
+      ext({
+        name: 'Code',
+        type: 'module',
+        family: [{ name: 'ai', root: true }],
+      }),
+    ];
+    const result = acceptFamilyMemberships(items);
+    expect(result.accepted.get(items[0])).toEqual([{ name: 'ai', root: true }]);
+    expect(result.accepted.get(items[1])).toEqual([{ name: 'ai' }]);
+    expect(result.accepted.get(items[2])).toEqual([]);
+    expect(result.warnings).toEqual([
+      "Code: family 'ai' ignored, only plugins can be family members.",
+    ]);
+  });
+});
+
+describe('authored declarations', () => {
+  it('are kept, so the combined Store view can accept a member whose root is only in the Store', () => {
+    const member = ext({ name: 'Applied', family: [{ name: 'ai' }] });
+    const {
+      items: [installedOnly],
+    } = withAcceptedFamilies([member]);
+    expect(installedOnly.definition.family).toEqual([]);
+    expect(installedOnly.definition.declaredFamily).toEqual([{ name: 'ai' }]);
+
+    const storeRoot = ext({
+      name: 'Bare',
+      family: [{ name: 'ai', root: true }],
+    });
+    const wider = withAcceptedFamilies([
+      storeRoot,
+      {
+        ...installedOnly,
+        definition: {
+          ...installedOnly.definition,
+          family: installedOnly.definition.declaredFamily,
+        },
+      },
+    ]);
+    expect(wider.items[1].definition.family).toEqual([{ name: 'ai' }]);
   });
 });

@@ -1,5 +1,6 @@
 import { ConfigFile, Extension, LoadOrder } from '../../../config/ucp/common';
 import { deserializeLoadOrder } from '../../../config/ucp/config-files/load-order';
+import { ExtensionDependencyTree } from './dependency-resolution';
 import {
   FamilyMembership,
   normalizeFamilies,
@@ -76,6 +77,7 @@ type OwnershipCandidate = {
     author?: unknown;
     type?: string;
     family?: unknown;
+    declaredFamily?: unknown;
   };
 };
 
@@ -100,10 +102,14 @@ export function acceptFamilyMemberships<T extends OwnershipCandidate>(
     items.map((item) => [item, normalizeFamilies(item.definition.family)]),
   );
   const roots = new Map<string, T[]>();
+  const moduleRoots = new Set<string>();
   declared.forEach((families, item) =>
     families
       .filter((f) => f.root)
-      .forEach((f) => roots.set(f.name, [...(roots.get(f.name) ?? []), item])),
+      .forEach((f) => {
+        if (typeOf(item) === 'module') moduleRoots.add(f.name);
+        else roots.set(f.name, [...(roots.get(f.name) ?? []), item]);
+      }),
   );
   const warnings: string[] = [];
   const accepted = new Map<T, FamilyMembership[]>();
@@ -123,13 +129,16 @@ export function acceptFamilyMemberships<T extends OwnershipCandidate>(
         const ownerNames = new Set(
           owners.map((owner) => owner.definition.name),
         );
-        if (ownerNames.size === 0) return ignore('its root is not available');
+        if (ownerNames.size === 0)
+          return ignore(
+            moduleRoots.has(membership.name)
+              ? 'its root is a module'
+              : 'its root is not available',
+          );
         if (ownerNames.size > 1)
           return ignore(
             `several plugins claim to be its root (${[...ownerNames].sort().join(', ')})`,
           );
-        if (owners.some((owner) => typeOf(owner) === 'module'))
-          return ignore('its root is a module');
         if (ownerNames.has(item.definition.name)) return true;
         const acceptedByRoot = owners.some(
           (owner) =>
@@ -153,7 +162,8 @@ export function acceptFamilyMemberships<T extends OwnershipCandidate>(
 
 /**
  * Copies whose `family` holds only memberships their root accepts, plus the
- * warnings for ignored declarations. The input is not changed.
+ * warnings for ignored declarations. `declaredFamily` keeps what was authored.
+ * The input is not changed.
  */
 export function withAcceptedFamilies<T extends OwnershipCandidate>(
   items: T[],
@@ -165,7 +175,11 @@ export function withAcceptedFamilies<T extends OwnershipCandidate>(
         ? item
         : ({
             ...item,
-            definition: { ...item.definition, family: accepted.get(item) },
+            definition: {
+              ...item.definition,
+              family: accepted.get(item),
+              declaredFamily: item.definition.family,
+            },
           } as T),
     ),
     warnings,
@@ -175,6 +189,43 @@ export function withAcceptedFamilies<T extends OwnershipCandidate>(
 export type ProfileFamilyConflict = { family: string; members: Extension[] };
 
 /**
+ * The extensions a saved profile makes active, by exact version: its full load
+ * order, or for a profile saved without one, its explicit selections plus their
+ * dependency closure as the sparse import resolves it. Entries whose exact
+ * version isn't installed are left out; the import reports them.
+ */
+export function profileActiveExtensions(
+  config: ConfigFile,
+  installed: Extension[],
+  tree?: ExtensionDependencyTree,
+) {
+  const exact = ({
+    extension,
+    version,
+  }: {
+    extension: string;
+    version: string;
+  }) =>
+    installed.find((ext) => ext.name === extension && ext.version === version);
+  const listed = (order: unknown) =>
+    deserializeLoadOrder((order ?? []) as LoadOrder)
+      .map(exact)
+      .filter((ext): ext is Extension => ext !== undefined);
+  const explicit = listed(config['config-sparse']?.['load-order']);
+  const full = config['config-full']?.['load-order'];
+  let closure: Extension[] = full ? listed(full) : [];
+  if (!full && tree) {
+    try {
+      const solution = tree.copy().extensionDependenciesForExtensions(explicit);
+      if (solution.status === 'OK') closure = solution.extensions ?? [];
+    } catch {
+      closure = [];
+    }
+  }
+  return [...new Set([...closure, ...explicit])];
+}
+
+/**
  * Families for which a saved profile selects more than one configuration.
  * Uses the same claiming rule as validation: explicitly selected members and
  * active members that apply configuration demands.
@@ -182,27 +233,14 @@ export type ProfileFamilyConflict = { family: string; members: Extension[] };
 export function findProfileFamilyConflicts(
   config: ConfigFile,
   installed: Extension[],
+  tree?: ExtensionDependencyTree,
 ): ProfileFamilyConflict[] {
-  const explicitOrder = deserializeLoadOrder(
-    config['config-sparse']?.['load-order'] ?? [],
+  const explicit = new Set(
+    deserializeLoadOrder(
+      (config['config-sparse']?.['load-order'] ?? []) as LoadOrder,
+    ).map(({ extension }) => extension),
   );
-  const fullOrder = config['config-full']?.['load-order']
-    ? deserializeLoadOrder(config['config-full']['load-order'])
-    : explicitOrder;
-  const resolve = ({
-    extension,
-    version,
-  }: {
-    extension: string;
-    version: string;
-  }) =>
-    installed.find(
-      (ext) => ext.name === extension && ext.version === version,
-    ) ?? installed.find((ext) => ext.name === extension);
-  const explicit = new Set(explicitOrder.map(({ extension }) => extension));
-  const active = [...fullOrder, ...explicitOrder]
-    .map(resolve)
-    .filter((ext): ext is Extension => ext !== undefined);
+  const active = profileActiveExtensions(config, installed, tree);
   const choices = new Map<string, Extension[]>();
   familyConfigurationMembers({
     activeExtensions: active,
@@ -223,25 +261,23 @@ export function findProfileFamilyConflicts(
     .sort((a, b) => a.family.localeCompare(b.family));
 }
 
-/** A copy of the profile without the named extensions in either load order. The input is not changed. */
+/**
+ * A copy of the profile without the named extensions in its explicit selections.
+ * The saved full load order is dropped too, so the import re-resolves the
+ * dependency closure from the kept selections: providers only the dropped member
+ * needed go, and anything a kept bundle still needs comes back. Explicit
+ * versions and their order are kept. The input is not changed.
+ */
 export function withoutProfileMembers(config: ConfigFile, names: string[]) {
-  const drop = (order: unknown) =>
-    deserializeLoadOrder(order as LoadOrder).filter(
-      ({ extension }) => !names.includes(extension),
-    );
+  const copy = { ...config };
+  delete copy['config-full'];
   return {
-    ...config,
+    ...copy,
     'config-sparse': {
       ...config['config-sparse'],
-      'load-order': drop(config['config-sparse']['load-order'] ?? []),
+      'load-order': deserializeLoadOrder(
+        (config['config-sparse']['load-order'] ?? []) as LoadOrder,
+      ).filter(({ extension }) => !names.includes(extension)),
     },
-    ...(config['config-full']
-      ? {
-          'config-full': {
-            ...config['config-full'],
-            'load-order': drop(config['config-full']['load-order'] ?? []),
-          },
-        }
-      : {}),
   } as ConfigFile;
 }

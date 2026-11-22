@@ -35,6 +35,7 @@ import { buildConfigMetaContentDBForUser } from '../../../../function/configurat
 import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-changes';
 import {
   findProfileFamilyConflicts,
+  profileActiveExtensions,
   withoutProfileMembers,
 } from '../../../../function/extensions/dependency-management/families';
 import { chooseProfileFamilyMembers } from './family-chooser';
@@ -265,7 +266,11 @@ export async function importUcpConfigFile(
   // A profile that selects two members of one family is not an error: the player
   // chooses which one to keep, and only then is a filtered copy staged and loaded.
   const current = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
-  const conflicts = findProfileFamilyConflicts(config, current.extensions);
+  const conflicts = findProfileFamilyConflicts(
+    config,
+    current.extensions,
+    current.tree,
+  );
   let profile = config;
   let dropped: string[] = [];
   if (conflicts.length > 0) {
@@ -287,10 +292,19 @@ export async function importUcpConfigFile(
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
     // Importing replaces the whole setup; only a player-initiated import starts
-    // from a live setup (startup and reload start empty).
-    const removed = options.confirmSaveStateLoss
-      ? saveStateChanges(current.activeExtensions, incoming).removed
-      : [];
+    // from a live setup (startup and reload start empty). A family choice can
+    // also leave out modules the saved setup itself used.
+    const removed = [
+      ...(options.confirmSaveStateLoss
+        ? saveStateChanges(current.activeExtensions, incoming).removed
+        : []),
+      ...(dropped.length > 0
+        ? saveStateChanges(
+            profileActiveExtensions(config, current.extensions, current.tree),
+            incoming,
+          ).removed
+        : []),
+    ];
     if (!(await confirmSaveStateLoss(removed)))
       return { status: 'aborted' } as ImportButtonCallbackResult;
   }

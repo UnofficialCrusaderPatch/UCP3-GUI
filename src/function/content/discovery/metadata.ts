@@ -12,7 +12,10 @@ export type FamilyMembership = {
 export type TagLocales = Record<string, Record<string, string>>;
 
 export type DiscoveryMetadata = {
+  /** Memberships the family roots accept among the packages this list was checked against. */
   family?: FamilyMembership[];
+  /** The memberships as authored, kept so a wider view (installed + Store) can check them again. */
+  declaredFamily?: FamilyMembership[];
   tags?: string[];
   capabilities?: {
     files?: boolean;

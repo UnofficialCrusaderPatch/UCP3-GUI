@@ -40,6 +40,7 @@ vi.mock('../../../../localization/localization', async (original) => {
 
 const BARE = 'Aggressive-AI-Behaviour';
 const APPLIED = 'Aggressive-AI-Behaviour-Applied';
+const BARE_SYNTHETIC = 'Bare';
 
 function installed() {
   const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions(
@@ -145,5 +146,132 @@ describe('loading a profile that selects two members of one family', () => {
         { family: 'aggressive', members: [applied, bare] },
       ]),
     ).toEqual([APPLIED]);
+  });
+});
+
+function synthetic(
+  name: string,
+  {
+    type = 'plugin',
+    dependencies = {},
+    family,
+    saveState,
+  }: {
+    type?: 'plugin' | 'module';
+    dependencies?: Record<string, string>;
+    family?: { name: string; root?: boolean }[];
+    saveState?: 'required';
+  } = {},
+) {
+  return {
+    name,
+    version: '1.0.0',
+    type,
+    definition: {
+      meta: { version: '1.0.0' },
+      name,
+      version: '1.0.0',
+      author: 'test',
+      dependencies,
+      'display-name': name,
+      description: '',
+      type,
+      ...(family ? { family } : {}),
+      ...(saveState ? { 'save-state': saveState } : {}),
+    },
+    configEntries: {},
+  };
+}
+
+/** Bare (root) and Applied, which needs Provider; the saved setup selects both. */
+function savedWithBoth(providerSaveState?: 'required') {
+  const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
+    synthetic('Bare', { family: [{ name: 'ai', root: true }] }),
+    synthetic('Provider', {
+      type: providerSaveState ? 'module' : 'plugin',
+      saveState: providerSaveState,
+    }),
+    synthetic('Applied', {
+      family: [{ name: 'ai' }],
+      dependencies: { Provider: '^1.0.0' },
+    }),
+  ] as never);
+  getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+  const order = (names: string[]) =>
+    names.map((extension) => ({ extension, version: '1.0.0' }));
+  vi.mocked(loadConfigFromFile).mockResolvedValue({
+    status: 'OK',
+    message: '',
+    result: {
+      meta: { version: '1.0.0' },
+      'config-sparse': {
+        modules: {},
+        plugins: {},
+        'load-order': order(['Applied', 'Bare']),
+      },
+      'config-full': {
+        modules: {},
+        plugins: {},
+        'load-order': order(['Applied', 'Provider', 'Bare']),
+      },
+    } as unknown as ConfigFile,
+  } as never);
+  return state;
+}
+
+describe('after a family choice', () => {
+  it('re-resolves the setup, so a provider only the dropped member needed is gone', async () => {
+    savedWithBoth();
+    pick('ai', BARE_SYNTHETIC);
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('success');
+    expect(
+      getStore()
+        .get(EXTENSION_STATE_INTERFACE_ATOM)
+        .activeExtensions.map((e) => e.name),
+    ).toEqual(['Bare']);
+  });
+
+  it('asks before the choice drops a module that saves made with this setup need', async () => {
+    savedWithBoth('required');
+    const before = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    pick('ai', BARE_SYNTHETIC);
+    // The second dialog is the save-state warning; cancel it.
+    vi.mocked(showModalOkCancel).mockResolvedValueOnce(false);
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('aborted');
+    expect(vi.mocked(showModalOkCancel).mock.calls[1][0].title).toBe(
+      'extensions.savestate.loss.title',
+    );
+    expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
+  });
+
+  it('can only be confirmed when the picks keep one member per family', async () => {
+    const state = savedWithBoth();
+    const [bare, , applied] = state.extensions;
+    const both = { ...applied } as typeof applied;
+    vi.mocked(showModalOkCancel).mockImplementationOnce(async (spec) => {
+      const chooser = spec.children as ReactElement<{
+        onChange: (f: string, m: string) => void;
+      }>;
+      // Applied belongs to both families; keeping it in one and Bare in the
+      // other leaves two kept members in the second family.
+      chooser.props.onChange('ai', 'Applied');
+      chooser.props.onChange('other', 'Bare');
+      expect(spec.confirmable!()).toBe(false);
+      chooser.props.onChange('other', 'Applied');
+      expect(spec.confirmable!()).toBe(true);
+      return true;
+    });
+    expect(
+      await chooseProfileFamilyMembers([
+        { family: 'ai', members: [both, bare] },
+        { family: 'other', members: [both, bare] },
+      ]),
+    ).toEqual(['Bare']);
   });
 });

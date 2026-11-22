@@ -5,7 +5,7 @@
 - Switch Creator mode directly from Content as well as Customisations.
 - Active extensions stay individually visible in their actual load order. Shared dependencies remain available, while conflicting family choices are explained before anything changes.
 - When an extension requires a different value for one of your settings, the launcher shows the change as old → new before applying it, and the Customisations tab always shows what the game will use.
-- A saved setup that selects two configurations of the same family asks you which one to keep instead of failing to load.
+- A saved setup that selects two configurations of the same family asks you which one to keep instead of failing to load. If you cancel while the launcher starts, Save before launch won't overwrite that setup.
 - Families are owned by their root plugin: only plugins can be members, and a plugin joins a family only if the root accepts it.
 
 Family grouping appears when creators add family information to their extensions. Existing extensions and saved setups keep working as before.

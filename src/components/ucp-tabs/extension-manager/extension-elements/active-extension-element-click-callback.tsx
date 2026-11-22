@@ -109,6 +109,15 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
   const res = newExtensionState;
   if (!(await reportAndConfirmBuildResult(res))) return;
 
+  // A dialog was open; never apply a preview computed from an older setup.
+  if (
+    getStore().get(EXTENSION_STATE_REDUCER_ATOM) !== oldExtensionState ||
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM) !== userConfiguration
+  ) {
+    LOGGER.msg('Setup changed while confirming; deactivation skipped').warn();
+    return;
+  }
+
   ConsoleLogger.info('New user configuration: ', newUserConfiguration);
 
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {

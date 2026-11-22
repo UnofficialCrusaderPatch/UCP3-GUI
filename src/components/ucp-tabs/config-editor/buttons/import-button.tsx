@@ -28,6 +28,7 @@ function ImportButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
             setConfigStatus,
             localize,
             '',
+            { confirmSaveStateLoss: true },
           );
           if (report.status === 'fail') {
             if (report.reason === 'strategy') {

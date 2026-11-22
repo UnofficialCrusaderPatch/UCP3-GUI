@@ -28,7 +28,8 @@ export function readSaveStateDeclaration(
     };
   if (!isSaveState(value))
     return {
-      warning: `Invalid save-state value ${JSON.stringify(value)} in definition.yml of ${id}; it is ignored. Use "required" or "optional"`,
+      // Never serialize the raw value: YAML can produce circular objects.
+      warning: `Invalid save-state value (${typeof value === 'string' ? `"${value}"` : typeof value}) in definition.yml of ${id}; it is ignored. Use "required" or "optional"`,
     };
   return { value };
 }
@@ -53,20 +54,20 @@ export function withSaveState(extensions: Extension[]) {
 }
 
 /**
- * Compares two setups by extension name among extensions that declare save-state.
- * A different version of the same name is neither removed nor added:
- * Map Extensions admits saves by provider id and schema, not by version.
+ * Compares two setups by extension name. A declared module is removed when no
+ * version of its name remains, and added when no version of its name was there.
+ * A different version of the same name is neither, even if only one version
+ * declares save-state: Map Extensions admits saves by provider id and schema,
+ * not by version, and the outgoing declaration decides what is reported.
  */
 export function saveStateChanges(
   before: Extension[],
   after: Extension[],
 ): { removed: Extension[]; added: Extension[] } {
-  const declaredBefore = withSaveState(before);
-  const declaredAfter = withSaveState(after);
-  const namesBefore = new Set(declaredBefore.map((ext) => ext.name));
-  const namesAfter = new Set(declaredAfter.map((ext) => ext.name));
+  const namesBefore = new Set(before.map((ext) => ext.name));
+  const namesAfter = new Set(after.map((ext) => ext.name));
   return {
-    removed: declaredBefore.filter((ext) => !namesAfter.has(ext.name)),
-    added: declaredAfter.filter((ext) => !namesBefore.has(ext.name)),
+    removed: withSaveState(before).filter((ext) => !namesAfter.has(ext.name)),
+    added: withSaveState(after).filter((ext) => !namesBefore.has(ext.name)),
   };
 }

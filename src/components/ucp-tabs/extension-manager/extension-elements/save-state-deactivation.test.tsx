@@ -180,3 +180,21 @@ describe('deactivating an extension whose modules write into saves', () => {
     });
   });
 });
+
+describe('deactivating while the setup changes', () => {
+  test('does not commit a preview made from an older setup', async () => {
+    setup();
+    vi.mocked(showModalOkCancel).mockImplementation(async () => {
+      getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+        type: 'reset',
+        value: { 'imported.option': 1 },
+      });
+      return true;
+    });
+    await deactivate(pack);
+    expect(activeNames()).toContain('pack');
+    expect(getStore().get(CONFIGURATION_USER_REDUCER_ATOM)).toEqual({
+      'imported.option': 1,
+    });
+  });
+});

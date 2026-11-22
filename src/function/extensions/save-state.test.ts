@@ -86,12 +86,19 @@ describe('saveStateChanges', () => {
     });
   });
 
-  test('a later version without the declaration counts as removed', () => {
+  test('a later version without the declaration is not a removal', () => {
     const declared = ext('tunnelers', 'required', '1.0.0');
     expect(
-      saveStateChanges([declared], [ext('tunnelers', undefined, '2.0.0')])
-        .removed,
-    ).toEqual([declared]);
+      saveStateChanges([declared], [ext('tunnelers', undefined, '2.0.0')]),
+    ).toEqual({ removed: [], added: [] });
+  });
+
+  test('reports an invalid object value without serializing it', () => {
+    const circular: unknown[] = [];
+    circular.push(circular);
+    expect(
+      readSaveStateDeclaration(circular, 'module', 'fixture-1.0.0').warning,
+    ).toContain('(object)');
   });
 
   test('lists each exact version once', () => {
@@ -143,7 +150,7 @@ describe('save-state in definition.yml', () => {
       ),
     );
     expect(result.status).toBe('warning');
-    expect(result.messages[0]).toContain('Invalid save-state value "maybe"');
+    expect(result.messages[0]).toContain('Invalid save-state value ("maybe")');
     expect(result.content).toBeDefined();
     expect(result.content).not.toHaveProperty('save-state');
   });

@@ -30,6 +30,7 @@ import { ContentElement } from '../../../../../function/content/types/content-el
 import { ContentElementView } from '../../content-element/content-element-view';
 import { UninstallButton } from '../uninstall-button';
 import { uninstallContentButtonCallback } from './uninstall-button-callback';
+import { reloadCurrentGameFolder } from '../../../../../function/game-folder/modifications/reload-current-game-folder';
 import { OkCancelModalWindowProperties } from '../../../../modals/modal-ok-cancel';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../common/buttons/config-serialized-state';
 
@@ -607,4 +608,13 @@ it('records the written setup and deletes nothing when settings change during th
   ).not.toContain('Applied');
   expect(getStore().get(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM)).toBe(true);
   expect(mocks.modal).toHaveBeenCalled();
+});
+it('reloads the game folder when the player accepts the reload prompt', async () => {
+  setup();
+  getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
+  mocks.confirm.mockResolvedValueOnce(true);
+  await uninstallContentButtonCallback([content(independent)], []);
+  expect(reloadCurrentGameFolder).toHaveBeenCalledTimes(1);
+  expect(getStore().get(BUSY_CONTENT_COUNT)).toBe(0);
+  expect(mocks.remove).not.toHaveBeenCalled();
 });

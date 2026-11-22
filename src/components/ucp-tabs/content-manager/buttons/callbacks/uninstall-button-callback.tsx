@@ -41,12 +41,15 @@ import { reloadCurrentGameFolder } from '../../../../../function/game-folder/mod
 /**
  * Extension IDs the profile file on disk refers to. The disk-state atom can describe
  * an imported but unapplied setup, so the file itself decides whether it must be saved
- * before a package it uses is deleted. An unreadable profile counts as using everything.
+ * before a package it uses is deleted. An unreadable profile, or one without a full
+ * load order (its dependency closure isn't listed), counts as using everything.
  */
 async function profileExtensionIDs(file: string, ids: string[]) {
   if (!(await onFsExists(file))) return new Set<string>();
   const loaded = await loadConfigFromFile(file);
   if (loaded.status !== 'OK') return new Set(ids);
+  if (loaded.result['config-full']?.['load-order'] === undefined)
+    return new Set(ids);
   const orders = [
     loaded.result['config-full']?.['load-order'],
     loaded.result['config-sparse']?.['load-order'],
@@ -217,10 +220,13 @@ export async function uninstallContentButtonCallback(
       );
       if (!unchanged()) {
         // The file now holds the staged setup even though nothing is deleted.
-        store.set(CONFIGURATION_DISK_STATE_ATOM, [
-          ...prepared.state.activeExtensions,
-        ]);
-        store.set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+        // Record that only while the same profile file is still the current one.
+        if (store.get(UCP_CONFIG_FILE_ATOM) === file) {
+          store.set(CONFIGURATION_DISK_STATE_ATOM, [
+            ...prepared.state.activeExtensions,
+          ]);
+          store.set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+        }
         throw Error('content.uninstallation.changed');
       }
       store.set(CONFIGURATION_USER_REDUCER_ATOM, {
@@ -338,6 +344,7 @@ export async function uninstallContentButtonCallback(
     });
   } finally {
     store.set(BUSY_CONTENT_COUNT, 0);
+    // Runs after the early return of the reload prompt, once the busy flag is released.
+    if (reload) reloadCurrentGameFolder();
   }
-  if (reload) reloadCurrentGameFolder();
 }

@@ -304,6 +304,7 @@ export async function importUcpConfigFile(
   // import must leave them as they were.
   const preferredVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   const staged = stageUcpConfigImport(profile, setConfigStatus);
+  const stagedVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
     // Never report success for a choice the resolved setup doesn't honour.
@@ -337,7 +338,9 @@ export async function importUcpConfigFile(
         : []),
     ];
     if (!(await confirmSaveStateLoss(removed))) {
-      getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
+      // Undo only this staging; a newer import may have committed meanwhile.
+      if (getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) === stagedVersions)
+        getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
       return { status: 'aborted' } as ImportButtonCallbackResult;
     }
   }

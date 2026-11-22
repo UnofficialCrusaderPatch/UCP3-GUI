@@ -22,14 +22,19 @@ import { GAME_FOLDER_ATOM } from '../../../../../function/game-folder/interface'
 
 const LOGGER = new Logger('download-button.tsx');
 
+/** Package sources this launcher can download and install. */
+export function installableSources(contentElement: ContentElement) {
+  return (contentElement.contents?.package ?? []).filter(
+    (pc) => pc.method === 'github-binary',
+  );
+}
+
 export async function downloadAndInstallContent(
   contentElement: ContentElement,
 ) {
   const setStatus = createStatusSetter(contentElement);
 
-  const zipSources = contentElement.contents.package.filter(
-    (pc) => pc.method === 'github-binary',
-  );
+  const zipSources = installableSources(contentElement);
 
   if (zipSources.length === 0) {
     /* todo:locale: */

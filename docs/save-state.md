@@ -21,12 +21,7 @@ Use the same choice you register with Map Extensions: a required section means `
 - It reads only this declaration and never opens save files.
 - Before a declared module leaves the setup, it asks OK/Cancel and names the module: "saves made with X need X". Cancel changes nothing. This happens when:
   - the player deactivates the module, or an extension that pulled it in as a dependency;
-  - the player uninstalls it, active or not, because deleting the files also breaks saves made with it;
-  - the player switches to another family member.
+  - the player uninstalls it, active or not, because deleting the files also breaks saves made with it.
 - A different version of the same module doesn't count as a removal. Map Extensions admits saves by provider id and schema, not by version.
 - Values other than `required` or `optional` are ignored, and discovery logs a warning. Plugins have no code, so `save-state` on a plugin is ignored too, also with a warning.
 - The launcher only warns. Map Extensions decides whether a save loads when the player loads it. If a required module is missing, Map Extensions refuses the save before the world loads.
-
-## Families
-
-Family members must not differ in which save-state modules they bring in, so that switching between them never breaks a save. See [extension families](extension-families.md).

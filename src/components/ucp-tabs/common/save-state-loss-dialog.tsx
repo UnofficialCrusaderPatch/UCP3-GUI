@@ -51,7 +51,6 @@ export async function confirmSaveStateLoss(removed: Extension[]) {
   ];
   return showModalOkCancel({
     title: 'extensions.savestate.loss.title',
-    style: { wide: true },
     message: (localize) => (
       <>
         <p>{localize('extensions.savestate.loss.message')}</p>

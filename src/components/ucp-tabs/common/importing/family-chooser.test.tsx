@@ -157,22 +157,24 @@ function synthetic(
     family,
     saveState,
     configEntries = {},
+    version = '1.0.0',
   }: {
     type?: 'plugin' | 'module';
     dependencies?: Record<string, string>;
     family?: { name: string; root?: boolean }[];
     saveState?: 'required';
     configEntries?: Record<string, unknown>;
+    version?: string;
   } = {},
 ) {
   return {
     name,
-    version: '1.0.0',
+    version,
     type,
     definition: {
       meta: { version: '1.0.0' },
       name,
-      version: '1.0.0',
+      version,
       author: 'test',
       dependencies,
       'display-name': name,
@@ -322,5 +324,98 @@ describe('keeping a preset that a bundle brought in', () => {
       'Preset-A',
     ]);
     expect(loaded.activeExtensions.map((e) => e.name)).toEqual(['Preset-A']);
+  });
+});
+
+describe('keeping a preset that a remaining bundle needs', () => {
+  it('loads it through the bundle without changing the explicit order', async () => {
+    const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
+      synthetic('Preset', {
+        family: [{ name: 'ai', root: true }],
+        configEntries: {
+          'aiSwapper.menu': { contents: { 'suggested-value': 1 } },
+        },
+      }),
+      synthetic('Rival', { family: [{ name: 'ai' }] }),
+      synthetic('Bundle', { dependencies: { Preset: '^1.0.0' } }),
+    ] as never);
+    getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+    const order = (names: string[]) =>
+      names.map((extension) => ({ extension, version: '1.0.0' }));
+    vi.mocked(loadConfigFromFile).mockResolvedValue({
+      status: 'OK',
+      message: '',
+      result: {
+        meta: { version: '1.0.0' },
+        'config-sparse': {
+          modules: {},
+          plugins: {},
+          'load-order': order(['Bundle', 'Rival']),
+        },
+      } as unknown as ConfigFile,
+    } as never);
+    pick('ai', 'Preset');
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('success');
+    const loaded = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    expect(loaded.explicitlyActivatedExtensions.map((e) => e.name)).toEqual([
+      'Bundle',
+    ]);
+    expect(loaded.activeExtensions.map((e) => e.name).sort()).toEqual([
+      'Bundle',
+      'Preset',
+    ]);
+  });
+});
+
+describe('keeping the chosen version', () => {
+  it('loads the exact version the saved setup chose, even if a bundle would resolve a newer one', async () => {
+    const preset = (version: string) =>
+      synthetic('Preset', {
+        version,
+        family: [{ name: 'ai', root: true }],
+        configEntries: {
+          'aiSwapper.menu': { contents: { 'suggested-value': 1 } },
+        },
+      });
+    const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
+      preset('1.0.0'),
+      preset('1.1.0'),
+      synthetic('Rival', { family: [{ name: 'ai' }] }),
+      synthetic('Bundle', { dependencies: { Preset: '^1.0.0' } }),
+    ] as never);
+    getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+    const entry = (extension: string, version = '1.0.0') => ({
+      extension,
+      version,
+    });
+    vi.mocked(loadConfigFromFile).mockResolvedValue({
+      status: 'OK',
+      message: '',
+      result: {
+        meta: { version: '1.0.0' },
+        'config-sparse': {
+          modules: {},
+          plugins: {},
+          'load-order': [entry('Bundle'), entry('Rival')],
+        },
+        'config-full': {
+          modules: {},
+          plugins: {},
+          'load-order': [entry('Preset'), entry('Bundle'), entry('Rival')],
+        },
+      } as unknown as ConfigFile,
+    } as never);
+    pick('ai', 'Preset');
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('success');
+    const loaded = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    expect(
+      loaded.activeExtensions.map((e) => `${e.name}@${e.version}`).sort(),
+    ).toEqual(['Bundle@1.0.0', 'Preset@1.0.0']);
   });
 });

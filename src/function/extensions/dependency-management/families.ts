@@ -12,15 +12,37 @@ type FamilyState = Pick<
   'activeExtensions' | 'explicitlyActivatedExtensions'
 >;
 
-/** Dependency-only providers do not select a configuration unless they apply a preset. */
+const appliesConfiguration = (ext: Extension) =>
+  Object.keys(ext.configEntries ?? {}).length > 0;
+
+/**
+ * Dependency-only providers do not select a configuration unless they apply a
+ * preset: their own configuration demands, or those of a plugin they depend on
+ * directly that is outside their families (a wrapper member such as "Basics +
+ * Fixes" that brings in a separate fixes preset). Modules never count, so a
+ * files-only Bare member that depends on a module stays a plain provider.
+ */
 export function familyConfigurationMembers(state: FamilyState) {
   const explicit = new Set(
     state.explicitlyActivatedExtensions.map((ext) => ext.name),
   );
-  return state.activeExtensions.filter(
-    (ext) =>
-      explicit.has(ext.name) || Object.keys(ext.configEntries ?? {}).length > 0,
-  );
+  const active = new Map(state.activeExtensions.map((ext) => [ext.name, ext]));
+  const familiesOf = (ext: Extension) =>
+    normalizeFamilies(ext.definition?.family).map(({ name }) => name);
+  return state.activeExtensions.filter((ext) => {
+    if (explicit.has(ext.name) || appliesConfiguration(ext)) return true;
+    const own = familiesOf(ext);
+    if (own.length === 0) return false;
+    return Object.keys(ext.definition?.dependencies ?? {}).some((name) => {
+      const dependency = active.get(name);
+      return (
+        dependency !== undefined &&
+        (dependency.definition?.type ?? dependency.type) !== 'module' &&
+        appliesConfiguration(dependency) &&
+        !familiesOf(dependency).some((family) => own.includes(family))
+      );
+    });
+  });
 }
 
 export class FamilyConflictError extends Error {
@@ -215,11 +237,11 @@ export function profileActiveExtensions(
   const fullOrder = config['config-full']?.['load-order'];
   // The importer falls back to resolving the explicit selections when an exact
   // version of the saved full order isn't installed; mirror that here.
+  const fullEntries =
+    fullOrder !== undefined ? deserializeLoadOrder(fullOrder as LoadOrder) : [];
   const full =
-    fullOrder !== undefined &&
-    deserializeLoadOrder(fullOrder as LoadOrder).every(
-      (entry) => exact(entry) !== undefined,
-    )
+    fullEntries.length > 0 &&
+    fullEntries.every((entry) => exact(entry) !== undefined)
       ? fullOrder
       : undefined;
   let closure: Extension[] = full ? listed(full) : [];
@@ -232,6 +254,24 @@ export function profileActiveExtensions(
     }
   }
   return [...new Set([...closure, ...explicit])];
+}
+
+/** Installed extensions a saved profile lists by exact version, in either load order. */
+export function profileListedExtensions(
+  config: ConfigFile,
+  installed: Extension[],
+) {
+  return [
+    config['config-full']?.['load-order'],
+    config['config-sparse']?.['load-order'],
+  ]
+    .flatMap((order) => deserializeLoadOrder((order ?? []) as LoadOrder))
+    .map(({ extension, version }) =>
+      installed.find(
+        (ext) => ext.name === extension && ext.version === version,
+      ),
+    )
+    .filter((ext): ext is Extension => ext !== undefined);
 }
 
 /**
@@ -270,36 +310,48 @@ export function findProfileFamilyConflicts(
     .sort((a, b) => a.family.localeCompare(b.family));
 }
 
+type LoadOrderEntry = { extension: string; version: string };
+
 /**
  * A copy of the profile for a family choice: the dropped members leave the
- * explicit selections, and a kept member that only a dropped one brought in
- * becomes an explicit selection at its resolved version, in the dropped
- * member's place. The saved full load order is dropped, so the import
- * re-resolves the dependency closure from the kept selections; the saved
- * values stay as the baseline for the old -> new warning. Explicit versions
- * and their order are kept. The input is not changed.
+ * explicit selections, and `promoted` members (kept choices the remaining
+ * selections don't bring in at the chosen version) become explicit selections
+ * at that version. An explicit entry of the same name gets the chosen version
+ * in place. Otherwise the member goes just before the first remaining selection
+ * that `needs` it (the sparse load order lists providers first), but after its
+ * own explicit providers; without a consumer it goes at the end. The saved full
+ * load order is dropped, so the import re-resolves the dependency closure from
+ * the kept selections; the saved values stay as the baseline for the old -> new
+ * warning. The input is not changed.
  */
 export function withoutProfileMembers(
   config: ConfigFile,
   names: string[],
-  kept: Extension[] = [],
+  promoted: Extension[] = [],
+  needs: (entry: LoadOrderEntry, member: Extension) => boolean = () => false,
 ) {
-  const saved = deserializeLoadOrder(
+  const order: LoadOrderEntry[] = deserializeLoadOrder(
     (config['config-sparse']['load-order'] ?? []) as LoadOrder,
-  );
-  const order = saved.filter(({ extension }) => !names.includes(extension));
-  const firstDropped = saved.findIndex(({ extension }) =>
-    names.includes(extension),
-  );
-  const at =
-    firstDropped < 0
-      ? order.length
-      : saved.slice(0, firstDropped).filter((e) => !names.includes(e.extension))
-          .length;
-  const promoted = kept
-    .filter((ext) => !order.some(({ extension }) => extension === ext.name))
-    .map((ext) => ({ extension: ext.name, version: ext.version }));
-  order.splice(at, 0, ...promoted);
+  ).filter(({ extension }) => !names.includes(extension));
+  promoted.forEach((member) => {
+    const entry = { extension: member.name, version: member.version };
+    const same = order.findIndex(({ extension }) => extension === member.name);
+    if (same >= 0) {
+      order[same] = entry;
+      return;
+    }
+    const consumer = order.findIndex((selection) => needs(selection, member));
+    const ownProviders = order
+      .map(({ extension }, index) =>
+        member.definition?.dependencies?.[extension] !== undefined ? index : -1,
+      )
+      .filter((index) => index >= 0);
+    const at = Math.max(
+      consumer < 0 ? order.length : consumer,
+      ownProviders.length > 0 ? Math.max(...ownProviders) + 1 : 0,
+    );
+    order.splice(at, 0, entry);
+  });
   const full = config['config-full'];
   const fullValues = full
     ? (Object.fromEntries(

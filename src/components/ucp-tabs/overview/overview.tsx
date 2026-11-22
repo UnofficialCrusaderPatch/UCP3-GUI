@@ -38,7 +38,10 @@ import { NewsHighlights } from './news-highlights';
 import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 import { InstallationButton } from './installation/InstallationButton';
 import { confirmSaveStateLoss } from '../common/save-state-loss-dialog';
-import { EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM } from '../content-manager/state/atoms';
+import {
+  BUSY_CONTENT_COUNT,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
+} from '../content-manager/state/atoms';
 import { getStore } from '../../../hooks/jotai/base';
 import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../function/extensions/state/state';
 
@@ -242,6 +245,17 @@ export default function Overview() {
               cancel: 'no',
             }))
           ) {
+            return;
+          }
+
+          // A Store install or removal still running would change the folder after
+          // the warning below; wait for it.
+          const busy = getStore().get(BUSY_CONTENT_COUNT);
+          if (busy > 0) {
+            createStatusToast(ToastType.ERROR, {
+              key: 'store.tab.processing',
+              args: { lock: String(busy) },
+            });
             return;
           }
 

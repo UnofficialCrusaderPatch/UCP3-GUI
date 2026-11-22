@@ -159,5 +159,9 @@ describe('modules that saved games depend on', () => {
 
     expect(result.status).toBe('success');
     expect(saveStateAsked()).toBe(false);
+    // Preferred versions are written when the import commits, not while staging.
+    expect(getStore().get(PREFERRED_EXTENSION_VERSION_ATOM)).toEqual({
+      Other: '1.0.0',
+    });
   });
 });

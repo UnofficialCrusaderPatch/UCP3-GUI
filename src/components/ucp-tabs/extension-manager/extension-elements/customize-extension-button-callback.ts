@@ -22,6 +22,7 @@ import { constructUserConfigObjects } from '../../common/importing/import-button
 import saveConfig from '../../common/save-config';
 import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
 import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
+import { warnLoadedConfigurationChanges } from '../../common/importing/warn-loaded-configuration-changes';
 
 // eslint-disable-next-line import/prefer-default-export
 export async function customizeExtensionButtonCallback(ext: Extension) {
@@ -131,6 +132,19 @@ export async function customizeExtensionButtonCallback(ext: Extension) {
     );
     // Set the new extension state, which fires an update of the full config
     getStore().set(EXTENSION_STATE_INTERFACE_ATOM, stateIncludingNewConfig);
+
+    // A dependency's required value can repair the extension's stored values;
+    // list those changes exactly as when loading a saved setup.
+    const changedUrls = warnLoadedConfigurationChanges(
+      newUserConfiguration,
+      getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
+      undefined,
+      getStore().get(CONFIGURATION_FULL_REDUCER_ATOM),
+    );
+    getStore().set(CONFIGURATION_TOUCHED_REDUCER_ATOM, {
+      type: 'reset',
+      value: Object.fromEntries(changedUrls.map((url) => [url, true])),
+    });
   } catch (err: any) {
     await showModalOk({
       title: 'error',

@@ -32,6 +32,7 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
+    // Resolves on copied trees: a cancelled confirmation leaves the live graph unchanged.
     newExtensionsState = selectExtensionFamilyMember(
       currentExtensionsState,
       ext,

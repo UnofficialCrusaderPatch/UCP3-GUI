@@ -60,8 +60,9 @@ export function constructUserConfigObjects(config: ConfigFile) {
     userConfigEntries = { ...userConfigEntries, ...result };
   }
 
-  Object.entries(config['config-sparse'].modules).forEach(parseEntry);
-  Object.entries(config['config-sparse'].plugins).forEach(parseEntry);
+  // A section may legitimately hold only a load order.
+  Object.entries(config['config-sparse'].modules ?? {}).forEach(parseEntry);
+  Object.entries(config['config-sparse'].plugins ?? {}).forEach(parseEntry);
 
   // ConsoleLogger.debug('parsed user config entries: ', userConfigEntries);
 
@@ -148,16 +149,23 @@ export function importUcpConfig(
     });
   }
 
+  // Parse everything before the first live write, so a malformed section can't
+  // leave a half-imported setup behind.
+  const ucos = constructUserConfigObjects(config);
+  const newUserConfiguration = ucos.userConfig;
+  const newConfigurationQualifier = ucos.userConfigQualifiers;
+  const full = config['config-full'];
+  // Without saved values there is no baseline to compare game settings against.
+  const savedFullConfiguration =
+    full && (full.modules !== undefined || full.plugins !== undefined)
+      ? constructUserConfigObjects({ ...config, 'config-sparse': full })
+          .userConfig
+      : undefined;
+
   /* Remember the active extensions as on disk (ucp-config.yml file) */
   getStore().set(CONFIGURATION_DISK_STATE_ATOM, [
     ...newExtensionsState.activeExtensions,
   ]);
-
-  // ConsoleLogger.debug('opened config', parsingResult.result);
-
-  const ucos = constructUserConfigObjects(config);
-  const newUserConfiguration = ucos.userConfig;
-  const newConfigurationQualifier = ucos.userConfigQualifiers;
 
   getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'reset',
@@ -175,12 +183,6 @@ export function importUcpConfig(
   // Set the new extension state, which fires an update of the full config
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, newExtensionsState);
 
-  const savedFullConfiguration = config['config-full']
-    ? constructUserConfigObjects({
-        ...config,
-        'config-sparse': config['config-full'],
-      }).userConfig
-    : undefined;
   const changedUrls = warnLoadedConfigurationChanges(
     newUserConfiguration,
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),

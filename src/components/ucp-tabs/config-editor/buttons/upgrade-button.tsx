@@ -44,7 +44,11 @@ async function upgradeExtensionsCallback(
   const oldState = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
   let newState = oldState;
   try {
-    newState = upgradeAllExtensions(oldState);
+    // Resolve on a copy: a cancelled confirmation must not change the live graph.
+    newState = upgradeAllExtensions({
+      ...oldState,
+      tree: oldState.tree.copy(),
+    });
   } catch (err: any) {
     if (interactive) {
       await showModalOk({

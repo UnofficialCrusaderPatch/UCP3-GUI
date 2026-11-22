@@ -1,5 +1,8 @@
 import { Getter, Setter } from 'jotai';
-import { applyRequiredValueRepairs } from '../../configuration/required-value-repairs';
+import {
+  applyRequiredValueRepairs,
+  conflictingRequirements,
+} from '../../configuration/required-value-repairs';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -12,14 +15,17 @@ export function generateAndSetFullConfig(
   set: Setter,
   extensionsState: ExtensionsState,
 ) {
-  const { defined, locks } = extensionsState.configuration;
+  const { defined, locks, overrides } = extensionsState.configuration;
 
   // Repair persisted overrides as well as the effective configuration. Otherwise
   // removing a requirement would silently restore the conflicting preference.
   // Callers that change the active extensions confirm these repairs first.
+  // A setting that two extensions require differently is an error state; the
+  // player's stored value is not replaced by either requirement.
   const userDefinedValues = applyRequiredValueRepairs(
     get(CONFIGURATION_USER_REDUCER_ATOM),
     locks,
+    conflictingRequirements(overrides ?? new Map()),
   );
   set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'reset',

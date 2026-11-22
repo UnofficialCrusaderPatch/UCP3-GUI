@@ -212,6 +212,26 @@ describe('loading saved configuration', () => {
     );
   });
 
+  test('loads a config-full that holds only a load order, without comparing game values', () => {
+    const config = savedConfig(
+      { [HOTKEYS]: true, [UNRELATED]: 'keep me' },
+      { [HOTKEYS]: true },
+    );
+    const full = config['config-full'] as unknown as Record<string, unknown>;
+    delete full.modules;
+    delete full.plugins;
+    expect(importUcpConfig(config, vi.fn()).status).toBe('success');
+    warningContent();
+    expect(
+      screen.getByText('config.load.changed.preference: true → false'),
+    ).toBeDefined();
+    expect(screen.queryByText(/config.load.changed.game:/)).toBeNull();
+    expect(getStore().get(CONFIGURATION_USER_REDUCER_ATOM)).toEqual({
+      [HOTKEYS]: false,
+      [UNRELATED]: 'keep me',
+    });
+  });
+
   test('does not change the current preferences or show a repair warning when import fails', () => {
     const config = savedConfig({ [HOTKEYS]: true }, {});
     config['config-full']['load-order'][0].extension = 'missing';

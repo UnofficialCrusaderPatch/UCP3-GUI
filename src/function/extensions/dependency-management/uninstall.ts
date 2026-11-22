@@ -10,33 +10,98 @@ export type UninstallPlan = {
   errors: string[];
 };
 
-/** Use the ordinary resolver for both installed packages and pinned active versions. */
-// eslint-disable-next-line import/prefer-default-export
-export function uninstallErrors(state: ExtensionsState, ids: string[]) {
-  const selected = new Set(ids);
-  const remaining = state.extensions.filter(
-    (ext) => !selected.has(createExtensionID(ext)),
-  );
-  const candidates = [remaining];
-  if (
-    state.activeExtensions.some((ext) => selected.has(createExtensionID(ext)))
-  ) {
-    candidates.push(
-      state.activeExtensions.filter(
-        (ext) => !selected.has(createExtensionID(ext)),
-      ),
-    );
-  }
-  const errors = candidates.map((extensions) => {
-    const tree = new ExtensionDependencyTree(
+type TreeFor = (extensions: Extension[]) => ExtensionDependencyTree;
+
+const treeForState =
+  (state: ExtensionsState): TreeFor =>
+  (extensions) =>
+    new ExtensionDependencyTree(
       extensions,
       state.tree.frontendVersion,
       state.tree.frameworkVersion,
     );
-    const solution = tree.tryResolveAllDependencies();
+
+/**
+ * Packages that resolved among `packages` but no longer resolve once `removed` is
+ * gone, using the full per-package solve. Packages that were already unsolvable
+ * are never reported, so a pre-existing conflict can't turn into a removal.
+ * Only packages that depend (transitively, by name) on a removed name are solved.
+ */
+function newlyUnsolvable(
+  packages: Extension[],
+  removed: Set<string>,
+  treeFor: TreeFor,
+) {
+  const affected = new Set(
+    packages
+      .filter((ext) => removed.has(createExtensionID(ext)))
+      .map((ext) => ext.name),
+  );
+  if (affected.size === 0) return [];
+  let size = 0;
+  while (affected.size !== size) {
+    size = affected.size;
+    packages
+      .filter(
+        (ext) =>
+          !affected.has(ext.name) &&
+          Object.keys(ext.definition.dependencies).some((name) =>
+            affected.has(name),
+          ),
+      )
+      .forEach((ext) => affected.add(ext.name));
+  }
+  const remaining = packages.filter(
+    (ext) => !removed.has(createExtensionID(ext)),
+  );
+  const candidates = remaining.filter((ext) => affected.has(ext.name));
+  if (candidates.length === 0) return [];
+  const before = treeFor(packages);
+  const after = treeFor(remaining);
+  return candidates.filter(
+    (ext) =>
+      before.extensionDependenciesFor(ext).status === 'OK' &&
+      after.extensionDependenciesFor(ext).status !== 'OK',
+  );
+}
+
+/**
+ * The installed packages, where any installed version may satisfy a dependency,
+ * and, when an active package is removed, the active set with its pinned versions.
+ */
+function inventories(state: ExtensionsState, removed: Set<string>) {
+  return state.activeExtensions.some((ext) =>
+    removed.has(createExtensionID(ext)),
+  )
+    ? [state.extensions, state.activeExtensions]
+    : [state.extensions];
+}
+
+/** Use the ordinary resolver for both installed packages and pinned active versions. */
+// eslint-disable-next-line import/prefer-default-export
+export function uninstallErrors(state: ExtensionsState, ids: string[]) {
+  const selected = new Set(ids);
+  const treeFor = treeForState(state);
+  const lists = inventories(state, selected);
+  const edgeErrors = lists.map((packages) => {
+    const solution = treeFor(
+      packages.filter((ext) => !selected.has(createExtensionID(ext))),
+    ).tryResolveAllDependencies();
     return solution.status !== 'ok' ? solution.messages : [];
   });
-  return errors.find((messages) => messages.length) ?? [];
+  const edgeError = edgeErrors.find((messages) => messages.length);
+  if (edgeError) return edgeError;
+  // Every dependency still has a candidate; also require that no package that
+  // resolved before stops resolving (e.g. incompatible ranges after removal).
+  const broken = new Map<string, Extension>();
+  lists.forEach((packages) =>
+    newlyUnsolvable(packages, selected, treeFor).forEach((ext) =>
+      broken.set(createExtensionID(ext), ext),
+    ),
+  );
+  return [...broken.keys()].map(
+    (id) => `${id} would no longer resolve without ${[...selected].join(', ')}`,
+  );
 }
 
 /** Preview removals through the existing resolver, including installed and pinned users. */
@@ -45,12 +110,7 @@ export function planUninstall(
   ids: string[],
   cleanUnused = false,
 ): UninstallPlan {
-  const treeFor = (extensions: Extension[]) =>
-    new ExtensionDependencyTree(
-      extensions,
-      state.tree.frontendVersion,
-      state.tree.frameworkVersion,
-    );
+  const treeFor = treeForState(state);
   const selected = state.extensions.filter((ext) =>
     ids.includes(createExtensionID(ext)),
   );
@@ -81,16 +141,11 @@ export function planUninstall(
     const previousSize = removing.size;
     // An alternative installed version may satisfy an inactive package; an active
     // package must keep its actual pinned providers instead of silently switching.
+    // Only packages that this removal breaks join the cascade.
     [state.extensions, state.activeExtensions].forEach((packages) => {
-      const remaining = packages.filter(
-        (ext) => !removing.has(createExtensionID(ext)),
+      newlyUnsolvable(packages, removing, treeFor).forEach((ext) =>
+        removing.add(createExtensionID(ext)),
       );
-      const tree = treeFor(remaining);
-      remaining.forEach((ext) => {
-        if (tree.extensionDependenciesFor(ext).status !== 'OK') {
-          removing.add(createExtensionID(ext));
-        }
-      });
     });
     changed = removing.size !== previousSize;
   }

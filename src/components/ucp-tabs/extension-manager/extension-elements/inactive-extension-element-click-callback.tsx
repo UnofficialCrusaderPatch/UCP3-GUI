@@ -31,8 +31,9 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
+    // Resolve on a copy: a cancelled confirmation must not change the live graph.
     newExtensionsState = addExtensionToExplicityActivatedExtensions(
-      currentExtensionsState,
+      { ...currentExtensionsState, tree: currentExtensionsState.tree.copy() },
       ext,
     );
   } catch (err: any) {

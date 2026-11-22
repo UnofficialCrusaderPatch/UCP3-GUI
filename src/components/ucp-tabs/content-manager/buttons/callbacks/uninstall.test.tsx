@@ -25,12 +25,14 @@ import {
   BUSY_CONTENT_COUNT,
   CONTENT_INTERFACE_STATE_ATOM,
   CONTENT_UNINSTALL_ERRORS_ATOM,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
 } from '../../state/atoms';
 import { ContentElement } from '../../../../../function/content/types/content-element';
 import { ContentElementView } from '../../content-element/content-element-view';
 import { UninstallButton } from '../uninstall-button';
 import { uninstallContentButtonCallback } from './uninstall-button-callback';
 import { OkCancelModalWindowProperties } from '../../../../modals/modal-ok-cancel';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../common/buttons/config-serialized-state';
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
@@ -38,6 +40,8 @@ const mocks = vi.hoisted(() => ({
   write: vi.fn(),
   remove: vi.fn(),
   removeFile: vi.fn(),
+  exists: vi.fn(),
+  load: vi.fn(),
 }));
 vi.mock('../../../../../hooks/jotai/base', async (original) => ({
   ...(await original<object>()),
@@ -52,7 +56,19 @@ vi.mock('../../../../../tauri/tauri-files', async (original) => ({
   writeTextFile: mocks.write,
   removeDir: mocks.remove,
   removeFile: mocks.removeFile,
+  onFsExists: mocks.exists,
 }));
+vi.mock(
+  '../../../../../config/ucp/config-files/config-files',
+  async (original) => ({
+    ...(await original<object>()),
+    loadConfigFromFile: mocks.load,
+  }),
+);
+vi.mock(
+  '../../../../../function/game-folder/modifications/reload-current-game-folder',
+  () => ({ reloadCurrentGameFolder: vi.fn() }),
+);
 vi.mock('../../../../../function/game-folder/interface', async (original) => {
   const { atom } = await import('jotai');
   return {
@@ -149,6 +165,7 @@ beforeEach(() => {
   mocks.write.mockResolvedValue(Result.emptyOk());
   mocks.remove.mockResolvedValue(Result.emptyOk());
   mocks.removeFile.mockResolvedValue(Result.emptyOk());
+  mocks.exists.mockResolvedValue(false);
   getStore().set(UCP_CONFIG_FILE_ATOM, 'C:/fixture/ucp-config.yml');
 });
 function setup(
@@ -451,30 +468,149 @@ it('retains a provider if its dependent fails to uninstall', async () => {
     applied,
   ]);
 });
-it('marks which removed exact versions the Store can reinstall', async () => {
-  setup();
-  const offline = { ...content(independent), online: false };
-  mocks.confirm.mockResolvedValueOnce(false);
-  await uninstallContentButtonCallback([content(applied), offline], []);
+function reviewRecoverable() {
   const review = mocks.confirm.mock
     .calls[0][0] as OkCancelModalWindowProperties;
-  const { recoverable } = (
+  return (
     review.children as { props: { recoverable: (ext: Extension) => boolean } }
-  ).props;
-  expect(recoverable(applied)).toBe(true);
-  expect(recoverable(independent)).toBe(false);
+  ).props.recoverable;
+}
+it.each([
+  ['an installable Store source', [{ method: 'github-binary' }], true, false],
+  ['only an unsupported source', [{ method: 'github-zip' }], true, false],
+  ['no package source', [], true, false],
+  ['no Store entry', [{ method: 'github-binary' }], false, false],
+  ['a deprecated Store entry', [{ method: 'github-binary' }], true, true],
+])(
+  'marks a removed exact version with %s as reinstallable only when the installer accepts it',
+  async (_, packages, online, deprecated) => {
+    setup();
+    const entry = {
+      ...content(applied),
+      online,
+      contents: { package: packages, description: [] },
+    } as unknown as ContentElement;
+    mocks.confirm.mockResolvedValueOnce(false);
+    await uninstallContentButtonCallback(
+      [entry],
+      deprecated ? [content(applied)] : [],
+    );
+    expect(reviewRecoverable()(applied)).toBe(
+      online && !deprecated && packages[0]?.method === 'github-binary',
+    );
+    expect(mocks.remove).not.toHaveBeenCalled();
+  },
+);
+it('does not cascade into a package that already failed a full solve', () => {
+  const core1 = extension('Core', {}, '1.0.0');
+  const core2 = extension('Core', {}, '2.0.0');
+  const bridge = extension('Bridge', { Core: '^1.0.0' });
+  const broken = extension('Broken', { Bridge: '^1.0.0', Core: '^2.0.0' });
+  const unrelated = extension('Unrelated');
+  const plan = planUninstall(state([core1, core2, bridge, broken, unrelated]), [
+    'Unrelated@1.0.0',
+  ]);
+  expect(plan.dependents).toEqual([]);
+  expect(plan.errors).toEqual([]);
+});
+it('blocks removing a provider whose dependent would no longer fully resolve', () => {
+  const cores = ['1.0.0', '2.0.0', '3.0.0'].map((v) =>
+    extension('Core', {}, v),
+  );
+  const bridge = extension('Bridge', { Core: '^1.0.0 || ^2.0.0' });
+  const client = extension('Client', {
+    Bridge: '^1.0.0',
+    Core: '^2.0.0 || ^3.0.0',
+  });
+  const installedState = state([...cores, bridge, client]);
+  // Every dependency edge keeps a candidate, but Client needs Core 2.
+  expect(uninstallErrors(installedState, ['Core@2.0.0']).length).toBe(1);
+  expect(
+    planUninstall(installedState, ['Core@2.0.0']).dependents.map(
+      (ext) => ext.name,
+    ),
+  ).toEqual(['Client']);
+});
+it('keeps a provider when the dependent that needs it fails to uninstall', async () => {
+  const cores = ['1.0.0', '2.0.0', '3.0.0'].map((v) =>
+    extension('Core', {}, v),
+  );
+  const bridge = extension('Bridge', { Core: '^1.0.0 || ^2.0.0' });
+  const client = extension('Client', {
+    Bridge: '^1.0.0',
+    Core: '^2.0.0 || ^3.0.0',
+  });
+  setup([...cores, bridge, client], [], []);
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, { type: 'reset', value: {} });
+  mocks.remove.mockImplementation(async (path: string) =>
+    path.includes('Client') ? Result.err('access denied') : Result.emptyOk(),
+  );
+  await uninstallContentButtonCallback([content(cores[1])], []);
+  expect(mocks.remove.mock.calls.map(([path]) => path)).toEqual([
+    client.io.path,
+  ]);
+  expect(
+    getStore()
+      .get(EXTENSION_STATE_INTERFACE_ATOM)
+      .extensions.map((ext) => `${ext.name}@${ext.version}`),
+  ).toContain('Core@2.0.0');
+});
+it('saves first when the profile on disk still uses the package after an unapplied import', async () => {
+  setup([applied, files], [], []);
+  // An imported setup without Applied replaced the disk snapshot, and no
+  // preference of Applied is set, so only the file itself shows it is in use.
+  getStore().set(CONFIGURATION_DISK_STATE_ATOM, []);
+  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, { type: 'reset', value: {} });
+  mocks.exists.mockResolvedValue(true);
+  mocks.load.mockResolvedValue({
+    status: 'OK',
+    message: '',
+    result: {
+      'config-sparse': {
+        modules: {},
+        plugins: {},
+        'load-order': [{ extension: 'Applied', version: '1.0.0' }],
+      },
+    },
+  });
+  await uninstallContentButtonCallback([content(applied)], []);
+  expect(mocks.write).toHaveBeenCalledTimes(1);
+  expect(
+    parse(mocks.write.mock.calls[0][1])['config-full']['load-order'],
+  ).toEqual([]);
+  expect(mocks.remove).toHaveBeenCalledTimes(1);
+});
+it('asks to reload instead of removing when packages changed on disk since loading', async () => {
+  setup();
+  getStore().set(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM, true);
+  mocks.confirm.mockResolvedValueOnce(false);
+  await uninstallContentButtonCallback([content(independent)], []);
+  expect(mocks.confirm).toHaveBeenCalledTimes(1);
+  expect(mocks.confirm.mock.calls[0][0].title).toBe(
+    'extensions.reload.required.title',
+  );
+  expect(mocks.write).not.toHaveBeenCalled();
   expect(mocks.remove).not.toHaveBeenCalled();
 });
-it('treats a deprecated Store entry as not reinstallable', async () => {
+it('records the written setup and deletes nothing when settings change during the save', async () => {
   setup();
-  mocks.confirm.mockResolvedValueOnce(false);
-  await uninstallContentButtonCallback([content(applied)], [content(applied)]);
-  const review = mocks.confirm.mock
-    .calls[0][0] as OkCancelModalWindowProperties;
-  const { recoverable } = (
-    review.children as { props: { recoverable: (ext: Extension) => boolean } }
-  ).props;
-  expect(recoverable(applied)).toBe(false);
+  mocks.write.mockImplementationOnce(async () => {
+    getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+      type: 'reset',
+      value: { 'Independent.option': 7 },
+    });
+    return Result.emptyOk();
+  });
+  await uninstallContentButtonCallback([content(applied)], []);
+  expect(mocks.write).toHaveBeenCalledTimes(1);
+  expect(mocks.remove).not.toHaveBeenCalled();
+  expect(
+    getStore()
+      .get(CONFIGURATION_DISK_STATE_ATOM)
+      .map((ext) => ext.name),
+  ).not.toContain('Applied');
+  expect(getStore().get(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM)).toBe(true);
+  expect(mocks.modal).toHaveBeenCalled();
 });
 
 const SAVE_STATE_TITLE = 'extensions.savestate.loss.title';

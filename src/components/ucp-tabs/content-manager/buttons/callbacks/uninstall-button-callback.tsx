@@ -33,6 +33,36 @@ import {
 } from '../../state/atoms';
 import { uninstallContents } from './uninstall-content';
 import { confirmUninstall } from './uninstall-review';
+import { installableSources } from './install-content';
+import { loadConfigFromFile } from '../../../../../config/ucp/config-files/config-files';
+import { deserializeLoadOrder } from '../../../../../config/ucp/config-files/load-order';
+import { onFsExists } from '../../../../../tauri/tauri-files';
+import { reloadCurrentGameFolder } from '../../../../../function/game-folder/modifications/reload-current-game-folder';
+
+/**
+ * Extension IDs the profile file on disk refers to. The disk-state atom can describe
+ * an imported but unapplied setup, so the file itself decides whether it must be saved
+ * before a package it uses is deleted. An unreadable profile counts as using everything.
+ */
+async function profileExtensionIDs(file: string, ids: string[]) {
+  if (!(await onFsExists(file))) return new Set<string>();
+  const loaded = await loadConfigFromFile(file);
+  if (loaded.status !== 'OK') return new Set(ids);
+  const orders = [
+    loaded.result['config-full']?.['load-order'],
+    loaded.result['config-sparse']?.['load-order'],
+  ];
+  try {
+    return new Set(
+      orders
+        .filter((order) => order !== undefined)
+        .flatMap((order) => deserializeLoadOrder(order!))
+        .map(({ extension, version }) => `${extension}@${version}`),
+    );
+  } catch {
+    return new Set(ids);
+  }
+}
 
 // eslint-disable-next-line import/prefer-default-export
 export async function uninstallContentButtonCallback(
@@ -42,7 +72,17 @@ export async function uninstallContentButtonCallback(
   const store = getStore();
   if (store.get(BUSY_CONTENT_COUNT) > 0 || installed.length === 0) return;
   store.set(BUSY_CONTENT_COUNT, 1);
+  let reload = false;
   try {
+    // Packages installed or removed since the last load are not in the extension
+    // state yet, so a removal preview could miss a new dependent. Reload first.
+    if (store.get(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM)) {
+      reload = await showModalOkCancel({
+        title: 'extensions.reload.required.title',
+        message: 'extensions.reload.required.message',
+      });
+      return;
+    }
     const before = store.get(EXTENSION_STATE_INTERFACE_ATOM);
     const user = store.get(CONFIGURATION_USER_REDUCER_ATOM);
     const qualifiers = store.get(CONFIGURATION_QUALIFIER_REDUCER_ATOM);
@@ -90,7 +130,11 @@ export async function uninstallContentButtonCallback(
       planUninstall(before, selectedIds, true),
       (ext) => {
         const ce = findInstalled(createExtensionID(ext));
-        return ce !== undefined && !isOffline(ce);
+        return (
+          ce !== undefined &&
+          !isOffline(ce) &&
+          installableSources(ce).length > 0
+        );
       },
     );
     if (!confirmed) return;
@@ -129,10 +173,15 @@ export async function uninstallContentButtonCallback(
     }
     // Deleting the files breaks saves made with them, whether or not they are active.
     if (!(await confirmSaveStateLoss(extensions))) return;
+    const onDisk = file
+      ? await profileExtensionIDs(file, ids)
+      : new Set<string>();
     const needsSave =
       [...before.activeExtensions, ...disk].some((ext) =>
         ids.includes(createExtensionID(ext)),
-      ) || prepared.disappearingEntries.length > 0;
+      ) ||
+      ids.some((id) => onDisk.has(id)) ||
+      prepared.disappearingEntries.length > 0;
     if (
       needsSave &&
       !(await showModalOkCancel({
@@ -169,7 +218,14 @@ export async function uninstallContentButtonCallback(
         file,
         nextQualifiers,
       );
-      if (!unchanged()) throw Error('content.uninstallation.changed');
+      if (!unchanged()) {
+        // The file now holds the staged setup even though nothing is deleted.
+        store.set(CONFIGURATION_DISK_STATE_ATOM, [
+          ...prepared.state.activeExtensions,
+        ]);
+        store.set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+        throw Error('content.uninstallation.changed');
+      }
       store.set(CONFIGURATION_USER_REDUCER_ATOM, {
         type: 'reset',
         value: prepared.user,
@@ -286,4 +342,5 @@ export async function uninstallContentButtonCallback(
   } finally {
     store.set(BUSY_CONTENT_COUNT, 0);
   }
+  if (reload) reloadCurrentGameFolder();
 }

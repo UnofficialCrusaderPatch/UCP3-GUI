@@ -1,5 +1,6 @@
 import { CONFIGURATION_USER_REDUCER_ATOM } from '../../../function/configuration/state';
 import {
+  conflictingRequirements,
   findRequiredValueRepairs,
   RequiredValueRepair,
 } from '../../../function/configuration/required-value-repairs';
@@ -53,12 +54,12 @@ export async function confirmRequiredValueRepairs(
   const repairs = findRequiredValueRepairs(
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
     state.configuration.locks,
+    conflictingRequirements(state.configuration.overrides ?? new Map()),
   );
   if (repairs.length === 0 || !interactive) return true;
 
   return showModalOkCancel({
     title: 'extensions.activation.required.repair.title',
-    style: { wide: true },
     message: (localize) => (
       <>
         <p>

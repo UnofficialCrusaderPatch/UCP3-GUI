@@ -112,8 +112,10 @@
       "targets": [
         "nsis",
         "updater",
+        "deb",
         "appimage",
-        "deb"
+        "app",
+        "dmg"
       ],
       "windows": {
         "certificateThumbprint": null,

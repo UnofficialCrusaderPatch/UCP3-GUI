@@ -237,6 +237,53 @@ describe('saved profiles that select two family members', () => {
     ]);
   });
 
+  it('places a promoted member before the first selection that needs it, after its own providers', () => {
+    const input = profile(['Base', 'Widget', 'Other']);
+    const preset = ext({ name: 'Preset' });
+    preset.definition.dependencies = { Base: new Range('^1.0.0') };
+    const order = withoutProfileMembers(
+      input,
+      [],
+      [preset],
+      ({ extension }) => extension === 'Widget',
+    )['config-sparse']['load-order'].map(({ extension }) => extension);
+    expect(order).toEqual(['Base', 'Preset', 'Widget', 'Other']);
+  });
+
+  it('never places a promoted member before its own explicit provider', () => {
+    const input = profile(['Widget', 'Base']);
+    const preset = ext({ name: 'Preset' });
+    preset.definition.dependencies = { Base: new Range('^1.0.0') };
+    const order = withoutProfileMembers(
+      input,
+      [],
+      [preset],
+      ({ extension }) => extension === 'Widget',
+    )['config-sparse']['load-order'].map(({ extension }) => extension);
+    expect(order).toEqual(['Widget', 'Base', 'Preset']);
+  });
+
+  it('gives an explicit entry of the same name the chosen version in place', () => {
+    const input = {
+      ...profile(['Other']),
+      'config-sparse': {
+        modules: {},
+        plugins: {},
+        'load-order': [
+          { extension: 'Preset', version: '1.1.0' },
+          { extension: 'Other', version: '1.0.0' },
+        ],
+      },
+    } as unknown as ConfigFile;
+    const chosen = ext({ name: 'Preset', version: '1.0.0' });
+    expect(
+      withoutProfileMembers(input, [], [chosen])['config-sparse']['load-order'],
+    ).toEqual([
+      { extension: 'Preset', version: '1.0.0' },
+      { extension: 'Other', version: '1.0.0' },
+    ]);
+  });
+
   it('uses the explicit closure when the saved full order names a version that is not installed', () => {
     const bundle = {
       ...ext({ name: 'Bundle' }),

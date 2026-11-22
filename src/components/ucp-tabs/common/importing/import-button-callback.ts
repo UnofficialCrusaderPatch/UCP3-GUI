@@ -328,30 +328,51 @@ export async function importUcpConfigFile(
             ),
         )
       : [];
-  if (notResolved(staged).length > 0) {
-    profile = withoutProfileMembers(
-      config,
-      dropped,
-      notResolved(staged),
-      current.extensions,
-    );
+  const promote = notResolved(staged);
+  if (promote.length > 0 && staged.status === 'ok') {
+    // Place each promoted member by the resolved graph of the first attempt:
+    // before the first remaining selection that actually needs it.
+    const resolved = staged.newExtensionsState;
+    const needs = (
+      entry: { extension: string; version: string },
+      member: Extension,
+    ) => {
+      const selection = resolved.activeExtensions.find(
+        (ext) => ext.name === entry.extension && ext.version === entry.version,
+      );
+      if (selection === undefined) return false;
+      const closure = resolved.tree.copy().extensionDependenciesFor(selection);
+      return (
+        closure.status === 'OK' &&
+        (closure.extensions ?? []).some(
+          (ext) => ext !== selection && ext.name === member.name,
+        )
+      );
+    };
+    profile = withoutProfileMembers(config, dropped, promote, needs);
     staged = stageUcpConfigImport(profile, setConfigStatus);
+  }
+  // Never report success for a choice the resolved setup doesn't honour.
+  const missing = staged.status === 'ok' ? notResolved(staged) : promote;
+  if (missing.length > 0) {
+    const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+    const details = [
+      ...missing.map(createExtensionID),
+      ...(staged.status === 'fail' && 'message' in staged.result
+        ? [staged.result.message]
+        : []),
+    ].join('\n');
+    return {
+      status: 'fail',
+      reason: 'family',
+      message: localize({
+        key: 'discovery.family.conflict.message',
+        args: { details },
+      }),
+    } as ImportButtonCallbackResult;
   }
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
-    // Never report success for a choice the resolved setup doesn't honour.
-    const missing = notResolved(staged);
-    if (missing.length > 0) {
-      const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
-      return {
-        status: 'fail',
-        reason: 'family',
-        message: localize({
-          key: 'discovery.family.conflict.message',
-          args: { details: missing.map(createExtensionID).join('\n') },
-        }),
-      } as ImportButtonCallbackResult;
-    }
     // Importing replaces the whole setup; only a player-initiated import starts
     // from a live setup (startup and reload start empty). A family choice can
     // also leave out modules the saved setup itself used.

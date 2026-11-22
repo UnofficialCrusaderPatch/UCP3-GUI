@@ -24,12 +24,21 @@ import {
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
-import { MessageType } from '../../../../localization/localization';
+import {
+  GUI_LOCALIZATION_ATOM,
+  MessageType,
+} from '../../../../localization/localization';
 import { ImportButtonCallbackResult, makeErrorReport } from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
 import { showModalOk } from '../../../modals/modal-ok';
 import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
 import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-changes';
+import {
+  findProfileFamilyConflicts,
+  withoutProfileMembers,
+} from '../../../../function/extensions/dependency-management/families';
+import { chooseProfileFamilyMembers } from './family-chooser';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized-state';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -224,7 +233,32 @@ export async function importUcpConfigFile(
 
   const config = parsingResult.result;
 
-  return importUcpConfig(config, setConfigStatus);
+  // A profile that selects two members of one family is not an error: the player
+  // chooses which one to keep, and only then is a filtered copy loaded.
+  const conflicts = findProfileFamilyConflicts(
+    config,
+    getStore().get(EXTENSION_STATE_REDUCER_ATOM).extensions,
+  );
+  if (conflicts.length === 0) return importUcpConfig(config, setConfigStatus);
+
+  const dropped = await chooseProfileFamilyMembers(conflicts);
+  if (dropped === undefined) {
+    const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+    setConfigStatus('config.load.family.cancelled');
+    return {
+      status: 'fail',
+      reason: 'family',
+      message: localize('config.load.family.cancelled'),
+    } as ImportButtonCallbackResult;
+  }
+  const result = importUcpConfig(
+    withoutProfileMembers(config, dropped),
+    setConfigStatus,
+  );
+  // The loaded setup differs from the file until the player applies it.
+  if (result.status === 'success')
+    getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+  return result;
 }
 
 /**

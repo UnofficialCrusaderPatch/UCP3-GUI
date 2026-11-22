@@ -41,6 +41,8 @@ export async function setupExtensionsStateConfiguration(
           throw Error(`${importResult.reason} ${importResult.message}`);
         } else if (importResult.reason === 'strategy') {
           throw Error(`${importResult.reason} ${importResult.message}`);
+        } else if (importResult.reason === 'family') {
+          throw Error(importResult.message);
         } else {
           throw Error(`Unknown error`);
         }

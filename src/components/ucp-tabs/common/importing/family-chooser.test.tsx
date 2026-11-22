@@ -1,0 +1,149 @@
+/* eslint-disable no-param-reassign */
+import { createStore } from 'jotai';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ReactElement } from 'react';
+import { getStore } from '../../../../hooks/jotai/base';
+import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../../testing/dump-extensions-state';
+import DATA from '../../../../function/game-folder/initialization/tests/load-extensions-state.test.data.json';
+import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../../function/extensions/state/state';
+import { ConfigFile } from '../../../../config/ucp/common';
+import { loadConfigFromFile } from '../../../../config/ucp/config-files/config-files';
+import { showModalOkCancel } from '../../../modals/modal-ok-cancel';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized-state';
+import { importUcpConfigFile } from './import-button-callback';
+import { chooseProfileFamilyMembers } from './family-chooser';
+
+vi.mock('../../../../hooks/jotai/base', async (original) => ({
+  ...(await original<typeof import('../../../../hooks/jotai/base')>()),
+  getStore: vi.fn(),
+}));
+vi.mock(
+  '../../../../config/ucp/config-files/config-files',
+  async (original) => ({
+    ...(await original<object>()),
+    loadConfigFromFile: vi.fn(),
+  }),
+);
+vi.mock('../../../modals/modal-ok-cancel', () => ({
+  showModalOkCancel: vi.fn(),
+}));
+vi.mock('../../../modals/modal-ok', () => ({ showModalOk: vi.fn() }));
+vi.mock('../../../../localization/localization', async (original) => {
+  const actual =
+    await original<typeof import('../../../../localization/localization')>();
+  const { atom } = await import('jotai');
+  return {
+    ...actual,
+    GUI_LOCALIZATION_ATOM: atom(async () => (key: unknown) => key),
+  };
+});
+
+const BARE = 'Aggressive-AI-Behaviour';
+const APPLIED = 'Aggressive-AI-Behaviour-Applied';
+
+function installed() {
+  const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions(
+    JSON.parse(JSON.stringify(DATA.EXTENSIONS)),
+  );
+  state.extensions
+    .filter((ext) => [BARE, APPLIED].includes(ext.name))
+    .forEach((ext) => {
+      ext.definition.family = [
+        { name: 'aggressive', ...(ext.name === BARE ? { root: true } : {}) },
+      ];
+    });
+  return state;
+}
+
+function profileWithBoth(state: ReturnType<typeof installed>): ConfigFile {
+  const version = (name: string) =>
+    state.extensions.find((ext) => ext.name === name)!.version;
+  return {
+    meta: { version: '1.0.0' },
+    'config-sparse': {
+      modules: {},
+      plugins: {},
+      'load-order': [APPLIED, BARE].map((name) => ({
+        extension: name,
+        version: version(name),
+      })),
+    },
+  } as unknown as ConfigFile;
+}
+
+/** The chooser's children with the player's clicks applied. */
+function pick(family: string, member: string) {
+  vi.mocked(showModalOkCancel).mockImplementationOnce(async (spec) => {
+    const chooser = spec.children as ReactElement<{
+      onChange: (f: string, m: string) => void;
+    }>;
+    expect(spec.confirmable!()).toBe(false);
+    chooser.props.onChange(family, member);
+    expect(spec.confirmable!()).toBe(true);
+    return true;
+  });
+}
+
+beforeEach(() => {
+  vi.mocked(getStore).mockReturnValue(createStore());
+  vi.mocked(showModalOkCancel).mockReset();
+});
+
+describe('loading a profile that selects two members of one family', () => {
+  it('loads only the configuration the player keeps and marks the setup unsaved', async () => {
+    const state = installed();
+    getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+    vi.mocked(loadConfigFromFile).mockResolvedValue({
+      status: 'OK',
+      message: '',
+      result: profileWithBoth(state),
+    } as never);
+    pick('aggressive', APPLIED);
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('success');
+    const loaded = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    expect(loaded.explicitlyActivatedExtensions.map((e) => e.name)).toEqual([
+      APPLIED,
+    ]);
+    // Bare stays loaded as Applied's file provider, without claiming the choice.
+    expect(loaded.activeExtensions.map((e) => e.name)).toContain(BARE);
+    expect(getStore().get(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM)).toBe(true);
+  });
+
+  it('changes nothing when the player cancels', async () => {
+    const state = installed();
+    getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+    const before = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    vi.mocked(loadConfigFromFile).mockResolvedValue({
+      status: 'OK',
+      message: '',
+      result: profileWithBoth(state),
+    } as never);
+    vi.mocked(showModalOkCancel).mockResolvedValueOnce(false);
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result).toMatchObject({
+      status: 'fail',
+      reason: 'family',
+      message: 'config.load.family.cancelled',
+    });
+    expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
+    expect(getStore().get(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM)).toBe(false);
+  });
+
+  it('returns the members that were not chosen', async () => {
+    const state = installed();
+    const [bare, applied] = [BARE, APPLIED].map(
+      (name) => state.extensions.find((ext) => ext.name === name)!,
+    );
+    pick('aggressive', BARE);
+    expect(
+      await chooseProfileFamilyMembers([
+        { family: 'aggressive', members: [applied, bare] },
+      ]),
+    ).toEqual([APPLIED]);
+  });
+});

@@ -156,11 +156,13 @@ function synthetic(
     dependencies = {},
     family,
     saveState,
+    configEntries = {},
   }: {
     type?: 'plugin' | 'module';
     dependencies?: Record<string, string>;
     family?: { name: string; root?: boolean }[];
     saveState?: 'required';
+    configEntries?: Record<string, unknown>;
   } = {},
 ) {
   return {
@@ -179,7 +181,7 @@ function synthetic(
       ...(family ? { family } : {}),
       ...(saveState ? { 'save-state': saveState } : {}),
     },
-    configEntries: {},
+    configEntries,
   };
 }
 
@@ -273,5 +275,52 @@ describe('after a family choice', () => {
         { family: 'other', members: [both, bare] },
       ]),
     ).toEqual(['Bare']);
+  });
+});
+
+describe('keeping a preset that a bundle brought in', () => {
+  it('loads it as an explicit choice instead of dropping both', async () => {
+    const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
+      synthetic('Preset-A', {
+        family: [{ name: 'ai', root: true }],
+        configEntries: {
+          'aiSwapper.menu': { contents: { 'suggested-value': 1 } },
+        },
+      }),
+      synthetic('Preset-B', {
+        family: [{ name: 'ai' }],
+        dependencies: { 'Preset-A': '^1.0.0' },
+      }),
+    ] as never);
+    getStore().set(EXTENSION_STATE_INTERFACE_ATOM, state);
+    const order = (names: string[]) =>
+      names.map((extension) => ({ extension, version: '1.0.0' }));
+    vi.mocked(loadConfigFromFile).mockResolvedValue({
+      status: 'OK',
+      message: '',
+      result: {
+        meta: { version: '1.0.0' },
+        'config-sparse': {
+          modules: {},
+          plugins: {},
+          'load-order': order(['Preset-B']),
+        },
+        'config-full': {
+          modules: {},
+          plugins: {},
+          'load-order': order(['Preset-B', 'Preset-A']),
+        },
+      } as unknown as ConfigFile,
+    } as never);
+    pick('ai', 'Preset-A');
+
+    const result = await importUcpConfigFile('C:/test/ucp-config.yml', vi.fn());
+
+    expect(result.status).toBe('success');
+    const loaded = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    expect(loaded.explicitlyActivatedExtensions.map((e) => e.name)).toEqual([
+      'Preset-A',
+    ]);
+    expect(loaded.activeExtensions.map((e) => e.name)).toEqual(['Preset-A']);
   });
 });

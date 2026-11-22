@@ -212,7 +212,16 @@ export function profileActiveExtensions(
       .map(exact)
       .filter((ext): ext is Extension => ext !== undefined);
   const explicit = listed(config['config-sparse']?.['load-order']);
-  const full = config['config-full']?.['load-order'];
+  const fullOrder = config['config-full']?.['load-order'];
+  // The importer falls back to resolving the explicit selections when an exact
+  // version of the saved full order isn't installed; mirror that here.
+  const full =
+    fullOrder !== undefined &&
+    deserializeLoadOrder(fullOrder as LoadOrder).every(
+      (entry) => exact(entry) !== undefined,
+    )
+      ? fullOrder
+      : undefined;
   let closure: Extension[] = full ? listed(full) : [];
   if (!full && tree) {
     try {
@@ -262,22 +271,44 @@ export function findProfileFamilyConflicts(
 }
 
 /**
- * A copy of the profile without the named extensions in its explicit selections.
- * The saved full load order is dropped too, so the import re-resolves the
- * dependency closure from the kept selections: providers only the dropped member
- * needed go, and anything a kept bundle still needs comes back. Explicit
- * versions and their order are kept. The input is not changed.
+ * A copy of the profile for a family choice: the dropped members leave the
+ * explicit selections, and a kept member that only a dropped one brought in
+ * becomes an explicit selection at its resolved version, in the dropped
+ * member's place. The saved full load order is dropped, so the import
+ * re-resolves the dependency closure from the kept selections; the saved
+ * values stay as the baseline for the old -> new warning. Explicit versions
+ * and their order are kept. The input is not changed.
  */
-export function withoutProfileMembers(config: ConfigFile, names: string[]) {
-  const copy = { ...config };
-  delete copy['config-full'];
+export function withoutProfileMembers(
+  config: ConfigFile,
+  names: string[],
+  kept: Extension[] = [],
+) {
+  const saved = deserializeLoadOrder(
+    (config['config-sparse']['load-order'] ?? []) as LoadOrder,
+  );
+  const order = saved.filter(({ extension }) => !names.includes(extension));
+  const firstDropped = saved.findIndex(({ extension }) =>
+    names.includes(extension),
+  );
+  const at =
+    firstDropped < 0
+      ? order.length
+      : saved.slice(0, firstDropped).filter((e) => !names.includes(e.extension))
+          .length;
+  const promoted = kept
+    .filter((ext) => !order.some(({ extension }) => extension === ext.name))
+    .map((ext) => ({ extension: ext.name, version: ext.version }));
+  order.splice(at, 0, ...promoted);
+  const full = config['config-full'];
+  const fullValues = full
+    ? (Object.fromEntries(
+        Object.entries(full).filter(([key]) => key !== 'load-order'),
+      ) as typeof full)
+    : undefined;
   return {
-    ...copy,
-    'config-sparse': {
-      ...config['config-sparse'],
-      'load-order': deserializeLoadOrder(
-        (config['config-sparse']['load-order'] ?? []) as LoadOrder,
-      ).filter(({ extension }) => !names.includes(extension)),
-    },
+    ...config,
+    'config-sparse': { ...config['config-sparse'], 'load-order': order },
+    ...(fullValues ? { 'config-full': fullValues } : {}),
   } as ConfigFile;
 }

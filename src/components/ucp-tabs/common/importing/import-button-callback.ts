@@ -13,6 +13,7 @@ import {
   ConfigFile,
   ConfigEntry,
   ConfigFileExtensionEntry,
+  Extension,
 } from '../../../../config/ucp/common';
 import { loadConfigFromFile } from '../../../../config/ucp/config-files/config-files';
 import { ConfigMetaObjectDB } from '../../../../config/ucp/config-merge/objects';
@@ -40,6 +41,7 @@ import {
   withoutProfileMembers,
 } from '../../../../function/extensions/dependency-management/families';
 import { chooseProfileFamilyMembers } from './family-chooser';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized-state';
 import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { saveStateChanges } from '../../../../function/extensions/save-state';
@@ -274,6 +276,7 @@ export async function importUcpConfigFile(
   );
   let profile = config;
   let dropped: string[] = [];
+  let kept: Extension[] = [];
   if (conflicts.length > 0) {
     const chosen = await chooseProfileFamilyMembers(conflicts);
     if (chosen === undefined) {
@@ -286,7 +289,15 @@ export async function importUcpConfigFile(
       } as ImportButtonCallbackResult;
     }
     dropped = chosen;
-    profile = withoutProfileMembers(config, dropped);
+    kept = [
+      ...new Map(
+        conflicts
+          .flatMap(({ members }) => members)
+          .filter(({ name }) => !dropped.includes(name))
+          .map((ext) => [ext.name, ext]),
+      ).values(),
+    ];
+    profile = withoutProfileMembers(config, dropped, kept);
   }
 
   // Staging a sparse profile already records preferred versions; a cancelled
@@ -295,6 +306,22 @@ export async function importUcpConfigFile(
   const staged = stageUcpConfigImport(profile, setConfigStatus);
   if (staged.status === 'ok') {
     const incoming = staged.newExtensionsState.activeExtensions;
+    // Never report success for a choice the resolved setup doesn't honour.
+    const missing = kept.filter(
+      ({ name }) => !incoming.some((ext) => ext.name === name),
+    );
+    if (missing.length > 0) {
+      getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
+      const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+      return {
+        status: 'fail',
+        reason: 'family',
+        message: localize({
+          key: 'discovery.family.conflict.message',
+          args: { details: missing.map(createExtensionID).join('\n') },
+        }),
+      } as ImportButtonCallbackResult;
+    }
     // Importing replaces the whole setup; only a player-initiated import starts
     // from a live setup (startup and reload start empty). A family choice can
     // also leave out modules the saved setup itself used.

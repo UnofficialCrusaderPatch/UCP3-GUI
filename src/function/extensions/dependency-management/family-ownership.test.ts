@@ -214,9 +214,47 @@ describe('saved profiles that select two family members', () => {
     expect(result['config-sparse']['load-order']).toEqual([
       { extension: 'Applied', version: '1.0.0' },
     ]);
-    expect(result['config-full']).toBeUndefined();
+    // Saved values stay as the warning baseline; the saved order goes.
+    expect(result['config-full']).toEqual({ modules: {}, plugins: {} });
     expect(input['config-sparse']['load-order']).toHaveLength(2);
-    expect(input['config-full']).toBeDefined();
+    expect(input['config-full']!['load-order']).toHaveLength(3);
+  });
+
+  it('makes a kept member that only the dropped one brought in explicit, in its place', () => {
+    const input = profile(['Other', 'Bundle', 'Last']);
+    const kept = ext({ name: 'Applied', version: '1.2.0' });
+    expect(
+      withoutProfileMembers(input, ['Bundle'], [kept])['config-sparse'][
+        'load-order'
+      ],
+    ).toEqual([
+      { extension: 'Other', version: '1.0.0' },
+      { extension: 'Applied', version: '1.2.0' },
+      { extension: 'Last', version: '1.0.0' },
+    ]);
+  });
+
+  it('uses the explicit closure when the saved full order names a version that is not installed', () => {
+    const bundle = {
+      ...ext({ name: 'Bundle' }),
+      definition: {
+        ...ext({ name: 'Bundle' }).definition,
+        dependencies: { Applied: new Range('^1.0.0') },
+      },
+    } as unknown as Extension;
+    const installed = [bare, applied, bundle];
+    const tree = new ExtensionDependencyTree(installed, '1.0.17', '3.0.7');
+    const config = profile(['Bundle', 'Bare'], ['Bundle', 'Bare']);
+    // The saved order pins a provider version that is gone, so import falls back.
+    config['config-full']!['load-order'].push({
+      extension: 'Removed',
+      version: '1.0.0',
+    });
+    expect(
+      findProfileFamilyConflicts(config, installed, tree).map(
+        ({ family }) => family,
+      ),
+    ).toEqual(['ai']);
   });
 
   it('finds a preset a bundle brings in next to an explicit sibling', () => {

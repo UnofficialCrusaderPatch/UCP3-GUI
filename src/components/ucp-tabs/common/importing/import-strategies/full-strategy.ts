@@ -40,8 +40,9 @@ export function fullStrategy(
   if (config['config-full'] === undefined) {
     return {
       status: 'error',
+      code: 'MISSING_LOAD_ORDER',
       messages: ['no config-full present'],
-    } as GenericFailure;
+    } as MissingLoadOrderFailure;
   }
 
   const loadOrder = deserializeLoadOrder(config['config-full']['load-order']);

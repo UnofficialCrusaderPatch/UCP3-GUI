@@ -285,3 +285,9 @@ content.uninstallation.cleanup.help: "仅检查这些软件包的依赖项。共
 content.uninstallation.review.title: "确认卸载范围"
 content.uninstallation.review.message: "请检查以下软件包。已启用的软件包将被停用，并在删除其文件前保存当前配置。"
 store.element.uninstall.dependents: "其他已安装的软件包依赖此包。卸载时可以检查并一并移除这些软件包。"
+
+config.load.changed.title: "已加载的设置发生变化"
+config.load.changed.message: "部分已保存的设置与当前启用扩展生成的配置不同。冲突的偏好设置已修正。请检查以下更改；自定义页面现在显示将为游戏保存的设置。请应用或保存以更新磁盘上的文件。"
+config.load.changed.preference: "已保存的偏好设置"
+config.load.changed.game: "游戏设置"
+config.load.changed.unset: "未设置"

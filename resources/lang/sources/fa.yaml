@@ -285,3 +285,9 @@ content.uninstallation.cleanup.help: "فقط وابستگی‌های این بس
 content.uninstallation.review.title: "بررسی حذف"
 content.uninstallation.review.message: "بسته‌های زیر را بررسی کنید. بسته‌های فعال غیرفعال می‌شوند و پیکربندی فعلی پیش از حذف فایل‌های آن‌ها ذخیره خواهد شد."
 store.element.uninstall.dependents: "بسته‌های نصب‌شدهٔ دیگری به این بسته وابسته‌اند. هنگام حذف می‌توانید آن‌ها را بررسی و با هم حذف کنید."
+
+config.load.changed.title: "تنظیمات بارگذاری‌شده تغییر کرد"
+config.load.changed.message: "برخی تنظیمات ذخیره‌شده با پیکربندی افزونه‌های فعال متفاوت است. ترجیحات ناسازگار اصلاح شده‌اند. تغییرات زیر را بررسی کنید؛ بخش شخصی‌سازی اکنون تنظیماتی را نشان می‌دهد که برای بازی ذخیره خواهند شد. برای به‌روزرسانی فایل روی دیسک، اعمال یا ذخیره کنید."
+config.load.changed.preference: "ترجیح ذخیره‌شده"
+config.load.changed.game: "تنظیم بازی"
+config.load.changed.unset: "تنظیم نشده"

@@ -285,3 +285,9 @@ content.uninstallation.cleanup.help: "Csak e csomagok függőségeit vizsgáljuk
 content.uninstallation.review.title: "Eltávolítás áttekintése"
 content.uninstallation.review.message: "Ellenőrizd az alábbi csomagokat. Az aktív csomagok deaktiválódnak, és a jelenlegi beállítások mentésre kerülnek a fájlok törlése előtt."
 store.element.uninstall.dependents: "Más telepített csomagok függnek ettől a csomagtól. Eltávolításkor áttekintheted és együtt eltávolíthatod őket."
+
+config.load.changed.title: "A betöltött beállítások megváltoztak"
+config.load.changed.message: "Egyes mentett beállítások eltérnek az aktív bővítmények konfigurációjától. Az ütköző beállításokat javítottuk. Ellenőrizd az alábbi változásokat; a Testreszabás most a játékhoz mentendő értékeket mutatja. Alkalmazd vagy mentsd a beállításokat a lemezen lévő fájl frissítéséhez."
+config.load.changed.preference: "Mentett beállítás"
+config.load.changed.game: "Játékbeállítás"
+config.load.changed.unset: "nincs megadva"

@@ -285,3 +285,9 @@ content.uninstallation.cleanup.help: "Solo se revisan las dependencias de estos 
 content.uninstallation.review.title: "Revisar desinstalación"
 content.uninstallation.review.message: "Revisa los paquetes siguientes. Los paquetes activos se desactivarán y la configuración actual se guardará antes de eliminar sus archivos."
 store.element.uninstall.dependents: "Otros paquetes instalados dependen de este paquete. Al desinstalar puedes revisarlos y eliminarlos juntos."
+
+config.load.changed.title: "Ajustes cargados modificados"
+config.load.changed.message: "Algunos ajustes guardados difieren de la configuración de las extensiones activas. Se han corregido las preferencias incompatibles. Revisa los cambios siguientes; Personalizaciones muestra los ajustes que se guardarán para el juego. Aplica o guarda para actualizar el archivo en disco."
+config.load.changed.preference: "Preferencia guardada"
+config.load.changed.game: "Ajuste del juego"
+config.load.changed.unset: "sin definir"

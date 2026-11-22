@@ -285,3 +285,9 @@ content.uninstallation.cleanup.help: "Yalnızca bu paketlerin bağımlılıklar�
 content.uninstallation.review.title: "Kaldırmayı gözden geçir"
 content.uninstallation.review.message: "Aşağıdaki paketleri inceleyin. Etkin paketler devre dışı bırakılacak ve dosyaları kaldırılmadan önce mevcut yapılandırma kaydedilecek."
 store.element.uninstall.dependents: "Diğer yüklü paketler bu pakete bağımlıdır. Kaldırırken bu paketleri inceleyip birlikte kaldırabilirsiniz."
+
+config.load.changed.title: "Yüklenen ayarlar değişti"
+config.load.changed.message: "Bazı kayıtlı ayarlar etkin uzantıların yapılandırmasından farklı. Çakışan tercihler düzeltildi. Aşağıdaki değişiklikleri inceleyin; Özelleştirmeler artık oyun için kaydedilecek ayarları gösteriyor. Diskteki dosyayı güncellemek için uygulayın veya kaydedin."
+config.load.changed.preference: "Kayıtlı tercih"
+config.load.changed.game: "Oyun ayarı"
+config.load.changed.unset: "ayarlanmamış"

@@ -285,3 +285,9 @@ content.uninstallation.cleanup.help: "Seules les dépendances de ces paquets son
 content.uninstallation.review.title: "Vérifier la désinstallation"
 content.uninstallation.review.message: "Vérifiez les paquets ci-dessous. Les paquets actifs seront désactivés et la configuration actuelle sera enregistrée avant la suppression de leurs fichiers."
 store.element.uninstall.dependents: "D’autres paquets installés dépendent de ce paquet. La désinstallation permet de les vérifier et de les supprimer ensemble."
+
+config.load.changed.title: "Paramètres chargés modifiés"
+config.load.changed.message: "Certains paramètres enregistrés diffèrent de la configuration des extensions actives. Les préférences incompatibles ont été corrigées. Vérifiez les changements ci-dessous ; Personnalisation affiche les paramètres qui seront enregistrés pour le jeu. Appliquez ou enregistrez pour mettre à jour le fichier sur le disque."
+config.load.changed.preference: "Préférence enregistrée"
+config.load.changed.game: "Paramètre du jeu"
+config.load.changed.unset: "non défini"

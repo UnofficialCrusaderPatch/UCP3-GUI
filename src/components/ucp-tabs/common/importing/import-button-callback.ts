@@ -93,7 +93,11 @@ export function constructUserConfigObjects(config: ConfigFile) {
 }
 
 export type StagedImport =
-  | { status: 'ok'; newExtensionsState: ExtensionsState }
+  | {
+      status: 'ok';
+      newExtensionsState: ExtensionsState;
+      preferredVersions?: Record<string, string>;
+    }
   | { status: 'fail'; result: ImportButtonCallbackResult };
 
 /** Resolves a profile against the installed extensions without changing live state. */
@@ -133,7 +137,11 @@ export function stageUcpConfigImport(
     };
   }
 
-  return { status: 'ok', newExtensionsState: result.newExtensionsState };
+  return {
+    status: 'ok',
+    newExtensionsState: result.newExtensionsState,
+    preferredVersions: result.preferredVersions,
+  };
 }
 
 export function importUcpConfig(
@@ -144,6 +152,13 @@ export function importUcpConfig(
   if (staged.status === 'fail') return staged.result;
 
   const { newExtensionsState } = staged;
+
+  // Staging changes nothing live; remember the explicit versions only now.
+  if (staged.preferredVersions)
+    getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, {
+      ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM),
+      ...staged.preferredVersions,
+    });
 
   /**
    * Make sure to apply the current loaded configuration exactly as is (version specific)
@@ -254,11 +269,7 @@ export async function importUcpConfigFile(
 
   const config = parsingResult.result;
 
-  // Staging a sparse profile already records preferred versions; a cancelled
-  // import must leave them as they were.
-  const preferredVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   const staged = stageUcpConfigImport(config, setConfigStatus);
-  const stagedVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   if (staged.status === 'ok' && options.confirmSaveStateLoss) {
     // Importing replaces the whole setup. Startup and reload start from an empty
     // setup, so only a player-initiated import can drop modules saves depend on.
@@ -266,12 +277,8 @@ export async function importUcpConfigFile(
       getStore().get(EXTENSION_STATE_REDUCER_ATOM).activeExtensions,
       staged.newExtensionsState.activeExtensions,
     );
-    if (!(await confirmSaveStateLoss(removed))) {
-      // Undo only this staging; a newer import may have committed meanwhile.
-      if (getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) === stagedVersions)
-        getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
+    if (!(await confirmSaveStateLoss(removed)))
       return { status: 'aborted' } as ImportButtonCallbackResult;
-    }
   }
   return importUcpConfig(config, setConfigStatus, staged);
 }

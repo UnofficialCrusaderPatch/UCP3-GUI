@@ -252,13 +252,10 @@ export default function Overview() {
           // the warning below; wait for it.
           const busy = getStore().get(BUSY_CONTENT_COUNT);
           if (busy > 0) {
-            createStatusToast(
-              ToastType.ERROR,
-              localize({
-                key: 'store.tab.processing',
-                args: { lock: String(busy) },
-              }),
-            );
+            createStatusToast(ToastType.ERROR, {
+              key: 'store.tab.processing',
+              args: { lock: String(busy) },
+            });
             return;
           }
 

@@ -6,10 +6,7 @@ import {
   Version,
 } from '../../../../../config/ucp/dependency-statement';
 import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
-import {
-  AVAILABLE_EXTENSION_VERSIONS_ATOM,
-  PREFERRED_EXTENSION_VERSION_ATOM,
-} from '../../../../../function/extensions/state/state';
+import { AVAILABLE_EXTENSION_VERSIONS_ATOM } from '../../../../../function/extensions/state/state';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { MessageType } from '../../../../../localization/localization';
 import { ConsoleLogger } from '../../../../../util/scripts/logging';
@@ -22,17 +19,6 @@ import {
   Success,
   StrategyResult,
 } from './common';
-
-function updatePreferredExtensionVersions(extensions: Extension[]) {
-  // Set the new preferences for which version to use for each extension
-  const newPrefs = { ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) };
-
-  extensions.forEach((e: Extension) => {
-    newPrefs[e.name] = e.version;
-  });
-
-  getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, newPrefs);
-}
 
 /**
  * Builds the new extension state and load order from the
@@ -50,6 +36,7 @@ export function sparseStrategy(
   setConfigStatus: (message: MessageType) => void,
   repair?: boolean,
 ): StrategyResult {
+  let preferredVersions: Record<string, string> | undefined;
   const { extensions } = newExtensionsState;
 
   // Get the current available versions database
@@ -154,7 +141,10 @@ export function sparseStrategy(
       );
     }
 
-    updatePreferredExtensionVersions(bottomUpExplicitActiveExtensions);
+    // Remembered as preferred versions only when the import commits.
+    preferredVersions = Object.fromEntries(
+      bottomUpExplicitActiveExtensions.map((e) => [e.name, e.version]),
+    );
 
     // eslint-disable-next-line no-restricted-syntax
     for (const ext of bottomUpExplicitActiveExtensions) {
@@ -185,5 +175,6 @@ export function sparseStrategy(
   return {
     newExtensionsState,
     status: 'ok',
+    preferredVersions,
   } as Success;
 }

@@ -146,6 +146,7 @@
 }
 .discovery-store-columns {
   display: grid;
+  width: 100%;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1rem;
   flex: 1;

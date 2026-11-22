@@ -14,9 +14,9 @@ export default function useGUIUpdateNotification(hasGUIUpdate: boolean) {
     // Tab renders, query retries and StrictMode must not repeat the notice.
     notified.current = true;
     makeToast({
-      title: 'GUI Update available!',
+      title: 'gui.update.available.title',
       // Tauri's updater supports AppImages on Linux, but not .deb installs.
-      body: 'Download the latest GUI from the releases page.',
+      body: 'gui.update.available.body',
       customDelay: 60 * 1000,
       onClick: () => {
         shellOpen(

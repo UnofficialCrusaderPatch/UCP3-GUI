@@ -43,7 +43,6 @@ import { packageFamilyLabel } from '../../../function/content/discovery/tag-loca
 import { useDiscovery } from '../common/discovery/use-discovery';
 import { createExtensionID } from '../../../function/global/constants/extension-id';
 import { SearchExcerpt } from '../common/discovery/search-excerpt';
-
 import { OpenExtensionsFolderButton } from './extension-elements/extension-element/shell-open-button';
 
 export const EXTENSION_DISCOVERY_FILTER = atom<DiscoveryFilter>(

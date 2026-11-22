@@ -45,7 +45,8 @@ describe('GUI update notification', () => {
   it('offers a manual download that also works for .deb installations', () => {
     renderHook(() => useGUIUpdateNotification(true));
     const [notice] = vi.mocked(makeToast).mock.calls[0];
-    expect(notice.body).toBe('Download the latest GUI from the releases page.');
+    expect(notice.title).toBe('gui.update.available.title');
+    expect(notice.body).toBe('gui.update.available.body');
     notice.onClick?.();
     expect(shellOpen).toHaveBeenCalledWith(
       'https://github.com/UnofficialCrusaderPatch/UCP3-GUI/releases',

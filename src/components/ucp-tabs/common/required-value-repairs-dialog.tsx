@@ -58,7 +58,6 @@ export async function confirmRequiredValueRepairs(
 
   return showModalOkCancel({
     title: 'extensions.activation.required.repair.title',
-    style: { wide: true },
     message: (localize) => (
       <>
         <p>

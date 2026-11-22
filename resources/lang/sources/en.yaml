@@ -417,3 +417,9 @@ content.uninstallation.unrecoverable: "not in the Store: removal is permanent"
 store.element.uninstall.dependents: "Other installed packages depend on this package. Uninstall lets you review and remove those packages together."
 sandbox.init.error: Could not initialize the custom menu.
 sandbox.retry: Retry
+
+modal.search: "Search this menu"
+modal.show.all: "Show all"
+modal.empty: "This menu has no options."
+modal.no.results: "No matching options. Clear the search to show all settings."
+modal.live.edit: "Changes stay in your working configuration when you close. Use the main editor to save or export."

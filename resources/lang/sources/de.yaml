@@ -355,3 +355,9 @@ content.uninstallation.review.message: "Prüfe die folgenden Pakete. Aktive Pake
 store.element.uninstall.dependents: "Andere installierte Pakete benötigen dieses Paket. Bei der Deinstallation kannst du diese Pakete prüfen und gemeinsam entfernen."
 sandbox.init.error: Das benutzerdefinierte Menü konnte nicht initialisiert werden.
 sandbox.retry: Erneut versuchen
+
+modal.search: "In diesem Menü suchen"
+modal.show.all: "Alle anzeigen"
+modal.empty: "Dieses Menü enthält keine Einstellungen."
+modal.no.results: "Keine passenden Einstellungen. Leeren Sie die Suche, um alle Einstellungen anzuzeigen."
+modal.live.edit: "Änderungen bleiben beim Schließen in Ihrer Arbeitskonfiguration. Speichern oder exportieren Sie im Haupteditor."

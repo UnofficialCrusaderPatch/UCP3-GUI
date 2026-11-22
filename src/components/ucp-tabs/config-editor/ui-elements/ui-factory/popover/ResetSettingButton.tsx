@@ -1,7 +1,9 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Button } from 'react-bootstrap';
-
+import { useContext } from 'react';
 import { TrashFill } from 'react-bootstrap-icons';
+import ConfigDisabledContext from '../ConfigDisabledContext';
+
 import {
   CONFIGURATION_QUALIFIER_REDUCER_ATOM,
   CONFIGURATION_FULL_REDUCER_ATOM,
@@ -30,6 +32,7 @@ export default function ResetSettingButton({
   disabled?: boolean;
 }) {
   const locks = useAtomValue(CONFIGURATION_LOCKS_REDUCER_ATOM);
+  const inheritedDisabled = useContext(ConfigDisabledContext);
   const { [url]: lock } = locks;
   const locked = lock !== undefined;
   const setUserConfiguration = useSetAtom(CONFIGURATION_USER_REDUCER_ATOM);
@@ -54,7 +57,7 @@ export default function ResetSettingButton({
   if (!resetAvailable) return null;
   const button = (
     <Button
-      disabled={locked || disabled}
+      disabled={locked || disabled || inheritedDisabled}
       role="button"
       className={compact ? 'qualifier-reset' : 'ms-2 me-2'}
       id={`${url}-${compact ? 'inline' : 'popover'}-reset-button`}

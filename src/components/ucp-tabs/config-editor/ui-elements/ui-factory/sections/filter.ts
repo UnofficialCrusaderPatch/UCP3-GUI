@@ -1,5 +1,9 @@
 /* eslint-disable no-param-reassign */
 import { atom } from 'jotai';
+import {
+  displayChildren,
+  shouldBeIncluded,
+} from '../../../../../../config/ucp/display-tree';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
   DisplayConfigElement,
@@ -10,40 +14,20 @@ import { ConsoleLogger } from '../../../../../../util/scripts/logging';
 import { LOCALIZED_UI_OPTION_ENTRIES_ATOM } from './localized-options';
 import { SEARCH_RESULTS_ATOM } from './search';
 
-function isIncluded(included: Set<number>, d: DisplayConfigElement) {
-  if (d.id !== undefined) {
-    return included.has(d.id);
-  }
-  return true;
-}
-
-function shouldBeIncluded(included: Set<number>, d: DisplayConfigElement) {
-  if (isIncluded(included, d)) return true;
-
-  if (d.display === 'Group' || d.display === 'GroupBox') {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const child of d.children) {
-      if (shouldBeIncluded(included, child)) return true;
-    }
-  }
-
-  return false;
-}
-
 function sumScore(
   scores: { [id: number]: number },
   d: DisplayConfigElement,
 ): number {
   if (d.id === undefined) return 0;
-  if (d.display === 'Group' || d.display === 'GroupBox') {
+  if (displayChildren(d).length) {
     return (
-      scores[d.id] +
-      d.children
+      (scores[d.id] ?? 0) +
+      displayChildren(d)
         .map((c) => sumScore(scores, c))
-        .reduce((total, value) => total + value)
+        .reduce((total, value) => total + value, 0)
     );
   }
-  return scores[d.id];
+  return scores[d.id] ?? 0;
 }
 
 /**

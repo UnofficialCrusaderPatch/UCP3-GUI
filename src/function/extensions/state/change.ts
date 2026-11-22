@@ -1,5 +1,5 @@
 import { Getter, Setter } from 'jotai';
-import deepEqual from 'deep-equal';
+import { applyRequiredValueRepairs } from '../../configuration/required-value-repairs';
 import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
@@ -13,18 +13,14 @@ export function generateAndSetFullConfig(
   extensionsState: ExtensionsState,
 ) {
   const { defined, locks } = extensionsState.configuration;
-  const userDefinedValues = { ...get(CONFIGURATION_USER_REDUCER_ATOM) };
 
   // Repair persisted overrides as well as the effective configuration. Otherwise
   // removing a requirement would silently restore the conflicting preference.
-  Object.entries(locks).forEach(([url, { lockedValue }]) => {
-    if (
-      Object.prototype.hasOwnProperty.call(userDefinedValues, url) &&
-      !deepEqual(userDefinedValues[url], lockedValue, { strict: true })
-    ) {
-      userDefinedValues[url] = lockedValue;
-    }
-  });
+  // Callers that change the active extensions confirm these repairs first.
+  const userDefinedValues = applyRequiredValueRepairs(
+    get(CONFIGURATION_USER_REDUCER_ATOM),
+    locks,
+  );
   set(CONFIGURATION_USER_REDUCER_ATOM, {
     type: 'reset',
     value: userDefinedValues,

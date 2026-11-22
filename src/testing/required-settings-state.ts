@@ -2,8 +2,8 @@ import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from './
 import { buildExtensionConfigurationDB } from '../function/configuration/extension-configuration/build-extension-configuration-db';
 import { parseConfigEntries } from '../function/extensions/discovery/parse-config-entries';
 
-// eslint-disable-next-line import/prefer-default-export
-export function requiredSettingsState(requiredValue: unknown = false) {
+/** Legacy plus Custom Hotkeys, which requires a Legacy option, as installed extensions. */
+export function requiredSettingsExtensions(requiredValue: unknown = false) {
   const { configEntries } = parseConfigEntries({
     meta: { version: '1.0.0' },
     'config-sparse': {
@@ -37,8 +37,14 @@ export function requiredSettingsState(requiredValue: unknown = false) {
     },
     configEntries: name === 'custom-hotkeys' ? configEntries : {},
   }));
-  const state =
-    deserializeSimplifiedSerializedExtensionsStateFromExtensions(extensions);
+  return deserializeSimplifiedSerializedExtensionsStateFromExtensions(
+    extensions,
+  );
+}
+
+/** Both extensions active, so Custom Hotkeys locks the Legacy option. */
+export function requiredSettingsState(requiredValue: unknown = false) {
+  const state = requiredSettingsExtensions(requiredValue);
   return buildExtensionConfigurationDB({
     ...state,
     activeExtensions: state.extensions,

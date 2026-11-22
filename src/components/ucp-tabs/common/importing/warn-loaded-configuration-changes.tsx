@@ -1,5 +1,6 @@
 import deepEqual from 'deep-equal';
 import { showModalOk } from '../../../modals/modal-ok';
+import { formatSettingValue } from '../required-value-repairs-dialog';
 
 type Configuration = Record<string, unknown>;
 
@@ -24,9 +25,7 @@ export function warnLoadedConfigurationChanges(
     style: { wide: true },
     message: (localize) => {
       const formatValue = (value: unknown) =>
-        value === undefined
-          ? localize('config.load.changed.unset')
-          : JSON.stringify(value);
+        formatSettingValue(localize, value);
       return (
         <>
           <p>{localize('config.load.changed.message')}</p>

@@ -81,8 +81,9 @@ extensions.customisations: Customisations
 extensions.activated: "Activated extensions"
 extensions.activation.dependency.conflicts.error.title: Could not activate extension
 extensions.activation.dependency.conflicts.error.message: "Could not activate extension due to missing extensions or dependency conflicts.\n\nLog:\n\n{{log}}"
-extensions.activation.customisations.loss.title: Losing customisations
-extensions.activation.customisations.loss.message: "You will lose {{n}} customisations. Do you want to proceed?\n\nLosing customisations:\n{{entries}}"
+extensions.activation.required.repair.by: "required by {{extension}}"
+extensions.activation.required.repair.message: "The new extension setup requires different values for {{n}} of your saved settings. If you continue, these saved settings are changed to the required values and keep them after the requiring extensions are removed. Cancel leaves your current setup unchanged."
+extensions.activation.required.repair.title: "Required settings will change"
 extensions.available: "Available extensions"
 extensions.deactivate.dependencies.error.title: "Deactivating extension: Error in dependencies"
 extensions.deactivate.config.loss.warning.title: "Config loss warning"

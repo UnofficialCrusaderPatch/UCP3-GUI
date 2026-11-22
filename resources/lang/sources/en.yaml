@@ -388,6 +388,10 @@ discovery.family.conflict.message: 'Choose one configuration per family. Resolve
   {{details}}'
 discovery.family.switch: Select configuration
 discovery.family.selected: Selected configuration
+extensions.savestate.loss.message: "Saved games made with these modules need them. The game checks each save when you load it; the launcher doesn't read your saves. Cancel leaves everything unchanged."
+extensions.savestate.loss.optional: "Saves made with {{name}} still load without it, but lose its saved data."
+extensions.savestate.loss.required: "Saves made with {{name}} need {{name}} and won't load without it."
+extensions.savestate.loss.title: "Saved games use these modules"
 store.toolbar.uninstall.dependencies: "Cannot uninstall: other extensions still need this content.\n{{lst}}"
 store.element.activated.uninstall: "Select to deactivate and uninstall {{name}}."
 content.uninstallation.deactivate.title: "Deactivate and uninstall"

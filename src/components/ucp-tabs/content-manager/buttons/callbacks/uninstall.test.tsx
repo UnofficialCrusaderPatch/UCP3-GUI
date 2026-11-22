@@ -3,7 +3,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { Range } from 'semver';
 import { parse } from 'yaml';
-import { Extension } from '../../../../../config/ucp/common';
+import { Extension, SaveState } from '../../../../../config/ucp/common';
+import { MessageResolver } from '../../../../../localization/localization';
 import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
 import { ExtensionDependencyTree } from '../../../../../function/extensions/dependency-management/dependency-resolution';
 import {
@@ -38,6 +39,7 @@ const mocks = vi.hoisted(() => ({
   modal: vi.fn(),
   write: vi.fn(),
   remove: vi.fn(),
+  removeFile: vi.fn(),
   exists: vi.fn(),
   load: vi.fn(),
 }));
@@ -53,6 +55,7 @@ vi.mock('../../../../../tauri/tauri-files', async (original) => ({
   ...(await original<object>()),
   writeTextFile: mocks.write,
   removeDir: mocks.remove,
+  removeFile: mocks.removeFile,
   onFsExists: mocks.exists,
 }));
 vi.mock(
@@ -161,6 +164,7 @@ beforeEach(() => {
   mocks.modal.mockResolvedValue(undefined);
   mocks.write.mockResolvedValue(Result.emptyOk());
   mocks.remove.mockResolvedValue(Result.emptyOk());
+  mocks.removeFile.mockResolvedValue(Result.emptyOk());
   mocks.exists.mockResolvedValue(false);
   getStore().set(UCP_CONFIG_FILE_ATOM, 'C:/fixture/ucp-config.yml');
 });
@@ -607,4 +611,92 @@ it('records the written setup and deletes nothing when settings change during th
   ).not.toContain('Applied');
   expect(getStore().get(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM)).toBe(true);
   expect(mocks.modal).toHaveBeenCalled();
+});
+
+const SAVE_STATE_TITLE = 'extensions.savestate.loss.title';
+function saveStateModule(name: string, saveState: SaveState): Extension {
+  const base = extension(name);
+  return {
+    ...base,
+    type: 'module',
+    definition: { ...base.definition, type: 'module', 'save-state': saveState },
+    io: { ...base.io, path: `C:/fixture/ucp/modules/${name}-1.0.0.zip` },
+  };
+}
+const saveStateDialog = () =>
+  mocks.confirm.mock.calls
+    .map(([spec]) => spec as OkCancelModalWindowProperties)
+    .find((spec) => spec.title === SAVE_STATE_TITLE);
+it('asks no save-state question when no removed package declares one', async () => {
+  setup();
+  await uninstallContentButtonCallback([content(applied)], []);
+  expect(saveStateDialog()).toBeUndefined();
+  expect(mocks.remove).toHaveBeenCalledTimes(1);
+});
+it('lists an inactive installed save-state module and cancel deletes nothing', async () => {
+  const tunnelers = saveStateModule('Tunnelers', 'required');
+  const before = setup(
+    [applied, files, independent, tunnelers],
+    [applied, files, independent],
+    [applied, independent],
+  );
+  mocks.confirm.mockImplementation(
+    async (spec: Partial<OkCancelModalWindowProperties>) =>
+      spec.title !== SAVE_STATE_TITLE,
+  );
+  await uninstallContentButtonCallback([content(tunnelers)], []);
+  const dialog = saveStateDialog();
+  if (typeof dialog?.message !== 'function')
+    throw Error('Expected the save-state warning');
+  const localize = ((message: string | { key: string }) =>
+    typeof message === 'string' ? message : message.key) as MessageResolver;
+  const view = render(<div>{dialog.message(localize)}</div>);
+  expect(view.container.textContent).toContain('Tunnelers (1.0.0)');
+  expect(view.container.textContent).toContain(
+    'extensions.savestate.loss.required',
+  );
+  view.unmount();
+  expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
+  expect(mocks.write).not.toHaveBeenCalled();
+  expect(mocks.remove).not.toHaveBeenCalled();
+  expect(mocks.removeFile).not.toHaveBeenCalled();
+});
+it('removes a save-state module after the warning is confirmed', async () => {
+  const fixes = saveStateModule('Fixes', 'optional');
+  setup([applied, files, independent, fixes]);
+  await uninstallContentButtonCallback([content(fixes)], []);
+  expect(saveStateDialog()).toBeDefined();
+  expect(mocks.removeFile.mock.calls[0][0]).toContain(
+    'ucp/modules/Fixes-1.0.0.zip',
+  );
+  expect(
+    getStore()
+      .get(EXTENSION_STATE_INTERFACE_ATOM)
+      .extensions.map((ext) => ext.name),
+  ).not.toContain('Fixes');
+});
+it('revalidates after the save-state warning instead of overwriting newer choices', async () => {
+  const tunnelers = saveStateModule('Tunnelers', 'required');
+  setup(
+    [applied, files, independent, tunnelers],
+    [applied, files, independent, tunnelers],
+    [applied, independent, tunnelers],
+  );
+  mocks.confirm.mockImplementation(
+    async (spec: Partial<OkCancelModalWindowProperties>) => {
+      if (spec.title === SAVE_STATE_TITLE)
+        getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
+          type: 'reset',
+          value: { 'Independent.option': 99 },
+        });
+      return true;
+    },
+  );
+  await uninstallContentButtonCallback([content(tunnelers)], []);
+  expect(saveStateDialog()).toBeDefined();
+  expect(mocks.write).not.toHaveBeenCalled();
+  expect(mocks.removeFile).not.toHaveBeenCalled();
+  expect(
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM)['Independent.option'],
+  ).toBe(99);
 });

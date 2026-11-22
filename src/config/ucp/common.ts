@@ -177,6 +177,12 @@ type PluginType = 'plugin';
 type ModuleType = 'module';
 type ExtensionType = PluginType | ModuleType;
 
+/**
+ * How saved games depend on a module that writes its own data into them (see docs/save-state.md).
+ * required: saves made with it refuse to load without it; optional: they load, its data is dropped.
+ */
+type SaveState = 'required' | 'optional';
+
 type Definition = DiscoveryMetadata & {
   meta: DefinitionMeta;
   name: string;
@@ -186,6 +192,8 @@ type Definition = DiscoveryMetadata & {
   'display-name': string;
   description: string;
   type: ExtensionType;
+  /** Validated during discovery; only modules keep it. */
+  'save-state'?: SaveState;
 };
 
 type ExtensionIOCallback<R> = (extensionHandle: ExtensionHandle) => Promise<R>;
@@ -494,6 +502,7 @@ export type {
   PluginType,
   ModuleType,
   ExtensionType,
+  SaveState,
   ExtensionIOCallback,
   FileInputContents,
 };

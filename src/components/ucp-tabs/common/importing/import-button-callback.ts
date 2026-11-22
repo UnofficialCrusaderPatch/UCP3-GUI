@@ -258,6 +258,7 @@ export async function importUcpConfigFile(
   // import must leave them as they were.
   const preferredVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   const staged = stageUcpConfigImport(config, setConfigStatus);
+  const stagedVersions = getStore().get(PREFERRED_EXTENSION_VERSION_ATOM);
   if (staged.status === 'ok' && options.confirmSaveStateLoss) {
     // Importing replaces the whole setup. Startup and reload start from an empty
     // setup, so only a player-initiated import can drop modules saves depend on.
@@ -266,7 +267,9 @@ export async function importUcpConfigFile(
       staged.newExtensionsState.activeExtensions,
     );
     if (!(await confirmSaveStateLoss(removed))) {
-      getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
+      // Undo only this staging; a newer import may have committed meanwhile.
+      if (getStore().get(PREFERRED_EXTENSION_VERSION_ATOM) === stagedVersions)
+        getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, preferredVersions);
       return { status: 'aborted' } as ImportButtonCallbackResult;
     }
   }

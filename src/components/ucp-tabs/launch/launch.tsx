@@ -10,6 +10,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import logoCrusaderVanilla from '../../../assets/game-assets/logo-crusader-vanilla.png';
 import logoCrusaderExtreme from '../../../assets/game-assets/logo-crusader-extreme.png';
 import GameStarter from './game-starter/game-starter';
+import withGuiLanguage from './game-starter/gui-language-environment';
 import FreeArgs from './launch-options/free-args';
 import FreeEnvs from './launch-options/free-envs';
 import {
@@ -67,6 +68,7 @@ export default function Launch() {
   );
 
   const envVars = useAtomValue(LAUNCH_OPTION_ENVIRONMENT_VARIABLES_ATOM);
+  const language = useAtomValue(GuiSettings.LANGUAGE_ATOM);
 
   const receiveArgs = () => {
     const args = new Array<string>();
@@ -100,7 +102,7 @@ export default function Launch() {
 
     return args;
   };
-  const receiveEnvs = () => envVars;
+  const receiveEnvs = () => withGuiLanguage(envVars, language);
 
   const active = !useAtomValue(NOT_INSTALLED_ATOM);
 

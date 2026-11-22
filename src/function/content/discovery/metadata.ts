@@ -1,4 +1,12 @@
-export type FamilyMembership = { name: string; root?: boolean };
+/**
+ * `root: true` marks the plugin that owns the family ID. A root may list the
+ * other members it accepts in `members`; members by the same author are accepted too.
+ */
+export type FamilyMembership = {
+  name: string;
+  root?: boolean;
+  members?: string[];
+};
 
 /** Extracted from the package's ordinary locale/<language>.yml tags.<id> keys. */
 export type TagLocales = Record<string, Record<string, string>>;
@@ -37,12 +45,21 @@ export function normalizeFamilies(value: unknown): FamilyMembership[] {
       typeof entry.name !== 'string' ||
       !entry.name.trim() ||
       (entry.root !== undefined && typeof entry.root !== 'boolean') ||
+      (entry.members !== undefined &&
+        (!entry.root ||
+          !Array.isArray(entry.members) ||
+          !entry.members.every(
+            (m: unknown) => typeof m === 'string' && m.trim(),
+          ))) ||
       result.some((f) => f.name === entry.name.trim())
     )
       return false;
     result.push({
       name: entry.name.trim(),
       ...(entry.root ? { root: true } : {}),
+      ...(entry.members
+        ? { members: entry.members.map((m: string) => m.trim()) }
+        : {}),
     });
     return true;
   });

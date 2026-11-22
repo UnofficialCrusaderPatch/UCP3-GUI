@@ -21,6 +21,7 @@ import {
   planUninstall,
   uninstallErrors,
 } from '../../../../function/extensions/dependency-management/uninstall';
+import { withAcceptedFamilies } from '../../../../function/extensions/dependency-management/families';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -133,13 +134,14 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
 
   const epIDs = extensionPackages.map((ce) => createExtensionID(ce));
 
-  return [
+  // Store entries follow the same family ownership rules as installed ones.
+  return withAcceptedFamilies<ContentElement>([
     // Filter out already installed elements
     ...storePackages.filter(
       (ce) => epIDs.indexOf(createExtensionID(ce)) === -1,
     ),
     ...extensionPackages,
-  ];
+  ]).items;
 });
 
 // export const contentInstallationStatusAtoms: {

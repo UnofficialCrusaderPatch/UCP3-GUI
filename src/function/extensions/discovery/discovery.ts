@@ -20,6 +20,7 @@ import { createIO } from './components/io';
 import { validateDefinition } from './components/definition';
 import { TranslationDB } from './translation';
 import { AVAILABLE_LANGUAGES_ATOM } from '../../../localization/localization';
+import { withAcceptedFamilies } from '../dependency-management/families';
 
 export const LOGGER = new Logger('discovery.ts');
 
@@ -234,8 +235,13 @@ export async function discoverExtensions(
 
   LOGGER.msg(extensionsWithWarnings.join('\n\n')).warn();
 
+  // Family IDs belong to their root plugin; drop memberships the root does not accept.
+  const families = withAcceptedFamilies(extensions);
+  if (families.warnings.length) LOGGER.msg(families.warnings.join('\n')).warn();
+  const ownedExtensions = families.items;
+
   // Should not happen anymore
-  extensions.forEach((e) => {
+  ownedExtensions.forEach((e) => {
     const id = `${e.name}@${e.version}`;
     if (extensionsByID[id] !== undefined) {
       throw Error(
@@ -245,5 +251,5 @@ export async function discoverExtensions(
     extensionsByID[id] = e;
   });
 
-  return extensions;
+  return ownedExtensions;
 }

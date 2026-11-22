@@ -4,6 +4,9 @@ import { ExtensionDependencyTree } from './dependency-resolution';
 import { ConfigFile, Extension } from '../../../config/ucp/common';
 import {
   acceptFamilyMemberships,
+  assertFamilyChoices,
+  familyConfigurationMembers,
+  FamilyConflictError,
   findProfileFamilyConflicts,
   withAcceptedFamilies,
   withoutProfileMembers,
@@ -346,5 +349,59 @@ describe('authored declarations', () => {
       },
     ]);
     expect(wider.items[1].definition.family).toEqual([{ name: 'ai' }]);
+  });
+});
+
+describe('wrapper members', () => {
+  const cfg = { 'ucp3-fixes.worker-delivery': {} };
+  const basics = ext({
+    name: 'ucp3-basics',
+    family: [{ name: 'ucp3', root: true }],
+  });
+  const fixesPreset = ext({ name: 'ucp3-fixes', configEntries: cfg });
+  const wrapper = {
+    ...ext({ name: 'ucp3-basics-fixes', family: [{ name: 'ucp3' }] }),
+  } as Extension;
+  wrapper.definition.dependencies = {
+    'ucp3-basics': new Range('^1.0.0'),
+    'ucp3-fixes': new Range('^0.2.0'),
+  };
+  const third = ext({ name: 'third' });
+  third.definition.dependencies = { 'ucp3-basics-fixes': new Range('^1.0.0') };
+
+  it('claims its slot when a preset plugin it wraps applies configuration', () => {
+    const state = {
+      activeExtensions: [third, wrapper, fixesPreset, basics],
+      explicitlyActivatedExtensions: [third, basics],
+    };
+    expect(familyConfigurationMembers(state).map((e) => e.name)).toEqual([
+      'third',
+      'ucp3-basics-fixes',
+      'ucp3-fixes',
+      'ucp3-basics',
+    ]);
+    expect(() => assertFamilyChoices(state)).toThrow(FamilyConflictError);
+  });
+
+  it('does not make a files-only member claim because of a module it needs', () => {
+    const swapper = {
+      ...ext({ name: 'aiSwapper', type: 'module', configEntries: cfg }),
+    } as Extension;
+    const bareFiles = ext({
+      name: 'Bare',
+      family: [{ name: 'ai', root: true }],
+    });
+    bareFiles.definition.dependencies = { aiSwapper: new Range('^1.0.0') };
+    const appliedPreset = ext({
+      name: 'Applied',
+      family: [{ name: 'ai' }],
+      configEntries: cfg,
+    });
+    appliedPreset.definition.dependencies = { Bare: new Range('^1.0.0') };
+    const state = {
+      activeExtensions: [appliedPreset, bareFiles, swapper],
+      explicitlyActivatedExtensions: [appliedPreset],
+    };
+    expect(() => assertFamilyChoices(state)).not.toThrow();
   });
 });

@@ -12,15 +12,37 @@ type FamilyState = Pick<
   'activeExtensions' | 'explicitlyActivatedExtensions'
 >;
 
-/** Dependency-only providers do not select a configuration unless they apply a preset. */
+const appliesConfiguration = (ext: Extension) =>
+  Object.keys(ext.configEntries ?? {}).length > 0;
+
+/**
+ * Dependency-only providers do not select a configuration unless they apply a
+ * preset: their own configuration demands, or those of a plugin they depend on
+ * directly that is outside their families (a wrapper member such as "Basics +
+ * Fixes" that brings in a separate fixes preset). Modules never count, so a
+ * files-only Bare member that depends on a module stays a plain provider.
+ */
 export function familyConfigurationMembers(state: FamilyState) {
   const explicit = new Set(
     state.explicitlyActivatedExtensions.map((ext) => ext.name),
   );
-  return state.activeExtensions.filter(
-    (ext) =>
-      explicit.has(ext.name) || Object.keys(ext.configEntries ?? {}).length > 0,
-  );
+  const active = new Map(state.activeExtensions.map((ext) => [ext.name, ext]));
+  const familiesOf = (ext: Extension) =>
+    normalizeFamilies(ext.definition?.family).map(({ name }) => name);
+  return state.activeExtensions.filter((ext) => {
+    if (explicit.has(ext.name) || appliesConfiguration(ext)) return true;
+    const own = familiesOf(ext);
+    if (own.length === 0) return false;
+    return Object.keys(ext.definition?.dependencies ?? {}).some((name) => {
+      const dependency = active.get(name);
+      return (
+        dependency !== undefined &&
+        (dependency.definition?.type ?? dependency.type) !== 'module' &&
+        appliesConfiguration(dependency) &&
+        !familiesOf(dependency).some((family) => own.includes(family))
+      );
+    });
+  });
 }
 
 export class FamilyConflictError extends Error {

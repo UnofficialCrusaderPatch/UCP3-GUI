@@ -37,6 +37,13 @@ import { useMessage } from '../../general/message';
 import { NewsHighlights } from './news-highlights';
 import { reloadCurrentGameFolder } from '../../../function/game-folder/modifications/reload-current-game-folder';
 import { InstallationButton } from './installation/InstallationButton';
+import { confirmSaveStateLoss } from '../common/save-state-loss-dialog';
+import {
+  BUSY_CONTENT_COUNT,
+  EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM,
+} from '../content-manager/state/atoms';
+import { getStore } from '../../../hooks/jotai/base';
+import { EXTENSION_STATE_INTERFACE_ATOM } from '../../../function/extensions/state/state';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LOGGER = new Logger('overview.tsx');
@@ -237,6 +244,37 @@ export default function Overview() {
               ok: 'yes',
               cancel: 'no',
             }))
+          ) {
+            return;
+          }
+
+          // A Store install or removal still running would change the folder after
+          // the warning below; wait for it.
+          const busy = getStore().get(BUSY_CONTENT_COUNT);
+          if (busy > 0) {
+            createStatusToast(ToastType.ERROR, {
+              key: 'store.tab.processing',
+              args: { lock: String(busy) },
+            });
+            return;
+          }
+
+          // Removing UCP deletes every installed module, active or not. Packages
+          // installed since the last load aren't in the inventory yet: reload first.
+          if (getStore().get(EXTENSIONS_STATE_IS_DISK_DIRTY_ATOM)) {
+            if (
+              await showModalOkCancel({
+                title: 'extensions.reload.required.title',
+                message: 'extensions.reload.required.message',
+              })
+            )
+              reloadCurrentGameFolder();
+            return;
+          }
+          if (
+            !(await confirmSaveStateLoss(
+              getStore().get(EXTENSION_STATE_INTERFACE_ATOM).extensions,
+            ))
           ) {
             return;
           }

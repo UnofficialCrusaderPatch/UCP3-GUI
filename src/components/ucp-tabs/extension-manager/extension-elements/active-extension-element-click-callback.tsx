@@ -22,6 +22,8 @@ import { filterOutExtensions as filterExtensions } from './filter-out-extensions
 import reportAndConfirmBuildResult from './reporting';
 import { removeProviderAiOverrides } from './remove-provider-ai-overrides';
 import { compareObjects } from '../../../../util/scripts/objectCompare';
+import { saveStateChanges } from '../../../../function/extensions/save-state';
+import { confirmSaveStateLoss } from '../../common/save-state-loss-dialog';
 
 const LOGGER = new Logger('ActiveExtensionElementClickCallback.tsx');
 
@@ -81,6 +83,12 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
     disappearingEntries,
   } = prepareExtensionDeactivation(oldExtensionState, [ext], userConfiguration);
 
+  const { removed: savedGameModules } = saveStateChanges(
+    oldExtensionState.activeExtensions,
+    newExtensionState.activeExtensions,
+  );
+  if (!(await confirmSaveStateLoss(savedGameModules))) return;
+
   if (disappearingEntries.length > 0) {
     const confirmed = await showModalOkCancel({
       title: 'extensions.deactivate.config.loss.warning.title',
@@ -100,6 +108,15 @@ const activeExtensionElementClickCallback = async (ext: Extension) => {
 
   const res = newExtensionState;
   if (!(await reportAndConfirmBuildResult(res))) return;
+
+  // A dialog was open; never apply a preview computed from an older setup.
+  if (
+    getStore().get(EXTENSION_STATE_REDUCER_ATOM) !== oldExtensionState ||
+    getStore().get(CONFIGURATION_USER_REDUCER_ATOM) !== userConfiguration
+  ) {
+    LOGGER.msg('Setup changed while confirming; deactivation skipped').warn();
+    return;
+  }
 
   ConsoleLogger.info('New user configuration: ', newUserConfiguration);
 

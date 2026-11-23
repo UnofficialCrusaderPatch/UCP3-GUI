@@ -1,0 +1,1 @@
+- Before you deactivate, uninstall or upgrade away a module that saved games depend on, the launcher names it and asks first. Module creators declare this with `save-state` in `definition.yml` ([docs/save-state.md](../../save-state.md)).

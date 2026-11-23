@@ -20,6 +20,7 @@ import { ConfigMetaObjectDB } from '../../../../config/ucp/config-merge/objects'
 import {
   EXTENSION_STATE_INTERFACE_ATOM,
   EXTENSION_STATE_REDUCER_ATOM,
+  PREFERRED_EXTENSION_VERSION_ATOM,
 } from '../../../../function/extensions/state/state';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
@@ -30,6 +31,9 @@ import { attemptStrategies } from './import-strategies/attempt-strategies';
 import { showModalOk } from '../../../modals/modal-ok';
 import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
 import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-changes';
+import { ExtensionsState } from '../../../../function/extensions/extensions-state';
+import { saveStateChanges } from '../../../../function/extensions/save-state';
+import { confirmSaveStateLoss } from '../save-state-loss-dialog';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -88,10 +92,19 @@ export function constructUserConfigObjects(config: ConfigFile) {
   };
 }
 
-export function importUcpConfig(
+type StagedImport =
+  | {
+      status: 'ok';
+      newExtensionsState: ExtensionsState;
+      preferredVersions?: Record<string, string>;
+    }
+  | { status: 'fail'; result: ImportButtonCallbackResult };
+
+/** Resolves a profile against the installed extensions without changing live state. */
+function stageUcpConfigImport(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-): ImportButtonCallbackResult {
+): StagedImport {
   // Get the current extension state
   const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -114,14 +127,38 @@ export function importUcpConfig(
     const elab = makeErrorReport(strategyResultReport);
     return {
       status: 'fail',
-      reason: 'strategy',
-      report: strategyResultReport,
-      elaborateMessage: elab,
-      message: `${elab.title}\n${elab.shortDescription}\n${elab.report}`,
-    } as ImportButtonCallbackResult;
+      result: {
+        status: 'fail',
+        reason: 'strategy',
+        report: strategyResultReport,
+        elaborateMessage: elab,
+        message: `${elab.title}\n${elab.shortDescription}\n${elab.report}`,
+      } as ImportButtonCallbackResult,
+    };
   }
 
-  const { newExtensionsState } = result;
+  return {
+    status: 'ok',
+    newExtensionsState: result.newExtensionsState,
+    preferredVersions: result.preferredVersions,
+  };
+}
+
+export function importUcpConfig(
+  config: ConfigFile,
+  setConfigStatus: (message: MessageType) => void,
+  staged: StagedImport = stageUcpConfigImport(config, setConfigStatus),
+): ImportButtonCallbackResult {
+  if (staged.status === 'fail') return staged.result;
+
+  const { newExtensionsState } = staged;
+
+  // Staging changes nothing live; remember the explicit versions only now.
+  if (staged.preferredVersions)
+    getStore().set(PREFERRED_EXTENSION_VERSION_ATOM, {
+      ...getStore().get(PREFERRED_EXTENSION_VERSION_ATOM),
+      ...staged.preferredVersions,
+    });
 
   /**
    * Make sure to apply the current loaded configuration exactly as is (version specific)
@@ -190,9 +227,15 @@ export function importUcpConfig(
   } as ImportButtonCallbackResult;
 }
 
+type ImportOptions = {
+  /** Ask before an import drops modules that saved games depend on. */
+  confirmSaveStateLoss?: boolean;
+};
+
 export async function importUcpConfigFile(
   path: string,
   setConfigStatus: (message: MessageType) => void,
+  options: ImportOptions = {},
 ): Promise<ImportButtonCallbackResult> {
   // Parse the config file
   const parsingResult: {
@@ -226,7 +269,17 @@ export async function importUcpConfigFile(
 
   const config = parsingResult.result;
 
-  return importUcpConfig(config, setConfigStatus);
+  const staged = stageUcpConfigImport(config, setConfigStatus);
+  if (staged.status === 'ok' && options.confirmSaveStateLoss) {
+    // Only a player-initiated import starts from a live setup; startup and reload start empty.
+    const { removed } = saveStateChanges(
+      getStore().get(EXTENSION_STATE_REDUCER_ATOM).activeExtensions,
+      staged.newExtensionsState.activeExtensions,
+    );
+    if (!(await confirmSaveStateLoss(removed)))
+      return { status: 'aborted' } as ImportButtonCallbackResult;
+  }
+  return importUcpConfig(config, setConfigStatus, staged);
 }
 
 /**
@@ -242,6 +295,7 @@ async function importButtonCallback(
   setConfigStatus: (message: MessageType) => void,
   localizeString: (message: string) => string,
   file: string | undefined,
+  options: ImportOptions = {},
 ): Promise<ImportButtonCallbackResult> {
   // Get which elements have been touched
   const configurationTouched = getStore().get(
@@ -285,7 +339,7 @@ async function importButtonCallback(
       status: 'aborted',
     } as ImportButtonCallbackResult;
 
-  return importUcpConfigFile(path, setConfigStatus);
+  return importUcpConfigFile(path, setConfigStatus, options);
 }
 
 export default importButtonCallback;

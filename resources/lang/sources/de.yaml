@@ -284,6 +284,10 @@ extensions.folder.error.title: Ordner konnte nicht geöffnet werden
 extensions.folder.error.message: Der Ordner oder die installierte Erweiterung fehlt möglicherweise, ist nicht zugänglich oder gehört zu einer zuvor gewählten Installation. Wähle die Installation erneut aus und prüfe, ob ein Dateimanager verfügbar ist. Einzelheiten stehen im Protokoll.
 extensions.extension.shell.reveal: Installierte Erweiterung im Explorer anzeigen
 extensions.extension.shell.parent: Übergeordneten Ordner der installierten Erweiterung öffnen
+extensions.savestate.loss.message: "Diese Module schreiben eigene Daten in Spielstände, und diese Änderung entfernt sie aus deiner Konfiguration. Das Spiel prüft jeden Spielstand beim Laden; der Launcher liest deine Spielstände nicht. Abbrechen lässt alles unverändert."
+extensions.savestate.loss.optional: "Spielstände, die mit {{name}} erstellt wurden, lassen sich auch ohne dieses Modul laden. Das Spiel überspringt seine Daten, und beim erneuten Speichern werden diese Daten weggelassen."
+extensions.savestate.loss.required: "Spielstände, die mit {{name}} erstellt wurden, benötigen {{name}} und lassen sich ohne dieses Modul nicht laden."
+extensions.savestate.loss.title: "Spielstände verwenden diese Module"
 store.toolbar.uninstall.dependencies: "Deinstallation nicht möglich: Andere Erweiterungen benötigen diese Inhalte.\n{{lst}}"
 store.element.activated.uninstall: "Auswählen, um {{name}} zu deaktivieren und zu deinstallieren."
 content.uninstallation.deactivate.title: "Deaktivieren und deinstallieren"

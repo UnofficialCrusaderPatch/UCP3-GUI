@@ -27,6 +27,8 @@ import { prepareExtensionDeactivation } from '../../../extension-manager/extensi
 import { filterOutExtensions } from '../../../extension-manager/extension-elements/filter-out-extensions';
 import { EXTENSION_EDITOR_STATE_ATOM } from '../../../common/extension-editor/extension-editor-state';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../common/buttons/config-serialized-state';
+import { confirmSaveStateLoss } from '../../../common/save-state-loss-dialog';
+import { saveStateChanges } from '../../../../../function/extensions/save-state';
 import {
   BUSY_CONTENT_COUNT,
   CONTENT_ELEMENTS_ATOM,
@@ -158,6 +160,18 @@ export async function uninstallContentButtonCallback(
       });
       return;
     }
+    // Deleting the files breaks saves made with them, whether or not they are active;
+    // modules that only drop out of the saved setup affect saves as well.
+    if (
+      !(await confirmSaveStateLoss([
+        ...extensions,
+        ...saveStateChanges(
+          before.activeExtensions,
+          prepared.state.activeExtensions,
+        ).removed,
+      ]))
+    )
+      return;
     const onDisk = file
       ? await profileExtensionIDs(file, ids)
       : new Set<string>();

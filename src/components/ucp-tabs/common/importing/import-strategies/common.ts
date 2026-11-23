@@ -14,6 +14,8 @@ export function sanitizeVersionRange(rangeString: string) {
 export type Success = {
   status: 'ok';
   newExtensionsState: ExtensionsState;
+  /** Versions to remember as preferred once the import commits (sparse import). */
+  preferredVersions?: Record<string, string>;
 };
 
 export type Failure = {

@@ -11,6 +11,8 @@ import reportAndConfirmBuildResult from 'components/ucp-tabs/extension-manager/e
 import { buildExtensionConfigurationDB } from 'function/configuration/extension-configuration/build-extension-configuration-db';
 import { showModalOk } from 'components/modals/modal-ok';
 import { confirmRequiredValueRepairs } from 'components/ucp-tabs/common/required-value-repairs-dialog';
+import { confirmSaveStateLoss } from 'components/ucp-tabs/common/save-state-loss-dialog';
+import { saveStateChanges } from 'function/extensions/save-state';
 import { makeToast, ToastType } from 'components/toasts/toasts-display';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 
@@ -69,6 +71,14 @@ async function upgradeExtensionsCallback(
   if (!(await reportAndConfirmBuildResult(res))) return;
 
   if (!(await confirmRequiredValueRepairs(res, interactive))) return;
+
+  if (
+    interactive &&
+    !(await confirmSaveStateLoss(
+      saveStateChanges(oldState.activeExtensions, res.activeExtensions).removed,
+    ))
+  )
+    return;
 
   getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 

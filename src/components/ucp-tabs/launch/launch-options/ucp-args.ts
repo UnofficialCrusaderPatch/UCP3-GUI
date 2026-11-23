@@ -6,3 +6,6 @@ export const UCP_SECURITY_ARG = '--ucp-security';
 export const UCP_NO_SECURITY_ARG = '--ucp-no-security';
 export const UCP_CONSOLE_ARG = '--ucp-console';
 export const UCP_NO_CONSOLE_ARG = '--ucp-no-console';
+// UCP 3.0.8+; older versions ignore unknown --ucp-* arguments
+export const UCP_ALLOW_MULTIPLE_INSTANCES_ARG =
+  '--ucp-allow-multiple-instances';

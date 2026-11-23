@@ -75,5 +75,6 @@ export const LAUNCH_SETTINGS_ATOM = atomWithStorage<LaunchSettings>(
       console: 'DEFAULT',
     },
     security: true,
+    allowMultipleInstances: false,
   },
 );

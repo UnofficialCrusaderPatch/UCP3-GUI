@@ -5,6 +5,8 @@ export type LaunchSettings = {
     show: boolean;
   };
   security: boolean;
+  // Missing in settings saved by older GUI versions; treat as false
+  allowMultipleInstances?: boolean;
   logLevel: {
     file: string;
     console: string;

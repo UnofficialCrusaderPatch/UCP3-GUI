@@ -14,9 +14,14 @@ import { ACTIVE_EXTENSIONS_ID_ATOM } from '../../../../function/extensions/state
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
 import {
+  DiscoveryFilter,
+  EMPTY_DISCOVERY_FILTER,
+} from '../../../../function/content/discovery/search';
+import {
   planUninstall,
   uninstallErrors,
 } from '../../../../function/extensions/dependency-management/uninstall';
+import { withAcceptedFamilies } from '../../../../function/extensions/dependency-management/families';
 
 // eslint-disable-next-line import/prefer-default-export
 export const CONTENT_STATE_ATOM = atom(DEFAULT_CONTENT_STATE);
@@ -25,6 +30,10 @@ export const CONTENT_INTERFACE_STATE_ATOM = atom(
 );
 
 export const LAST_CLICKED_CONTENT_ATOM = atom<ContentElement | undefined>();
+
+export const CONTENT_FILTERS_ATOM = atom<DiscoveryFilter>(
+  EMPTY_DISCOVERY_FILTER,
+);
 
 export const SINGLE_CONTENT_SELECTION_ATOM = atom((get) => {
   const { selected } = get(CONTENT_INTERFACE_STATE_ATOM);
@@ -94,7 +103,7 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const descriptions = [
       {
         language: 'default',
-        content: e.description || '< not loaded >',
+        content: e.description || '',
         method: 'inline',
       },
       ...(matchingStorePackage !== undefined
@@ -105,12 +114,17 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
     const p = {
       definition: {
         ...e.definition,
-        url: 'nonsense',
+        tags: e.definition.tags ?? matchingStorePackage?.definition.tags,
+        // Installed declarations are authoritative; the Store's metadata never adds a
+        // family to an installed version, and the combined list is checked again below.
+        family: e.definition.declaredFamily ?? e.definition.family,
         dependencies: deps,
       },
       contents: {
+        source: matchingStorePackage?.contents.source,
         package: pack,
         description: descriptions,
+        'tag-locales': matchingStorePackage?.contents['tag-locales'],
       },
       online: isOnline,
       installed: true,
@@ -122,13 +136,14 @@ export const CONTENT_ELEMENTS_ATOM = atom((get) => {
 
   const epIDs = extensionPackages.map((ce) => createExtensionID(ce));
 
-  return [
+  // Store entries follow the same family ownership rules as installed ones.
+  return withAcceptedFamilies<ContentElement>([
     // Filter out already installed elements
     ...storePackages.filter(
       (ce) => epIDs.indexOf(createExtensionID(ce)) === -1,
     ),
     ...extensionPackages,
-  ];
+  ]).items;
 });
 
 // export const contentInstallationStatusAtoms: {

@@ -11,6 +11,11 @@ import reportAndConfirmBuildResult from 'components/ucp-tabs/extension-manager/e
 import { buildExtensionConfigurationDB } from 'function/configuration/extension-configuration/build-extension-configuration-db';
 import { showModalOk } from 'components/modals/modal-ok';
 import { confirmRequiredValueRepairs } from 'components/ucp-tabs/common/required-value-repairs-dialog';
+import {
+  chosenFamilyExtensions,
+  FamilyConflictError,
+} from 'function/extensions/dependency-management/families';
+import { refuseFamilySaveStateChange } from 'components/ucp-tabs/common/family-switch-dialog';
 import { confirmSaveStateLoss } from 'components/ucp-tabs/common/save-state-loss-dialog';
 import { saveStateChanges } from 'function/extensions/save-state';
 import { makeToast, ToastType } from 'components/toasts/toasts-display';
@@ -53,11 +58,18 @@ async function upgradeExtensionsCallback(
   } catch (err: any) {
     if (interactive) {
       await showModalOk({
-        title: 'extensions.activation.dependency.conflicts.error.title',
+        title:
+          err instanceof FamilyConflictError
+            ? 'discovery.family.conflict.title'
+            : 'extensions.activation.dependency.conflicts.error.title',
         message: {
-          key: 'extensions.activation.dependency.conflicts.error.message',
+          key:
+            err instanceof FamilyConflictError
+              ? 'discovery.family.conflict.message'
+              : 'extensions.activation.dependency.conflicts.error.message',
           args: {
             log: err.toString(),
+            details: err instanceof FamilyConflictError ? err.details : '',
           },
         },
       });
@@ -67,6 +79,17 @@ async function upgradeExtensionsCallback(
   }
 
   const res = buildExtensionConfigurationDB(newState);
+
+  const families = chosenFamilyExtensions(oldState, res);
+  if (
+    families &&
+    (await refuseFamilySaveStateChange(
+      families.before,
+      families.after,
+      interactive,
+    ))
+  )
+    return;
 
   if (!(await reportAndConfirmBuildResult(res))) return;
 
@@ -80,9 +103,11 @@ async function upgradeExtensionsCallback(
   )
     return;
 
-  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+  // A dialog was open; never apply a candidate computed from an older state.
+  if (getStore().get(EXTENSION_STATE_INTERFACE_ATOM) !== oldState) return;
 
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
   makeToast({
     title: 'extensions.upgrade.toast.success.title',

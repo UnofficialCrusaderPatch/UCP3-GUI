@@ -1,7 +1,8 @@
 import { createStore, Provider, useAtomValue } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { parse } from 'yaml';
-import { afterEach, expect, test } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
+import { exists } from '@tauri-apps/api/fs';
 import {
   cleanup,
   render,
@@ -24,6 +25,44 @@ import TEST_DATA from './tests/load-extensions-state.test.data.json';
 import { setupExtensionsStateConfiguration } from './load-extensions-state';
 import { createExtensionID } from '../../global/constants/extension-id';
 import { ExtensionsState } from '../../extensions/extensions-state';
+import { ConfigFile } from '../../../config/ucp/common';
+import { loadConfigFromFile } from '../../../config/ucp/config-files/config-files';
+import { findProfileFamilyConflicts } from '../../extensions/dependency-management/families';
+import importButtonCallback from '../../../components/ucp-tabs/common/importing/import-button-callback';
+import { PROFILE_NOT_LOADED_ATOM } from '../../../components/ucp-tabs/common/save-config';
+import { INIT_DONE } from './initialization-states';
+
+vi.mock('@tauri-apps/api/fs', async (original) => {
+  const module = await original<typeof import('@tauri-apps/api/fs')>();
+  return { ...module, exists: vi.fn(module.exists) };
+});
+vi.mock('../../../config/ucp/config-files/config-files', async (original) => {
+  const module =
+    await original<
+      typeof import('../../../config/ucp/config-files/config-files')
+    >();
+  return { ...module, loadConfigFromFile: vi.fn(module.loadConfigFromFile) };
+});
+vi.mock('../../extensions/dependency-management/families', async (original) => {
+  const module =
+    await original<
+      typeof import('../../extensions/dependency-management/families')
+    >();
+  return {
+    ...module,
+    findProfileFamilyConflicts: vi.fn(module.findProfileFamilyConflicts),
+  };
+});
+vi.mock(
+  '../../../components/ucp-tabs/common/importing/import-button-callback',
+  async (original) => {
+    const module =
+      await original<
+        typeof import('../../../components/ucp-tabs/common/importing/import-button-callback')
+      >();
+    return { ...module, default: vi.fn(module.default) };
+  },
+);
 
 // @ts-expect-error 7031
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -248,4 +287,39 @@ test('setupExtensionsStateConfiguration with proper state creates first time use
         .replaceAll(' ', ''),
     );
   });
+});
+
+test('a saved setup that needs a family choice loads after initialization', async () => {
+  vi.mocked(importButtonCallback).mockClear();
+  vi.mocked(exists).mockResolvedValueOnce(true);
+  vi.mocked(loadConfigFromFile).mockResolvedValueOnce({
+    status: 'OK',
+    message: '',
+    result: {} as ConfigFile,
+  });
+  vi.mocked(findProfileFamilyConflicts).mockReturnValueOnce([
+    { family: 'ai', members: [] },
+  ]);
+  vi.mocked(importButtonCallback).mockResolvedValueOnce({ status: 'success' });
+  getStore().set(INIT_DONE, false);
+
+  const result = await setupExtensionsStateConfiguration(
+    createBasicExtensionsState([], '1.0.7', '3.0.5'),
+    'game',
+    'ucp-config.yml',
+  );
+  expect(result.isOk()).toBe(true);
+  expect(importButtonCallback).not.toHaveBeenCalled();
+  expect(getStore().get(PROFILE_NOT_LOADED_ATOM)).toBe(true);
+
+  getStore().set(INIT_DONE, true);
+  await waitFor(() =>
+    expect(getStore().get(PROFILE_NOT_LOADED_ATOM)).toBe(false),
+  );
+  expect(importButtonCallback).toHaveBeenCalledWith(
+    'game',
+    expect.any(Function),
+    expect.any(Function),
+    'ucp-config.yml',
+  );
 });

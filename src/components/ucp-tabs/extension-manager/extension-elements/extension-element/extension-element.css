@@ -60,7 +60,10 @@
   background-repeat: no-repeat;
   background-position: center;
   background-color: transparent;
-  height: 100%;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  align-self: center;
   aspect-ratio: 18/17;
   border: none;
   border-radius: 0px;
@@ -94,7 +97,10 @@
 .arrow-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  align-self: center;
   aspect-ratio: 1/1;
 }
 

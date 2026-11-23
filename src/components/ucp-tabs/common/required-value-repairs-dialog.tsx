@@ -15,7 +15,7 @@ export function formatSettingValue(localize: MessageResolver, value: unknown) {
     : JSON.stringify(value);
 }
 
-function RequiredValueRepairList(props: {
+export function RequiredValueRepairList(props: {
   repairs: RequiredValueRepair[];
   localize: MessageResolver;
 }) {
@@ -43,15 +43,18 @@ function RequiredValueRepairList(props: {
 }
 
 /** Asks before a new extension state stores required values over saved preferences. */
-export async function confirmRequiredValueRepairs(
-  state: ExtensionsState,
-  interactive = true,
-) {
-  const repairs = findRequiredValueRepairs(
+export const requiredValueRepairsFor = (state: ExtensionsState) =>
+  findRequiredValueRepairs(
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
     state.configuration.locks,
     conflictingRequirements(state.configuration.overrides ?? new Map()),
   );
+
+export async function confirmRequiredValueRepairs(
+  state: ExtensionsState,
+  interactive = true,
+) {
+  const repairs = requiredValueRepairsFor(state);
   if (repairs.length === 0 || !interactive) return true;
 
   return showModalOkCancel({

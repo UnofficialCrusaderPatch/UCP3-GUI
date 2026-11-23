@@ -93,6 +93,7 @@ import * as semver from 'semver';
 import { CSSProperties } from 'react';
 import { ExtensionHandle } from '../../function/extensions/handles/extension-handle';
 import { ConfigMeta, DefinitionMeta } from './config/meta';
+import { DiscoveryMetadata } from '../../function/content/discovery/metadata';
 
 type ConfigEntryContents = {
   // TODO: is the default value required or suggested? I would prefer required
@@ -182,7 +183,7 @@ type ExtensionType = PluginType | ModuleType;
  */
 type SaveState = 'required' | 'optional';
 
-type Definition = {
+type Definition = DiscoveryMetadata & {
   meta: DefinitionMeta;
   name: string;
   version: string;
@@ -212,7 +213,8 @@ type Extension = {
     isZip: boolean;
     isDirectory: boolean;
     path: string;
-    fetchDescription: () => Promise<string>;
+    fetchDescription: (language?: string) => Promise<string>;
+    descriptionRevision?: number;
     handle: <R>(cb: ExtensionIOCallback<R>) => Promise<R>;
   };
 };

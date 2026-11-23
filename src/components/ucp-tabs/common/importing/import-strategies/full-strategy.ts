@@ -37,7 +37,11 @@ export function fullStrategy(
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
   // Get the load order from the sparse part of the config file
 
-  if (config['config-full'] === undefined) {
+  // A family choice keeps the saved values but drops the saved order (see withoutProfileMembers).
+  if (
+    config['config-full'] === undefined ||
+    config['config-full']['load-order'] === undefined
+  ) {
     return {
       status: 'error',
       code: 'MISSING_LOAD_ORDER',
@@ -161,15 +165,23 @@ export function fullStrategy(
     }
 
     // Complete the new extension state by building the configuration DB
-    // eslint-disable-next-line no-param-reassign
-    newExtensionsState = buildExtensionConfigurationDB({
-      ...newExtensionsState,
-      activeExtensions: bottomUpActiveExtensions.slice().reverse(),
-      installedExtensions: installedExtensionsCopy,
-      explicitlyActivatedExtensions: bottomUpExplicitlyActiveExtensions
-        .slice()
-        .reverse(),
-    });
+    try {
+      // eslint-disable-next-line no-param-reassign
+      newExtensionsState = buildExtensionConfigurationDB({
+        ...newExtensionsState,
+        activeExtensions: bottomUpActiveExtensions.slice().reverse(),
+        installedExtensions: installedExtensionsCopy,
+        explicitlyActivatedExtensions: bottomUpExplicitlyActiveExtensions
+          .slice()
+          .reverse(),
+      });
+    } catch (err: unknown) {
+      return {
+        status: 'error',
+        code: 'GENERIC',
+        messages: [String(err)],
+      } as GenericFailure;
+    }
   } else {
     return {
       status: 'error',

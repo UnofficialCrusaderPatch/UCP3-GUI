@@ -10,8 +10,19 @@ import {
 } from '../../../../function/configuration/state';
 import Logger, { ConsoleLogger } from '../../../../util/scripts/logging';
 import { buildExtensionConfigurationDB } from '../../../../function/configuration/extension-configuration/build-extension-configuration-db';
-import { addExtensionToExplicityActivatedExtensions } from '../extensions-state-manipulation';
+import { selectExtensionFamilyMember } from '../extensions-state-manipulation';
+import {
+  chosenFamilyExtensions,
+  FamilyConflictError,
+  familyMoves,
+} from '../../../../function/extensions/dependency-management/families';
+import {
+  confirmFamilySwitch,
+  refuseFamilySaveStateChange,
+} from '../../common/family-switch-dialog';
 import { confirmRequiredValueRepairs } from '../../common/required-value-repairs-dialog';
+import { saveStateChanges } from '../../../../function/extensions/save-state';
+import { confirmSaveStateLoss } from '../../common/save-state-loss-dialog';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../common/buttons/config-serialized-state';
 import reportAndConfirmBuildResult from './reporting';
 import { showModalOk } from '../../../modals/modal-ok';
@@ -31,18 +42,25 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
   let newExtensionsState = { ...currentExtensionsState };
 
   try {
-    // Resolve on a copy: a cancelled confirmation must not change the live graph.
-    newExtensionsState = addExtensionToExplicityActivatedExtensions(
-      { ...currentExtensionsState, tree: currentExtensionsState.tree.copy() },
+    // Resolves on copied trees: a cancelled confirmation leaves the live graph unchanged.
+    newExtensionsState = selectExtensionFamilyMember(
+      currentExtensionsState,
       ext,
     );
   } catch (err: any) {
     await showModalOk({
-      title: 'extensions.activation.dependency.conflicts.error.title',
+      title:
+        err instanceof FamilyConflictError
+          ? 'discovery.family.conflict.title'
+          : 'extensions.activation.dependency.conflicts.error.title',
       message: {
-        key: 'extensions.activation.dependency.conflicts.error.message',
+        key:
+          err instanceof FamilyConflictError
+            ? 'discovery.family.conflict.message'
+            : 'extensions.activation.dependency.conflicts.error.message',
         args: {
           log: err.toString(),
+          details: err instanceof FamilyConflictError ? err.details : '',
         },
       },
     });
@@ -52,9 +70,25 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
 
   const res = buildExtensionConfigurationDB(newExtensionsState);
 
+  const families = chosenFamilyExtensions(currentExtensionsState, res);
+  if (
+    families &&
+    (await refuseFamilySaveStateChange(families.before, families.after))
+  )
+    return;
+
   if (!(await reportAndConfirmBuildResult(res))) return;
 
-  if (!(await confirmRequiredValueRepairs(res))) return;
+  if (familyMoves(currentExtensionsState, res).length > 0) {
+    if (!(await confirmFamilySwitch(currentExtensionsState, res, ext))) return;
+  } else {
+    const { removed } = saveStateChanges(
+      currentExtensionsState.activeExtensions,
+      res.activeExtensions,
+    );
+    if (!(await confirmSaveStateLoss(removed))) return;
+    if (!(await confirmRequiredValueRepairs(res))) return;
+  }
 
   ConsoleLogger.info(
     'Current full config state',
@@ -66,12 +100,15 @@ async function inactiveExtensionElementClickCallback(ext: Extension) {
     getStore().get(CONFIGURATION_USER_REDUCER_ATOM),
   );
 
-  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+  // A dialog was open; never apply a candidate computed from an older state.
+  if (getStore().get(EXTENSION_STATE_REDUCER_ATOM) !== currentExtensionsState)
+    return;
 
   ConsoleLogger.info('New extension state', res);
 
   // Stores confirmed required values in place of conflicting preferences.
   getStore().set(EXTENSION_STATE_INTERFACE_ATOM, res);
+  getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 
   ConsoleLogger.info(
     'New user config state',

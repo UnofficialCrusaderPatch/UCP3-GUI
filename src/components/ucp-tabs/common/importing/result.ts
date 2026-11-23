@@ -26,6 +26,12 @@ export type FailImportButtonCallbackResult =
       status: 'fail';
       reason: 'file';
       message: string;
+    }
+  | {
+      status: 'fail';
+      /** The player cancelled the choice between family members; nothing was loaded. */
+      reason: 'family';
+      message: string;
     };
 
 type SuccessImportButtonCallbackResult = {

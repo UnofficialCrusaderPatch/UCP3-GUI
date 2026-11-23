@@ -5,7 +5,7 @@ import { MessageType } from '../../../../../localization/localization';
 import Logger from '../../../../../util/scripts/logging';
 import { StrategyResultReport } from '../result';
 import { fullStrategy } from './full-strategy';
-import { sparseStrategy } from './sparse-strategy';
+import { ScratchImport, sparseStrategy } from './sparse-strategy';
 
 const LOGGER = new Logger('attempt-strategies.ts');
 
@@ -15,6 +15,7 @@ export function attemptStrategies(
   extensionsState: ExtensionsState,
   setConfigStatus: (message: MessageType) => void,
   repair?: boolean,
+  scratch?: ScratchImport,
 ): StrategyResultReport {
   const report: StrategyResultReport = {
     reports: [],
@@ -70,6 +71,7 @@ export function attemptStrategies(
       config,
       setConfigStatus,
       repair,
+      scratch,
     );
 
     report.reports.push({

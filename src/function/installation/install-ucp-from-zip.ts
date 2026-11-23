@@ -10,6 +10,8 @@ import { getStore } from '../../hooks/jotai/base';
 import { initializeUCPVersion } from '../ucp-files/ucp-version';
 import { MessageType } from '../../localization/localization';
 import Logger from '../../util/scripts/logging';
+import { saveFirstTimeUseConfiguration } from '../game-folder/modifications/activate-first-time-use-extensions';
+import { UCP_CONFIG_YML } from '../global/constants/file-constants';
 import {
   BundledUpdateRollbackError,
   updateBundledExtensions,
@@ -22,13 +24,15 @@ export async function installUCPFromZip(
   createStatusToast: (type: ToastType, status: MessageType) => void,
 ): Promise<Result<void, FileUtilError>> {
   return Result.tryAsync(async () => {
-    const freshInstall =
-      !(await exists(`${gameFolder}/ucp`)) &&
-      !(await exists(`${gameFolder}/ucp-config.yml`));
+    const config = `${gameFolder}/${UCP_CONFIG_YML}`;
+    const emptyFolder =
+      !(await exists(`${gameFolder}/ucp`)) && !(await exists(config));
     (await createRealBink()).throwIfErr();
 
     createStatusToast(ToastType.INFO, 'zip.extract');
     await extractZipToPath(zipFilePath, gameFolder);
+    // A profile that came with the archive may pin the bundled versions
+    const freshInstall = emptyFolder && !(await exists(config));
 
     // Force a refresh on this atom to ensure activateUCP() is dealing with the right IO state
     const versionResult = await initializeUCPVersion(gameFolder);
@@ -48,5 +52,17 @@ export async function installUCPFromZip(
 
     // Activate the UCP by default when installing
     (await activateUCP()).throwIfErr();
+
+    // An installation into an empty folder ends with a profile that loads: its
+    // first configuration, or one from the archive or saved meanwhile
+    if (emptyFolder) {
+      try {
+        await saveFirstTimeUseConfiguration(gameFolder, versionResult);
+      } catch (error) {
+        throw new Error(
+          `The installation has no usable ${config}; the installed files were kept. ${error}`,
+        );
+      }
+    }
   });
 }

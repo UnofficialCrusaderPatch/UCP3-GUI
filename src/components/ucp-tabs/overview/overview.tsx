@@ -149,7 +149,11 @@ export default function Overview() {
               .consider(
                 () =>
                   createStatusToast(ToastType.SUCCESS, 'overview.zip.success'),
-                (err) => createStatusToast(ToastType.ERROR, err),
+                (error) =>
+                  createStatusToast(ToastType.ERROR, {
+                    key: 'ucp.install.failed',
+                    args: { error },
+                  }),
               );
           } catch (e: unknown) {
             await showModalOk({

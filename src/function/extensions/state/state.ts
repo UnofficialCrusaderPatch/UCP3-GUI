@@ -46,16 +46,18 @@ export const PREFERRED_EXTENSION_VERSION_ATOM =
 export type AvailableExtensionVersionsDictionary = {
   [extensionName: string]: string[];
 };
+export function availableExtensionVersions({
+  extensions,
+  tree,
+}: ExtensionsState) {
+  return Object.fromEntries(
+    Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
+      name,
+      tree.allExtensionVersionsForName(name),
+    ]),
+  ) as AvailableExtensionVersionsDictionary;
+}
 export const AVAILABLE_EXTENSION_VERSIONS_ATOM =
-  atom<AvailableExtensionVersionsDictionary>((get) => {
-    const { extensions } = get(EXTENSION_STATE_REDUCER_ATOM);
-
-    const { tree } = get(EXTENSION_STATE_REDUCER_ATOM);
-
-    return Object.fromEntries(
-      Array.from(new Set(extensions.map((e) => e.name))).map((name) => [
-        name,
-        tree.allExtensionVersionsForName(name),
-      ]),
-    ) as AvailableExtensionVersionsDictionary;
-  });
+  atom<AvailableExtensionVersionsDictionary>((get) =>
+    availableExtensionVersions(get(EXTENSION_STATE_REDUCER_ATOM)),
+  );

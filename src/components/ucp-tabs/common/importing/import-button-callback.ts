@@ -30,8 +30,14 @@ import {
   GUI_LOCALIZATION_ATOM,
   MessageType,
 } from '../../../../localization/localization';
-import { ImportButtonCallbackResult, makeErrorReport } from './result';
+import {
+  FailImportButtonCallbackResult,
+  ImportButtonCallbackResult,
+  makeErrorReport,
+} from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
+import { ScratchImport } from './import-strategies/sparse-strategy';
+import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { showModalOk } from '../../../modals/modal-ok';
 import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
 import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-changes';
@@ -45,7 +51,6 @@ import {
 import { chooseProfileFamilyMembers } from './family-chooser';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized-state';
-import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { saveStateChanges } from '../../../../function/extensions/save-state';
 import { confirmSaveStateLoss } from '../save-state-loss-dialog';
 import { refuseFamilySaveStateChange } from '../family-switch-dialog';
@@ -113,16 +118,19 @@ type StagedImport =
       newExtensionsState: ExtensionsState;
       preferredVersions?: Record<string, string>;
     }
-  | { status: 'fail'; result: ImportButtonCallbackResult };
+  | { status: 'fail'; result: FailImportButtonCallbackResult };
 
-/** Resolves a profile against the installed extensions without changing live state. */
-function stageUcpConfigImport(
+/**
+ * Resolves a profile without changing live state: against the loaded extensions,
+ * or with `scratch` against a state that isn't loaded, as the installer does to
+ * check a kept profile.
+ */
+export function prepareUcpConfigImport(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
+  extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM),
+  scratch?: ScratchImport,
 ): StagedImport {
-  // Get the current extension state
-  const extensionsState = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
-
   ConsoleLogger.debug(
     'import-button-callback.tsx: old extension state',
     extensionsState,
@@ -134,6 +142,8 @@ function stageUcpConfigImport(
     config,
     extensionsState,
     setConfigStatus,
+    undefined,
+    scratch,
   );
 
   const { result } = strategyResultReport;
@@ -148,7 +158,7 @@ function stageUcpConfigImport(
         report: strategyResultReport,
         elaborateMessage: elab,
         message: `${elab.title}\n${elab.shortDescription}\n${elab.report}`,
-      } as ImportButtonCallbackResult,
+      },
     };
   }
 
@@ -159,10 +169,16 @@ function stageUcpConfigImport(
   };
 }
 
+/** Applies an imported setup exactly as loaded, version specific, to its tree. */
+export function solveImportedState(state: ExtensionsState) {
+  state.tree.reset();
+  return state.tree.extensionDependenciesForExtensions(state.activeExtensions);
+}
+
 export function importUcpConfig(
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
-  staged: StagedImport = stageUcpConfigImport(config, setConfigStatus),
+  staged: StagedImport = prepareUcpConfigImport(config, setConfigStatus),
 ): ImportButtonCallbackResult {
   if (staged.status === 'fail') return staged.result;
 
@@ -175,14 +191,7 @@ export function importUcpConfig(
       ...staged.preferredVersions,
     });
 
-  /**
-   * Make sure to apply the current loaded configuration exactly as is (version specific)
-   * to the configuration tree.
-   */
-  newExtensionsState.tree.reset();
-  const solution = newExtensionsState.tree.extensionDependenciesForExtensions(
-    newExtensionsState.activeExtensions,
-  );
+  const solution = solveImportedState(newExtensionsState);
 
   if (solution.status !== 'OK') {
     showModalOk({
@@ -317,7 +326,7 @@ export async function importUcpConfigFile(
     profile = withoutProfileMembers(config, dropped);
   }
 
-  let staged = stageUcpConfigImport(profile, setConfigStatus);
+  let staged = prepareUcpConfigImport(profile, setConfigStatus);
   // A kept choice the remaining selections don't bring in at its version becomes explicit.
   const notResolved = (attempt: StagedImport) =>
     attempt.status === 'ok'
@@ -349,7 +358,7 @@ export async function importUcpConfigFile(
       );
     };
     profile = withoutProfileMembers(config, dropped, promote, needs);
-    staged = stageUcpConfigImport(profile, setConfigStatus);
+    staged = prepareUcpConfigImport(profile, setConfigStatus);
   }
   // Never report success for a choice the resolved setup doesn't honour.
   const missing = staged.status === 'ok' ? notResolved(staged) : promote;

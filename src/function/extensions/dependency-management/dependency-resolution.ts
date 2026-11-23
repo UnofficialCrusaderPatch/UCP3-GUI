@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // eslint-disable-next-line max-classes-per-file
-import { Dependency, Package, Repository, Tree } from 'lean-resolution';
+import { Dependency, Node, Package, Repository, Tree } from 'lean-resolution';
 import { rcompare } from 'semver';
 
 import { Extension } from '../../../config/ucp/common';
@@ -61,9 +61,48 @@ type SuccesfullInitialSolution = {
 
 export type InitialSolution = SuccesfullInitialSolution | FailedInitialSolution;
 
+/**
+ * lean-resolution's tree, with a dependency walk that records what it has
+ * visited. The library's walk (Tree.allDependenciesForNode) never fills its
+ * visited list, so it never ends on a dependency cycle and processes a node
+ * once per path. Every solver step walks through this method: the first
+ * solve, conflict retargeting and the brute-force search. The result is the
+ * library's: free of duplicates, in the order nodes are first reached. A cycle
+ * then reaches the library's topological sort, which reports it as an error.
+ */
+export class VisitingTree extends Tree {
+  // Overrides the library's method, which its solvers call on the tree
+  // eslint-disable-next-line class-methods-use-this
+  allDependenciesForNode(
+    initialNode: Node,
+    options?: { allowUnresolvedEdges: boolean },
+  ) {
+    const allowUnresolvedEdges = options?.allowUnresolvedEdges ?? false;
+    const dependencies: Node[] = [initialNode];
+    const reached = new Set<Node>(dependencies);
+    // Breadth first, as the library walks
+    for (let i = 0; i < dependencies.length; i += 1) {
+      dependencies[i].out.forEach((e) => {
+        const target = e.to;
+        if (target === undefined) {
+          if (!allowUnresolvedEdges) {
+            throw Error(`Encountered unresolved edge: ${e.id}`);
+          }
+          return;
+        }
+        if (!reached.has(target)) {
+          reached.add(target);
+          dependencies.push(target);
+        }
+      });
+    }
+    return dependencies;
+  }
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export class DependencyTree {
-  tree: Tree = new Tree([]);
+  tree: Tree = new VisitingTree([]);
 
   frontendVersion: string;
 
@@ -77,7 +116,7 @@ export class DependencyTree {
     this.frontendVersion = frontendVersion || '0.0.0';
     this.frameworkVersion = frameworkVersion || '3.0.0';
 
-    this.tree = new Tree([
+    this.tree = new VisitingTree([
       ...packages,
       new Package('frontend', this.frontendVersion),
       new Package('framework', this.frameworkVersion),
@@ -91,7 +130,7 @@ export class DependencyTree {
       this.frameworkVersion,
     );
 
-    result.tree = new Tree(this.tree.packages);
+    result.tree = new VisitingTree(this.tree.packages);
 
     return result;
   }
@@ -122,7 +161,7 @@ export class DependencyTree {
     repo.push(new Package('frontend', this.frontendVersion));
     repo.push(new Package('framework', this.frameworkVersion));
 
-    this.tree = new Tree(repo);
+    this.tree = new VisitingTree(repo);
   }
 
   tryResolveAllDependencies() {
@@ -270,7 +309,7 @@ export class ExtensionDependencyTree extends DependencyTree {
           ),
         ),
     );
-    this.tree = new Tree([
+    this.tree = new VisitingTree([
       ...packages,
       new Package('frontend', this.frontendVersion),
       new Package('framework', this.frameworkVersion),

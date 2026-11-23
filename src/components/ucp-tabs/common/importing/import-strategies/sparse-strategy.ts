@@ -6,7 +6,10 @@ import {
   Version,
 } from '../../../../../config/ucp/dependency-statement';
 import { ExtensionsState } from '../../../../../function/extensions/extensions-state';
-import { AVAILABLE_EXTENSION_VERSIONS_ATOM } from '../../../../../function/extensions/state/state';
+import {
+  AVAILABLE_EXTENSION_VERSIONS_ATOM,
+  AvailableExtensionVersionsDictionary,
+} from '../../../../../function/extensions/state/state';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { MessageType } from '../../../../../localization/localization';
 import { ConsoleLogger } from '../../../../../util/scripts/logging';
@@ -20,6 +23,12 @@ import {
   StrategyResult,
 } from './common';
 
+// A read-only import into a scratch state: available versions come from that
+// state instead of the loaded GUI.
+export type ScratchImport = {
+  availableVersions: AvailableExtensionVersionsDictionary;
+};
+
 /**
  * Builds the new extension state and load order from the
  * sparse part of the ConfigFile. Uses setConfigStatus to
@@ -27,14 +36,15 @@ import {
  * @param newExtensionsState the new extension state to base on
  * @param config the ConfigFile to use the sparse part from
  * @param setConfigStatus the callback to report status with
+ * @param scratch set to import read-only into a scratch state
  * @returns A StrategyResult object
  */
-// eslint-disable-next-line import/prefer-default-export
 export function sparseStrategy(
   newExtensionsState: ExtensionsState,
   config: ConfigFile,
   setConfigStatus: (message: MessageType) => void,
   repair?: boolean,
+  scratch?: ScratchImport,
 ): StrategyResult {
   let preferredVersions: Record<string, string> | undefined;
   const { extensions } = newExtensionsState;
@@ -42,9 +52,9 @@ export function sparseStrategy(
   // Get the current available versions database
   // This updates every time extension state changes but since no extensions will be installed during an import
   // This is fine to declare as const here.
-  const availableVersionsDatabase = getStore().get(
-    AVAILABLE_EXTENSION_VERSIONS_ATOM,
-  );
+  const availableVersionsDatabase =
+    scratch?.availableVersions ??
+    getStore().get(AVAILABLE_EXTENSION_VERSIONS_ATOM);
 
   // TODO: don't allow fancy semver in a user configuration. Only allow it in definition.yml. Use tree logic.
   // Get the load order from the sparse part of the config file

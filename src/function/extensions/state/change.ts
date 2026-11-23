@@ -1,5 +1,9 @@
 import { Getter, Setter } from 'jotai';
 import {
+  applyRequiredValueRepairs,
+  conflictingRequirements,
+} from '../../configuration/required-value-repairs';
+import {
   CONFIGURATION_FULL_REDUCER_ATOM,
   CONFIGURATION_USER_REDUCER_ATOM,
 } from '../../configuration/state';
@@ -11,14 +15,30 @@ export function generateAndSetFullConfig(
   set: Setter,
   extensionsState: ExtensionsState,
 ) {
-  const { defined } = extensionsState.configuration;
-  const userDefinedValues = get(CONFIGURATION_USER_REDUCER_ATOM);
+  const { defined, locks, overrides } = extensionsState.configuration;
+
+  // Repair the stored preferences too: otherwise removing the requirement
+  // would bring the conflicting value back.
+  const userDefinedValues = applyRequiredValueRepairs(
+    get(CONFIGURATION_USER_REDUCER_ATOM),
+    locks,
+    conflictingRequirements(overrides ?? new Map()),
+  );
+  set(CONFIGURATION_USER_REDUCER_ATOM, {
+    type: 'reset',
+    value: userDefinedValues,
+  });
 
   const fullConfig = {
     // First enter all default values as defined by the original UI files
     ...defined,
     ...userDefinedValues,
   };
+
+  // Required extension values also apply when importing or restoring user settings.
+  Object.entries(locks).forEach(([url, { lockedValue }]) => {
+    fullConfig[url] = lockedValue;
+  });
 
   // TODO: make it read only and write only to the user config
   set(CONFIGURATION_FULL_REDUCER_ATOM, {

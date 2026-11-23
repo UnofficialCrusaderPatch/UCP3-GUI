@@ -6,7 +6,10 @@ import { setExtensionsStateAndClearConfiguration } from '../../extensions/state/
 import { FIRST_TIME_USE_ATOM } from '../../gui-settings/settings';
 import { LOGGER } from '../logger';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../../../components/ucp-tabs/common/buttons/config-serialized-state';
-import { saveCurrentConfig } from '../../../components/ucp-tabs/common/save-config';
+import {
+  PROFILE_NOT_LOADED_ATOM,
+  saveCurrentConfig,
+} from '../../../components/ucp-tabs/common/save-config';
 import { ConsoleLogger } from '../../../util/scripts/logging';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
@@ -26,6 +29,7 @@ export async function setupExtensionsStateConfiguration(
   // The first time use logic can not set anything so that is why the state is set here
   setExtensionsStateAndClearConfiguration(newExtensionsState);
 
+  getStore().set(PROFILE_NOT_LOADED_ATOM, false);
   if (await exists(file)) {
     getStore().set(FIRST_TIME_USE_ATOM, false);
     try {
@@ -34,6 +38,13 @@ export async function setupExtensionsStateConfiguration(
         () => {},
         (message) => message, // TODO: will need a refactoring
         file,
+      );
+
+      // A failed or cancelled load leaves a partial setup that must not be
+      // written over the file by Save before launch.
+      getStore().set(
+        PROFILE_NOT_LOADED_ATOM,
+        importResult.status !== 'success',
       );
 
       if (importResult.status === 'fail') {
@@ -49,6 +60,7 @@ export async function setupExtensionsStateConfiguration(
       endResult = Result.emptyOk();
     } catch (err: any) {
       LOGGER.msg(`${err}`).error();
+      getStore().set(PROFILE_NOT_LOADED_ATOM, true);
 
       endResult = Result.err(`${err?.message ?? err}`);
     }

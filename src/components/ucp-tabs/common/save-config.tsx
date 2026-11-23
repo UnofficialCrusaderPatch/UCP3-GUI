@@ -1,3 +1,4 @@
+import { atom } from 'jotai';
 import { Extension } from '../../../config/ucp/common';
 import { saveUCPConfig } from '../../../config/ucp/config-files/config-files';
 import {
@@ -12,6 +13,16 @@ import { CONFIGURATION_DISK_STATE_ATOM as CONFIGURATION_DISK_STATE_ACTIVE_EXTENS
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../function/extensions/state/state';
 import { getStore } from '../../../hooks/jotai/base';
 import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from './buttons/config-serialized-state';
+import Logger from '../../../util/scripts/logging';
+
+const LOGGER = new Logger('save-config.tsx');
+
+/**
+ * True while the profile on disk isn't loaded because loading it failed or was
+ * cancelled. The launcher then shows a partial or empty setup, so Save before
+ * launch must not write it over the file. Apply still saves.
+ */
+export const PROFILE_NOT_LOADED_ATOM = atom(false);
 
 /**
  * Note: reverses both lists of extensions to match what the export order expects.
@@ -49,6 +60,7 @@ function saveConfig(
     });
 
     getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, false);
+    getStore().set(PROFILE_NOT_LOADED_ATOM, false);
 
     /* Remember the active extensions that are now on disk */
     getStore().set(CONFIGURATION_DISK_STATE_ACTIVE_EXTENSIONS, [
@@ -83,6 +95,17 @@ export function saveCurrentConfig(helpingInfo?: { file?: string }) {
     [...getStore().get(EXTENSION_STATE_REDUCER_ATOM).activeExtensions],
     getStore().get(CONFIGURATION_QUALIFIER_REDUCER_ATOM),
   );
+}
+
+/** Save before launch: skipped while the profile on disk wasn't loaded. */
+export async function saveBeforeLaunch() {
+  if (getStore().get(PROFILE_NOT_LOADED_ATOM)) {
+    LOGGER.msg(
+      'Save before launch skipped: the profile on disk was not loaded',
+    ).warn();
+    return 'skipped';
+  }
+  return saveCurrentConfig();
 }
 
 export default saveConfig;

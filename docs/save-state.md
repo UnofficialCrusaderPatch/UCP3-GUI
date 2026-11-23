@@ -13,3 +13,5 @@ save-state: optional   # saves still load without it; its saved data is dropped
 - `required` only if continuing without the module would corrupt the match, as with Improved Tunnelers' tunnels.
 
 Use the same choice you register with Map Extensions: a required section means `required`, an optional one `optional`. The launcher warns before a declared module leaves the setup or is uninstalled; Map Extensions decides whether a save loads. Other values, and `save-state` on a plugin, are ignored with a warning.
+
+Family members must bring in the same save-state modules; the launcher refuses a family switch that would change them. See [extension families](extension-families.md).

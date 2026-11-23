@@ -17,7 +17,10 @@ import {
   setExtensionsStateAndClearConfiguration,
   createBasicExtensionsState,
 } from '../../extensions/state/init';
-import { setupExtensionsStateConfiguration } from './load-extensions-state';
+import {
+  setupExtensionsStateConfiguration,
+  showLoadFailure,
+} from './load-extensions-state';
 
 /**
  * Initialize the game folder
@@ -102,23 +105,13 @@ export async function initializeGameFolder(
 
   const noInitErrors = getStore().get(INIT_ERROR) === false;
   if (noInitErrors) {
-    const setupResult = await setupExtensionsStateConfiguration(
-      inactiveExtensionsState,
-      folder,
-      file,
+    showLoadFailure(
+      await setupExtensionsStateConfiguration(
+        inactiveExtensionsState,
+        folder,
+        file,
+      ),
     );
-
-    if (setupResult.isErr()) {
-      showModalOk({
-        title: 'config.load.fail.title',
-        message: {
-          key: 'config.load.fail.message',
-          args: {
-            err: setupResult.err().getOrElse('unknown error'),
-          },
-        },
-      });
-    }
   } else {
     LOGGER.msg(
       `Not loading ${UCP_CONFIG_YML} as there were errors during init`,

@@ -13,6 +13,7 @@ import {
   OkCancelModalWindowProperties,
   showModalOkCancel,
 } from '../../modals/modal-ok-cancel';
+import { showModalOk } from '../../modals/modal-ok';
 import { upgradeExtensionsCallback } from '../config-editor/buttons/upgrade-button';
 import { importUcpConfigFile } from './importing/import-button-callback';
 
@@ -41,6 +42,7 @@ function extension(
   version: string,
   dependencies: Record<string, string> = {},
   saveState?: 'required',
+  family?: { name: string; root?: boolean }[],
 ) {
   const type = saveState ? 'module' : 'plugin';
   return {
@@ -57,16 +59,18 @@ function extension(
       description: '',
       type,
       ...(saveState ? { 'save-state': saveState } : {}),
+      ...(family ? { family } : {}),
     },
     configEntries: {},
   };
 }
 
-function presetWithTunnels() {
+function presetWithTunnels(asFamily = false) {
+  const family = asFamily ? [{ name: 'ai', root: true }] : undefined;
   const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
     extension('Tunnels', '1.0.0', {}, 'required'),
-    extension('Preset', '1.0.0', { Tunnels: '^1.0.0' }),
-    extension('Preset', '1.1.0'),
+    extension('Preset', '1.0.0', { Tunnels: '^1.0.0' }, undefined, family),
+    extension('Preset', '1.1.0', {}, undefined, family),
     extension('Other', '1.0.0'),
   ] as never);
   const [tunnels, preset10, preset11, other] = state.extensions;
@@ -91,6 +95,7 @@ const saveStateAsked = () =>
 beforeEach(() => {
   vi.mocked(getStore).mockReturnValue(createStore());
   vi.mocked(showModalOkCancel).mockReset();
+  vi.mocked(showModalOk).mockReset();
   vi.mocked(showModalOkCancel).mockImplementation(
     async (spec) => spec.title !== TITLE,
   );
@@ -134,13 +139,62 @@ describe('modules that saved games depend on', () => {
         });
       },
     ],
-  ])('%s that drops one asks first, and Cancel keeps the setup', async (_, run) => {
-    const fixture = presetWithTunnels();
+  ])(
+    '%s that drops one asks first, and Cancel keeps the setup',
+    async (_, run) => {
+      const fixture = presetWithTunnels();
+      const before = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+      await run(fixture);
+      expect(saveStateAsked()).toBe(true);
+      expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
+      expect(before.activeExtensions).toEqual([
+        fixture.preset10,
+        fixture.tunnels,
+      ]);
+    },
+  );
+
+  test('an upgrade of a family member that drops one is refused', async () => {
+    const { preset10, preset11 } = presetWithTunnels(true);
     const before = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
-    await run(fixture);
-    expect(saveStateAsked()).toBe(true);
+    await upgradeExtensionsCallback(
+      [{ extension: preset10, upgrades: [preset11] }],
+      true,
+    );
+    expect(vi.mocked(showModalOk).mock.calls[0][0].title).toBe(
+      'discovery.family.savestate.title',
+    );
+    expect(saveStateAsked()).toBe(false);
     expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
-    expect(before.activeExtensions).toEqual([fixture.preset10, fixture.tunnels]);
+  });
+
+  test('a dependency upgrade that drops one from a chosen family member is refused', async () => {
+    const state = deserializeSimplifiedSerializedExtensionsStateFromExtensions([
+      extension('Tunnels', '1.0.0', {}, 'required'),
+      extension('Provider', '1.0.0', { Tunnels: '^1.0.0' }),
+      extension('Provider', '1.1.0'),
+      extension('Preset', '1.0.0', { Provider: '^1.0.0' }, undefined, [
+        { name: 'ai', root: true },
+      ]),
+    ] as never);
+    const [tunnels, provider10, provider11, preset] = state.extensions;
+    getStore().set(
+      EXTENSION_STATE_INTERFACE_ATOM,
+      buildExtensionConfigurationDB({
+        ...state,
+        activeExtensions: [preset, provider10, tunnels],
+        explicitlyActivatedExtensions: [preset],
+      }),
+    );
+    const before = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
+    await upgradeExtensionsCallback(
+      [{ extension: provider10, upgrades: [provider11] }],
+      true,
+    );
+    expect(vi.mocked(showModalOk).mock.calls[0][0].title).toBe(
+      'discovery.family.savestate.title',
+    );
+    expect(getStore().get(EXTENSION_STATE_INTERFACE_ATOM)).toBe(before);
   });
 
   test('loading at startup does not ask', async () => {

@@ -9,6 +9,8 @@ export interface OkCancelModalWindowProperties
   extends AbstractModalWindowProperties<boolean, boolean> {
   cancel?: MessageType;
   children?: ReactNode;
+  /** OK does nothing while this returns false, e.g. until a required choice is made. */
+  confirmable?: () => boolean;
 }
 
 const DEFAULT_OK_CANCEL_MODAL_PROPERTIES: OkCancelModalWindowProperties = {
@@ -26,11 +28,13 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
     cancel,
     alternativeMessageSource,
     children,
+    confirmable,
   } = props;
 
   const [show, setShow] = useState(true);
 
   const internalHandleAction = () => {
+    if (confirmable && !confirmable()) return;
     setShow(false);
     handleAction(true);
   };

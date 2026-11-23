@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import { useAtomValue } from 'jotai';
 import { useCallback } from 'react';
 import { Extension } from '../../../../../config/ucp/common';
@@ -13,8 +14,9 @@ export function ActiveExtensionElement(props: {
   ext: Extension;
   index: number;
   arr: Extension[];
+  displayName?: string;
 }) {
-  const { ext, index, arr } = props;
+  const { ext, index, arr, displayName } = props;
 
   const extensionsState = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
 
@@ -68,6 +70,7 @@ export function ActiveExtensionElement(props: {
   return (
     <ExtensionElement
       ext={ext}
+      displayName={displayName}
       fixedVersion
       active
       movability={movability}

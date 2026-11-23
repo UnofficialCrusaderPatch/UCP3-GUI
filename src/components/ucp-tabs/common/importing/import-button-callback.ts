@@ -13,6 +13,7 @@ import {
   ConfigFile,
   ConfigEntry,
   ConfigFileExtensionEntry,
+  Extension,
 } from '../../../../config/ucp/common';
 import { loadConfigFromFile } from '../../../../config/ucp/config-files/config-files';
 import { ConfigMetaObjectDB } from '../../../../config/ucp/config-merge/objects';
@@ -25,15 +26,29 @@ import {
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import warnClearingOfConfiguration from '../warn-clearing-of-configuration';
 import { CONFIGURATION_DISK_STATE_ATOM } from '../../../../function/extensions/state/disk';
-import { MessageType } from '../../../../localization/localization';
+import {
+  GUI_LOCALIZATION_ATOM,
+  MessageType,
+} from '../../../../localization/localization';
 import { ImportButtonCallbackResult, makeErrorReport } from './result';
 import { attemptStrategies } from './import-strategies/attempt-strategies';
 import { showModalOk } from '../../../modals/modal-ok';
 import { buildConfigMetaContentDBForUser } from '../../../../function/configuration/extension-configuration/build-config-meta-content-db';
 import { warnLoadedConfigurationChanges } from './warn-loaded-configuration-changes';
+import {
+  findProfileFamilyConflicts,
+  chosenFamilyExtensions,
+  profileActiveExtensions,
+  profileListedExtensions,
+  withoutProfileMembers,
+} from '../../../../function/extensions/dependency-management/families';
+import { chooseProfileFamilyMembers } from './family-chooser';
+import { createExtensionID } from '../../../../function/global/constants/extension-id';
+import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized-state';
 import { ExtensionsState } from '../../../../function/extensions/extensions-state';
 import { saveStateChanges } from '../../../../function/extensions/save-state';
 import { confirmSaveStateLoss } from '../save-state-loss-dialog';
+import { refuseFamilySaveStateChange } from '../family-switch-dialog';
 
 export function constructUserConfigObjects(config: ConfigFile) {
   let userConfigEntries: { [key: string]: ConfigEntry } = {};
@@ -269,17 +284,136 @@ export async function importUcpConfigFile(
 
   const config = parsingResult.result;
 
-  const staged = stageUcpConfigImport(config, setConfigStatus);
-  if (staged.status === 'ok' && options.confirmSaveStateLoss) {
+  // Two members of one family: the player keeps one, then a filtered copy is loaded.
+  const current = getStore().get(EXTENSION_STATE_REDUCER_ATOM);
+  const conflicts = findProfileFamilyConflicts(
+    config,
+    current.extensions,
+    current.tree,
+  );
+  let profile = config;
+  let dropped: string[] = [];
+  let kept: Extension[] = [];
+  if (conflicts.length > 0) {
+    const chosen = await chooseProfileFamilyMembers(conflicts);
+    if (chosen === undefined) {
+      const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+      setConfigStatus('config.load.family.cancelled');
+      return {
+        status: 'fail',
+        reason: 'family',
+        message: localize('config.load.family.cancelled'),
+      } as ImportButtonCallbackResult;
+    }
+    dropped = chosen;
+    kept = [
+      ...new Map(
+        conflicts
+          .flatMap(({ members }) => members)
+          .filter(({ name }) => !dropped.includes(name))
+          .map((ext) => [ext.name, ext]),
+      ).values(),
+    ];
+    profile = withoutProfileMembers(config, dropped);
+  }
+
+  let staged = stageUcpConfigImport(profile, setConfigStatus);
+  // A kept choice the remaining selections don't bring in at its version becomes explicit.
+  const notResolved = (attempt: StagedImport) =>
+    attempt.status === 'ok'
+      ? kept.filter(
+          (choice) =>
+            !attempt.newExtensionsState.activeExtensions.some(
+              (ext) => createExtensionID(ext) === createExtensionID(choice),
+            ),
+        )
+      : [];
+  const promote = notResolved(staged);
+  if (promote.length > 0 && staged.status === 'ok') {
+    // Placed before the first remaining selection that needs it in the first attempt's graph.
+    const resolved = staged.newExtensionsState;
+    const needs = (
+      entry: { extension: string; version: string },
+      member: Extension,
+    ) => {
+      const selection = resolved.activeExtensions.find(
+        (ext) => ext.name === entry.extension && ext.version === entry.version,
+      );
+      if (selection === undefined) return false;
+      const closure = resolved.tree.copy().extensionDependenciesFor(selection);
+      return (
+        closure.status === 'OK' &&
+        (closure.extensions ?? []).some(
+          (ext) => ext !== selection && ext.name === member.name,
+        )
+      );
+    };
+    profile = withoutProfileMembers(config, dropped, promote, needs);
+    staged = stageUcpConfigImport(profile, setConfigStatus);
+  }
+  // Never report success for a choice the resolved setup doesn't honour.
+  const missing = staged.status === 'ok' ? notResolved(staged) : promote;
+  if (missing.length > 0) {
+    const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+    const details = [
+      ...missing.map(createExtensionID),
+      ...(staged.status === 'fail' && 'message' in staged.result
+        ? [staged.result.message]
+        : []),
+    ].join('\n');
+    return {
+      status: 'fail',
+      reason: 'family',
+      message: localize({
+        key: 'discovery.family.conflict.message',
+        args: { details },
+      }),
+    } as ImportButtonCallbackResult;
+  }
+  if (staged.status === 'ok') {
+    const incoming = staged.newExtensionsState.activeExtensions;
+    // A family choice must keep the modules the saved setup's games depend on:
+    // what it listed, even if its full order no longer resolves, and what it resolves to.
+    // A family chosen in the live setup and the import must keep what it brings in.
+    const families = chosenFamilyExtensions(current, staged.newExtensionsState);
+    if (
+      (dropped.length > 0 &&
+        (await refuseFamilySaveStateChange(
+          [
+            ...profileListedExtensions(config, current.extensions),
+            ...profileActiveExtensions(
+              config,
+              current.extensions,
+              current.tree,
+            ),
+          ],
+          incoming,
+        ))) ||
+      (families &&
+        (await refuseFamilySaveStateChange(families.before, families.after)))
+    ) {
+      const localize = await getStore().get(GUI_LOCALIZATION_ATOM);
+      setConfigStatus('discovery.family.savestate.title');
+      return {
+        status: 'fail',
+        reason: 'family',
+        message: localize('discovery.family.savestate.message'),
+      } as ImportButtonCallbackResult;
+    }
     // Only a player-initiated import starts from a live setup; startup and reload start empty.
-    const { removed } = saveStateChanges(
-      getStore().get(EXTENSION_STATE_REDUCER_ATOM).activeExtensions,
-      staged.newExtensionsState.activeExtensions,
-    );
-    if (!(await confirmSaveStateLoss(removed)))
+    if (
+      options.confirmSaveStateLoss &&
+      !(await confirmSaveStateLoss(
+        saveStateChanges(current.activeExtensions, incoming).removed,
+      ))
+    )
       return { status: 'aborted' } as ImportButtonCallbackResult;
   }
-  return importUcpConfig(config, setConfigStatus, staged);
+  const result = importUcpConfig(profile, setConfigStatus, staged);
+  // The loaded setup differs from the file until the player saves it.
+  if (dropped.length > 0 && result.status === 'success')
+    getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
+  return result;
 }
 
 /**

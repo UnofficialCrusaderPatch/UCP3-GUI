@@ -31,6 +31,7 @@ export function installableSources(contentElement: ContentElement) {
 
 export async function downloadAndInstallContent(
   contentElement: ContentElement,
+  gameFolder = getStore().get(GAME_FOLDER_ATOM),
 ) {
   const setStatus = createStatusSetter(contentElement);
 
@@ -54,8 +55,6 @@ export async function downloadAndInstallContent(
   }
 
   const src = zipSources.at(0)!;
-
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
 
@@ -217,12 +216,11 @@ export async function downloadAndInstallContent(
 export async function installOnlineContent(
   contentElements: ContentElement[],
   onSettled?: (result: DownloadAndInstallContentResult) => void,
+  gameFolder = getStore().get(GAME_FOLDER_ATOM),
 ) {
   LOGGER.msg(
     `Downloading: ${contentElements.map((ce) => ce.definition.name).join(', ')}`,
   ).debug();
-
-  const gameFolder = getStore().get(GAME_FOLDER_ATOM);
 
   const cacheDir = `${gameFolder}/${UCP_CACHE_FOLDER}`;
   if (!(await onFsExists(cacheDir))) {
@@ -273,7 +271,7 @@ export async function installOnlineContent(
       });
 
       try {
-        const result = await downloadAndInstallContent(ce);
+        const result = await downloadAndInstallContent(ce, gameFolder);
         if (onSettled) onSettled(result);
         return result;
       } catch (e: unknown) {

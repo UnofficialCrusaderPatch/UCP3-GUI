@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import { Modal, Button } from 'react-bootstrap';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { AbstractModalWindowProperties, registerModal } from './abstract-modal';
 import { MessageType } from '../../localization/localization';
 import Message from '../general/message';
@@ -8,6 +8,7 @@ import Message from '../general/message';
 export interface OkCancelModalWindowProperties
   extends AbstractModalWindowProperties<boolean, boolean> {
   cancel?: MessageType;
+  children?: ReactNode;
 }
 
 const DEFAULT_OK_CANCEL_MODAL_PROPERTIES: OkCancelModalWindowProperties = {
@@ -24,6 +25,7 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
     ok,
     cancel,
     alternativeMessageSource,
+    children,
   } = props;
 
   const [show, setShow] = useState(true);
@@ -61,6 +63,7 @@ function ModalOkCancel(props: OkCancelModalWindowProperties) {
           message={message}
           alternativeSource={alternativeMessageSource}
         />
+        {children}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={internalHandleClose}>

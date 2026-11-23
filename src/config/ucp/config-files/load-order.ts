@@ -1,5 +1,5 @@
 import yaml from 'yaml';
-import { Extension, LoadOrder } from '../common';
+import { ConfigFile, Extension, LoadOrder } from '../common';
 import { DependencyStatement } from '../dependency-statement';
 
 export function serializeLoadOrder(extensions: Extension[]) {
@@ -46,4 +46,15 @@ export function deserializeLoadOrder(values: string[] | LoadOrder) {
 
 export function deserializeLoadOrderFromYaml(value: string) {
   return deserializeLoadOrder(yaml.parse(value));
+}
+
+/**
+ * Every entry a saved profile lists in its load orders, `config-full` first,
+ * then `config-sparse`. Throws like deserializeLoadOrder on an invalid order.
+ */
+export function profileLoadOrderEntries(config: ConfigFile): LoadOrder {
+  return [
+    config['config-full']?.['load-order'],
+    config['config-sparse']?.['load-order'],
+  ].flatMap((order) => deserializeLoadOrder(order ?? []));
 }

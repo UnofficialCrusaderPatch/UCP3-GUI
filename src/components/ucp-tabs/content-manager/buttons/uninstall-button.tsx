@@ -2,8 +2,9 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { XSquare } from 'react-bootstrap-icons';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import {
-  BUSY_CONTENT_ELEMENTS_ATOM,
+  BUSY_CONTENT_COUNT,
   CONTENT_INTERFACE_STATE_ATOM,
+  SELECTED_UNINSTALL_ERRORS_ATOM,
 } from '../state/atoms';
 import Logger from '../../../../util/scripts/logging';
 import { uninstallContentButtonCallback } from './callbacks/uninstall-button-callback';
@@ -28,7 +29,8 @@ export function UninstallButton(
     (ce) => ce.installed && !ce.online,
   );
 
-  const busyCount = useAtomValue(BUSY_CONTENT_ELEMENTS_ATOM).length;
+  const busyCount = useAtomValue(BUSY_CONTENT_COUNT);
+  const removalErrors = useAtomValue(SELECTED_UNINSTALL_ERRORS_ATOM);
 
   const countElement =
     selectionCount < 2 ? (
@@ -49,6 +51,12 @@ export function UninstallButton(
   } else if (busyCount > 0) {
     enabled = false;
     helpText = localize('store.toolbar.uninstall.notidle');
+  } else if (removalErrors.length) {
+    enabled = false;
+    helpText = localize({
+      key: 'store.toolbar.uninstall.dependencies',
+      args: { lst: removalErrors.join('\n') },
+    });
   }
 
   return (
@@ -59,6 +67,7 @@ export function UninstallButton(
       onMouseLeave={() => {
         setStatusBarMessage(undefined);
       }}
+      title={helpText}
     >
       <button
         className="ucp-button ucp-button-variant"

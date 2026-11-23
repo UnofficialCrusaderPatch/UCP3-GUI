@@ -20,7 +20,7 @@ import { CONFIG_DIRTY_STATE_ATOM } from '../common/buttons/config-serialized-sta
 import GameDataPath from './launch-options/game-data-path';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import { saveBeforeLaunch } from '../common/save-config';
-import Message from '../../general/message';
+import Message, { useMessage } from '../../general/message';
 import UCP2_STATE_ATOM from '../../../function/game-files/game-ucp2-check';
 import GAME_VERSION_ATOM from '../../../function/game-files/game-version-state';
 import EXE_PATHS_ATOM from '../../../function/game-files/game-path';
@@ -28,6 +28,10 @@ import { LAUNCH_OPTION_DISPLAY_ATOM } from './launch-options/option-display';
 import { LAUNCH_OPTION_NO_SECURITY_ATOM } from './launch-options/option-security';
 import { LAUNCH_OPTION_CONSOLE_SHOW_ATOM } from './launch-options/option-console-show';
 import { LAUNCH_OPTION_GAME_DATA_PATH_ATOM } from './launch-options/option-game-data-path';
+import {
+  allowMultipleInstancesArgs,
+  LAUNCH_OPTION_ALLOW_MULTIPLE_INSTANCES_ATOM,
+} from './launch-options/option-allow-multiple-instances';
 import {
   UCP_CONSOLE_ARG,
   UCP_CONSOLE_VERBOSITY_ARG,
@@ -55,6 +59,10 @@ export default function Launch() {
   const [consoleShow, setConsoleShow] = useAtom(
     LAUNCH_OPTION_CONSOLE_SHOW_ATOM,
   );
+  const [allowMultipleInstances, setAllowMultipleInstances] = useAtom(
+    LAUNCH_OPTION_ALLOW_MULTIPLE_INSTANCES_ATOM,
+  );
+  const localize = useMessage();
   const gameDataPath = useAtomValue(LAUNCH_OPTION_GAME_DATA_PATH_ATOM);
 
   const configurationDirtyState = useAtomValue(CONFIG_DIRTY_STATE_ATOM);
@@ -73,6 +81,8 @@ export default function Launch() {
 
     args.push(noSecurity ? UCP_NO_SECURITY_ARG : UCP_SECURITY_ARG);
     args.push(consoleShow ? UCP_CONSOLE_ARG : UCP_NO_CONSOLE_ARG);
+
+    args.push(...allowMultipleInstancesArgs(allowMultipleInstances));
 
     if (gameDataPath !== undefined && gameDataPath.length > 0) {
       args.push(UCP_GAME_DATA_PATH_ARG);
@@ -237,6 +247,37 @@ export default function Launch() {
                     type="checkbox"
                     checked={noSecurity}
                     onChange={() => setNoSecurity(!noSecurity)}
+                  />
+                </div>
+                <div
+                  className="launch__options__box--ucp-checkbox"
+                  onClick={() =>
+                    setAllowMultipleInstances(!allowMultipleInstances)
+                  }
+                  onMouseEnter={() => {
+                    getStore().set(
+                      STATUS_BAR_MESSAGE_ATOM,
+                      'launch.options.allow.multiple.instances.help',
+                    );
+                  }}
+                  onMouseLeave={() => {
+                    getStore().set(STATUS_BAR_MESSAGE_ATOM, undefined);
+                  }}
+                >
+                  <h5>
+                    <Message message="launch.options.allow.multiple.instances" />
+                  </h5>
+                  <input
+                    type="checkbox"
+                    aria-label={localize(
+                      'launch.options.allow.multiple.instances',
+                    )}
+                    checked={allowMultipleInstances}
+                    // the box's own click toggles it; don't let it reach the row's handler too
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(event) =>
+                      setAllowMultipleInstances(event.currentTarget.checked)
+                    }
                   />
                 </div>
               </div>

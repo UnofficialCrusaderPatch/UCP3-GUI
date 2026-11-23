@@ -19,7 +19,7 @@ import {
 import { CONFIG_DIRTY_STATE_ATOM } from '../common/buttons/config-serialized-state';
 import GameDataPath from './launch-options/game-data-path';
 import * as GuiSettings from '../../../function/gui-settings/settings';
-import { saveCurrentConfig } from '../common/save-config';
+import { saveBeforeLaunch } from '../common/save-config';
 import Message from '../../general/message';
 import UCP2_STATE_ATOM from '../../../function/game-files/game-ucp2-check';
 import GAME_VERSION_ATOM from '../../../function/game-files/game-version-state';
@@ -117,7 +117,7 @@ export default function Launch() {
           receiveEnvs={receiveEnvs}
           beforeLaunch={() => {
             if (autoSave) {
-              saveCurrentConfig();
+              saveBeforeLaunch();
             }
           }}
         />
@@ -131,7 +131,7 @@ export default function Launch() {
           receiveEnvs={receiveEnvs}
           beforeLaunch={() => {
             if (autoSave) {
-              saveCurrentConfig();
+              saveBeforeLaunch();
             }
           }}
         />

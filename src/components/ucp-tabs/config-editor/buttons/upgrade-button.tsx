@@ -10,9 +10,8 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from 'components/ucp-tabs/common/b
 import reportAndConfirmBuildResult from 'components/ucp-tabs/extension-manager/extension-elements/reporting';
 import { buildExtensionConfigurationDB } from 'function/configuration/extension-configuration/build-extension-configuration-db';
 import { showModalOk } from 'components/modals/modal-ok';
-import { computeConfigLoss } from 'components/ucp-tabs/extension-manager/extension-elements/inactive-extension-element-click-callback';
+import { confirmRequiredValueRepairs } from 'components/ucp-tabs/common/required-value-repairs-dialog';
 import { makeToast, ToastType } from 'components/toasts/toasts-display';
-import { CONFIGURATION_USER_REDUCER_ATOM } from 'function/configuration/state';
 import { STATUS_BAR_MESSAGE_ATOM } from 'components/footer/footer';
 
 async function upgradeExtensionsCallback(
@@ -44,7 +43,11 @@ async function upgradeExtensionsCallback(
   const oldState = getStore().get(EXTENSION_STATE_INTERFACE_ATOM);
   let newState = oldState;
   try {
-    newState = upgradeAllExtensions(oldState);
+    // Resolve on a copy: a cancelled confirmation must not change the live graph.
+    newState = upgradeAllExtensions({
+      ...oldState,
+      tree: oldState.tree.copy(),
+    });
   } catch (err: any) {
     if (interactive) {
       await showModalOk({
@@ -65,31 +68,7 @@ async function upgradeExtensionsCallback(
 
   if (!(await reportAndConfirmBuildResult(res))) return;
 
-  const { lostConfig, retainedConfig } = computeConfigLoss(res);
-
-  if (lostConfig.length > 0) {
-    if (interactive) {
-      const answer = await showModalOkCancel({
-        title: 'extensions.activation.customisations.loss.title',
-        message: {
-          key: 'extensions.activation.customisations.loss.message',
-          args: {
-            n: lostConfig.length,
-            entries: lostConfig.map(([url]) => url).sort(),
-          },
-        },
-      });
-
-      if (!answer) {
-        return;
-      }
-    }
-  }
-
-  getStore().set(CONFIGURATION_USER_REDUCER_ATOM, {
-    type: 'reset',
-    value: retainedConfig,
-  });
+  if (!(await confirmRequiredValueRepairs(res, interactive))) return;
 
   getStore().set(CONFIG_EXTENSIONS_DIRTY_STATE_ATOM, true);
 

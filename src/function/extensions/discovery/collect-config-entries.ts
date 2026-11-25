@@ -19,21 +19,18 @@ export function collectConfigEntries(
       }
       // eslint-disable-next-line no-param-reassign
       collection[url] = { ...o };
-    } else {
-      Object.keys(obj).forEach((key) => {
-        let newUrl = url;
-        if (newUrl === undefined) newUrl = '';
-        if (newUrl !== '') {
-          newUrl += '.';
-        }
-        newUrl += key;
+    }
+
+    Object.keys(obj)
+      .filter((key) => key !== 'contents')
+      .forEach((key) => {
+        const newUrl = url ? `${url}.${key}` : key;
         collectConfigEntries(
           obj[key] as { contents: unknown; [key: string]: unknown },
           newUrl,
           collection,
         );
       });
-    }
   }
 
   return collection;

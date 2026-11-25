@@ -131,6 +131,7 @@ function PageLink(props: { href: string | undefined; children: ReactNode }) {
       <button
         type="button"
         className="description-page-link"
+        data-page={key}
         onClick={() => open(key)}
       >
         {children}
@@ -161,8 +162,19 @@ export function DescriptionPages(props: {
   const [stack, setStack] = useState<string[]>([]);
   const top = useRef<HTMLDivElement>(null);
 
+  // the page key that Back just closed; its button is scrolled back into view
+  const closed = useRef<string>();
+
   useEffect(() => setStack([]), [extension, children, language]);
-  useEffect(() => top.current?.scrollIntoView({ block: 'nearest' }), [stack]);
+  useEffect(() => {
+    const opener = closed.current
+      ? top.current?.querySelector(
+          `[data-page="${CSS.escape(closed.current)}"]`,
+        )
+      : undefined;
+    closed.current = undefined;
+    (opener ?? top.current)?.scrollIntoView({ block: 'nearest' });
+  }, [stack]);
 
   const find = useMemo(() => {
     const dependencies =
@@ -205,7 +217,10 @@ export function DescriptionPages(props: {
           <button
             type="button"
             className="description-page-back"
-            onClick={() => setStack((opened) => opened.slice(0, -1))}
+            onClick={() => {
+              closed.current = current;
+              setStack((opened) => opened.slice(0, -1));
+            }}
           >
             <Message message="back" />
           </button>

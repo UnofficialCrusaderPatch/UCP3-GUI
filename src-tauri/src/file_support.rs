@@ -322,6 +322,15 @@ pub async fn canonicalize(
     }
 }
 
+// size of a file in bytes
+#[tauri::command]
+pub async fn get_file_size(app_handle: AppHandle, path: &str) -> Result<u64, String> {
+    let validated_path = get_allowed_path_with_string_error(&app_handle, path)?;
+    std::fs::metadata(validated_path)
+        .map(|metadata| metadata.len())
+        .map_err(|err| err.to_string())
+}
+
 // searches for a sequence of bytes in a file
 // this naive approach checks everything, should this be to slow, consider adding
 // an implementation of https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm

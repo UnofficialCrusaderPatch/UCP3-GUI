@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 import { Extension } from '../../config/ucp/common';
+import { extensionToID } from '../../function/extensions/dependency-management/dependency-resolution';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../function/extensions/state/state';
 import { LANGUAGE_ATOM } from '../../function/gui-settings/settings';
 import Message from '../general/message';
@@ -26,6 +27,7 @@ const IMAGE_TYPES: Record<string, string> = {
   gif: 'image/gif',
   webp: 'image/webp',
 };
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type Page = { text: string; extension: Extension };
 
@@ -41,11 +43,26 @@ const PagesContext = createContext<Pages>({
   open: () => {},
 });
 
-// The MIME type of a relative image path inside the plugin, or undefined
-function pluginImageType(src: string) {
-  if (/[:\\]/.test(src) || src.startsWith('/')) return undefined;
-  if (src.split('/').includes('..')) return undefined;
-  return IMAGE_TYPES[src.split('.').pop()!.toLowerCase()];
+function ownString(record: Record<string, unknown> | undefined, key: string) {
+  const value =
+    record && Object.prototype.hasOwnProperty.call(record, key)
+      ? record[key]
+      : undefined;
+  return typeof value === 'string' ? value : undefined;
+}
+
+// The decoded path and MIME type of a relative image inside the plugin
+function pluginImage(src: string) {
+  let path: string;
+  try {
+    path = decodeURIComponent(src);
+  } catch {
+    return undefined;
+  }
+  if (/[:\\]/.test(path) || path.startsWith('/')) return undefined;
+  if (path.split('/').includes('..')) return undefined;
+  const type = ownString(IMAGE_TYPES, path.split('.').pop()!.toLowerCase());
+  return type === undefined ? undefined : { path, type };
 }
 
 function toBase64(bytes: Uint8Array) {
@@ -58,10 +75,11 @@ function toBase64(bytes: Uint8Array) {
 
 function PluginImage(props: {
   extension: Extension;
-  src: string;
+  path: string;
+  type: string;
   alt: string;
 }) {
-  const { extension, src, alt } = props;
+  const { extension, path, type, alt } = props;
   const [url, setUrl] = useState<string>();
   useEffect(() => {
     let current = true;
@@ -69,10 +87,9 @@ function PluginImage(props: {
     (async () => {
       try {
         const bytes = await extension.io.handle((eh) =>
-          eh.getBinaryContents(src),
+          eh.getBinaryContents(path, MAX_IMAGE_BYTES),
         );
-        if (current)
-          setUrl(`data:${pluginImageType(src)};base64,${toBase64(bytes)}`);
+        if (current) setUrl(`data:${type};base64,${toBase64(bytes)}`);
       } catch {
         // a missing picture leaves the page without it
       }
@@ -80,7 +97,7 @@ function PluginImage(props: {
     return () => {
       current = false;
     };
-  }, [extension, src]);
+  }, [extension, path, type]);
   return url ? <ResizeImage100PercentWidth src={url} alt={alt} /> : null;
 }
 
@@ -90,8 +107,16 @@ function PageImage(props: {
 }) {
   const { src = '', alt = '' } = props;
   const { source } = useContext(PagesContext);
-  if (source && pluginImageType(src))
-    return <PluginImage extension={source} src={src} alt={alt} />;
+  const image = pluginImage(src);
+  if (source && image)
+    return (
+      <PluginImage
+        extension={source}
+        path={image.path}
+        type={image.type}
+        alt={alt}
+      />
+    );
   // eslint-disable-next-line react/jsx-props-no-spreading
   return <ResizeImage100PercentWidth {...props} />;
 }
@@ -132,35 +157,32 @@ export function DescriptionPages(props: {
 }) {
   const { extension, children } = props;
   const language = useAtomValue(LANGUAGE_ATOM);
-  const { extensions, activeExtensions } = useAtomValue(
-    EXTENSION_STATE_REDUCER_ATOM,
-  );
+  const { tree } = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
   const [stack, setStack] = useState<string[]>([]);
   const top = useRef<HTMLDivElement>(null);
 
-  useEffect(() => setStack([]), [extension, children]);
+  useEffect(() => setStack([]), [extension, children, language]);
   useEffect(() => top.current?.scrollIntoView({ block: 'nearest' }), [stack]);
 
   const find = useMemo(() => {
-    const chain = extension
-      ? [
-          extension,
-          ...Object.keys(extension.definition.dependencies ?? {})
-            .map(
-              (name) =>
-                activeExtensions.find((e) => e.name === name) ??
-                extensions.find((e) => e.name === name),
-            )
-            .filter((e): e is Extension => e !== undefined),
-        ]
-      : [];
+    const dependencies =
+      extension && tree.extensionsById[extensionToID(extension)]
+        ? tree
+            .nodeForExtension(extension)
+            .edgesOut.map((edge) => edge.to && tree.extensionsById[edge.to.id])
+            .filter((e): e is Extension => e !== undefined)
+        : [];
+    const chain = extension ? [extension, ...dependencies] : [];
     return (key: string) =>
       [language, 'en']
         .flatMap((lang) =>
-          chain.map((e) => ({ text: e.locales[lang]?.[key], extension: e })),
+          chain.map((e) => ({
+            text: ownString(e.locales[lang], key),
+            extension: e,
+          })),
         )
         .find((page): page is Page => page.text !== undefined);
-  }, [extension, extensions, activeExtensions, language]);
+  }, [extension, tree, language]);
   const current = stack.at(-1);
   const page = useMemo(
     () => (current === undefined ? undefined : find(current)),

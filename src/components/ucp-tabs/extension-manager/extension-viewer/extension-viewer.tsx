@@ -10,6 +10,7 @@ import { extensionToID } from '../../../../function/extensions/dependency-manage
 import ExtensionRelations from './extension-relations';
 import { CONTENT_STORE_ATOM } from '../../content-manager/state/atoms';
 import githubRepositoryUrl from '../../../../function/content/store/repository';
+import { LANGUAGE_ATOM } from '../../../../function/gui-settings/settings';
 
 export type ExtensionViewerProps = {
   extension: Extension;
@@ -21,9 +22,10 @@ export function ExtensionViewer(
   const { args, closeFunc } = props;
   const { extension } = args;
 
+  const language = useAtomValue(LANGUAGE_ATOM);
   const contentAtom = useMemo(
-    () => loadable(atom(async () => extension.io.fetchDescription())),
-    [extension],
+    () => loadable(atom(async () => extension.io.fetchDescription(language))),
+    [extension, language],
   );
 
   const content = useAtomValue(contentAtom);

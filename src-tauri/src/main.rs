@@ -25,6 +25,7 @@ fn main() {
             file_support::canonicalize,
             file_support::read_and_filter_dir,
             file_support::scan_file_for_bytes,
+            file_support::get_file_size,
             file_support::open_extension_path
         ])
         .build(tauri::generate_context!())

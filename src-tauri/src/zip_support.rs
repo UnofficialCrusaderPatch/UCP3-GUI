@@ -150,15 +150,28 @@ impl ZipReaderHelper {
             .collect())
     }
 
-    fn get_entry_as_binary(&mut self, path: &str) -> Result<Vec<u8>, String> {
-        let read_result = || -> Result<Vec<u8>, ZipError> {
-            let mut zip_file = self.reader.by_name(path)?;
+    fn get_entry_as_binary(
+        &mut self,
+        path: &str,
+        max_size: Option<u64>,
+    ) -> Result<Vec<u8>, String> {
+        let limit = max_size.unwrap_or(u64::MAX);
+        let too_large = || String::from("zip.entry.too_large");
+        let zip_file = self.reader.by_name(path).map_err(|error| error.to_string())?;
+        if zip_file.size() > limit {
+            return Err(too_large());
+        }
 
-            let mut vec_buf: Vec<u8> = Vec::new();
-            zip_file.read_to_end(&mut vec_buf)?;
-            Ok(vec_buf)
-        }();
-        read_result.map_err(|error| error.to_string())
+        let mut vec_buf: Vec<u8> = Vec::new();
+        // the declared size is not trusted, so reading stops past the limit
+        zip_file
+            .take(limit.saturating_add(1))
+            .read_to_end(&mut vec_buf)
+            .map_err(|error| error.to_string())?;
+        if vec_buf.len() as u64 > limit {
+            return Err(too_large());
+        }
+        Ok(vec_buf)
     }
 
     fn get_entry_as_text(&mut self, path: &str) -> Result<String, String> {
@@ -312,8 +325,9 @@ fn get_zip_reader_entry_as_binary<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
+    max_size: Option<u64>,
 ) -> Result<Vec<u8>, String> {
-    do_with_reader(&app_handle, id, |reader| reader.get_entry_as_binary(path))
+    do_with_reader(&app_handle, id, |reader| reader.get_entry_as_binary(path, max_size))
 }
 
 #[tauri::command]

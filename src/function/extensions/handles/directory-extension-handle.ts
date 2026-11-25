@@ -4,7 +4,11 @@ import {
   readBinaryFile,
   readTextFile,
 } from '../../../tauri/tauri-files';
-import { readAndFilterPaths } from '../../../tauri/tauri-invoke';
+import {
+  canonicalize,
+  getFileSize,
+  readAndFilterPaths,
+} from '../../../tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
 
 class DirectoryExtensionFileHandle implements ExtensionFileHandle {
@@ -83,9 +87,20 @@ class DirectoryExtensionHandle implements ExtensionHandle {
     throw new Error(`${p} not found`);
   }
 
-  async getBinaryContents(path: string): Promise<Uint8Array> {
+  async getBinaryContents(path: string, maxSize?: number): Promise<Uint8Array> {
     const p = `${this.path}/${path}`;
     if (await onFsExists(p)) {
+      // symlinks and junctions must not lead out of the extension folder
+      const [root, file] = await Promise.all([
+        canonicalize(this.path),
+        canonicalize(p),
+      ]);
+      if (!file.startsWith(`${root}/`)) {
+        throw new Error(`${p} is outside the extension folder`);
+      }
+      if (maxSize !== undefined && (await getFileSize(p)) > maxSize) {
+        throw new Error(`${p} is larger than ${maxSize} bytes`);
+      }
       const result = await readBinaryFile(p);
       result.err().ifPresent((error) => {
         throw new Error(

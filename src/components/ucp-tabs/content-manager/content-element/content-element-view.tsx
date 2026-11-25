@@ -22,6 +22,7 @@ import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { getStore } from '../../../../hooks/jotai/base';
 import { createExtensionID } from '../../../../function/global/constants/extension-id';
 import Message, { useMessage } from '../../../general/message';
+import { SimpleMessageType } from '../../../../localization/localization';
 
 const shiftSelectionStartAtom = atom<string>('');
 
@@ -89,11 +90,12 @@ export function ContentElementView(props: ContentElementViewProps) {
   const isInUse = useAtomValue(isInUseAtom);
   const removalErrors = useAtomValue(CONTENT_UNINSTALL_ERRORS_ATOM)[id] ?? [];
   const localize = useMessage();
-  let removalHelp = isInUse
-    ? localize({ key: 'store.element.activated.uninstall', args: { name } })
+  let removalMessage: SimpleMessageType | undefined = isInUse
+    ? { key: 'store.element.activated.uninstall', args: { name } }
     : undefined;
   if (removalErrors.length)
-    removalHelp = localize('store.element.uninstall.dependents');
+    removalMessage = 'store.element.uninstall.dependents';
+  const removalHelp = removalMessage ? localize(removalMessage) : undefined;
 
   const statusElementAtom = useMemo(
     () =>
@@ -292,7 +294,7 @@ export function ContentElementView(props: ContentElementViewProps) {
       title={removalHelp}
       style={{ cursor: 'pointer', position: 'relative', ...selectedStyle }}
       onMouseEnter={() => {
-        if (removalHelp) setStatusBarMessage(removalHelp);
+        if (removalMessage) setStatusBarMessage(removalMessage);
       }}
       onMouseLeave={() => {
         setStatusBarMessage(undefined);

@@ -1,2 +1,0 @@
-- Search extensions by name, description and translated tags in your GUI language, and filter by tags.
-- Choose one configuration from an extension family, such as Bare or Applied. A switch shows what changes first, and a saved setup with two choices from one family asks which one to keep.

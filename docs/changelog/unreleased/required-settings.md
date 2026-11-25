@@ -1,2 +1,0 @@
-- When an extension requires a different value for one of your settings, the launcher changes the saved setting and shows each change as old → new, on load and before activating or upgrading. Customisations always show the value the game uses.
-- If a saved setup can't be loaded, Save before launch leaves the file alone.

@@ -1,7 +1,7 @@
 import { atom, useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { loadable } from 'jotai/utils';
-import { SaferMarkdown } from '../../../markdown/safer-markdown';
+import { DescriptionPages } from '../../../markdown/description-pages';
 import { Extension } from '../../../../config/ucp/common';
 import { OverlayContentProps } from '../../../overlay/overlay';
 import Message from '../../../general/message';
@@ -59,9 +59,9 @@ export function ExtensionViewer(
             tree={tree}
             activeExtensions={activeExtensions}
           />
-          <SaferMarkdown>
+          <DescriptionPages extension={extension}>
             {content.state === 'hasData' ? content.data : ''}
-          </SaferMarkdown>
+          </DescriptionPages>
         </div>
       </div>
       <button

@@ -12,7 +12,7 @@ import {
   LAST_CLICKED_CONTENT_ATOM,
   SINGLE_CONTENT_SELECTION_ATOM,
 } from './state/atoms';
-import { SaferMarkdown } from '../../markdown/safer-markdown';
+import { DescriptionPages } from '../../markdown/description-pages';
 import Logger from '../../../util/scripts/logging';
 import { SELECTED_CONTENT_DESCRIPTION_ATOM } from './description/fetching';
 import { inlineDescription } from '../../../function/content/discovery/descriptions';
@@ -289,7 +289,9 @@ export function ContentManager() {
               className="parchment-box extension-manager-list text-dark"
               style={{ padding: '10px 10px' }}
             >
-              <SaferMarkdown>{description}</SaferMarkdown>
+              <DescriptionPages extension={selected?.extension}>
+                {description}
+              </DescriptionPages>
             </div>
             <ContentManagerToolbar />
           </div>

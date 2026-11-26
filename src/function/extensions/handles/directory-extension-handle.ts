@@ -1,10 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { onFsExists, readTextFile } from '../../../tauri/tauri-files';
-import {
-  canonicalize,
-  readAndFilterPaths,
-  readFileBytes,
-} from '../../../tauri/tauri-invoke';
+import { readAndFilterPaths, readFileBytes } from '../../../tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
 
 class DirectoryExtensionFileHandle implements ExtensionFileHandle {
@@ -87,14 +83,7 @@ class DirectoryExtensionHandle implements ExtensionHandle {
     const p = `${this.path}/${path}`;
     if (await onFsExists(p)) {
       // symlinks and junctions must not lead out of the extension folder
-      const [root, file] = await Promise.all([
-        canonicalize(this.path),
-        canonicalize(p),
-      ]);
-      if (!file.startsWith(`${root}/`)) {
-        throw new Error(`${p} is outside the extension folder`);
-      }
-      return readFileBytes(file, maxSize);
+      return readFileBytes(this.path, p, maxSize);
     }
     throw new Error(`${p} not found`);
   }

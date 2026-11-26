@@ -251,13 +251,15 @@ export async function canonicalize(
   return invoke(TAURI_COMMAND.FILES_CANONICALIZE, { path, slash });
 }
 
-// rejects files larger than maxSize bytes
+// rejects files that resolve outside root or are larger than maxSize bytes
 export async function readFileBytes(
+  root: string,
   path: string,
   maxSize?: number,
 ): Promise<Uint8Array> {
   return new Uint8Array(
     await invoke<number[]>(TAURI_COMMAND.FILES_READ_FILE_BYTES, {
+      root,
       path,
       maxSize,
     }),

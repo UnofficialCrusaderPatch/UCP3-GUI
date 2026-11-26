@@ -322,15 +322,25 @@ pub async fn canonicalize(
     }
 }
 
-// reads a file and fails if it is larger than max_size bytes
+// reads a file whose link-resolved path lies inside the link-resolved root folder,
+// and fails if it is larger than max_size bytes
 #[tauri::command]
 pub async fn read_file_bytes(
     app_handle: AppHandle,
+    root: &str,
     path: &str,
     max_size: Option<u64>,
 ) -> Result<Vec<u8>, String> {
-    let validated_path = get_allowed_path_with_string_error(&app_handle, path)?;
-    let file = File::open(validated_path).map_err(|err| err.to_string())?;
+    let canonical_root =
+        dunce::canonicalize(get_allowed_path_with_string_error(&app_handle, root)?)
+            .map_err(|err| err.to_string())?;
+    let canonical_path =
+        dunce::canonicalize(get_allowed_path_with_string_error(&app_handle, path)?)
+            .map_err(|err| err.to_string())?;
+    if !canonical_path.starts_with(&canonical_root) {
+        return Err(format!("{path} is outside {root}"));
+    }
+    let file = File::open(canonical_path).map_err(|err| err.to_string())?;
     read_bounded(file, max_size)
 }
 

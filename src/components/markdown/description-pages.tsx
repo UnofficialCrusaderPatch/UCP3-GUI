@@ -1,6 +1,8 @@
 import { useAtomValue } from 'jotai';
 import {
+  Children,
   createContext,
+  isValidElement,
   ReactNode,
   useContext,
   useEffect,
@@ -130,7 +132,13 @@ function PageLink(props: { href: string | undefined; children: ReactNode }) {
     return (
       <button
         type="button"
-        className="description-page-link"
+        className={
+          Children.toArray(children).some(
+            (child) => isValidElement(child) && child.type === PageImage,
+          )
+            ? 'description-page-link description-page-picture'
+            : 'description-page-link'
+        }
         data-page={key}
         onClick={() => open(key)}
       >
@@ -149,7 +157,8 @@ function PageLink(props: { href: string | undefined; children: ReactNode }) {
 const COMPONENTS = { a: PageLink, img: PageImage };
 
 // A plugin description with pages (#page:<key>), coloured text
-// (#color:<colour>) and images from the plugin folder. A page is a locale
+// (#color:<colour>) and images from the plugin folder; a page link around an
+// image is a picture button. A page is a locale
 // value of the plugin or, if it has none, of its direct dependencies.
 // eslint-disable-next-line import/prefer-default-export
 export function DescriptionPages(props: {

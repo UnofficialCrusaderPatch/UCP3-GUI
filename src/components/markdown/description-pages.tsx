@@ -126,7 +126,7 @@ function PageLink(props: { href: string | undefined; children: ReactNode }) {
   const { find, open } = useContext(PagesContext);
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
-    if (find(key) === undefined) return null;
+    if (find(key) === undefined) return <span>{children}</span>;
     return (
       <button
         type="button"
@@ -186,9 +186,9 @@ export function DescriptionPages(props: {
         : [];
     const chain = extension ? [extension, ...dependencies] : [];
     return (key: string) =>
-      [language, 'en']
-        .flatMap((lang) =>
-          chain.map((e) => ({
+      chain
+        .flatMap((e) =>
+          [language, 'en'].map((lang) => ({
             text: ownString(e.locales[lang], key),
             extension: e,
           })),

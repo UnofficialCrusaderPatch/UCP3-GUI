@@ -1,8 +1,6 @@
 import { useAtomValue } from 'jotai';
 import {
-  Children,
   createContext,
-  isValidElement,
   ReactNode,
   useContext,
   useEffect,
@@ -33,11 +31,21 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type Page = { text: string; extension: Extension };
 
+// an opened page and the position of the page link that opened it
+type Opened = { key: string; link: number };
+
+type MarkdownNode = {
+  type: string;
+  tagName?: string;
+  value?: string;
+  children?: MarkdownNode[];
+};
+
 type Pages = {
   // the plugin that images of the shown page are read from
   source?: Extension;
   find: (key: string) => Page | undefined;
-  open: (key: string) => void;
+  open: (key: string, link: HTMLElement) => void;
 };
 
 const PagesContext = createContext<Pages>({
@@ -67,6 +75,24 @@ function pluginImage(src: string) {
   return type === undefined ? undefined : { path, type };
 }
 
+// Whether a link shows nothing but one image
+function imageOnly(node: MarkdownNode | undefined) {
+  let images = 0;
+  const empty = (child: MarkdownNode): boolean => {
+    if (child.type === 'text') return !child.value?.trim();
+    if (child.tagName === 'img') {
+      images += 1;
+      return true;
+    }
+    return (child.children ?? []).every(empty);
+  };
+  return node !== undefined && empty(node) && images === 1;
+}
+
+function pageLinks(root: HTMLElement | null) {
+  return Array.from(root?.querySelectorAll<HTMLElement>('[data-page]') ?? []);
+}
+
 function toBase64(bytes: Uint8Array) {
   let binary = '';
   for (let offset = 0; offset < bytes.length; offset += 0x8000) {
@@ -82,7 +108,8 @@ function PluginImage(props: {
   alt: string;
 }) {
   const { extension, path, type, alt } = props;
-  const [url, setUrl] = useState<string>();
+  // null: the picture can't be read
+  const [url, setUrl] = useState<string | null>();
   useEffect(() => {
     let current = true;
     setUrl(undefined);
@@ -93,13 +120,14 @@ function PluginImage(props: {
         );
         if (current) setUrl(`data:${type};base64,${toBase64(bytes)}`);
       } catch {
-        // a missing picture leaves the page without it
+        if (current) setUrl(null);
       }
     })();
     return () => {
       current = false;
     };
   }, [extension, path, type]);
+  if (url === null) return <span>{alt}</span>;
   return url ? <ResizeImage100PercentWidth src={url} alt={alt} /> : null;
 }
 
@@ -123,8 +151,12 @@ function PageImage(props: {
   return <ResizeImage100PercentWidth {...props} />;
 }
 
-function PageLink(props: { href: string | undefined; children: ReactNode }) {
-  const { href = '', children } = props;
+function PageLink(props: {
+  href: string | undefined;
+  children: ReactNode;
+  node: MarkdownNode | undefined;
+}) {
+  const { href = '', children, node } = props;
   const { find, open } = useContext(PagesContext);
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
@@ -133,14 +165,12 @@ function PageLink(props: { href: string | undefined; children: ReactNode }) {
       <button
         type="button"
         className={
-          Children.toArray(children).some(
-            (child) => isValidElement(child) && child.type === PageImage,
-          )
+          imageOnly(node)
             ? 'description-page-link description-page-picture'
             : 'description-page-link'
         }
         data-page={key}
-        onClick={() => open(key)}
+        onClick={(event) => open(key, event.currentTarget)}
       >
         {children}
       </button>
@@ -157,9 +187,9 @@ function PageLink(props: { href: string | undefined; children: ReactNode }) {
 const COMPONENTS = { a: PageLink, img: PageImage };
 
 // A plugin description with pages (#page:<key>), coloured text
-// (#color:<colour>) and images from the plugin folder; a page link around an
-// image is a picture button. A page is a locale
-// value of the plugin or, if it has none, of its direct dependencies.
+// (#color:<colour>) and images from the plugin folder; a page link showing
+// only an image is a picture button. A page is a locale value of the plugin
+// or, if it has none, of its direct dependencies.
 // eslint-disable-next-line import/prefer-default-export
 export function DescriptionPages(props: {
   extension: Extension | undefined;
@@ -168,24 +198,30 @@ export function DescriptionPages(props: {
   const { extension, children } = props;
   const language = useAtomValue(LANGUAGE_ATOM);
   const { tree } = useAtomValue(EXTENSION_STATE_REDUCER_ATOM);
-  const [stack, setStack] = useState<string[]>([]);
+  const [stack, setStack] = useState<Opened[]>([]);
   const top = useRef<HTMLDivElement>(null);
+  const back = useRef<HTMLButtonElement>(null);
 
-  // the page key that Back just closed; its button is scrolled back into view
-  const closed = useRef<string>();
+  // the position of the link that opened the page Back just closed
+  const closed = useRef<number>();
 
   useEffect(() => setStack([]), [extension, children, language]);
   useEffect(() => {
-    const opener = closed.current
-      ? top.current?.querySelector(
-          `[data-page="${CSS.escape(closed.current)}"]`,
-        )
-      : undefined;
+    const opener =
+      closed.current === undefined
+        ? undefined
+        : pageLinks(top.current)[closed.current];
     closed.current = undefined;
-    // a newly opened page starts at its top
-    (opener ?? top.current)?.scrollIntoView({
-      block: opener || stack.length === 0 ? 'nearest' : 'start',
-    });
+    if (opener) {
+      opener.scrollIntoView({ block: 'nearest' });
+      opener.focus({ preventScroll: true });
+    } else if (stack.length > 0) {
+      // a newly opened page starts at its top
+      top.current?.scrollIntoView({ block: 'start' });
+      back.current?.focus({ preventScroll: true });
+    } else {
+      top.current?.scrollIntoView({ block: 'nearest' });
+    }
   }, [stack]);
 
   const find = useMemo(() => {
@@ -207,7 +243,7 @@ export function DescriptionPages(props: {
         )
         .find((page): page is Page => page.text !== undefined);
   }, [extension, tree, language]);
-  const current = stack.at(-1);
+  const current = stack.at(-1)?.key;
   const page = useMemo(
     () => (current === undefined ? undefined : find(current)),
     [find, current],
@@ -217,7 +253,10 @@ export function DescriptionPages(props: {
     () => ({
       source: page ? page.extension : extension,
       find,
-      open: (key) => setStack((opened) => [...opened, key]),
+      open: (key, link) => {
+        const position = pageLinks(top.current).indexOf(link);
+        setStack((opened) => [...opened, { key, link: position }]);
+      },
     }),
     [page, extension, find],
   );
@@ -227,10 +266,11 @@ export function DescriptionPages(props: {
       <div ref={top}>
         {current !== undefined && (
           <button
+            ref={back}
             type="button"
             className="description-page-back"
             onClick={() => {
-              closed.current = current;
+              closed.current = stack.at(-1)?.link;
               setStack((opened) => opened.slice(0, -1));
             }}
           >

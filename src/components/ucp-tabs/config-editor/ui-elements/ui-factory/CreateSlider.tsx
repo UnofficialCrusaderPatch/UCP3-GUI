@@ -2,7 +2,7 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   NumberContents,
@@ -109,6 +109,13 @@ function CreateSlider(args: {
   const ref = useRef(null);
   const moved = useRef(false);
 
+  useEffect(() => {
+    setLocalValue(
+      currentSliderValue === undefined ? 0 : currentSliderValue * factor,
+    );
+    moved.current = false;
+  }, [currentSliderValue, factor]);
+
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
   const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
   const specifiedStyle = createSpecifiedStyleIfSpecifiedAndTouched(
@@ -144,6 +151,10 @@ function CreateSlider(args: {
     });
   };
 
+  const commit = () => {
+    if (moved.current) save(localValue);
+  };
+
   return (
     <div
       onMouseEnter={() => {
@@ -174,11 +185,9 @@ function CreateSlider(args: {
           setLocalValue(parseInt(event.target.value, 10));
           moved.current = true;
         }}
-        // onAfterChange fires only on mouse up and touch end.
-        onAfterChange={(event) => save(parseInt(event.target.value, 10))}
-        onKeyUp={() => {
-          if (moved.current) save(localValue);
-        }}
+        onMouseUp={commit}
+        onTouchEnd={commit}
+        onKeyUp={commit}
         disabled={isDisabled}
       />
     </div>

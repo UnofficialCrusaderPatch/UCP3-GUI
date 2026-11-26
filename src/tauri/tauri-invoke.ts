@@ -1,11 +1,11 @@
 // Helper file, wrapping tauri invokes in simple functions
 
-import { BinaryFileContents } from '@tauri-apps/api/fs';
-import { invoke } from '@tauri-apps/api/tauri';
+import { BinaryFileContents } from './compat/fs';
+import { invoke } from './compat/tauri';
 
-const PLUGIN_CONFIG = 'tauri-plugin-ucp-config';
-const PLUGIN_LOGGING = 'tauri-plugin-ucp-logging';
-const PLUGIN_ZIP = 'tauri-plugin-ucp-zip-support';
+const PLUGIN_CONFIG = 'ucp-config';
+const PLUGIN_LOGGING = 'ucp-logging';
+const PLUGIN_ZIP = 'ucp-zip-support';
 
 const TEXT_ENCODER = new TextEncoder();
 

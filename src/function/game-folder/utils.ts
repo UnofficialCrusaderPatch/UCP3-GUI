@@ -1,6 +1,6 @@
 import { atom, useAtomValue } from 'jotai';
 import { loadable } from 'jotai/utils';
-import { exists } from '@tauri-apps/api/fs';
+import { exists } from '../../tauri/compat/fs';
 import Logger from '../../util/scripts/logging';
 import { GAME_FOLDER_ATOM } from './interface';
 

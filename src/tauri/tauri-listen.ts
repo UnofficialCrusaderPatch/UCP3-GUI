@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { EventCallback, listen } from '@tauri-apps/api/event';
+import { EventCallback, listen } from './compat/event';
 
 const TAURI_EVENT = {
   LOG_BACKEND: 'backend-log',

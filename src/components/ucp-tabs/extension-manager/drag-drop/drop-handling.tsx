@@ -1,5 +1,5 @@
-import { Event } from '@tauri-apps/api/event';
 import { atom } from 'jotai';
+import { Event } from '../../../../tauri/compat/event';
 import { getStore } from '../../../../hooks/jotai/base';
 import { ConsoleLogger } from '../../../../util/scripts/logging';
 import { showModalOk } from '../../../modals/modal-ok';

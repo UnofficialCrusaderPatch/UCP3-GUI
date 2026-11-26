@@ -26,8 +26,8 @@ vi.mock('../../../../function/game-folder/utils', async () => {
     DOES_UCP_FOLDER_EXIST_ATOM: makeAtom(() => mocks.exists),
   };
 });
-vi.mock('@tauri-apps/api/tauri', () => ({ invoke: mocks.invoke }));
-vi.mock('@tauri-apps/api/os', () => ({ type: async () => 'Windows_NT' }));
+vi.mock('../../../../tauri/compat/tauri', () => ({ invoke: mocks.invoke }));
+vi.mock('../../../../tauri/compat/os', () => ({ type: async () => 'Windows_NT' }));
 vi.mock('../../../general/message', () => ({
   useMessage: () => mocks.localize,
 }));

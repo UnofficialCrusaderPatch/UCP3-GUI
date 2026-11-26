@@ -3,11 +3,11 @@ import {
   FetchOptions,
   Response,
   ResponseType,
-} from '@tauri-apps/api/http';
+} from './compat/http';
 import {
   download as tauriPluginDownload,
   upload as tauriPluginUpload,
-} from 'tauri-plugin-upload-api';
+} from './compat/upload';
 import { resolvePath } from './tauri-files';
 
 function addToOptions(

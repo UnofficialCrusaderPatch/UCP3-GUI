@@ -10,10 +10,18 @@ mod hash_utils;
 mod logging;
 mod run_program;
 mod utils;
+mod updater;
 mod zip_support;
 
 fn main() {
     let tauri_app = tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(logging::init()) // logging is loaded first, currently using INFO until set by config
         .plugin(gui_config::init())
         .plugin(zip_support::init())
@@ -27,6 +35,10 @@ fn main() {
             file_support::scan_file_for_bytes,
             file_support::open_extension_path
         ])
+        .setup(|app| {
+            updater::check_on_startup(app.handle());
+            Ok(())
+        })
         .build(tauri::generate_context!())
         .expect("error while running tauri application");
 

@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { BinaryFileContents } from '@tauri-apps/api/fs';
+import { BinaryFileContents } from '../../tauri/compat/fs';
 import {
   loadZipReader,
   closeZipReader,

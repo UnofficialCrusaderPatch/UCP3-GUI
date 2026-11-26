@@ -1,5 +1,5 @@
 import { SemVer } from 'semver';
-import { ResponseType } from '@tauri-apps/api/http';
+import { ResponseType } from '../../tauri/compat/http';
 import Logger from '../../util/scripts/logging';
 import { UCP3_REPO_GIST_URL } from './download-enums';
 import { ProgressHandler, download, fetch } from '../../tauri/tauri-http';

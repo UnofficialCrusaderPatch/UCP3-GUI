@@ -1,0 +1,127 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissions migrated from the Tauri v1 allowlist. Applies to all windows, as the v1 allowlist did.",
+  "windows": [
+    "*"
+  ],
+  "permissions": [
+    "core:default",
+    "core:window:allow-create",
+    "core:window:allow-center",
+    "core:window:allow-request-user-attention",
+    "core:window:allow-set-resizable",
+    "core:window:allow-set-maximizable",
+    "core:window:allow-set-minimizable",
+    "core:window:allow-set-closable",
+    "core:window:allow-set-title",
+    "core:window:allow-maximize",
+    "core:window:allow-unmaximize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-minimize",
+    "core:window:allow-unminimize",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "core:window:allow-set-decorations",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-set-content-protected",
+    "core:window:allow-set-size",
+    "core:window:allow-set-min-size",
+    "core:window:allow-set-max-size",
+    "core:window:allow-set-position",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-set-focus",
+    "core:window:allow-set-icon",
+    "core:window:allow-set-skip-taskbar",
+    "core:window:allow-set-cursor-grab",
+    "core:window:allow-set-cursor-visible",
+    "core:window:allow-set-cursor-icon",
+    "core:window:allow-set-cursor-position",
+    "core:window:allow-set-ignore-cursor-events",
+    "core:window:allow-start-dragging",
+    "core:webview:allow-create-webview-window",
+    "core:webview:allow-print",
+    "fs:read-all",
+    "fs:write-all",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$TEMP/**/*"
+        },
+        {
+          "path": "$DATA/**/*"
+        },
+        {
+          "path": "$DOWNLOAD/*"
+        },
+        {
+          "path": "$LOCALDATA/**/*"
+        },
+        {
+          "path": "$APPCONFIG/**/*"
+        },
+        {
+          "path": "$RESOURCE/gameinfo/**/*.yaml"
+        },
+        {
+          "path": "$RESOURCE/lang/**/*.yaml"
+        },
+        {
+          "path": "$RESOURCE/lang/sources/**/*.yaml"
+        },
+        {
+          "path": "$RESOURCE/backgrounds/*"
+        }
+      ]
+    },
+    "shell:allow-open",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "wevtutil",
+          "cmd": "wevtutil",
+          "args": [
+            "qe",
+            "Application",
+            "/Q:*[System[(EventID=1000 or EventID=1001)]]"
+          ],
+          "sidecar": false
+        }
+      ]
+    },
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-ask",
+    "dialog:allow-message",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://api.github.com/repos/UnofficialCrusaderPatch/**/*"
+        },
+        {
+          "url": "https://github.com/UnofficialCrusaderPatch/**/*"
+        },
+        {
+          "url": "https://gist.githubusercontent.com/ucp3-machine/**/*"
+        },
+        {
+          "url": "https://gist.githubusercontent.com/gynt/**/*"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/**/*"
+        }
+      ]
+    },
+    "os:default",
+    "clipboard-manager:allow-write-text",
+    "upload:default",
+    "ucp-config:default",
+    "ucp-logging:default",
+    "ucp-zip-support:default"
+  ]
+}

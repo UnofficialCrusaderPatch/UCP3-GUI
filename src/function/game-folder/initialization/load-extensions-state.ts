@@ -1,4 +1,4 @@
-import { exists } from '@tauri-apps/api/fs';
+import { exists } from '../../../tauri/compat/fs';
 import importButtonCallback from '../../../components/ucp-tabs/common/importing/import-button-callback';
 import { getStore } from '../../../hooks/jotai/base';
 import { ExtensionsState } from '../../extensions/extensions-state';

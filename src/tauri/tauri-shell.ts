@@ -1,5 +1,5 @@
-import { open } from '@tauri-apps/api/shell';
-import { invoke } from '@tauri-apps/api/tauri';
+import { open } from './compat/shell';
+import { invoke } from './compat/tauri';
 import Logger from '../util/scripts/logging';
 
 const LOGGER = new Logger('tauri-shell.ts');

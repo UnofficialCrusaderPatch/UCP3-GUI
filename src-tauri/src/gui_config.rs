@@ -9,10 +9,11 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use tauri::{
-    api::dialog,
     plugin::{Builder, TauriPlugin},
-    AppHandle, Manager, RunEvent, Runtime, Window,
+    AppHandle, Emitter, Manager, RunEvent, Runtime, Window,
 };
+use tauri_plugin_dialog::DialogExt;
+use tauri_plugin_fs::FsExt;
 
 use crate::{
     constants::{
@@ -66,7 +67,7 @@ struct ConfigEvent {
 
 impl<R: Runtime> GuiConfig<R> {
     fn emit_config_event(&self, event_type: &str) {
-        if let Err(err) = self.app_handle.emit_all::<ConfigEvent>(
+        if let Err(err) = self.app_handle.emit::<ConfigEvent>(
             FILE_CONFIG_EVENT,
             ConfigEvent {
                 event_type: event_type.to_string(),
@@ -186,7 +187,7 @@ impl<R: Runtime> GuiConfig<R> {
         title: &str,
     ) -> Result<Option<String>, GuiError> {
         let selected_folder_option = if new {
-            let mut folder_picker = dialog::blocking::FileDialogBuilder::new().set_parent(window);
+            let mut folder_picker = self.app_handle.dialog().file().set_parent(window);
             if !title.is_empty() {
                 folder_picker = folder_picker.set_title(title);
             }
@@ -194,7 +195,8 @@ impl<R: Runtime> GuiConfig<R> {
                 folder_picker = folder_picker.set_directory(directory_path);
             }
             folder_picker
-                .pick_folder()
+                .blocking_pick_folder()
+                .and_then(|path| path.into_path().ok())
                 .and_then(|path| path.to_slash().map(String::from))
         } else if !directory_path.is_empty() {
             Some(directory_path.to_string())
@@ -305,7 +307,7 @@ fn save_config<R: Runtime>(app_handle: AppHandle<R>) {
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("tauri-plugin-ucp-config")
+    Builder::new("ucp-config")
         .invoke_handler(tauri::generate_handler![
             get_config_recent_folders,
             select_config_recent_folder,
@@ -314,7 +316,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             set_config_log_level,
             save_config
         ])
-        .setup(|app_handle| {
+        .setup(|app_handle, _api| {
             app_handle.manage::<Mutex<GuiConfig<R>>>(Mutex::new(GuiConfig::new(app_handle)));
             Ok(())
         })

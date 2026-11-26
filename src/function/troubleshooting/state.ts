@@ -1,5 +1,5 @@
 import { atomWithQuery } from 'jotai-tanstack-query';
-import { ResponseType, Response } from '@tauri-apps/api/http';
+import { ResponseType, Response } from '../../tauri/compat/http';
 import { fetch } from '../../tauri/tauri-http';
 import { LANGUAGE_ATOM } from '../gui-settings/settings';
 

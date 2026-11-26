@@ -1,4 +1,4 @@
-import { dialog } from '@tauri-apps/api';
+import * as dialog from './compat/dialog';
 import Option from '../util/structs/option';
 
 export async function open(

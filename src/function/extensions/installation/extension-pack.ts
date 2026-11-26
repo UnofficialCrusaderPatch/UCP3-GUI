@@ -1,4 +1,4 @@
-import { tempdir } from '@tauri-apps/api/os';
+import { tempdir } from '../../../tauri/compat/os';
 import {
   createDir,
   BaseDirectory,
@@ -6,7 +6,7 @@ import {
   exists,
   readDir,
   renameFile,
-} from '@tauri-apps/api/fs';
+} from '../../../tauri/compat/fs';
 import { extractZipToPath } from '../../../tauri/tauri-invoke';
 import { ZipReader } from '../../../util/structs/zip-handler';
 import Logger from '../../../util/scripts/logging';

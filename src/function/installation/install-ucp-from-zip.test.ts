@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   saveFirst: vi.fn(),
   version: vi.fn(),
 }));
-vi.mock('@tauri-apps/api/fs', () => ({ exists: mocks.exists }));
+vi.mock('../../tauri/compat/fs', () => ({ exists: mocks.exists }));
 vi.mock('./update-bundled-extensions', () => ({
   BundledUpdateRollbackError: class extends Error {},
   updateBundledExtensions: mocks.update,

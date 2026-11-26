@@ -2,12 +2,8 @@
 // currently it will just take care that only one window per path can be created
 // the main (landing) window is ignored)
 
-// import { TauriEvent } from '@tauri-apps/api/event';
-import {
-  appWindow,
-  WebviewWindow,
-  WindowOptions,
-} from '@tauri-apps/api/window';
+// import { TauriEvent } from './compat/event';
+import { appWindow, WebviewWindow, WindowOptions } from './compat/window';
 import { getHexHashOfString } from '../util/scripts/hash';
 
 export function getCurrentWindow() {
@@ -22,18 +18,8 @@ export async function getWindowIfExists(
     ? windowName
     : await getHexHashOfString(windowName);
 
-  // currently uses internal value found in code to not create a backend window
-  // after that, a simple visibility status function of the window is called to check for error
-  // TODO: replace with proper function once something working is available
-  try {
-    const window = new WebviewWindow(hashedWindowName, {
-      skip: true,
-    } as WindowOptions);
-    await window.isVisible();
-    return window;
-  } catch (error) {
-    return null;
-  }
+  // Tauri v2 can look up windows by label directly
+  return WebviewWindow.getByLabel(hashedWindowName);
 }
 
 // I do not like this solution one bit -TheRedDaemon

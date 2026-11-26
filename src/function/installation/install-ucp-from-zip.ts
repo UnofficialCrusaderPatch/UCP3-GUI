@@ -1,4 +1,4 @@
-import { exists } from '@tauri-apps/api/fs';
+import { exists } from '../../tauri/compat/fs';
 import { ToastType } from '../../components/toasts/toasts-display';
 import { Error as FileUtilError } from '../../tauri/tauri-files';
 import { extractZipToPath } from '../../tauri/tauri-invoke';

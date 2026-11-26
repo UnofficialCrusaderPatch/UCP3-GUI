@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { writeTextFile } from '@tauri-apps/api/fs';
+import { writeTextFile } from '../../../../tauri/compat/fs';
 import {
   ConfigFile,
   Definition,

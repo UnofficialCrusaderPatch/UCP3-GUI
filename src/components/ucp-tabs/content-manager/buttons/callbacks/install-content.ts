@@ -1,4 +1,4 @@
-import { createDir } from '@tauri-apps/api/fs';
+import { createDir } from '../../../../../tauri/compat/fs';
 import { ContentElement } from '../../../../../function/content/types/content-element';
 import { getStore } from '../../../../../hooks/jotai/base';
 import { download } from '../../../../../tauri/tauri-http';

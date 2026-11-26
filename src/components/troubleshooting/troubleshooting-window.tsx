@@ -1,8 +1,8 @@
 import { atom, useAtomValue } from 'jotai';
-import { Command, open } from '@tauri-apps/api/shell';
 import { dataDir } from '@tauri-apps/api/path';
-import { exists } from '@tauri-apps/api/fs';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
+import { Command, open } from '../../tauri/compat/shell';
+import { exists } from '../../tauri/compat/fs';
 import { TROUBLESHOOTING_MD_CONTENT_ATOM } from '../../function/troubleshooting/state';
 import Message from '../general/message';
 import { SaferMarkdown } from '../markdown/safer-markdown';

@@ -1,7 +1,7 @@
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { atom } from 'jotai';
-import { ResponseType } from '@tauri-apps/api/http';
 import semver from 'semver';
+import { ResponseType } from '../../../tauri/compat/http';
 import { GUI_VERSION_ATOM } from '../../footer/footer';
 import { fetch } from '../../../tauri/tauri-http';
 

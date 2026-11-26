@@ -1,6 +1,6 @@
 import { rcompare } from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
-import { exists } from '@tauri-apps/api/fs';
+import { exists } from '../../../tauri/compat/fs';
 import { buildExtensionConfigurationDB } from '../../configuration/extension-configuration/build-extension-configuration-db';
 import { addExtensionToExplicityActivatedExtensions } from '../../../components/ucp-tabs/extension-manager/extensions-state-manipulation';
 import { Extension } from '../../../config/ucp/common';

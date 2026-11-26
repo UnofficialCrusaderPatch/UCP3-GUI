@@ -1,6 +1,6 @@
-import { createDir, exists, writeTextFile } from '@tauri-apps/api/fs';
 import semver from 'semver';
 import { useSetAtom } from 'jotai';
+import { createDir, exists, writeTextFile } from '../../../../tauri/compat/fs';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalCreatePlugin } from '../../../modals/modal-create-plugin';
 import { showModalOk } from '../../../modals/modal-ok';

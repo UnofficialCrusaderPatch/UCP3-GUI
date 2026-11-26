@@ -1,8 +1,8 @@
 /* eslint-disable react/require-default-props */
 import { atom, useAtomValue, useSetAtom } from 'jotai';
-import { type } from '@tauri-apps/api/os';
 import { FolderFill } from 'react-bootstrap-icons';
 import { useState } from 'react';
+import { type } from '../../../../../tauri/compat/os';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../../footer/footer';
 import { useMessage } from '../../../../general/message';
 import { showModalOk } from '../../../../modals/modal-ok';

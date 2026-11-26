@@ -54,6 +54,7 @@ function CreateSlider(args: {
   const { url, enabled } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
+  const declaredValue = contents.value as SliderValue;
   let { [url]: value } = configuration as {
     [url: string]: SliderValue | undefined;
   };
@@ -148,9 +149,12 @@ function CreateSlider(args: {
           const sliderValue = parseInt(event.target.value, 10) / factor;
           const updatedConfiguration = {
             [url]:
-              typeof value === 'number' || typeof defaultValue === 'number'
+              typeof declaredValue === 'number'
                 ? sliderValue
-                : { ...value, sliderValue },
+                : {
+                    ...(typeof value === 'number' ? declaredValue : value),
+                    sliderValue,
+                  },
           };
           setUserConfiguration({
             type: 'set-multiple',

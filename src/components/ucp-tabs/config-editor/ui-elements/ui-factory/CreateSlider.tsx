@@ -116,6 +116,32 @@ function CreateSlider(args: {
     url,
   );
 
+  const save = (input: number) => {
+    const sliderValue = input / factor;
+    if (sliderValue === currentSliderValue) return;
+    const updatedConfiguration = {
+      [url]:
+        typeof declaredValue === 'number'
+          ? sliderValue
+          : {
+              ...(typeof value === 'number' ? declaredValue : value),
+              sliderValue,
+            },
+    };
+    setUserConfiguration({
+      type: 'set-multiple',
+      value: updatedConfiguration,
+    });
+    setConfiguration({
+      type: 'set-multiple',
+      value: updatedConfiguration,
+    });
+    setConfigurationTouched({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, true]]),
+    });
+  };
+
   return (
     <div
       onMouseEnter={() => {
@@ -145,30 +171,9 @@ function CreateSlider(args: {
         onChange={(event) => {
           setLocalValue(parseInt(event.target.value, 10));
         }}
-        onAfterChange={(event) => {
-          const sliderValue = parseInt(event.target.value, 10) / factor;
-          const updatedConfiguration = {
-            [url]:
-              typeof declaredValue === 'number'
-                ? sliderValue
-                : {
-                    ...(typeof value === 'number' ? declaredValue : value),
-                    sliderValue,
-                  },
-          };
-          setUserConfiguration({
-            type: 'set-multiple',
-            value: updatedConfiguration,
-          });
-          setConfiguration({
-            type: 'set-multiple',
-            value: updatedConfiguration,
-          });
-          setConfigurationTouched({
-            type: 'set-multiple',
-            value: Object.fromEntries([[url, true]]),
-          });
-        }}
+        // onAfterChange fires only on mouse up and touch end.
+        onAfterChange={(event) => save(parseInt(event.target.value, 10))}
+        onKeyUp={() => save(localValue)}
         disabled={isDisabled}
       />
     </div>

@@ -173,7 +173,10 @@ export function DescriptionPages(props: {
         )
       : undefined;
     closed.current = undefined;
-    (opener ?? top.current)?.scrollIntoView({ block: 'nearest' });
+    // a newly opened page starts at its top
+    (opener ?? top.current)?.scrollIntoView({
+      block: opener || stack.length === 0 ? 'nearest' : 'start',
+    });
   }, [stack]);
 
   const find = useMemo(() => {

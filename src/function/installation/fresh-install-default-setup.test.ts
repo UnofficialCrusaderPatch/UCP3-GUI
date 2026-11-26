@@ -66,7 +66,7 @@ vi.mock('../../hooks/jotai/base', async (importOriginal) => {
   return { ...actual, getStore: () => mocks.store ?? actual.getStore() };
 });
 vi.mock('@tauri-apps/api/app', () => ({ getVersion: async () => '1.0.17' }));
-vi.mock('@tauri-apps/api/fs', async (importOriginal) => ({
+vi.mock('../../tauri/compat/fs', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   exists: async (path: string) =>
     path === `${FOLDER}/ucp`

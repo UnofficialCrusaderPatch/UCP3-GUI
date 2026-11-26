@@ -27,7 +27,7 @@ vi.mock('../../../../hooks/jotai/base', async (importOriginal) => {
     await importOriginal<typeof import('../../../../hooks/jotai/base')>();
   return { ...actual, getStore: () => mocks.store ?? actual.getStore() };
 });
-vi.mock('@tauri-apps/api/fs', async (importOriginal) => ({
+vi.mock('../../../../tauri/compat/fs', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   exists: mocks.exists,
 }));

@@ -1,20 +1,4 @@
 import {
-  exists as tauriFileExists,
-  createDir,
-  readDir as tauriReadDir,
-  FsOptions,
-  readTextFile as tauriReadTextFile,
-  writeTextFile as tauriWriteTextFile,
-  readBinaryFile as tauriReadBinaryFile,
-  writeBinaryFile as tauriWriteBinaryFile,
-  copyFile as tauriCopyFile,
-  renameFile as tauriRenameFile,
-  removeFile as tauriRemoveFile,
-  removeDir as tauriRemoveDir,
-  BinaryFileContents,
-  FsDirOptions,
-} from '@tauri-apps/api/fs';
-import {
   dataDir,
   dirname,
   downloadDir,
@@ -32,7 +16,23 @@ import {
   SchemaOptions,
   ToJSOptions,
 } from 'yaml';
-import { convertFileSrc } from '@tauri-apps/api/tauri';
+import {
+  exists as tauriFileExists,
+  createDir,
+  readDir as tauriReadDir,
+  FsOptions,
+  readTextFile as tauriReadTextFile,
+  writeTextFile as tauriWriteTextFile,
+  readBinaryFile as tauriReadBinaryFile,
+  writeBinaryFile as tauriWriteBinaryFile,
+  copyFile as tauriCopyFile,
+  renameFile as tauriRenameFile,
+  removeFile as tauriRemoveFile,
+  removeDir as tauriRemoveDir,
+  BinaryFileContents,
+  FsDirOptions,
+} from './compat/fs';
+import { convertFileSrc } from './compat/tauri';
 import Result from '../util/structs/result';
 import {
   readAndFilterPaths as invokeReadAndFilterPaths,

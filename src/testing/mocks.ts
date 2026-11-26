@@ -7,7 +7,7 @@ export function testingMockIPC(): (
     // eslint-disable-next-line no-console
     console.log('mockIPC', cmd, args);
 
-    if (cmd === 'plugin:tauri-plugin-ucp-config|get_config_recent_folders') {
+    if (cmd === 'plugin:ucp-config|get_config_recent_folders') {
       return ['test'];
     }
 

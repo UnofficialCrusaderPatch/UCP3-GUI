@@ -3,6 +3,7 @@ use std::{
     sync::{Mutex, MutexGuard},
 };
 use tauri::{AppHandle, Error, Manager, Runtime, State};
+use tauri_plugin_fs::FsExt;
 
 use crate::constants::BASE_FOLDER;
 
@@ -57,7 +58,7 @@ pub fn get_state_mutex_from_handle<R: Runtime, T: std::marker::Send + 'static>(
 }
 
 pub fn get_roaming_folder_path() -> PathBuf {
-    let mut data_path = tauri::api::path::data_dir().unwrap(); // fail if not there
+    let mut data_path = dirs::data_dir().unwrap(); // fail if not there
     data_path.push(BASE_FOLDER);
     data_path
 }
@@ -70,7 +71,11 @@ pub fn get_allowed_path<'a, R: Runtime>(
     if app_handle.fs_scope().is_allowed(path_object) {
         Ok(path_object)
     } else {
-        Err(Error::PathNotAllowed(path_object.to_path_buf()))
+        // `tauri::Error::PathNotAllowed` was removed in Tauri v2; keep the v1 message
+        Err(Error::Io(std::io::Error::new(
+            std::io::ErrorKind::PermissionDenied,
+            format!("path not allowed on the configured scope: {}", path_object.display()),
+        )))
     }
 }
 

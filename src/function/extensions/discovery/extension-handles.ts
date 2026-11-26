@@ -1,4 +1,4 @@
-import { type FileEntry } from '@tauri-apps/api/fs';
+import { type FileEntry } from '../../../tauri/compat/fs';
 import { readDir } from '../../../tauri/tauri-files';
 import { slashify } from '../../../tauri/tauri-invoke';
 import DirectoryExtensionHandle from '../handles/directory-extension-handle';

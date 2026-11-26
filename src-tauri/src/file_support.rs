@@ -4,11 +4,9 @@ use std::{
     io::{self, Read},
     path::Path,
 };
-use tauri::{
-    api::dir::{read_dir, DiskEntry},
-    scope::GlobPattern,
-    AppHandle, FsScope, Manager,
-};
+use glob::Pattern as GlobPattern;
+use tauri::{fs::Scope as FsScope, AppHandle};
+use tauri_plugin_fs::FsExt;
 
 use crate::{
     constants::PATH_MATCH_OPTIONS,
@@ -239,6 +237,32 @@ pub async fn open_extension_path(
     tauri::async_runtime::spawn_blocking(move || open_in_file_manager(&target, reveal))
         .await
         .map_err(|err| err.to_string())?
+}
+
+// Replacement for the removed `tauri::api::dir` (Tauri v1) helpers.
+struct DiskEntry {
+    path: std::path::PathBuf,
+    children: Option<Vec<DiskEntry>>,
+}
+
+fn read_dir<P: AsRef<Path>>(path: P, recursive: bool) -> io::Result<Vec<DiskEntry>> {
+    let mut entries = vec![];
+    for entry in std::fs::read_dir(path)? {
+        let path = entry?.path();
+        if let Ok(metadata) = std::fs::metadata(&path) {
+            let children = if metadata.is_dir() {
+                Some(if recursive {
+                    read_dir(&path, true)?
+                } else {
+                    vec![]
+                })
+            } else {
+                None
+            };
+            entries.push(DiskEntry { path, children });
+        }
+    }
+    Ok(entries)
 }
 
 fn fill_with_paths_with_slash(

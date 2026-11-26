@@ -25,7 +25,9 @@ import { CONFIG_EXTENSIONS_DIRTY_STATE_ATOM } from '../buttons/config-serialized
 afterEach(cleanup);
 
 // Folder controls read native host information on each row.
-vi.mock('@tauri-apps/api/os', () => ({ type: async () => 'Windows_NT' }));
+vi.mock('../../../../tauri/compat/os', () => ({
+  type: async () => 'Windows_NT',
+}));
 vi.mock('../../../../tauri/tauri-invoke', async (original) => ({
   ...(await original<typeof import('../../../../tauri/tauri-invoke')>()),
   getGuiConfigRecentFolders: async () => [],

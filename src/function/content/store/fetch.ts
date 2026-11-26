@@ -1,5 +1,5 @@
 import { parse as parseYaml } from 'yaml';
-import { ResponseType } from '@tauri-apps/api/http';
+import { ResponseType } from '../../../tauri/compat/http';
 import { fetch } from '../../../tauri/tauri-http';
 import Logger from '../../../util/scripts/logging';
 import { DiscoveryMetadata, TagLocales } from '../discovery/metadata';

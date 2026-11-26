@@ -1,6 +1,6 @@
 import { useSetAtom } from 'jotai';
 import { PlusLg } from 'react-bootstrap-icons';
-import { exists } from '@tauri-apps/api/fs';
+import { exists } from '../../../../tauri/compat/fs';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import ExtensionPack from '../../../../function/extensions/installation/extension-pack';

@@ -1,6 +1,6 @@
 import yaml from 'yaml';
-import { exists } from '@tauri-apps/api/fs';
 import { basename } from '@tauri-apps/api/path';
+import { exists } from '../../../tauri/compat/fs';
 import RustZipExtensionHandle from '../handles/rust-zip-extension-handle';
 import { Definition } from '../../../config/ucp/common';
 import { extractZipToPath } from '../../../tauri/tauri-invoke';

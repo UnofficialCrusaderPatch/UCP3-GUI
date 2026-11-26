@@ -15,9 +15,9 @@ if (process && process.env && process.env.VITEST) {
 
 // used to globally store hooks tauri hooks
 // eslint-disable-next-line import/first
-import { TauriEvent } from '@tauri-apps/api/event';
+import { TauriEvent } from './compat/event';
 // eslint-disable-next-line import/first
-import { appWindow } from '@tauri-apps/api/window';
+import { appWindow } from './compat/window';
 
 class TauriEventHandler {
   intern_funcs: (() => void | Promise<void>)[] = [];

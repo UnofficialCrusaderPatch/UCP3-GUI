@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   exists: vi.fn(),
 }));
 vi.mock('@tauri-apps/api/app', () => ({ getVersion: mocks.gui }));
-vi.mock('@tauri-apps/api/fs', () => ({ exists: mocks.exists }));
+vi.mock('../../tauri/compat/fs', () => ({ exists: mocks.exists }));
 vi.mock('../content/store/fetch', () => ({ fetchStore: mocks.fetch }));
 vi.mock('./plan-bundled-updates', async (importOriginal) => ({
   ...(await importOriginal<object>()),

@@ -1,6 +1,6 @@
-import { FileEntry, exists, readDir } from '@tauri-apps/api/fs';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { Stack } from 'react-bootstrap-icons';
+import { FileEntry, exists, readDir } from '../../../../tauri/compat/fs';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { showModalOk } from '../../../modals/modal-ok';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../../../function/extensions/state/state';

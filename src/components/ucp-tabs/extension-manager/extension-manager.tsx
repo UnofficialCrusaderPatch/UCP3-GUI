@@ -3,9 +3,9 @@
 import './extension-manager.css';
 
 import { atom, useAtom, useAtomValue } from 'jotai';
-import { listen } from '@tauri-apps/api/event';
 import { Fragment, ReactNode, useEffect } from 'react';
-import { FileDropEvent } from '@tauri-apps/api/window';
+import { listen } from '../../../tauri/compat/event';
+import { FileDropEvent } from '../../../tauri/compat/window';
 import * as GuiSettings from '../../../function/gui-settings/settings';
 import {
   EXTENSION_STATE_REDUCER_ATOM,

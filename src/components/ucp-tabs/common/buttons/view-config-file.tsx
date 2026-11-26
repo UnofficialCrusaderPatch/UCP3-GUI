@@ -7,7 +7,7 @@ import { EyeFill } from 'react-bootstrap-icons';
 import { useMemo } from 'react';
 import { loadable } from 'jotai/utils';
 
-import { writeText } from '@tauri-apps/api/clipboard';
+import { writeText } from '../../../../tauri/compat/clipboard';
 import { STATUS_BAR_MESSAGE_ATOM } from '../../../footer/footer';
 import { SaferMarkdown } from '../../../markdown/safer-markdown';
 import {

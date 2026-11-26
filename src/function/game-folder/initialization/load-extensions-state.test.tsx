@@ -2,7 +2,6 @@ import { createStore, Provider, useAtomValue } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { parse } from 'yaml';
 import { afterEach, expect, test, vi } from 'vitest';
-import { exists } from '@tauri-apps/api/fs';
 import {
   cleanup,
   render,
@@ -11,8 +10,12 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { useEffect } from 'react';
+import { exists } from '../../../tauri/compat/fs';
 import CreateUCP2SliderChoice from '../../../components/ucp-tabs/config-editor/ui-elements/ui-factory/CreateUCP2SliderChoice';
-import { UCP2SliderChoiceDisplayConfigElement } from '../../../config/ucp/common';
+import {
+  UCP2SliderChoiceDisplayConfigElement,
+  ConfigFile,
+} from '../../../config/ucp/common';
 import { deserializeSimplifiedSerializedExtensionsStateFromExtensions } from '../../../testing/dump-extensions-state';
 import { EXTENSION_STATE_REDUCER_ATOM } from '../../extensions/state/state';
 import { activateFirstTimeUseExtensions } from '../modifications/activate-first-time-use-extensions';
@@ -25,15 +28,14 @@ import TEST_DATA from './tests/load-extensions-state.test.data.json';
 import { setupExtensionsStateConfiguration } from './load-extensions-state';
 import { createExtensionID } from '../../global/constants/extension-id';
 import { ExtensionsState } from '../../extensions/extensions-state';
-import { ConfigFile } from '../../../config/ucp/common';
 import { loadConfigFromFile } from '../../../config/ucp/config-files/config-files';
 import { findProfileFamilyConflicts } from '../../extensions/dependency-management/families';
 import importButtonCallback from '../../../components/ucp-tabs/common/importing/import-button-callback';
 import { PROFILE_NOT_LOADED_ATOM } from '../../../components/ucp-tabs/common/save-config';
 import { INIT_DONE } from './initialization-states';
 
-vi.mock('@tauri-apps/api/fs', async (original) => {
-  const module = await original<typeof import('@tauri-apps/api/fs')>();
+vi.mock('../../../tauri/compat/fs', async (original) => {
+  const module = await original<typeof import('../../../tauri/compat/fs')>();
   return { ...module, exists: vi.fn(module.exists) };
 });
 vi.mock('../../../config/ucp/config-files/config-files', async (original) => {

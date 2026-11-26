@@ -1,5 +1,5 @@
-import { TauriEvent } from '@tauri-apps/api/event';
 import { atom } from 'jotai';
+import { TauriEvent } from '../../tauri/compat/event';
 import { atomWithRefresh, getStore } from '../../hooks/jotai/base';
 import {
   getGuiConfigLogLevel,

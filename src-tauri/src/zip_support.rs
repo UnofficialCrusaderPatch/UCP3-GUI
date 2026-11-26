@@ -7,9 +7,9 @@ use std::{
     sync::Mutex,
     sync::MutexGuard,
 };
+use glob::Pattern as GlobPattern;
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    scope::GlobPattern,
     AppHandle, Manager, Runtime,
 };
 use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
@@ -410,7 +410,7 @@ async fn extract_zip_to_path<R: Runtime>(
 /// INIT ///
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("tauri-plugin-ucp-zip-support")
+    Builder::new("ucp-zip-support")
         .invoke_handler(tauri::generate_handler![
             extract_zip_to_path,
             load_zip_reader,
@@ -428,7 +428,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             write_zip_writer_entry_from_text,
             write_zip_writer_entry_from_file
         ])
-        .setup(|app_handle| {
+        .setup(|app_handle, _api| {
             app_handle.manage::<Mutex<ZipCollectionsState>>(Mutex::new(ZipCollectionsState::new()));
             Ok(())
         })

@@ -3,158 +3,85 @@
   "build": {
     "beforeBuildCommand": "npm run vite-build",
     "beforeDevCommand": "npm run vite-dev",
-    "devPath": "http://localhost:5173",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173"
   },
-  "package": {
-    "productName": "UCP3-GUI"
-  },
-  "tauri": {
-    "allowlist": {
-      "clipboard": {
-        "writeText": true
-      },
-      "os": {
-        "all": true
-      },
-      "fs": {
-        "all": true,
-        "scope": {
-          "allow": [
-            "$TEMP/**/*",
-            "$DATA/**/*",
-            "$DOWNLOAD/*",
-            "$LOCALDATA/**/*",
-            "$APP/**/*",
-            "$RESOURCE/gameinfo/**/*.yaml",
-            "$RESOURCE/lang/**/*.yaml",
-            "$RESOURCE/lang/sources/**/*.yaml",
-            "$RESOURCE/backgrounds/*"
-          ],
-          "deny": [],
-          "requireLiteralLeadingDot": false
-        }
-      },
-      "path": {
-        "all": true
-      },
-      "dialog": {
-        "open": true,
-        "save": true
-      },
-      "window": {
-        "all": true
-      },
-      "http": {
-        "all": true,
-        "scope": [
-          "https://api.github.com/repos/UnofficialCrusaderPatch/**/*",
-          "https://github.com/UnofficialCrusaderPatch/**/*",
-          "https://gist.githubusercontent.com/ucp3-machine/**/*",
-          "https://gist.githubusercontent.com/gynt/**/*",
-          "https://raw.githubusercontent.com/**/*"
-        ]
-      },
-      "shell": {
-        "open": "^((mailto:\\w+)|(tel:\\w+)|(https?://\\w+)|([A-Z]:)).+",
-        "execute": true,
-        "scope": [
-          {
-            "name": "wevtutil",
-            "cmd": "wevtutil",
-            "args": [
-              "qe",
-              "Application",
-              "/Q:*[System[(EventID=1000 or EventID=1001)]]"
-            ]
-          }
-        ]
-      },
-      "protocol": {
-        "asset": true,
-        "assetScope": [
-          "$RESOURCE/backgrounds/*"
-        ]
+  "bundle": {
+    "active": true,
+    "category": "DeveloperTool",
+    "copyright": "",
+    "targets": [
+      "nsis",
+      "appimage",
+      "deb"
+    ],
+    "externalBin": [],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "../resources/": "."
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "",
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": true,
+        "languages": [
+          "English"
+        ],
+        "headerImage": "../installer/headerImage.bmp",
+        "sidebarImage": "../installer/sidebarImage.bmp",
+        "installerIcon": "../installer/ucp3.ico",
+        "installerHooks": "./windows/hooks.nsh"
       }
     },
-    "bundle": {
-      "active": true,
-      "category": "DeveloperTool",
-      "copyright": "",
+    "publisher": "ucp-team",
+    "longDescription": "",
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "shortDescription": "",
+    "linux": {
       "deb": {
         "depends": [
           "libc6 (>= 2.34)",
           "libssl3"
         ]
-      },
-      "externalBin": [],
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "resources": {
-        "../resources/": "."
-      },
-      "identifier": "ucp.gui.tauri",
-      "publisher": "ucp-team",
-      "longDescription": "",
-      "macOS": {
-        "entitlements": null,
-        "exceptionDomain": "",
-        "frameworks": [],
-        "providerShortName": null,
-        "signingIdentity": null
-      },
-      "shortDescription": "",
-      "targets": [
-        "nsis",
-        "updater",
-        "appimage",
-        "deb"
-      ],
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": "",
-        "nsis": {
-          "installMode": "currentUser",
-          "displayLanguageSelector": true,
-          "languages": [
-            "English"
-          ],
-          "license": "../LICENSE",
-          "headerImage": "../installer/headerImage.bmp",
-          "sidebarImage": "../installer/sidebarImage.bmp",
-          "installerIcon": "../installer/ucp3.ico",
-          "template": "nsis-template-with-msvc.nsi"
-        }
       }
     },
-    "security": {
-      "csp": {
-        "default-src": "'self'",
-        "img-src": "'self' data: asset: https://asset.localhost https://user-images.githubusercontent.com https://raw.githubusercontent.com https://discordapp.com/api/guilds/426318193603117057/widget.png",
-        "script-src": "'self' 'unsafe-inline'",
-        "style-src": "'self' 'unsafe-inline'"
-      },
-      "dangerousDisableAssetCspModification": [
-        "script-src"
-      ]
-    },
+    "licenseFile": "../LICENSE",
+    "createUpdaterArtifacts": "v1Compatible"
+  },
+  "productName": "UCP3-GUI",
+  "mainBinaryName": "UCP3-GUI",
+  "identifier": "ucp.gui.tauri",
+  "plugins": {
     "updater": {
-      "active": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc5OUQwNEU2QjcxMUVFMTMKUldRVDdoRzM1Z1NkZVN3V2h2cXcwOTh6c1pTZFROS3BwM2UzM2lMTGFQajU3RzdLZ1gzc2RWS0kK",
       "endpoints": [
         "https://gist.githubusercontent.com/ucp3-machine/2a179c892f49448c85dfcc9e5f9a3c6b/raw/"
       ],
-      "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc5OUQwNEU2QjcxMUVFMTMKUldRVDdoRzM1Z1NkZVN3V2h2cXcwOTh6c1pTZFROS3BwM2UzM2lMTGFQajU3RzdLZ1gzc2RWS0kK",
       "windows": {
         "installMode": "passive"
-      }
+      },
+      "requireSignedVersion": true
     },
+    "shell": {
+      "open": "^((mailto:\\w+)|(tel:\\w+)|(https?://\\w+)|([A-Z]:)).+"
+    }
+  },
+  "app": {
     "windows": [
       {
         "fullscreen": false,
@@ -164,8 +91,29 @@
         "title": "Unofficial Crusader Patch 3 - GUI",
         "width": 1024,
         "minWidth": 800,
-        "decorations": false
+        "decorations": false,
+        "useHttpsScheme": true
       }
-    ]
+    ],
+    "security": {
+      "assetProtocol": {
+        "scope": [
+          "$RESOURCE/backgrounds/*"
+        ],
+        "enable": true
+      },
+      "dangerousDisableAssetCspModification": [
+        "script-src"
+      ],
+      "csp": {
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' data: asset: https://asset.localhost https://user-images.githubusercontent.com https://raw.githubusercontent.com https://discordapp.com/api/guilds/426318193603117057/widget.png",
+        "connect-src": [
+          "ipc: http://ipc.localhost"
+        ],
+        "default-src": "'self'",
+        "script-src": "'self' 'unsafe-inline'"
+      }
+    }
   }
 }

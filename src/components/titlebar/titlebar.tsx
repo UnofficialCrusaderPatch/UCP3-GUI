@@ -7,8 +7,8 @@ import maximizeIcon from 'assets/misc/fullscreen.svg';
 import maximizeExitIcon from 'assets/misc/fullscreen-exit.svg';
 import mainIcon from 'assets/ucp3.png';
 
-import { TauriEvent } from '@tauri-apps/api/event';
 import { atom, useAtomValue } from 'jotai';
+import { TauriEvent } from '../../tauri/compat/event';
 import SvgHelper from '../general/svg-helper';
 import { getCurrentWindow } from '../../tauri/tauri-window';
 import { registerTauriEventListener } from '../../tauri/tauri-hooks';

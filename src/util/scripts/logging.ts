@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable max-classes-per-file */
 /* eslint-disable no-console */
-import { TauriEvent } from '@tauri-apps/api/event';
+import { TauriEvent } from '../../tauri/compat/event';
 import { registerTauriEventListener } from '../../tauri/tauri-hooks';
 import { log } from '../../tauri/tauri-invoke';
 import { onBackendLog } from '../../tauri/tauri-listen';

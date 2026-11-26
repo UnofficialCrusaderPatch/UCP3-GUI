@@ -1,5 +1,5 @@
 import yaml from 'yaml';
-import { type FileEntry } from '@tauri-apps/api/fs';
+import { type FileEntry } from '../../../tauri/compat/fs';
 import { ExtensionHandle } from '../handles/extension-handle';
 import { TranslationDB, Translation } from './translation';
 import { ConfigFile } from '../../../config/ucp/common';

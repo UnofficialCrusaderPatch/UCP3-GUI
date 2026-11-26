@@ -23,7 +23,7 @@ use log4rs::Handle;
 use serde::Serialize;
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    AppHandle, Manager, Runtime,
+    AppHandle, Emitter, Manager, Runtime,
 };
 
 use crate::constants::{
@@ -67,7 +67,7 @@ impl<R: Runtime> Append for WebConsoleAppender<R> {
         let mut buffer = Vec::new();
         self.fill_vec_with_log(&mut buffer, record)?;
 
-        self.app_handle.emit_all::<BackendLog>(
+        self.app_handle.emit::<BackendLog>(
             LOG_BACKEND_EVENT,
             BackendLog {
                 level: record.level() as usize,
@@ -207,9 +207,9 @@ fn log(level: usize, message: &str) -> Result<(), String> {
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("tauri-plugin-ucp-logging")
+    Builder::new("ucp-logging")
         .invoke_handler(tauri::generate_handler![log])
-        .setup(|app_handle| {
+        .setup(|app_handle, _api| {
             app_handle.manage::<Mutex<log4rs::Handle>>(Mutex::new(init_logging::<R>()));
             Ok(())
         })

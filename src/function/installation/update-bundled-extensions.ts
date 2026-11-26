@@ -1,6 +1,6 @@
 import { gt } from 'semver';
 import { getVersion } from '@tauri-apps/api/app';
-import { exists } from '@tauri-apps/api/fs';
+import { exists } from '../../tauri/compat/fs';
 import Logger from '../../util/scripts/logging';
 import { installOnlineContent } from '../../components/ucp-tabs/content-manager/buttons/callbacks/install-content';
 import { fetchStore } from '../content/store/fetch';

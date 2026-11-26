@@ -31,13 +31,14 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type Page = { text: string; extension: Extension };
 
-// an opened page and the position of the page link that opened it
+// an opened page and which of the links to it opened it
 type Opened = { key: string; link: number };
 
 type MarkdownNode = {
   type: string;
   tagName?: string;
   value?: string;
+  properties?: { alt?: unknown };
   children?: MarkdownNode[];
 };
 
@@ -75,22 +76,27 @@ function pluginImage(src: string) {
   return type === undefined ? undefined : { path, type };
 }
 
-// Whether a link shows nothing but one image
-function imageOnly(node: MarkdownNode | undefined) {
-  let images = 0;
+// The image of a link that shows nothing but one image
+function onlyImage(node: MarkdownNode | undefined) {
+  const images: MarkdownNode[] = [];
   const empty = (child: MarkdownNode): boolean => {
     if (child.type === 'text') return !child.value?.trim();
     if (child.tagName === 'img') {
-      images += 1;
+      images.push(child);
       return true;
     }
     return (child.children ?? []).every(empty);
   };
-  return node !== undefined && empty(node) && images === 1;
+  return node !== undefined && empty(node) && images.length === 1
+    ? images[0]
+    : undefined;
 }
 
-function pageLinks(root: HTMLElement | null) {
-  return Array.from(root?.querySelectorAll<HTMLElement>('[data-page]') ?? []);
+// The page links to `key`, in document order
+function pageLinks(root: HTMLElement | null, key: string) {
+  return Array.from(
+    root?.querySelectorAll<HTMLElement>('[data-page]') ?? [],
+  ).filter((link) => link.dataset.page === key);
 }
 
 function toBase64(bytes: Uint8Array) {
@@ -161,14 +167,18 @@ function PageLink(props: {
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
     if (find(key) === undefined) return <span>{children}</span>;
+    const image = onlyImage(node);
+    const alt = image?.properties?.alt;
     return (
       <button
         type="button"
         className={
-          imageOnly(node)
+          image
             ? 'description-page-link description-page-picture'
             : 'description-page-link'
         }
+        // the picture's name, also while it loads
+        aria-label={typeof alt === 'string' && alt ? alt : undefined}
         data-page={key}
         onClick={(event) => open(key, event.currentTarget)}
       >
@@ -202,19 +212,19 @@ export function DescriptionPages(props: {
   const top = useRef<HTMLDivElement>(null);
   const back = useRef<HTMLButtonElement>(null);
 
-  // the position of the link that opened the page Back just closed
-  const closed = useRef<number>();
+  // the page Back just closed
+  const closed = useRef<Opened>();
 
   useEffect(() => setStack([]), [extension, children, language]);
   useEffect(() => {
-    const opener =
-      closed.current === undefined
-        ? undefined
-        : pageLinks(top.current)[closed.current];
+    const returned = closed.current;
     closed.current = undefined;
-    if (opener) {
-      opener.scrollIntoView({ block: 'nearest' });
-      opener.focus({ preventScroll: true });
+    if (returned) {
+      // the link that opened the closed page, or this page when it is gone
+      const target =
+        pageLinks(top.current, returned.key)[returned.link] ?? top.current;
+      target?.scrollIntoView({ block: 'nearest' });
+      target?.focus({ preventScroll: true });
     } else if (stack.length > 0) {
       // a newly opened page starts at its top
       top.current?.scrollIntoView({ block: 'start' });
@@ -254,7 +264,7 @@ export function DescriptionPages(props: {
       source: page ? page.extension : extension,
       find,
       open: (key, link) => {
-        const position = pageLinks(top.current).indexOf(link);
+        const position = pageLinks(top.current, key).indexOf(link);
         setStack((opened) => [...opened, { key, link: position }]);
       },
     }),
@@ -263,14 +273,14 @@ export function DescriptionPages(props: {
 
   return (
     <PagesContext.Provider value={pages}>
-      <div ref={top}>
+      <div ref={top} tabIndex={-1}>
         {current !== undefined && (
           <button
             ref={back}
             type="button"
             className="description-page-back"
             onClick={() => {
-              closed.current = stack.at(-1)?.link;
+              closed.current = stack.at(-1);
               setStack((opened) => opened.slice(0, -1));
             }}
           >

@@ -107,6 +107,7 @@ function CreateSlider(args: {
 
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
+  const moved = useRef(false);
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
   const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
@@ -117,6 +118,7 @@ function CreateSlider(args: {
   );
 
   const save = (input: number) => {
+    moved.current = false;
     const sliderValue = input / factor;
     if (sliderValue === currentSliderValue) return;
     const updatedConfiguration = {
@@ -170,10 +172,13 @@ function CreateSlider(args: {
         tooltipLabel={(currentValue) => (currentValue / factor).toString()}
         onChange={(event) => {
           setLocalValue(parseInt(event.target.value, 10));
+          moved.current = true;
         }}
         // onAfterChange fires only on mouse up and touch end.
         onAfterChange={(event) => save(parseInt(event.target.value, 10))}
-        onKeyUp={() => save(localValue)}
+        onKeyUp={() => {
+          if (moved.current) save(localValue);
+        }}
         disabled={isDisabled}
       />
     </div>

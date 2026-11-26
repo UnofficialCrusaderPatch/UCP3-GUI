@@ -27,6 +27,8 @@ import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/Specified
 
 const LOGGER = new Logger('CreateSlider.tsx');
 
+type SliderValue = number | { enabled?: boolean; sliderValue: number };
+
 function CreateSlider(args: {
   spec: SliderDisplayConfigElement;
   disabled: boolean;
@@ -53,10 +55,10 @@ function CreateSlider(args: {
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
   let { [url]: value } = configuration as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: SliderValue | undefined;
   };
   const { [url]: defaultValue } = configurationDefaults as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: SliderValue | undefined;
   };
 
   if (value === undefined) {
@@ -81,11 +83,11 @@ function CreateSlider(args: {
 
   // eslint-disable-next-line no-nested-ternary
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
+  const currentSliderValue =
+    typeof value === 'number' ? value : value.sliderValue;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localValue, setLocalValue] = useState(
-    value.sliderValue === undefined
-      ? 0
-      : (value.sliderValue as number) * factor,
+    currentSliderValue === undefined ? 0 : currentSliderValue * factor,
   );
 
   const statusBarMessage = createStatusBarMessage(
@@ -143,33 +145,20 @@ function CreateSlider(args: {
           setLocalValue(parseInt(event.target.value, 10));
         }}
         onAfterChange={(event) => {
+          const sliderValue = parseInt(event.target.value, 10) / factor;
+          const updatedConfiguration = {
+            [url]:
+              typeof value === 'number' || typeof defaultValue === 'number'
+                ? sliderValue
+                : { ...value, sliderValue },
+          };
           setUserConfiguration({
             type: 'set-multiple',
-            value: Object.fromEntries([
-              [
-                url,
-                {
-                  ...value,
-                  ...{
-                    sliderValue: parseInt(event.target.value, 10) / factor,
-                  },
-                },
-              ],
-            ]),
+            value: updatedConfiguration,
           });
           setConfiguration({
             type: 'set-multiple',
-            value: Object.fromEntries([
-              [
-                url,
-                {
-                  ...value,
-                  ...{
-                    sliderValue: parseInt(event.target.value, 10) / factor,
-                  },
-                },
-              ],
-            ]),
+            value: updatedConfiguration,
           });
           setConfigurationTouched({
             type: 'set-multiple',

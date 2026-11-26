@@ -12,7 +12,7 @@ use tauri::{
 
 use crate::{
     constants::PATH_MATCH_OPTIONS,
-    utils::{get_allowed_path, get_allowed_path_with_string_error},
+    utils::{get_allowed_path, get_allowed_path_with_string_error, read_bounded},
 };
 
 // Validate the discovered storage entry, not an extension name or store URL.
@@ -322,13 +322,16 @@ pub async fn canonicalize(
     }
 }
 
-// size of a file in bytes
+// reads a file and fails if it is larger than max_size bytes
 #[tauri::command]
-pub async fn get_file_size(app_handle: AppHandle, path: &str) -> Result<u64, String> {
+pub async fn read_file_bytes(
+    app_handle: AppHandle,
+    path: &str,
+    max_size: Option<u64>,
+) -> Result<Vec<u8>, String> {
     let validated_path = get_allowed_path_with_string_error(&app_handle, path)?;
-    std::fs::metadata(validated_path)
-        .map(|metadata| metadata.len())
-        .map_err(|err| err.to_string())
+    let file = File::open(validated_path).map_err(|err| err.to_string())?;
+    read_bounded(file, max_size)
 }
 
 // searches for a sequence of bytes in a file

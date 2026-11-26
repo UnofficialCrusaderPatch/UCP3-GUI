@@ -57,7 +57,7 @@ const TAURI_COMMAND = {
   FILES_CANONICALIZE: 'canonicalize',
   FILES_READ_AND_FILTER_DIR: 'read_and_filter_dir',
   FILES_SCAN_FILE_FOR_BYTES: 'scan_file_for_bytes',
-  FILES_GET_FILE_SIZE: 'get_file_size',
+  FILES_READ_FILE_BYTES: 'read_file_bytes',
 
   LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
@@ -251,8 +251,17 @@ export async function canonicalize(
   return invoke(TAURI_COMMAND.FILES_CANONICALIZE, { path, slash });
 }
 
-export async function getFileSize(path: string): Promise<number> {
-  return invoke(TAURI_COMMAND.FILES_GET_FILE_SIZE, { path });
+// rejects files larger than maxSize bytes
+export async function readFileBytes(
+  path: string,
+  maxSize?: number,
+): Promise<Uint8Array> {
+  return new Uint8Array(
+    await invoke<number[]>(TAURI_COMMAND.FILES_READ_FILE_BYTES, {
+      path,
+      maxSize,
+    }),
+  );
 }
 
 // paths returned by this function will always use the slash as separator

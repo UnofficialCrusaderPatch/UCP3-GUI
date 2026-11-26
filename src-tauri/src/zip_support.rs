@@ -16,7 +16,7 @@ use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 
 use crate::{
     constants::PATH_MATCH_OPTIONS,
-    utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle},
+    utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle, read_bounded},
 };
 
 /// STATE OBJECT ///
@@ -155,23 +155,8 @@ impl ZipReaderHelper {
         path: &str,
         max_size: Option<u64>,
     ) -> Result<Vec<u8>, String> {
-        let limit = max_size.unwrap_or(u64::MAX);
-        let too_large = || String::from("zip.entry.too_large");
         let zip_file = self.reader.by_name(path).map_err(|error| error.to_string())?;
-        if zip_file.size() > limit {
-            return Err(too_large());
-        }
-
-        let mut vec_buf: Vec<u8> = Vec::new();
-        // the declared size is not trusted, so reading stops past the limit
-        zip_file
-            .take(limit.saturating_add(1))
-            .read_to_end(&mut vec_buf)
-            .map_err(|error| error.to_string())?;
-        if vec_buf.len() as u64 > limit {
-            return Err(too_large());
-        }
-        Ok(vec_buf)
+        read_bounded(zip_file, max_size)
     }
 
     fn get_entry_as_text(&mut self, path: &str) -> Result<String, String> {

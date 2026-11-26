@@ -31,8 +31,9 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 type Page = { text: string; extension: Extension };
 
-// an opened page and which of the links to it opened it
-type Opened = { key: string; link: number };
+// an opened page and its opener: the opener's name, and which of the `links`
+// links to the page with that name it is
+type Opened = { key: string; name: string; link: number; links: number };
 
 type MarkdownNode = {
   type: string;
@@ -92,11 +93,20 @@ function onlyImage(node: MarkdownNode | undefined) {
     : undefined;
 }
 
-// The page links to `key`, in document order
-function pageLinks(root: HTMLElement | null, key: string) {
+// The first heading of a page
+function pageTitle(text: string) {
+  return text.match(/^#{1,6}[ \t]+(.+?)[ \t#]*$/m)?.[1];
+}
+
+function linkName(link: HTMLElement) {
+  return link.getAttribute('aria-label') ?? link.textContent ?? '';
+}
+
+// The page links to `key` named `name`, in document order
+function pageLinks(root: HTMLElement | null, key: string, name: string) {
   return Array.from(
     root?.querySelectorAll<HTMLElement>('[data-page]') ?? [],
-  ).filter((link) => link.dataset.page === key);
+  ).filter((link) => link.dataset.page === key && linkName(link) === name);
 }
 
 function toBase64(bytes: Uint8Array) {
@@ -166,9 +176,14 @@ function PageLink(props: {
   const { find, open } = useContext(PagesContext);
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
-    if (find(key) === undefined) return <span>{children}</span>;
+    const target = find(key);
+    if (target === undefined) return <span>{children}</span>;
     const image = onlyImage(node);
     const alt = image?.properties?.alt;
+    const name =
+      typeof alt === 'string' && alt.trim()
+        ? alt.trim()
+        : (pageTitle(target.text) ?? key);
     return (
       <button
         type="button"
@@ -177,8 +192,8 @@ function PageLink(props: {
             ? 'description-page-link description-page-picture'
             : 'description-page-link'
         }
-        // the picture's name, also while it loads
-        aria-label={typeof alt === 'string' && alt ? alt : undefined}
+        // a picture's name, also while it loads: its alt text, else the page's title
+        aria-label={image ? name : undefined}
         data-page={key}
         onClick={(event) => open(key, event.currentTarget)}
       >
@@ -220,9 +235,12 @@ export function DescriptionPages(props: {
     const returned = closed.current;
     closed.current = undefined;
     if (returned) {
-      // the link that opened the closed page, or this page when it is gone
+      // the link that opened the closed page; this page when that link can't
+      // be told apart any more
+      const links = pageLinks(top.current, returned.key, returned.name);
       const target =
-        pageLinks(top.current, returned.key)[returned.link] ?? top.current;
+        (links.length === returned.links && links[returned.link]) ||
+        top.current;
       target?.scrollIntoView({ block: 'nearest' });
       target?.focus({ preventScroll: true });
     } else if (stack.length > 0) {
@@ -264,8 +282,12 @@ export function DescriptionPages(props: {
       source: page ? page.extension : extension,
       find,
       open: (key, link) => {
-        const position = pageLinks(top.current, key).indexOf(link);
-        setStack((opened) => [...opened, { key, link: position }]);
+        const name = linkName(link);
+        const links = pageLinks(top.current, key, name);
+        setStack((opened) => [
+          ...opened,
+          { key, name, link: links.indexOf(link), links: links.length },
+        ]);
       },
     }),
     [page, extension, find],

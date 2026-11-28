@@ -4,6 +4,7 @@ import {
   ReactNode,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -18,6 +19,7 @@ import { LinkRenderer, SaferMarkdown } from './safer-markdown';
 import './description-pages.css';
 
 const PAGE_LINK = '#page:';
+const HINT_LINK = '#hint:';
 const COLOR_LINK = '#color:';
 const COLOR = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|[a-z]{3,20})$/i;
 const IMAGE_TYPES: Record<string, string> = {
@@ -167,6 +169,72 @@ function PageImage(props: {
   return <ResizeImage100PercentWidth {...props} />;
 }
 
+// A rolled scroll tied around an arrow
+function HintIcon() {
+  return (
+    <svg className="description-hint-icon" viewBox="0 0 24 24" aria-hidden>
+      <path d="M4 20 19 5M5 19l-2-4m2 4 4 2" />
+      <path className="description-hint-head" d="M20 4l-6.5 1.5 5 5z" />
+      <g transform="translate(11.5 12.5) rotate(-45)">
+        <rect
+          className="description-hint-scroll"
+          x="-4"
+          y="-2.25"
+          width="8"
+          height="4.5"
+        />
+        <ellipse className="description-hint-scroll" cx="-4" rx="1" ry="2.25" />
+        <ellipse className="description-hint-scroll" cx="4" rx="1" ry="2.25" />
+        <path className="description-hint-cord" d="M0-2.25v4.5" />
+      </g>
+    </svg>
+  );
+}
+
+// a paragraph of a hint, which is shown inside the paragraph of its link
+function HintParagraph(props: { children: ReactNode }) {
+  const { children } = props;
+  return <span className="description-hint-paragraph">{children}</span>;
+}
+
+function HintLink(props: { hint: Page; children: ReactNode }) {
+  const { hint, children } = props;
+  const pages = useContext(PagesContext);
+  const hintPages = useMemo(
+    () => ({ ...pages, source: hint.extension }),
+    [pages, hint.extension],
+  );
+  const id = useId();
+  // the text the hint was opened with; another text starts closed
+  const [shown, setShown] = useState<string>();
+  const open = shown === hint.text;
+  return (
+    <>
+      <button
+        type="button"
+        className="description-page-link description-hint"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setShown(open ? undefined : hint.text)}
+      >
+        <HintIcon />
+        {children}
+      </button>
+      <span id={id} className="description-hint-text" hidden={!open}>
+        {open && (
+          <PagesContext.Provider value={hintPages}>
+            {/* a hint's own links render through PageLink again */}
+            {/* eslint-disable-next-line @typescript-eslint/no-use-before-define */}
+            <SaferMarkdown components={HINT_COMPONENTS}>
+              {hint.text}
+            </SaferMarkdown>
+          </PagesContext.Provider>
+        )}
+      </span>
+    </>
+  );
+}
+
 function PageLink(props: {
   href: string | undefined;
   children: ReactNode;
@@ -174,6 +242,11 @@ function PageLink(props: {
 }) {
   const { href = '', children, node } = props;
   const { find, open } = useContext(PagesContext);
+  if (href.startsWith(HINT_LINK)) {
+    const hint = find(href.slice(HINT_LINK.length).toLowerCase());
+    if (hint === undefined) return <span>{children}</span>;
+    return <HintLink hint={hint}>{children}</HintLink>;
+  }
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
     const target = find(key);
@@ -210,11 +283,13 @@ function PageLink(props: {
 }
 
 const COMPONENTS = { a: PageLink, img: PageImage };
+const HINT_COMPONENTS = { ...COMPONENTS, p: HintParagraph };
 
-// A plugin description with pages (#page:<key>), coloured text
-// (#color:<colour>) and images from the plugin folder; a page link showing
-// only an image is a picture button. A page is a locale value of the plugin
-// or, if it has none, of its direct dependencies.
+// A plugin description with pages (#page:<key>), hints shown in place
+// (#hint:<key>), coloured text (#color:<colour>) and images from the plugin
+// folder; a page link showing only an image is a picture button. A page or
+// hint is a locale value of the plugin or, if it has none, of its direct
+// dependencies.
 // eslint-disable-next-line import/prefer-default-export
 export function DescriptionPages(props: {
   extension: Extension | undefined;

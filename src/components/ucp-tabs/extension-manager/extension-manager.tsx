@@ -36,7 +36,11 @@ import {
   DiscoverySearch,
   DiscoveryFilterButton,
 } from '../common/discovery/discovery-toolbar';
-import { FamilyList, FamilyRow } from '../common/discovery/family-list';
+import {
+  FamilyList,
+  FamilyRow,
+  familyRowName,
+} from '../common/discovery/family-list';
 import { familyConfigurationMembers } from '../../../function/extensions/dependency-management/families';
 import { normalizeFamilies } from '../../../function/content/discovery/metadata';
 import { packageFamilyLabel } from '../../../function/content/discovery/tag-localization';
@@ -141,7 +145,10 @@ export default function ExtensionManager() {
             familyConfigurationMembers(extensionsState).some(
               (member) => createExtensionID(member) === createExtensionID(ext),
             )
-              ? `${familyLabel(ext.definition.family![0].name, ext)}: ${familyLabel(ext.definition.family![0].name, ext, true)}`
+              ? familyRowName(
+                  familyLabel(ext.definition.family![0].name, ext),
+                  familyLabel(ext.definition.family![0].name, ext, true),
+                )
               : undefined
           }
         />

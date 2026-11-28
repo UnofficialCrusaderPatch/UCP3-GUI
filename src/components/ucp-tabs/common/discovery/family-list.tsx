@@ -11,7 +11,10 @@ const EXPANSION = atom<Record<string, boolean>>({});
 
 export type FamilyRow = { displayName: string; selected: boolean };
 
-// eslint-disable-next-line import/prefer-default-export
+export function familyRowName(family: string, configuration: string) {
+  return family === configuration ? family : `${family}: ${configuration}`;
+}
+
 export function FamilyList<T extends FamilyItem>(props: {
   items: T[];
   available: T[];
@@ -94,7 +97,10 @@ export function FamilyList<T extends FamilyItem>(props: {
           choice ??
           group.members.find((item) => item.name === offered) ??
           group.root;
-        const displayName = `${familyLabel?.(group.id, group.root) ?? label(group.root)}: ${configurationLabel?.(group.id, shown) ?? label(shown)}`;
+        const displayName = familyRowName(
+          familyLabel?.(group.id, group.root) ?? label(group.root),
+          configurationLabel?.(group.id, shown) ?? label(shown),
+        );
         const choices = [group.root, ...group.members].filter(
           (item) => item.id !== shown.id,
         );

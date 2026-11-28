@@ -261,7 +261,12 @@ function PageLink(props: {
   if (href.startsWith(HINT_LINK)) {
     const hint = find(href.slice(HINT_LINK.length).toLowerCase());
     if (hint === undefined) return <span>{children}</span>;
-    return <HintLink hint={hint}>{children}</HintLink>;
+    // a hint with another text starts closed
+    return (
+      <HintLink key={hint.text} hint={hint}>
+        {children}
+      </HintLink>
+    );
   }
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
@@ -304,7 +309,7 @@ const COMPONENTS = { a: PageLink, img: PageImage, p: Paragraph };
 // (#hint:<key>), coloured text (#color:<colour>) and images from the plugin
 // folder; a page link showing only an image is a picture button. A page or
 // hint is a locale value of the plugin or, if it has none, of its direct
-// dependencies.
+// dependencies. A hint link belongs in a paragraph.
 // eslint-disable-next-line import/prefer-default-export
 export function DescriptionPages(props: {
   extension: Extension | undefined;

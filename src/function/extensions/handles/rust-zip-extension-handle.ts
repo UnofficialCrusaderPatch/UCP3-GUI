@@ -80,11 +80,11 @@ class RustZipExtensionHandle implements ExtensionHandle {
     return this.#zip.getEntryAsText(path);
   }
 
-  async getBinaryContents(path: string): Promise<Uint8Array> {
+  async getBinaryContents(path: string, maxSize?: number): Promise<Uint8Array> {
     if (!(await this.doesEntryExist(path))) {
       throw Error(`/File does not exist: ${path}`);
     }
-    return this.#zip.getEntryAsBinary(path);
+    return this.#zip.getEntryAsBinary(path, maxSize);
   }
 
   async doesEntryExist(path: string): Promise<boolean> {

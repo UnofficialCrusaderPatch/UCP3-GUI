@@ -57,6 +57,7 @@ const TAURI_COMMAND = {
   FILES_CANONICALIZE: 'canonicalize',
   FILES_READ_AND_FILTER_DIR: 'read_and_filter_dir',
   FILES_SCAN_FILE_FOR_BYTES: 'scan_file_for_bytes',
+  FILES_READ_FILE_BYTES: 'read_file_bytes',
 
   LOGGING_LOG: buildPluginCmd(PLUGIN_LOGGING, 'log'),
 };
@@ -143,8 +144,16 @@ export async function getZipReaderEntryNames(
 export async function getZipReaderEntryAsBinary(
   id: number,
   path: string,
+  maxSize?: number,
 ): Promise<Uint8Array> {
-  return invoke(TAURI_COMMAND.ZIP_READER_GET_ENTRY_AS_BINARY, { id, path });
+  // the command returns the bytes as a number array
+  return new Uint8Array(
+    await invoke<number[]>(TAURI_COMMAND.ZIP_READER_GET_ENTRY_AS_BINARY, {
+      id,
+      path,
+      maxSize,
+    }),
+  );
 }
 
 // WARNING: Do not use directly, only through ZipReader
@@ -240,6 +249,21 @@ export async function canonicalize(
   slash: boolean = true,
 ): Promise<string> {
   return invoke(TAURI_COMMAND.FILES_CANONICALIZE, { path, slash });
+}
+
+// rejects files that resolve outside root or are larger than maxSize bytes
+export async function readFileBytes(
+  root: string,
+  path: string,
+  maxSize?: number,
+): Promise<Uint8Array> {
+  return new Uint8Array(
+    await invoke<number[]>(TAURI_COMMAND.FILES_READ_FILE_BYTES, {
+      root,
+      path,
+      maxSize,
+    }),
+  );
 }
 
 // paths returned by this function will always use the slash as separator

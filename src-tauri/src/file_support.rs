@@ -12,7 +12,7 @@ use tauri::{
 
 use crate::{
     constants::PATH_MATCH_OPTIONS,
-    utils::{get_allowed_path, get_allowed_path_with_string_error},
+    utils::{get_allowed_path, get_allowed_path_with_string_error, read_bounded},
 };
 
 // Validate the discovered storage entry, not an extension name or store URL.
@@ -320,6 +320,28 @@ pub async fn canonicalize(
             |canonical_path_str| Ok(canonical_path_str.to_string()),
         )
     }
+}
+
+// reads a file whose link-resolved path lies inside the link-resolved root folder,
+// and fails if it is larger than max_size bytes
+#[tauri::command]
+pub async fn read_file_bytes(
+    app_handle: AppHandle,
+    root: &str,
+    path: &str,
+    max_size: Option<u64>,
+) -> Result<Vec<u8>, String> {
+    let canonical_root =
+        dunce::canonicalize(get_allowed_path_with_string_error(&app_handle, root)?)
+            .map_err(|err| err.to_string())?;
+    let canonical_path =
+        dunce::canonicalize(get_allowed_path_with_string_error(&app_handle, path)?)
+            .map_err(|err| err.to_string())?;
+    if !canonical_path.starts_with(&canonical_root) {
+        return Err(format!("{path} is outside {root}"));
+    }
+    let file = File::open(canonical_path).map_err(|err| err.to_string())?;
+    read_bounded(file, max_size)
 }
 
 // searches for a sequence of bytes in a file

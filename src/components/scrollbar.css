@@ -10,10 +10,10 @@
 }
 
 ::-webkit-scrollbar-track-piece:start:vertical {
-  background-image: url("/src/assets/ucp3/scroll_bar_middle.png");
+  background-image: url('/src/assets/ucp3/scroll_bar_middle.png');
   background-repeat: no-repeat repeat;
   background-position: center bottom;
-  /* Native start pieces reach the thumb centre. Leave half the hook clear. */
+  /* End the start piece 9px above the thumb centre, where the thumb's chain begins. */
   border-bottom: 9px solid transparent;
   background-origin: padding-box;
   background-clip: padding-box;
@@ -22,14 +22,13 @@
 ::-webkit-scrollbar-thumb:vertical {
   background-color: transparent;
   box-shadow: none;
-  /* Paint one hook at the chain end; repeating links here would overlap it. */
   border: 0;
   min-height: 18px;
-  background-image: url("/src/assets/ucp3/scroll_bar_bottom_hook.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-origin: border-box;
-  background-clip: border-box;
+  background: url('/src/assets/ucp3/scroll_bar_bottom_hook.png') center bottom
+    no-repeat;
+  /* Continue the start piece's chain down to the 18px hook. */
+  border-image: url('/src/assets/ucp3/scroll_bar_middle.png') 0 fill /
+    calc(50% - 9px) 2.5px 18px stretch repeat;
 }
 
 ::-webkit-scrollbar-track:horizontal {
@@ -55,7 +54,7 @@
   border-width: 7px 8px 0 8px;
   border-color: transparent;
 }
- 
+
 ::-webkit-scrollbar-corner {
   border-image: url('/src/assets/ucp3/ornament_border.png');
   border-image-slice: 7 8;

@@ -1,2 +1,0 @@
-- New installations update the included extensions to the newest compatible Store versions, and keep the bundled versions when the Store is unavailable.
-- First-use defaults pick the newest installed version by version number.

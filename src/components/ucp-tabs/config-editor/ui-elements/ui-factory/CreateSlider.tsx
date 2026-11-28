@@ -2,7 +2,7 @@ import 'components/ucp-tabs/config-editor/ui-elements/ui-factory/specified/speci
 import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import RangeSlider from 'react-bootstrap-range-slider';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
   NumberContents,
@@ -26,6 +26,8 @@ import Logger from '../../../../../util/scripts/logging';
 import { createSpecifiedStyleIfSpecifiedAndTouched } from './specified/SpecifiedStyle';
 
 const LOGGER = new Logger('CreateSlider.tsx');
+
+type SliderValue = number | { enabled?: boolean; sliderValue: number };
 
 function CreateSlider(args: {
   spec: SliderDisplayConfigElement;
@@ -52,11 +54,12 @@ function CreateSlider(args: {
   const { url, enabled } = spec;
   const { contents } = spec;
   const { min, max, step } = contents as NumberContents;
+  const declaredValue = contents.value as SliderValue;
   let { [url]: value } = configuration as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: SliderValue | undefined;
   };
   const { [url]: defaultValue } = configurationDefaults as {
-    [url: string]: { enabled: boolean; sliderValue: number };
+    [url: string]: SliderValue | undefined;
   };
 
   if (value === undefined) {
@@ -81,11 +84,11 @@ function CreateSlider(args: {
 
   // eslint-disable-next-line no-nested-ternary
   const factor = 1 / (step === undefined ? 1 : step === 0 ? 1 : step);
+  const currentSliderValue =
+    typeof value === 'number' ? value : value.sliderValue;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localValue, setLocalValue] = useState(
-    value.sliderValue === undefined
-      ? 0
-      : (value.sliderValue as number) * factor,
+    currentSliderValue === undefined ? 0 : currentSliderValue * factor,
   );
 
   const statusBarMessage = createStatusBarMessage(
@@ -104,6 +107,14 @@ function CreateSlider(args: {
 
   const [showPopover, setShowPopover] = useState(false);
   const ref = useRef(null);
+  const moved = useRef(false);
+
+  useEffect(() => {
+    setLocalValue(
+      currentSliderValue === undefined ? 0 : currentSliderValue * factor,
+    );
+    moved.current = false;
+  }, [currentSliderValue, factor]);
 
   const configurationTouched = useAtomValue(CONFIGURATION_TOUCHED_REDUCER_ATOM);
   const userConfiguration = useAtomValue(CONFIGURATION_USER_REDUCER_ATOM);
@@ -112,6 +123,37 @@ function CreateSlider(args: {
     configurationTouched,
     url,
   );
+
+  const save = (input: number) => {
+    moved.current = false;
+    const sliderValue = input / factor;
+    if (sliderValue === currentSliderValue) return;
+    const updatedConfiguration = {
+      [url]:
+        typeof declaredValue === 'number'
+          ? sliderValue
+          : {
+              ...(typeof value === 'number' ? declaredValue : value),
+              sliderValue,
+            },
+    };
+    setUserConfiguration({
+      type: 'set-multiple',
+      value: updatedConfiguration,
+    });
+    setConfiguration({
+      type: 'set-multiple',
+      value: updatedConfiguration,
+    });
+    setConfigurationTouched({
+      type: 'set-multiple',
+      value: Object.fromEntries([[url, true]]),
+    });
+  };
+
+  const commit = () => {
+    if (moved.current) save(localValue);
+  };
 
   return (
     <div
@@ -141,41 +183,11 @@ function CreateSlider(args: {
         tooltipLabel={(currentValue) => (currentValue / factor).toString()}
         onChange={(event) => {
           setLocalValue(parseInt(event.target.value, 10));
+          moved.current = true;
         }}
-        onAfterChange={(event) => {
-          setUserConfiguration({
-            type: 'set-multiple',
-            value: Object.fromEntries([
-              [
-                url,
-                {
-                  ...value,
-                  ...{
-                    sliderValue: parseInt(event.target.value, 10) / factor,
-                  },
-                },
-              ],
-            ]),
-          });
-          setConfiguration({
-            type: 'set-multiple',
-            value: Object.fromEntries([
-              [
-                url,
-                {
-                  ...value,
-                  ...{
-                    sliderValue: parseInt(event.target.value, 10) / factor,
-                  },
-                },
-              ],
-            ]),
-          });
-          setConfigurationTouched({
-            type: 'set-multiple',
-            value: Object.fromEntries([[url, true]]),
-          });
-        }}
+        onMouseUp={commit}
+        onTouchEnd={commit}
+        onKeyUp={commit}
         disabled={isDisabled}
       />
     </div>

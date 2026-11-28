@@ -1,1 +1,0 @@
-- New installations start with UCP3 Basics + Fixes from the Store, or with the previous defaults (UCP2 legacy defaults and the graphics API replacer) when no compatible version can be installed.

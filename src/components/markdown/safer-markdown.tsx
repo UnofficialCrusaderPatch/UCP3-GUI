@@ -1,7 +1,7 @@
 import Markdown from 'react-markdown';
 import { ResizeImage100PercentWidth } from '../ucp-tabs/common/markdown/images';
 
-function LinkRenderer(props: any) {
+export function LinkRenderer(props: any) {
   const { href, children } = props;
   return (
     <a href={href} target="_blank" rel="noreferrer">

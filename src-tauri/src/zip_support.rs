@@ -16,7 +16,7 @@ use zip::{result::ZipError, write::FileOptions, ZipArchive, ZipWriter};
 
 use crate::{
     constants::PATH_MATCH_OPTIONS,
-    utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle},
+    utils::{get_allowed_path_with_string_error, get_state_mutex_from_handle, read_bounded},
 };
 
 /// STATE OBJECT ///
@@ -150,15 +150,13 @@ impl ZipReaderHelper {
             .collect())
     }
 
-    fn get_entry_as_binary(&mut self, path: &str) -> Result<Vec<u8>, String> {
-        let read_result = || -> Result<Vec<u8>, ZipError> {
-            let mut zip_file = self.reader.by_name(path)?;
-
-            let mut vec_buf: Vec<u8> = Vec::new();
-            zip_file.read_to_end(&mut vec_buf)?;
-            Ok(vec_buf)
-        }();
-        read_result.map_err(|error| error.to_string())
+    fn get_entry_as_binary(
+        &mut self,
+        path: &str,
+        max_size: Option<u64>,
+    ) -> Result<Vec<u8>, String> {
+        let zip_file = self.reader.by_name(path).map_err(|error| error.to_string())?;
+        read_bounded(zip_file, max_size)
     }
 
     fn get_entry_as_text(&mut self, path: &str) -> Result<String, String> {
@@ -312,8 +310,9 @@ fn get_zip_reader_entry_as_binary<R: Runtime>(
     app_handle: AppHandle<R>,
     id: usize,
     path: &str,
+    max_size: Option<u64>,
 ) -> Result<Vec<u8>, String> {
-    do_with_reader(&app_handle, id, |reader| reader.get_entry_as_binary(path))
+    do_with_reader(&app_handle, id, |reader| reader.get_entry_as_binary(path, max_size))
 }
 
 #[tauri::command]

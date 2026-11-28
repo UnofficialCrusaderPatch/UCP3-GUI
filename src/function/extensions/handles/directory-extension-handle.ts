@@ -1,10 +1,6 @@
 /* eslint-disable max-classes-per-file */
-import {
-  onFsExists,
-  readBinaryFile,
-  readTextFile,
-} from '../../../tauri/tauri-files';
-import { readAndFilterPaths } from '../../../tauri/tauri-invoke';
+import { onFsExists, readTextFile } from '../../../tauri/tauri-files';
+import { readAndFilterPaths, readFileBytes } from '../../../tauri/tauri-invoke';
 import { ExtensionFileHandle, ExtensionHandle } from './extension-handle';
 
 class DirectoryExtensionFileHandle implements ExtensionFileHandle {
@@ -83,20 +79,11 @@ class DirectoryExtensionHandle implements ExtensionHandle {
     throw new Error(`${p} not found`);
   }
 
-  async getBinaryContents(path: string): Promise<Uint8Array> {
+  async getBinaryContents(path: string, maxSize?: number): Promise<Uint8Array> {
     const p = `${this.path}/${path}`;
     if (await onFsExists(p)) {
-      const result = await readBinaryFile(p);
-      result.err().ifPresent((error) => {
-        throw new Error(
-          `Error while reading binary file: ${p}. Error: ${error}`,
-        );
-      });
-      const array = result.ok().get();
-      if (array instanceof Uint8Array) {
-        return array;
-      }
-      throw new Error(`${p} contents is unexpected type`);
+      // symlinks and junctions must not lead out of the extension folder
+      return readFileBytes(this.path, p, maxSize);
     }
     throw new Error(`${p} not found`);
   }

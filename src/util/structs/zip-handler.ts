@@ -77,8 +77,8 @@ export class ZipReader {
     return getZipReaderEntryNames(this.#id, globPattern);
   }
 
-  async getEntryAsBinary(path: string) {
-    return getZipReaderEntryAsBinary(this.#id, path);
+  async getEntryAsBinary(path: string, maxSize?: number) {
+    return getZipReaderEntryAsBinary(this.#id, path, maxSize);
   }
 
   async getEntryAsText(path: string) {

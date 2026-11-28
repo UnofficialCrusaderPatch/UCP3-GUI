@@ -1,1 +1,0 @@
-- Uninstall extensions from the Store even while they are active: the review lists dependent packages that go too, says which removed versions the Store can reinstall, and can also remove dependencies nothing else uses.

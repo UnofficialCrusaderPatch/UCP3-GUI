@@ -1,4 +1,5 @@
 use std::{
+    io::Read,
     path::{Path, PathBuf},
     sync::{Mutex, MutexGuard},
 };
@@ -83,4 +84,18 @@ pub fn get_allowed_path_with_string_error<'a, R: Runtime>(
         Ok(path) => Ok(path),
         Err(error) => Err(error.to_string()),
     }
+}
+
+// reads to the end and fails past max_size bytes, whatever size the source declares
+pub fn read_bounded(reader: impl Read, max_size: Option<u64>) -> Result<Vec<u8>, String> {
+    let limit = max_size.unwrap_or(u64::MAX);
+    let mut buffer = Vec::new();
+    reader
+        .take(limit.saturating_add(1))
+        .read_to_end(&mut buffer)
+        .map_err(|error| error.to_string())?;
+    if buffer.len() as u64 > limit {
+        return Err(String::from("file.too_large"));
+    }
+    Ok(buffer)
 }

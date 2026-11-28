@@ -41,7 +41,7 @@ type MarkdownNode = {
   type: string;
   tagName?: string;
   value?: string;
-  properties?: { alt?: unknown };
+  properties?: { alt?: unknown; href?: unknown };
   children?: MarkdownNode[];
 };
 
@@ -191,30 +191,31 @@ function HintIcon() {
   );
 }
 
-// A hint is shown inside the paragraph of its link, so its block elements
-// render as spans styled by their tag.
-function hintBlock(tag: string) {
-  return function HintBlock(props: { children: ReactNode }) {
-    const { children } = props;
-    return <span className={`description-hint-${tag}`}>{children}</span>;
-  };
+function hasHintLink(node: MarkdownNode | undefined): boolean {
+  if (!node) return false;
+  const href = node.properties?.href;
+  if (
+    node.tagName === 'a' &&
+    typeof href === 'string' &&
+    href.startsWith(HINT_LINK)
+  ) {
+    return true;
+  }
+  return (node.children ?? []).some(hasHintLink);
 }
-const HINT_BLOCKS = Object.fromEntries(
-  [
-    'p',
-    'ul',
-    'ol',
-    'li',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'blockquote',
-    'pre',
-  ].map((tag) => [tag, hintBlock(tag)]),
-);
+
+// A paragraph with a hint link is a div, so the hint's own blocks can open
+// inside it.
+function Paragraph(props: {
+  node: MarkdownNode | undefined;
+  children: ReactNode;
+}) {
+  const { node, children } = props;
+  if (hasHintLink(node)) {
+    return <div className="description-hint-host">{children}</div>;
+  }
+  return <p>{children}</p>;
+}
 
 function HintLink(props: { hint: Page; children: ReactNode }) {
   const { hint, children } = props;
@@ -237,17 +238,15 @@ function HintLink(props: { hint: Page; children: ReactNode }) {
         <HintIcon />
         {children}
       </button>
-      <span id={id} className="description-hint-text" hidden={!open}>
+      <div id={id} className="description-hint-text" hidden={!open}>
         {open && (
           <PagesContext.Provider value={hintPages}>
             {/* a hint's own links render through PageLink again */}
             {/* eslint-disable-next-line @typescript-eslint/no-use-before-define */}
-            <SaferMarkdown components={HINT_COMPONENTS}>
-              {hint.text}
-            </SaferMarkdown>
+            <SaferMarkdown components={COMPONENTS}>{hint.text}</SaferMarkdown>
           </PagesContext.Provider>
         )}
-      </span>
+      </div>
     </>
   );
 }
@@ -259,20 +258,10 @@ function PageLink(props: {
 }) {
   const { href = '', children, node } = props;
   const { find, open } = useContext(PagesContext);
-  const language = useAtomValue(LANGUAGE_ATOM);
   if (href.startsWith(HINT_LINK)) {
-    const key = href.slice(HINT_LINK.length).toLowerCase();
-    const hint = find(key);
+    const hint = find(href.slice(HINT_LINK.length).toLowerCase());
     if (hint === undefined) return <span>{children}</span>;
-    // another plugin, hint or language starts closed
-    return (
-      <HintLink
-        key={`${extensionToID(hint.extension)}:${key}:${language}`}
-        hint={hint}
-      >
-        {children}
-      </HintLink>
-    );
+    return <HintLink hint={hint}>{children}</HintLink>;
   }
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
@@ -309,8 +298,7 @@ function PageLink(props: {
   return <LinkRenderer {...props} />;
 }
 
-const COMPONENTS = { a: PageLink, img: PageImage };
-const HINT_COMPONENTS = { ...COMPONENTS, ...HINT_BLOCKS };
+const COMPONENTS = { a: PageLink, img: PageImage, p: Paragraph };
 
 // A plugin description with pages (#page:<key>), hints shown in place
 // (#hint:<key>), coloured text (#color:<colour>) and images from the plugin
@@ -411,7 +399,11 @@ export function DescriptionPages(props: {
             <Message message="back" />
           </button>
         )}
-        <SaferMarkdown components={COMPONENTS}>
+        {/* another plugin, language or page starts with its hints closed */}
+        <SaferMarkdown
+          key={`${extension ? extensionToID(extension) : ''}:${language}:${stack.length}:${current ?? ''}`}
+          components={COMPONENTS}
+        >
           {page ? page.text : children}
         </SaferMarkdown>
       </div>

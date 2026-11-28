@@ -86,10 +86,56 @@
   background: rgba(255, 255, 255, 0.35);
 }
 
-.description-hint-paragraph {
+.description-hint-p,
+.description-hint-ul,
+.description-hint-ol,
+.description-hint-h1,
+.description-hint-h2,
+.description-hint-h3,
+.description-hint-h4,
+.description-hint-h5,
+.description-hint-h6,
+.description-hint-blockquote,
+.description-hint-pre {
   display: block;
 }
 
-.description-hint-paragraph + .description-hint-paragraph {
+.description-hint-text > * + * {
   margin-top: 0.5rem;
+}
+
+.description-hint-ul,
+.description-hint-ol {
+  padding-left: 1.2em;
+}
+
+.description-hint-ul {
+  list-style: disc;
+}
+
+.description-hint-ol {
+  list-style: decimal;
+}
+
+.description-hint-li {
+  display: list-item;
+}
+
+.description-hint-h1,
+.description-hint-h2,
+.description-hint-h3,
+.description-hint-h4,
+.description-hint-h5,
+.description-hint-h6 {
+  font-weight: bold;
+}
+
+.description-hint-blockquote {
+  padding-left: 0.6em;
+  border-left: 2px solid #65543d;
+}
+
+.description-hint-pre {
+  white-space: pre-wrap;
+  font-family: monospace;
 }

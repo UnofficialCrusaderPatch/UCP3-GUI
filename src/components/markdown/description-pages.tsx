@@ -191,11 +191,30 @@ function HintIcon() {
   );
 }
 
-// a paragraph of a hint, which is shown inside the paragraph of its link
-function HintParagraph(props: { children: ReactNode }) {
-  const { children } = props;
-  return <span className="description-hint-paragraph">{children}</span>;
+// A hint is shown inside the paragraph of its link, so its block elements
+// render as spans styled by their tag.
+function hintBlock(tag: string) {
+  return function HintBlock(props: { children: ReactNode }) {
+    const { children } = props;
+    return <span className={`description-hint-${tag}`}>{children}</span>;
+  };
 }
+const HINT_BLOCKS = Object.fromEntries(
+  [
+    'p',
+    'ul',
+    'ol',
+    'li',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'blockquote',
+    'pre',
+  ].map((tag) => [tag, hintBlock(tag)]),
+);
 
 function HintLink(props: { hint: Page; children: ReactNode }) {
   const { hint, children } = props;
@@ -205,9 +224,7 @@ function HintLink(props: { hint: Page; children: ReactNode }) {
     [pages, hint.extension],
   );
   const id = useId();
-  // the text the hint was opened with; another text starts closed
-  const [shown, setShown] = useState<string>();
-  const open = shown === hint.text;
+  const [open, setOpen] = useState(false);
   return (
     <>
       <button
@@ -215,7 +232,7 @@ function HintLink(props: { hint: Page; children: ReactNode }) {
         className="description-page-link description-hint"
         aria-expanded={open}
         aria-controls={id}
-        onClick={() => setShown(open ? undefined : hint.text)}
+        onClick={() => setOpen(!open)}
       >
         <HintIcon />
         {children}
@@ -242,10 +259,20 @@ function PageLink(props: {
 }) {
   const { href = '', children, node } = props;
   const { find, open } = useContext(PagesContext);
+  const language = useAtomValue(LANGUAGE_ATOM);
   if (href.startsWith(HINT_LINK)) {
-    const hint = find(href.slice(HINT_LINK.length).toLowerCase());
+    const key = href.slice(HINT_LINK.length).toLowerCase();
+    const hint = find(key);
     if (hint === undefined) return <span>{children}</span>;
-    return <HintLink hint={hint}>{children}</HintLink>;
+    // another plugin, hint or language starts closed
+    return (
+      <HintLink
+        key={`${extensionToID(hint.extension)}:${key}:${language}`}
+        hint={hint}
+      >
+        {children}
+      </HintLink>
+    );
   }
   if (href.startsWith(PAGE_LINK)) {
     const key = href.slice(PAGE_LINK.length).toLowerCase();
@@ -283,7 +310,7 @@ function PageLink(props: {
 }
 
 const COMPONENTS = { a: PageLink, img: PageImage };
-const HINT_COMPONENTS = { ...COMPONENTS, p: HintParagraph };
+const HINT_COMPONENTS = { ...COMPONENTS, ...HINT_BLOCKS };
 
 // A plugin description with pages (#page:<key>), hints shown in place
 // (#hint:<key>), coloured text (#color:<colour>) and images from the plugin
